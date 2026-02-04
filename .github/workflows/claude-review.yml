@@ -22,6 +22,7 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          use_sticky_comment: true
           prompt: |
             이 PR의 코드를 리뷰해주세요. 한국어로 답변해주세요.
 
