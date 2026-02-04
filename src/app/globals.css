@@ -1,0 +1,94 @@
+@import 'tailwindcss';
+
+/* 토큰(theme 레이어로 직접 삽입) */
+@import '../styles/tokens.colors.css' layer(theme);
+@import '../styles/tokens.typography.css' layer(theme);
+@import '../styles/tokens.spacing.css' layer(theme);
+@import '../styles/tokens.layout.css' layer(theme);
+
+/* 폰트(base 레이어로 직접 삽입) */
+@import '../styles/fonts.css' layer(base);
+
+/* 유틸리티 - Tailwind 이후에 로드하여 우선순위 확보 */
+@import '../styles/utilities/typography.css';
+
+/* 기본 폰트 설정 - layer 외부에서 최종 적용 */
+html {
+  font-family:
+    'Pretendard Variable',
+    Pretendard,
+    -apple-system,
+    BlinkMacSystemFont,
+    system-ui,
+    Roboto,
+    'Helvetica Neue',
+    'Segoe UI',
+    'Apple SD Gothic Neo',
+    'Noto Sans KR',
+    'Malgun Gothic',
+    'Apple Color Emoji',
+    'Segoe UI Emoji',
+    'Segoe UI Symbol',
+    sans-serif;
+}
+
+body {
+  color: var(--color-gray-900);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings:
+    'liga' 1,
+    'calt' 1;
+}
+
+/* Placeholder 폰트 상속 */
+input::placeholder,
+textarea::placeholder {
+  font-family: 'Pretendard Variable';
+}
+
+/* Logo 폰트 */
+.logo {
+  font-family: 'BMJUA', sans-serif;
+}
+
+/* Chrome / Edge / Safari */
+input[type='date']::-webkit-calendar-picker-indicator {
+  opacity: 0; /* 안 보이게 */
+  position: absolute;
+  inset: 0; /* 클릭 영역 유지 */
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+/* 스크롤바 숨기기 유틸리티 */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE, Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+@keyframes toast-progress-fill {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.toast-progress__fill {
+  width: 100%;
+  height: 100%;
+  transform: translateX(0);
+  background-color: currentColor;
+  animation-name: toast-progress-fill;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+  animation-duration: var(--toast-duration, 4500ms);
+}

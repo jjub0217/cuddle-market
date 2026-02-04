@@ -1,0 +1,43 @@
+.react-datepicker__triangle {
+  display: none;
+}
+
+.react-datepicker-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.react-datepicker-popper {
+  left: 0 !important;
+  z-index: 9999;
+  top: -5px !important;
+}
+
+/* 캘린더 스타일 */
+.react-datepicker {
+  border: 2px solid #e5e7eb;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  font-family: inherit;
+}
+.react-datepicker__header {
+  padding: 0;
+}
+.react-datepicker__header {
+  background-color: #fff;
+  border-bottom: none;
+  padding-bottom: 4px;
+}
+/* 헤더 스타일 (년월) */
+.react-datepicker__current-month {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1f2937;
+}
+
+/* 요일 스타일 */
+.react-datepicker__day-name {
+  font-weight: 300;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
