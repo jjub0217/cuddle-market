@@ -2,11 +2,19 @@ name: Claude Code Review
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, ready_for_review]
+  issue_comment:
+    types: [created]
 
 jobs:
   claude-review:
     runs-on: ubuntu-latest
+    # PR 이벤트이거나, 코멘트에 @claude re-review가 포함된 경우에만 실행
+    if: |
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request &&
+       contains(github.event.comment.body, '@claude re-review'))
     permissions:
       contents: read
       pull-requests: write
@@ -17,6 +25,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # issue_comment 이벤트의 경우 PR의 head ref를 체크아웃
+          ref: ${{ github.event_name == 'issue_comment' && format('refs/pull/{0}/head', github.event.issue.number) || github.ref }}
 
       - name: Run Claude Code Review
         uses: anthropics/claude-code-action@v1
