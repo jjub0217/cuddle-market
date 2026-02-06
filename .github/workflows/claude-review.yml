@@ -40,6 +40,7 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ steps.app-token.outputs.token }}
           use_sticky_comment: true
+          show_full_output: true
           prompt: |
             이 PR의 코드를 리뷰해주세요. 한국어로 답변해주세요.
 
