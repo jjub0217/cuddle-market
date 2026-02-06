@@ -9,7 +9,6 @@ on:
 jobs:
   claude-review:
     runs-on: ubuntu-latest
-    # PR 이벤트이거나, 코멘트에 @claude re-review가 포함된 경우에만 실행
     if: |
       github.event_name == 'pull_request' ||
       (github.event_name == 'issue_comment' &&
@@ -24,7 +23,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           ref: ${{ github.event_name == 'issue_comment' && format('refs/pull/{0}/head', github.event.issue.number) || github.ref }}
 
       - name: Generate GitHub App token
@@ -35,11 +34,14 @@ jobs:
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - name: Run Claude Code Review
-        uses: anthropics/claude-code-action@beta
+        uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ steps.app-token.outputs.token }}
-          direct_prompt: |
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
             이 PR의 코드를 리뷰해주세요. 한국어로 답변해주세요.
 
             다음 항목들을 확인해주세요:
@@ -50,3 +52,9 @@ jobs:
             - Next.js/React 모범 사례 준수 여부
 
             좋은 점과 개선할 점을 모두 언급해주세요.
+
+            Use `gh pr comment` for top-level feedback.
+            Only post GitHub comments - don't submit review text as messages.
+
+          claude_args: |
+            --allowedTools "Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
