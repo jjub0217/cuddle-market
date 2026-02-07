@@ -62,7 +62,7 @@ export const PETS = [
   },
   {
     code: 'AMPHIBIAN',
-    name: '곤충/절지동물',
+    name: '양서류',
     details: [
       { code: 'CRICKET', name: '귀뚜라미' },
       { code: 'MANTIS', name: '사마귀' },
