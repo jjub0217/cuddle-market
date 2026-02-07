@@ -1,4 +1,17 @@
 // ========== 알림 관련 타입 ==========
+
+export interface NotificationItem {
+  notificationId: number
+  notificationType: NotificationType
+  title: string
+  content: string
+  relatedEntityType: string
+  relatedEntityId: number
+  isRead: boolean
+  readAt: string | null
+  createdAt: string
+}
+
 export interface NotificationsDataResponse {
   code: {
     code: string
@@ -19,24 +32,14 @@ export interface NotificationsDataResponse {
 }
 
 export enum NotificationType {
-  CHAT = 'CHAT',
-  COMMENT = 'COMMENT',
-  PRODUCT = 'PRODUCT',
-  FOLLOW = 'FOLLOW',
-  LIKE = 'LIKE',
-  SYSTEM = 'SYSTEM',
-}
-
-export interface NotificationItem {
-  notificationId: number
-  notificationType: NotificationType
-  title: string
-  content: string
-  relatedEntityType: string
-  relatedEntityId: number
-  isRead: boolean
-  readAt: string | null
-  createdAt: string
+  CHAT_NEW_ROOM = 'CHAT_NEW_ROOM',
+  CHAT_NEW_MESSAGE = 'CHAT_NEW_MESSAGE',
+  PRODUCT_FAVORITE_STATUS_CHANGED = 'PRODUCT_FAVORITE_STATUS_CHANGED',
+  PRODUCT_FAVORITE_PRICE_CHANGED = 'PRODUCT_FAVORITE_PRICE_CHANGED',
+  ADMIN_SANCTION = 'ADMIN_SANCTION',
+  POST_DELETED = 'POST_DELETED',
+  COMMENT_REPLY = 'COMMENT_REPLY',
+  POST_COMMENT = 'POST_COMMENT',
 }
 
 export interface NotificationsPatchResponse {
