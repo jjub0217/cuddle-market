@@ -16,7 +16,7 @@ export interface User {
 // ========== 마이페이지 관련 타입 ==========
 export interface MyPageDataResponse {
   code: {
-    code: 200
+    code: number
     message: string
   }
   message: string
@@ -121,8 +121,8 @@ export interface UserBlockedResponse {
   code: string
   message: string
   data: {
-    blockerId: 1
-    blockedUserId: 123
+    blockerId: number
+    blockedUserId: number
     blockedNickname: string
     blockedProfileImageUrl: string
     createdAt: string
