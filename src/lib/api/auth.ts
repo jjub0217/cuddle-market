@@ -1,11 +1,20 @@
-import type { NicknameCheckResponse, EmailCheckResponse, SignUpRequestData, SignUpResponse, LoginRequestData, LoginResponse } from '@/types'
+import type {
+  NicknameCheckResponse,
+  EmailCheckResponse,
+  SignUpRequestData,
+  SignUpResponse,
+  LoginRequestData,
+  LoginResponse,
+} from '@/types'
 import axios from 'axios'
 import { api } from './api'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api'
 
 export const checkNickname = async (nickname: string): Promise<NicknameCheckResponse> => {
-  const response = await axios.get(`${API_BASE_URL}/auth/nickname/check?nickname=${nickname}`)
+  const response = await axios.get(`${API_BASE_URL}/auth/nickname/check`, {
+    params: { nickname },
+  })
   return response.data
 }
 
