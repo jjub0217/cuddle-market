@@ -38,22 +38,22 @@ export const profileValidationRules = {
   nickname: {
     minLength: {
       value: 2,
-      message: '닉네임은 2~ 10자 이상이어야 합니다.',
+      message: '닉네임은 2~10자여야 합니다.',
     },
     maxLength: {
       value: 10,
-      message: '닉네임은 2~ 10자 이상이어야 합니다.',
+      message: '닉네임은 2~10자여야 합니다.',
     },
   } satisfies RegisterOptions<ProfileUpdateBaseFormValues, 'nickname'>,
 
   introduction: {
     minLength: {
       value: 2,
-      message: '자기소개는 2~ 100자 이하이어야 합니다.',
+      message: '2자 이상이어야 합니다.',
     },
     maxLength: {
       value: 1000,
-      message: '자기소개는 2~ 1000자 이하이어야 합니다.',
+      message: '자기소개는 1000자 이하이어야 합니다.',
     },
   } satisfies RegisterOptions<ProfileUpdateBaseFormValues, 'introduction'>,
 
@@ -68,7 +68,7 @@ export const profileValidationRules = {
       message: '비밀번호는 최대 30자까지 가능합니다',
     },
     pattern: {
-      value: /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()]).+$/,
+      value: /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/,
       message: '영문 대소문자, 숫자, 특수문자를 모두 포함해야 합니다',
     },
   } satisfies RegisterOptions,
@@ -84,7 +84,7 @@ export const profileValidationRules = {
       message: '비밀번호는 최대 30자까지 가능합니다',
     },
     pattern: {
-      value: /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()]).+$/,
+      value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
       message: '영문 대소문자, 숫자, 특수문자를 모두 포함해야 합니다',
     },
   } satisfies RegisterOptions,
