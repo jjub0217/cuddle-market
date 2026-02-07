@@ -58,7 +58,7 @@ export const useUserStore = create<UserState>()(
 
       isLogin: () => {
         const { user, accessToken } = get()
-        return Boolean(user && accessToken)
+        return user !== null && accessToken !== null
       },
 
       getUserId: () => {
@@ -86,6 +86,6 @@ export const useUserStore = create<UserState>()(
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,
       }),
-    },
-  ),
+    }
+  )
 )
