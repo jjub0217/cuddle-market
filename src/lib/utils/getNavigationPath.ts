@@ -1,5 +1,5 @@
 import { ROUTES } from '@/constants/routes'
-import type { NotificationItem } from '@/types/notifications'
+import { NotificationType, type NotificationItem } from '@/types/notifications'
 
 export const getNavigationPath = (notification: NotificationItem): string => {
   const { relatedEntityType, relatedEntityId, notificationType } = notification
@@ -12,10 +12,10 @@ export const getNavigationPath = (notification: NotificationItem): string => {
     case 'POST':
       return ROUTES.COMMUNITY_DETAIL_ID(relatedEntityId)
     default:
-      if (notificationType === 'ADMIN_SANCTION') {
+      if (notificationType === NotificationType.ADMIN_SANCTION) {
         return ROUTES.MYPAGE
       }
-      if (notificationType === 'POST_DELETED') {
+      if (notificationType === NotificationType.POST_DELETED) {
         return ROUTES.COMMUNITY
       }
       return ROUTES.HOME
