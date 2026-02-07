@@ -20,7 +20,7 @@ export const fetchQuestionCommunity = async (
   size: number = 10,
   searchType?: string | null,
   keyword?: string | null,
-  sortBy?: string | null,
+  sortBy?: string | null
 ) => {
   const params = new URLSearchParams({
     page: page.toString(),
@@ -39,7 +39,7 @@ export const fetchInfoCommunity = async (
   size: number = 10,
   searchType?: string | null,
   keyword?: string | null,
-  sortBy?: string | null,
+  sortBy?: string | null
 ) => {
   const params = new URLSearchParams({
     page: page.toString(),
@@ -89,7 +89,7 @@ export const postReply = async (requestData: CommentPostRequestData, postId: str
 }
 
 export const deleteReply = async (commentId: number) => {
-  const response = await api.delete<DeleteResponse>(`community/comments/${commentId}`)
+  const response = await api.delete<DeleteResponse>(`/community/comments/${commentId}`)
   return response.data.data
 }
 
