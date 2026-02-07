@@ -1,7 +1,7 @@
 // ========== 알림 관련 타입 ==========
 export interface NotificationsDataResponse {
   code: {
-    code: number
+    code: string
     message: string
   }
   message: string
@@ -10,22 +10,32 @@ export interface NotificationsDataResponse {
     size: number
     total: number
     content: NotificationItem[]
-    totalPages: 8
+    totalPages: number
     hasNext: boolean
     hasPrevious: boolean
     totalElements: number
     numberOfElements: number
   }
 }
+
+export enum NotificationType {
+  CHAT = 'CHAT',
+  COMMENT = 'COMMENT',
+  PRODUCT = 'PRODUCT',
+  FOLLOW = 'FOLLOW',
+  LIKE = 'LIKE',
+  SYSTEM = 'SYSTEM',
+}
+
 export interface NotificationItem {
   notificationId: number
-  notificationType: string
+  notificationType: NotificationType
   title: string
   content: string
   relatedEntityType: string
   relatedEntityId: number
   isRead: boolean
-  readAt: null
+  readAt: string | null
   createdAt: string
 }
 

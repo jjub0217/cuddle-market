@@ -15,7 +15,7 @@ export interface CommunityItem {
 
 export interface CommunityResponse {
   code: {
-    code: number
+    code: string
     message: string
   }
   message: string

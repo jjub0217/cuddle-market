@@ -11,7 +11,7 @@ export interface ChatRoom {
   productImageUrl: string
   createdAt: string
   sellerNickname: string
-  sellerProfileImageUrl: null
+  sellerProfileImageUrl: string | null
 }
 
 export interface CreateChatRoomResponse {
@@ -26,9 +26,9 @@ export interface Message {
   senderNickname: string
   messageType: string
   content: string
-  imageUrl: null
+  imageUrl: string | null
   isBlocked: boolean
-  blockReason: null
+  blockReason: string | null
   createdAt: string
   isMine: boolean
 }
@@ -64,7 +64,9 @@ export interface fetchChatRoom {
 export interface ChatRoomsResponse {
   code: string
   message: string
-  data: { chatRooms: fetchChatRoom[]; currentPage: number; totalPages: number; totalElements: number; hasNext: boolean; hasPrevious: boolean }
+  data: {
+    chatRooms: fetchChatRoom[]
+  }
   currentPage: number
   totalPages: number
   totalElements: number
