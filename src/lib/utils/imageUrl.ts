@@ -20,7 +20,9 @@ export const PLACEHOLDER_SRCSET = `${PLACEHOLDER_IMAGES[150]} 150w, ${PLACEHOLDE
  */
 export function toResizedWebpUrl(originalUrl: string | null | undefined, size: ImageSize): string {
   if (!originalUrl) return ''
-  return originalUrl.replace(/\.[^.]+$/, `_${size}.webp`)
+  const lastDotIndex = originalUrl.lastIndexOf('.')
+  if (lastDotIndex === -1) return `${originalUrl}_${size}.webp`
+  return `${originalUrl.substring(0, lastDotIndex)}_${size}.webp`
 }
 
 /**
@@ -28,9 +30,10 @@ export function toResizedWebpUrl(originalUrl: string | null | undefined, size: I
  * @param originalUrl - API에서 받은 원본 이미지 URL
  * @returns srcset 문자열 (예: "url_150.webp 150w, url_400.webp 400w, url_800.webp 800w")
  */
+const SIZES: ImageSize[] = [150, 400, 800]
 export function getImageSrcSet(originalUrl: string | null | undefined): string {
   if (!originalUrl) return ''
-  return `${toResizedWebpUrl(originalUrl, 150)} 150w, ${toResizedWebpUrl(originalUrl, 400)} 400w, ${toResizedWebpUrl(originalUrl, 800)} 800w`
+  return SIZES.map((size) => `${toResizedWebpUrl(originalUrl, size)} ${size}w`).join(', ')
 }
 
 /**
