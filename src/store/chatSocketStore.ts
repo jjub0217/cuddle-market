@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { Client, type IMessage, type StompSubscription } from '@stomp/stompjs'
 import type { ChatRoomUpdateResponse, Message } from '@/types'
 import SockJS from 'sockjs-client'
+import { useToastStore } from './toastStore'
 
 interface ChatSocketState {
   socket: Client | null
@@ -46,7 +47,10 @@ export const chatSocketStore = create<ChatSocketState>((set, get) => ({
       onConnect: () => {
         socket.subscribe('/user/queue/errors', (message) => {
           const error = JSON.parse(message.body)
-          alert(`에러: ${error.message}`)
+          useToastStore.getState().error({
+            title: '채팅 오류',
+            content: error.message,
+          })
         })
         socket.subscribe('/user/queue/chat-room-list', (message) => {
           const updatedChatRoom = JSON.parse(message.body)
@@ -100,7 +104,14 @@ export const chatSocketStore = create<ChatSocketState>((set, get) => ({
     const socket = get().socket
     if (socket) {
       socket.deactivate()
-      set({ socket: null, isConnected: false, subscriptions: {} })
+      set({
+        socket: null,
+        isConnected: false,
+        subscriptions: {},
+        messages: {},
+        chatRoomUpdates: {},
+        connectionError: null,
+      })
     }
   },
 
