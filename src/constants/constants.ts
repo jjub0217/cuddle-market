@@ -334,3 +334,12 @@ export const TOAST_ANIMATION = {
     transition: { duration: 0.25, ease: 'easeOut' },
   },
 } as const
+
+export const TIME_UNITS = {
+  MINUTE: 60 * 1000,
+  HOUR: 60 * 60 * 1000,
+  DAY: 24 * 60 * 60 * 1000,
+  WEEK: 7 * 24 * 60 * 60 * 1000,
+  MONTH: 30 * 24 * 60 * 60 * 1000, // 근사치
+  YEAR: 365 * 24 * 60 * 60 * 1000, // 근사치
+} as const
