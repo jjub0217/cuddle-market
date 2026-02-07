@@ -1,5 +1,4 @@
-// TODO: @/constants/cities 추가 후 Province 타입으로 교체
-type Province = string
+import type { Province } from '@/constants/cities'
 
 // ========== 인증 관련 타입 ==========
 export interface NicknameCheckResponse {
