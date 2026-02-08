@@ -1,25 +1,31 @@
-import { useEffect } from 'react'
+import { type RefObject, useEffect, useRef } from 'react'
 
-interface AnyRef {
-  current: Element | null
-}
+export function useOutsideClick(open: boolean, refs: RefObject<Element | null>[], onClose: () => void) {
+  const onCloseRef = useRef(onClose)
 
-export function useOutsideClick(open: boolean, refs: AnyRef[], onClose: () => void) {
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
+
   useEffect(() => {
     if (!open) return
 
-    const handleDocumentMouseDown = (event: MouseEvent) => {
+    const handleMouseDown = (event: MouseEvent) => {
       const targetNode = event.target as Node
-      const insideRef = refs.find((ref) => {
-        const element = ref.current
-        return element ? element.contains(targetNode) : false
-      })
-
-      const clickedOutside = !insideRef
-      if (clickedOutside) onClose()
+      const isInside = refs.some((ref) => ref.current?.contains(targetNode))
+      if (!isInside) onCloseRef.current()
     }
 
-    document.addEventListener('mousedown', handleDocumentMouseDown)
-    return () => document.removeEventListener('mousedown', handleDocumentMouseDown)
-  }, [open, refs, onClose])
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onCloseRef.current()
+    }
+
+    document.addEventListener('mousedown', handleMouseDown)
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [open, refs])
 }

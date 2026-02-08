@@ -23,20 +23,17 @@ export function useScrollDirection({ threshold = 10, ignoreTime = 300 }: UseScro
 
       if (Math.abs(diff) >= threshold) {
         const shouldCollapse = diff > 0
+        lastScrollY.current = currentScrollY
 
         if (shouldCollapse === isCollapsedRef.current) {
-          lastScrollY.current = currentScrollY
-          return
+          isCollapsedRef.current = shouldCollapse
+          setIsCollapsed(shouldCollapse)
+          isIgnoring.current = true
+          setTimeout(() => {
+            isIgnoring.current = false
+            lastScrollY.current = window.scrollY
+          }, ignoreTime)
         }
-
-        isIgnoring.current = true
-        isCollapsedRef.current = shouldCollapse
-        setIsCollapsed(shouldCollapse)
-
-        setTimeout(() => {
-          isIgnoring.current = false
-          lastScrollY.current = window.scrollY
-        }, ignoreTime)
       }
     }
 
