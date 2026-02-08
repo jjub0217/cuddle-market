@@ -21,6 +21,7 @@ interface InputFieldProps {
   id?: string
   suffix?: string
   autoFocus?: boolean
+  maxLength?: number
 }
 
 export function InputField({ error, checkResult, registration, className, inputClass, id, suffix, ...inputProps }: InputFieldProps) {
