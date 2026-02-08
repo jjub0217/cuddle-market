@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { ROUTES } from '@/constants/routes'
+import Header from '@/components/header/Header'
 import type { ReactNode } from 'react'
 
 // ========== 공통 동적 경로 패턴 ==========
@@ -47,17 +48,12 @@ export default function MainLayout({ children }: { children: ReactNode }) {
     (HIDE_SEARCHBAR_MOBILE_PATHS.includes(pathname) || HIDE_SEARCHBAR_MOBILE_PATTERNS.some((pattern) => pattern.test(pathname)))
   const hideSearchBarAlways =
     HIDE_SEARCHBAR_ALWAYS_PATHS.includes(pathname) || HIDE_SEARCHBAR_ALWAYS_PATTERNS.some((pattern) => pattern.test(pathname))
-  const _hideSearchBar = hideSearchBarMobile || hideSearchBarAlways
-  const _hideMenuButton = HIDE_MENU_BUTTON_PATHS.includes(pathname)
+  const hideSearchBar = hideSearchBarMobile || hideSearchBarAlways
+  const hideMenuButton = HIDE_MENU_BUTTON_PATHS.includes(pathname)
 
   return (
     <div className="flex min-h-screen flex-col">
-      {/* TODO: Header 컴포넌트 마이그레이션 후 교체 (#34-#37) */}
-      {showHeader && (
-        <header className="bg-primary-200 fixed top-0 z-50 flex h-18 w-full items-center justify-center px-4">
-          <span className="font-bold text-white">커들마켓</span>
-        </header>
-      )}
+      {showHeader && <Header hideSearchBar={hideSearchBar} hideMenuButton={hideMenuButton} />}
       <main
         className="w-full flex-1 transition-[padding-top] duration-300"
         style={{ paddingTop: showHeader ? 'var(--header-height, 72px)' : '0' }}
