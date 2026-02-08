@@ -15,7 +15,7 @@ interface InputFieldProps {
   size?: string
   error?: FieldError
   checkResult?: { status: string; message: string }
-  classname?: string
+  className?: string
   inputClass?: string
   registration: UseFormRegisterReturn
   id?: string
@@ -23,9 +23,9 @@ interface InputFieldProps {
   autoFocus?: boolean
 }
 
-export function InputField({ error, checkResult, registration, classname, inputClass, id, suffix, ...inputProps }: InputFieldProps) {
+export function InputField({ error, checkResult, registration, className, inputClass, id, suffix, ...inputProps }: InputFieldProps) {
   return (
-    <div className={cn('flex flex-col gap-1', classname)}>
+    <div className={cn('flex flex-col gap-1', className)}>
       <Input {...inputProps} {...registration} inputClass={inputClass} id={id} suffix={suffix} />
       {error && <p className="text-danger-500 text-xs font-semibold">{error.message}</p>}
       {checkResult?.message && (
