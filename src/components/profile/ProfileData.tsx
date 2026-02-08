@@ -48,7 +48,7 @@ export default function ProfileData({
   const user = useUserStore((state) => state.user)
   const isMd = useMediaQuery('(min-width: 768px)')
   const pathname = usePathname()
-  const isProfileEditPage = /^\/profile-update$/.test(pathname)
+  const isProfileEditPage = pathname === '/profile-update'
   const formattedJoinDate = data?.createdAt ? formatJoinDate(data.createdAt) : ''
 
   const getProvider = (email: string | undefined) => {
