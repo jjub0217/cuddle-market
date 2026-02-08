@@ -15,7 +15,7 @@ const sizeStyles = {
   lg: 'p-2',
 }
 
-export function IconButton({ children, onClick, size = 'md', className, type = 'button', ...rest }: IconButtonProps) {
+export default function IconButton({ children, onClick, size = 'md', className, type = 'button', ...rest }: IconButtonProps) {
   return (
     <button type={type} onClick={onClick} className={cn('cursor-pointer rounded', sizeStyles[size], className)} {...rest}>
       {children}
