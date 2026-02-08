@@ -5,6 +5,6 @@ interface BadgeProps {
   className?: string
 }
 
-export function Badge({ children, className }: BadgeProps) {
+export default function Badge({ children, className }: BadgeProps) {
   return <span className={cn('flex items-center justify-center rounded-md px-2 py-1 text-sm', className)}>{children}</span>
 }

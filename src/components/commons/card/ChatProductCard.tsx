@@ -15,7 +15,7 @@ const sizeClasses = {
   md: 'w-16',
 }
 
-export function ChatProductCard({ productImageUrl, productTitle, productPrice, size = 'sm' }: ChatProductCardProps) {
+export default function ChatProductCard({ productImageUrl, productTitle, productPrice, size = 'sm' }: ChatProductCardProps) {
   return (
     <>
       <div className={`relative aspect-square shrink-0 overflow-hidden rounded-lg ${sizeClasses[size]}`}>

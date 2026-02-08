@@ -7,7 +7,7 @@ interface EmptyStateProps {
   className?: string
 }
 
-export function EmptyState({ icon: Icon, title, description, className = '' }: EmptyStateProps) {
+export default function EmptyState({ icon: Icon, title, description, className = '' }: EmptyStateProps) {
   return (
     <div
       className={`flex flex-col items-center justify-center gap-6 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 px-7 py-16 ${className}`}

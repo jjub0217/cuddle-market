@@ -1,6 +1,6 @@
 'use client'
 
-import { Button } from '@/components/commons/button/Button'
+import Button from '@/components/commons/button/Button'
 import { cn } from '@/lib/utils/cn'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 
@@ -18,7 +18,7 @@ interface TabsProps {
   excludeTabId?: string
 }
 
-export function Tabs({ tabs, activeTab, onTabChange, ariaLabel, excludeTabId }: TabsProps) {
+export default function Tabs({ tabs, activeTab, onTabChange, ariaLabel, excludeTabId }: TabsProps) {
   const filteredTabs = excludeTabId ? tabs.filter((tab) => tab.id !== excludeTabId) : tabs
   const isMd = useMediaQuery('(min-width: 768px)')
   return (
