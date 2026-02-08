@@ -13,6 +13,7 @@ import {
 } from 'react-hook-form'
 import { signupValidationRules } from '../validationRules'
 import { checkNickname } from '@/lib/api/auth'
+import { isAxiosError } from 'axios'
 import { useEffect } from 'react'
 
 interface NicknameFieldProps<T extends FieldValues> {
@@ -54,11 +55,19 @@ export function NicknameField<T extends FieldValues>({
         })
         setIsNicknameVerified(false)
       }
-    } catch {
-      setCheckResult({
-        status: 'error',
-        message: '닉네임 확인 중 오류가 발생했습니다.',
-      })
+    } catch (error) {
+      console.error('닉네임 확인 실패:', error)
+      if (isAxiosError(error)) {
+        setCheckResult({
+          status: 'error',
+          message: error.response?.data?.message || '닉네임 확인 중 오류가 발생했습니다.',
+        })
+      } else {
+        setCheckResult({
+          status: 'error',
+          message: '네트워크 오류가 발생했습니다.',
+        })
+      }
       setIsNicknameVerified(false)
     }
   }

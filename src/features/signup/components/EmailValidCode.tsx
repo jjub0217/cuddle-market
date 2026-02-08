@@ -6,6 +6,7 @@ import type { SignUpFormValues } from './SignUpForm'
 import { type UseFormRegister, type FieldErrors, type UseFormWatch, type UseFormClearErrors } from 'react-hook-form'
 import { authValidationRules } from '@/lib/utils/validation/authValidationRules'
 import { checkEmail, checkEmailValidCode, sendEmailValidCode } from '@/lib/api/auth'
+import { isAxiosError } from 'axios'
 import { useState } from 'react'
 
 interface EmailValidCodeProps {
@@ -57,18 +58,26 @@ export function EmailValidCode({ register, errors, watch, setIsEmailVerified, se
     }
   }
 
-  const handleSendVaildCode = async () => {
+  const handleSendValidCode = async () => {
     try {
       await sendEmailValidCode(email)
       setEmailCheckResult({
         status: 'success',
         message: '인증 번호를 발송했습니다.',
       })
-    } catch {
-      setEmailCheckResult({
-        status: 'error',
-        message: '인증코드 오류. 인증코드를 다시 받아주세요.',
-      })
+    } catch (error) {
+      console.error('인증코드 발송 실패:', error)
+      if (isAxiosError(error)) {
+        setEmailCheckResult({
+          status: 'error',
+          message: error.response?.data?.message || '인증코드 발송에 실패했습니다.',
+        })
+      } else {
+        setEmailCheckResult({
+          status: 'error',
+          message: '네트워크 오류가 발생했습니다.',
+        })
+      }
     }
   }
 
@@ -81,11 +90,19 @@ export function EmailValidCode({ register, errors, watch, setIsEmailVerified, se
       })
       setIsEmailCodeVerified(true)
       clearErrors('emailCode')
-    } catch {
-      setCodeCheckResult({
-        status: 'error',
-        message: '인증코드 오류. 인증코드를 다시 받아주세요.',
-      })
+    } catch (error) {
+      console.error('인증코드 확인 실패:', error)
+      if (isAxiosError(error)) {
+        setCodeCheckResult({
+          status: 'error',
+          message: error.response?.data?.message || '인증코드 오류. 인증코드를 다시 받아주세요.',
+        })
+      } else {
+        setCodeCheckResult({
+          status: 'error',
+          message: '네트워크 오류가 발생했습니다.',
+        })
+      }
       setIsEmailCodeVerified(false)
     }
   }
@@ -102,7 +119,7 @@ export function EmailValidCode({ register, errors, watch, setIsEmailVerified, se
           checkResult={emailCheckResult}
           registration={register('email', authValidationRules.email)}
           buttonText={emailCheckResult.status === 'success' ? '인증코드 전송' : '중복체크'}
-          onButtonClick={emailCheckResult.status === 'success' ? handleSendVaildCode : handleEmailCheck}
+          onButtonClick={emailCheckResult.status === 'success' ? handleSendValidCode : handleEmailCheck}
         />
         <InputWithButton
           id="signup-email-code"

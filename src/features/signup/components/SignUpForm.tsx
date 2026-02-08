@@ -58,6 +58,7 @@ export function SignUpForm() {
   const [isNicknameVerified, setIsNicknameVerified] = useState(false)
   const [isEmailVerified, setIsEmailVerified] = useState(false)
   const [isEmailCodeVerified, setIsEmailCodeVerified] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [signupNotification, setSignupNotification] = useState<{ message: string; type: ToastType } | null>(null)
   const [checkResult, setCheckResult] = useState<{
     status: 'idle' | 'success' | 'error'
@@ -100,6 +101,8 @@ export function SignUpForm() {
       return
     }
 
+    setIsSubmitting(true)
+
     const requestData: SignUpRequestData = {
       email: data.email,
       password: data.password,
@@ -136,6 +139,8 @@ export function SignUpForm() {
       } else {
         setSignupNotification({ message: '네트워크 연결을 확인해주세요.', type: 'warning' })
       }
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -173,8 +178,8 @@ export function SignUpForm() {
             </InlineNotification>
           )}
         </AnimatePresence>
-        <Button size="md" className="bg-primary-300 w-full cursor-pointer text-white" type="submit">
-          회원가입
+        <Button size="md" className="bg-primary-300 w-full cursor-pointer text-white" type="submit" disabled={isSubmitting}>
+          {isSubmitting ? '가입 중...' : '회원가입'}
         </Button>
       </fieldset>
     </form>

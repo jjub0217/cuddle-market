@@ -25,6 +25,7 @@ const validateBirthDate = (value: string): string | true => {
 
   if (!value || value === '--') return '생년월일을 입력해주세요'
   if (!yearStr || !monthStr || !dayStr) return '생년월일을 모두 입력해주세요'
+  if (isNaN(year) || isNaN(month) || isNaN(day)) return '올바른 날짜 형식을 입력해주세요'
   if (year < 1900 || year > currentYear) return '유효한 년도를 입력해주세요'
   if (month < 1 || month > 12) return '유효한 월을 입력해주세요'
   if (day < 1 || day > lastDayOfMonth) return '유효한 일을 입력해주세요'
@@ -63,11 +64,12 @@ export function BirthDateField<T extends FieldValues>({ control }: BirthDateFiel
 
           return (
             <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4" role="group" aria-label="생년월일">
                 <input
                   type="text"
                   inputMode="numeric"
                   placeholder="YYYY"
+                  aria-label="생년월일 년도"
                   value={year}
                   onChange={(e) => {
                     const newValue = isNumber(e, 4)
@@ -80,6 +82,7 @@ export function BirthDateField<T extends FieldValues>({ control }: BirthDateFiel
                   type="text"
                   inputMode="numeric"
                   placeholder="MM"
+                  aria-label="생년월일 월"
                   value={month}
                   onChange={(e) => {
                     const newValue = isNumber(e, 2)
@@ -92,6 +95,7 @@ export function BirthDateField<T extends FieldValues>({ control }: BirthDateFiel
                   type="text"
                   inputMode="numeric"
                   placeholder="DD"
+                  aria-label="생년월일 일"
                   value={day}
                   onChange={(e) => {
                     const newValue = isNumber(e, 2)
