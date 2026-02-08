@@ -19,6 +19,7 @@ export function ChatProductCard({ productImageUrl, productTitle, productPrice, s
   return (
     <>
       <div className={`relative aspect-square shrink-0 overflow-hidden rounded-lg ${sizeClasses[size]}`}>
+        {/* eslint-disable-next-line @next/next/no-img-element -- 백엔드 Lambda+CloudFront에서 이미 WebP 리사이즈 처리됨 */}
         <img
           src={productImageUrl ? toResizedWebpUrl(productImageUrl, 150) : PLACEHOLDER_IMAGES[150]}
           srcSet={productImageUrl ? getImageSrcSet(productImageUrl) : PLACEHOLDER_SRCSET}
