@@ -1,8 +1,7 @@
 'use client'
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useState, useEffect, type ReactNode } from 'react'
-import { useUserStore } from '@/store/userStore'
+import { useState, type ReactNode } from 'react'
 
 export default function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
@@ -16,11 +15,6 @@ export default function Providers({ children }: { children: ReactNode }) {
         },
       }),
   )
-  const validateAuthState = useUserStore((state) => state.validateAuthState)
-
-  useEffect(() => {
-    validateAuthState()
-  }, [validateAuthState])
 
   return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 }
