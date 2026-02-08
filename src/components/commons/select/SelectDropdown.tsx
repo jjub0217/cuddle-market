@@ -129,7 +129,7 @@ interface SelectDropdownProps {
   optionClassName?: string
 }
 
-export function SelectDropdown({
+export default function SelectDropdown({
   value,
   onChange,
   options,

@@ -1,8 +1,8 @@
 'use client'
 
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form'
-import { SelectDropdown } from './SelectDropdown'
-import { RequiredLabel } from '../RequiredLabel'
+import SelectDropdown from './SelectDropdown'
+import RequiredLabel from '../RequiredLabel'
 import { cn } from '@/lib/utils/cn'
 
 export interface SelectOption {
@@ -33,7 +33,7 @@ interface CascadingSelectFieldProps<T extends FieldValues> {
   required?: boolean
 }
 
-export function CascadingSelectField<T extends FieldValues>({
+export default function CascadingSelectField<T extends FieldValues>({
   control,
   primaryName,
   primaryOptions,
