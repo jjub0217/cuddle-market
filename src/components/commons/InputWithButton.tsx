@@ -1,7 +1,7 @@
 'use client'
 
-import { InputField } from './InputField'
-import { Button } from './button/Button'
+import InputField from './InputField'
+import Button from './button/Button'
 import type { FieldError, UseFormRegisterReturn } from 'react-hook-form'
 
 interface InputWithButtonProps {
@@ -19,7 +19,7 @@ interface InputWithButtonProps {
   borderColor?: string
 }
 
-export function InputWithButton({
+export default function InputWithButton({
   id,
   type,
   placeholder,

@@ -7,7 +7,7 @@ interface RequiredLabelProps {
   required?: boolean
 }
 
-export function RequiredLabel({ htmlFor, children, labelClass, required = true }: RequiredLabelProps) {
+export default function RequiredLabel({ htmlFor, children, labelClass, required = true }: RequiredLabelProps) {
   return (
     <label htmlFor={htmlFor} className={cn('text-gray-900', labelClass)}>
       <span>{children}</span>
