@@ -1,3 +1,5 @@
+'use no memo'
+
 import Button from '../commons/button/Button'
 import { WITH_DRAW_ALERT_LIST, WiTH_DRAW_REASON } from '@/constants/constants'
 import { Controller, useForm } from 'react-hook-form'

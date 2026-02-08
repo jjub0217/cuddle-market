@@ -1,3 +1,5 @@
+'use no memo'
+
 import Button from '../commons/button/Button'
 import ModalTitle from './ModalTitle'
 import RequiredLabel from '../commons/RequiredLabel'
