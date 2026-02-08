@@ -11,7 +11,7 @@ interface LoadMoreButtonProps {
   className?: string
 }
 
-export function LoadMoreButton({
+export default function LoadMoreButton({
   onClick,
   disabled = false,
   isLoading = false,
