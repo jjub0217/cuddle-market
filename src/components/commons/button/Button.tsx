@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils/cn'
 import type { ReactNode } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { buttonVariants, iconSizeMap, type ButtonVariants } from './buttonClass'
+import Image from 'next/image'
 
 interface ButtonProps extends Omit<React.ComponentPropsWithoutRef<'button'>, 'disabled'>, ButtonVariants {
   children?: ReactNode
@@ -25,7 +26,7 @@ export function Button({ children, icon: Icon, iconSrc, variant, size = 'md', di
       {...rest}
     >
       {Icon && <Icon size={iconSize} {...iconProps} />}
-      {iconSrc && <img src={iconSrc} alt="" className="h-4 w-4 object-contain" />}
+      {iconSrc && <Image src={iconSrc} alt="" width={16} height={16} className="object-contain" />}
       {children}
     </button>
   )
