@@ -124,7 +124,6 @@ interface SelectDropdownProps {
   options: { value: string; label: string }[]
   placeholder?: string
   disabled?: boolean
-  className?: string
   id?: string
   buttonClassName?: string
   optionClassName?: string
