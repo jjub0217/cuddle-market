@@ -1,6 +1,6 @@
 'use client'
 
-import { Input } from '@/components/commons/Input'
+import Input from '@/components/commons/Input'
 import type { FieldError, UseFormRegisterReturn } from 'react-hook-form'
 import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
@@ -24,7 +24,7 @@ interface InputFieldProps {
   maxLength?: number
 }
 
-export function InputField({ error, checkResult, registration, className, inputClass, id, suffix, ...inputProps }: InputFieldProps) {
+export default function InputField({ error, checkResult, registration, className, inputClass, id, suffix, ...inputProps }: InputFieldProps) {
   return (
     <div className={cn('flex flex-col gap-1', className)}>
       <Input {...inputProps} {...registration} inputClass={inputClass} id={id} suffix={suffix} />

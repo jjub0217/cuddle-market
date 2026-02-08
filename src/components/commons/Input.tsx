@@ -14,7 +14,7 @@ interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, '
   onClear?: () => void
 }
 
-export function Input({
+export default function Input({
   type,
   placeholder,
   icon: Icon,
