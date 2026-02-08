@@ -121,12 +121,9 @@ function Home() {
   })
 
   // 모든 페이지의 상품을 하나의 배열로 합치기
-  const allProducts = []
-  if (data?.pages) {
-    for (const page of data.pages) {
-      allProducts.push(...page.data.data.content)
-    }
-  }
+  const allProducts = useMemo(() => {
+    return data?.pages?.flatMap((page) => page.data.data.content) ?? []
+  }, [data?.pages])
 
   // 무한 스크롤 감지
   const targetRef = useIntersectionObserver({
@@ -221,7 +218,10 @@ function Home() {
 
           {isFetchingNextPage && (
             <div className="flex items-center justify-center py-8">
-              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" aria-label="상품 로딩 중" role="status"></div>
+              <div role="status" aria-live="polite">
+                <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" aria-hidden="true"></div>
+                <span className="sr-only">상품 로딩 중</span>
+              </div>
             </div>
           )}
         </div>

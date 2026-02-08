@@ -16,18 +16,22 @@ export function LocationFilter({ headingClassName }: LocationFilterProps) {
   const router = useRouter()
   const pathname = usePathname()
 
+  const isValidProvince = (value: string): value is Province => {
+    return PROVINCES.includes(value as Province)
+  }
+
   // URL에서 초기값 읽기
   const initialSido = searchParams.get('addressSido') || ''
   const initialGugun = searchParams.get('addressGugun') || ''
 
-  const [selectedSido, setSelectedSido] = useState<Province | ''>(initialSido as Province | '')
+  const [selectedSido, setSelectedSido] = useState<Province | ''>(isValidProvince(initialSido) ? initialSido : '')
   const [selectedGugun, setSelectedGugun] = useState(initialGugun)
 
   // URL이 변경될 때 state 동기화 (뒤로가기 대응)
   useEffect(() => {
     const urlSido = searchParams.get('addressSido') || ''
     const urlGugun = searchParams.get('addressGugun') || ''
-    setSelectedSido(urlSido as Province | '')
+    setSelectedSido(isValidProvince(urlSido) ? urlSido : '')
     setSelectedGugun(urlGugun)
   }, [searchParams])
 
