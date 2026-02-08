@@ -13,15 +13,15 @@ interface ButtonProps extends Omit<React.ComponentPropsWithoutRef<'button'>, 'di
   iconProps?: React.ComponentProps<LucideIcon>
 }
 
-export function Button({ children, icon: Icon, iconSrc, size = 'md', disabled = false, type = 'button', className, iconProps, ...rest }: ButtonProps) {
+export function Button({ children, icon: Icon, iconSrc, variant, size = 'md', disabled = false, type = 'button', className, iconProps, ...rest }: ButtonProps) {
   const iconPosition = (Icon || iconSrc) && !children ? 'only' : (Icon || iconSrc) && children ? 'left' : 'none'
   const iconSize = size && Icon ? iconSizeMap[size] : undefined
 
   return (
     <button
       type={type}
-      disabled={disabled ?? false}
-      className={cn(buttonVariants({ size, iconPosition, disabled: disabled || undefined }), className)}
+      disabled={disabled}
+      className={cn(buttonVariants({ variant, size, iconPosition, disabled: disabled || undefined }), className)}
       {...rest}
     >
       {Icon && <Icon size={iconSize} {...iconProps} />}
