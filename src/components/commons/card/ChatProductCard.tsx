@@ -25,7 +25,7 @@ export function ChatProductCard({ productImageUrl, productTitle, productPrice, s
           srcSet={productImageUrl ? getImageSrcSet(productImageUrl) : PLACEHOLDER_SRCSET}
           sizes={IMAGE_SIZES.tinyThumbnail}
           loading="lazy"
-          alt={productTitle}
+          alt={productTitle ?? '상품 이미지'}
           onError={(e) => {
             const img = e.currentTarget
             if (productImageUrl && img.src !== productImageUrl) {
@@ -41,7 +41,7 @@ export function ChatProductCard({ productImageUrl, productTitle, productPrice, s
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate">{productTitle}</p>
-        <p className="font-bold">{formatPrice(Number(productPrice))}원</p>
+        <p className="font-bold">{productPrice != null ? `${formatPrice(productPrice)}원` : ''}</p>
       </div>
     </>
   )
