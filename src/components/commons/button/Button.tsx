@@ -16,7 +16,7 @@ interface ButtonProps extends Omit<React.ComponentPropsWithoutRef<'button'>, 'di
 
 export function Button({ children, icon: Icon, iconSrc, variant, size = 'md', disabled = false, type = 'button', className, iconProps, ...rest }: ButtonProps) {
   const iconPosition = (Icon || iconSrc) && !children ? 'only' : (Icon || iconSrc) && children ? 'left' : 'none'
-  const iconSize = size && Icon ? iconSizeMap[size] : undefined
+  const iconSize = size ? iconSizeMap[size] : undefined
 
   return (
     <button
@@ -26,7 +26,7 @@ export function Button({ children, icon: Icon, iconSrc, variant, size = 'md', di
       {...rest}
     >
       {Icon && <Icon size={iconSize} {...iconProps} />}
-      {iconSrc && <Image src={iconSrc} alt="" width={16} height={16} className="object-contain" />}
+      {iconSrc && <Image src={iconSrc} alt="" width={iconSize ?? 16} height={iconSize ?? 16} className="object-contain" />}
       {children}
     </button>
   )
