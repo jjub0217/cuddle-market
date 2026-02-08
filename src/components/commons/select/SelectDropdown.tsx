@@ -97,7 +97,7 @@ function SelectOptions({ options, selectedValue, onSelect, placeholder, optionCl
       role="listbox"
       aria-label={placeholder}
       className={cn(
-        'absolute top-full left-0 mt-0.5 flex max-h-56 w-full flex-col gap-1 overflow-scroll rounded-md border border-gray-400 bg-white p-1 shadow-md',
+        'absolute top-full left-0 mt-0.5 flex max-h-56 w-full flex-col gap-1 overflow-auto rounded-md border border-gray-400 bg-white p-1 shadow-md',
         Z_INDEX.DROPDOWN,
       )}
     >
