@@ -5,7 +5,6 @@ export interface ToastOptions {
   title?: string
   content?: string
   durationMs?: number
-  pauseOnHover?: boolean
   showBar?: boolean
 }
 
@@ -16,6 +15,5 @@ export interface ToastItem {
   title?: string
   content?: string
   durationMs: number
-  pauseOnHover: boolean
   showBar: boolean
 }
