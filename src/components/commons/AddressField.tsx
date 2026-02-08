@@ -2,7 +2,7 @@
 
 import { type Control, type UseFormSetValue, type FieldValues, type Path } from 'react-hook-form'
 import { CITIES, PROVINCES } from '@/constants/cities'
-import { CascadingSelectField, type SelectOption } from '@/components/commons/select/CascadingSelectField'
+import CascadingSelectField, { type SelectOption } from '@/components/commons/select/CascadingSelectField'
 
 const provinceOptions: SelectOption[] = PROVINCES.map((province) => ({
   value: province,
@@ -24,7 +24,7 @@ interface AddressFieldProps<T extends FieldValues> {
   required?: boolean
 }
 
-export function AddressField<T extends FieldValues>({
+export default function AddressField<T extends FieldValues>({
   control,
   setValue,
   primaryName,

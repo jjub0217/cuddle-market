@@ -1,7 +1,7 @@
 'use client'
 
-import { InputField } from '@/components/commons/InputField'
-import { RequiredLabel } from '@/components/commons/RequiredLabel'
+import InputField from '@/components/commons/InputField'
+import RequiredLabel from '@/components/commons/RequiredLabel'
 import { type UseFormRegister, type FieldErrors, type RegisterOptions, type FieldValues, type Path, type FieldError } from 'react-hook-form'
 import { cn } from '@/lib/utils/cn'
 
@@ -19,7 +19,7 @@ interface TitleFieldProps<T extends FieldValues> {
   counterClassName?: string
 }
 
-export function TitleField<T extends FieldValues>({
+export default function TitleField<T extends FieldValues>({
   register,
   errors,
   fieldName,
