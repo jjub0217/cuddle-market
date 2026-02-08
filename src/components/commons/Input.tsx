@@ -3,21 +3,15 @@
 import { cn } from '@/lib/utils/cn'
 import { X, type LucideIcon } from 'lucide-react'
 
-interface InputProps {
-  type: string
-  placeholder?: string
+interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   icon?: LucideIcon
   border?: boolean
   borderColor?: string
   backgroundColor?: string
-  value?: string | number
   size?: string
-  id?: string
   inputClass?: string
   suffix?: string
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
   onClear?: () => void
-  [key: string]: any
 }
 
 export function Input({
