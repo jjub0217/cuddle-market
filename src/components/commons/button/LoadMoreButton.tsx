@@ -8,7 +8,7 @@ interface LoadMoreButtonProps {
   isLoading?: boolean
   loadingText?: string
   text?: string
-  classname?: string
+  className?: string
 }
 
 export function LoadMoreButton({
@@ -17,15 +17,16 @@ export function LoadMoreButton({
   isLoading = false,
   loadingText = '로딩중...',
   text = '더보기',
-  classname,
+  className,
 }: LoadMoreButtonProps) {
   return (
     <button
       onClick={onClick}
       disabled={disabled || isLoading}
+      type="button"
       className={cn(
         'bg-primary-200 hover:bg-primary-400 w-full cursor-pointer rounded-lg border py-2 font-bold text-white transition-all disabled:cursor-not-allowed disabled:opacity-50',
-        classname,
+        className
       )}
     >
       {isLoading ? loadingText : text}
