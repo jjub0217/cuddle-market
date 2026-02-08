@@ -77,6 +77,9 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+
             이 PR의 코드를 리뷰해주세요. 한국어로 답변해주세요.
 
             다음 항목들을 확인해주세요:
@@ -87,6 +90,12 @@ jobs:
             - 모범 사례 준수 여부
 
             발견된 문제점과 개선 제안을 구체적으로 설명해주세요.
+
+            Use `gh pr comment` for top-level feedback.
+            Only post GitHub comments - don't submit review text as messages.
+
+          claude_args: |
+            --allowedTools "Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
 ```
 
 ### 4단계: Workflow 파일 커밋 및 푸시
@@ -191,7 +200,7 @@ Vercel을 사용하는 프로젝트에서는 PR 프리뷰 빌드와 함께 Claud
 Vercel 대시보드 → Settings → Git → Ignored Build Step에서:
 
 ```bash
-if [ "$VERCEL_GIT_COMMIT_REF" == "main" ] || [ "$VERCEL_GIT_COMMIT_REF" == "develop" ] || [ "$VERCEL_GIT_PULL_REQUEST_ID" != "" ]; then exit 1; else exit 0; fi
+if [ "$VERCEL_GIT_COMMIT_REF" == "main" ] || [ "$VERCEL_GIT_COMMIT_REF" == "develop" ] || [ -n "$VERCEL_GIT_PULL_REQUEST_ID" ]; then exit 1; else exit 0; fi
 ```
 
 이 설정으로:
@@ -203,11 +212,24 @@ if [ "$VERCEL_GIT_COMMIT_REF" == "main" ] || [ "$VERCEL_GIT_COMMIT_REF" == "deve
 
 ## ⚠️ 주의사항 및 트러블슈팅
 
-### 1. Workflow 파일이 main 브랜치에 있어야 함
+### 1. Workflow 파일이 default 브랜치에 있어야 함
 
-Claude Code Action은 **main(또는 default) 브랜치에 있는 워크플로우 파일**을 기준으로 실행됩니다. 새 브랜치에서 워크플로우를 수정해도 즉시 반영되지 않습니다.
+`pull_request` 이벤트는 PR의 base 브랜치에 있는 워크플로우 파일을 사용하지만, **`issue_comment` 이벤트는 항상 저장소의 default 브랜치에 있는 워크플로우 파일**을 사용합니다.
 
-### 2. OIDC 토큰 에러
+따라서 `@claude re-review` 재리뷰 기능이 동작하려면 워크플로우 파일이 **default 브랜치** (예: `main` 또는 `develop`)에 반드시 존재해야 합니다. default 브랜치가 `main`이 아닌 `develop`인 경우, `develop`에 워크플로우 파일을 푸시해야 재리뷰가 작동합니다.
+
+### 2. 재리뷰 시 PR NUMBER가 비어있는 문제
+
+`issue_comment` 이벤트에서는 `github.event.pull_request` 객체가 존재하지 않습니다. 따라서 프롬프트에 PR 번호를 전달할 때 fallback이 필요합니다:
+
+```yaml
+prompt: |
+  PR NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+```
+
+`github.event.pull_request.number`는 `pull_request` 이벤트에서, `github.event.issue.number`는 `issue_comment` 이벤트에서 사용됩니다.
+
+### 3. OIDC 토큰 에러
 
 ```
 Error: Workflow validation failed
@@ -215,10 +237,10 @@ Error: Workflow validation failed
 
 이 에러가 발생하면:
 1. `id-token: write` 권한이 있는지 확인
-2. 워크플로우 파일이 main 브랜치에 푸시되었는지 확인
+2. 워크플로우 파일이 default 브랜치에 푸시되었는지 확인
 3. GitHub Actions 인덱싱을 위해 몇 분 대기 후 재시도
 
-### 3. API 키 에러
+### 4. API 키 에러
 
 ```
 Error: Invalid API key

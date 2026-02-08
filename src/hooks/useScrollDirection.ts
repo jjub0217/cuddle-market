@@ -12,6 +12,7 @@ export function useScrollDirection({ threshold = 10, ignoreTime = 300 }: UseScro
   const isCollapsedRef = useRef(false)
 
   useEffect(() => {
+    const timeoutId: NodeJS.Timeout | null = null
     lastScrollY.current = window.scrollY
 
     const handleScroll = () => {
@@ -25,7 +26,7 @@ export function useScrollDirection({ threshold = 10, ignoreTime = 300 }: UseScro
         const shouldCollapse = diff > 0
         lastScrollY.current = currentScrollY
 
-        if (shouldCollapse === isCollapsedRef.current) {
+        if (shouldCollapse !== isCollapsedRef.current) {
           isCollapsedRef.current = shouldCollapse
           setIsCollapsed(shouldCollapse)
           isIgnoring.current = true
@@ -38,7 +39,10 @@ export function useScrollDirection({ threshold = 10, ignoreTime = 300 }: UseScro
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      if (timeoutId) clearTimeout(timeoutId)
+    }
   }, [threshold, ignoreTime])
 
   return { isCollapsed }

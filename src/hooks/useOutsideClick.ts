@@ -8,12 +8,15 @@ export function useOutsideClick(open: boolean, refs: RefObject<Element | null>[]
   }, [onClose])
 
   useEffect(() => {
-    if (!open) return
+    if (!open || refs.length === 0) return
 
     const handleMouseDown = (event: MouseEvent) => {
       const targetNode = event.target as Node
       const isInside = refs.some((ref) => ref.current?.contains(targetNode))
-      if (!isInside) onCloseRef.current()
+      if (!isInside) {
+        event.stopPropagation()
+        onCloseRef.current()
+      }
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
