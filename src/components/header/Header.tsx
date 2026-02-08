@@ -7,9 +7,12 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ROUTES } from '@/constants/routes'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import IconButton from '@/components/commons/button/IconButton'
+import SearchBar from '@/components/header/components/SearchBar'
 import { Search } from 'lucide-react'
+import UserControls from '@/components/header/components/UserControls'
+import MobileNavigation from '@/components/header/components/MobileNavigation'
 
 interface HeaderProps {
   hideSearchBar?: boolean
@@ -81,13 +84,17 @@ export default function Header({ hideSearchBar = false, hideMenuButton = false }
               )}
             </div>
             <div className="flex items-center gap-1 xl:gap-8">
-              {/* TODO: SearchBar 마이그레이션 (#35) */}
+              {!hideSearchBar && (
+                <Suspense>
+                  <SearchBar className="hidden md:h-9 xl:block" inputClass="text-sm py-0" />
+                </Suspense>
+              )}
               {!hideSearchBar && !isXl && (
                 <IconButton aria-label="검색" onClick={() => setIsSearchOpen(!isSearchOpen)}>
                   <Search className="text-white" />
                 </IconButton>
               )}
-              {/* TODO: UserControls 마이그레이션 (#37) */}
+              <UserControls isSideOpen={isSideOpen} setIsSideOpen={setIsSideOpen} hideMenuButton={hideMenuButton} />
             </div>
           </div>
           {/* 모바일 검색바 - 아코디언 */}
@@ -101,12 +108,14 @@ export default function Header({ hideSearchBar = false, hideMenuButton = false }
                 marginBottom: isSearchOpen ? '12px' : '0',
               }}
             >
-              {/* TODO: SearchBar 마이그레이션 (#35) */}
+              <Suspense>
+                <SearchBar className="h-8 xl:hidden" inputClass="py-1 text-sm" />
+              </Suspense>
             </div>
           )}
         </div>
       </header>
-      {/* TODO: MobileNavigation 마이그레이션 (#37) */}
+      <MobileNavigation isOpen={isSideOpen} onClose={() => setIsSideOpen(false)} />
     </>
   )
 }
