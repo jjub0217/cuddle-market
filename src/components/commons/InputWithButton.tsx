@@ -44,7 +44,7 @@ export function InputWithButton({
         borderColor={borderColor}
         error={error}
         checkResult={checkResult}
-        classname="flex-1"
+        className="flex-1"
         registration={registration}
       />
       <Button size={buttonSize} className={buttonClassName} type="button" onClick={onButtonClick}>
