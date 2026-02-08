@@ -4,7 +4,7 @@ import ProductCard from '@/components/product/ProductCard'
 import { useLoginModalStore } from '@/store/modalStore'
 import { useUserStore } from '@/store/userStore'
 import type { Product } from '@/types/product'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils/cn'
 
 interface ProductListProps {
@@ -17,9 +17,10 @@ export default function ProductList({ products, showMoreButton = false, sellerId
   const { isLogin, setRedirectUrl } = useUserStore()
   const { openLoginModal } = useLoginModalStore()
   const router = useRouter()
+  const pathname = usePathname()
   const goToUserPage = (sellerId: number) => {
     if (!isLogin()) {
-      setRedirectUrl(window.location.pathname)
+      setRedirectUrl(pathname)
       openLoginModal()
       return
     }
