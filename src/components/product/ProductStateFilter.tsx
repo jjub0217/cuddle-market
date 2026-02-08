@@ -34,25 +34,20 @@ export function ProductStateFilter({
   const selectedProductStatus = externalSelectedStatus !== undefined ? externalSelectedStatus : internalSelectedStatus
 
   const handleStatusChange = (value: string) => {
-    const isDeselecting = selectedProductStatus === value
-    const newValue = isDeselecting ? null : value
+    if (selectedProductStatus === value) return
 
     // URL 동기화 모드일 때만 URL 업데이트
     if (useUrlSync) {
       const params = new URLSearchParams(searchParams.toString())
-      if (isDeselecting) {
-        params.delete('productStatuses')
-      } else {
-        params.set('productStatuses', value)
-      }
+      params.set('productStatuses', value)
       router.push(`${pathname}?${params.toString()}`)
     }
 
     // 외부 콜백이 있으면 호출, 없으면 내부 state 업데이트
     if (onProductStatusChange) {
-      onProductStatusChange(newValue)
+      onProductStatusChange(value)
     } else {
-      setInternalSelectedStatus(newValue)
+      setInternalSelectedStatus(value)
     }
   }
 
