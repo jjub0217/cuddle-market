@@ -9,7 +9,6 @@ import { ROUTES } from '@/constants/routes'
 
 interface SearchBarProps {
   placeholder?: string
-  delay?: number // 디바운스 시간 (ms)
   className?: string
   borderColor?: string
   paramName?: string // URL 파라미터 이름 (기본값: 'keyword')
@@ -32,7 +31,7 @@ export default function SearchBar({
 
   function handleKeywordChange(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter') {
-      const target = e.target as HTMLInputElement
+      const target = e.currentTarget
       const searchKeyword = target.value.trim()
 
       if (isHomePage) {
@@ -72,7 +71,7 @@ export default function SearchBar({
   }, [currentKeyword])
 
   return (
-    <div className={cn('h-5 flex-1 md:h-10 md:min-w-[480px]', className)}>
+    <div className={cn('h-5 flex-1 md:h-10 md:min-w-120', className)}>
       <Input
         type="text"
         value={keyword}
