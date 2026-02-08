@@ -18,7 +18,12 @@ export function DetailFilterButton({ isOpen, onClick, ariaControls, filterReset 
     <div
       role="button"
       onClick={onClick}
-      onKeyDown={(e) => e.key === 'Enter' && onClick()}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onClick()
+        }
+      }}
       tabIndex={0}
       aria-expanded={isOpen}
       aria-controls={ariaControls}

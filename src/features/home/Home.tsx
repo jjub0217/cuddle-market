@@ -61,7 +61,7 @@ function Home() {
     setIsDetailFilterOpen(isOpen)
   }, [])
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error } = useInfiniteQuery({
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error, refetch } = useInfiniteQuery({
     queryKey: [
       'products',
       activeProductTypeTab,
@@ -167,8 +167,8 @@ function Home() {
       <div className="flex min-h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <p>상품을 불러올 수 없습니다</p>
-          <button onClick={() => window.location.reload()} className="text-blue-600 hover:text-blue-800">
-            새로고침
+          <button onClick={() => refetch()} className="text-blue-600 hover:text-blue-800">
+            다시 시도
           </button>
         </div>
       </div>
