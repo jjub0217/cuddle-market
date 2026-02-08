@@ -1,8 +1,6 @@
-'use no memo'
-
 import Button from '../commons/button/Button'
 import { WITH_DRAW_ALERT_LIST, WiTH_DRAW_REASON } from '@/constants/constants'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import SelectDropdown from '../commons/select/SelectDropdown'
 import RequiredLabel from '../commons/RequiredLabel'
 import { WithDrawApiErrors } from '@/constants/validationRules'
@@ -34,7 +32,6 @@ export default function WithdrawModal({ isOpen, onConfirm, onCancel, error, onCl
     control,
     handleSubmit,
     register,
-    watch,
     reset,
     formState: { errors, isValid },
   } = useForm<WithDrawFormValues>({
@@ -45,7 +42,8 @@ export default function WithdrawModal({ isOpen, onConfirm, onCancel, error, onCl
       agree: false,
     },
   })
-  const titleLength = watch('detailReason')?.length ?? 0
+  const detailReason = useWatch({ control, name: 'detailReason' })
+  const titleLength = detailReason?.length ?? 0
   const modalRef = useRef<HTMLDivElement>(null)
 
   useOutsideClick(isOpen, [modalRef], onCancel)

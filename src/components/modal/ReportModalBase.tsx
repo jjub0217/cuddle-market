@@ -1,9 +1,7 @@
-'use no memo'
-
 import Button from '../commons/button/Button'
 import ModalTitle from './ModalTitle'
 import RequiredLabel from '../commons/RequiredLabel'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { ReportApiErrors } from '@/constants/validationRules'
 // TODO: ImageUploadField 마이그레이션 후 활성화 (#42-#43)
 // import ImageUploadField from '@/components/product/imageUploadField/ImageUploadField'
@@ -39,7 +37,7 @@ export default function ReportModalBase({ isOpen, heading, description, reasons,
   const {
     handleSubmit,
     register,
-    watch,
+    control,
     reset,
     formState: { errors, isValid },
   } = useForm<ReportFormValues>({
@@ -53,7 +51,8 @@ export default function ReportModalBase({ isOpen, heading, description, reasons,
   const modalRef = useRef<HTMLDivElement>(null)
   useOutsideClick(isOpen, [modalRef], onCancel)
 
-  const titleLength = watch('detailReason')?.length ?? 0
+  const detailReason = useWatch({ control, name: 'detailReason' })
+  const titleLength = detailReason?.length ?? 0
 
   const handleCancel = () => {
     reset()
@@ -107,7 +106,7 @@ export default function ReportModalBase({ isOpen, heading, description, reasons,
                 <textarea
                   placeholder="신고 상세 사유를 입력해주세요."
                   className="bg-primary-50 focus:border-primary-500 min-h-32 w-full resize-none rounded-lg px-3 py-3 text-sm placeholder:text-gray-400 focus:outline-none md:min-h-20"
-                  id="withdrawReasonDetail"
+                  id="reportReasonDetail"
                   {...register('detailReason', {
                     maxLength: ReportApiErrors.detailReason.maxLength,
                   })}
