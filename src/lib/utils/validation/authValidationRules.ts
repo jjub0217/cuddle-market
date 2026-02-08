@@ -84,7 +84,7 @@ export const profileValidationRules = {
       message: '비밀번호는 최대 30자까지 가능합니다',
     },
     pattern: {
-      value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+      value: /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()]).+$/,
       message: '영문 대소문자, 숫자, 특수문자를 모두 포함해야 합니다',
     },
   } satisfies RegisterOptions,
