@@ -11,6 +11,8 @@ import { Suspense, useEffect, useRef, useState } from 'react'
 import IconButton from '@/components/commons/button/IconButton'
 import SearchBar from '@/components/header/components/SearchBar'
 import { Search } from 'lucide-react'
+import UserControls from '@/components/header/components/UserControls'
+import MobileNavigation from '@/components/header/components/MobileNavigation'
 
 interface HeaderProps {
   hideSearchBar?: boolean
@@ -92,7 +94,7 @@ export default function Header({ hideSearchBar = false, hideMenuButton = false }
                   <Search className="text-white" />
                 </IconButton>
               )}
-              {/* TODO: UserControls 마이그레이션 (#37) */}
+              <UserControls isSideOpen={isSideOpen} setIsSideOpen={setIsSideOpen} hideMenuButton={hideMenuButton} />
             </div>
           </div>
           {/* 모바일 검색바 - 아코디언 */}
@@ -113,7 +115,7 @@ export default function Header({ hideSearchBar = false, hideMenuButton = false }
           )}
         </div>
       </header>
-      {/* TODO: MobileNavigation 마이그레이션 (#37) */}
+      <MobileNavigation isOpen={isSideOpen} onClose={() => setIsSideOpen(false)} />
     </>
   )
 }
