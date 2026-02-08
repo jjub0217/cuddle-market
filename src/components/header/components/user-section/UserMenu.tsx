@@ -5,18 +5,14 @@ import { cn } from '@/lib/utils/cn'
 import { UserRound as UserRoundIcon, LogOut as LogOutIcon } from 'lucide-react'
 import { ROUTES } from '@/constants/routes'
 import { useUserStore } from '@/store/userStore'
-import { logout } from '@/lib/api/auth'
-import { useLoginModalStore } from '@/store/modalStore'
-import { chatSocketStore } from '@/store/chatSocketStore'
 import ProfileAvatar from '@/components/commons/ProfileAvatar'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
 import { useRef } from 'react'
 import { useOutsideClick } from '@/hooks/useOutsideClick'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import IconButton from '@/components/commons/button/IconButton'
 import { Menu } from 'lucide-react'
-import { useQueryClient } from '@tanstack/react-query'
+import { useLogout } from '@/hooks/useLogout'
 
 interface UserMenuProps {
   isNotificationOpen: boolean
@@ -36,15 +32,12 @@ export default function UserMenu({
   isSideOpen,
   setIsSideOpen,
 }: UserMenuProps) {
-  const queryClient = useQueryClient()
-  const router = useRouter()
-  const pathname = usePathname()
-  const { user, clearAll } = useUserStore()
-  const { openLogoutModal } = useLoginModalStore()
-  const { disconnect } = chatSocketStore()
+  const { user } = useUserStore()
   const modalRef = useRef<HTMLDivElement>(null)
   useOutsideClick(isUserMenuOpen, [modalRef], () => setIsUserMenuOpen(false))
   const isMd = useMediaQuery('(min-width: 768px)')
+  const { openLogoutConfirm } = useLogout(() => setIsUserMenuOpen(false))
+
   const handleAvatarToggle = () => {
     if (isNotificationOpen) {
       setIsNotificationOpen(false)
@@ -52,33 +45,10 @@ export default function UserMenu({
     setIsUserMenuOpen(!isUserMenuOpen)
   }
 
-  // 로그인 필수 페이지 목록
-  const authRequiredPaths = [ROUTES.MYPAGE, ROUTES.PROFILE_UPDATE, ROUTES.CHAT]
-
-  // 현재 페이지가 로그인 필수 페이지인지 확인
-  const isAuthRequiredPage = authRequiredPaths.some((path) => pathname.startsWith(path))
-
-  // 로그아웃 실행 함수
-  const onLogout = async () => {
-    try {
-      await logout()
-    } catch (error) {
-      console.error('로그아웃 API 실패:', error)
-    } finally {
-      setIsUserMenuOpen(false)
-      disconnect()
-      clearAll()
-      queryClient.clear()
-      if (isAuthRequiredPage) {
-        router.push(ROUTES.HOME)
-      }
-    }
-  }
-
   // 로그아웃 버튼 클릭 시 확인 모달 열기
   const handleLogoutClick = () => {
     setIsUserMenuOpen(false)
-    openLogoutModal(onLogout)
+    openLogoutConfirm()
   }
 
   return isMd ? (

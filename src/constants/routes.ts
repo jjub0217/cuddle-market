@@ -31,3 +31,6 @@ export const ROUTES = {
   SOCIAL_SIGNUP: '/auth/social-signup',
   FIND_PASSWORD: '/auth/find-password',
 } as const
+
+// 로그인 필수 페이지 목록
+export const AUTH_REQUIRED_ROUTES = [ROUTES.MYPAGE, ROUTES.PROFILE_UPDATE, ROUTES.CHAT] as const

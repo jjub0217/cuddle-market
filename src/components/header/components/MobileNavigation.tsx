@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
 import { X, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { ROUTES } from '@/constants/routes'
@@ -11,10 +10,7 @@ import Logo from '@/components/Logo'
 import { useOutsideClick } from '@/hooks/useOutsideClick'
 import IconButton from '@/components/commons/button/IconButton'
 import { useUserStore } from '@/store/userStore'
-import { useLoginModalStore } from '@/store/modalStore'
-import { chatSocketStore } from '@/store/chatSocketStore'
-import { logout } from '@/lib/api/auth'
-import { useQueryClient } from '@tanstack/react-query'
+import { useLogout } from '@/hooks/useLogout'
 
 interface MobileNavigationProps {
   isOpen: boolean
@@ -22,9 +18,6 @@ interface MobileNavigationProps {
 }
 
 export default function MobileNavigation({ isOpen, onClose }: MobileNavigationProps) {
-  const queryClient = useQueryClient()
-  const router = useRouter()
-  const pathname = usePathname()
   const [isCommunityOpen, setIsCommunityOpen] = useState(false)
   const [communityHeight, setCommunityHeight] = useState(0)
   const communityRef = useRef<HTMLDivElement>(null)
@@ -36,35 +29,8 @@ export default function MobileNavigation({ isOpen, onClose }: MobileNavigationPr
   const sideNavRef = useRef<HTMLDivElement>(null)
   useOutsideClick(isOpen, [sideNavRef], onClose)
 
-  const { isLogin, clearAll } = useUserStore()
-  const { openLogoutModal } = useLoginModalStore()
-  const { disconnect } = chatSocketStore()
-
-  // 로그인 필수 페이지 목록
-  const authRequiredPaths = [ROUTES.MYPAGE, ROUTES.PROFILE_UPDATE, ROUTES.CHAT]
-
-  // 현재 페이지가 로그인 필수 페이지인지 확인
-  const isAuthRequiredPage = authRequiredPaths.some((path) => pathname.startsWith(path))
-
-  const handleLogout = async () => {
-    try {
-      await logout()
-    } catch (error) {
-      console.error('로그아웃 API 실패:', error)
-    } finally {
-      onClose()
-      disconnect()
-      clearAll()
-      queryClient.clear()
-      if (isAuthRequiredPage) {
-        router.push(ROUTES.HOME)
-      }
-    }
-  }
-
-  const handleLogoutClick = () => {
-    openLogoutModal(handleLogout)
-  }
+  const { isLogin } = useUserStore()
+  const { openLogoutConfirm } = useLogout(onClose)
 
   useEffect(() => {
     if (communityRef.current) {
@@ -112,7 +78,7 @@ export default function MobileNavigation({ isOpen, onClose }: MobileNavigationPr
             {isLogin() ? (
               <button
                 type="button"
-                onClick={handleLogoutClick}
+                onClick={openLogoutConfirm}
                 className="border-primary-200 text-primary-200 flex-1 cursor-pointer rounded-sm border py-2 text-center text-sm font-bold"
               >
                 로그아웃
