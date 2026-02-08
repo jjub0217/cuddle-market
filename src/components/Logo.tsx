@@ -3,7 +3,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { cn } from '@/lib/utils/cn'
-import { useFilterStore } from '@/store/filterStore'
 import { ROUTES } from '@/constants/routes'
 
 interface LogoProps {
@@ -13,15 +12,8 @@ interface LogoProps {
 }
 
 export default function Logo({ logoClassname, textClassname, onClick }: LogoProps) {
-  const resetFilters = useFilterStore((state) => state.resetFilters)
-
-  const handleLogoClick = () => {
-    resetFilters()
-    onClick?.()
-  }
-
   return (
-    <Link href={ROUTES.HOME} onClick={handleLogoClick} className="flex items-center gap-2 xl:mr-5">
+    <Link href={ROUTES.HOME} onClick={onClick} className="flex items-center gap-2 xl:mr-5">
       <div className={cn('h-11 w-auto object-contain', logoClassname)}>
         <Image src="/images/CuddleMarketLogoImage_100.webp" alt="CuddleMarket 로고" width={44} height={44} className="h-full w-auto object-cover" />
       </div>
