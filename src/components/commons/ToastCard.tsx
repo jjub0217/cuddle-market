@@ -13,7 +13,6 @@ interface ToastCardProps {
   title?: string
   children?: ReactNode
   durationMs: number
-  pauseOnHover: boolean
   showBar: boolean
   onClose: () => void
 }

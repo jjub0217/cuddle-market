@@ -33,7 +33,6 @@ export const useToastStore = create<ToastStore>((set, get) => ({
       title: opts.title,
       content: opts.content,
       durationMs,
-      pauseOnHover: opts.pauseOnHover ?? true,
       showBar: opts.showBar ?? true,
     }
 

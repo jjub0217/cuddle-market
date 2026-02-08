@@ -23,7 +23,6 @@ export default function ToastContainer() {
             type={toast.type}
             title={toast.title}
             durationMs={toast.durationMs}
-            pauseOnHover={toast.pauseOnHover}
             showBar={toast.showBar}
             onClose={() => remove(toast.id)}
           >
