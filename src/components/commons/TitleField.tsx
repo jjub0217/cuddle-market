@@ -46,6 +46,7 @@ export function TitleField<T extends FieldValues>({
         borderColor="border-gray-400"
         classname="flex flex-col gap-2.5"
         error={errors[fieldName] as FieldError | undefined}
+        maxLength={maxLength}
         registration={register(fieldName, rules)}
       />
       <p className={cn(counterClassName)}>
