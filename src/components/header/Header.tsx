@@ -44,6 +44,10 @@ export default function Header({ hideSearchBar = false, hideMenuButton = false }
     } else {
       document.documentElement.style.setProperty('--header-height', `${baseHeight}px`)
     }
+
+    return () => {
+      document.documentElement.style.removeProperty('--header-height')
+    }
   }, [isSearchOpen, searchBarHeight, isXl])
 
   return (
@@ -52,7 +56,7 @@ export default function Header({ hideSearchBar = false, hideMenuButton = false }
         className={cn(
           'bg-primary-200 fixed top-0 flex w-full items-center justify-center pt-3 xl:pb-3',
           !isXl && (isSearchOpen ? 'pb-0' : 'pb-3'),
-          `${Z_INDEX.HEADER}`,
+          Z_INDEX.HEADER,
         )}
       >
         <div className="flex w-full flex-col px-4 xl:block xl:max-w-7xl xl:gap-3 xl:px-3.5">
