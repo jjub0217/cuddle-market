@@ -8,10 +8,9 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 interface PriceFilterProps {
   headingClassName?: string
   selectedPriceRange?: PriceRange | null
-  onMinPriceChange?: (priceRange: PriceRange | null) => void
 }
 
-export function PriceFilter({ headingClassName, selectedPriceRange, onMinPriceChange }: PriceFilterProps) {
+export function PriceFilter({ headingClassName, selectedPriceRange }: PriceFilterProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -35,8 +34,6 @@ export function PriceFilter({ headingClassName, selectedPriceRange, onMinPriceCh
       }
     }
     router.push(`${pathname}?${params.toString()}`)
-
-    onMinPriceChange?.(isDeselecting ? null : priceRange)
   }
   return (
     <div className="flex flex-col gap-2">

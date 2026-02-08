@@ -2,7 +2,7 @@
 
 import ProductList from '@/components/product/ProductList'
 import SelectDropdown from '@/components/commons/select/SelectDropdown'
-import { PRODUCT_TYPE_TABS, SORT_TYPE, type ProductTypeTabId, type SORT_LABELS } from '@/constants/constants'
+import { PRODUCT_TYPE_TABS, SORT_TYPE, type ProductTypeTabId } from '@/constants/constants'
 import type { Product } from '@/types/product'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 
@@ -22,9 +22,7 @@ interface ProductsSectionProps {
   products: Product[]
   totalElements: number
   activeTab: ProductTypeTabId
-  selectedSort?: SORT_LABELS
-  setSelectedSort?: (sort: string) => void
-  onSortChange?: (sort: SORT_LABELS) => void
+  selectedSort?: string
 }
 
 export function ProductsSection({
@@ -32,8 +30,6 @@ export function ProductsSection({
   totalElements,
   activeTab,
   selectedSort = '최신순',
-  setSelectedSort,
-  onSortChange,
 }: ProductsSectionProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -60,8 +56,6 @@ export function ProductsSection({
         params.delete('sortOrder')
     }
     router.push(`${pathname}?${params.toString()}`)
-    setSelectedSort?.(sortItem.label)
-    onSortChange?.(value as SORT_LABELS)
   }
 
   return (

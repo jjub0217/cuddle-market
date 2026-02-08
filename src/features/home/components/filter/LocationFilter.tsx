@@ -5,15 +5,13 @@ import SelectDropdown from '@/components/commons/select/SelectDropdown'
 import { CITIES, PROVINCES } from '@/constants/cities'
 import { cn } from '@/lib/utils/cn'
 import type { Province } from '@/constants/cities'
-import type { LocationFilter as LocationFilterType } from '@/constants/constants'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 
 interface LocationFilterProps {
   headingClassName?: string
-  onLocationChange?: (location: LocationFilterType | null) => void
 }
 
-export function LocationFilter({ headingClassName, onLocationChange }: LocationFilterProps) {
+export function LocationFilter({ headingClassName }: LocationFilterProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -36,34 +34,21 @@ export function LocationFilter({ headingClassName, onLocationChange }: LocationF
   // 선택된 시/도에 따른 구/군 목록
   const availableGugun = selectedSido ? CITIES[selectedSido] || [] : []
 
-  // 시/도나 구/군이 변경되면 부모에게 알림 + URL 업데이트
+  // 시/도나 구/군이 변경되면 URL 업데이트
   useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString())
     if (selectedSido) {
-      // 시/도가 있으면 필터 전달 (구/군은 선택 안 했을 수도 있음)
-      onLocationChange?.({
-        sido: selectedSido,
-        gugun: selectedGugun || null,
-      })
-
-      // URL 업데이트
-      const params = new URLSearchParams(searchParams.toString())
       params.set('addressSido', selectedSido)
       if (selectedGugun) {
         params.set('addressGugun', selectedGugun)
       } else {
         params.delete('addressGugun')
       }
-      router.push(`${pathname}?${params.toString()}`)
     } else {
-      // 시/도가 없으면 null 전달
-      onLocationChange?.(null)
-
-      // URL에서 제거
-      const params = new URLSearchParams(searchParams.toString())
       params.delete('addressSido')
       params.delete('addressGugun')
-      router.push(`${pathname}?${params.toString()}`)
     }
+    router.push(`${pathname}?${params.toString()}`)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSido, selectedGugun])
 

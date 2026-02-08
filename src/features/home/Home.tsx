@@ -1,13 +1,13 @@
 'use client'
 
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import Tabs from '@/components/Tabs'
 import { DetailFilter } from '@/features/home/components/filter/DetailFilter'
 import { ProductsSection } from '@/features/home/components/product-section/ProductsSection'
 import { fetchAllProducts } from '@/lib/api/products'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
-import { PRODUCT_TYPE_TABS, PET_TYPE_TABS, type ProductTypeTabId, SORT_TYPE, type SORT_LABELS } from '@/constants/constants'
+import { PRODUCT_TYPE_TABS, PET_TYPE_TABS, type ProductTypeTabId, SORT_TYPE, type PetTypeTabId } from '@/constants/constants'
 import { PetTypeFilter } from './components/filter/PetTypeFilter'
 import { CategoryFilter } from './components/filter/CategoryFilter'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
@@ -15,7 +15,6 @@ import { Plus } from 'lucide-react'
 import Button from '@/components/commons/button/Button'
 import { useUserStore } from '@/store/userStore'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { useFilterStore } from '@/store/filterStore'
 import { Z_INDEX } from '@/constants/ui'
 import HomeSkeleton from './components/product-section/HomeSkeleton'
 
@@ -26,61 +25,37 @@ function Home() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
+
+  // 탭 상태 (새로고침 시 초기화)
+  const [activePetTypeTab, setActivePetTypeTab] = useState<PetTypeTabId>('tab-all')
+  const [activeProductTypeTab, setActiveProductTypeTab] = useState<ProductTypeTabId>('tab-all')
+
+  // URL에서 필터 값 직접 파싱 (Single Source of Truth)
   const keyword = searchParams.get('keyword') || ''
   const sortBy = searchParams.get('sortBy')
   const sortOrder = searchParams.get('sortOrder')
+  const selectedDetailPet = searchParams.get('petDetailType') || null
+  const selectedCategory = searchParams.get('categories') || null
+  const selectedProductStatus = searchParams.get('productStatuses') || null
+  const minPrice = searchParams.get('minPrice')
+  const maxPrice = searchParams.get('maxPrice')
+  const selectedProductPrice = minPrice ? { min: Number(minPrice), max: maxPrice ? Number(maxPrice) : null } : null
+  const addressSido = searchParams.get('addressSido') || ''
+  const addressGugun = searchParams.get('addressGugun') || ''
+  const selectedLocation = addressSido ? { sido: addressSido, gugun: addressGugun || null } : null
 
-  const {
-    activePetTypeTab,
-    setActivePetTypeTab,
-    selectedDetailPet,
-    setSelectedDetailPet,
-    selectedCategory,
-    setSelectedCategory,
-    selectedProductStatus,
-    setSelectedProductStatus,
-    selectedProductPrice,
-    setSelectedProductPrice,
-    selectedLocation,
-    setSelectedLocation,
-    selectedSort,
-    setSelectedSort,
-    activeProductTypeTab,
-    setActiveProductTypeTab,
-    resetFilters,
-  } = useFilterStore()
+  const selectedSort = useMemo(() => {
+    if (!sortBy) return '최신순'
+    const sortItem = SORT_TYPE.find((sort) => {
+      if (sortBy === 'price') {
+        return sortOrder === 'asc' ? sort.id === 'orderedLowPriced' : sort.id === 'orderedHighPriced'
+      }
+      return sort.id === sortBy
+    })
+    return sortItem?.label ?? '최신순'
+  }, [sortBy, sortOrder])
 
   const [isDetailFilterOpen, setIsDetailFilterOpen] = useState(false)
-
-  // URL searchParams에서 초기값 설정 (마운트 시 1회)
-  useEffect(() => {
-    const petDetailType = searchParams.get('petDetailType')
-    const categories = searchParams.get('categories')
-    const productStatuses = searchParams.get('productStatuses')
-    const minPrice = searchParams.get('minPrice')
-    const maxPrice = searchParams.get('maxPrice')
-
-    if (petDetailType) setSelectedDetailPet(petDetailType)
-    if (categories) setSelectedCategory(categories)
-    if (productStatuses) setSelectedProductStatus(productStatuses)
-    if (minPrice) {
-      setSelectedProductPrice({
-        min: Number(minPrice),
-        max: maxPrice ? Number(maxPrice) : null,
-      })
-    }
-
-    if (sortBy) {
-      const sortItem = SORT_TYPE.find((sort) => {
-        if (sortBy === 'price') {
-          return sortOrder === 'asc' ? sort.id === 'orderedLowPriced' : sort.id === 'orderedHighPriced'
-        }
-        return sort.id === sortBy
-      })
-      if (sortItem) setSelectedSort(sortItem.label)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   const handleDetailFilterToggle = useCallback((isOpen: boolean) => {
     setIsDetailFilterOpen(isOpen)
@@ -165,10 +140,11 @@ function Home() {
   const filterReset = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation()
+      setActivePetTypeTab('tab-all')
+      setActiveProductTypeTab('tab-all')
       router.push(pathname)
-      resetFilters()
     },
-    [router, pathname, resetFilters],
+    [router, pathname],
   )
 
   const toGoProductPostPage = (e: React.MouseEvent) => {
@@ -209,18 +185,14 @@ function Home() {
                 activeTab={activePetTypeTab}
                 onTabChange={setActivePetTypeTab}
                 selectedDetailPet={selectedDetailPet}
-                onPetDetailTypeChange={setSelectedDetailPet}
                 headingClassName="heading-h5"
               />
-              <CategoryFilter selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} headingClassName="heading-h5" />
+              <CategoryFilter selectedCategory={selectedCategory} headingClassName="heading-h5" />
               <DetailFilter
                 isOpen={isDetailFilterOpen}
                 onToggle={handleDetailFilterToggle}
                 selectedProductStatus={selectedProductStatus}
-                onProductStatusChange={setSelectedProductStatus}
                 selectedPriceRange={selectedProductPrice}
-                onMinPriceChange={setSelectedProductPrice}
-                onLocationChange={setSelectedLocation}
                 filterReset={filterReset}
                 headingClassName="lg:text-base!"
               />
@@ -239,8 +211,7 @@ function Home() {
                   products={allProducts}
                   totalElements={totalElements}
                   activeTab={activeProductTypeTab}
-                  selectedSort={selectedSort as SORT_LABELS}
-                  setSelectedSort={setSelectedSort}
+                  selectedSort={selectedSort}
                 />
               )}
             </div>

@@ -8,10 +8,9 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 interface CategoryFilterProps {
   headingClassName?: string
   selectedCategory?: string | null
-  onCategoryChange?: (category: string | null) => void
 }
 
-export function CategoryFilter({ headingClassName, selectedCategory, onCategoryChange }: CategoryFilterProps) {
+export function CategoryFilter({ headingClassName, selectedCategory }: CategoryFilterProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -29,8 +28,6 @@ export function CategoryFilter({ headingClassName, selectedCategory, onCategoryC
       params.set('categories', category) // 선택 시 URL에 추가
     }
     router.push(`${pathname}?${params.toString()}`)
-
-    onCategoryChange?.(isDeselecting ? null : category)
   }
   return (
     <div className="flex flex-col gap-2.5">

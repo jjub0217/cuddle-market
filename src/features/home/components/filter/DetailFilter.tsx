@@ -3,16 +3,13 @@ import { DetailFilterButton } from './DetailFilterButton'
 import { ProductStateFilter } from '@/components/product/ProductStateFilter'
 import { PriceFilter } from './PriceFilter'
 import { LocationFilter } from './LocationFilter'
-import type { PriceRange, LocationFilter as LocationFilterType } from '@/constants/constants'
+import type { PriceRange } from '@/constants/constants'
 
 interface DetailFilterProps {
   isOpen: boolean
   onToggle: (isOpen: boolean) => void
   selectedProductStatus?: string | null
-  onProductStatusChange?: (status: string | null) => void
   selectedPriceRange?: PriceRange | null
-  onMinPriceChange?: (priceRange: PriceRange | null) => void
-  onLocationChange?: (location: LocationFilterType | null) => void
   filterReset: (e: React.MouseEvent) => void
   headingClassName?: string
 }
@@ -21,10 +18,7 @@ export const DetailFilter = memo(function DetailFilterSection({
   isOpen,
   onToggle,
   selectedProductStatus,
-  onProductStatusChange,
   selectedPriceRange,
-  onMinPriceChange,
-  onLocationChange,
   filterReset,
   headingClassName,
 }: DetailFilterProps) {
@@ -40,12 +34,11 @@ export const DetailFilter = memo(function DetailFilterSection({
         >
           <ProductStateFilter
             selectedProductStatus={selectedProductStatus}
-            onProductStatusChange={onProductStatusChange}
             useUrlSync
             headingClassName={headingClassName}
           />
-          <PriceFilter selectedPriceRange={selectedPriceRange} onMinPriceChange={onMinPriceChange} headingClassName={headingClassName} />
-          <LocationFilter onLocationChange={onLocationChange} headingClassName={headingClassName} />
+          <PriceFilter selectedPriceRange={selectedPriceRange} headingClassName={headingClassName} />
+          <LocationFilter headingClassName={headingClassName} />
         </div>
       )}
     </div>

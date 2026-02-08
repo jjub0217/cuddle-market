@@ -15,10 +15,9 @@ interface PetTypeFilterProps {
   onTabChange: (tabId: PetTypeTabId) => void
   headingClassName?: string
   selectedDetailPet?: string | null
-  onPetDetailTypeChange?: (category: string | null) => void
 }
 
-export function PetTypeFilter({ activeTab, headingClassName, selectedDetailPet, onPetDetailTypeChange, onTabChange }: PetTypeFilterProps) {
+export function PetTypeFilter({ activeTab, headingClassName, selectedDetailPet, onTabChange }: PetTypeFilterProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -42,8 +41,6 @@ export function PetTypeFilter({ activeTab, headingClassName, selectedDetailPet, 
       params.set('petDetailType', pet) // 선택 시 URL에 추가
     }
     router.push(`${pathname}?${params.toString()}`)
-
-    onPetDetailTypeChange?.(isDeselecting ? null : pet)
   }
   const selectedPetTypeCode = PET_TYPE_TABS.find((tab) => tab.id === activeTab)?.code
 
