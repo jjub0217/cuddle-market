@@ -33,7 +33,7 @@ function UserPage() {
     isLoading: isLoadingUserData,
     error: errorUserData,
   } = useQuery({
-    queryKey: ['userPage'],
+    queryKey: ['userPage', id],
     queryFn: () => fetchUserData(Number(id)),
     enabled: !!id,
     refetchOnWindowFocus: false,
@@ -59,7 +59,7 @@ function UserPage() {
   const { mutate: unblockUser } = useMutation({
     mutationFn: () => userUnBlocked(Number(userData?.id)),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['userPage'] })
+      queryClient.invalidateQueries({ queryKey: ['userPage', id] })
     },
     onError: () => {
       setUnblockError(
@@ -120,13 +120,13 @@ function UserPage() {
           />
           <section className="flex w-full flex-col gap-6 rounded-xl border-gray-200 p-5 md:border">
             <div className="flex justify-between">
-              <h4 className="flex flex-col items-start">
-                <span className="font-bold">{userData?.nickname}님의 판매상품</span>
-                <span>총 {totalProducts}개의 상품이 있습니다</span>
-              </h4>
+              <div className="flex flex-col items-start">
+                <h4 className="font-bold">{userData?.nickname}님의 판매상품</h4>
+                <p>총 {totalProducts}개의 상품이 있습니다</p>
+              </div>
             </div>
             <div className="gap-lg flex max-h-[60vh] flex-col overflow-y-auto">
-              {userProductData?.pages?.flatMap((page) => page.content).length ? (
+              {allProducts.length ? (
                 <>
                   <ul className="flex flex-col items-center justify-start gap-2.5">
                     {allProducts.map((product) => (
