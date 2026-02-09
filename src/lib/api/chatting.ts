@@ -19,7 +19,11 @@ export const createChatRoom = async (requestData: CreateChatRequestData) => {
 
 export const fetchRooms = async (page: number = 0, size: number = 10) => {
   const response = await api.get<ChatRoomsResponse>(`/chat/rooms?page=${page}&size=${size}`)
-  return response.data.data
+  return {
+    chatRooms: response.data.data.chatRooms,
+    currentPage: response.data.currentPage,
+    hasNext: response.data.hasNext,
+  }
 }
 
 export const fetchRoomMessages = async (chatRoomId: number, page: number = 0, size: number = 50) => {
