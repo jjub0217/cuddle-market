@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react'
 import RequiredLabel from '@/components/commons/RequiredLabel'
 import InputWithButton from '@/components/commons/InputWithButton'
 import { checkValidCode, reSettingPassword, sendValidCode } from '@/lib/api/profile'
+import { isAxiosError } from 'axios'
 import { StepIndicator } from './StepIndicator'
 import { StepHeader } from './StepHeader'
 
@@ -64,11 +65,19 @@ export function FindPasswordForm() {
         status: 'success',
         message: '인증 번호를 발송했습니다.',
       })
-    } catch {
-      setSendValidCodeResult({
-        status: 'error',
-        message: '인증코드 오류. 인증코드를 다시 받아주세요.',
-      })
+    } catch (error) {
+      console.error('인증코드 전송 실패:', error)
+      if (isAxiosError(error)) {
+        setSendValidCodeResult({
+          status: 'error',
+          message: error.response?.data?.message || '인증코드 전송에 실패했습니다.',
+        })
+      } else {
+        setSendValidCodeResult({
+          status: 'error',
+          message: '네트워크 오류가 발생했습니다.',
+        })
+      }
     }
   }
 
@@ -79,12 +88,25 @@ export function FindPasswordForm() {
         status: 'success',
         message: '',
       })
-    } catch {
-      setCheckValidCodeResult({
-        status: 'error',
-        message: '만료된 인증 코드입니다. 인증코드를 재발급 받아주세요.',
-      })
+    } catch (error) {
+      console.error('인증코드 확인 실패:', error)
+      if (isAxiosError(error)) {
+        setCheckValidCodeResult({
+          status: 'error',
+          message: error.response?.data?.message || '만료된 인증 코드입니다. 인증코드를 재발급 받아주세요.',
+        })
+      } else {
+        setCheckValidCodeResult({
+          status: 'error',
+          message: '네트워크 오류가 발생했습니다.',
+        })
+      }
     }
+  }
+
+  const handlePreviousStep = () => {
+    setSendValidCodeResult({ status: 'idle', message: '' })
+    setCheckValidCodeResult({ status: 'idle', message: '' })
   }
 
   const onReSettingPassword = async () => {
@@ -97,11 +119,19 @@ export function FindPasswordForm() {
       setTimeout(() => {
         router.push(ROUTES.LOGIN)
       }, 1500)
-    } catch {
-      setPasswordConfirmResult({
-        status: 'error',
-        message: '비밀번호 변경에 실패했습니다. 다시 시도해주세요.',
-      })
+    } catch (error) {
+      console.error('비밀번호 변경 실패:', error)
+      if (isAxiosError(error)) {
+        setPasswordConfirmResult({
+          status: 'error',
+          message: error.response?.data?.message || '비밀번호 변경에 실패했습니다. 다시 시도해주세요.',
+        })
+      } else {
+        setPasswordConfirmResult({
+          status: 'error',
+          message: '네트워크 오류가 발생했습니다.',
+        })
+      }
     }
   }
 
@@ -204,7 +234,7 @@ export function FindPasswordForm() {
                     size="md"
                     className="w-full cursor-pointer border border-gray-400 bg-white text-gray-900"
                     type="button"
-                    onClick={onVerifyCode}
+                    onClick={handlePreviousStep}
                   >
                     이전단계
                   </Button>
