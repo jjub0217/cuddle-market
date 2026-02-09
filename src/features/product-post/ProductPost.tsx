@@ -51,15 +51,19 @@ function ProductPost() {
   useEffect(() => {
     const loadProduct = async () => {
       if (isEditMode && id) {
-        const data = await fetchProductById(id)
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-        setProductData(data)
-        const tabId = data.productType === 'SELL' ? 'tab-sales' : 'tab-purchases'
-        setActiveProductTypeTab(tabId)
+        try {
+          const data = await fetchProductById(id)
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+          setProductData(data)
+          const tabId = data.productType === 'SELL' ? 'tab-sales' : 'tab-purchases'
+          setActiveProductTypeTab(tabId)
+        } catch {
+          router.push('/')
+        }
       }
     }
     loadProduct()
-  }, [id, isEditMode])
+  }, [id, isEditMode, router])
 
   return (
     <>

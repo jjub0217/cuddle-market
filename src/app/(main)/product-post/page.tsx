@@ -1,8 +1,7 @@
 import { Suspense } from 'react'
+import ProductPost from '@/features/product-post/ProductPost'
 
 export const dynamic = 'force-dynamic'
-
-import ProductPost from '@/features/product-post/ProductPost'
 
 export default function ProductPostPage() {
   return (
