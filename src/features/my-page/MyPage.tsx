@@ -105,6 +105,13 @@ function MyPage() {
     enabled: activeMyPageTab === 'tab-blocked',
   })
 
+  const paginationProps = {
+    'tab-sales': { fetchNextPage: fetchNextProducts, hasNextPage: hasNextProducts, isFetchingNextPage: isFetchingNextProducts },
+    'tab-purchases': { fetchNextPage: fetchNextRequests, hasNextPage: hasNextRequests, isFetchingNextPage: isFetchingNextRequests },
+    'tab-wishlist': { fetchNextPage: fetchNextFavorites, hasNextPage: hasNextFavorites, isFetchingNextPage: isFetchingNextFavorites },
+    'tab-blocked': { fetchNextPage: fetchNextBlocked, hasNextPage: hasNextBlocked, isFetchingNextPage: isFetchingNextBlocked },
+  }[activeMyPageTab]
+
   const { mutate: deleteProductMutate } = useMutation({
     mutationFn: (id: number) => deleteProduct(id),
     onSuccess: () => {
@@ -214,9 +221,15 @@ function MyPage() {
     )
   }
 
+  useEffect(() => {
+    if (!user?.id) {
+      setRedirectUrl(pathname)
+      router.push('/auth/login')
+    }
+  }, [user?.id, pathname, router, setRedirectUrl])
+
   if (!user?.id) {
-    setRedirectUrl(pathname)
-    router.push('/auth/login')
+    return null
   }
 
   return (
@@ -251,33 +264,7 @@ function MyPage() {
               myFavoriteTotal={myFavoriteData?.pages[0]?.total}
               myBlockedData={myBlockedData?.pages.flatMap((page) => page.content)}
               myBlockedTotal={myBlockedData?.pages[0]?.total}
-              fetchNextPage={
-                activeMyPageTab === 'tab-sales'
-                  ? fetchNextProducts
-                  : activeMyPageTab === 'tab-purchases'
-                    ? fetchNextRequests
-                    : activeMyPageTab === 'tab-wishlist'
-                      ? fetchNextFavorites
-                      : fetchNextBlocked
-              }
-              hasNextPage={
-                activeMyPageTab === 'tab-sales'
-                  ? hasNextProducts
-                  : activeMyPageTab === 'tab-purchases'
-                    ? hasNextRequests
-                    : activeMyPageTab === 'tab-wishlist'
-                      ? hasNextFavorites
-                      : hasNextBlocked
-              }
-              isFetchingNextPage={
-                activeMyPageTab === 'tab-sales'
-                  ? isFetchingNextProducts
-                  : activeMyPageTab === 'tab-purchases'
-                    ? isFetchingNextRequests
-                    : activeMyPageTab === 'tab-wishlist'
-                      ? isFetchingNextFavorites
-                      : isFetchingNextBlocked
-              }
+              {...paginationProps}
               handleConfirmModal={handleConfirmModal}
               unblockUser={unblockUser}
             />
