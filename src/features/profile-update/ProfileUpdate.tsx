@@ -11,6 +11,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useRouter, usePathname } from 'next/navigation'
 import WithdrawModal, { type WithDrawFormValues } from '@/components/modal/WithdrawModal'
 import { withDraw } from '@/lib/api/profile'
+import { ROUTES } from '@/constants/routes'
 
 function ProfileUpdate() {
   const router = useRouter()
@@ -26,7 +27,7 @@ function ProfileUpdate() {
   useEffect(() => {
     if (!user?.id) {
       setRedirectUrl(pathname)
-      router.push('/auth/login')
+      router.push(ROUTES.LOGIN)
     }
   }, [user, router, setRedirectUrl, pathname])
   const isMd = useMediaQuery('(min-width: 768px)')
@@ -44,7 +45,7 @@ function ProfileUpdate() {
     try {
       await withDraw(data)
       clearAll()
-      router.push('/')
+      router.push(ROUTES.HOME)
     } catch {
       setWithdrawError(
         <div className="flex flex-col gap-0.5">
@@ -84,7 +85,7 @@ function ProfileUpdate() {
       <div className="flex min-h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <p>프로필 정보를 불러올 수 없습니다</p>
-          <button onClick={() => router.push('/my-page')} className="text-blue-600 hover:text-blue-800">
+          <button onClick={() => router.push(ROUTES.MYPAGE)} className="text-blue-600 hover:text-blue-800">
             마이페이지로 돌아가기
           </button>
         </div>

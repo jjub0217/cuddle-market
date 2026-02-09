@@ -67,7 +67,6 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
   const queryClient = useQueryClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const isMd = useMediaQuery('(min-width: 768px)')
-  const [, setIsNicknameVerified] = useState(false)
 
   const [updateError, setUpdateError] = useState<React.ReactNode | null>(null)
   const [updateSuccess, setUpdateSuccess] = useState<React.ReactNode | null>(null)
@@ -103,21 +102,19 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
           status: 'success',
           message: response.message,
         })
-        setIsNicknameVerified(true)
         clearErrors('nickname')
       } else {
         setCheckResult({
           status: 'error',
           message: response.message,
         })
-        setIsNicknameVerified(false)
+
       }
     } catch {
       setCheckResult({
         status: 'error',
         message: '닉네임 확인 중 오류가 발생했습니다.',
       })
-      setIsNicknameVerified(false)
     }
   }
 
@@ -240,12 +237,14 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
                     <div className="heading-h1 font-normal!">{myData?.nickname.charAt(0).toUpperCase()}</div>
                   )}
                 </div>
-                <div
+                <button
+                  type="button"
                   className="bg-primary-100 absolute right-0 bottom-2 flex size-8 cursor-pointer items-center justify-center rounded-full"
                   onClick={() => fileInputRef.current?.click()}
+                  aria-label="프로필 사진 변경"
                 >
                   <Camera className="" size={20} />
-                </div>
+                </button>
               </div>
               {errors.profileImageUrl && <p className="text-danger-500 text-xs font-semibold">{errors.profileImageUrl.message}</p>}
               <p className="text-sm">프로필 사진을 변경하려면 카메라 아이콘을 클릭하세요</p>
