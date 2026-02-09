@@ -37,6 +37,11 @@ export function getImageSrcSet(originalUrl: string | null | undefined): string {
 }
 
 /**
+ * Next.js Image 커스텀 로더 (CDN이 리사이징을 처리하므로 src 그대로 반환)
+ */
+export const imageLoader = ({ src }: { src: string }) => src
+
+/**
  * 사전 정의된 sizes 값
  */
 export const IMAGE_SIZES = {
