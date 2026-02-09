@@ -1,0 +1,13 @@
+@theme {
+  /* Container */
+  --container-max-width: 1280px;
+
+  /* Breakpoints */
+  /* Tailwind는 모바일 퍼스트이므로, 기본 스타일을 모바일(768 이하)로 두고
+    tablet:(768 이상), 
+    desktop:(1024 이상)에서 덮어씁니다.
+   */
+  --breakpoint-tablet: 768px; /* tablet ≥768px */
+  --breakpoint-desktop: 1024px; /* desktop ≥1024px */
+  --breakpoint-ultrawide: 1920px; /* desktop ≥1024px */
+}

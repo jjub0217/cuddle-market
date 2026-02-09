@@ -1,0 +1,81 @@
+/* --color-변수명 → 유틸리티명 변환 규칙이 Tailwind v4에 내장되어 있습니다. */
+/* 예시: text-primary, text-text-primary */
+
+@theme {
+  /* 브랜드 색상 */
+  /* --color-primary: #a7c5eb; */
+  /* 시그니처 */
+  --color-secondary: #c8d9f0; /* 보조 */
+  --color-dark: #7ba5d6; /* 어두운 요소 */
+  --color-point: #fff8f0; /* 포인트 컬러 */
+  --color-dark-point: #2b7fff;
+
+  /* 텍스트 색상 */
+  --color-text-primary: #2d3748; /* 제목과 주요 텍스트 */
+  --color-text-secondary: #718096; /* 설명, 캡션 */
+
+  /* 구분선/테두리 */
+  --color-border: #e2e8f0;
+
+  /* 카드 배경 */
+  --color-light: #f7fafc;
+
+  /* 상태 컬러 */
+  /* --color-sale: #00c951; */
+  /* --color-complete: #6a7282; */
+  /* --color-reserved: #ff6900; */
+
+  /* 알림 */
+  --color-alert: #fc8181;
+
+  /* 필요 시 기존 변수 유지 (레거시 호환) */
+  --color-bg: #fff;
+}
+
+/* --color-변수명 → 유틸리티명 변환 규칙이 Tailwind v4에 내장되어 있습니다. */
+/* 예시: text-primary, text-text-primary */
+
+@theme {
+  /* 브랜드 컬러 */
+  --color-primary-50: #f0f4ff;
+  --color-primary-100: #c8d9f0;
+  --color-primary-200: #a7c5eb;
+  --color-primary-300: #7ba5d6;
+  --color-primary-400: #5a8bc7;
+  --color-primary-500: #4a7bb8;
+  --color-primary-600: #3d6ba8;
+  --color-primary-700: #315a98;
+  --color-primary-800: #264a88;
+  --color-primary-900: #1c3a78;
+
+  /* 중성 컬러 */
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #e5e7eb;
+  --color-gray-200: #e2e8f0;
+  --color-gray-300: #cbd5e0;
+  --color-gray-400: #a0aec0;
+  --color-gray-500: #718096;
+  --color-gray-600: #4a5568;
+  --color-gray-700: #2d3748;
+  --color-gray-800: #1a202c;
+  --color-gray-900: #171923;
+
+  /* 시스템 컬러 */
+  --color-onsale: #48bb78;
+  --color-complete: #a0aec0;
+  --color-reserved: #ed8936;
+  --color-requesting: #4299e1;
+  --color-notification: #facc15;
+
+  /* 성공 컬러 */
+  --color-success-100: #dcfce7;
+  --color-success-500: #22c55e;
+  --color-success-600: #16a34a;
+  --color-success-800: #166534;
+
+  /* 에러 컬러 */
+  --color-danger-100: #fca5a5;
+  --color-danger-500: #ef4444;
+  --color-danger-600: #dc2626;
+  --color-danger-800: #991b1b;
+}

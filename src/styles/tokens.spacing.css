@@ -1,0 +1,13 @@
+/* Tailwind v4에서는 --spacing-* 네이밍을 사용하면
+자동으로 p-*, m-*, gap-*, space-x-* 등의 유틸리티로 변환됩니다. */
+
+@theme {
+  --spacing-xs: 4px; /* 아이콘과 텍스트 사이, 작은 간격 */
+  --spacing-sm: 8px; /* 버튼 내부 패딩, 작은 요소 간격 */
+  --spacing-md: 12px; /* 카드 내부 요소 간격 */
+  --spacing-lg: 16px; /* 일반적인 요소 간격, 기본 패딩 */
+  --spacing-xl: 24px; /* 섹션 간격, 카드 패딩 */
+  --spacing-2xl: 32px; /* 큰 섹션 간격, 컨테이너 패딩 */
+  --spacing-3xl: 48px; /* 페이지 섹션 간격 */
+  --spacing-4xl: 64px; /* 메인 섹션 간격, 큰 여백 */
+}

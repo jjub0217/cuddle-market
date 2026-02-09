@@ -1,0 +1,84 @@
+@layer utilities {
+  /* 헤딩 */
+  .heading-h1 {
+    font-size: var(--text-h1);
+    line-height: var(--text-h1--line-height);
+    font-weight: var(--text-h1--weight);
+    letter-spacing: var(--text-h1--tracking);
+  }
+
+  .heading-h2 {
+    font-size: var(--text-h2);
+    line-height: var(--text-h2--line-height);
+    font-weight: var(--text-h2--weight);
+    letter-spacing: var(--text-h2--tracking);
+  }
+
+  .heading-h2_5 {
+    font-size: var(--text-h2_5);
+    line-height: var(--text-h2_5--line-height);
+    font-weight: var(--text-h2_5--weight);
+    letter-spacing: var(--text-h2_5--tracking);
+  }
+
+  .heading-h3 {
+    font-size: var(--text-h3);
+    line-height: var(--text-h3--line-height);
+    font-weight: var(--text-h3--weight);
+    letter-spacing: var(--text-h3--tracking);
+  }
+
+  .heading-h4 {
+    font-size: var(--text-h4);
+    line-height: var(--text-h4--line-height);
+    font-weight: var(--text-h4--weight);
+    letter-spacing: var(--text-h4--tracking);
+  }
+
+  .heading-h5 {
+    font-size: var(--text-h5);
+    line-height: var(--text-h5--line-height);
+    font-weight: var(--text-h5--weight);
+    letter-spacing: var(--text-h5--tracking);
+  }
+
+  .blind {
+    position: absolute;
+    border: 0px;
+    width: 1px;
+    height: 1px;
+    padding: 0px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0px, 0px, 0px, 0px);
+    white-space: nowrap;
+    overflow-wrap: normal;
+  }
+
+  .nobreakstyle {
+    @apply overflow-hidden break-keep text-ellipsis whitespace-nowrap;
+  }
+
+  /* 기본 line-clamp 유틸리티 */
+  .line-clamp {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    line-clamp: var(--lines, 2); /* 표준 속성 */
+    -webkit-line-clamp: var(--lines, 2); /* 벤더 프리픽스 */
+    overflow: hidden;
+  }
+
+  /* 줄 수 지정 */
+  .line-1 {
+    --lines: 1;
+  }
+  .line-2 {
+    --lines: 2;
+  }
+  .line-3 {
+    --lines: 3;
+  }
+  .line-4 {
+    --lines: 4;
+  }
+}
