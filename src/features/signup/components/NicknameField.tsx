@@ -8,8 +8,9 @@ import {
   type Path,
   type UseFormRegister,
   type FieldErrors,
-  type UseFormWatch,
+  type Control,
   type UseFormClearErrors,
+  useWatch,
 } from 'react-hook-form'
 import { signupValidationRules } from '../validationRules'
 import { checkNickname } from '@/lib/api/auth'
@@ -17,7 +18,7 @@ import { isAxiosError } from 'axios'
 import { useEffect } from 'react'
 
 interface NicknameFieldProps<T extends FieldValues> {
-  watch: UseFormWatch<T>
+  control: Control<T>
   register: UseFormRegister<T>
   errors: FieldErrors<T>
   setIsNicknameVerified: (verified: boolean) => void
@@ -29,13 +30,13 @@ interface NicknameFieldProps<T extends FieldValues> {
 export function NicknameField<T extends FieldValues>({
   register,
   errors,
-  watch,
+  control,
   setIsNicknameVerified,
   clearErrors,
   setCheckResult,
   checkResult,
 }: NicknameFieldProps<T>) {
-  const nickname = watch('nickname' as Path<T>)
+  const nickname = useWatch({ control, name: 'nickname' as Path<T> })
 
   const handleNicknameCheck = async () => {
     try {
