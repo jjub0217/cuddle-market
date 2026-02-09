@@ -111,18 +111,33 @@ export function ChatLog({
   const { user } = useUserStore()
   const groupedMessages = groupMessagesByDate(roomMessages)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const [isNearBottom, setIsNearBottom] = useState(true)
+  const prevScrollHeightRef = useRef(0)
 
   const handleScroll = () => {
     if (scrollRef.current) {
-      if (scrollRef.current.scrollTop === 0 && hasMorePrevious && !isLoadingPrevious) {
+      const { scrollTop, scrollHeight, clientHeight } = scrollRef.current
+      setIsNearBottom(scrollHeight - scrollTop - clientHeight < 50)
+
+      if (scrollTop === 0 && hasMorePrevious && !isLoadingPrevious) {
+        prevScrollHeightRef.current = scrollHeight
         onLoadPrevious?.()
       }
     }
   }
 
+  // 맨 아래 근처에 있을 때만 자동 스크롤
   useEffect(() => {
-    if (scrollRef.current) {
+    if (scrollRef.current && isNearBottom) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+    }
+  }, [roomMessages, isNearBottom])
+
+  // 이전 메시지 로드 후 스크롤 위치 복원
+  useEffect(() => {
+    if (scrollRef.current && prevScrollHeightRef.current > 0) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight - prevScrollHeightRef.current
+      prevScrollHeightRef.current = 0
     }
   }, [roomMessages])
 

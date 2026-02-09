@@ -162,6 +162,9 @@ export default function ChattingPage() {
     if (accessToken) {
       connect(WS_URL, accessToken)
     }
+    return () => {
+      disconnect()
+    }
   }, [connect, disconnect, accessToken])
 
   useEffect(() => {
