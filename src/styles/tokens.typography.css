@@ -1,0 +1,47 @@
+/* utilities 에서, @apply 키워드와 함께 사용하면 하나의 클래스네임의 Tailwind 클래스가 자동 생성됩니다. */
+/* 예시: @apply text-heading1; =>  --text-heading1 이라는 텍스트가 포함된 속성들은 전부 반영됩니다. */
+@theme {
+  /* H1 */
+  --text-h1: 36px;
+  --text-h1--line-height: 40px;
+  --text-h1--weight: 700;
+  --text-h1--tracking: 0;
+
+  /* H2 */
+  --text-h2: 30px;
+  --text-h2--line-height: 36px;
+  --text-h2--weight: 700;
+  --text-h2--tracking: 0;
+
+  /* H2.5 */
+  --text-h2_5: 28px;
+  --text-h2_5--line-height: 38px;
+  --text-h2_5--weight: 700;
+  --text-h2_5--tracking: 0;
+
+  /* H3 */
+  --text-h3: 24px;
+  --text-h3--line-height: 32px;
+  --text-h3--weight: 700;
+  --text-h3--tracking: 0;
+
+  /* H4 */
+  --text-h4: 20px;
+  --text-h4--line-height: 28px;
+  --text-h4--weight: 600;
+  --text-h4--tracking: 0;
+
+  /* H5 */
+  --text-h5: 18px;
+  --text-h5--line-height: 26px;
+  --text-h5--weight: 600;
+  --text-h5--tracking: 0;
+}
+
+/* theme 레이어에 타이포그래피 토큰 정의 */
+@theme {
+  /* 폰트 패밀리 */
+  --font-pretendard: 'Pretendard Variable';
+  --font-family-sans: 'Pretendard Variable', 'Pretendard Fallback', ui-sans-serif, system-ui, sans-serif;
+  --font-family-mono: ui-monospace, SFMono-Regular, 'SF Mono', Monaco, monospace;
+}
