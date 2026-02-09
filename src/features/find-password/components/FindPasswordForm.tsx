@@ -53,15 +53,19 @@ export function FindPasswordForm() {
   const passwordConfirm = useWatch({ control, name: 'passwordConfirm' })
   const router = useRouter()
 
-  const passwordConfirmResult = useMemo(() => {
-    if (passwordResetError) {
-      return { status: 'error' as const, message: passwordResetError }
-    }
+  const passwordMatchResult = useMemo(() => {
     if (passwordConfirm && password && password === passwordConfirm) {
       return { status: 'success' as const, message: '비밀번호가 일치합니다.' }
     }
     return { status: 'idle' as const, message: '' }
-  }, [password, passwordConfirm, passwordResetError])
+  }, [password, passwordConfirm])
+
+  const passwordConfirmResult = useMemo(() => {
+    if (passwordResetError) {
+      return { status: 'error' as const, message: passwordResetError }
+    }
+    return passwordMatchResult
+  }, [passwordResetError, passwordMatchResult])
 
   const currentStep: 1 | 2 | 3 = checkValidCodeResult.status !== 'idle' ? 3 : sendValidCodeResult.status !== 'idle' ? 2 : 1
 
