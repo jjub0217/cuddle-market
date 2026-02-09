@@ -2,11 +2,11 @@
 
 import Button from '@/components/commons/button/Button'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api'
+const OAUTH_BASE_URL = 'https://cmarket-api.duckdns.org'
 
 export function SocialLoginButtons() {
   const handleSocialLogin = (provider: 'google' | 'kakao') => {
-    window.location.href = `${API_BASE_URL}/oauth2/authorization/${provider}`
+    window.location.href = `${OAUTH_BASE_URL}/oauth2/authorization/${provider}`
   }
 
   return (
