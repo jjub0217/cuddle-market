@@ -32,7 +32,7 @@ export default function CommunityPage() {
 
   const sortBy = searchParams.get('sortBy')
   const [selectedSort, setSelectedSort] = useState<string>(() => {
-    const sortItem = COMMUNITY_SEARCH_TYPE.find((sort) => {
+    const sortItem = COMMUNITY_SORT_TYPE.find((sort) => {
       return sort.id === sortBy
     })
 

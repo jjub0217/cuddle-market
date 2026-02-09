@@ -90,9 +90,9 @@ export default function CommunityDetail() {
     },
   })
 
-  const handlePostDelete = async (id: number) => {
+  const handlePostDelete = async (postId: number) => {
     try {
-      await deletePost(id)
+      await deletePost(postId)
       queryClient.invalidateQueries({ queryKey: ['community'] })
       router.push('/community')
     } catch {

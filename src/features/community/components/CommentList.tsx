@@ -84,7 +84,16 @@ export function CommentList({ comments, postId }: CommentListProps) {
   })
 
   const handleDeleteComment = async (commentId: number) => {
-    await deleteMutation.mutateAsync(commentId)
+    try {
+      await deleteMutation.mutateAsync(commentId)
+    } catch {
+      setReplyPostError(
+        <div className="flex flex-col gap-0.5">
+          <p className="text-base font-semibold">댓글 삭제에 실패했습니다.</p>
+          <p>잠시 후 다시 시도해주세요.</p>
+        </div>
+      )
+    }
   }
 
   const handleOpenReplyForm = (commentId: number) => {
