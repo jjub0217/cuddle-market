@@ -26,8 +26,12 @@ export interface SocialSignUpFormValues {
 export function SocialSignUpForm() {
   const [user] = useState(() => {
     if (typeof window !== 'undefined') {
-      const stored = sessionStorage.getItem('socialSignupUser')
-      return stored ? JSON.parse(stored) : null
+      try {
+        const stored = sessionStorage.getItem('socialSignupUser')
+        return stored ? JSON.parse(stored) : null
+      } catch {
+        return null
+      }
     }
     return null
   })
