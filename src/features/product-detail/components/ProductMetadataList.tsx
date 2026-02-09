@@ -2,7 +2,7 @@ import { Clock, Heart, MapPin, Eye } from 'lucide-react'
 import { getTimeAgo } from '@/lib/utils/getTimeAgo'
 import { ProductMetaItem } from '@/components/product/ProductMetaItem'
 
-interface productMetadataListProps {
+interface ProductMetadataListProps {
   addressSido: string
   addressGugun: string
   createdAt: string
@@ -10,7 +10,7 @@ interface productMetadataListProps {
   favoriteCount: number
 }
 
-export default function ProductMetadataList({ addressSido, addressGugun, createdAt, viewCount, favoriteCount }: productMetadataListProps) {
+export default function ProductMetadataList({ addressSido, addressGugun, createdAt, viewCount, favoriteCount }: ProductMetadataListProps) {
   return (
     <div className="flex flex-wrap items-center gap-2 md:gap-5">
       <ProductMetaItem icon={MapPin} label={`${addressSido} ${addressGugun}`} />

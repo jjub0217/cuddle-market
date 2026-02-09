@@ -36,7 +36,6 @@ function SubImageItem({ image, title, idx }: { image: string; title: string; idx
         sizes={IMAGE_SIZES.subImages}
         alt={`${title} - ${idx + 1}`}
         fill
-        priority
         className="object-cover object-top"
         onError={handleImageError}
         unoptimized={imgError || usePlaceholder || !image}
