@@ -1,0 +1,22 @@
+User-agent: *
+
+# 인증 관련 페이지
+Disallow: /auth/
+
+# 개인정보 관련
+Disallow: /mypage
+Disallow: /profile-update
+
+# 작성/수정 페이지 (인증 필요)
+Disallow: /product-post
+Disallow: /community-post
+Disallow: /*edit
+
+# 채팅 (개인정보)
+Disallow: /chat
+
+# OAuth 콜백
+Disallow: /oauth-redirect
+
+# 사이트맵 위치
+Sitemap: https://cuddle-market-fe.vercel.app/sitemap.xml
