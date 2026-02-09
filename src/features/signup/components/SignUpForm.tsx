@@ -36,7 +36,6 @@ export function SignUpForm() {
     control,
     handleSubmit,
     register,
-    watch,
     setValue,
     setError,
     clearErrors,
@@ -153,7 +152,7 @@ export function SignUpForm() {
           <NicknameField
             register={register}
             errors={errors}
-            watch={watch}
+            control={control}
             setIsNicknameVerified={setIsNicknameVerified}
             clearErrors={clearErrors}
             checkResult={checkResult}
@@ -164,12 +163,12 @@ export function SignUpForm() {
           <EmailValidCode
             register={register}
             errors={errors}
-            watch={watch}
+            control={control}
             setIsEmailVerified={setIsEmailVerified}
             setIsEmailCodeVerified={setIsEmailCodeVerified}
             clearErrors={clearErrors}
           />
-          <PasswordField register={register} errors={errors} watch={watch} setError={setError} clearErrors={clearErrors} />
+          <PasswordField register={register} errors={errors} control={control} setError={setError} clearErrors={clearErrors} />
         </div>
         <AnimatePresence>
           {signupNotification && (

@@ -3,14 +3,14 @@
 import RequiredLabel from '@/components/commons/RequiredLabel'
 import InputWithButton from '@/components/commons/InputWithButton'
 import type { SignUpFormValues } from './SignUpForm'
-import { type UseFormRegister, type FieldErrors, type UseFormWatch, type UseFormClearErrors } from 'react-hook-form'
+import { type UseFormRegister, type FieldErrors, type Control, type UseFormClearErrors, useWatch } from 'react-hook-form'
 import { authValidationRules } from '@/lib/utils/validation/authValidationRules'
 import { checkEmail, checkEmailValidCode, sendEmailValidCode } from '@/lib/api/auth'
 import { isAxiosError } from 'axios'
 import { useState } from 'react'
 
 interface EmailValidCodeProps {
-  watch: UseFormWatch<SignUpFormValues>
+  control: Control<SignUpFormValues>
   register: UseFormRegister<SignUpFormValues>
   errors: FieldErrors<SignUpFormValues>
   setIsEmailVerified: (verified: boolean) => void
@@ -18,7 +18,7 @@ interface EmailValidCodeProps {
   clearErrors: UseFormClearErrors<SignUpFormValues>
 }
 
-export function EmailValidCode({ register, errors, watch, setIsEmailVerified, setIsEmailCodeVerified, clearErrors }: EmailValidCodeProps) {
+export function EmailValidCode({ register, errors, control, setIsEmailVerified, setIsEmailCodeVerified, clearErrors }: EmailValidCodeProps) {
   const [emailCheckResult, setEmailCheckResult] = useState<{
     status: 'idle' | 'success' | 'error'
     message: string
@@ -28,8 +28,8 @@ export function EmailValidCode({ register, errors, watch, setIsEmailVerified, se
     message: string
   }>({ status: 'idle', message: '' })
 
-  const email = watch('email')
-  const emailCode = watch('emailCode')
+  const email = useWatch({ control, name: 'email' })
+  const emailCode = useWatch({ control, name: 'emailCode' })
 
   const handleEmailCheck = async () => {
     try {

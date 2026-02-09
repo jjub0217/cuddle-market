@@ -3,51 +3,40 @@
 import InputField from '@/components/commons/InputField'
 import RequiredLabel from '@/components/commons/RequiredLabel'
 import type { SignUpFormValues } from './SignUpForm'
-import { type UseFormRegister, type FieldErrors, type UseFormWatch, type UseFormSetError, type UseFormClearErrors } from 'react-hook-form'
+import { type UseFormRegister, type FieldErrors, type Control, type UseFormSetError, type UseFormClearErrors, useWatch } from 'react-hook-form'
 import { authValidationRules } from '@/lib/utils/validation/authValidationRules'
 import { signupValidationRules } from '../validationRules'
-import { useState, useEffect } from 'react'
+import { useMemo, useEffect } from 'react'
 
 interface PasswordFieldProps {
   register: UseFormRegister<SignUpFormValues>
   errors: FieldErrors<SignUpFormValues>
-  watch: UseFormWatch<SignUpFormValues>
+  control: Control<SignUpFormValues>
   setError: UseFormSetError<SignUpFormValues>
   clearErrors: UseFormClearErrors<SignUpFormValues>
 }
 
-export function PasswordField({ register, errors, watch, setError, clearErrors }: PasswordFieldProps) {
-  const [checkResult, setCheckResult] = useState<{
-    status: 'idle' | 'success' | 'error'
-    message: string
-  }>({ status: 'idle', message: '' })
+export function PasswordField({ register, errors, control, setError, clearErrors }: PasswordFieldProps) {
+  const password = useWatch({ control, name: 'password' })
+  const passwordConfirm = useWatch({ control, name: 'passwordConfirm' })
 
-  const password = watch('password')
-  const passwordConfirm = watch('passwordConfirm')
+  const checkResult = useMemo(() => {
+    if (passwordConfirm && password && password === passwordConfirm) {
+      return { status: 'success' as const, message: '비밀번호가 일치합니다.' }
+    }
+    return { status: 'idle' as const, message: '' }
+  }, [password, passwordConfirm])
 
   useEffect(() => {
     if (passwordConfirm && password) {
       if (password === passwordConfirm) {
-        setCheckResult({
-          status: 'success',
-          message: '비밀번호가 일치합니다.',
-        })
         clearErrors('passwordConfirm')
       } else {
-        setCheckResult({
-          status: 'idle',
-          message: '',
-        })
         setError('passwordConfirm', {
           type: 'manual',
           message: '비밀번호가 일치하지 않습니다.',
         })
       }
-    } else {
-      setCheckResult({
-        status: 'idle',
-        message: '',
-      })
     }
   }, [password, passwordConfirm, setError, clearErrors])
 
@@ -74,7 +63,7 @@ export function PasswordField({ register, errors, watch, setError, clearErrors }
           borderColor="border-gray-400"
           error={errors.passwordConfirm}
           checkResult={checkResult}
-          registration={register('passwordConfirm', signupValidationRules.passwordConfirm(watch('password')))}
+          registration={register('passwordConfirm', signupValidationRules.passwordConfirm(password))}
         />
       </div>
     </div>

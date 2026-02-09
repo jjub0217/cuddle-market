@@ -1,7 +1,7 @@
 'use client'
 
 import Button from '@/components/commons/button/Button'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { type Province } from '@/constants/cities'
 import { useRouter } from 'next/navigation'
 import ProductImageUpload from './imageUploadField/ImageUploadField'
@@ -43,7 +43,6 @@ export function ProductRequestForm({ isEditMode, productId: id, initialData }: P
     setError,
     clearErrors,
     reset,
-    watch,
     formState: { errors, isValid }, // errors: register의 에러 메세지 자동 출력 : 각 필드의 에러 상태
   } = useForm<ProductRequestFormValues>({
     mode: 'onChange',
@@ -61,6 +60,7 @@ export function ProductRequestForm({ isEditMode, productId: id, initialData }: P
       addressGugun: '',
     },
   }) // 폼에서 관리할 필드들의 타입(이름) 정의.
+  const titleLength = useWatch({ control, name: 'title' })?.length ?? 0
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -146,7 +146,7 @@ export function ProductRequestForm({ isEditMode, productId: id, initialData }: P
               setValue={setValue}
               register={register}
               errors={errors}
-              titleLength={watch('title')?.length ?? 0}
+              titleLength={titleLength}
               productNameLabel="찾고 있는 상품명"
               productDescriptionLabel="상세 요청사항"
               productDescriptionPlaceHolder="어떤 상품을 찾고 있는지, 원하는 조건(가격대, 상태 등)을 자세히 적어주세요"

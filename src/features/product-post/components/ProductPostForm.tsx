@@ -1,7 +1,7 @@
 'use client'
 
 import Button from '@/components/commons/button/Button'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { type Province } from '@/constants/cities'
 import { useRouter } from 'next/navigation'
 import ProductImageUpload from './imageUploadField/ImageUploadField'
@@ -39,7 +39,6 @@ export function ProductPostForm({ isEditMode, productId: id, initialData }: Prod
     control,
     handleSubmit, // form onSubmit에 들어가는 함수 : 제출 시 실행할 함수를 감싸주는 함수
     register, // onChange 등의 이벤트 객체 생성 : input에 "이 필드는 폼의 어떤 이름이다"라고 연결해주는 함수
-    watch, // 특정 필드 값을 실시간으로 구독
     setValue,
     setError,
     clearErrors,
@@ -61,6 +60,7 @@ export function ProductPostForm({ isEditMode, productId: id, initialData }: Prod
       addressGugun: '',
     },
   }) // 폼에서 관리할 필드들의 타입(이름) 정의.
+  const titleLength = useWatch({ control, name: 'title' })?.length ?? 0
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -141,7 +141,7 @@ export function ProductPostForm({ isEditMode, productId: id, initialData }: Prod
         <fieldset className="flex flex-col gap-5">
           <legend className="sr-only">상품 등록폼</legend>
           <div className="flex flex-col gap-5">
-            <BasicInfoSection control={control} setValue={setValue} register={register} errors={errors} titleLength={watch('title')?.length ?? 0} />
+            <BasicInfoSection control={control} setValue={setValue} register={register} errors={errors} titleLength={titleLength} />
             <PriceAndStatusSection control={control} register={register} errors={errors} />
             <TradeInfoSection control={control} setValue={setValue} />
             <ProductImageUpload

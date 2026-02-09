@@ -38,7 +38,6 @@ export function SocialSignUpForm() {
   const {
     control,
     register,
-    watch,
     setError,
     clearErrors,
     handleSubmit,
@@ -123,7 +122,7 @@ export function SocialSignUpForm() {
           <NicknameField
             register={register}
             errors={errors}
-            watch={watch}
+            control={control}
             setIsNicknameVerified={setIsNicknameVerified}
             clearErrors={clearErrors}
             checkResult={checkResult}

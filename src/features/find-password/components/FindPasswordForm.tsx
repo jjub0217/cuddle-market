@@ -4,10 +4,10 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import Button from '@/components/commons/button/Button'
 import { ROUTES } from '@/constants/routes'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import InputField from '@/components/commons/InputField'
 import { authValidationRules, profileValidationRules } from '@/lib/utils/validation/authValidationRules'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import RequiredLabel from '@/components/commons/RequiredLabel'
 import InputWithButton from '@/components/commons/InputWithButton'
 import { checkValidCode, reSettingPassword, sendValidCode } from '@/lib/api/profile'
@@ -31,17 +31,14 @@ export function FindPasswordForm() {
     status: 'idle' | 'success' | 'error'
     message: string
   }>({ status: 'idle', message: '' })
-  const [passwordConfirmResult, setPasswordConfirmResult] = useState<{
-    status: 'idle' | 'success' | 'error'
-    message: string
-  }>({ status: 'idle', message: '' })
+  const [passwordResetError, setPasswordResetError] = useState<string | null>(null)
   const {
     handleSubmit,
     register,
     formState: { errors },
     setError,
     clearErrors,
-    watch,
+    control,
   } = useForm<FindPasswordFormValues>({
     defaultValues: {
       email: '',
@@ -50,11 +47,21 @@ export function FindPasswordForm() {
       passwordConfirm: '',
     },
   })
-  const email = watch('email')
-  const code = watch('AuthenticationCode')
-  const password = watch('password')
-  const passwordConfirm = watch('passwordConfirm')
+  const email = useWatch({ control, name: 'email' })
+  const code = useWatch({ control, name: 'AuthenticationCode' })
+  const password = useWatch({ control, name: 'password' })
+  const passwordConfirm = useWatch({ control, name: 'passwordConfirm' })
   const router = useRouter()
+
+  const passwordConfirmResult = useMemo(() => {
+    if (passwordResetError) {
+      return { status: 'error' as const, message: passwordResetError }
+    }
+    if (passwordConfirm && password && password === passwordConfirm) {
+      return { status: 'success' as const, message: '비밀번호가 일치합니다.' }
+    }
+    return { status: 'idle' as const, message: '' }
+  }, [password, passwordConfirm, passwordResetError])
 
   const currentStep: 1 | 2 | 3 = checkValidCodeResult.status !== 'idle' ? 3 : sendValidCodeResult.status !== 'idle' ? 2 : 1
 
@@ -110,6 +117,7 @@ export function FindPasswordForm() {
   }
 
   const onReSettingPassword = async () => {
+    setPasswordResetError(null)
     try {
       await reSettingPassword({
         email,
@@ -122,15 +130,9 @@ export function FindPasswordForm() {
     } catch (error) {
       console.error('비밀번호 변경 실패:', error)
       if (isAxiosError(error)) {
-        setPasswordConfirmResult({
-          status: 'error',
-          message: error.response?.data?.message || '비밀번호 변경에 실패했습니다. 다시 시도해주세요.',
-        })
+        setPasswordResetError(error.response?.data?.message || '비밀번호 변경에 실패했습니다. 다시 시도해주세요.')
       } else {
-        setPasswordConfirmResult({
-          status: 'error',
-          message: '네트워크 오류가 발생했습니다.',
-        })
+        setPasswordResetError('네트워크 오류가 발생했습니다.')
       }
     }
   }
@@ -138,26 +140,13 @@ export function FindPasswordForm() {
   useEffect(() => {
     if (passwordConfirm && password) {
       if (password === passwordConfirm) {
-        setPasswordConfirmResult({
-          status: 'success',
-          message: '비밀번호가 일치합니다.',
-        })
         clearErrors('passwordConfirm')
       } else {
-        setPasswordConfirmResult({
-          status: 'idle',
-          message: '',
-        })
         setError('passwordConfirm', {
           type: 'manual',
           message: '비밀번호가 일치하지 않습니다.',
         })
       }
-    } else {
-      setPasswordConfirmResult({
-        status: 'idle',
-        message: '',
-      })
     }
   }, [password, passwordConfirm, setError, clearErrors])
 
@@ -201,7 +190,7 @@ export function FindPasswordForm() {
                       borderColor="border-gray-400"
                       error={errors.passwordConfirm}
                       checkResult={passwordConfirmResult}
-                      registration={register('passwordConfirm', profileValidationRules.confirmPassword(watch('password')))}
+                      registration={register('passwordConfirm', profileValidationRules.confirmPassword(password))}
                     />
                   </div>
                 </div>
