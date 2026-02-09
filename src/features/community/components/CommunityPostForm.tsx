@@ -1,8 +1,8 @@
 'use client'
 
 import Button from '@/components/commons/button/Button'
-import { Controller, useForm } from 'react-hook-form'
-import { useRouter, useParams, useSearchParams } from 'next/navigation'
+import { Controller, useForm, useWatch } from 'react-hook-form'
+import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation'
 import type { CommunityPostRequestData } from '@/types'
 import { cn } from '@/lib/utils/cn'
 import RequiredLabel from '@/components/commons/RequiredLabel'
@@ -62,19 +62,21 @@ export default function CommunityPostForm() {
   const [showDraftModal, setShowDraftModal] = useState(false)
   const [isDraftChecked, setIsDraftChecked] = useState(false)
 
+  const pathname = usePathname()
+
   // 비로그인 시 로그인 페이지로 리다이렉트
   useEffect(() => {
     if (!user?.id) {
-      setRedirectUrl(window.location.pathname)
+      setRedirectUrl(pathname)
       router.push('/auth/login')
     }
-  }, [user, router, setRedirectUrl])
+  }, [user, router, setRedirectUrl, pathname])
 
   const {
     control,
     handleSubmit,
     register,
-    watch,
+    getValues,
     reset,
     formState: { errors, isValid },
   } = useForm<CommunityPostFormValues>({
@@ -82,13 +84,14 @@ export default function CommunityPostForm() {
     defaultValues: { boardType: initialBoardType, title: '', content: '', imageUrls: [] },
   })
 
+  const formValues = useWatch({ control })
+  const titleLength = useWatch({ control, name: 'title' })?.length ?? 0
+
   const [postError, setPostError] = useState<React.ReactNode | null>(null)
   const [postLoadError, setPostLoadError] = useState(false)
 
-  const formValues = watch()
-
   const handleCancel = () => {
-    clearDraft(formValues.boardType)
+    clearDraft(getValues('boardType'))
     router.push('/community')
   }
 
@@ -106,7 +109,7 @@ export default function CommunityPostForm() {
         router.push(`/community/${id}`)
       } else {
         const response = await postCommunity(requestData)
-        clearDraft(formValues.boardType)
+        clearDraft(getValues('boardType'))
         router.push(`/community/${response.id}`)
       }
     } catch {
@@ -141,12 +144,11 @@ export default function CommunityPostForm() {
   // 새 글 작성 시 폼 데이터 변경마다 sessionStorage에 자동 저장
   useEffect(() => {
     if (!isEditMode && isDraftChecked) {
-      sessionStorage.setItem(getDraftStorageKey(formValues.boardType), JSON.stringify(formValues))
+      sessionStorage.setItem(getDraftStorageKey(formValues.boardType ?? initialBoardType), JSON.stringify(formValues))
     }
-  }, [formValues, isEditMode, isDraftChecked])
+  }, [formValues, isEditMode, isDraftChecked, initialBoardType])
 
   useEffect(() => {
-    // if (isEditMode) return // 수정 모드에서는 임시저장 무시
     if (isEditMode) {
       setIsDraftChecked(true) // 수정 모드면 바로 체크 완료
       return
@@ -228,7 +230,7 @@ export default function CommunityPostForm() {
                         }))}
                         placeholder="질문 있어요"
                         optionClassName="text-base"
-                        buttonClassName="border-gray-400 bg-white border text-gray-900 px-3 py-3 border text-base"
+                        buttonClassName="border border-gray-400 bg-white text-gray-900 px-3 py-3 text-base"
                       />
                       {fieldState.error && <p className="text-xs font-semibold text-red-500">{fieldState.error.message}</p>}
                     </div>
@@ -240,7 +242,7 @@ export default function CommunityPostForm() {
                   fieldName="title"
                   rules={commonTitleValidationRules}
                   label="제목"
-                  titleLength={watch('title')?.length ?? 0}
+                  titleLength={titleLength}
                   maxLength={50}
                   id="community-title"
                   placeholder="제목을 입력해주세요"
