@@ -136,9 +136,11 @@ function Home({ initialData }: HomeProps) {
   })
 
   // 모든 페이지의 상품을 하나의 배열로 합치기
-  const allProducts = useMemo(() => {
-    return data?.pages?.flatMap((page) => page.data.data.content) ?? []
-  }, [data?.pages])
+  // SSR 시 useInfiniteQuery가 initialData를 즉시 반영하지 못하므로,
+  // query 데이터가 없을 때 initialData props에서 직접 가져옴
+  const allProducts = data?.pages?.length
+    ? data.pages.flatMap((page) => page.data.data.content)
+    : initialData?.data?.data?.content ?? []
 
   // 무한 스크롤 감지
   const targetRef = useIntersectionObserver({
@@ -208,7 +210,7 @@ function Home({ initialData }: HomeProps) {
                 onTabChange={(tabId) => setActiveProductTypeTab(tabId as ProductTypeTabId)}
                 ariaLabel="상품 타입 분류"
               />
-              {isLoading ? (
+              {isLoading && allProducts.length === 0 ? (
                 <HomeSkeleton />
               ) : (
                 <ProductsSection
