@@ -31,7 +31,7 @@ export function ProductPetTypeTabs({ activeTab, onTabChange }: ProductPetTypeTab
       cancelAnimationFrame(rafId)
       el.removeEventListener('scroll', handleScroll)
     }
-  }, [])
+  }, [isMd])
 
   return (
     <div className="relative">
