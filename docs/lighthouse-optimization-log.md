@@ -553,4 +553,175 @@ HTML이 약간 커지지만 (스켈레톤 vs 상품 그리드), 수 KB 차이라
 
 ---
 
+## 6차 분석 — TBT 증가 원인 및 StaticHomeFallback (2026-02-10)
+
+### 상황
+
+5차 분석에서 `<link rel="preload">`를 추가했으나 점수가 94 → 91로 하락했다.
+DebugBear 측정 결과 TBT가 140ms → 190ms로 증가한 것이 원인이다.
+
+### DebugBear 측정 결과
+
+**Performance Score: 91점**
+
+| 지표 | 값 | 점수 |
+|------|-----|------|
+| **TBT** | **190ms** | **84%** |
+| CLS | 0 | 100% |
+| LCP | 1.2s | 88% |
+| SI | 1.0s | 97% |
+| FCP | 0.4s | 100% |
+
+### TBT 분석 — CPU Time By Request
+
+DebugBear의 CPU Time By Request 데이터:
+
+| 청크 | CPU Time | 내용 |
+|------|----------|------|
+| `5f**.js` | 335ms | react-dom + Next.js 런타임 |
+| HTML 문서 | 94ms | RSC 페이로드 파싱 |
+| `8b**.js` | 68ms | 앱 코드 |
+| `7d**.js` | 67ms | Next.js 런타임 |
+
+TBT Window: FCP(380ms) ~ TTI(993ms) = 613ms
+
+### 번들 분석 (@next/bundle-analyzer)
+
+`@next/bundle-analyzer`를 사용하여 홈페이지 JS 번들을 분석했다.
+
+> 주의: `@next/bundle-analyzer`는 Turbopack과 호환되지 않는다.
+> `ANALYZE=true npx next build --webpack` 으로 webpack 모드에서 실행해야 한다.
+
+**홈페이지 주요 청크:**
+
+| 청크 | 크기 | 내용 |
+|------|------|------|
+| `5f6838a6...js` | 219KB | react-dom + Next.js runtime (불가피) |
+| `a6dad97d...js` | 110KB | zustand + axios + Header 컴포넌트 |
+| `7d6514a9...js` | 108KB | Next.js runtime |
+| 기타 13개 | ~402KB | 앱 코드, 유틸리티 등 |
+| **합계** | **839KB** | **16개 청크** |
+
+**발견 사항: react-hook-form이 홈페이지 청크에 포함**
+
+홈페이지에는 폼이 없지만 react-hook-form이 로드되고 있었다.
+조사 결과, Turbopack의 공유 청크 전략 때문이었다:
+
+- react-hook-form은 로그인, 상품 등록 등 다른 페이지에서 사용
+- 같은 `(main)` 레이아웃 그룹을 공유하는 라우트들이 공유 청크에 묶임
+- import 구조를 바꿔서 해결할 수 있는 문제가 아님
+
+### TBT 190ms의 결론
+
+TBT 190ms 중 **~170ms는 react-dom + Next.js 런타임의 하이드레이션 비용**으로 프레임워크를 사용하는 한 피할 수 없다.
+나머지 ~20ms만 앱 코드 비용이다.
+
+### 근본 원인 — LCP가 개선되지 않은 이유
+
+`initialData`를 추가하고 preload를 적용했지만 LCP가 1.3s → 1.2s로 미미하게 개선된 이유:
+
+**`useSearchParams()`가 Suspense bailout을 일으키기 때문**
+
+```
+page.tsx (Server Component)
+  └── <Suspense fallback={HomeSkeleton}>    ← Suspense 경계
+       └── Home ('use client')
+            └── useSearchParams()           ← 이것이 SSR bailout 유발
+```
+
+Next.js ISR에서 `useSearchParams()`를 사용하면, 가장 가까운 Suspense 경계까지 서버 렌더링을 건너뛰고 fallback을 렌더링한다.
+
+결과:
+1. 서버는 `Home` 대신 `HomeSkeleton`을 렌더링 → 초기 HTML에 `<img>` 태그 없음
+2. `initialData`는 RSC 페이로드에 직렬화되어 하이드레이션 시에만 사용됨
+3. preload로 이미지 다운로드는 빨라졌지만, `<img>` 태그가 JS 실행 후에야 생성됨
+4. RSC 페이로드 증가(20개 상품 JSON)로 TBT가 50ms 증가
+
+**개선(Load Duration 감소)과 퇴보(TBT 증가)가 거의 상쇄된 것.**
+
+### 해결 방안 — StaticHomeFallback
+
+**핵심 아이디어: Suspense fallback을 스켈레톤이 아닌, 실제 데이터를 가진 서버 컴포넌트로 교체**
+
+Suspense bailout이 발생해도 fallback은 서버에서 렌더링된다.
+따라서 fallback에 실제 상품 데이터가 포함된 서버 컴포넌트를 넣으면, 초기 HTML에 `<img>` 태그가 포함된다.
+
+### 구현
+
+**1. StaticHomeFallback.tsx 생성** (`src/features/home/components/StaticHomeFallback.tsx`)
+
+서버 컴포넌트로, `Home`과 동일한 레이아웃 구조를 유지하면서:
+- 필터/탭: 비인터랙티브 스켈레톤 플레이스홀더
+- 상품 카드: 실제 데이터로 렌더링 (`<img>` 포함, `srcSet`, priority 적용)
+- 클라이언트 전용 기능(좋아요, onError) 제거
+
+**2. page.tsx 수정**
+
+```tsx
+import { Suspense } from 'react'
+import Home from '@/features/home/Home'
+import StaticHomeFallback from '@/features/home/components/StaticHomeFallback'
+import { fetchInitialProducts } from '@/lib/api/server/products'
+import { getImageSrcSet, IMAGE_SIZES } from '@/lib/utils/imageUrl'
+
+export default async function HomePage() {
+  const initialData = await fetchInitialProducts()
+  const products = initialData?.data?.data?.content ?? []
+  const totalElements = initialData?.data?.data?.totalElements ?? 0
+  const firstImageUrl = products[0]?.mainImageUrl
+
+  return (
+    <>
+      {firstImageUrl && (
+        <link
+          rel="preload"
+          as="image"
+          imageSrcSet={getImageSrcSet(firstImageUrl)}
+          imageSizes={IMAGE_SIZES.productThumbnail}
+          fetchPriority="high"
+        />
+      )}
+      <Suspense fallback={<StaticHomeFallback products={products} totalElements={totalElements} />}>
+        <Home initialData={initialData} />
+      </Suspense>
+    </>
+  )
+}
+```
+
+### 검증
+
+빌드 성공: `○ / Revalidate: 1m Expire: 1y` (ISR 유지)
+
+초기 HTML 검증:
+```
+변경 전: <img> 0개 (상품 이미지 없음, 스켈레톤만)
+변경 후: <img> 22개 (로고 2개 + 상품 이미지 20개)
+```
+
+첫 번째 상품 이미지에 `fetchPriority="high"`, `loading="eager"` 적용 확인.
+
+### 기대 효과
+
+```
+변경 전: TTFB(190ms) + Load Delay(917ms) + Load Duration(199ms) = LCP 1.3s
+변경 후: TTFB(190ms) + Load Delay(~0ms)  + Load Duration(199ms) = LCP ~0.4s
+```
+
+`<img>` 태그가 초기 HTML에 포함되므로 Load Delay가 대폭 감소할 것으로 예상.
+preload와 결합되면 이미지 다운로드가 HTML 파싱과 동시에 시작된다.
+
+### CLS 영향
+
+`StaticHomeFallback`은 `Home`과 동일한 CSS 클래스와 레이아웃 구조를 사용하므로,
+하이드레이션 시 `Home`으로 교체될 때 레이아웃 시프트가 발생하지 않는다.
+
+### 남은 작업
+
+- [ ] DebugBear 재측정 (배포 후)
+- [ ] LCP Load Delay 감소 확인
+- [ ] TBT 변화 관찰
+
+---
+
 <!-- 이후 최적화 작업 내용은 아래에 추가 -->

@@ -31,4 +31,42 @@
 
 ---
 
+## 5차: `<link rel="preload">` 추가
+
+> 관련 섹션: [5차 분석 — DebugBear LCP Load Delay](./lighthouse-optimization-log.md#5차-분석--debugbear-lcp-load-delay-2026-02-10)
+
+- [x] `page.tsx`에 `<link rel="preload" as="image">` 추가
+- [x] 첫 번째 상품 이미지 URL을 서버에서 추출하여 preload에 적용
+- [x] `imageSrcSet` + `imageSizes` 속성으로 반응형 preload 구현
+- [x] DebugBear 재측정 (LCP 1.3s → 1.2s, TBT 140ms → 190ms, 점수 94 → 91)
+
+---
+
+## 6차: TBT 분석 및 StaticHomeFallback
+
+> 관련 섹션: [6차 분석 — TBT 증가 원인 및 StaticHomeFallback](./lighthouse-optimization-log.md#6차-분석--tbt-증가-원인-및-statichomefallback-2026-02-10)
+
+### 번들 분석
+- [x] `@next/bundle-analyzer`로 홈페이지 JS 청크 분석
+- [x] TBT 주요 원인 식별 (react-dom + Next.js 런타임 ~170ms — 불가피)
+- [x] react-hook-form 홈페이지 로드 원인 식별 (Turbopack 공유 청크 전략)
+
+### Suspense bailout 원인 분석
+- [x] `useSearchParams()`가 Suspense bailout을 일으키는 것 확인
+- [x] 초기 HTML에 `<img>` 태그가 0개인 것 확인
+- [x] `initialData` RSC 페이로드 추가가 TBT 증가의 원인임을 확인
+
+### StaticHomeFallback 구현
+- [x] `src/features/home/components/StaticHomeFallback.tsx` 생성 (서버 컴포넌트)
+- [x] `Home`과 동일한 레이아웃 구조로 CLS 방지
+- [x] 상품 카드에 `<img>` 태그 + `srcSet` + priority 적용
+- [x] `page.tsx` Suspense fallback을 `HomeSkeleton` → `StaticHomeFallback`으로 변경
+- [x] 빌드 성공 및 ISR 유지 확인 (`○ / Revalidate: 1m`)
+- [x] 초기 HTML에 `<img>` 22개 포함 확인 (로고 2 + 상품 20)
+- [ ] DebugBear 재측정 (배포 후)
+- [ ] LCP Load Delay 감소 확인
+- [ ] TBT 변화 관찰
+
+---
+
 <!-- 이후 최적화 항목은 아래에 추가 -->

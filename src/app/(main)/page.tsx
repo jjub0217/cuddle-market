@@ -1,12 +1,14 @@
 import { Suspense } from 'react'
 import Home from '@/features/home/Home'
-import HomeSkeleton from '@/features/home/components/product-section/HomeSkeleton'
+import StaticHomeFallback from '@/features/home/components/StaticHomeFallback'
 import { fetchInitialProducts } from '@/lib/api/server/products'
 import { getImageSrcSet, IMAGE_SIZES } from '@/lib/utils/imageUrl'
 
 export default async function HomePage() {
   const initialData = await fetchInitialProducts()
-  const firstImageUrl = initialData?.data?.data?.content?.[0]?.mainImageUrl
+  const products = initialData?.data?.data?.content ?? []
+  const totalElements = initialData?.data?.data?.totalElements ?? 0
+  const firstImageUrl = products[0]?.mainImageUrl
 
   return (
     <>
@@ -19,7 +21,7 @@ export default async function HomePage() {
           fetchPriority="high"
         />
       )}
-      <Suspense fallback={<HomeSkeleton />}>
+      <Suspense fallback={<StaticHomeFallback products={products} totalElements={totalElements} />}>
         <Home initialData={initialData} />
       </Suspense>
     </>
