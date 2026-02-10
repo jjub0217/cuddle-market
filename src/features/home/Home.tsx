@@ -1,7 +1,7 @@
 'use client'
 
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import Tabs from '@/components/Tabs'
 import { DetailFilter } from '@/features/home/components/filter/DetailFilter'
 import { ProductsSection } from '@/features/home/components/product-section/ProductsSection'
@@ -17,8 +17,13 @@ import { useUserStore } from '@/store/userStore'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { Z_INDEX } from '@/constants/ui'
 import HomeSkeleton from './components/product-section/HomeSkeleton'
+import { ProductResponse } from '@/types'
 
-function Home() {
+interface HomeProps {
+  initialData: { data: ProductResponse; total: number } | null
+}
+
+function Home({ initialData }: HomeProps) {
   const { isLogin } = useUserStore()
   const isLoggedIn = isLogin()
   const isMd = useMediaQuery('(min-width: 768px)')
@@ -55,7 +60,16 @@ function Home() {
     return sortItem?.label ?? '최신순'
   }, [sortBy, sortOrder])
 
-  const [isDetailFilterOpen, setIsDetailFilterOpen] = useState(false)
+  const hasDetailFilter = searchParams.has('productStatuses') || searchParams.has('minPrice') || searchParams.has('addressSido')
+  const [isDetailFilterOpen, setIsDetailFilterOpen] = useState(hasDetailFilter)
+  const [prevSearchParams, setPrevSearchParams] = useState(searchParams)
+
+  if (searchParams !== prevSearchParams) {
+    setPrevSearchParams(searchParams)
+    if (hasDetailFilter) {
+      setIsDetailFilterOpen(true)
+    }
+  }
 
   const handleDetailFilterToggle = useCallback((isOpen: boolean) => {
     setIsDetailFilterOpen(isOpen)
@@ -98,9 +112,10 @@ function Home() {
         selectedDetailPet,
         keyword,
         sortBy,
-        sortOrder,
+        sortOrder
       )
     },
+    initialData: initialData ? { pages: [initialData], pageParams: [0] } : undefined,
 
     getNextPageParam: (lastPage) => {
       const currentPage = lastPage.data.data.page
@@ -141,7 +156,7 @@ function Home() {
       setActiveProductTypeTab('tab-all')
       router.push(pathname)
     },
-    [router, pathname],
+    [router, pathname]
   )
 
   const toGoProductPostPage = (e: React.MouseEvent) => {
@@ -150,14 +165,6 @@ function Home() {
   }
 
   const totalElements = data?.pages?.[0]?.total || 0
-
-  useEffect(() => {
-    const hasDetailFilter = searchParams.has('productStatuses') || searchParams.has('minPrice') || searchParams.has('addressSido')
-
-    if (hasDetailFilter) {
-      setIsDetailFilterOpen(true)
-    }
-  }, [searchParams])
 
   if (error && !isLoading) {
     return (
@@ -228,7 +235,12 @@ function Home() {
       </div>
       {isLoggedIn && (
         <div className={`fixed right-10 bottom-5 ${Z_INDEX.FLOATING_BUTTON}`}>
-          <Button size={isMd ? 'lg' : 'md'} className="bg-primary-300 cursor-pointer text-white" icon={Plus} onClick={toGoProductPostPage}>
+          <Button
+            size={isMd ? 'lg' : 'md'}
+            className="bg-primary-300 cursor-pointer text-white"
+            icon={Plus}
+            onClick={toGoProductPostPage}
+          >
             상품등록
           </Button>
         </div>
