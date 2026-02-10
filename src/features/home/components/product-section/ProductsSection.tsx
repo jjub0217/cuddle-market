@@ -70,6 +70,7 @@ export function ProductsSection({
               value: sort.label,
               label: sort.label,
             }))}
+            placeholder="최신순"
             buttonClassName="border-0 bg-primary-50 text-gray-900 px-3 py-2"
           />
         </div>
