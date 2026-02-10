@@ -25,10 +25,13 @@ export function ProductPetTypeTabs({ activeTab, onTabChange }: ProductPetTypeTab
       setShowFade(!isAtEnd)
     }
 
-    handleScroll()
-    el.addEventListener('scroll', handleScroll)
-    return () => el.removeEventListener('scroll', handleScroll)
-  }, [])
+    const rafId = requestAnimationFrame(handleScroll)
+    el.addEventListener('scroll', handleScroll, { passive: true })
+    return () => {
+      cancelAnimationFrame(rafId)
+      el.removeEventListener('scroll', handleScroll)
+    }
+  }, [isMd])
 
   return (
     <div className="relative">
