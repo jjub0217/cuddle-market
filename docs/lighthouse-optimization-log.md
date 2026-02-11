@@ -716,11 +716,103 @@ preload와 결합되면 이미지 다운로드가 HTML 파싱과 동시에 시�
 `StaticHomeFallback`은 `Home`과 동일한 CSS 클래스와 레이아웃 구조를 사용하므로,
 하이드레이션 시 `Home`으로 교체될 때 레이아웃 시프트가 발생하지 않는다.
 
-### 남은 작업
+### DebugBear 4차 측정 결과 (StaticHomeFallback 적용 후)
 
-- [ ] DebugBear 재측정 (배포 후)
-- [ ] LCP Load Delay 감소 확인
-- [ ] TBT 변화 관찰
+**Performance Score: 94점** (3차 91점 → 94점, +3)
+
+| 지표 | 3차 (preload만) | 4차 (StaticHomeFallback) | 변화 |
+|------|:---:|:---:|:---:|
+| **Score** | 91 | **94** | **+3** |
+| **LCP** | 1.2s (88%) | **1.0s (95%)** | **-0.2s** |
+| **TBT** | 190ms (84%) | **160ms (88%)** | **-30ms** |
+| CLS | 0 (100%) | 0.008 (100%) | +0.008 |
+| FCP | 0.4s (100%) | 0.9s (92%) | +0.5s |
+| SI | 1.0s (97%) | 1.1s (95%) | +0.1s |
+
+**CPU Time By Request:**
+
+| 청크 | CPU Time |
+|------|----------|
+| `5f**.js` (react-dom) | 400ms |
+| HTML 문서 | 188ms |
+| `7d**.js` | 80ms |
+| `turbopack-b9**.js` | 62ms |
+
+TBT Window: 447ms (FCP 866ms ~ TTI 1.31s)
+
+**트레이드오프:**
+- FCP 0.4s → 0.9s — StaticHomeFallback으로 HTML이 커져 첫 페인트까지 시간 증가
+- HTML 문서 CPU Time 94ms → 188ms — 더 큰 HTML 파싱 비용
+- CLS 0 → 0.008 — StaticHomeFallback → Home 교체 시 미미한 레이아웃 시프트
+
+---
+
+## 7차 분석 — Forced Reflow 제거 (2026-02-10)
+
+### 상황
+
+4차 DebugBear 측정의 Diagnostics에서 **Forced reflow** 항목이 발견되었다.
+총 81ms의 forced reflow 중 77ms가 단일 청크(`daf39bea7378ed38.js:1:27014`)에서 발생.
+
+### 원인 추적
+
+Vercel 배포된 청크를 다운로드하여 분석한 결과, `ProductPetTypeTabs.tsx`의 `useEffect`에서
+`scrollWidth`, `clientWidth` 등 레이아웃 속성을 하이드레이션 직후 동기적으로 읽고 있었다.
+
+```tsx
+// 변경 전 — forced reflow 발생
+useEffect(() => {
+  const el = scrollRef.current
+  if (!el) return
+  const handleScroll = () => {
+    const isAtEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1
+    setShowFade(!isAtEnd)
+  }
+  handleScroll()  // ← 하이드레이션 직후 동기적 레이아웃 읽기 → forced reflow
+  el.addEventListener('scroll', handleScroll)
+  return () => el.removeEventListener('scroll', handleScroll)
+}, [])
+```
+
+### 해결
+
+1. **`requestAnimationFrame`으로 초기 체크 지연**: 브라우저가 레이아웃을 완료한 후 읽기 수행
+2. **`{ passive: true }` 추가**: 스크롤 이벤트에서 `preventDefault()` 미호출 보장
+3. **`isMd` 의존성 추가**: 반응형 브레이크포인트 변경 시 fade 상태 재계산
+
+```tsx
+// 변경 후 — forced reflow 제거
+useEffect(() => {
+  const el = scrollRef.current
+  if (!el) return
+  const handleScroll = () => {
+    const isAtEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1
+    setShowFade(!isAtEnd)
+  }
+  const rafId = requestAnimationFrame(handleScroll)  // ← 다음 프레임으로 지연
+  el.addEventListener('scroll', handleScroll, { passive: true })
+  return () => {
+    cancelAnimationFrame(rafId)
+    el.removeEventListener('scroll', handleScroll)
+  }
+}, [isMd])  // ← 브레이크포인트 변경 시 재실행
+```
+
+### 기대 효과
+
+- Forced reflow 77ms 제거
+- DebugBear Diagnostics에서 "Forced reflow" 항목 개선
+
+### 최종 최적화 여정 요약
+
+| 단계 | 점수 | LCP | TBT | 주요 변경 |
+|------|:---:|:---:|:---:|----------|
+| 1차 (최초) | 94 | 1.3s | 140ms | 기준선 |
+| 2차 (SSR initialData) | 94 | 1.3s | 140ms | 서버 fetch + initialData 추가 |
+| 3차 (preload) | 91 | 1.2s | 190ms | `<link rel="preload">` 추가 |
+| (Suspense 제거 시도) | 83 | - | - | force-dynamic → 즉시 되돌림 |
+| 4차 (StaticHomeFallback) | 94 | 1.0s | 160ms | 서버 컴포넌트 fallback |
+| **5차 (Forced Reflow)** | **측정 예정** | - | - | **rAF + passive + isMd 의존성** |
 
 ---
 

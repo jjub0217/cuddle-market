@@ -63,9 +63,22 @@
 - [x] `page.tsx` Suspense fallback을 `HomeSkeleton` → `StaticHomeFallback`으로 변경
 - [x] 빌드 성공 및 ISR 유지 확인 (`○ / Revalidate: 1m`)
 - [x] 초기 HTML에 `<img>` 22개 포함 확인 (로고 2 + 상품 20)
-- [ ] DebugBear 재측정 (배포 후)
-- [ ] LCP Load Delay 감소 확인
-- [ ] TBT 변화 관찰
+- [x] DebugBear 재측정 (LCP 1.0s, TBT 160ms, 점수 94)
+- [x] LCP Load Delay 감소 확인 (1.2s → 1.0s)
+- [x] TBT 변화 관찰 (190ms → 160ms, 프레임워크 한계로 추가 개선 불가)
+
+---
+
+## 7차: Forced Reflow 제거
+
+> 관련 섹션: [7차 분석 — Forced Reflow 제거](./lighthouse-optimization-log.md#7차-분석--forced-reflow-제거-2026-02-10)
+
+- [x] DebugBear Diagnostics에서 forced reflow 77ms 원인 파악 (`ProductPetTypeTabs.tsx`)
+- [x] `handleScroll()` 직접 호출을 `requestAnimationFrame`으로 지연
+- [x] scroll 이벤트 리스너에 `{ passive: true }` 추가
+- [x] `useEffect` 의존성 배열에 `isMd` 추가
+- [x] 빌드 성공 확인
+- [ ] DebugBear 재측정: "Forced reflow" 항목 개선 확인
 
 ---
 
