@@ -1,0 +1,83 @@
+name: Kimi Code Review
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, synchronize]
+  issue_comment:
+    types: [created]
+
+jobs:
+  kimi-review:
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request &&
+       contains(github.event.comment.body, '@kimi re-review'))
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'issue_comment' && format('refs/pull/{0}/head', github.event.issue.number) || github.ref }}
+
+      - name: Get PR Diff
+        id: get-diff
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER="${{ github.event.pull_request.number || github.event.issue.number }}"
+          gh pr diff "$PR_NUMBER" --repo "${{ github.repository }}" > pr_diff.txt
+          echo "diff_length=$(wc -c < pr_diff.txt)" >> $GITHUB_OUTPUT
+
+      - name: Run Kimi Code Review
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER="${{ github.event.pull_request.number || github.event.issue.number }}"
+          REPO="${{ github.repository }}"
+
+          # PR 정보 가져오기
+          PR_TITLE=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json title -q '.title')
+          PR_BODY=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json body -q '.body')
+
+          # diff 파일 읽기 (최대 100KB 제한)
+          DIFF_CONTENT=$(head -c 100000 pr_diff.txt)
+
+          # OpenRouter API 호출 (Kimi K2.5)
+          REVIEW_RESPONSE=$(curl -s -X POST \
+            https://openrouter.ai/api/v1/chat/completions \
+            -H "Authorization: Bearer $OPENROUTER_API_KEY" \
+            -H "Content-Type: application/json" \
+            -H "HTTP-Referer: https://github.com/$REPO" \
+            -H "X-Title: Kimi Code Review" \
+            -d "{
+              \"model\": \"moonshotai/kimi-k2.5\",
+              \"messages\": [
+                {
+                  \"role\": \"system\",
+                  \"content\": \"당신은 코드 리뷰어입니다. 한국어로 코드 리뷰를 제공하세요. 코드 품질, 잠재적 버그, 성능 이슈, 보안 취약점, 그리고 Next.js/React 모범 사례를 확인해주세요.\"
+                },
+                {
+                  \"role\": \"user\",
+                  \"content\": \"PR 제목: $PR_TITLE\\n\\nPR 설명: $PR_BODY\\n\\n코드 변경사항:\\n\\n$DIFF_CONTENT\"
+                }
+              ],
+              \"temperature\": 0.3,
+              \"max_tokens\": 4000
+            }")
+
+          # 응답에서 리뷰 내용 추출
+          REVIEW_CONTENT=$(echo "$REVIEW_RESPONSE" | jq -r '.choices[0].message.content // "리뷰 생성에 실패했습니다."')
+
+          # GitHub PR에 코멘트 작성
+          printf "## 🤖 Kimi Code Review (via OpenRouter)\n\n%s\n\n---\n*Powered by Moonshot AI (kimi-k2.5) via OpenRouter*" "$REVIEW_CONTENT" | gh pr comment "$PR_NUMBER" --repo "$REPO" --body-file -
+
+      - name: Cleanup
+        if: always()
+        run: rm -f pr_diff.txt
