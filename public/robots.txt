@@ -19,4 +19,4 @@ Disallow: /chat
 Disallow: /oauth-redirect
 
 # 사이트맵 위치
-Sitemap: https://cuddle-market-fe.vercel.app/sitemap.xml
+Sitemap: https://cuddle-market.vercel.app/sitemap.xml
