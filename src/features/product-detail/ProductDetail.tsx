@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter, useParams } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { fetchProductById } from '@/lib/api/products'
 import { useQuery } from '@tanstack/react-query'
 import Footer from '@/components/footer/Footer'
@@ -13,42 +13,26 @@ import ProductDescription from './components/ProductDescription'
 import ProductActions from './components/ProductActions'
 import SellerOtherProducts from './components/SellerOtherProducts'
 import { useEffect } from 'react'
+import type { ProductDetailItem } from '@/types/product'
 
-function ProductDetail() {
-  const router = useRouter()
+interface ProductDetailProps {
+  initialData: ProductDetailItem
+}
+
+function ProductDetail({ initialData }: ProductDetailProps) {
   const params = useParams<{ id: string }>()
   const id = params.id
 
-  const { data, isLoading, error } = useQuery({
+  const { data } = useQuery({
     queryKey: ['product', id],
     queryFn: () => fetchProductById(id!),
     enabled: !!id,
+    initialData,
   })
 
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [])
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
-      </div>
-    )
-  }
-
-  if (error || !data) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <p>상품 정보를 불러올 수 없습니다</p>
-          <button onClick={() => router.push('/')} className="text-blue-600 hover:text-blue-800">
-            목록으로 돌아가기
-          </button>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <>
