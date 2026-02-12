@@ -21,10 +21,8 @@ export default function BlockModal({ isOpen, onCancel, userNickname, userId }: B
   const [userBlockError, setUserBlockError] = useState<React.ReactNode | null>(null)
 
   const handleCancel = () => {
-    onCancel()
+    dialogRef.current?.close()
   }
-
-  // useOutsideClick(isOpen, [modalRef], onCancel)
 
   const onUserBlock = async () => {
     try {
@@ -42,9 +40,9 @@ export default function BlockModal({ isOpen, onCancel, userNickname, userId }: B
   }
   useEffect(() => {
     const dialog = dialogRef.current
-    if (isOpen) {
+    if (isOpen && !dialog?.open) {
       dialog?.showModal()
-    } else {
+    } else if (!isOpen && dialog?.open) {
       dialog?.close()
     }
   }, [isOpen])
@@ -54,7 +52,7 @@ export default function BlockModal({ isOpen, onCancel, userNickname, userId }: B
       ref={dialogRef}
       className="w-11/12 open:flex flex-col gap-4 rounded-lg bg-white p-5 backdrop:bg-gray-900/70 md:w-[16vw] md:min-w-max"
       onClick={(e) => {
-        if (e.target === dialogRef.current) onCancel()
+        if (e.target === dialogRef.current) dialogRef.current.close()
       }}
       onClose={onCancel}
     >
