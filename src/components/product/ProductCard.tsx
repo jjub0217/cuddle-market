@@ -37,27 +37,29 @@ function ProductCard({ data, 'data-index': dataIndex }: ProductCardProps) {
   }
 
   return (
-    <Link
-      className="border-border text-text-primary flex cursor-pointer flex-row-reverse overflow-hidden rounded-xl border bg-white shadow-md transition-shadow duration-200 hover:shadow-xl md:flex-col-reverse"
-      onClick={handleCardClick}
-      data-index={dataIndex}
-      aria-label={`${title}, ${price}원, ${productStatusName}, ${petTypeName}, ${productTradeName}`}
-      href={ROUTES.DETAIL_ID(id)}
-    >
-      <ProductInfo title={title} price={price} createdAt={createdAt} favoriteCount={favoriteCount} productTypeName={productTypeName} />
-      <ProductThumbnail
-        imageUrl={mainImageUrl}
-        title={title}
-        petTypeName={petTypeName}
-        productTypeName={productTypeName}
-        productStatusName={productStatusName}
-        tradeStatus={productTradeName}
-        productTradeColor={productTradeColor}
-        isFavorite={isFavorite}
-        onLikeClick={handleToggleFavorite}
-        priority={dataIndex !== undefined && dataIndex < 4}
-      />
-    </Link>
+    <article>
+      <Link
+        className="border-border text-text-primary flex cursor-pointer flex-row-reverse overflow-hidden rounded-xl border bg-white shadow-md transition-shadow duration-200 hover:shadow-xl md:flex-col-reverse"
+        onClick={handleCardClick}
+        data-index={dataIndex}
+        aria-label={`${title}, ${price}원, ${productStatusName}, ${petTypeName}, ${productTradeName}`}
+        href={ROUTES.DETAIL_ID(id)}
+      >
+        <ProductInfo title={title} price={price} createdAt={createdAt} favoriteCount={favoriteCount} productTypeName={productTypeName} />
+        <ProductThumbnail
+          imageUrl={mainImageUrl}
+          title={title}
+          petTypeName={petTypeName}
+          productTypeName={productTypeName}
+          productStatusName={productStatusName}
+          tradeStatus={productTradeName}
+          productTradeColor={productTradeColor}
+          isFavorite={isFavorite}
+          onLikeClick={handleToggleFavorite}
+          priority={dataIndex !== undefined && dataIndex < 4}
+        />
+      </Link>
+    </article>
   )
 }
 

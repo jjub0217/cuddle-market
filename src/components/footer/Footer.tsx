@@ -12,28 +12,30 @@ export default function Footer() {
             <p className="text-gray-500">반려동물과 함께하는 행복한 반려동물 용품 거래를 경험하세요.</p>
           </div>
 
-          <div className="flex flex-col gap-4">
-            <strong className="font-semibold text-gray-500">커뮤니티</strong>
-            <ul className="flex flex-col gap-3 text-gray-500">
-              <li>
-                <Link href={`${ROUTES.COMMUNITY}?tab=tab-info`}>정보 공유해요</Link>
-              </li>
-              <li>
-                <Link href={`${ROUTES.COMMUNITY}?tab=tab-question`}>질문 있어요</Link>
-              </li>
-            </ul>
-          </div>
+          <nav aria-label="푸터 링크" className="flex flex-wrap gap-x-10 gap-y-5">
+            <div className="flex flex-col gap-4">
+              <strong className="font-semibold text-gray-500">커뮤니티</strong>
+              <ul className="flex flex-col gap-3 text-gray-500">
+                <li>
+                  <Link href={`${ROUTES.COMMUNITY}?tab=tab-info`}>정보 공유해요</Link>
+                </li>
+                <li>
+                  <Link href={`${ROUTES.COMMUNITY}?tab=tab-question`}>질문 있어요</Link>
+                </li>
+              </ul>
+            </div>
 
-          <div className="flex flex-col gap-4">
-            <strong className="font-semibold text-gray-500">고객센터</strong>
-            <ul className="flex flex-col gap-3 text-gray-500">
-              <li>
-                <a href="mailto:support@cuddlemarket.com?subject=커들마켓 1:1 문의" aria-label="고객센터 이메일로 1:1 문의하기">
-                  1:1 문의
-                </a>
-              </li>
-            </ul>
-          </div>
+            <div className="flex flex-col gap-4">
+              <strong className="font-semibold text-gray-500">고객센터</strong>
+              <ul className="flex flex-col gap-3 text-gray-500">
+                <li>
+                  <a href="mailto:support@cuddlemarket.com?subject=커들마켓 1:1 문의" aria-label="고객센터 이메일로 1:1 문의하기">
+                    1:1 문의
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </nav>
         </div>
 
         <div className="mt-6 border-t border-gray-300 pt-6">
