@@ -52,6 +52,7 @@ export default function ProductActions({ id, isFavorite: initialIsFavorite, sell
         }}
         size="md"
         className="cursor-pointer border border-gray-300 bg-white"
+        aria-label="찜하기"
         onClick={handleToggleFavorite}
       />
       <Button size="md" className="bg-primary-400 flex-1 cursor-pointer text-white" onClick={isMyProduct ? () => handleEdit(id) : handleChat}>
