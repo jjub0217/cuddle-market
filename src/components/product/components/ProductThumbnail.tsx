@@ -45,7 +45,7 @@ export function ProductThumbnail({
         <ProductBadge petTypeName={petTypeName} productStatusName={productStatusName} productTypeName={productTypeName} />
         <Button
           type="button"
-          className="z-1 flex cursor-pointer items-center justify-center rounded-full bg-gray-100"
+          className="pointer-events-auto z-1 flex cursor-pointer items-center justify-center rounded-full bg-gray-100"
           aria-label="찜하기"
           icon={Heart}
           iconProps={{
