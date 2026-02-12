@@ -38,7 +38,7 @@ export default function UserControls({ isSideOpen, setIsSideOpen, hideMenuButton
     <div className="flex items-center gap-2 xl:gap-4">
       {isLogin() ? (
         <div className="flex items-center gap-1">
-          <Link href={ROUTES.CHAT} className="ml-1">
+          <Link href={ROUTES.CHAT} className="ml-1" aria-label="채팅">
             <MessageCircleMore className="text-white" strokeWidth={1.5} />
           </Link>
           <div className="relative mr-2.5" onClick={handleBellToggle}>
