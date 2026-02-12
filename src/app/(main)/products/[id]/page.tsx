@@ -1,12 +1,23 @@
 import { Suspense } from 'react'
+import { notFound } from 'next/navigation'
 import ProductDetail from '@/features/product-detail/ProductDetail'
+import { fetchProductDetail } from '@/lib/api/server/products'
 
-export const dynamic = 'force-dynamic'
+interface ProductDetailPageProps {
+  params: Promise<{ id: string }>
+}
 
-export default function ProductDetailPage() {
+export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
+  const { id } = await params
+  const initialData = await fetchProductDetail(id)
+
+  if (!initialData) {
+    notFound()
+  }
+
   return (
     <Suspense fallback={null}>
-      <ProductDetail />
+      <ProductDetail initialData={initialData} />
     </Suspense>
   )
 }
