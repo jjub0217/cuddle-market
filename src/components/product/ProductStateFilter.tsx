@@ -54,15 +54,19 @@ export function ProductStateFilter({
   return (
     <div className="flex flex-col gap-2">
       {useUrlSync ? (
-        <span id="condition-filter-heading" className={cn('heading-h5', headingClassName)}>
+        <h4 id="condition-filter-heading" className={cn('heading-h5', headingClassName)}>
           상품 상태
-        </span>
+        </h4>
       ) : (
         <RequiredLabel htmlFor="signup-name" labelClass="heading-h5">
           상품 상태
         </RequiredLabel>
       )}
-      <div className={cn('grid grid-cols-2 flex-wrap gap-2.5 md:flex')} role="radiogroup" aria-labelledby="condition-filter-heading">
+      <div
+        className={cn('grid grid-cols-2 flex-wrap gap-2.5 md:flex')}
+        role="radiogroup"
+        aria-labelledby="condition-filter-heading"
+      >
         {CONDITION_ITEMS.map((item) => (
           <div key={item.value} className={inputClassname}>
             <input
@@ -80,7 +84,9 @@ export function ProductStateFilter({
                 'flex cursor-pointer flex-col gap-1 rounded-lg px-4 py-2 text-center',
                 'bg-primary-50 text-sm font-medium',
                 labelClassname,
-                selectedProductStatus === item.value ? 'bg-primary-300 text-white' : 'hover:bg-primary-300 text-gray-900 hover:text-white',
+                selectedProductStatus === item.value
+                  ? 'bg-primary-300 text-white'
+                  : 'hover:bg-primary-300 text-gray-900 hover:text-white'
               )}
             >
               <span>{item.title}</span>

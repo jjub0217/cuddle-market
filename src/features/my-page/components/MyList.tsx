@@ -24,6 +24,28 @@ import IconButton from '@/components/commons/button/IconButton'
 import { Z_INDEX } from '@/constants/ui'
 import { useOutsideClick } from '@/hooks/useOutsideClick'
 
+interface StatusDropdownProps {
+  className?: string
+  value: string
+  onChange: (value: string) => void
+}
+
+function StatusDropdown({ className, value, onChange }: StatusDropdownProps) {
+  return (
+    <div className={className} onClick={(e) => e.preventDefault()}>
+      <SelectDropdown
+        value={value}
+        onChange={onChange}
+        options={STATUS_EN_TO_KO.map((sort) => ({
+          value: sort.name,
+          label: sort.name,
+        }))}
+        buttonClassName="border-0 bg-primary-50 text-gray-900 px-3 py-2"
+      />
+    </div>
+  )
+}
+
 type MyListProps = Product & {
   activeTab?: MyPageTabId
   handleConfirmModal: (e: React.MouseEvent, id: number, title: string, price: number, mainImageUrl: string) => void
@@ -96,20 +118,6 @@ export default function MyList({ id, title, price, mainImageUrl, tradeStatus, vi
   const isPurchasesTab = activeTab === 'tab-purchases'
   const isWishlistTab = activeTab === 'tab-wishlist'
   const isMyProductTab = isSalesTab || isPurchasesTab
-
-  const StatusDropdown = ({ className }: { className?: string }) => (
-    <div className={className} onClick={(e) => e.preventDefault()}>
-      <SelectDropdown
-        value={currentTradeStatusKo}
-        onChange={handleProductType}
-        options={STATUS_EN_TO_KO.map((sort) => ({
-          value: sort.name,
-          label: sort.name,
-        }))}
-        buttonClassName="border-0 bg-primary-50 text-gray-900 px-3 py-2"
-      />
-    </div>
-  )
 
   const handleCancelFavorite = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -185,7 +193,7 @@ export default function MyList({ id, title, price, mainImageUrl, tradeStatus, vi
                   </div>
                 )}
                 <span className="font-bold text-gray-500 md:font-medium">{formatPrice(price)} 원</span>
-                {!isMd && !isCompleted && isSalesTab && <StatusDropdown className="w-full" />}
+                {!isMd && !isCompleted && isSalesTab && <StatusDropdown className="w-full" value={currentTradeStatusKo} onChange={handleProductType} />}
                 {!isMd && !isCompleted && isPurchasesTab && (
                   <Button
                     size="sm"
@@ -200,7 +208,7 @@ export default function MyList({ id, title, price, mainImageUrl, tradeStatus, vi
             <ProductMetaItem icon={Eye} label={`조회 ${viewCount}`} className="text-sm text-gray-400" />
           </div>
           <div className="flex flex-col items-end gap-2">
-            {isMd && !isCompleted && isSalesTab && <StatusDropdown className="w-32" />}
+            {isMd && !isCompleted && isSalesTab && <StatusDropdown className="w-32" value={currentTradeStatusKo} onChange={handleProductType} />}
             {isMd && !isCompleted && isPurchasesTab && (
               <Button
                 size="sm"

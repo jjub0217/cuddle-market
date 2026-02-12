@@ -49,7 +49,7 @@ export default function DraftModal({
     <div className={`fixed inset-0 flex items-center justify-center bg-gray-900/70 ${Z_INDEX.MODAL}`}>
       <div ref={modalRef} className="flex w-11/12 flex-col items-center gap-6 rounded-lg bg-white p-5 md:w-[16vw] md:min-w-80">
         <div className="flex w-full flex-col items-center gap-2">
-          <h3 className="heading-h4">임시저장된 글이 있습니다</h3>
+          <h2 className="heading-h4">임시저장된 글이 있습니다</h2>
           <p>이어서 작성하시겠습니까?</p>
         </div>
         <div className="flex w-full gap-3">

@@ -157,6 +157,7 @@ export default function CommunityPage() {
 
   return (
     <div className="relative min-h-screen bg-[#F3F4F6] pt-0 md:pt-5">
+      <h1 className="sr-only">커뮤니티 페이지</h1>
       <div className="pb-4xl mx-auto max-w-7xl px-0 md:px-4">
         <div className="flex w-full flex-col">
           {/* 모바일: 필터 영역 */}
@@ -170,7 +171,12 @@ export default function CommunityPage() {
                 )}
               >
                 <div className="flex items-center justify-between border-b border-gray-200 p-3.5">
-                  <CommunityTabs tabs={COMMUNITY_TABS} activeTab={activeCommunityTypeTab} onTabChange={handleTabChange} ariaLabel="커뮤니티 타입" />
+                  <CommunityTabs
+                    tabs={COMMUNITY_TABS}
+                    activeTab={activeCommunityTypeTab}
+                    onTabChange={handleTabChange}
+                    ariaLabel="커뮤니티 타입"
+                  />
                 </div>
 
                 <div className="flex flex-row-reverse items-center justify-between gap-3 border-b border-gray-200 px-3.5 pt-4 pb-3.5">
@@ -185,7 +191,12 @@ export default function CommunityPage() {
                       buttonClassName="border border-gray-300 bg-primary-50 text-gray-900 text-base px-3 py-2"
                     />
                   </div>
-                  <SearchBar placeholder="게시글 검색" borderColor="border-gray-300" className="h-11 max-w-full" paramName="communityKeyword" />
+                  <SearchBar
+                    placeholder="게시글 검색"
+                    borderColor="border-gray-300"
+                    className="h-11 max-w-full"
+                    paramName="communityKeyword"
+                  />
                 </div>
                 <div className="flex gap-2 border-b border-gray-200 bg-white px-3.5 py-3.5">
                   {COMMUNITY_SORT_TYPE.map((sortType) => (
@@ -196,7 +207,9 @@ export default function CommunityPage() {
                       onClick={() => handleSortChange(sortType.label)}
                       className={cn(
                         'cursor-pointer rounded-full whitespace-nowrap',
-                        selectedSort === sortType.label ? 'bg-primary-500 font-bold text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        selectedSort === sortType.label
+                          ? 'bg-primary-500 font-bold text-white'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                       )}
                     >
                       {sortType.label}
@@ -211,9 +224,17 @@ export default function CommunityPage() {
           {isMd && (
             <div className="mb-7 flex w-full flex-col gap-4">
               <div className="flex items-center justify-between">
-                <CommunityTabs tabs={COMMUNITY_TABS} activeTab={activeCommunityTypeTab} onTabChange={handleTabChange} ariaLabel="커뮤니티 타입" />
+                <CommunityTabs
+                  tabs={COMMUNITY_TABS}
+                  activeTab={activeCommunityTypeTab}
+                  onTabChange={handleTabChange}
+                  ariaLabel="커뮤니티 타입"
+                />
                 {isLogin() && (
-                  <Link href={`${ROUTES.COMMUNITY_POST}?tab=${activeCommunityTypeTab}`} className="bg-primary-300 rounded-lg px-3 py-2 text-white">
+                  <Link
+                    href={`${ROUTES.COMMUNITY_POST}?tab=${activeCommunityTypeTab}`}
+                    className="bg-primary-300 rounded-lg px-3 py-2 text-white"
+                  >
                     글쓰기
                   </Link>
                 )}

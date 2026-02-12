@@ -15,7 +15,7 @@ interface SellerOtherProductsProps {
 export default function SellerOtherProducts({ sellerInfo, sellerOtherProducts }: SellerOtherProductsProps) {
   return (
     <div className="pb-4xl">
-      <h3 className="heading-h4 text-text-primary mb-lg">{sellerInfo?.sellerNickname}님의 다른 판매 상품</h3>
+      <h2 className="heading-h4 text-text-primary mb-lg">{sellerInfo?.sellerNickname}님의 다른 판매 상품</h2>
 
       {sellerOtherProducts?.length !== 0 ? (
         <ProductList products={sellerOtherProducts.slice(0, 3)} showMoreButton sellerId={sellerInfo.sellerId} />

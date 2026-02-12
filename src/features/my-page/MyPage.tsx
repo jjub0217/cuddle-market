@@ -4,7 +4,14 @@ import { useUserStore } from '@/store/userStore'
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { useMutation, useInfiniteQuery, useQueryClient, useQuery } from '@tanstack/react-query'
-import { deleteProduct, fetchMyBlockedData, fetchMyFavoriteData, fetchMyPageData, fetchMyProductData, fetchMyRequestData } from '@/lib/api/products'
+import {
+  deleteProduct,
+  fetchMyBlockedData,
+  fetchMyFavoriteData,
+  fetchMyPageData,
+  fetchMyProductData,
+  fetchMyRequestData,
+} from '@/lib/api/products'
 import Tabs from '@/components/Tabs'
 import { MY_PAGE_TABS, type MyPageTabId } from '@/constants/constants'
 import MyPagePanel from './components/MyPagePanel'
@@ -34,8 +41,7 @@ function MyPage() {
     mainImageUrl: string
   } | null>(null)
   const tabParam = searchParams.get('tab') as MyPageTabId | null
-  const initialTab = tabParam && MY_PAGE_TABS.some((tab) => tab.id === tabParam) ? tabParam : 'tab-sales'
-  const [activeMyPageTab, setActiveMyPageTab] = useState<MyPageTabId>(initialTab)
+  const activeMyPageTab = tabParam && MY_PAGE_TABS.some((tab) => tab.id === tabParam) ? tabParam : 'tab-sales'
   const activeTabCode = MY_PAGE_TABS.find((tab) => tab.id === activeMyPageTab)?.code ?? 'SELL'
 
   const {
@@ -107,8 +113,16 @@ function MyPage() {
 
   const paginationProps = {
     'tab-sales': { fetchNextPage: fetchNextProducts, hasNextPage: hasNextProducts, isFetchingNextPage: isFetchingNextProducts },
-    'tab-purchases': { fetchNextPage: fetchNextRequests, hasNextPage: hasNextRequests, isFetchingNextPage: isFetchingNextRequests },
-    'tab-wishlist': { fetchNextPage: fetchNextFavorites, hasNextPage: hasNextFavorites, isFetchingNextPage: isFetchingNextFavorites },
+    'tab-purchases': {
+      fetchNextPage: fetchNextRequests,
+      hasNextPage: hasNextRequests,
+      isFetchingNextPage: isFetchingNextRequests,
+    },
+    'tab-wishlist': {
+      fetchNextPage: fetchNextFavorites,
+      hasNextPage: hasNextFavorites,
+      isFetchingNextPage: isFetchingNextFavorites,
+    },
     'tab-blocked': { fetchNextPage: fetchNextBlocked, hasNextPage: hasNextBlocked, isFetchingNextPage: isFetchingNextBlocked },
   }[activeMyPageTab]
 
@@ -134,7 +148,6 @@ function MyPage() {
   })
 
   const handleTabChange = (tabId: string) => {
-    setActiveMyPageTab(tabId as MyPageTabId)
     router.replace(`?tab=${tabId}`)
   }
 
@@ -180,11 +193,6 @@ function MyPage() {
   })
 
   useEffect(() => {
-    const currentTab = tabParam && MY_PAGE_TABS.some((tab) => tab.id === tabParam) ? tabParam : 'tab-sales'
-    setActiveMyPageTab(currentTab)
-  }, [tabParam])
-
-  useEffect(() => {
     if (myData) {
       updateUserProfile({
         profileImageUrl: myData.profileImageUrl,
@@ -199,6 +207,13 @@ function MyPage() {
       })
     }
   }, [myData, updateUserProfile])
+
+  useEffect(() => {
+    if (!user?.id) {
+      setRedirectUrl(pathname)
+      router.push('/auth/login')
+    }
+  }, [user?.id, pathname, router, setRedirectUrl])
 
   if ((isLoadingMyData && !myData) || (isLoadingMyProductData && !myProductsData)) {
     return (
@@ -221,13 +236,6 @@ function MyPage() {
     )
   }
 
-  useEffect(() => {
-    if (!user?.id) {
-      setRedirectUrl(pathname)
-      router.push('/auth/login')
-    }
-  }, [user?.id, pathname, router, setRedirectUrl])
-
   if (!user?.id) {
     return null
   }
@@ -235,6 +243,7 @@ function MyPage() {
   return (
     <>
       <div className="pb-4xl bg-white pt-0 md:pt-8">
+        <h1 className="sr-only">마이페이지</h1>
         <div className="mx-auto flex max-w-7xl flex-col gap-3.5 md:flex-row md:gap-8">
           <ProfileData setIsWithdrawModalOpen={setIsWithdrawModalOpen} data={myData!} isMyProfile />
           <section className="relative flex flex-1 flex-col gap-3.5 md:gap-7">

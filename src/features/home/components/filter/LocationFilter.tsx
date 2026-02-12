@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import SelectDropdown from '@/components/commons/select/SelectDropdown'
-import { CITIES, PROVINCES } from '@/constants/cities'
+import { CITIES, PROVINCES, type Province } from '@/constants/cities'
 import { cn } from '@/lib/utils/cn'
-import type { Province } from '@/constants/cities'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 
 interface LocationFilterProps {
@@ -64,9 +63,9 @@ export function LocationFilter({ headingClassName }: LocationFilterProps) {
 
   return (
     <div className="flex flex-1 flex-col gap-2">
-      <span id="location-filter-heading" className={cn('heading-h5', headingClassName)}>
+      <h4 id="location-filter-heading" className={cn('heading-h5', headingClassName)}>
         지역
-      </span>
+      </h4>
       <div className="flex flex-col gap-2.5 md:flex-row" role="group" aria-labelledby="location-filter-heading">
         {/* 시/도 선택 */}
         <div className="flex-1">

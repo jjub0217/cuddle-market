@@ -71,7 +71,7 @@ export default function SearchBar({
   }, [currentKeyword])
 
   return (
-    <div className={cn('h-5 flex-1 md:h-10 md:min-w-120', className)}>
+    <div className={cn('h-5 flex-1 md:h-10 md:min-w-120', className)} role="search" aria-label={placeholder}>
       <Input
         type="text"
         value={keyword}

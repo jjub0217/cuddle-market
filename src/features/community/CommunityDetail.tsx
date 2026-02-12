@@ -162,11 +162,15 @@ export default function CommunityDetail() {
   return (
     <>
       {!isMd ? (
-        <div className={cn('bg-primary-200 sticky top-0 mx-auto flex w-full max-w-7xl justify-between px-3.5 py-4', Z_INDEX.HEADER)}>
+        <div
+          className={cn('bg-primary-200 sticky top-0 mx-auto flex w-full max-w-7xl justify-between px-3.5 py-4', Z_INDEX.HEADER)}
+        >
           <button type="button" onClick={() => router.back()} className="flex cursor-pointer items-center gap-1 text-gray-600">
             <ArrowLeft size={23} className="text-white" />
           </button>
-          <h2 className="heading-h4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg font-extrabold! text-white">{headerTitle}</h2>
+          <span className="heading-h4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg font-extrabold! text-white">
+            {headerTitle}
+          </span>
         </div>
       ) : (
         <SimpleHeader
@@ -181,12 +185,17 @@ export default function CommunityDetail() {
           <div className="flex flex-col justify-center gap-3.5">
             <div className="flex flex-col gap-3.5 rounded-lg border border-gray-400 bg-white px-6 py-5 shadow-xl">
               <div className="relative flex items-center justify-between">
-                <Badge className="bg-primary-400 w-fit rounded-full text-white">{getBoardType(data.boardType as 'QUESTION' | 'INFO')}</Badge>
+                <Badge className="bg-primary-400 w-fit rounded-full text-white">
+                  {getBoardType(data.boardType as 'QUESTION' | 'INFO')}
+                </Badge>
                 <IconButton className="" size="sm" onClick={handleMoreToggle}>
                   <EllipsisVertical size={16} className="text-gray-500" />
                 </IconButton>
                 {isMoreMenuOpen && (
-                  <div className="absolute top-7 right-0 flex flex-col rounded border border-gray-200 bg-white shadow-md md:min-w-14" ref={modalRef}>
+                  <div
+                    className="absolute top-7 right-0 flex flex-col rounded border border-gray-200 bg-white shadow-md md:min-w-14"
+                    ref={modalRef}
+                  >
                     {user?.id === data?.authorId ? (
                       <>
                         <button
@@ -240,11 +249,11 @@ export default function CommunityDetail() {
                 </div>
                 <p>조회 {data.viewCount}</p>
               </div>
-              <p className="border-b border-gray-300 pb-3.5 text-lg font-semibold">{data.title}</p>
+              <h1 className="border-b border-gray-300 pb-3.5 text-lg font-semibold">{data.title}</h1>
               <MdPreview value={data.content} className="p-0" />
             </div>
 
-            <div className="flex flex-col gap-3.5 rounded-lg border border-gray-400 bg-white px-6 py-5 shadow-xl">
+            <section aria-label="댓글" className="flex flex-col gap-3.5 rounded-lg border border-gray-400 bg-white px-6 py-5 shadow-xl">
               <div className="flex items-center gap-1">
                 <span>댓글</span>
                 <span>{data.commentCount}</span>
@@ -266,7 +275,7 @@ export default function CommunityDetail() {
                 onSubmit={handleSubmit(onSubmit)}
                 onCancel={() => reset()}
               />
-            </div>
+            </section>
           </div>
         </div>
       </div>

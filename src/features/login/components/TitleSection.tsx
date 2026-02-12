@@ -10,7 +10,7 @@ interface TitleSectionProps {
 export function TitleSection({ title, desc, link, linkPath }: TitleSectionProps) {
   return (
     <div className="flex flex-col items-center gap-2">
-      <h2 className="heading-h2">{title}</h2>
+      <h1 className="heading-h2">{title}</h1>
       <div className="flex items-center gap-2">
         <span>{desc}</span>
         {link && linkPath && (

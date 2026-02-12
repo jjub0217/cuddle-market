@@ -16,7 +16,7 @@ export default function SimpleHeader({ title, description, href, layoutClassname
           {title}
         </Link>
       ) : (
-        <h2 className="heading-h2">{title}</h2>
+        <span className="heading-h2">{title}</span>
       )}
       {description && <p>{description}</p>}
     </div>

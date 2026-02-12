@@ -24,7 +24,13 @@ export const DetailFilter = memo(function DetailFilterSection({
 }: DetailFilterProps) {
   return (
     <div className="flex flex-col gap-2.5">
-      <DetailFilterButton isOpen={isOpen} onClick={() => onToggle(!isOpen)} ariaControls="detail-filter-content" filterReset={filterReset} />
+      <h3 className="sr-only">세부필터</h3>
+      <DetailFilterButton
+        isOpen={isOpen}
+        onClick={() => onToggle(!isOpen)}
+        ariaControls="detail-filter-content"
+        filterReset={filterReset}
+      />
       {isOpen && (
         <div
           className="bg-primary-100 flex flex-col gap-3.5 rounded-lg px-3 py-2.5 md:flex-row md:gap-10"
@@ -32,11 +38,7 @@ export const DetailFilter = memo(function DetailFilterSection({
           id="detail-filter-content"
           aria-label="세부 필터 옵션"
         >
-          <ProductStateFilter
-            selectedProductStatus={selectedProductStatus}
-            useUrlSync
-            headingClassName={headingClassName}
-          />
+          <ProductStateFilter selectedProductStatus={selectedProductStatus} useUrlSync headingClassName={headingClassName} />
           <PriceFilter selectedPriceRange={selectedPriceRange} headingClassName={headingClassName} />
           <LocationFilter headingClassName={headingClassName} />
         </div>

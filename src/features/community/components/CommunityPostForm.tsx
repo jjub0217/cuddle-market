@@ -60,7 +60,7 @@ export default function CommunityPostForm() {
   const searchParams = useSearchParams()
   const initialBoardType = searchParams.get('tab') === 'tab-question' ? 'QUESTION' : 'INFO'
   const [showDraftModal, setShowDraftModal] = useState(false)
-  const [isDraftChecked, setIsDraftChecked] = useState(false)
+  const [isDraftChecked, setIsDraftChecked] = useState(isEditMode)
 
   const pathname = usePathname()
 
@@ -149,20 +149,20 @@ export default function CommunityPostForm() {
   }, [formValues, isEditMode, isDraftChecked, initialBoardType])
 
   useEffect(() => {
-    if (isEditMode) {
-      setIsDraftChecked(true) // 수정 모드면 바로 체크 완료
-      return
-    }
+    if (isEditMode) return
 
-    const draft = getSavedDraft(initialBoardType)
-    // 임시저장에 실제 내용이 있는지 확인 (제목이나 내용이 있으면)
-    const hasSavedContent = draft.title.trim() !== '' || draft.content.trim() !== ''
+    // sessionStorage 읽기 후 상태 업데이트를 비동기로 처리
+    const checkDraft = async () => {
+      const draft = getSavedDraft(initialBoardType)
+      const hasSavedContent = draft.title.trim() !== '' || draft.content.trim() !== ''
 
-    if (hasSavedContent) {
-      setShowDraftModal(true)
-    } else {
-      setIsDraftChecked(true) // 임시저장 없으면 바로 자동저장 시작
+      if (hasSavedContent) {
+        setShowDraftModal(true)
+      } else {
+        setIsDraftChecked(true)
+      }
     }
+    checkDraft()
   }, [initialBoardType, isEditMode])
 
   if (postLoadError) {
@@ -180,12 +180,17 @@ export default function CommunityPostForm() {
 
   return (
     <>
+      <h1 className="sr-only">{isEditMode ? '게시글 수정' : '커뮤니티 글쓰기'}</h1>
       {!isMd ? (
-        <div className={cn('bg-primary-200 sticky top-0 mx-auto flex w-full max-w-7xl justify-between px-3.5 py-4', Z_INDEX.HEADER)}>
+        <div
+          className={cn('bg-primary-200 sticky top-0 mx-auto flex w-full max-w-7xl justify-between px-3.5 py-4', Z_INDEX.HEADER)}
+        >
           <button type="button" onClick={() => router.back()} className="flex cursor-pointer items-center gap-1 text-gray-600">
             <ArrowLeft size={23} className="text-white" />
           </button>
-          <h2 className="heading-h4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg font-extrabold! text-white">커뮤니티</h2>
+          <span className="heading-h4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg font-extrabold! text-white">
+            커뮤니티
+          </span>
         </div>
       ) : (
         <SimpleHeader
@@ -194,7 +199,6 @@ export default function CommunityPostForm() {
           layoutClassname="py-5 flex-col justify-between border-b border-gray-200"
         />
       )}
-
       <div className="bg-[#F3F4F6]">
         <div className="px-lg mx-auto max-w-7xl pt-5">
           <AnimatePresence>
@@ -206,13 +210,11 @@ export default function CommunityPostForm() {
           </AnimatePresence>
         </div>
       </div>
-
       <div className="min-h-screen bg-[#F3F4F6] pt-5">
         <div className="px-lg pb-4xl mx-auto max-w-7xl">
           <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
             <fieldset className="flex flex-col gap-5">
               <legend className="sr-only">커뮤니티 등록폼</legend>
-
               <div className="flex flex-col gap-6 rounded-lg border border-gray-400 bg-white px-3.5 py-5 shadow-xl md:px-6">
                 <Controller
                   name="boardType"
@@ -260,7 +262,9 @@ export default function CommunityPostForm() {
                       <RequiredLabel labelClass="heading-h5">내용</RequiredLabel>
                       <Markdown value={field.value} onChange={field.onChange} placeholder="내용을 입력하세요" height={320} />
                       <div className="flex flex-col gap-1">
-                        {fieldState.error && <p className="pt-1.5 text-xs font-semibold text-red-500">{fieldState.error.message}</p>}
+                        {fieldState.error && (
+                          <p className="pt-1.5 text-xs font-semibold text-red-500">{fieldState.error.message}</p>
+                        )}
                         <p className="text-sm text-gray-500">{field.value?.length ?? 0}/1000자</p>
                       </div>
                     </div>
@@ -275,7 +279,12 @@ export default function CommunityPostForm() {
                 >
                   {isEditMode ? '수정' : '등록'}
                 </Button>
-                <Button size="md" className="w-[20%] cursor-pointer bg-gray-100 text-gray-900" type="button" onClick={handleCancel}>
+                <Button
+                  size="md"
+                  className="w-[20%] cursor-pointer bg-gray-100 text-gray-900"
+                  type="button"
+                  onClick={handleCancel}
+                >
                   취소
                 </Button>
               </div>

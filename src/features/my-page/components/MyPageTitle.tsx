@@ -24,7 +24,7 @@ export default function MyPageTitle({ heading, count, description, buttonLabel, 
   return (
     <div className="flex justify-between">
       <div>
-        <h4 className="flex items-center gap-2 text-lg font-bold">{heading}</h4>
+        <h2 className="flex items-center gap-2 text-lg font-bold">{heading}</h2>
         {description && <p>{count !== undefined ? `총 ${count}${description}` : description}</p>}
       </div>
       {buttonLabel && (

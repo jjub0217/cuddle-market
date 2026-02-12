@@ -59,12 +59,12 @@ export default function Header({ hideSearchBar = false, hideMenuButton = false }
         className={cn(
           'bg-primary-200 fixed top-0 flex w-full items-center justify-center pt-3 xl:pb-3',
           !isXl && (isSearchOpen ? 'pb-0' : 'pb-3'),
-          Z_INDEX.HEADER,
+          Z_INDEX.HEADER
         )}
       >
         <div className="flex w-full flex-col px-4 xl:block xl:max-w-7xl xl:gap-3 xl:px-3.5">
           <div className="flex h-12 items-center justify-between gap-4">
-            <div className="flex items-center gap-8">
+            <nav className="flex items-center gap-8" aria-label="주 메뉴">
               <Logo />
               {isXl && (
                 <>
@@ -82,7 +82,7 @@ export default function Header({ hideSearchBar = false, hideMenuButton = false }
                   </Link>
                 </>
               )}
-            </div>
+            </nav>
             <div className="flex items-center gap-1 xl:gap-8">
               {!hideSearchBar && (
                 <Suspense>

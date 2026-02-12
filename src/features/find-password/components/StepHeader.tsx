@@ -10,10 +10,7 @@ export function StepHeader({ currentStep, email }: StepHeaderProps) {
   return (
     <div className="flex flex-col items-center gap-4">
       <div
-        className={cn(
-          'bg-primary-50 flex size-16 items-center justify-center rounded-full',
-          currentStep === 3 && 'bg-[#DCFCE7]'
-        )}
+        className={cn('bg-primary-50 flex size-16 items-center justify-center rounded-full', currentStep === 3 && 'bg-[#DCFCE7]')}
       >
         {currentStep === 3 ? (
           <KeyRound size={24} className="text-[#22C55E]" />
@@ -26,17 +23,17 @@ export function StepHeader({ currentStep, email }: StepHeaderProps) {
       <div className="flex flex-col items-center gap-1">
         {currentStep === 3 ? (
           <>
-            <h3 className="heading-h5">비밀번호 재설정</h3>
+            <h2 className="heading-h5">비밀번호 재설정</h2>
             <p>가입하신 이메일을 입력하면 인증코드를 보내드립니다</p>
           </>
         ) : currentStep === 2 ? (
           <>
-            <h3 className="heading-h5">이메일 인증</h3>
+            <h2 className="heading-h5">이메일 인증</h2>
             <p>{`${email}로 인증코드를 발송했습니다.`}</p>
           </>
         ) : (
           <>
-            <h3 className="heading-h5">이메일 입력</h3>
+            <h2 className="heading-h5">이메일 입력</h2>
             <p>가입하신 이메일을 입력하면 인증코드를 보내드립니다</p>
           </>
         )}
