@@ -1,8 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import Image from 'next/image'
-import { IMAGE_SIZES, imageLoader, toResizedWebpUrl, PLACEHOLDER_IMAGES } from '@/lib/utils/imageUrl'
+import { getImageSrcSet, IMAGE_SIZES, toResizedWebpUrl, PLACEHOLDER_IMAGES, PLACEHOLDER_SRCSET } from '@/lib/utils/imageUrl'
 
 interface MainImageProps {
   mainImageUrl: string | null
@@ -10,35 +8,26 @@ interface MainImageProps {
 }
 
 export default function MainImage({ mainImageUrl, title }: MainImageProps) {
-  const [imgError, setImgError] = useState(false)
-  const [usePlaceholder, setUsePlaceholder] = useState(false)
-
-  const handleImageError = () => {
-    if (!imgError && mainImageUrl) {
-      setImgError(true)
-    } else {
-      setUsePlaceholder(true)
-    }
-  }
-
-  const getImageSrc = () => {
-    if (usePlaceholder || !mainImageUrl) return PLACEHOLDER_IMAGES[800]
-    if (imgError) return mainImageUrl
-    return toResizedWebpUrl(mainImageUrl, 800)
-  }
-
   return (
     <div className="relative overflow-hidden rounded-xl pb-[100%]">
-      <Image
-        src={getImageSrc()}
-        loader={imgError || usePlaceholder || !mainImageUrl ? undefined : imageLoader}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={mainImageUrl ? toResizedWebpUrl(mainImageUrl, 800) : PLACEHOLDER_IMAGES[800]}
+        srcSet={mainImageUrl ? getImageSrcSet(mainImageUrl) : PLACEHOLDER_SRCSET}
         sizes={IMAGE_SIZES.mainImage}
         alt={title}
-        fill
-        priority
-        className="object-cover"
-        onError={handleImageError}
-        unoptimized={imgError || usePlaceholder || !mainImageUrl}
+        fetchPriority="high"
+        className="absolute inset-0 h-full w-full object-cover"
+        onError={(e) => {
+          const img = e.currentTarget
+          if (mainImageUrl && img.src !== mainImageUrl) {
+            img.srcset = ''
+            img.src = mainImageUrl
+          } else {
+            img.srcset = PLACEHOLDER_SRCSET
+            img.src = PLACEHOLDER_IMAGES[800]
+          }
+        }}
       />
     </div>
   )
