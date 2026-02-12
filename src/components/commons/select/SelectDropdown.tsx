@@ -19,8 +19,9 @@ function Select({ isOpen, disabled, onClick, id, buttonClassName, selectedLabel,
   return (
     <button
       type="button"
-      role="combobox"
+      aria-haspopup="listbox"
       aria-expanded={isOpen}
+      aria-label={placeholder}
       disabled={disabled}
       onClick={onClick}
       id={id}
