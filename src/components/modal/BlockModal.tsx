@@ -50,7 +50,7 @@ export default function BlockModal({ isOpen, onCancel, userNickname, userId }: B
   return (
     <dialog
       ref={dialogRef}
-      className="w-11/12 open:flex flex-col gap-4 rounded-lg bg-white p-5 backdrop:bg-gray-900/70 md:w-[16vw] md:min-w-max"
+      className="m-auto w-11/12 open:flex flex-col gap-4 rounded-lg bg-white p-5 backdrop:bg-gray-900/70 md:w-[16vw] md:min-w-max"
       onClick={(e) => {
         if (e.target === dialogRef.current) dialogRef.current.close()
       }}
