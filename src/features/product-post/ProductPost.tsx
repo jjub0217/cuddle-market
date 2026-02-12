@@ -26,7 +26,13 @@ function ProductPost() {
   const isEditMode = !!id
 
   const isSalesTab = activeProductTypeTab === 'tab-sales'
-  const headerTitle = isSalesTab ? (isEditMode ? '판매 상품 수정' : '판매 상품 등록') : isEditMode ? '판매 요청 수정' : '판매 요청 등록'
+  const headerTitle = isSalesTab
+    ? isEditMode
+      ? '판매 상품 수정'
+      : '판매 상품 등록'
+    : isEditMode
+      ? '판매 요청 수정'
+      : '판매 요청 등록'
   const headerDescription = isSalesTab
     ? isEditMode
       ? '등록된 상품 정보를 수정할 수 있습니다.'
@@ -67,6 +73,7 @@ function ProductPost() {
 
   return (
     <>
+      <h1 className="sr-only">{headerTitle}</h1>
       <SimpleHeader title={headerTitle} description={headerDescription} />
       <div className="bg-[#F3F4F6] pt-5">
         <div className="px-lg pb-4xl mx-auto max-w-7xl">
@@ -80,8 +87,12 @@ function ProductPost() {
                 excludeTabId="tab-all"
               />
             )}
-            {activeProductTypeTab === 'tab-sales' && <ProductPostForm isEditMode={isEditMode} productId={id} initialData={productData} />}
-            {activeProductTypeTab === 'tab-purchases' && <ProductRequestForm isEditMode={isEditMode} productId={id} initialData={productData} />}
+            {activeProductTypeTab === 'tab-sales' && (
+              <ProductPostForm isEditMode={isEditMode} productId={id} initialData={productData} />
+            )}
+            {activeProductTypeTab === 'tab-purchases' && (
+              <ProductRequestForm isEditMode={isEditMode} productId={id} initialData={productData} />
+            )}
           </div>
         </div>
       </div>

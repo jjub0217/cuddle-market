@@ -23,8 +23,6 @@ const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:8080/ws-stomp
 export default function ChattingPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const queryClient = useQueryClient()
-  const [isChatOpen, setIsChatOpen] = useState(false)
-  const [selectedRoom, setSelectedRoom] = useState<fetchChatRoom | null>(null)
   const [inputMessage, setInputMessage] = useState('')
   const [imageUploadError, setImageUploadError] = useState<React.ReactNode | null>(null)
 
@@ -89,6 +87,13 @@ export default function ChattingPage() {
     })
   }, [rooms, chatRoomUpdates])
 
+  const selectedRoom = useMemo(() => {
+    if (!chatRoomId) return null
+    return allRooms.find((room) => room.chatRoomId === Number(chatRoomId)) ?? null
+  }, [allRooms, chatRoomId])
+
+  const isChatOpen = !!chatRoomId
+
   const handleSelectRoom = (room: fetchChatRoom) => {
     subscribeToRoom(room.chatRoomId)
     const roomUnreadCount = chatSocketStore.getState().chatRoomUpdates[room.chatRoomId]?.unreadCount ?? room.unreadCount ?? 0
@@ -98,14 +103,12 @@ export default function ChattingPage() {
       }))
     }
     clearUnreadCount(room.chatRoomId)
-    setSelectedRoom(room)
-    setIsChatOpen(true)
     router.push(`/chat/${room.chatRoomId}`)
   }
 
   const handleSend = () => {
-    if (selectedRoom && inputMessage.length > 0) {
-      sendMessage(selectedRoom.chatRoomId, inputMessage, 'TEXT')
+    if (chatRoomId && inputMessage.length > 0) {
+      sendMessage(Number(chatRoomId), inputMessage, 'TEXT')
       setInputMessage('')
     }
   }
@@ -122,13 +125,13 @@ export default function ChattingPage() {
 
   const handleImageSend = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
-    if (!files || files.length === 0 || !selectedRoom) return
+    if (!files || files.length === 0 || !chatRoomId) return
 
     try {
       const compressedFiles = await Promise.all(Array.from(files).map((file) => compressImage(file)))
       const uploadResult = await uploadImage(compressedFiles)
       const imageUrl = uploadResult.mainImageUrl
-      sendMessage(selectedRoom.chatRoomId, '', 'IMAGE', imageUrl)
+      sendMessage(Number(chatRoomId), '', 'IMAGE', imageUrl)
     } catch {
       setImageUploadError(
         <div className="flex flex-col gap-0.5">
@@ -144,18 +147,18 @@ export default function ChattingPage() {
     const remainingRooms = allRooms?.filter((room) => room.chatRoomId !== leftRoomId) ?? []
 
     if (remainingRooms.length > 0) {
-      const nextRoom = remainingRooms.sort((a, b) => new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime())[0]
+      const nextRoom = remainingRooms.sort(
+        (a, b) => new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
+      )[0]
       subscribeToRoom(nextRoom.chatRoomId)
-      setSelectedRoom(nextRoom)
       router.replace(`/chat/${nextRoom.chatRoomId}`)
     } else {
-      setSelectedRoom(null)
-      setIsChatOpen(false)
+      router.replace('/chat')
     }
   }
 
   const handleBack = () => {
-    setIsChatOpen(false)
+    router.push('/chat')
   }
 
   useEffect(() => {
@@ -173,22 +176,6 @@ export default function ChattingPage() {
       subscribeToRoom(Number(chatRoomId))
     }
   }, [isConnected, chatRoomId, subscribeToRoom, clearRoomMessages])
-
-  useEffect(() => {
-    if (allRooms && chatRoomId && !selectedRoom) {
-      const room = allRooms.find((room) => room.chatRoomId === Number(chatRoomId))
-      if (room) {
-        setSelectedRoom(room)
-      }
-    }
-  }, [allRooms, chatRoomId, selectedRoom])
-
-  useEffect(() => {
-    if (!chatRoomId) {
-      setIsChatOpen(false)
-      setSelectedRoom(null)
-    }
-  }, [chatRoomId])
 
   useEffect(() => {
     if (!user) {
@@ -219,6 +206,7 @@ export default function ChattingPage() {
 
   return (
     <div className="md:pb-4xl bg-white md:h-auto md:pt-8">
+      <h1 className="sr-only">채팅 페이지</h1>
       <div className="mx-auto flex h-full max-w-7xl flex-col md:h-[80vh] md:flex-row">
         <div className={cn('md:flex', isChatOpen ? 'hidden' : 'block')}>
           <ChatRooms
@@ -257,7 +245,14 @@ export default function ChattingPage() {
                   Z_INDEX.HEADER
                 )}
               >
-                <input type="file" id="chat-file-input" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageSend} />
+                <input
+                  type="file"
+                  id="chat-file-input"
+                  ref={fileInputRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleImageSend}
+                />
                 <label htmlFor="chat-file-input" className="cursor-pointer rounded p-1">
                   <Paperclip size={20} />
                 </label>

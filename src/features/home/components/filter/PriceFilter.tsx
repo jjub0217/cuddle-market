@@ -37,9 +37,9 @@ export function PriceFilter({ headingClassName, selectedPriceRange }: PriceFilte
   }
   return (
     <div className="flex flex-col gap-2">
-      <span id="price-filter-heading" className={cn('heading-h5', headingClassName)}>
+      <h4 id="price-filter-heading" className={cn('heading-h5', headingClassName)}>
         가격대
-      </span>
+      </h4>
       <div className="gap-sm grid grid-cols-2 flex-wrap md:flex" role="group" aria-labelledby="price-filter-heading">
         {PRICE_TYPE.map((item) => (
           <Button
@@ -50,7 +50,7 @@ export function PriceFilter({ headingClassName, selectedPriceRange }: PriceFilte
               'bg-primary-50 cursor-pointer',
               selectedPriceRange?.min === item.value.min && selectedPriceRange?.max === item.value.max
                 ? 'bg-primary-300 font-bold text-white'
-                : 'hover:bg-primary-300 text-gray-900 hover:text-white',
+                : 'hover:bg-primary-300 text-gray-900 hover:text-white'
             )}
             onClick={(e) => handleMinPrice(e, item.value)}
             aria-pressed={selectedPriceRange?.min === item.value.min && selectedPriceRange?.max === item.value.max}

@@ -5,7 +5,7 @@ import { PET_DETAILS, PET_TYPE_TABS, PETS, type PetTypeTabId } from '@/constants
 import { cn } from '@/lib/utils/cn'
 import { ProductPetTypeTabs } from '../tab/ProductPetTypeTabs'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 
 const INITIAL_DISPLAY_COUNT = 9
@@ -23,10 +23,6 @@ export function PetTypeFilter({ activeTab, headingClassName, selectedDetailPet, 
   const pathname = usePathname()
   const [showAll, setShowAll] = useState(false)
   const isMobile = useMediaQuery('(max-width: 767px)')
-
-  useEffect(() => {
-    setShowAll(false)
-  }, [activeTab])
 
   const handleProductPetDetailType = (e: React.MouseEvent, pet: string) => {
     e.stopPropagation() // 이벤트 버블링 방지
@@ -48,17 +44,27 @@ export function PetTypeFilter({ activeTab, headingClassName, selectedDetailPet, 
   const filteredPetDetails =
     selectedPetTypeCode === 'ALL'
       ? PET_DETAILS // 전체 선택 시 모든 details 표시
-      : PET_DETAILS.filter((pet) => PETS.find((petType) => petType.code === selectedPetTypeCode)?.details.some((detail) => detail.code === pet.code))
+      : PET_DETAILS.filter((pet) =>
+          PETS.find((petType) => petType.code === selectedPetTypeCode)?.details.some((detail) => detail.code === pet.code)
+        )
 
   // 모바일 + "전체" 탭일 때만 더보기 기능 적용 (데스크탑은 항상 전체 표시)
   const displayedPetDetails =
-    isMobile && selectedPetTypeCode === 'ALL' && !showAll ? filteredPetDetails.slice(0, INITIAL_DISPLAY_COUNT) : filteredPetDetails
+    isMobile && selectedPetTypeCode === 'ALL' && !showAll
+      ? filteredPetDetails.slice(0, INITIAL_DISPLAY_COUNT)
+      : filteredPetDetails
 
   const hasMoreItems = isMobile && selectedPetTypeCode === 'ALL' && filteredPetDetails.length > INITIAL_DISPLAY_COUNT
 
+  const [prevActiveTab, setPrevActiveTab] = useState(activeTab)
+  if (prevActiveTab !== activeTab) {
+    setPrevActiveTab(activeTab)
+    setShowAll(false)
+  }
+
   return (
     <div className="flex flex-col gap-2.5">
-      <span className={cn('heading-h4', headingClassName)}>반려동물 종류</span>
+      <h2 className={cn('heading-h4', headingClassName)}>반려동물 종류</h2>
       <div className="flex flex-col gap-4">
         <ProductPetTypeTabs activeTab={activeTab} onTabChange={onTabChange} />
         <div className="flex flex-wrap gap-2.5" role="tabpanel" id={`panel-${selectedPetTypeCode}`} aria-labelledby={activeTab}>
@@ -69,7 +75,9 @@ export function PetTypeFilter({ activeTab, headingClassName, selectedDetailPet, 
               size="sm"
               className={cn(
                 'border-primary-200 cursor-pointer border',
-                selectedDetailPet === pet.code ? 'bg-primary-300 font-bold text-white' : 'hover:bg-primary-300 text-gray-900 hover:text-white',
+                selectedDetailPet === pet.code
+                  ? 'bg-primary-300 font-bold text-white'
+                  : 'hover:bg-primary-300 text-gray-900 hover:text-white'
               )}
               onClick={(e) => handleProductPetDetailType(e, pet.code)}
               aria-pressed={selectedDetailPet === pet.code}
@@ -78,7 +86,12 @@ export function PetTypeFilter({ activeTab, headingClassName, selectedDetailPet, 
             </Button>
           ))}
           {hasMoreItems && !showAll && (
-            <Button type="button" size="sm" className="cursor-pointer bg-gray-100 text-gray-600 md:hidden" onClick={() => setShowAll(true)}>
+            <Button
+              type="button"
+              size="sm"
+              className="cursor-pointer bg-gray-100 text-gray-600 md:hidden"
+              onClick={() => setShowAll(true)}
+            >
               더보기 ({filteredPetDetails.length - INITIAL_DISPLAY_COUNT}개)
             </Button>
           )}

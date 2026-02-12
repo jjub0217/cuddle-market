@@ -60,7 +60,7 @@ export default function ProfileData({
   const provider = getProvider(user?.email)
 
   return (
-    <section className="flex h-fit flex-col rounded-none border-b border-gray-200 px-5 py-0 pt-5 md:max-w-72 md:min-w-72 md:rounded-xl md:border md:py-5">
+    <aside aria-label="프로필" className="flex h-fit flex-col rounded-none border-b border-gray-200 px-5 py-0 pt-5 md:max-w-72 md:min-w-72 md:rounded-xl md:border md:py-5">
       <div className="text-text-primary sticky top-24 flex flex-col rounded-xl">
         <div className="flex flex-col gap-3 md:gap-6">
           <div className="flex flex-row items-center gap-3.5 md:flex-col">
@@ -89,11 +89,11 @@ export default function ProfileData({
 
             {isMd ? (
               // 데스크탑 공통 표시
-              <h3 className="heading-h5 text-text-primary">{data?.nickname}</h3>
+              <p className="heading-h5 text-text-primary">{data?.nickname}</p>
             ) : (
               // 모바일 내 정보
               <div>
-                <h3 className="heading-h5 text-text-primary pb-0.5">{data?.nickname}</h3>
+                <p className="heading-h5 text-text-primary pb-0.5">{data?.nickname}</p>
                 <p className="text-sm font-semibold text-gray-500">
                   {data?.addressSido} {data?.addressGugun}
                 </p>
@@ -108,7 +108,12 @@ export default function ProfileData({
               <div className="flex flex-col gap-3.5">
                 {isMd && (
                   <div className="flex flex-col gap-2.5">
-                    <ProductMetaItem icon={MapPin} iconSize={17} label={`${data?.addressSido} ${data?.addressGugun}`} className="gap-2" />
+                    <ProductMetaItem
+                      icon={MapPin}
+                      iconSize={17}
+                      label={`${data?.addressSido} ${data?.addressGugun}`}
+                      className="gap-2"
+                    />
                     <ProductMetaItem icon={Calendar} iconSize={17} label={`가입일: ${formattedJoinDate}`} className="gap-2" />
                     <ProductMetaItem icon={Route} iconSize={17} label={`가입 경로: ${provider}`} className="gap-2" />
                   </div>
@@ -183,6 +188,6 @@ export default function ProfileData({
           )}
         </div>
       </div>
-    </section>
+    </aside>
   )
 }

@@ -13,7 +13,7 @@ export default function Footer() {
           </div>
 
           <div className="flex flex-col gap-4">
-            <h4 className="font-semibold text-gray-500">커뮤니티</h4>
+            <strong className="font-semibold text-gray-500">커뮤니티</strong>
             <ul className="flex flex-col gap-3 text-gray-500">
               <li>
                 <Link href={`${ROUTES.COMMUNITY}?tab=tab-info`}>정보 공유해요</Link>
@@ -25,7 +25,7 @@ export default function Footer() {
           </div>
 
           <div className="flex flex-col gap-4">
-            <h4 className="font-semibold text-gray-500">고객센터</h4>
+            <strong className="font-semibold text-gray-500">고객센터</strong>
             <ul className="flex flex-col gap-3 text-gray-500">
               <li>
                 <a href="mailto:support@cuddlemarket.com?subject=커들마켓 1:1 문의" aria-label="고객센터 이메일로 1:1 문의하기">

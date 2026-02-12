@@ -37,7 +37,7 @@ export default function LoginModal() {
     <div className={`fixed inset-0 flex items-center justify-center bg-gray-900/70 ${Z_INDEX.MODAL}`}>
       <div ref={modalRef} className="flex w-11/12 flex-col items-center gap-6 rounded-lg bg-white p-5 md:w-[16vw] md:min-w-80">
         <div className="flex w-full flex-col items-center gap-2">
-          <h3 className="heading-h4">{heading}</h3>
+          <h2 className="heading-h4">{heading}</h2>
           <p>{description}</p>
         </div>
         <div className="flex w-full gap-3">

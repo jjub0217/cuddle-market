@@ -31,9 +31,9 @@ export function CategoryFilter({ headingClassName, selectedCategory }: CategoryF
   }
   return (
     <div className="flex flex-col gap-2.5">
-      <span id="category-filter-heading" className={cn('heading-h4', headingClassName)}>
+      <h2 id="category-filter-heading" className={cn('heading-h4', headingClassName)}>
         상품 카테고리
-      </span>
+      </h2>
       <div className="flex flex-wrap gap-2.5" role="group" aria-labelledby="category-filter-heading">
         {PRODUCT_CATEGORIES?.map((category) => (
           <Button
@@ -42,7 +42,9 @@ export function CategoryFilter({ headingClassName, selectedCategory }: CategoryF
             size="sm"
             className={cn(
               'border-primary-200 cursor-pointer border',
-              selectedCategory === category.code ? 'bg-primary-300 font-bold text-white' : 'hover:bg-primary-300 text-gray-900 hover:text-white',
+              selectedCategory === category.code
+                ? 'bg-primary-300 font-bold text-white'
+                : 'hover:bg-primary-300 text-gray-900 hover:text-white'
             )}
             onClick={(e) => handleProductCategory(e, category.code)}
             aria-pressed={selectedCategory === category.code}

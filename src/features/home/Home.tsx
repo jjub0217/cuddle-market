@@ -140,7 +140,7 @@ function Home({ initialData }: HomeProps) {
   // query 데이터가 없을 때 initialData props에서 직접 가져옴
   const allProducts = data?.pages?.length
     ? data.pages.flatMap((page) => page.data.data.content)
-    : initialData?.data?.data?.content ?? []
+    : (initialData?.data?.data?.content ?? [])
 
   // 무한 스크롤 감지
   const targetRef = useIntersectionObserver({
@@ -184,9 +184,10 @@ function Home({ initialData }: HomeProps) {
   return (
     <>
       <div className="pb-4xl bg-white pt-6">
+        <h1 className="sr-only">커들마켓</h1>
         <div className="px-lg mx-auto max-w-7xl">
           <div className="flex flex-col gap-12">
-            <div className="flex flex-col gap-7">
+            <section aria-label="상품 필터" className="flex flex-col gap-7">
               <PetTypeFilter
                 activeTab={activePetTypeTab}
                 onTabChange={setActivePetTypeTab}
@@ -202,8 +203,8 @@ function Home({ initialData }: HomeProps) {
                 filterReset={filterReset}
                 headingClassName="lg:text-base!"
               />
-            </div>
-            <div className="flex flex-col gap-3">
+            </section>
+            <section aria-label="상품 목록" className="flex flex-col gap-3">
               <Tabs
                 tabs={PRODUCT_TYPE_TABS}
                 activeTab={activeProductTypeTab}
@@ -220,7 +221,7 @@ function Home({ initialData }: HomeProps) {
                   selectedSort={selectedSort}
                 />
               )}
-            </div>
+            </section>
           </div>
           {/* 무한 스크롤 감지용 요소 */}
           <div ref={targetRef} className="h-10" aria-hidden="true" />

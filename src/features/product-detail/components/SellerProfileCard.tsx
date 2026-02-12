@@ -51,7 +51,7 @@ export default function SellerProfileCard({ sellerInfo }: SellerProfileCardProps
               <div className="heading-h5 font-normal!">{sellerInfo?.sellerNickname.charAt(0).toUpperCase()}</div>
             )}
           </div>
-          <h3 className="text-gray-900">{sellerInfo?.sellerNickname}</h3>
+          <h2 className="text-gray-900">{sellerInfo?.sellerNickname}</h2>
         </div>
         <Button
           size="sm"
