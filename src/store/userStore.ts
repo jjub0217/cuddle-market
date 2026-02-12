@@ -81,6 +81,7 @@ export const useUserStore = create<UserState>()(
     {
       name: 'user-storage',
       storage: createJSONStorage(() => localStorage),
+      skipHydration: true,
       partialize: (state) => ({
         user: state.user,
         accessToken: state.accessToken,
