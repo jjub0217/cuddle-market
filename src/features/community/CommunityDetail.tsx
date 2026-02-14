@@ -11,7 +11,7 @@ import { CommentList, type ReplyRequestFormValues } from './components/CommentLi
 import { CommentForm } from './components/CommentForm'
 import ProfileAvatar from '@/components/commons/ProfileAvatar'
 import { useForm } from 'react-hook-form'
-import type { CommentPostRequestData } from '@/types'
+import type { CommentPostRequestData, CommunityDetailItem, Comment } from '@/types'
 import { useEffect, useRef, useState } from 'react'
 import PostReportModal from '@/components/modal/PostReportModal'
 import DeletePostConfirmModal from '@/components/modal/DeletePostConfirmModal'
@@ -27,7 +27,12 @@ import SimpleHeader from '@/components/header/SimpleHeader'
 import InlineNotification from '@/components/commons/InlineNotification'
 import { useOutsideClick } from '@/hooks/useOutsideClick'
 
-export default function CommunityDetail() {
+interface CommunityDetailProps {
+  initialPostData?: CommunityDetailItem
+  initialCommentData?: { comments: Comment[] } | null
+}
+
+export default function CommunityDetail({ initialPostData, initialCommentData }: CommunityDetailProps) {
   const {
     handleSubmit, // form onSubmit에 들어가는 함수 : 제출 시 실행할 함수를 감싸주는 함수
     register, // onChange 등의 이벤트 객체 생성 : input에 "이 필드는 폼의 어떤 이름이다"라고 연결해주는 함수
@@ -66,12 +71,14 @@ export default function CommunityDetail() {
     queryKey: ['community', id],
     queryFn: () => fetchCommunityId(id!),
     enabled: !!id,
+    initialData: initialPostData,
   })
 
   const { data: commentData, isLoading: isLoadingCommentData } = useQuery({
     queryKey: ['community', id, 'comments'],
     queryFn: () => fetchComments(id!),
     enabled: !!id,
+    initialData: initialCommentData ?? undefined,
   })
 
   const replyMutation = useMutation({
