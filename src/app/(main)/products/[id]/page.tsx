@@ -22,6 +22,9 @@ export async function generateMetadata({ params }: ProductDetailPageProps): Prom
   return {
     title,
     description,
+    alternates: {
+      canonical: `/products/${id}`,
+    },
     openGraph: {
       title,
       description,
@@ -47,9 +50,43 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
     notFound()
   }
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: initialData.title,
+    description: initialData.description,
+    image: [initialData.mainImageUrl, ...(initialData.subImageUrls ?? [])],
+    offers: {
+      '@type': 'Offer',
+      price: initialData.price,
+      priceCurrency: 'KRW',
+      availability:
+        initialData.tradeStatus === 'SELLING'
+          ? 'https://schema.org/InStock'
+          : initialData.tradeStatus === 'RESERVED'
+            ? 'https://schema.org/LimitedAvailability'
+            : 'https://schema.org/SoldOut',
+      itemCondition:
+        initialData.productStatus === 'NEW'
+          ? 'https://schema.org/NewCondition'
+          : 'https://schema.org/UsedCondition',
+      url: `https://cuddle-market.vercel.app/products/${id}`,
+      seller: {
+        '@type': 'Person',
+        name: initialData.sellerInfo.sellerNickname,
+      },
+    },
+  }
+
   return (
-    <Suspense fallback={null}>
-      <ProductDetail initialData={initialData} />
-    </Suspense>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <Suspense fallback={null}>
+        <ProductDetail initialData={initialData} />
+      </Suspense>
+    </>
   )
 }
