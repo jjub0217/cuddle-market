@@ -4,6 +4,7 @@ import ClientComponents from '@/components/ClientComponents'
 import './globals.css'
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://cuddle-market.vercel.app'),
   title: '커들마켓',
   description: '반려동물 용품을 사고팔 수 있는 커들마켓',
 }
