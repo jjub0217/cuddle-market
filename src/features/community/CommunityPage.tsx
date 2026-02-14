@@ -20,8 +20,25 @@ import Button from '@/components/commons/button/Button'
 import { cn } from '@/lib/utils/cn'
 import { Z_INDEX } from '@/constants/ui'
 import EmptyState from '@/components/EmptyState'
+import type { CommunityItem } from '@/types'
 
-export default function CommunityPage() {
+interface CommunityListData {
+  page: number
+  size: number
+  total: number
+  content: CommunityItem[]
+  hasNext: boolean
+  hasPrevious: boolean
+  totalElements: number
+  numberOfElements: number
+}
+
+interface CommunityPageProps {
+  initialQuestionData?: CommunityListData | null
+  initialInfoData?: CommunityListData | null
+}
+
+export default function CommunityPage({ initialQuestionData, initialInfoData }: CommunityPageProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const tabParam = searchParams.get('tab') as CommunityTabId | null
@@ -81,6 +98,7 @@ export default function CommunityPage() {
     queryFn: ({ pageParam }) => fetchQuestionCommunity(pageParam, 10, searchType, currentKeyword, sortBy),
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
     initialPageParam: 0,
+    initialData: initialQuestionData ? { pages: [initialQuestionData], pageParams: [0] } : undefined,
     enabled: activeCommunityTypeTab === 'tab-question',
   })
 
@@ -97,6 +115,7 @@ export default function CommunityPage() {
     queryFn: ({ pageParam }) => fetchInfoCommunity(pageParam, 10, searchType, currentKeyword, sortBy),
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
     initialPageParam: 0,
+    initialData: initialInfoData ? { pages: [initialInfoData], pageParams: [0] } : undefined,
     enabled: activeCommunityTypeTab === 'tab-info',
   })
 
