@@ -7,6 +7,7 @@ interface UserState {
   accessToken: string | null
   refreshToken: string | null
   redirectUrl: string | null
+  _hasHydrated: boolean
 
   setUser: (user: User | null) => void
   setAccessToken: (token: string | null) => void
@@ -29,6 +30,7 @@ export const useUserStore = create<UserState>()(
       accessToken: null,
       redirectUrl: null,
       refreshToken: null,
+      _hasHydrated: false,
 
       setUser: (user) => set({ user }),
       setAccessToken: (token) => set({ accessToken: token }),
@@ -87,6 +89,11 @@ export const useUserStore = create<UserState>()(
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,
       }),
+      onRehydrateStorage: () => {
+        return () => {
+          useUserStore.setState({ _hasHydrated: true })
+        }
+      },
     }
   )
 )

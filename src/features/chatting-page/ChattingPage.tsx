@@ -27,7 +27,7 @@ export default function ChattingPage() {
   const [imageUploadError, setImageUploadError] = useState<React.ReactNode | null>(null)
 
   const router = useRouter()
-  const { user, accessToken } = useUserStore()
+  const { user, _hasHydrated, accessToken } = useUserStore()
   const params = useParams()
   const chatRoomId = params.id as string | undefined
   const {
@@ -178,10 +178,10 @@ export default function ChattingPage() {
   }, [isConnected, chatRoomId, subscribeToRoom, clearRoomMessages])
 
   useEffect(() => {
-    if (!user) {
+    if (_hasHydrated && !user) {
       router.push('/auth/login')
     }
-  }, [router, user])
+  }, [_hasHydrated, router, user])
 
   if (isLoadingRooms && !rooms) {
     return (
@@ -257,7 +257,7 @@ export default function ChattingPage() {
                   <Paperclip size={20} />
                 </label>
                 <ChatInput value={inputMessage} onChange={setInputMessage} onSubmit={handleSend} />
-                <IconButton size="lg" className="bg-primary-100 aspect-square h-full" onClick={handleSend}>
+                <IconButton aria-label="전송" size="lg" className="bg-primary-100 aspect-square h-full" onClick={handleSend}>
                   <Send className="text-white" />
                 </IconButton>
               </div>
