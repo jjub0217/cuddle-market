@@ -95,7 +95,9 @@ export default function ChattingPage() {
   const isChatOpen = !!chatRoomId
 
   const handleSelectRoom = (room: fetchChatRoom) => {
-    subscribeToRoom(room.chatRoomId)
+    if (isConnected) {
+      subscribeToRoom(room.chatRoomId)
+    }
     const roomUnreadCount = chatSocketStore.getState().chatRoomUpdates[room.chatRoomId]?.unreadCount ?? room.unreadCount ?? 0
     if (roomUnreadCount > 0) {
       queryClient.setQueryData<{ unreadCount: number }>(['notifications', 'unreadCount'], (prev) => ({
