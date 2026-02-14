@@ -37,28 +37,28 @@ export default function MdToolbar({ tab, setTab, onBold, onItalic, onCode, onLin
 
       {/* 우측 툴바 */}
       <div className="ml-0 flex items-center gap-1 md:ml-auto">
-        <IconButton onClick={onBold}>
+        <IconButton aria-label="굵게" onClick={onBold}>
           <Bold size={16} />
         </IconButton>
-        <IconButton onClick={onItalic}>
+        <IconButton aria-label="기울임" onClick={onItalic}>
           <Italic size={16} />
         </IconButton>
-        <IconButton onClick={onCode}>
+        <IconButton aria-label="코드" onClick={onCode}>
           <Code2 size={16} />
         </IconButton>
-        <IconButton onClick={onLink}>
+        <IconButton aria-label="링크" onClick={onLink}>
           <LinkIcon size={16} />
         </IconButton>
-        <IconButton onClick={onH1}>
+        <IconButton aria-label="제목" onClick={onH1}>
           <span>
             <span>H</span>
             <span className="text-xs">1</span>
           </span>
         </IconButton>
-        <IconButton onClick={(e) => (e.shiftKey ? onNumber() : onBullet())}>
+        <IconButton aria-label="목록" onClick={(e) => (e.shiftKey ? onNumber() : onBullet())}>
           <List size={16} />
         </IconButton>
-        <IconButton onClick={onImage}>
+        <IconButton aria-label="이미지" onClick={onImage}>
           <Image size={16} />
         </IconButton>
       </div>

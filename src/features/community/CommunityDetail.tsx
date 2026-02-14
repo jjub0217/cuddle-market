@@ -161,6 +161,7 @@ export default function CommunityDetail() {
 
   return (
     <>
+      {/* 모바일 영역 */}
       {!isMd ? (
         <div
           className={cn('bg-primary-200 sticky top-0 mx-auto flex w-full max-w-7xl justify-between px-3.5 py-4', Z_INDEX.HEADER)}
@@ -173,6 +174,7 @@ export default function CommunityDetail() {
           </span>
         </div>
       ) : (
+        //  데스크탑
         <SimpleHeader
           title={headerTitle}
           description={isMd ? headerDescription : undefined}
@@ -188,7 +190,7 @@ export default function CommunityDetail() {
                 <Badge className="bg-primary-400 w-fit rounded-full text-white">
                   {getBoardType(data.boardType as 'QUESTION' | 'INFO')}
                 </Badge>
-                <IconButton className="" size="sm" onClick={handleMoreToggle}>
+                <IconButton aria-label="더보기" className="" size="sm" onClick={handleMoreToggle}>
                   <EllipsisVertical size={16} className="text-gray-500" />
                 </IconButton>
                 {isMoreMenuOpen && (
@@ -253,7 +255,10 @@ export default function CommunityDetail() {
               <MdPreview value={data.content} className="p-0" />
             </div>
 
-            <section aria-label="댓글" className="flex flex-col gap-3.5 rounded-lg border border-gray-400 bg-white px-6 py-5 shadow-xl">
+            <section
+              aria-label="댓글"
+              className="flex flex-col gap-3.5 rounded-lg border border-gray-400 bg-white px-6 py-5 shadow-xl"
+            >
               <div className="flex items-center gap-1">
                 <span>댓글</span>
                 <span>{data.commentCount}</span>
