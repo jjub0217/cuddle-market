@@ -23,6 +23,9 @@ export async function generateMetadata({ params }: CommunityDetailPageProps): Pr
   return {
     title,
     description,
+    alternates: {
+      canonical: `/community/${id}`,
+    },
     openGraph: {
       title,
       description,
@@ -51,9 +54,35 @@ export default async function CommunityDetailPage({ params }: CommunityDetailPag
     notFound()
   }
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: initialPostData.title,
+    description: initialPostData.contentPreview || '',
+    image: initialPostData.imageUrls,
+    author: {
+      '@type': 'Person',
+      name: initialPostData.authorNickname,
+    },
+    datePublished: initialPostData.createdAt,
+    dateModified: initialPostData.updatedAt,
+    articleSection: initialPostData.boardType === 'QUESTION' ? '질문' : '정보',
+    publisher: {
+      '@type': 'Organization',
+      name: '커들마켓',
+      url: 'https://cuddle-market.vercel.app',
+    },
+  }
+
   return (
-    <Suspense fallback={<CommunityDetailSkeleton />}>
-      <CommunityDetail initialPostData={initialPostData} initialCommentData={initialCommentData} />
-    </Suspense>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <Suspense fallback={<CommunityDetailSkeleton />}>
+        <CommunityDetail initialPostData={initialPostData} initialCommentData={initialCommentData} />
+      </Suspense>
+    </>
   )
 }

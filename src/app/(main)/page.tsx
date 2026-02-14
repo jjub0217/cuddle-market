@@ -8,6 +8,9 @@ import { getImageSrcSet, IMAGE_SIZES } from '@/lib/utils/imageUrl'
 export const metadata: Metadata = {
   title: '커들마켓 | 반려동물 용품 중고거래',
   description: '반려동물 용품을 사고팔 수 있는 따뜻한 중고거래 플랫폼, 커들마켓',
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
     title: '커들마켓 | 반려동물 용품 중고거래',
     description: '반려동물 용품을 사고팔 수 있는 따뜻한 중고거래 플랫폼, 커들마켓',
