@@ -18,18 +18,11 @@ function ProfileUpdate() {
   const pathname = usePathname()
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false)
   const [withdrawError, setWithdrawError] = useState<React.ReactNode | null>(null)
-  const { user, clearAll, updateUserProfile, setRedirectUrl } = useUserStore()
+  const { user, _hasHydrated, clearAll, updateUserProfile, setRedirectUrl } = useUserStore()
 
   const socialDomains = ['gmail', 'kakao']
   const isSocialLogin = socialDomains.some((domain) => user?.email?.includes(domain))
 
-  // 비로그인 시 로그인 페이지로 리다이렉트
-  useEffect(() => {
-    if (!user?.id) {
-      setRedirectUrl(pathname)
-      router.push(ROUTES.LOGIN)
-    }
-  }, [user, router, setRedirectUrl, pathname])
   const isMd = useMediaQuery('(min-width: 768px)')
   const {
     data: myData,
@@ -71,6 +64,14 @@ function ProfileUpdate() {
       })
     }
   }, [myData, updateUserProfile])
+
+  // 비로그인 시 로그인 페이지로 리다이렉트
+  useEffect(() => {
+    if (_hasHydrated && !user?.id) {
+      setRedirectUrl(pathname)
+      router.push(ROUTES.LOGIN)
+    }
+  }, [_hasHydrated, user, router, setRedirectUrl, pathname])
 
   if (isLoadingMyData) {
     return (

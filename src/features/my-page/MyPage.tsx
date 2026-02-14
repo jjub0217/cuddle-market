@@ -25,7 +25,7 @@ import InlineNotification from '@/components/commons/InlineNotification'
 function MyPage() {
   const [deleteError, setDeleteError] = useState<React.ReactNode | null>(null)
 
-  const { user, clearAll, updateUserProfile, setRedirectUrl } = useUserStore()
+  const { user, _hasHydrated, clearAll, updateUserProfile, setRedirectUrl } = useUserStore()
   const searchParams = useSearchParams()
   const queryClient = useQueryClient()
   const router = useRouter()
@@ -209,11 +209,11 @@ function MyPage() {
   }, [myData, updateUserProfile])
 
   useEffect(() => {
-    if (!user?.id) {
+    if (_hasHydrated && !user?.id) {
       setRedirectUrl(pathname)
       router.push('/auth/login')
     }
-  }, [user?.id, pathname, router, setRedirectUrl])
+  }, [_hasHydrated, user?.id, pathname, router, setRedirectUrl])
 
   if ((isLoadingMyData && !myData) || (isLoadingMyProductData && !myProductsData)) {
     return (
@@ -236,7 +236,7 @@ function MyPage() {
     )
   }
 
-  if (!user?.id) {
+  if (!_hasHydrated || !user?.id) {
     return null
   }
 

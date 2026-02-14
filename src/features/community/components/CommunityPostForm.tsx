@@ -56,21 +56,13 @@ export default function CommunityPostForm() {
   const params = useParams()
   const id = params.id as string | undefined
   const isEditMode = !!id
-  const { user, setRedirectUrl } = useUserStore()
+  const { user, _hasHydrated, setRedirectUrl } = useUserStore()
   const searchParams = useSearchParams()
   const initialBoardType = searchParams.get('tab') === 'tab-question' ? 'QUESTION' : 'INFO'
   const [showDraftModal, setShowDraftModal] = useState(false)
   const [isDraftChecked, setIsDraftChecked] = useState(isEditMode)
 
   const pathname = usePathname()
-
-  // 비로그인 시 로그인 페이지로 리다이렉트
-  useEffect(() => {
-    if (!user?.id) {
-      setRedirectUrl(pathname)
-      router.push('/auth/login')
-    }
-  }, [user, router, setRedirectUrl, pathname])
 
   const {
     control,
@@ -164,6 +156,14 @@ export default function CommunityPostForm() {
     }
     checkDraft()
   }, [initialBoardType, isEditMode])
+
+  // 비로그인 시 로그인 페이지로 리다이렉트
+  useEffect(() => {
+    if (_hasHydrated && !user?.id) {
+      setRedirectUrl(pathname)
+      router.push('/auth/login')
+    }
+  }, [_hasHydrated, user, router, setRedirectUrl, pathname])
 
   if (postLoadError) {
     return (

@@ -21,7 +21,7 @@ function ProductPost() {
   const [productData, setProductData] = useState<ProductDetailItem | null>(null)
   const params = useParams()
   const id = params.id as string | undefined
-  const { user, setRedirectUrl } = useUserStore()
+  const { user, _hasHydrated, setRedirectUrl } = useUserStore()
 
   const isEditMode = !!id
 
@@ -48,11 +48,11 @@ function ProductPost() {
 
   // 비로그인 시 로그인 페이지로 리다이렉트
   useEffect(() => {
-    if (!user?.id) {
+    if (_hasHydrated && !user?.id) {
       setRedirectUrl(window.location.pathname)
       router.push('/auth/login')
     }
-  }, [user, router, setRedirectUrl])
+  }, [_hasHydrated, user, router, setRedirectUrl])
 
   useEffect(() => {
     const loadProduct = async () => {
