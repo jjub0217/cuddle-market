@@ -45,27 +45,31 @@ export const chatSocketStore = create<ChatSocketState>((set, get) => ({
       },
       reconnectDelay: 5000,
       onConnect: () => {
-        socket.subscribe('/user/queue/errors', (message) => {
-          const error = JSON.parse(message.body)
-          useToastStore.getState().error({
-            title: '채팅 오류',
-            content: error.message,
+        try {
+          socket.subscribe('/user/queue/errors', (message) => {
+            const error = JSON.parse(message.body)
+            useToastStore.getState().error({
+              title: '채팅 오류',
+              content: error.message,
+            })
           })
-        })
-        socket.subscribe('/user/queue/chat-room-list', (message) => {
-          const updatedChatRoom = JSON.parse(message.body)
-          get().updateChatRoomInList(updatedChatRoom)
-        })
-        socket.subscribe('/user/queue/chat', (message) => {
-          const data = JSON.parse(message.body)
-          set((state) => ({
-            messages: {
-              ...state.messages,
-              [data.chatRoomId]: [...(state.messages[data.chatRoomId] || []), data],
-            },
-          }))
-        })
-        set({ socket, isConnected: true })
+          socket.subscribe('/user/queue/chat-room-list', (message) => {
+            const updatedChatRoom = JSON.parse(message.body)
+            get().updateChatRoomInList(updatedChatRoom)
+          })
+          socket.subscribe('/user/queue/chat', (message) => {
+            const data = JSON.parse(message.body)
+            set((state) => ({
+              messages: {
+                ...state.messages,
+                [data.chatRoomId]: [...(state.messages[data.chatRoomId] || []), data],
+              },
+            }))
+          })
+          set({ socket, isConnected: true })
+        } catch {
+          set({ connectionError: '채팅 서버 연결에 문제가 발생했습니다.' })
+        }
       },
       onDisconnect: () => {
         set({ isConnected: false })
@@ -117,28 +121,32 @@ export const chatSocketStore = create<ChatSocketState>((set, get) => ({
 
   subscribeToRoom: (chatRoomId: number) => {
     const socket = get().socket
-    if (!socket?.active) return
+    if (!socket?.connected) return
     if (get().subscriptions[chatRoomId]) return
 
-    const subscription = socket.subscribe(`/topic/chat/${chatRoomId}`, (message: IMessage) => {
-      const data = JSON.parse(message.body)
-      set((state) => ({
-        messages: {
-          ...state.messages,
-          [chatRoomId]: [...(state.messages[chatRoomId] || []), data],
-        },
-      }))
-    })
+    try {
+      const subscription = socket.subscribe(`/topic/chat/${chatRoomId}`, (message: IMessage) => {
+        const data = JSON.parse(message.body)
+        set((state) => ({
+          messages: {
+            ...state.messages,
+            [chatRoomId]: [...(state.messages[chatRoomId] || []), data],
+          },
+        }))
+      })
 
-    set((state) => ({
-      currentRoomId: chatRoomId,
-      subscriptions: { ...state.subscriptions, [chatRoomId]: subscription },
-    }))
+      set((state) => ({
+        currentRoomId: chatRoomId,
+        subscriptions: { ...state.subscriptions, [chatRoomId]: subscription },
+      }))
+    } catch {
+      set({ connectionError: '채팅방 연결에 실패했습니다. 페이지를 새로고침해주세요.' })
+    }
   },
 
   sendMessage: (chatRoomId: number, content: string, messageType: 'TEXT' | 'IMAGE' = 'TEXT', imageUrl: string | null = null) => {
     const socket = get().socket
-    if (!socket?.active) {
+    if (!socket?.connected) {
       set({ connectionError: '메시지를 전송할 수 없습니다. 채팅 서버에 연결되어 있지 않습니다.' })
       return
     }
