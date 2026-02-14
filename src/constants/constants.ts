@@ -73,13 +73,13 @@ export const PETS = [
 ] as const
 
 export const PET_TYPE_TABS = [
-  { id: 'tab-all', label: '전체', code: 'ALL' },
-  { id: 'tab-mammal', label: '포유류', code: 'MAMMAL' },
-  { id: 'tab-bird', label: '조류', code: 'BIRD' },
-  { id: 'tab-reptile', label: '파충류', code: 'REPTILE' },
-  { id: 'tab-fish', label: '수생동물', code: 'FISH' },
-  { id: 'tab-amphibian', label: '곤충/절지동물', code: 'AMPHIBIAN' },
-  { id: 'tab-etc', label: '기타', code: 'ETC' },
+  { id: 'pet-tab-all', label: '전체', code: 'ALL' },
+  { id: 'pet-tab-mammal', label: '포유류', code: 'MAMMAL' },
+  { id: 'pet-tab-bird', label: '조류', code: 'BIRD' },
+  { id: 'pet-tab-reptile', label: '파충류', code: 'REPTILE' },
+  { id: 'pet-tab-fish', label: '수생동물', code: 'FISH' },
+  { id: 'pet-tab-amphibian', label: '곤충/절지동물', code: 'AMPHIBIAN' },
+  { id: 'pet-tab-etc', label: '기타', code: 'ETC' },
 ] as const
 export type PetTypeTabId = (typeof PET_TYPE_TABS)[number]['id']
 

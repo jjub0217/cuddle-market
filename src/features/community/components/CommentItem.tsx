@@ -91,7 +91,7 @@ export function CommentItem({
 
         {isMyComment && (
           <div className="relative ml-auto">
-            <IconButton className="" size="sm" onClick={handleMoreToggle}>
+            <IconButton aria-label="더보기" className="" size="sm" onClick={handleMoreToggle}>
               <EllipsisVertical size={16} className="text-gray-500" />
             </IconButton>
             {isMoreMenuOpen && (

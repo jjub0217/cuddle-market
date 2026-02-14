@@ -32,7 +32,7 @@ function Home({ initialData }: HomeProps) {
   const pathname = usePathname()
 
   // 탭 상태 (새로고침 시 초기화)
-  const [activePetTypeTab, setActivePetTypeTab] = useState<PetTypeTabId>('tab-all')
+  const [activePetTypeTab, setActivePetTypeTab] = useState<PetTypeTabId>('pet-tab-all')
   const [activeProductTypeTab, setActiveProductTypeTab] = useState<ProductTypeTabId>('tab-all')
 
   // URL에서 필터 값 직접 파싱 (Single Source of Truth)
@@ -154,7 +154,7 @@ function Home({ initialData }: HomeProps) {
   const filterReset = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation()
-      setActivePetTypeTab('tab-all')
+      setActivePetTypeTab('pet-tab-all')
       setActiveProductTypeTab('tab-all')
       router.push(pathname)
     },
