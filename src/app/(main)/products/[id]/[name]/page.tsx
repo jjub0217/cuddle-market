@@ -32,14 +32,12 @@ export async function generateMetadata({ params }: ProductDetailPageProps): Prom
       description,
       url: `https://cuddle-market.vercel.app/products/${id}/${name}`,
       siteName: '커들마켓',
-      images: product.mainImageUrl ? [{ url: product.mainImageUrl }] : [{ url: '/og-image.png' }],
       type: 'article',
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: product.mainImageUrl ? [product.mainImageUrl] : ['/og-image.png'],
     },
   }
 }

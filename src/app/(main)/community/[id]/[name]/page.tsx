@@ -33,14 +33,12 @@ export async function generateMetadata({ params }: CommunityDetailPageProps): Pr
       description,
       url: `https://cuddle-market.vercel.app/community/${id}/${name}`,
       siteName: '커들마켓',
-      images: post.imageUrls?.[0] ? [{ url: post.imageUrls[0] }] : [{ url: '/og-image.png' }],
       type: 'article',
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: post.imageUrls?.[0] ? [post.imageUrls[0]] : ['/og-image.png'],
     },
   }
 }
