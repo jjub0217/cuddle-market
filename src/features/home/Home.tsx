@@ -184,11 +184,20 @@ function Home({ initialData }: HomeProps) {
   })
 
   // 모든 페이지의 상품을 하나의 배열로 합치기
-  // SSR 시 useInfiniteQuery가 initialData를 즉시 반영하지 못하므로,
-  // query 데이터가 없을 때 initialData props에서 직접 가져옴
+  // SSR initialData는 최초 마운트 시에만 폴백으로 사용
+  // 필터 전환 중에는 빈 배열을 유지하여 전체 목록 플리커 방지
+  const hasActiveFilters =
+    activePetTypeTab !== 'pet-tab-all' ||
+    activeProductTypeTab !== 'tab-all' ||
+    selectedDetailPet ||
+    selectedCategory ||
+    selectedProductStatus ||
+    selectedProductPrice ||
+    selectedLocation ||
+    keyword
   const allProducts = data?.pages?.length
     ? data.pages.flatMap((page) => page.data.data.content)
-    : (initialData?.data?.data?.content ?? [])
+    : (!hasActiveFilters && initialData?.data?.data?.content) || []
 
   // 무한 스크롤 감지
   const targetRef = useIntersectionObserver({
