@@ -31,9 +31,15 @@ function Home({ initialData }: HomeProps) {
   const router = useRouter()
   const pathname = usePathname()
 
-  // 탭 상태 (새로고침 시 초기화)
-  const [activePetTypeTab, setActivePetTypeTab] = useState<PetTypeTabId>('pet-tab-all')
-  const [activeProductTypeTab, setActiveProductTypeTab] = useState<ProductTypeTabId>('tab-all')
+  // URL에서 탭 초기값 결정
+  const urlPetType = searchParams.get('petType')
+  const urlProductType = searchParams.get('productType')
+  const initialPetTab = (urlPetType && PET_TYPE_TABS.find((tab) => tab.code === urlPetType)?.id) || 'pet-tab-all'
+  const initialProductTab =
+    (urlProductType && PRODUCT_TYPE_TABS.find((tab) => tab.code === urlProductType)?.id) || 'tab-all'
+
+  const [activePetTypeTab, setActivePetTypeTab] = useState<PetTypeTabId>(initialPetTab)
+  const [activeProductTypeTab, setActiveProductTypeTab] = useState<ProductTypeTabId>(initialProductTab)
 
   // URL에서 필터 값 직접 파싱 (Single Source of Truth)
   const keyword = searchParams.get('keyword') || ''
