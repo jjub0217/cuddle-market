@@ -1,8 +1,8 @@
 import type { MetadataRoute } from 'next'
 import { toUrlName } from '@/lib/utils/toUrlName'
+import { fetchProductSitemapEntries, fetchCommunitySitemapEntries } from '@/lib/api/server/sitemap'
 
 const SITE_URL = 'https://cuddle-market.vercel.app'
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
@@ -39,32 +39,4 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }))
 
   return [...staticPages, ...productPages, ...communityPages]
-}
-
-async function fetchProductSitemapEntries(): Promise<{ id: number; title: string; createdAt: string }[]> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/products/search?page=0&size=1000`, {
-      next: { revalidate: 3600 },
-    })
-    if (!res.ok) return []
-    const json = await res.json()
-    return json.data.content ?? []
-  } catch {
-    return []
-  }
-}
-
-async function fetchCommunitySitemapEntries(
-  boardType: string
-): Promise<{ id: number; title: string; createdAt: string; updatedAt: string }[]> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/community/posts?boardType=${boardType}&page=0&size=1000`, {
-      next: { revalidate: 3600 },
-    })
-    if (!res.ok) return []
-    const json = await res.json()
-    return json.data.content ?? []
-  } catch {
-    return []
-  }
 }
