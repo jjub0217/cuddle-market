@@ -6,6 +6,7 @@ import StaticHomeFallback from '@/features/home/components/StaticHomeFallback'
 import { fetchProducts } from '@/lib/api/server/products'
 import { productListQueryKey, extractProductSearchParams } from '@/lib/queries/productQueryKeys'
 import { getImageSrcSet, IMAGE_SIZES } from '@/lib/utils/imageUrl'
+import { FilterNavigationProvider } from '@/hooks/useFilterNavigation'
 
 export const metadata: Metadata = {
   title: '커들마켓 | 반려동물 용품 중고거래',
@@ -65,7 +66,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       )}
       <HydrationBoundary state={dehydrate(queryClient)}>
         <Suspense fallback={<StaticHomeFallback products={products} totalElements={totalElements} />}>
-          <Home />
+          <FilterNavigationProvider>
+            <Home />
+          </FilterNavigationProvider>
         </Suspense>
       </HydrationBoundary>
     </>

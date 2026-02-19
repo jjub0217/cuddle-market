@@ -4,7 +4,7 @@ import ProductList from '@/components/product/ProductList'
 import SelectDropdown from '@/components/commons/select/SelectDropdown'
 import { PRODUCT_TYPE_TABS, SORT_TYPE, type ProductTypeTabId } from '@/constants/constants'
 import type { Product } from '@/types/product'
-import { useSearchParams, useRouter, usePathname } from 'next/navigation'
+import { useFilterNavigation } from '@/hooks/useFilterNavigation'
 
 interface ProductListHeaderProps {
   totalElements: number
@@ -31,9 +31,7 @@ export function ProductsSection({
   activeTab,
   selectedSort = '최신순',
 }: ProductsSectionProps) {
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const pathname = usePathname()
+  const { searchParams, pathname, push } = useFilterNavigation()
 
   const activeTabCode = PRODUCT_TYPE_TABS.find((tab) => tab.id === activeTab)?.code
 
@@ -55,7 +53,7 @@ export function ProductsSection({
         params.set('sortBy', sortItem.id)
         params.delete('sortOrder')
     }
-    router.push(`${pathname}?${params.toString()}`)
+    push(`${pathname}?${params.toString()}`)
   }
 
   return (
