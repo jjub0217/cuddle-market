@@ -25,7 +25,7 @@ export function ProductListItem({ product, children }: ProductListItemProps) {
   const isMd = useMediaQuery('(min-width: 768px)')
   return (
     <li id={id.toString()} className="w-full">
-      <Link href={ROUTES.DETAIL_ID(id)} className="flex w-full items-center justify-center gap-6 rounded-lg border border-gray-300 p-3.5">
+      <Link href={ROUTES.DETAIL_ID(id, title)} className="flex w-full items-center justify-center gap-6 rounded-lg border border-gray-300 p-3.5">
         <div className="relative aspect-square w-32 shrink-0 overflow-hidden rounded-lg md:static md:w-[10%]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img

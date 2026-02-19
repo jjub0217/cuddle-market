@@ -1,15 +1,19 @@
+import { toUrlName } from '@/lib/utils/toUrlName'
+
 export const ROUTES = {
   HOME: '/',
   MYPAGE: '/mypage',
   DETAIL: `/products/:id`,
-  DETAIL_ID: (id: string | number) => `/products/${id}`,
+  DETAIL_ID: (id: string | number, name?: string) =>
+    name ? `/products/${id}/${toUrlName(name)}` : `/products/${id}`,
 
   // Community
   COMMUNITY: '/community',
   COMMUNITY_POST: '/community-post',
   COMMUNITY_EDIT: '/community/:id/edit',
   COMMUNITY_DETAIL: '/community/:id',
-  COMMUNITY_DETAIL_ID: (id: string | number) => `/community/${id}`,
+  COMMUNITY_DETAIL_ID: (id: string | number, name?: string) =>
+    name ? `/community/${id}/${toUrlName(name)}` : `/community/${id}`,
 
   // Product
   PRODUCT_POST: '/product-post',

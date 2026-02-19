@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next'
+import { toUrlName } from '@/lib/utils/toUrlName'
 
 const SITE_URL = 'https://cuddle-market.vercel.app'
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
@@ -18,20 +19,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]
 
   const [products, questionPosts, infoPosts] = await Promise.all([
-    fetchAllProducts(),
-    fetchAllCommunityPosts('QUESTION'),
-    fetchAllCommunityPosts('INFO'),
+    fetchProductSitemapEntries(),
+    fetchCommunitySitemapEntries('QUESTION'),
+    fetchCommunitySitemapEntries('INFO'),
   ])
 
   const productPages: MetadataRoute.Sitemap = products.map((product) => ({
-    url: `${SITE_URL}/products/${product.id}`,
+    url: `${SITE_URL}/products/${product.id}/${toUrlName(product.title)}`,
     lastModified: product.createdAt,
     changeFrequency: 'weekly',
     priority: 0.7,
   }))
 
   const communityPages: MetadataRoute.Sitemap = [...questionPosts, ...infoPosts].map((post) => ({
-    url: `${SITE_URL}/community/${post.id}`,
+    url: `${SITE_URL}/community/${post.id}/${toUrlName(post.title)}`,
     lastModified: post.updatedAt || post.createdAt,
     changeFrequency: 'weekly',
     priority: 0.6,
@@ -40,7 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [...staticPages, ...productPages, ...communityPages]
 }
 
-async function fetchAllProducts(): Promise<{ id: number; createdAt: string }[]> {
+async function fetchProductSitemapEntries(): Promise<{ id: number; title: string; createdAt: string }[]> {
   try {
     const res = await fetch(`${API_BASE_URL}/products/search?page=0&size=1000`, {
       next: { revalidate: 3600 },
@@ -53,9 +54,9 @@ async function fetchAllProducts(): Promise<{ id: number; createdAt: string }[]> 
   }
 }
 
-async function fetchAllCommunityPosts(
+async function fetchCommunitySitemapEntries(
   boardType: string
-): Promise<{ id: number; createdAt: string; updatedAt: string }[]> {
+): Promise<{ id: number; title: string; createdAt: string; updatedAt: string }[]> {
   try {
     const res = await fetch(`${API_BASE_URL}/community/posts?boardType=${boardType}&page=0&size=1000`, {
       next: { revalidate: 3600 },

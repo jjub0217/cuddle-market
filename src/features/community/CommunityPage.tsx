@@ -308,7 +308,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
                       key={post.id}
                       className="flex flex-col justify-center gap-2.5 rounded-lg border border-gray-400 bg-white px-3.5 pt-3.5 pb-3.5 shadow-xl"
                     >
-                      <Link href={ROUTES.COMMUNITY_DETAIL_ID(post.id)} className="flex flex-col gap-1">
+                      <Link href={ROUTES.COMMUNITY_DETAIL_ID(post.id, post.title)} className="flex flex-col gap-1">
                         <p className="font-semibold">{post.title}</p>
                         <div className="flex items-center gap-2.5">
                           <div className="flex items-center gap-1 text-gray-500">
@@ -336,7 +336,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
                       key={post.id}
                       className="flex flex-col justify-center gap-2.5 rounded-lg border border-gray-400 bg-white px-3.5 pt-3.5 pb-5 shadow-xl"
                     >
-                      <Link href={ROUTES.COMMUNITY_DETAIL_ID(post.id)} className="flex flex-col gap-4">
+                      <Link href={ROUTES.COMMUNITY_DETAIL_ID(post.id, post.title)} className="flex flex-col gap-4">
                         <div className="flex flex-col gap-2">
                           <p className="text-lg font-semibold">{post.title}</p>
 
