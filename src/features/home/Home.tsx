@@ -51,7 +51,7 @@ function Home({ initialData }: HomeProps) {
       } else {
         params.delete('petType')
       }
-      router.push(`${pathname}?${params.toString()}`)
+      router.push(`${pathname}?${params.toString()}`, { scroll: false })
     },
     [searchParams, router, pathname]
   )
@@ -66,7 +66,7 @@ function Home({ initialData }: HomeProps) {
       } else {
         params.delete('productType')
       }
-      router.push(`${pathname}?${params.toString()}`)
+      router.push(`${pathname}?${params.toString()}`, { scroll: false })
     },
     [searchParams, router, pathname]
   )
