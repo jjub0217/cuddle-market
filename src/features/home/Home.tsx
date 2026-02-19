@@ -179,6 +179,7 @@ function Home({ initialData }: HomeProps) {
 
     initialPageParam: 0,
 
+    placeholderData: (previousData) => previousData,
     refetchOnMount: 'always',
   })
 
