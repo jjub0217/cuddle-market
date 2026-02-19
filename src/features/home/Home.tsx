@@ -105,6 +105,18 @@ function Home({ initialData }: HomeProps) {
     if (hasDetailFilter) {
       setIsDetailFilterOpen(true)
     }
+    // 뒤로가기/앞으로가기 시 탭 상태 동기화
+    const newPetType = searchParams.get('petType')
+    const newPetTab = (newPetType && PET_TYPE_TABS.find((tab) => tab.code === newPetType)?.id) || 'pet-tab-all'
+    if (newPetTab !== activePetTypeTab) {
+      setActivePetTypeTab(newPetTab)
+    }
+    const newProductType = searchParams.get('productType')
+    const newProductTab =
+      (newProductType && PRODUCT_TYPE_TABS.find((tab) => tab.code === newProductType)?.id) || 'tab-all'
+    if (newProductTab !== activeProductTypeTab) {
+      setActiveProductTypeTab(newProductTab)
+    }
   }
 
   const handleDetailFilterToggle = useCallback((isOpen: boolean) => {
