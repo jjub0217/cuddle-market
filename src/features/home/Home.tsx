@@ -47,6 +47,8 @@ function Home() {
       } else {
         params.delete('petType')
       }
+      // 대분류 변경 시 소분류 초기화 (조류 + 토끼 같은 불가능한 조합 방지)
+      params.delete('petDetailType')
       push(`${pathname}?${params.toString()}`)
     },
     [searchParams, push, pathname]
