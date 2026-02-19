@@ -17,13 +17,9 @@ import { useUserStore } from '@/store/userStore'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { Z_INDEX } from '@/constants/ui'
 import HomeSkeleton from './components/product-section/HomeSkeleton'
-import { ProductResponse } from '@/types'
+import { productListQueryKey, extractProductSearchParams } from '@/lib/queries/productQueryKeys'
 
-interface HomeProps {
-  initialData: { data: ProductResponse; total: number } | null
-}
-
-function Home({ initialData }: HomeProps) {
+function Home() {
   const { isLogin } = useUserStore()
   const isLoggedIn = isLogin()
   const isMd = useMediaQuery('(min-width: 768px)')
@@ -31,7 +27,7 @@ function Home({ initialData }: HomeProps) {
   const router = useRouter()
   const pathname = usePathname()
 
-  // URL에서 탭 초기값 결정
+  // URL에서 탭 초기값 결정 (시각적 표시용)
   const urlPetType = searchParams.get('petType')
   const urlProductType = searchParams.get('productType')
   const initialPetTab = (urlPetType && PET_TYPE_TABS.find((tab) => tab.code === urlPetType)?.id) || 'pet-tab-all'
@@ -72,7 +68,6 @@ function Home({ initialData }: HomeProps) {
   )
 
   // URL에서 필터 값 직접 파싱 (Single Source of Truth)
-  const keyword = searchParams.get('keyword') || ''
   const sortBy = searchParams.get('sortBy')
   const sortOrder = searchParams.get('sortOrder')
   const selectedDetailPet = searchParams.get('petDetailType') || null
@@ -81,9 +76,6 @@ function Home({ initialData }: HomeProps) {
   const minPrice = searchParams.get('minPrice')
   const maxPrice = searchParams.get('maxPrice')
   const selectedProductPrice = minPrice ? { min: Number(minPrice), max: maxPrice ? Number(maxPrice) : null } : null
-  const addressSido = searchParams.get('addressSido') || ''
-  const addressGugun = searchParams.get('addressGugun') || ''
-  const selectedLocation = addressSido ? { sido: addressSido, gugun: addressGugun || null } : null
 
   const selectedSort = useMemo(() => {
     if (!sortBy) return '최신순'
@@ -123,47 +115,31 @@ function Home({ initialData }: HomeProps) {
     setIsDetailFilterOpen(isOpen)
   }, [])
 
+  // URL 파라미터 기반 쿼리 키 (서버 HydrationBoundary와 동일한 키)
+  const filterParams = useMemo(() => extractProductSearchParams(searchParams), [searchParams])
+  const queryKey = useMemo(() => productListQueryKey(filterParams), [filterParams])
+
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error, refetch } = useInfiniteQuery({
-    queryKey: [
-      'products',
-      activeProductTypeTab,
-      selectedDetailPet,
-      selectedProductStatus,
-      selectedProductPrice,
-      selectedLocation,
-      selectedCategory,
-      activePetTypeTab,
-      keyword,
-      sortBy,
-      sortOrder,
-    ],
+    queryKey,
 
     queryFn: ({ pageParam = 0 }) => {
-      const productTypeCode = PRODUCT_TYPE_TABS.find((tab) => tab.id === activeProductTypeTab)?.code
-      const petTypeCode = PET_TYPE_TABS.find((tab) => tab.id === activePetTypeTab)?.code
-
-      // 'ALL'은 undefined로 변환 (API에 파라미터 전달하지 않음)
-      const productType = productTypeCode === 'ALL' ? undefined : productTypeCode
-      const petType = petTypeCode === 'ALL' ? undefined : petTypeCode
-
       return fetchAllProducts(
         pageParam,
         20,
-        productType,
-        selectedProductStatus,
-        selectedProductPrice?.min ?? null,
-        selectedProductPrice?.max ?? null,
-        selectedLocation?.sido ?? null,
-        selectedLocation?.gugun ?? null,
-        selectedCategory,
-        petType,
-        selectedDetailPet,
-        keyword,
-        sortBy,
-        sortOrder
+        filterParams.productType || undefined,
+        filterParams.productStatuses,
+        filterParams.minPrice ? Number(filterParams.minPrice) : null,
+        filterParams.maxPrice ? Number(filterParams.maxPrice) : null,
+        filterParams.addressSido,
+        filterParams.addressGugun,
+        filterParams.categories,
+        filterParams.petType || undefined,
+        filterParams.petDetailType,
+        filterParams.keyword,
+        filterParams.sortBy,
+        filterParams.sortOrder,
       )
     },
-    initialData: initialData ? { pages: [initialData], pageParams: [0] } : undefined,
 
     getNextPageParam: (lastPage) => {
       const currentPage = lastPage.data.data.page
@@ -179,25 +155,10 @@ function Home({ initialData }: HomeProps) {
 
     initialPageParam: 0,
 
-    placeholderData: (previousData) => previousData,
-    refetchOnMount: 'always',
+    staleTime: 60 * 1000,
   })
 
-  // 모든 페이지의 상품을 하나의 배열로 합치기
-  // SSR initialData는 최초 마운트 시에만 폴백으로 사용
-  // 필터 전환 중에는 빈 배열을 유지하여 전체 목록 플리커 방지
-  const hasActiveFilters =
-    activePetTypeTab !== 'pet-tab-all' ||
-    activeProductTypeTab !== 'tab-all' ||
-    selectedDetailPet ||
-    selectedCategory ||
-    selectedProductStatus ||
-    selectedProductPrice ||
-    selectedLocation ||
-    keyword
-  const allProducts = data?.pages?.length
-    ? data.pages.flatMap((page) => page.data.data.content)
-    : (!hasActiveFilters && initialData?.data?.data?.content) || []
+  const allProducts = data?.pages?.flatMap((page) => page.data.data.content) ?? []
 
   // 무한 스크롤 감지
   const targetRef = useIntersectionObserver({
