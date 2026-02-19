@@ -4,16 +4,14 @@ import { useState, useEffect } from 'react'
 import SelectDropdown from '@/components/commons/select/SelectDropdown'
 import { CITIES, PROVINCES, type Province } from '@/constants/cities'
 import { cn } from '@/lib/utils/cn'
-import { useSearchParams, useRouter, usePathname } from 'next/navigation'
+import { useFilterNavigation } from '@/hooks/useFilterNavigation'
 
 interface LocationFilterProps {
   headingClassName?: string
 }
 
 export function LocationFilter({ headingClassName }: LocationFilterProps) {
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const pathname = usePathname()
+  const { searchParams, pathname, push } = useFilterNavigation()
 
   const isValidProvince = (value: string): value is Province => {
     return PROVINCES.includes(value as Province)
@@ -51,7 +49,7 @@ export function LocationFilter({ headingClassName }: LocationFilterProps) {
       params.delete('addressSido')
       params.delete('addressGugun')
     }
-    router.push(`${pathname}?${params.toString()}`)
+    push(`${pathname}?${params.toString()}`)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSido, selectedGugun])
 

@@ -4,7 +4,7 @@ import Button from '@/components/commons/button/Button'
 import { PET_DETAILS, PET_TYPE_TABS, PETS, type PetTypeTabId } from '@/constants/constants'
 import { cn } from '@/lib/utils/cn'
 import { ProductPetTypeTabs } from '../tab/ProductPetTypeTabs'
-import { useSearchParams, useRouter, usePathname } from 'next/navigation'
+import { useFilterNavigation } from '@/hooks/useFilterNavigation'
 import { useState } from 'react'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 
@@ -18,9 +18,7 @@ interface PetTypeFilterProps {
 }
 
 export function PetTypeFilter({ activeTab, headingClassName, selectedDetailPet, onTabChange }: PetTypeFilterProps) {
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const pathname = usePathname()
+  const { searchParams, pathname, push } = useFilterNavigation()
   const [showAll, setShowAll] = useState(false)
   const isMobile = useMediaQuery('(max-width: 767px)')
 
@@ -36,7 +34,7 @@ export function PetTypeFilter({ activeTab, headingClassName, selectedDetailPet, 
     } else {
       params.set('petDetailType', pet) // 선택 시 URL에 추가
     }
-    router.push(`${pathname}?${params.toString()}`)
+    push(`${pathname}?${params.toString()}`)
   }
   const selectedPetTypeCode = PET_TYPE_TABS.find((tab) => tab.id === activeTab)?.code
 

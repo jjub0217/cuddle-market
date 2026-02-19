@@ -10,7 +10,8 @@ import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import { PRODUCT_TYPE_TABS, PET_TYPE_TABS, type ProductTypeTabId, SORT_TYPE, type PetTypeTabId } from '@/constants/constants'
 import { PetTypeFilter } from './components/filter/PetTypeFilter'
 import { CategoryFilter } from './components/filter/CategoryFilter'
-import { useSearchParams, useRouter, usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
+import { useFilterNavigation } from '@/hooks/useFilterNavigation'
 import { Plus } from 'lucide-react'
 import Button from '@/components/commons/button/Button'
 import { useUserStore } from '@/store/userStore'
@@ -23,9 +24,8 @@ function Home() {
   const { isLogin } = useUserStore()
   const isLoggedIn = isLogin()
   const isMd = useMediaQuery('(min-width: 768px)')
-  const searchParams = useSearchParams()
+  const { searchParams, pathname, push } = useFilterNavigation()
   const router = useRouter()
-  const pathname = usePathname()
 
   // URL에서 탭 초기값 결정 (시각적 표시용)
   const urlPetType = searchParams.get('petType')
@@ -47,9 +47,9 @@ function Home() {
       } else {
         params.delete('petType')
       }
-      router.push(`${pathname}?${params.toString()}`, { scroll: false })
+      push(`${pathname}?${params.toString()}`)
     },
-    [searchParams, router, pathname]
+    [searchParams, push, pathname]
   )
 
   const handleProductTypeTabChange = useCallback(
@@ -62,9 +62,9 @@ function Home() {
       } else {
         params.delete('productType')
       }
-      router.push(`${pathname}?${params.toString()}`, { scroll: false })
+      push(`${pathname}?${params.toString()}`)
     },
-    [searchParams, router, pathname]
+    [searchParams, push, pathname]
   )
 
   // URL에서 필터 값 직접 파싱 (Single Source of Truth)
@@ -174,9 +174,9 @@ function Home() {
       e.stopPropagation()
       setActivePetTypeTab('pet-tab-all')
       setActiveProductTypeTab('tab-all')
-      router.push(pathname)
+      push(pathname)
     },
-    [router, pathname]
+    [push, pathname]
   )
 
   const toGoProductPostPage = (e: React.MouseEvent) => {

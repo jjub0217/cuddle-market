@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { CONDITION_ITEMS } from '@/constants/constants'
 import { cn } from '@/lib/utils/cn'
-import { useSearchParams, useRouter, usePathname } from 'next/navigation'
+import { useFilterNavigation } from '@/hooks/useFilterNavigation'
 import RequiredLabel from '@/components/commons/RequiredLabel'
 
 interface ProductStateFilterProps {
@@ -25,9 +25,7 @@ export function ProductStateFilter({
   onProductStatusChange,
   useUrlSync = false,
 }: ProductStateFilterProps) {
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const pathname = usePathname()
+  const { searchParams, pathname, push } = useFilterNavigation()
   const [internalSelectedStatus, setInternalSelectedStatus] = useState<string | null>(null)
 
   // 외부에서 전달된 값이 있으면 사용, 없으면 내부 state 사용
@@ -40,7 +38,7 @@ export function ProductStateFilter({
     if (useUrlSync) {
       const params = new URLSearchParams(searchParams.toString())
       params.set('productStatuses', value)
-      router.push(`${pathname}?${params.toString()}`)
+      push(`${pathname}?${params.toString()}`)
     }
 
     // 외부 콜백이 있으면 호출, 없으면 내부 state 업데이트

@@ -3,7 +3,7 @@
 import Button from '@/components/commons/button/Button'
 import { PRODUCT_CATEGORIES } from '@/constants/constants'
 import { cn } from '@/lib/utils/cn'
-import { useSearchParams, useRouter, usePathname } from 'next/navigation'
+import { useFilterNavigation } from '@/hooks/useFilterNavigation'
 
 interface CategoryFilterProps {
   headingClassName?: string
@@ -11,9 +11,7 @@ interface CategoryFilterProps {
 }
 
 export function CategoryFilter({ headingClassName, selectedCategory }: CategoryFilterProps) {
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const pathname = usePathname()
+  const { searchParams, pathname, push } = useFilterNavigation()
 
   const handleProductCategory = (e: React.MouseEvent, category: string) => {
     e.stopPropagation() // 이벤트 버블링 방지
@@ -27,7 +25,7 @@ export function CategoryFilter({ headingClassName, selectedCategory }: CategoryF
     } else {
       params.set('categories', category) // 선택 시 URL에 추가
     }
-    router.push(`${pathname}?${params.toString()}`)
+    push(`${pathname}?${params.toString()}`)
   }
   return (
     <div className="flex flex-col gap-2.5">
