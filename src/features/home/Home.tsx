@@ -41,6 +41,36 @@ function Home({ initialData }: HomeProps) {
   const [activePetTypeTab, setActivePetTypeTab] = useState<PetTypeTabId>(initialPetTab)
   const [activeProductTypeTab, setActiveProductTypeTab] = useState<ProductTypeTabId>(initialProductTab)
 
+  const handlePetTypeTabChange = useCallback(
+    (tabId: PetTypeTabId) => {
+      setActivePetTypeTab(tabId)
+      const petTypeCode = PET_TYPE_TABS.find((tab) => tab.id === tabId)?.code
+      const params = new URLSearchParams(searchParams.toString())
+      if (petTypeCode && petTypeCode !== 'ALL') {
+        params.set('petType', petTypeCode)
+      } else {
+        params.delete('petType')
+      }
+      router.push(`${pathname}?${params.toString()}`)
+    },
+    [searchParams, router, pathname]
+  )
+
+  const handleProductTypeTabChange = useCallback(
+    (tabId: string) => {
+      setActiveProductTypeTab(tabId as ProductTypeTabId)
+      const productTypeCode = PRODUCT_TYPE_TABS.find((tab) => tab.id === tabId)?.code
+      const params = new URLSearchParams(searchParams.toString())
+      if (productTypeCode && productTypeCode !== 'ALL') {
+        params.set('productType', productTypeCode)
+      } else {
+        params.delete('productType')
+      }
+      router.push(`${pathname}?${params.toString()}`)
+    },
+    [searchParams, router, pathname]
+  )
+
   // URL에서 필터 값 직접 파싱 (Single Source of Truth)
   const keyword = searchParams.get('keyword') || ''
   const sortBy = searchParams.get('sortBy')
@@ -196,7 +226,7 @@ function Home({ initialData }: HomeProps) {
             <section aria-label="상품 필터" className="flex flex-col gap-7">
               <PetTypeFilter
                 activeTab={activePetTypeTab}
-                onTabChange={setActivePetTypeTab}
+                onTabChange={handlePetTypeTabChange}
                 selectedDetailPet={selectedDetailPet}
                 headingClassName="heading-h5"
               />
@@ -214,7 +244,7 @@ function Home({ initialData }: HomeProps) {
               <Tabs
                 tabs={PRODUCT_TYPE_TABS}
                 activeTab={activeProductTypeTab}
-                onTabChange={(tabId) => setActiveProductTypeTab(tabId as ProductTypeTabId)}
+                onTabChange={handleProductTypeTabChange}
                 ariaLabel="상품 타입 분류"
               />
               {isLoading && allProducts.length === 0 ? (
