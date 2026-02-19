@@ -31,9 +31,45 @@ function Home({ initialData }: HomeProps) {
   const router = useRouter()
   const pathname = usePathname()
 
-  // 탭 상태 (새로고침 시 초기화)
-  const [activePetTypeTab, setActivePetTypeTab] = useState<PetTypeTabId>('pet-tab-all')
-  const [activeProductTypeTab, setActiveProductTypeTab] = useState<ProductTypeTabId>('tab-all')
+  // URL에서 탭 초기값 결정
+  const urlPetType = searchParams.get('petType')
+  const urlProductType = searchParams.get('productType')
+  const initialPetTab = (urlPetType && PET_TYPE_TABS.find((tab) => tab.code === urlPetType)?.id) || 'pet-tab-all'
+  const initialProductTab =
+    (urlProductType && PRODUCT_TYPE_TABS.find((tab) => tab.code === urlProductType)?.id) || 'tab-all'
+
+  const [activePetTypeTab, setActivePetTypeTab] = useState<PetTypeTabId>(initialPetTab)
+  const [activeProductTypeTab, setActiveProductTypeTab] = useState<ProductTypeTabId>(initialProductTab)
+
+  const handlePetTypeTabChange = useCallback(
+    (tabId: PetTypeTabId) => {
+      setActivePetTypeTab(tabId)
+      const petTypeCode = PET_TYPE_TABS.find((tab) => tab.id === tabId)?.code
+      const params = new URLSearchParams(searchParams.toString())
+      if (petTypeCode && petTypeCode !== 'ALL') {
+        params.set('petType', petTypeCode)
+      } else {
+        params.delete('petType')
+      }
+      router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    },
+    [searchParams, router, pathname]
+  )
+
+  const handleProductTypeTabChange = useCallback(
+    (tabId: string) => {
+      setActiveProductTypeTab(tabId as ProductTypeTabId)
+      const productTypeCode = PRODUCT_TYPE_TABS.find((tab) => tab.id === tabId)?.code
+      const params = new URLSearchParams(searchParams.toString())
+      if (productTypeCode && productTypeCode !== 'ALL') {
+        params.set('productType', productTypeCode)
+      } else {
+        params.delete('productType')
+      }
+      router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    },
+    [searchParams, router, pathname]
+  )
 
   // URL에서 필터 값 직접 파싱 (Single Source of Truth)
   const keyword = searchParams.get('keyword') || ''
@@ -68,6 +104,18 @@ function Home({ initialData }: HomeProps) {
     setPrevSearchParams(searchParams)
     if (hasDetailFilter) {
       setIsDetailFilterOpen(true)
+    }
+    // 뒤로가기/앞으로가기 시 탭 상태 동기화
+    const newPetType = searchParams.get('petType')
+    const newPetTab = (newPetType && PET_TYPE_TABS.find((tab) => tab.code === newPetType)?.id) || 'pet-tab-all'
+    if (newPetTab !== activePetTypeTab) {
+      setActivePetTypeTab(newPetTab)
+    }
+    const newProductType = searchParams.get('productType')
+    const newProductTab =
+      (newProductType && PRODUCT_TYPE_TABS.find((tab) => tab.code === newProductType)?.id) || 'tab-all'
+    if (newProductTab !== activeProductTypeTab) {
+      setActiveProductTypeTab(newProductTab)
     }
   }
 
@@ -190,7 +238,7 @@ function Home({ initialData }: HomeProps) {
             <section aria-label="상품 필터" className="flex flex-col gap-7">
               <PetTypeFilter
                 activeTab={activePetTypeTab}
-                onTabChange={setActivePetTypeTab}
+                onTabChange={handlePetTypeTabChange}
                 selectedDetailPet={selectedDetailPet}
                 headingClassName="heading-h5"
               />
@@ -208,7 +256,7 @@ function Home({ initialData }: HomeProps) {
               <Tabs
                 tabs={PRODUCT_TYPE_TABS}
                 activeTab={activeProductTypeTab}
-                onTabChange={(tabId) => setActiveProductTypeTab(tabId as ProductTypeTabId)}
+                onTabChange={handleProductTypeTabChange}
                 ariaLabel="상품 타입 분류"
               />
               {isLoading && allProducts.length === 0 ? (
