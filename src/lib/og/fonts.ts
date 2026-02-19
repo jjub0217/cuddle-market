@@ -8,7 +8,7 @@ export async function getKoreanFont(): Promise<ArrayBuffer> {
 
   const fontPath = join(process.cwd(), 'public', 'assets', 'fonts', 'NotoSansKR-Subset.ttf')
   const buffer = await readFile(fontPath)
-  fontData = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
+  fontData = Uint8Array.from(buffer).buffer
 
   return fontData
 }

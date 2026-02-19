@@ -35,7 +35,7 @@ export default async function OGImage({ params }: { params: Promise<{ id: string
   let productImageSrc: string | null = null
   if (product.mainImageUrl) {
     try {
-      const res = await fetch(product.mainImageUrl, { method: 'HEAD' })
+      const res = await fetch(product.mainImageUrl, { method: 'HEAD', signal: AbortSignal.timeout(3000) })
       const ct = res.headers.get('content-type') ?? ''
       if (ct.includes('png') || ct.includes('jpeg') || ct.includes('jpg')) {
         productImageSrc = product.mainImageUrl
@@ -64,8 +64,8 @@ export default async function OGImage({ params }: { params: Promise<{ id: string
               {status.label}
             </span>
           </div>
-          <p style={{ fontSize: 36, fontWeight: 700, color: OG_COLORS.textPrimary, lineClamp: 2, overflow: 'hidden' }}>
-            {product.title}
+          <p style={{ fontSize: 36, fontWeight: 700, color: OG_COLORS.textPrimary, overflow: 'hidden' }}>
+            {product.title.slice(0, 50)}
           </p>
           <p style={{ fontSize: 44, fontWeight: 700, color: OG_COLORS.primary }}>
             {price}

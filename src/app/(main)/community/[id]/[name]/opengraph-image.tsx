@@ -41,11 +41,11 @@ export default async function OGImage({ params }: { params: Promise<{ id: string
             {boardStyle.label}
           </span>
         </div>
-        <p style={{ fontSize: 40, fontWeight: 700, color: OG_COLORS.textPrimary, lineClamp: 2, overflow: 'hidden' }}>
-          {post.title}
+        <p style={{ fontSize: 40, fontWeight: 700, color: OG_COLORS.textPrimary, overflow: 'hidden' }}>
+          {post.title.slice(0, 50)}
         </p>
         {preview && (
-          <p style={{ fontSize: 24, color: OG_COLORS.textSecondary, lineClamp: 3, overflow: 'hidden' }}>
+          <p style={{ fontSize: 24, color: OG_COLORS.textSecondary, overflow: 'hidden' }}>
             {preview}
           </p>
         )}
