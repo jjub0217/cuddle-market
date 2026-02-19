@@ -132,7 +132,7 @@ export default function MyList({ id, title, price, mainImageUrl, tradeStatus, vi
   return (
     <li id={id.toString()} className="w-full pt-5 pb-5 md:p-0">
       <Link
-        href={ROUTES.DETAIL_ID(id)}
+        href={ROUTES.DETAIL_ID(id, title)}
         className="flex w-full items-start justify-center gap-3 rounded-lg border-gray-300 md:items-center md:justify-between md:gap-6 md:border md:p-3.5"
       >
         <div className="relative aspect-square w-32 shrink-0 overflow-hidden rounded-lg">

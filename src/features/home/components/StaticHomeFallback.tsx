@@ -135,7 +135,7 @@ function StaticProductCard({ product, index }: { product: Product; index: number
     <Link
       className="border-border text-text-primary flex cursor-pointer flex-row-reverse overflow-hidden rounded-xl border bg-white shadow-md transition-shadow duration-200 hover:shadow-xl md:flex-col-reverse"
       aria-label={`${title}, ${price}원, ${productStatusName}, ${petTypeName}, ${productTradeName}`}
-      href={ROUTES.DETAIL_ID(id)}
+      href={ROUTES.DETAIL_ID(id, title)}
     >
       {/* ProductInfo */}
       <div className="flex h-full flex-1 flex-col justify-between gap-5 p-3 md:flex-none">

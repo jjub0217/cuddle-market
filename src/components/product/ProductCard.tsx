@@ -42,7 +42,7 @@ function ProductCard({ data, 'data-index': dataIndex }: ProductCardProps) {
       data-index={dataIndex}
     >
       <Link
-        href={ROUTES.DETAIL_ID(id)}
+        href={ROUTES.DETAIL_ID(id, title)}
         className="absolute inset-0 z-0"
         aria-label={`${title}, ${price}원, ${productStatusName}, ${petTypeName}, ${productTradeName}`}
         onClick={handleCardClick}
