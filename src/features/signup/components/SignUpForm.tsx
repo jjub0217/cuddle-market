@@ -138,7 +138,6 @@ export function SignUpForm() {
       } else {
         setSignupNotification({ message: '네트워크 연결을 확인해주세요.', type: 'warning' })
       }
-    } finally {
       setIsSubmitting(false)
     }
   }
