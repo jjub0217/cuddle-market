@@ -13,6 +13,7 @@ interface InputWithButtonProps {
   registration: UseFormRegisterReturn
   buttonText: string
   buttonClassName?: string
+  buttonDisabled?: boolean
   onButtonClick?: () => void
   size?: string
   buttonSize?: 'xs' | 'sm' | 'md' | 'lg'
@@ -28,6 +29,7 @@ export default function InputWithButton({
   registration,
   buttonText,
   buttonClassName = 'bg-primary-50 text-primary-500 cursor-pointer font-semibold',
+  buttonDisabled,
   onButtonClick,
   size = 'text-sm',
   buttonSize = 'md',
@@ -47,7 +49,7 @@ export default function InputWithButton({
         className="flex-1"
         registration={registration}
       />
-      <Button size={buttonSize} className={buttonClassName} type="button" onClick={onButtonClick}>
+      <Button size={buttonSize} className={buttonClassName} type="button" onClick={onButtonClick} disabled={buttonDisabled}>
         {buttonText}
       </Button>
     </div>
