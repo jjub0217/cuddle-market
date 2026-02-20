@@ -15,7 +15,7 @@ import {
 import { signupValidationRules } from '../validationRules'
 import { checkNickname } from '@/lib/api/auth'
 import { isAxiosError } from 'axios'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 interface NicknameFieldProps<T extends FieldValues> {
   control: Control<T>
@@ -38,7 +38,10 @@ export function NicknameField<T extends FieldValues>({
 }: NicknameFieldProps<T>) {
   const nickname = useWatch({ control, name: 'nickname' as Path<T> })
 
+  const [isChecking, setIsChecking] = useState(false)
+
   const handleNicknameCheck = async () => {
+    setIsChecking(true)
     try {
       const response = await checkNickname(nickname)
 
@@ -70,6 +73,8 @@ export function NicknameField<T extends FieldValues>({
         })
       }
       setIsNicknameVerified(false)
+    } finally {
+      setIsChecking(false)
     }
   }
 
@@ -88,8 +93,9 @@ export function NicknameField<T extends FieldValues>({
         error={errors.nickname as FieldError | undefined}
         checkResult={checkResult}
         registration={register('nickname' as Path<T>, signupValidationRules.nickname)}
-        buttonText="중복체크"
+        buttonText={isChecking ? '체크 중...' : '중복체크'}
         onButtonClick={handleNicknameCheck}
+        buttonDisabled={isChecking}
       />
     </div>
   )
