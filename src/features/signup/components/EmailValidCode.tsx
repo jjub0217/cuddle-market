@@ -28,10 +28,14 @@ export function EmailValidCode({ register, errors, control, setIsEmailVerified, 
     message: string
   }>({ status: 'idle', message: '' })
 
+  const [isEmailChecking, setIsEmailChecking] = useState(false)
+  const [isCodeChecking, setIsCodeChecking] = useState(false)
+
   const email = useWatch({ control, name: 'email' })
   const emailCode = useWatch({ control, name: 'emailCode' })
 
   const handleEmailCheck = async () => {
+    setIsEmailChecking(true)
     try {
       const response = await checkEmail(email)
 
@@ -55,10 +59,13 @@ export function EmailValidCode({ register, errors, control, setIsEmailVerified, 
         message: '이메일 확인 중 오류가 발생했습니다.',
       })
       setIsEmailVerified(false)
+    } finally {
+      setIsEmailChecking(false)
     }
   }
 
   const handleSendValidCode = async () => {
+    setIsEmailChecking(true)
     try {
       await sendEmailValidCode(email)
       setEmailCheckResult({
@@ -78,10 +85,13 @@ export function EmailValidCode({ register, errors, control, setIsEmailVerified, 
           message: '네트워크 오류가 발생했습니다.',
         })
       }
+    } finally {
+      setIsEmailChecking(false)
     }
   }
 
   const handleCheckValidCode = async () => {
+    setIsCodeChecking(true)
     try {
       await checkEmailValidCode(email, emailCode)
       setCodeCheckResult({
@@ -104,6 +114,8 @@ export function EmailValidCode({ register, errors, control, setIsEmailVerified, 
         })
       }
       setIsEmailCodeVerified(false)
+    } finally {
+      setIsCodeChecking(false)
     }
   }
 
@@ -118,8 +130,9 @@ export function EmailValidCode({ register, errors, control, setIsEmailVerified, 
           error={errors.email}
           checkResult={emailCheckResult}
           registration={register('email', authValidationRules.email)}
-          buttonText={emailCheckResult.status === 'success' ? '인증코드 전송' : '중복체크'}
+          buttonText={isEmailChecking ? (emailCheckResult.status === 'success' ? '전송 중...' : '체크 중...') : emailCheckResult.status === 'success' ? '인증코드 전송' : '중복체크'}
           onButtonClick={emailCheckResult.status === 'success' ? handleSendValidCode : handleEmailCheck}
+          buttonDisabled={isEmailChecking}
         />
         <InputWithButton
           id="signup-email-code"
@@ -128,9 +141,10 @@ export function EmailValidCode({ register, errors, control, setIsEmailVerified, 
           error={errors.emailCode}
           checkResult={codeCheckResult}
           registration={register('emailCode', authValidationRules.emailCode)}
-          buttonText="인증코드 확인"
+          buttonText={isCodeChecking ? '확인 중...' : '인증코드 확인'}
           buttonClassName="cursor-pointer bg-gray-100 font-semibold text-gray-900"
           onButtonClick={handleCheckValidCode}
+          buttonDisabled={isCodeChecking}
         />
       </div>
     </div>
