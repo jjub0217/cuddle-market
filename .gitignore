@@ -34,5 +34,8 @@ Thumbs.db
 *.tsbuildinfo
 next-env.d.ts
 
+# MCP
+.mcp.json
+
 # Misc
 *.log
