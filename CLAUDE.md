@@ -22,8 +22,8 @@ NEXT_PUBLIC_WS_URL=https://cmarket-api.duckdns.org/ws-stomp
 ```
 
 ### Notion 연동 (Claude 명령어)
-- **DAILY SCRUM DB**: `2fc26170-466f-80e2-999f-cf5ac1963e2f`
-- **Schedule List DB**: `2fc26170-466f-8131-8a3c-d433dcda1cd4`
+- **DAILY SCRUM DB**: `30ff2b30-7961-817e-9601-d836505c5b04`
+- **Schedule List DB**: `30ff2b30-7961-8138-990e-e9ea63d1c151`
 - **사용자 ID (강주현)**: `7c32774b-0096-4545-a9fe-7cfec90faa15`
 
 ## 마이그레이션 가이드
