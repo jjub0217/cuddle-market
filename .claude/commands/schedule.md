@@ -10,7 +10,7 @@ DAILY SCRUM 데이터베이스의 작업 내용을 분석하여 Schedule List에
    - 기본값: 최근 2주간
 
 2. **DAILY SCRUM 데이터 수집**
-   - Database ID: `2fc26170-466f-80e2-999f-cf5ac1963e2f`
+   - Database ID: `30ff2b30-7961-817e-9601-d836505c5b04`
    - 지정된 기간의 모든 DAILY SCRUM 페이지 조회
    - 각 페이지의 "금일 예정 업무 보고" 테이블 내용 읽기
 
@@ -22,7 +22,7 @@ DAILY SCRUM 데이터베이스의 작업 내용을 분석하여 Schedule List에
      - 포함된 세부 작업 목록 정리
 
 4. **Schedule List에 일정 등록**
-   - Database ID: `2fc26170-466f-8131-8a3c-d433dcda1cd4`
+   - Database ID: `30ff2b30-7961-8138-990e-e9ea63d1c151`
    - 각 기능별 그룹에 대해 페이지 생성:
      - Name (title): 기능명
      - 일정 (date): `{"start": "YYYY-MM-DD", "end": "YYYY-MM-DD"}`
@@ -51,8 +51,8 @@ DAILY SCRUM 데이터베이스의 작업 내용을 분석하여 Schedule List에
 
 ## Notion API 정보
 
-- DAILY SCRUM Database ID: `2fc26170-466f-80e2-999f-cf5ac1963e2f`
-- Schedule List Database ID: `2fc26170-466f-8131-8a3c-d433dcda1cd4`
+- DAILY SCRUM Database ID: `30ff2b30-7961-817e-9601-d836505c5b04`
+- Schedule List Database ID: `30ff2b30-7961-8138-990e-e9ea63d1c151`
 - User ID (강주현): `7c32774b-0096-4545-a9fe-7cfec90faa15`
 
 ## 주의사항

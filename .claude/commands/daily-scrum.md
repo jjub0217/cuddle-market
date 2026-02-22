@@ -20,7 +20,7 @@
      -H "Notion-Version: 2022-06-28" \
      -d '{
        "parent": {
-         "database_id": "2fc26170-466f-80e2-999f-cf5ac1963e2f"
+         "database_id": "30ff2b30-7961-817e-9601-d836505c5b04"
        },
        "properties": {
          "이름": {
@@ -39,7 +39,7 @@
      }'
    ```
 
-   - Database ID: `2fc26170-466f-80e2-999f-cf5ac1963e2f`
+   - Database ID: `30ff2b30-7961-817e-9601-d836505c5b04`
    - 페이지 제목: `YYYY년 MM월 DD일` 형식 (예: `2025년 12월 3일`)
    - 작성일시: 오늘 날짜 (YYYY-MM-DD 형식)
    - 참여자: 강주현 (ID: `7c32774b-0096-4545-a9fe-7cfec90faa15`)
@@ -126,6 +126,6 @@
 
 ## Notion API 정보
 
-- DAILY SCRUM Database ID: `2fc26170-466f-80e2-999f-cf5ac1963e2f`
+- DAILY SCRUM Database ID: `30ff2b30-7961-817e-9601-d836505c5b04`
 - User ID (강주현): `7c32774b-0096-4545-a9fe-7cfec90faa15`
 - API Token: MCP 로그 파일에서 확인 (위 명령어 참고)
