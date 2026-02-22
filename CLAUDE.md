@@ -37,6 +37,17 @@ NEXT_PUBLIC_WS_URL=https://cmarket-api.duckdns.org/ws-stomp
 - `/daily-scrum` - DAILY SCRUM 노션 페이지 생성
 - `/schedule` - Schedule List 일정 등록
 
+## 머지 워크플로우
+
+사용자가 "머지", "머지했어", "PR 머지했어" 등의 표현을 사용하면:
+1. develop 브랜치를 main에 **직접 머지** (PR 생성 금지)
+2. PR 생성 시 kimi 코드리뷰가 자동 트리거되어 토큰이 소진되므로, main 머지는 항상 로컬에서 직접 수행
+3. 작업 브랜치 정리 (삭제)
+
+```bash
+git checkout main && git pull origin main && git merge develop && git push origin main
+```
+
 ## 기존 소스 복사 명령어
 
 ```bash
