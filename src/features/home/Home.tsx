@@ -207,7 +207,7 @@ function Home() {
         <h1 className="sr-only">커들마켓</h1>
         <div className="px-lg mx-auto max-w-7xl">
           <div className="flex flex-col gap-12">
-            <section aria-label="상품 필터" className="flex flex-col gap-7">
+            <section aria-label="상품 필터" className="flex flex-col gap-7" data-nosnippet>
               <PetTypeFilter
                 activeTab={activePetTypeTab}
                 onTabChange={handlePetTypeTabChange}
@@ -225,12 +225,14 @@ function Home() {
               />
             </section>
             <section aria-label="상품 목록" className="flex flex-col gap-3">
-              <Tabs
-                tabs={PRODUCT_TYPE_TABS}
-                activeTab={activeProductTypeTab}
-                onTabChange={handleProductTypeTabChange}
-                ariaLabel="상품 타입 분류"
-              />
+              <div data-nosnippet>
+                <Tabs
+                  tabs={PRODUCT_TYPE_TABS}
+                  activeTab={activeProductTypeTab}
+                  onTabChange={handleProductTypeTabChange}
+                  ariaLabel="상품 타입 분류"
+                />
+              </div>
               {isLoading && allProducts.length === 0 ? (
                 <HomeSkeleton />
               ) : (
