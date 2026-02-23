@@ -16,12 +16,14 @@
 ## 환경 설정
 
 ### 환경변수 (.env.local)
+
 ```
 NEXT_PUBLIC_API_BASE_URL=https://cmarket-api.duckdns.org/api
 NEXT_PUBLIC_WS_URL=https://cmarket-api.duckdns.org/ws-stomp
 ```
 
 ### Notion 연동 (Claude 명령어)
+
 - **DAILY SCRUM DB**: `30ff2b30-7961-817e-9601-d836505c5b04`
 - **Schedule List DB**: `30ff2b30-7961-8138-990e-e9ea63d1c151`
 - **사용자 ID (강주현)**: `7c32774b-0096-4545-a9fe-7cfec90faa15`
@@ -40,6 +42,7 @@ NEXT_PUBLIC_WS_URL=https://cmarket-api.duckdns.org/ws-stomp
 ## 머지 워크플로우
 
 사용자가 "머지", "머지했어", "PR 머지했어" 등의 표현을 사용하면:
+
 1. develop 브랜치를 main에 **직접 머지** (PR 생성 금지)
 2. PR 생성 시 kimi 코드리뷰가 자동 트리거되어 토큰이 소진되므로, main 머지는 항상 로컬에서 직접 수행
 3. 작업 브랜치 정리 (삭제)
