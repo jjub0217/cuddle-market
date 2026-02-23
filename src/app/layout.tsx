@@ -19,6 +19,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
+      <head>
+        <link rel="preconnect" href="https://df1xl13ui5mlo.cloudfront.net" />
+      </head>
       <body>
         <Providers>
           {children}
