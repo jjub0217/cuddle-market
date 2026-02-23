@@ -53,8 +53,29 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const totalElements = initialData?.data?.data?.totalElements ?? 0
   const firstImageUrl = products[0]?.mainImageUrl
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: '커들마켓',
+    url: 'https://cuddle-market.vercel.app',
+    description: '반려동물 용품을 사고팔 수 있는 따뜻한 중고거래 플랫폼, 커들마켓',
+    publisher: {
+      '@type': 'Organization',
+      name: '커들마켓',
+      url: 'https://cuddle-market.vercel.app',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://cuddle-market.vercel.app/og-image.png',
+      },
+    },
+  }
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {firstImageUrl && (
         <link
           rel="preload"

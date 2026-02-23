@@ -15,7 +15,9 @@
 **CUDDLE MARKET**은 반려동물을 사랑하는 모든 가족들이 모여
 따뜻한 마음을 나누는 동네 시장입니다.
 
-> 🚧 **Next.js 마이그레이션 진행 중** - [기존 Vite 버전](https://github.com/ExpectedAnnualSalaryOf4TrillionWon/Cuddle-Market-FE)
+🔗 **배포 URL**: [https://cuddle-market.vercel.app](https://cuddle-market.vercel.app)
+
+> 🚧 **Next.js 마이그레이션 진행 중** - [기존 React 버전](https://github.com/ExpectedAnnualSalaryOf4TrillionWon/Cuddle-Market-FE)
 
 ## 기술 스택
 
