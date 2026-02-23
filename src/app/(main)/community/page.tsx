@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import CommunityPage from '@/features/community/CommunityPage'
-import CommunityListSkeleton from '@/features/community/components/CommunityListSkeleton'
+import StaticCommunityFallback from '@/features/community/components/StaticCommunityFallback'
 import { fetchInitialQuestionCommunity, fetchInitialInfoCommunity } from '@/lib/api/server/community'
 
 export const metadata: Metadata = {
@@ -48,8 +48,12 @@ export default async function CommunityRoute({ searchParams }: CommunityRoutePro
       : Promise.resolve(null),
   ])
 
+  const posts = activeTab === 'tab-question'
+    ? initialQuestionData?.content ?? []
+    : initialInfoData?.content ?? []
+
   return (
-    <Suspense fallback={<CommunityListSkeleton />}>
+    <Suspense fallback={<StaticCommunityFallback posts={posts} />}>
       <CommunityPage initialQuestionData={initialQuestionData} initialInfoData={initialInfoData} />
     </Suspense>
   )
