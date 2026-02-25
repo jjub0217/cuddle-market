@@ -36,7 +36,8 @@ NEXT_PUBLIC_WS_URL=https://cmarket-api.duckdns.org/ws-stomp
 
 - `/create-issue` - 이슈 생성 및 브랜치 생성
 - `/commit-push` - 커밋 → 푸시 → PR 생성
-- `/daily-scrum` - DAILY SCRUM 노션 페이지 생성
+- `/daily-scrum` - DAILY SCRUM 노션 페이지 생성 (기본)
+- `/context-sync` - Notion + GitHub 병렬 수집 → 싱크 문서 + Daily Scrum 페이지 생성 (고급)
 - `/schedule` - Schedule List 일정 등록
 
 ## 머지 워크플로우

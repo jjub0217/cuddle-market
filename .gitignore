@@ -36,6 +36,10 @@ next-env.d.ts
 
 # MCP
 .mcp.json
+.mcp.local.json
+
+# Sync
+sync/
 
 # Misc
 *.log
