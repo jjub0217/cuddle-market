@@ -5,8 +5,10 @@ export const revalidate = 3600
 
 const SITE_URL = 'https://cuddle-market.vercel.app'
 
-function escapeXml(str: string): string {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+function sitemapUrl(url: string): string {
+  return encodeURI(url)
+    .replace(/&/g, '&amp;')
+    .replace(/'/g, '&apos;')
 }
 
 export async function GET() {
@@ -37,7 +39,7 @@ export async function GET() {
   for (const product of products) {
     urls.push(`
   <url>
-    <loc>${escapeXml(`${SITE_URL}/products/${product.id}/${toUrlName(product.title)}`)}</loc>
+    <loc>${sitemapUrl(`${SITE_URL}/products/${product.id}/${toUrlName(product.title)}`)}</loc>
     <lastmod>${product.createdAt}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -48,7 +50,7 @@ export async function GET() {
   for (const post of [...questionPosts, ...infoPosts]) {
     urls.push(`
   <url>
-    <loc>${escapeXml(`${SITE_URL}/community/${post.id}/${toUrlName(post.title)}`)}</loc>
+    <loc>${sitemapUrl(`${SITE_URL}/community/${post.id}/${toUrlName(post.title)}`)}</loc>
     <lastmod>${post.updatedAt || post.createdAt}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
