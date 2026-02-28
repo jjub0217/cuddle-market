@@ -10,6 +10,7 @@ export async function fetchGraphQL<T>(query: string, variables?: Record<string, 
     headers,
     body: JSON.stringify({ query, variables }),
   })
+  if (!res.ok) throw new Error(`GraphQL request failed: ${res.status}`)
   const json = await res.json()
   if (json.errors) throw new Error(json.errors[0].message)
   return json.data
