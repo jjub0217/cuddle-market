@@ -5,7 +5,7 @@ import { Z_INDEX } from '@/constants/ui'
 import { cn } from '@/lib/utils/cn'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
-import { fetchNotifications, patchNotifications, readNotification } from '@/lib/api/notifications'
+import { fetchGraphQL } from '@/lib/api/graphql'
 import { useUserStore } from '@/store/userStore'
 import type { NotificationItem as NotificationItemType } from '@/types/notifications'
 import NotificationItem from './NotificationItem'
@@ -37,7 +37,17 @@ export default function NotificationsDropdown({ isNotificationOpen, setIsNotific
     refetch,
   } = useInfiniteQuery({
     queryKey: ['notifications'],
-    queryFn: ({ pageParam }) => fetchNotifications(pageParam),
+    queryFn: async ({ pageParam }) => {
+      const data = await fetchGraphQL<{ notifications: any }>(`
+        query Notifications($page: Int!, $size: Int!) {
+          notifications(page: $page, size: $size) {
+            content { notificationId type message isRead relatedEntityType relatedEntityId createdAt senderNickname senderProfileImageUrl }
+            page hasNext
+          }
+        }
+      `, { page: pageParam, size: 10 })
+      return data.notifications
+    },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
     initialPageParam: 0,
     enabled: !!user,
@@ -52,7 +62,11 @@ export default function NotificationsDropdown({ isNotificationOpen, setIsNotific
   })
 
   const handleMarkAllAsRead = async () => {
-    await patchNotifications()
+    await fetchGraphQL(`
+      mutation MarkAllNotificationsRead {
+        markAllNotificationsRead { success }
+      }
+    `)
     queryClient.setQueryData<{ unreadCount: number }>(['notifications', 'unreadCount'], {
       unreadCount: 0,
     })
@@ -83,7 +97,11 @@ export default function NotificationsDropdown({ isNotificationOpen, setIsNotific
     } else {
       router.push(targetPath)
     }
-    await readNotification(notification.notificationId)
+    await fetchGraphQL(`
+      mutation MarkNotificationRead($notificationId: Int!) {
+        markNotificationRead(notificationId: $notificationId) { success }
+      }
+    `, { notificationId: notification.notificationId })
     refetch()
   }
 

@@ -6,7 +6,7 @@ import type { fetchChatRoom } from '@/types'
 import Link from 'next/link'
 import { SellerAvatar } from '@/components/commons/avatar/SellerAvatar'
 import ChatProductCard from '@/components/commons/card/ChatProductCard'
-import { outChatRoom } from '@/lib/api/chatting'
+import { fetchGraphQL } from '@/lib/api/graphql'
 import { chatSocketStore } from '@/store/chatSocketStore'
 import { useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft } from 'lucide-react'
@@ -23,7 +23,14 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
 
   const handleOutChatRoom = async () => {
     try {
-      await outChatRoom(data.chatRoomId)
+      const LEAVE_CHAT_ROOM = `
+        mutation LeaveChatRoom($chatRoomId: Int!) {
+          leaveChatRoom(chatRoomId: $chatRoomId) {
+            success
+          }
+        }
+      `
+      await fetchGraphQL(LEAVE_CHAT_ROOM, { chatRoomId: data.chatRoomId })
       unsubscribeFromRoom(data.chatRoomId)
       queryClient.invalidateQueries({ queryKey: ['chatRooms'] })
       onLeaveRoom(data.chatRoomId)

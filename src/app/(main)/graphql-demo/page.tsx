@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@apollo/client/react';
-import { gql } from '@apollo/client';
+import { useQuery } from '@tanstack/react-query';
+import { fetchGraphQL } from '@/lib/api/graphql';
 
-const GET_COMMUNITY_POSTS = gql`
+const GET_COMMUNITY_POSTS = `
   query GetCommunityPosts($page: Int, $size: Int, $keyword: String) {
     communityPosts(page: $page, size: $size, keyword: $keyword) {
       content {
@@ -22,7 +22,7 @@ const GET_COMMUNITY_POSTS = gql`
   }
 `;
 
-const GET_USER_PROFILE = gql`
+const GET_USER_PROFILE = `
   query GetUserProfile($userId: Int!) {
     userProfile(userId: $userId) {
       nickname
@@ -33,7 +33,7 @@ const GET_USER_PROFILE = gql`
   }
 `;
 
-const GET_PRODUCTS = gql`
+const GET_PRODUCTS = `
   query GetProducts($page: Int, $size: Int, $keyword: String) {
     products(page: $page, size: $size, keyword: $keyword) {
       content {
@@ -105,26 +105,29 @@ export default function GraphQLDemoPage() {
 
   const {
     data: postsData,
-    loading: postsLoading,
+    isLoading: postsLoading,
     error: postsError,
-  } = useQuery<GetCommunityPostsData>(GET_COMMUNITY_POSTS, {
-    variables: { page: 0, size: 5 },
+  } = useQuery({
+    queryKey: ['graphql-demo', 'posts'],
+    queryFn: () => fetchGraphQL<GetCommunityPostsData>(GET_COMMUNITY_POSTS, { page: 0, size: 5 }),
   });
 
   const {
     data: profileData,
-    loading: profileLoading,
+    isLoading: profileLoading,
     error: profileError,
-  } = useQuery<GetUserProfileData>(GET_USER_PROFILE, {
-    variables: { userId: 1 },
+  } = useQuery({
+    queryKey: ['graphql-demo', 'profile'],
+    queryFn: () => fetchGraphQL<GetUserProfileData>(GET_USER_PROFILE, { userId: 1 }),
   });
 
   const {
     data: productsData,
-    loading: productsLoading,
+    isLoading: productsLoading,
     error: productsError,
-  } = useQuery<GetProductsData>(GET_PRODUCTS, {
-    variables: { page: 0, size: 5 },
+  } = useQuery({
+    queryKey: ['graphql-demo', 'products'],
+    queryFn: () => fetchGraphQL<GetProductsData>(GET_PRODUCTS, { page: 0, size: 5 }),
   });
 
   return (

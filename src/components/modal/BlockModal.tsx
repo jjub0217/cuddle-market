@@ -2,7 +2,7 @@ import Button from '../commons/button/Button'
 import AlertBox from './AlertBox'
 import { USER_BLOCK_ALERT_LIST } from '@/constants/constants'
 import ModalTitle from './ModalTitle'
-import { userBlocked } from '@/lib/api/profile'
+import { fetchGraphQL } from '@/lib/api/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
@@ -26,7 +26,11 @@ export default function BlockModal({ isOpen, onCancel, userNickname, userId }: B
 
   const onUserBlock = async () => {
     try {
-      await userBlocked(userId)
+      await fetchGraphQL(`
+        mutation BlockUser($userId: Int!) {
+          blockUser(userId: $userId) { success }
+        }
+      `, { userId })
       queryClient.invalidateQueries({ queryKey: ['userPage'] })
       onCancel()
     } catch {

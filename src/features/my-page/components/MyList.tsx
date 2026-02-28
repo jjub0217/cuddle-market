@@ -17,7 +17,7 @@ import { ProductMetaItem } from '@/components/product/ProductMetaItem'
 import { getTradeStatus } from '@/lib/utils/getTradeStatus'
 import { getTradeStatusColor } from '@/lib/utils/getTradeStatusColor'
 import { cn } from '@/lib/utils/cn'
-import { patchProductTradeStatus, addFavorite } from '@/lib/api/products'
+import { fetchGraphQL } from '@/lib/api/graphql'
 import { ROUTES } from '@/constants/routes'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import IconButton from '@/components/commons/button/IconButton'
@@ -78,7 +78,11 @@ export default function MyList({ id, title, price, mainImageUrl, tradeStatus, vi
   const isMd = useMediaQuery('(min-width: 768px)')
   const queryClient = useQueryClient()
   const { mutate } = useMutation({
-    mutationFn: (newStatus: TransactionStatus) => patchProductTradeStatus(id, newStatus),
+    mutationFn: (newStatus: TransactionStatus) => fetchGraphQL(`
+      mutation UpdateTradeStatus($id: Int!, $tradeStatus: String!) {
+        updateTradeStatus(id: $id, tradeStatus: $tradeStatus) { success }
+      }
+    `, { id, tradeStatus: newStatus }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['myRequest'] })
       queryClient.invalidateQueries({ queryKey: ['myProducts'] })
@@ -86,7 +90,11 @@ export default function MyList({ id, title, price, mainImageUrl, tradeStatus, vi
   })
 
   const { mutate: cancelFavorite } = useMutation({
-    mutationFn: () => addFavorite(id),
+    mutationFn: () => fetchGraphQL(`
+      mutation ToggleFavorite($productId: Int!) {
+        toggleFavorite(productId: $productId) { success }
+      }
+    `, { productId: id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['myFavorite'] })
     },

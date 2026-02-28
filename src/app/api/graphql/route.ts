@@ -4,8 +4,16 @@ import { NextRequest } from 'next/server'
 import { typeDefs } from '@/graphql/schema'
 import { resolvers } from '@/graphql/resolvers'
 
-const server = new ApolloServer({ typeDefs, resolvers })
-const handler = startServerAndCreateNextHandler<NextRequest>(server)
+interface Context {
+  authorization: string
+}
+
+const server = new ApolloServer<Context>({ typeDefs, resolvers })
+const handler = startServerAndCreateNextHandler<NextRequest, Context>(server, {
+  context: async (req) => ({
+    authorization: req.headers.get('authorization') || '',
+  }),
+})
 
 // Must wrap - direct export causes Next.js 16 type error
 export async function GET(req: NextRequest) {

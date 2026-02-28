@@ -5,7 +5,7 @@ import { useState, useCallback, useMemo } from 'react'
 import Tabs from '@/components/Tabs'
 import { DetailFilter } from '@/features/home/components/filter/DetailFilter'
 import { ProductsSection } from '@/features/home/components/product-section/ProductsSection'
-import { fetchAllProducts } from '@/lib/api/products'
+import { fetchGraphQL } from '@/lib/api/graphql'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import { PRODUCT_TYPE_TABS, PET_TYPE_TABS, type ProductTypeTabId, SORT_TYPE, type PetTypeTabId } from '@/constants/constants'
 import { PetTypeFilter } from './components/filter/PetTypeFilter'
@@ -124,29 +124,37 @@ function Home() {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error, refetch } = useInfiniteQuery({
     queryKey,
 
-    queryFn: ({ pageParam = 0 }) => {
-      return fetchAllProducts(
-        pageParam,
-        20,
-        filterParams.productType || undefined,
-        filterParams.productStatuses,
-        filterParams.minPrice ? Number(filterParams.minPrice) : null,
-        filterParams.maxPrice ? Number(filterParams.maxPrice) : null,
-        filterParams.addressSido,
-        filterParams.addressGugun,
-        filterParams.categories,
-        filterParams.petType || undefined,
-        filterParams.petDetailType,
-        filterParams.keyword,
-        filterParams.sortBy,
-        filterParams.sortOrder,
-      )
+    queryFn: async ({ pageParam = 0 }) => {
+      const data = await fetchGraphQL<{ products: any }>(`
+        query Products($page: Int!, $size: Int!, $productType: String, $productStatuses: String, $minPrice: Int, $maxPrice: Int, $addressSido: String, $addressGugun: String, $categories: String, $petType: String, $petDetailType: String, $keyword: String, $sortBy: String, $sortOrder: String) {
+          products(page: $page, size: $size, productType: $productType, productStatuses: $productStatuses, minPrice: $minPrice, maxPrice: $maxPrice, addressSido: $addressSido, addressGugun: $addressGugun, categories: $categories, petType: $petType, petDetailType: $petDetailType, keyword: $keyword, sortBy: $sortBy, sortOrder: $sortOrder) {
+            content { id title price mainImageUrl petDetailType productStatus productType tradeStatus createdAt viewCount favoriteCount isFavorite }
+            page totalPages totalElements hasNext
+          }
+        }
+      `, {
+        page: pageParam,
+        size: 20,
+        productType: filterParams.productType || undefined,
+        productStatuses: filterParams.productStatuses || undefined,
+        minPrice: filterParams.minPrice ? Number(filterParams.minPrice) : undefined,
+        maxPrice: filterParams.maxPrice ? Number(filterParams.maxPrice) : undefined,
+        addressSido: filterParams.addressSido || undefined,
+        addressGugun: filterParams.addressGugun || undefined,
+        categories: filterParams.categories || undefined,
+        petType: filterParams.petType || undefined,
+        petDetailType: filterParams.petDetailType || undefined,
+        keyword: filterParams.keyword || undefined,
+        sortBy: filterParams.sortBy || undefined,
+        sortOrder: filterParams.sortOrder || undefined,
+      })
+      return data.products
     },
 
     getNextPageParam: (lastPage) => {
-      const currentPage = lastPage.data.data.page
-      const totalPages = lastPage.data.data.totalPages
-      const hasNext = lastPage.data.data.hasNext
+      const currentPage = lastPage.page
+      const totalPages = lastPage.totalPages
+      const hasNext = lastPage.hasNext
 
       if (hasNext && currentPage + 1 < totalPages) {
         return currentPage + 1
@@ -160,7 +168,7 @@ function Home() {
     staleTime: 60 * 1000,
   })
 
-  const allProducts = data?.pages?.flatMap((page) => page.data.data.content) ?? []
+  const allProducts = data?.pages?.flatMap((page) => page.content) ?? []
 
   // 무한 스크롤 감지
   const targetRef = useIntersectionObserver({
@@ -186,7 +194,7 @@ function Home() {
     router.push('/product-post')
   }
 
-  const totalElements = data?.pages?.[0]?.total || 0
+  const totalElements = data?.pages?.[0]?.totalElements || 0
 
   if (error && !isLoading) {
     return (

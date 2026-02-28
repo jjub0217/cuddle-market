@@ -9,7 +9,7 @@ import SearchBar from '@/components/header/components/SearchBar'
 import SelectDropdown from '@/components/commons/select/SelectDropdown'
 import { ROUTES } from '@/constants/routes'
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { fetchInfoCommunity, fetchQuestionCommunity } from '@/lib/api/community'
+import { fetchGraphQL } from '@/lib/api/graphql'
 import { UserRound, Clock, MessageSquare, Eye, Dot, Plus, MessageSquareText } from 'lucide-react'
 import LoadMoreButton from '@/components/commons/button/LoadMoreButton'
 import { getTimeAgo } from '@/lib/utils/getTimeAgo'
@@ -95,7 +95,17 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
     error: errorQuestion,
   } = useInfiniteQuery({
     queryKey: ['community', 'question', searchType, currentKeyword, sortBy],
-    queryFn: ({ pageParam }) => fetchQuestionCommunity(pageParam, 10, searchType, currentKeyword, sortBy),
+    queryFn: async ({ pageParam }) => {
+      const data = await fetchGraphQL<{ communityPosts: any }>(`
+        query CommunityPosts($page: Int!, $size: Int!, $boardType: String, $searchType: String, $keyword: String, $sortBy: String) {
+          communityPosts(page: $page, size: $size, boardType: $boardType, searchType: $searchType, keyword: $keyword, sortBy: $sortBy) {
+            content { id title contentPreview authorNickname boardType viewCount commentCount createdAt updatedAt isModified }
+            page hasNext hasPrevious total totalElements numberOfElements
+          }
+        }
+      `, { page: pageParam, size: 10, boardType: 'QUESTION', searchType, keyword: currentKeyword || undefined, sortBy: sortBy || undefined })
+      return data.communityPosts
+    },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
     initialPageParam: 0,
     initialData: initialQuestionData ? { pages: [initialQuestionData], pageParams: [0] } : undefined,
@@ -112,7 +122,17 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
     error: errorInfo,
   } = useInfiniteQuery({
     queryKey: ['community', 'info', searchType, currentKeyword, sortBy],
-    queryFn: ({ pageParam }) => fetchInfoCommunity(pageParam, 10, searchType, currentKeyword, sortBy),
+    queryFn: async ({ pageParam }) => {
+      const data = await fetchGraphQL<{ communityPosts: any }>(`
+        query CommunityPosts($page: Int!, $size: Int!, $boardType: String, $searchType: String, $keyword: String, $sortBy: String) {
+          communityPosts(page: $page, size: $size, boardType: $boardType, searchType: $searchType, keyword: $keyword, sortBy: $sortBy) {
+            content { id title contentPreview authorNickname boardType viewCount commentCount createdAt updatedAt isModified }
+            page hasNext hasPrevious total totalElements numberOfElements
+          }
+        }
+      `, { page: pageParam, size: 10, boardType: 'INFO', searchType, keyword: currentKeyword || undefined, sortBy: sortBy || undefined })
+      return data.communityPosts
+    },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
     initialPageParam: 0,
     initialData: initialInfoData ? { pages: [initialInfoData], pageParams: [0] } : undefined,

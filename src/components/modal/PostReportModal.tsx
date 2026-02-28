@@ -1,6 +1,6 @@
 import { POST_REPORT_REASON } from '@/constants/constants'
 import ReportModalBase, { type ReportFormValues } from './ReportModalBase'
-import { postReported } from '@/lib/api/community'
+import { fetchGraphQL } from '@/lib/api/graphql'
 import { useState } from 'react'
 
 interface PostReportModalProps {
@@ -16,7 +16,11 @@ export default function PostReportModal({ isOpen, postId, authorNickname, postTi
 
   const handleSubmit = async (data: ReportFormValues) => {
     try {
-      await postReported(postId, data)
+      await fetchGraphQL(`
+        mutation ReportPost($postId: Int!, $reason: String!, $details: String) {
+          reportPost(postId: $postId, reason: $reason, details: $details) { success }
+        }
+      `, { postId, reason: data.reasonCode, details: data.detailReason })
       onCancel()
     } catch {
       setPostReportError(

@@ -12,9 +12,8 @@ import Button from '@/components/commons/button/Button'
 import { cn } from '@/lib/utils/cn'
 import type { MyPageData } from '@/components/profile/ProfileData'
 import { formatBirthDate } from '@/lib/utils/formatBirthDate'
-import { checkNickname } from '@/lib/api/auth'
+import { fetchGraphQL } from '@/lib/api/graphql'
 import { useState, useEffect, useRef } from 'react'
-import { profileUpdate } from '@/lib/api/profile'
 import { useUserStore } from '@/store/userStore'
 import { uploadImage } from '@/lib/api/products'
 import { useQueryClient } from '@tanstack/react-query'
@@ -95,26 +94,20 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
 
   const handleNicknameCheck = async () => {
     try {
-      const response = await checkNickname(nickname)
+      const { checkNickname: response } = await fetchGraphQL<{ checkNickname: { available: boolean; message: string } }>(`
+        query CheckNickname($nickname: String!) {
+          checkNickname(nickname: $nickname) { available message }
+        }
+      `, { nickname })
 
-      if (response.data) {
-        setCheckResult({
-          status: 'success',
-          message: response.message,
-        })
+      if (response.available) {
+        setCheckResult({ status: 'success', message: response.message })
         clearErrors('nickname')
       } else {
-        setCheckResult({
-          status: 'error',
-          message: response.message,
-        })
-
+        setCheckResult({ status: 'error', message: response.message })
       }
     } catch {
-      setCheckResult({
-        status: 'error',
-        message: '닉네임 확인 중 오류가 발생했습니다.',
-      })
+      setCheckResult({ status: 'error', message: '닉네임 확인 중 오류가 발생했습니다.' })
     }
   }
 
@@ -169,7 +162,11 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
     }
 
     try {
-      const response = await profileUpdate(data)
+      const { updateProfile: response } = await fetchGraphQL<{ updateProfile: { success: boolean; code: string } }>(`
+        mutation UpdateProfile($input: ProfileUpdateInput!) {
+          updateProfile(input: $input) { success code }
+        }
+      `, { input: data })
       if (response.code === 'SUCCESS') {
         updateUserProfile(data)
         setCheckResult({ status: 'idle', message: '' })

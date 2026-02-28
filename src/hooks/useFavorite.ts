@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { addFavorite } from '@/lib/api/products'
+import { fetchGraphQL } from '@/lib/api/graphql'
 import { useUserStore } from '@/store/userStore'
 import { useLoginModalStore } from '@/store/modalStore'
 
@@ -20,7 +20,11 @@ export function useFavorite({ productId, initialIsFavorite }: UseFavoriteOptions
   }, [initialIsFavorite])
 
   const { mutate: toggleFavorite, isPending } = useMutation({
-    mutationFn: () => addFavorite(productId),
+    mutationFn: () => fetchGraphQL(`
+      mutation ToggleFavorite($productId: Int!) {
+        toggleFavorite(productId: $productId) { success }
+      }
+    `, { productId }),
     onMutate: () => {
       setIsFavorite((prev) => !prev)
     },

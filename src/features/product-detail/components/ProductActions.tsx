@@ -5,7 +5,7 @@ import Button from '@/components/commons/button/Button'
 import { useUserStore } from '@/store/userStore'
 import { useRouter } from 'next/navigation'
 import { useFavorite } from '@/hooks/useFavorite'
-import { createChatRoom } from '@/lib/api/chatting'
+import { fetchGraphQL } from '@/lib/api/graphql'
 import { ROUTES } from '@/constants/routes'
 
 interface ProductActionsProps {
@@ -34,7 +34,11 @@ export default function ProductActions({ id, isFavorite: initialIsFavorite, sell
 
   const handleChat = async () => {
     try {
-      const chatRoom = await createChatRoom({ productId: id })
+      const { createChatRoom: chatRoom } = await fetchGraphQL<{ createChatRoom: { chatRoomId: number } }>(`
+        mutation CreateChatRoom($productId: Int!) {
+          createChatRoom(productId: $productId) { chatRoomId }
+        }
+      `, { productId: id })
       sessionStorage.setItem('chatRoom', JSON.stringify(chatRoom))
       router.push(ROUTES.CHAT_ROOM_ID(chatRoom.chatRoomId))
     } catch {
