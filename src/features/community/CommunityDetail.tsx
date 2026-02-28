@@ -1,8 +1,10 @@
 'use client'
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { deletePost, fetchComments, fetchCommunityId, postReply } from '@/lib/api/community'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@apollo/client/react'
+import { gql } from '@apollo/client'
+import { deletePost, postReply } from '@/lib/api/community'
 import MdPreview from './components/markdown/MdPreview'
 import { getBoardType } from '@/lib/utils/getBoardType'
 import Badge from '@/components/commons/badge/Badge'
@@ -26,6 +28,49 @@ import { AnimatePresence } from 'framer-motion'
 import SimpleHeader from '@/components/header/SimpleHeader'
 import InlineNotification from '@/components/commons/InlineNotification'
 import { useOutsideClick } from '@/hooks/useOutsideClick'
+
+const GET_COMMUNITY_POST = gql`
+  query GetCommunityPost($id: Int!) {
+    communityPost(id: $id) {
+      id
+      title
+      content
+      authorNickname
+      authorProfileImageUrl
+      authorId
+      boardType
+      viewCount
+      commentCount
+      createdAt
+      updatedAt
+      imageUrls
+    }
+  }
+`
+
+const GET_COMMUNITY_COMMENTS = gql`
+  query GetCommunityComments($postId: Int!, $page: Int, $size: Int) {
+    communityPostComments(postId: $postId, page: $page, size: $size) {
+      comments {
+        id
+        content
+        authorNickname
+        authorProfileImageUrl
+        createdAt
+      }
+    }
+  }
+`
+
+interface GetCommunityPostData {
+  communityPost: CommunityDetailItem
+}
+
+interface GetCommunityCommentsData {
+  communityPostComments: {
+    comments: Comment[]
+  }
+}
 
 interface CommunityDetailProps {
   initialPostData?: CommunityDetailItem
@@ -64,22 +109,25 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
   const id = params.id as string
 
   const {
-    data,
-    isLoading: isLoadingCommunityData,
+    data: postQueryData,
+    loading: isLoadingCommunityData,
     error,
-  } = useQuery({
-    queryKey: ['community', id],
-    queryFn: () => fetchCommunityId(id!),
-    enabled: !!id,
-    initialData: initialPostData,
+  } = useQuery<GetCommunityPostData>(GET_COMMUNITY_POST, {
+    variables: { id: Number(id) },
+    skip: !id,
   })
 
-  const { data: commentData, isLoading: isLoadingCommentData } = useQuery({
-    queryKey: ['community', id, 'comments'],
-    queryFn: () => fetchComments(id!),
-    enabled: !!id,
-    initialData: initialCommentData ?? undefined,
+  const data = postQueryData?.communityPost ?? initialPostData
+
+  const {
+    data: commentQueryData,
+    loading: isLoadingCommentData,
+  } = useQuery<GetCommunityCommentsData>(GET_COMMUNITY_COMMENTS, {
+    variables: { postId: Number(id), page: 0, size: 100 },
+    skip: !id,
   })
+
+  const commentData = commentQueryData?.communityPostComments ?? initialCommentData ?? undefined
 
   const replyMutation = useMutation({
     mutationFn: (requestData: CommentPostRequestData) => postReply(requestData, id!),

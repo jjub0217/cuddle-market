@@ -1,8 +1,8 @@
 'use client'
 
 import { useParams } from 'next/navigation'
-import { fetchProductById } from '@/lib/api/products'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery } from '@apollo/client/react'
+import { gql } from '@apollo/client'
 import Footer from '@/components/footer/Footer'
 import MainImage from './components/MainImage'
 import SubImages from './components/SubImages'
@@ -15,6 +15,51 @@ import SellerOtherProducts from './components/SellerOtherProducts'
 import { useEffect } from 'react'
 import type { ProductDetailItem } from '@/types/product'
 
+const GET_PRODUCT = gql`
+  query GetProduct($id: Int!) {
+    product(id: $id) {
+      id
+      title
+      description
+      price
+      mainImageUrl
+      subImageUrls
+      productType
+      tradeStatus
+      petType
+      petDetailType
+      category
+      productStatus
+      addressSido
+      addressGugun
+      createdAt
+      viewCount
+      favoriteCount
+      isFavorite
+      sellerInfo {
+        sellerId
+        sellerNickname
+        sellerProfileImageUrl
+      }
+      sellerOtherProducts {
+        id
+        title
+        price
+        mainImageUrl
+        petDetailType
+        productStatus
+        tradeStatus
+        createdAt
+        favoriteCount
+      }
+    }
+  }
+`
+
+interface GetProductData {
+  product: ProductDetailItem
+}
+
 interface ProductDetailProps {
   initialData: ProductDetailItem
 }
@@ -23,12 +68,12 @@ function ProductDetail({ initialData }: ProductDetailProps) {
   const params = useParams<{ id: string }>()
   const id = params.id
 
-  const { data } = useQuery({
-    queryKey: ['product', id],
-    queryFn: () => fetchProductById(id!),
-    enabled: !!id,
-    initialData,
+  const { data: apolloData, loading, error: queryError } = useQuery<GetProductData>(GET_PRODUCT, {
+    variables: { id: Number(id) },
+    skip: !id,
   })
+
+  const data = apolloData?.product ?? initialData
 
   useEffect(() => {
     window.scrollTo(0, 0)
