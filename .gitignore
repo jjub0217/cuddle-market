@@ -41,5 +41,8 @@ next-env.d.ts
 # Sync
 sync/
 
+# OMC (oh-my-claudecode)
+.omc/
+
 # Misc
 *.log
