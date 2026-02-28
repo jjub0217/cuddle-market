@@ -12,7 +12,7 @@ import TitleField from '@/components/commons/TitleField'
 import { commonTitleValidationRules, communityContentValidationRules } from '../../signup/validationRules'
 import Markdown from './markdown/Markdown'
 import { ArrowLeft } from 'lucide-react'
-import { fetchCommunityId, patchPost, postCommunity } from '@/lib/api/community'
+import { fetchGraphQL } from '@/lib/api/graphql'
 import { useEffect, useState } from 'react'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import SimpleHeader from '@/components/header/SimpleHeader'
@@ -97,10 +97,18 @@ export default function CommunityPostForm() {
 
     try {
       if (isEditMode) {
-        await patchPost(Number(id), requestData)
+        await fetchGraphQL(`
+          mutation UpdatePost($id: Int!, $input: CommunityPostInput!) {
+            updatePost(id: $id, input: $input) { success }
+          }
+        `, { id: Number(id), input: requestData })
         router.push(`/community/${id}`)
       } else {
-        const response = await postCommunity(requestData)
+        const { createPost: response } = await fetchGraphQL<{ createPost: { id: number } }>(`
+          mutation CreatePost($input: CommunityPostInput!) {
+            createPost(input: $input) { id }
+          }
+        `, { input: requestData })
         clearDraft(getValues('boardType'))
         router.push(`/community/${response.id}`)
       }
@@ -118,7 +126,11 @@ export default function CommunityPostForm() {
     const loadPost = async () => {
       if (isEditMode && id) {
         try {
-          const data = await fetchCommunityId(id)
+          const { communityPost: data } = await fetchGraphQL<{ communityPost: any }>(`
+            query CommunityPost($id: Int!) {
+              communityPost(id: $id) { id title content boardType imageUrls }
+            }
+          `, { id: Number(id) })
           reset({
             boardType: data.boardType,
             title: data.title,

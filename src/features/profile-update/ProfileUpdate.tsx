@@ -4,13 +4,12 @@ import ProfileData from '@/components/profile/ProfileData'
 import { useEffect, useState } from 'react'
 import ProfileUpdateBaseForm from './components/ProfileUpdateBaseForm'
 import { useQuery } from '@tanstack/react-query'
-import { fetchMyPageData } from '@/lib/api/products'
+import { fetchGraphQL } from '@/lib/api/graphql'
 import { useUserStore } from '@/store/userStore'
 import ProfileUpdatePasswordForm from './components/ProfileUpdatePasswordForm'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useRouter, usePathname } from 'next/navigation'
 import WithdrawModal, { type WithDrawFormValues } from '@/components/modal/WithdrawModal'
-import { withDraw } from '@/lib/api/profile'
 import { ROUTES } from '@/constants/routes'
 
 function ProfileUpdate() {
@@ -30,13 +29,24 @@ function ProfileUpdate() {
     error,
   } = useQuery({
     queryKey: ['mypage', user?.id],
-    queryFn: () => fetchMyPageData(),
+    queryFn: async () => {
+      const data = await fetchGraphQL<{ myProfile: any }>(`
+        query MyProfile {
+          myProfile { id email name nickname birthDate profileImageUrl introduction addressSido addressGugun createdAt rating }
+        }
+      `)
+      return data.myProfile
+    },
     enabled: !!user,
   })
 
   const handleWithdraw = async (data: WithDrawFormValues) => {
     try {
-      await withDraw(data)
+      await fetchGraphQL(`
+        mutation Withdraw($reason: String!, $detailReason: String!) {
+          withdraw(reason: $reason, detailReason: $detailReason) { success }
+        }
+      `, { reason: data.reason, detailReason: data.detailReason })
       clearAll()
       router.push(ROUTES.HOME)
     } catch {

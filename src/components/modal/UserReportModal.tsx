@@ -1,4 +1,4 @@
-import { userReported } from '@/lib/api/profile'
+import { fetchGraphQL } from '@/lib/api/graphql'
 import { USER_REPORT_REASON } from '@/constants/constants'
 import ReportModalBase, { type ReportFormValues } from './ReportModalBase'
 import { useQueryClient } from '@tanstack/react-query'
@@ -17,7 +17,11 @@ export default function UserReportModal({ isOpen, userNickname, userId, onCancel
 
   const handleSubmit = async (data: ReportFormValues) => {
     try {
-      await userReported(userId, { ...data })
+      await fetchGraphQL(`
+        mutation ReportUser($userId: Int!, $reason: String!, $details: String) {
+          reportUser(userId: $userId, reason: $reason, details: $details) { success }
+        }
+      `, { userId, reason: data.reasonCode, details: data.detailReason })
       queryClient.invalidateQueries({ queryKey: ['userPage'] })
       onCancel()
     } catch {

@@ -10,7 +10,7 @@ import { MessageCircleMore, Bell } from 'lucide-react'
 import IconButton from '@/components/commons/button/IconButton'
 import NotificationsDropdown from './notification-section/NotificationsDropdown'
 import { useQuery } from '@tanstack/react-query'
-import { getUnreadCount } from '@/lib/api/notifications'
+import { fetchGraphQL } from '@/lib/api/graphql'
 import { useNotificationSSE } from '@/hooks/useNotifications'
 
 interface UserControlsProps {
@@ -30,7 +30,14 @@ export default function UserControls({ isSideOpen, setIsSideOpen, hideMenuButton
   }
   const { data: unreadCountData } = useQuery({
     queryKey: ['notifications', 'unreadCount'],
-    queryFn: () => getUnreadCount(),
+    queryFn: async () => {
+      const data = await fetchGraphQL<{ unreadNotificationCount: { unreadCount: number } }>(`
+        query UnreadNotificationCount {
+          unreadNotificationCount { unreadCount }
+        }
+      `)
+      return data.unreadNotificationCount
+    },
     enabled: !!user,
   })
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { fetchRoomMessages, fetchRooms } from '@/lib/api/chatting'
+import { fetchGraphQL } from '@/lib/api/graphql'
 import { useUserStore } from '@/store/userStore'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter, useParams } from 'next/navigation'
@@ -54,13 +54,23 @@ export default function ChattingPage() {
     refetch: refetchMessages,
   } = useInfiniteQuery({
     queryKey: ['messages', chatRoomId],
-    queryFn: ({ pageParam }) => fetchRoomMessages(Number(chatRoomId), pageParam),
+    queryFn: async ({ pageParam }) => {
+      const data = await fetchGraphQL<{ chatMessages: any }>(`
+        query ChatMessages($chatRoomId: Int!, $page: Int!, $size: Int!) {
+          chatMessages(chatRoomId: $chatRoomId, page: $page, size: $size) {
+            messages { messageId senderId senderNickname content messageType imageUrl createdAt }
+            currentPage hasNext
+          }
+        }
+      `, { chatRoomId: Number(chatRoomId), page: pageParam, size: 50 })
+      return data.chatMessages
+    },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.currentPage + 1 : undefined),
     initialPageParam: 0,
     enabled: !!user && !!chatRoomId,
   })
 
-  const httpMessages = roomMessages?.pages.flatMap((page) => page.data.messages) ?? []
+  const httpMessages = roomMessages?.pages.flatMap((page) => page.messages) ?? []
   const allMessages = [...httpMessages, ...(realtimeMessages[Number(chatRoomId)] ?? [])]
 
   const {
@@ -72,7 +82,17 @@ export default function ChattingPage() {
     error: errorRooms,
   } = useInfiniteQuery({
     queryKey: ['chatRooms'],
-    queryFn: ({ pageParam }) => fetchRooms(pageParam),
+    queryFn: async ({ pageParam }) => {
+      const data = await fetchGraphQL<{ chatRooms: any }>(`
+        query ChatRooms($page: Int!, $size: Int!) {
+          chatRooms(page: $page, size: $size) {
+            chatRooms { chatRoomId productId productTitle productMainImageUrl otherUserNickname otherUserProfileImageUrl lastMessage lastMessageTime unreadCount }
+            currentPage hasNext
+          }
+        }
+      `, { page: pageParam, size: 10 })
+      return data.chatRooms
+    },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.currentPage + 1 : undefined),
     initialPageParam: 0,
     enabled: !!user,

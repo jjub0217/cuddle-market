@@ -8,7 +8,7 @@ import { CircleAlert } from 'lucide-react'
 import InputField from '@/components/commons/InputField'
 import AlertBox from '@/components/modal/AlertBox'
 import { useEffect, useState } from 'react'
-import { changePassword } from '@/lib/api/profile'
+import { fetchGraphQL } from '@/lib/api/graphql'
 import InlineNotification from '@/components/commons/InlineNotification'
 import { AnimatePresence } from 'framer-motion'
 
@@ -58,7 +58,11 @@ export default function ProfileUpdatePasswordForm() {
     }
 
     try {
-      await changePassword({ ...requestData })
+      await fetchGraphQL(`
+        mutation ChangePassword($currentPassword: String!, $newPassword: String!, $confirmPassword: String!) {
+          changePassword(currentPassword: $currentPassword, newPassword: $newPassword, confirmPassword: $confirmPassword) { success }
+        }
+      `, { ...requestData })
       reset()
       setPwUpdateSuccess(
         <div className="flex flex-col gap-0.5">

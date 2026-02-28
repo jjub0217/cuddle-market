@@ -9,7 +9,7 @@ import BasicInfoSection from './basicInfoSection/BasicInfoSection'
 import PriceAndStatusSection from './priceAndStatusSection/PriceAndStatusSection'
 import TradeInfoSection from './tradeInfoSection/TradeInfoSection'
 import type { ProductDetailItem, RequestProductPostRequestData } from '@/types'
-import { patchRequestProduct, requestPostProduct } from '@/lib/api/products'
+import { fetchGraphQL } from '@/lib/api/graphql'
 import { cn } from '@/lib/utils/cn'
 import { useEffect, useMemo, useState } from 'react'
 import { IMAGE_PROCESSING_DELAY } from '@/constants/constants'
@@ -89,13 +89,21 @@ export function ProductRequestForm({ isEditMode, productId: id, initialData }: P
     try {
       if (isEditMode && id) {
         // 편집 모드: 기존 상품 ID로 수정
-        await patchRequestProduct(requestData, Number(id))
+        await fetchGraphQL(`
+          mutation UpdateProductRequest($id: Int!, $input: ProductRequestInput!) {
+            updateProductRequest(id: $id, input: $input) { success }
+          }
+        `, { id: Number(id), input: requestData })
         // Lambda 이미지 리사이징 처리 대기
         await new Promise((resolve) => setTimeout(resolve, IMAGE_PROCESSING_DELAY))
         router.push(`/products/${id}`)
       } else {
         // 새 등록: 서버에서 생성된 ID로 이동
-        const response = await requestPostProduct(requestData)
+        const { createProductRequest: response } = await fetchGraphQL<{ createProductRequest: { id: number } }>(`
+          mutation CreateProductRequest($input: ProductRequestInput!) {
+            createProductRequest(input: $input) { id }
+          }
+        `, { input: requestData })
         // Lambda 이미지 리사이징 처리 대기
         await new Promise((resolve) => setTimeout(resolve, IMAGE_PROCESSING_DELAY))
         router.push(`/products/${response.id}`)

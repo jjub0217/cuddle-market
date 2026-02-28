@@ -4,20 +4,12 @@ import { useUserStore } from '@/store/userStore'
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { useMutation, useInfiniteQuery, useQueryClient, useQuery } from '@tanstack/react-query'
-import {
-  deleteProduct,
-  fetchMyBlockedData,
-  fetchMyFavoriteData,
-  fetchMyPageData,
-  fetchMyProductData,
-  fetchMyRequestData,
-} from '@/lib/api/products'
+import { fetchGraphQL } from '@/lib/api/graphql'
 import Tabs from '@/components/Tabs'
 import { MY_PAGE_TABS, type MyPageTabId } from '@/constants/constants'
 import MyPagePanel from './components/MyPagePanel'
 import DeleteConfirmModal from '@/components/modal/DeleteConfirmModal'
 import WithdrawModal, { type WithDrawFormValues } from '@/components/modal/WithdrawModal'
-import { userUnBlocked, withDraw } from '@/lib/api/profile'
 import ProfileData from '@/components/profile/ProfileData'
 import { AnimatePresence } from 'framer-motion'
 import InlineNotification from '@/components/commons/InlineNotification'
@@ -50,7 +42,14 @@ function MyPage() {
     error: errorMyData,
   } = useQuery({
     queryKey: ['mypage', user?.id],
-    queryFn: () => fetchMyPageData(),
+    queryFn: async () => {
+      const data = await fetchGraphQL<{ myProfile: any }>(`
+        query MyProfile {
+          myProfile { id email name nickname birthDate profileImageUrl introduction addressSido addressGugun createdAt rating }
+        }
+      `)
+      return data.myProfile
+    },
     enabled: !!user,
   })
 
@@ -63,7 +62,17 @@ function MyPage() {
     error: errorMyProductData,
   } = useInfiniteQuery({
     queryKey: ['myProducts', user?.id],
-    queryFn: ({ pageParam }) => fetchMyProductData(pageParam),
+    queryFn: async ({ pageParam }) => {
+      const data = await fetchGraphQL<{ myProducts: any }>(`
+        query MyProducts($page: Int!, $size: Int!) {
+          myProducts(page: $page, size: $size) {
+            content { id title price mainImageUrl petDetailType productStatus productType tradeStatus createdAt viewCount favoriteCount isFavorite }
+            page hasNext total totalElements
+          }
+        }
+      `, { page: pageParam, size: 10 })
+      return data.myProducts
+    },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
     initialPageParam: 0,
     enabled: !!user,
@@ -77,7 +86,17 @@ function MyPage() {
     error: errorMyRequestData,
   } = useInfiniteQuery({
     queryKey: ['myRequest', user?.id],
-    queryFn: ({ pageParam }) => fetchMyRequestData(pageParam),
+    queryFn: async ({ pageParam }) => {
+      const data = await fetchGraphQL<{ myRequests: any }>(`
+        query MyRequests($page: Int!, $size: Int!) {
+          myRequests(page: $page, size: $size) {
+            content { id title price mainImageUrl petDetailType productStatus productType tradeStatus createdAt viewCount favoriteCount isFavorite }
+            page hasNext total totalElements
+          }
+        }
+      `, { page: pageParam, size: 10 })
+      return data.myRequests
+    },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
     initialPageParam: 0,
     enabled: activeMyPageTab === 'tab-purchases',
@@ -91,7 +110,17 @@ function MyPage() {
     error: errorMyFavoritetData,
   } = useInfiniteQuery({
     queryKey: ['myFavorite', user?.id],
-    queryFn: ({ pageParam }) => fetchMyFavoriteData(pageParam),
+    queryFn: async ({ pageParam }) => {
+      const data = await fetchGraphQL<{ myFavorites: any }>(`
+        query MyFavorites($page: Int!, $size: Int!) {
+          myFavorites(page: $page, size: $size) {
+            content { id title price mainImageUrl petDetailType productStatus productType tradeStatus createdAt viewCount favoriteCount isFavorite }
+            page hasNext total totalElements
+          }
+        }
+      `, { page: pageParam, size: 10 })
+      return data.myFavorites
+    },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
     initialPageParam: 0,
     enabled: activeMyPageTab === 'tab-wishlist',
@@ -105,7 +134,17 @@ function MyPage() {
     error: errorMyFBlockedData,
   } = useInfiniteQuery({
     queryKey: ['myBlocked', user?.id],
-    queryFn: ({ pageParam }) => fetchMyBlockedData(pageParam),
+    queryFn: async ({ pageParam }) => {
+      const data = await fetchGraphQL<{ myBlockedUsers: any }>(`
+        query MyBlockedUsers($page: Int!, $size: Int!) {
+          myBlockedUsers(page: $page, size: $size) {
+            content { blockedUserId blockedUserNickname blockedAt }
+            page hasNext total
+          }
+        }
+      `, { page: pageParam, size: 10 })
+      return data.myBlockedUsers
+    },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
     initialPageParam: 0,
     enabled: activeMyPageTab === 'tab-blocked',
@@ -127,7 +166,11 @@ function MyPage() {
   }[activeMyPageTab]
 
   const { mutate: deleteProductMutate } = useMutation({
-    mutationFn: (id: number) => deleteProduct(id),
+    mutationFn: (id: number) => fetchGraphQL(`
+      mutation DeleteProduct($id: Int!) {
+        deleteProduct(id: $id) { success }
+      }
+    `, { id }),
     onSuccess: () => {
       if (activeMyPageTab === 'tab-sales') {
         queryClient.invalidateQueries({ queryKey: ['myProducts', user?.id] })
@@ -164,7 +207,11 @@ function MyPage() {
 
   const handleWithdraw = async (data: WithDrawFormValues) => {
     try {
-      await withDraw(data)
+      await fetchGraphQL(`
+        mutation Withdraw($reason: String!, $detailReason: String!) {
+          withdraw(reason: $reason, detailReason: $detailReason) { success }
+        }
+      `, { reason: data.reason, detailReason: data.detailReason })
       clearAll()
       router.push('/')
     } catch {
@@ -178,7 +225,11 @@ function MyPage() {
   }
 
   const { mutate: unblockUser } = useMutation({
-    mutationFn: (blockedUserId: number) => userUnBlocked(blockedUserId),
+    mutationFn: (blockedUserId: number) => fetchGraphQL(`
+      mutation UnblockUser($userId: Int!) {
+        unblockUser(userId: $userId) { success }
+      }
+    `, { userId: blockedUserId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['myBlocked'] })
     },

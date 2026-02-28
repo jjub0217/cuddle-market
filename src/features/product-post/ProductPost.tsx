@@ -7,7 +7,7 @@ import { PRODUCT_TYPE_TABS, type ProductTypeTabId } from '@/constants/constants'
 import Tabs from '@/components/Tabs'
 import { ProductPostForm } from './components/ProductPostForm'
 import { ProductRequestForm } from './components/ProductRequestForm'
-import { fetchProductById } from '@/lib/api/products'
+import { fetchGraphQL } from '@/lib/api/graphql'
 import type { ProductDetailItem } from '@/types'
 import { useUserStore } from '@/store/userStore'
 
@@ -58,7 +58,17 @@ function ProductPost() {
     const loadProduct = async () => {
       if (isEditMode && id) {
         try {
-          const data = await fetchProductById(id)
+          const { product: data } = await fetchGraphQL<{ product: ProductDetailItem }>(`
+            query Product($id: Int!) {
+              product(id: $id) {
+                id title description price mainImageUrl subImageUrls productType tradeStatus
+                petType petDetailType category productStatus addressSido addressGugun
+                createdAt viewCount favoriteCount isFavorite
+                sellerInfo { sellerId sellerNickname sellerProfileImageUrl }
+                sellerOtherProducts { id title price mainImageUrl }
+              }
+            }
+          `, { id: Number(id) })
           window.scrollTo({ top: 0, behavior: 'smooth' })
           setProductData(data)
           const tabId = data.productType === 'SELL' ? 'tab-sales' : 'tab-purchases'

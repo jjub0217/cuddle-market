@@ -2,9 +2,8 @@
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useQuery } from '@apollo/client/react'
-import { gql } from '@apollo/client'
-import { deletePost, postReply } from '@/lib/api/community'
+import { useQuery } from '@tanstack/react-query'
+import { fetchGraphQL } from '@/lib/api/graphql'
 import MdPreview from './components/markdown/MdPreview'
 import { getBoardType } from '@/lib/utils/getBoardType'
 import Badge from '@/components/commons/badge/Badge'
@@ -29,7 +28,7 @@ import SimpleHeader from '@/components/header/SimpleHeader'
 import InlineNotification from '@/components/commons/InlineNotification'
 import { useOutsideClick } from '@/hooks/useOutsideClick'
 
-const GET_COMMUNITY_POST = gql`
+const GET_COMMUNITY_POST = `
   query GetCommunityPost($id: Int!) {
     communityPost(id: $id) {
       id
@@ -48,16 +47,37 @@ const GET_COMMUNITY_POST = gql`
   }
 `
 
-const GET_COMMUNITY_COMMENTS = gql`
+const GET_COMMUNITY_COMMENTS = `
   query GetCommunityComments($postId: Int!, $page: Int, $size: Int) {
     communityPostComments(postId: $postId, page: $page, size: $size) {
       comments {
         id
         content
+        authorId
         authorNickname
         authorProfileImageUrl
         createdAt
+        depth
+        parentId
+        hasChildren
+        childrenCount
       }
+    }
+  }
+`
+
+const CREATE_COMMENT = `
+  mutation CreateComment($postId: Int!, $content: String!) {
+    createComment(postId: $postId, content: $content) {
+      success
+    }
+  }
+`
+
+const DELETE_POST = `
+  mutation DeletePost($id: Int!) {
+    deletePost(id: $id) {
+      success
     }
   }
 `
@@ -110,27 +130,30 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
 
   const {
     data: postQueryData,
-    loading: isLoadingCommunityData,
+    isLoading: isLoadingCommunityData,
     error,
-  } = useQuery<GetCommunityPostData>(GET_COMMUNITY_POST, {
-    variables: { id: Number(id) },
-    skip: !id,
+  } = useQuery({
+    queryKey: ['community', id],
+    queryFn: () => fetchGraphQL<GetCommunityPostData>(GET_COMMUNITY_POST, { id: Number(id) }),
+    enabled: !!id,
   })
 
   const data = postQueryData?.communityPost ?? initialPostData
 
   const {
     data: commentQueryData,
-    loading: isLoadingCommentData,
-  } = useQuery<GetCommunityCommentsData>(GET_COMMUNITY_COMMENTS, {
-    variables: { postId: Number(id), page: 0, size: 100 },
-    skip: !id,
+    isLoading: isLoadingCommentData,
+  } = useQuery({
+    queryKey: ['community', id, 'comments'],
+    queryFn: () => fetchGraphQL<GetCommunityCommentsData>(GET_COMMUNITY_COMMENTS, { postId: Number(id), page: 0, size: 100 }),
+    enabled: !!id,
   })
 
   const commentData = commentQueryData?.communityPostComments ?? initialCommentData ?? undefined
 
   const replyMutation = useMutation({
-    mutationFn: (requestData: CommentPostRequestData) => postReply(requestData, id!),
+    mutationFn: (requestData: CommentPostRequestData) =>
+      fetchGraphQL(CREATE_COMMENT, { postId: Number(id), content: requestData.content }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['community', id, 'comments'] })
       reset()
@@ -147,7 +170,7 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
 
   const handlePostDelete = async (postId: number) => {
     try {
-      await deletePost(postId)
+      await fetchGraphQL(DELETE_POST, { id: postId })
       queryClient.invalidateQueries({ queryKey: ['community'] })
       router.push('/community')
     } catch {
