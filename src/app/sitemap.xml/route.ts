@@ -1,6 +1,10 @@
 import { toUrlName } from '@/lib/utils/toUrlName'
 import { fetchProductSitemapEntries, fetchCommunitySitemapEntries } from '@/lib/api/server/sitemap'
 
+function formatLastmod(dateStr: string): string {
+  return dateStr.slice(0, 10)
+}
+
 export const revalidate = 3600
 
 const SITE_URL = 'https://cuddle-market.vercel.app'
@@ -40,7 +44,7 @@ export async function GET() {
     urls.push(`
   <url>
     <loc>${sitemapUrl(`${SITE_URL}/products/${product.id}/${toUrlName(product.title)}`)}</loc>
-    <lastmod>${product.createdAt}</lastmod>
+    <lastmod>${formatLastmod(product.createdAt)}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>`)
@@ -51,7 +55,7 @@ export async function GET() {
     urls.push(`
   <url>
     <loc>${sitemapUrl(`${SITE_URL}/community/${post.id}/${toUrlName(post.title)}`)}</loc>
-    <lastmod>${post.updatedAt || post.createdAt}</lastmod>
+    <lastmod>${formatLastmod(post.updatedAt || post.createdAt)}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>`)
