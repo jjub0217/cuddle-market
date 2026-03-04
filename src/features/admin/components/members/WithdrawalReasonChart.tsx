@@ -7,7 +7,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
-import { WITHDRAW_REASON } from '@/constants/constants'
+import { WiTH_DRAW_REASON } from '@/constants/constants'
 import type { WithdrawalReasonStat } from '@/features/admin/mocks/mockMemberStats'
 
 const REASON_COLORS: Record<string, string> = {
@@ -19,7 +19,7 @@ const REASON_COLORS: Record<string, string> = {
 }
 
 const reasonLabelMap = Object.fromEntries(
-  WITHDRAW_REASON.map((r) => [r.id, r.label]),
+  WiTH_DRAW_REASON.map((r) => [r.id, r.label]),
 )
 
 interface WithdrawalReasonChartProps {
