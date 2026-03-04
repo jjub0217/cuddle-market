@@ -373,10 +373,15 @@ export const resolvers = {
       args: { userId: number; reasonCode: string; detailReason?: string; imageFiles?: string[] },
       context: Context
     ) => {
-      await fetchAPI(`/reports/users/${args.userId}`, context, {
-        method: 'POST',
-        body: JSON.stringify({ reasonCode: args.reasonCode, detailReason: args.detailReason, imageFiles: args.imageFiles }),
-      })
+      try {
+        await fetchAPI(`/reports/users/${args.userId}`, context, {
+          method: 'POST',
+          body: JSON.stringify({ reasonCode: args.reasonCode, detailReason: args.detailReason, imageFiles: args.imageFiles }),
+        })
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('409')) throw new Error('이미 신고한 사용자입니다.')
+        throw error
+      }
       return { success: true }
     },
 
