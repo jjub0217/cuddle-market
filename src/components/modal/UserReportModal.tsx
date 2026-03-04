@@ -18,10 +18,10 @@ export default function UserReportModal({ isOpen, userNickname, userId, onCancel
   const handleSubmit = async (data: ReportFormValues) => {
     try {
       await fetchGraphQL(`
-        mutation ReportUser($userId: Int!, $reason: String!, $details: String) {
-          reportUser(userId: $userId, reason: $reason, details: $details) { success }
+        mutation ReportUser($userId: Int!, $reasonCode: String!, $detailReason: String, $imageFiles: [String!]) {
+          reportUser(userId: $userId, reasonCode: $reasonCode, detailReason: $detailReason, imageFiles: $imageFiles) { success }
         }
-      `, { userId, reason: data.reasonCode, details: data.detailReason })
+      `, { userId, reasonCode: data.reasonCode, detailReason: data.detailReason, imageFiles: data.imageFiles })
       queryClient.invalidateQueries({ queryKey: ['userPage'] })
       onCancel()
     } catch {

@@ -370,12 +370,12 @@ export const resolvers = {
 
     reportUser: async (
       _parent: unknown,
-      args: { userId: number; reason: string; details?: string },
+      args: { userId: number; reasonCode: string; detailReason?: string; imageFiles?: string[] },
       context: Context
     ) => {
       await fetchAPI(`/reports/users/${args.userId}`, context, {
         method: 'POST',
-        body: JSON.stringify({ reason: args.reason, details: args.details }),
+        body: JSON.stringify({ reasonCode: args.reasonCode, detailReason: args.detailReason, imageFiles: args.imageFiles }),
       })
       return { success: true }
     },

@@ -363,7 +363,7 @@ export const typeDefs = gql`
     withdraw(reason: String!, detailReason: String!): MutationResponse!
     blockUser(userId: Int!): MutationResponse!
     unblockUser(userId: Int!): MutationResponse!
-    reportUser(userId: Int!, reason: String!, details: String): MutationResponse!
+    reportUser(userId: Int!, reasonCode: String!, detailReason: String, imageFiles: [String!]): MutationResponse!
 
     # Notifications
     markAllNotificationsRead: MutationResponse!
