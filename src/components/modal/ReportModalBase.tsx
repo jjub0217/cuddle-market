@@ -3,8 +3,7 @@ import ModalTitle from './ModalTitle'
 import RequiredLabel from '../commons/RequiredLabel'
 import { useForm, useWatch } from 'react-hook-form'
 import { ReportApiErrors } from '@/constants/validationRules'
-// TODO: ImageUploadField 마이그레이션 후 활성화 (#42-#43)
-// import ImageUploadField from '@/components/product/imageUploadField/ImageUploadField'
+import ImageUploadField from '@/features/product-post/components/imageUploadField/ImageUploadField'
 import { useEffect, useRef, type ReactNode } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import InlineNotification from '../commons/InlineNotification'
@@ -37,6 +36,9 @@ export default function ReportModalBase({ isOpen, heading, description, reasons,
     register,
     control,
     reset,
+    setValue,
+    setError,
+    clearErrors,
     formState: { errors, isValid },
   } = useForm<ReportFormValues>({
     mode: 'onChange',
@@ -123,8 +125,7 @@ export default function ReportModalBase({ isOpen, heading, description, reasons,
             </div>
           </div>
 
-          {/* TODO: ImageUploadField 마이그레이션 후 활성화 (#42-#43) */}
-          {/* <div className="flex w-full flex-col gap-3">
+          <div className="flex w-full flex-col gap-3">
             <ImageUploadField
               setValue={setValue}
               errors={errors}
@@ -137,7 +138,7 @@ export default function ReportModalBase({ isOpen, heading, description, reasons,
               className="gap-1"
               headingClassName="text-gray-900 font-semibold"
             />
-          </div> */}
+          </div>
         </div>
 
         <div className="flex justify-end gap-3">
