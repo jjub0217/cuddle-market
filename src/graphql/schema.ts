@@ -169,6 +169,7 @@ export const typeDefs = gql`
   type ProductConnection {
     content: [Product!]!
     page: Int
+    total: Int
     totalPages: Int
     totalElements: Int!
     hasNext: Boolean!
