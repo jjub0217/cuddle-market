@@ -199,6 +199,36 @@ Task(description="GitHub 수집", prompt="
 
 **Notion 마크다운 스펙 확인 필수**: 페이지 생성 전에 반드시 `ReadMcpResourceTool(server="claude.ai Notion", uri="notion://docs/enhanced-markdown-spec")`으로 스펙을 확인할 것.
 
+#### 사실 기반 원칙 (필수 준수)
+
+Daily Scrum 페이지 내용은 **검증 가능한 사실만** 기재한다.
+
+```
+[허용되는 소스 — 사실]
+  ✅ GitHub 커밋 (SHA, 메시지, 날짜)
+  ✅ GitHub PR (머지 여부, 번호, 제목)
+  ✅ GitHub 이슈 (열림/닫힘 상태)
+  ✅ Notion TASK DISTRIBUTION에 실제 등록된 태스크 (상태 확인 필수)
+
+[금지 — 추정/추론]
+  ❌ 커밋 없는 날에 "학습 진행", "준비 중" 등 활동 추정
+  ❌ 이전 Daily Scrum의 "금일 예정"을 다음 날 "전일 업무"로 전용
+  ❌ TASK DISTRIBUTION에 등록되지 않은 태스크를 예정 업무로 기재
+  ❌ "멘토 피드백 대기", "블로그 검토" 등 커밋/PR로 확인 불가능한 활동
+
+[전일 업무 작성 규칙]
+  1. 해당 날짜의 전일(또는 마지막 근무일) GitHub 커밋을 조회한다
+  2. 커밋이 있으면: 커밋 메시지 기반으로 작업 내용을 요약한다
+  3. 커밋이 없으면: "개발 커밋 없음"으로 기재한다
+  4. 머지된 PR이 있으면: PR 번호와 제목을 포함한다
+
+[금일 예정 작성 규칙]
+  1. 해당 날짜의 GitHub 커밋을 조회한다 (이미 지난 날짜인 경우)
+  2. 커밋이 있으면: 실제 커밋 내용 기반으로 작성한다
+  3. 커밋이 없으면: "개발 커밋 없음"으로 기재한다
+  4. 오늘 날짜인 경우만: 열린 이슈 + TASK DISTRIBUTION "개발 진행 중" 태스크로 작성 가능
+```
+
 페이지 속성:
 ```yaml
 이름: "YYYY년 M월 D일"          # 예: "2026년 2월 24일"
@@ -215,7 +245,7 @@ date:작성일시:is_datetime: 0
 <table>
 	<tr>
 		<td>강주현</td>
-		<td>(GitHub 어제 커밋 + Notion 완료 태스크에서 자동 추출)</td>
+		<td>(GitHub 전일 커밋 기반으로만 작성. 커밋 없으면 "개발 커밋 없음")</td>
 	</tr>
 </table>
 ## 금일 예정 업무 보고 {color="purple_bg"}
@@ -223,7 +253,7 @@ date:작성일시:is_datetime: 0
 <table>
 	<tr>
 		<td>강주현</td>
-		<td>(Notion "시작 전"/"개발 진행 중" 태스크 + GitHub 열린 이슈에서 자동 추출)</td>
+		<td>(과거 날짜: 해당일 실제 커밋 기반. 오늘: 열린 이슈 + TASK DISTRIBUTION 진행 중 태스크. 없으면 "개발 커밋 없음")</td>
 	</tr>
 </table>
 ## 회의 안건 {color="purple_bg"}
