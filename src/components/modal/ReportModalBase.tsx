@@ -125,20 +125,22 @@ export default function ReportModalBase({ isOpen, heading, description, reasons,
             </div>
           </div>
 
-          <div className="flex w-full flex-col gap-3">
-            <ImageUploadField
-              setValue={setValue}
-              errors={errors}
-              setError={setError}
-              clearErrors={clearErrors}
-              mainImageField="imageFiles"
-              heading="신고 이미지 첨부 (선택항목/최대 3장)"
-              showSection={false}
-              maxFiles={3}
-              className="gap-1"
-              headingClassName="text-gray-900 font-semibold"
-            />
-          </div>
+          {isOpen && (
+            <div className="flex w-full flex-col gap-3">
+              <ImageUploadField
+                setValue={setValue}
+                errors={errors}
+                setError={setError}
+                clearErrors={clearErrors}
+                mainImageField="imageFiles"
+                heading="신고 이미지 첨부 (선택항목/최대 3장)"
+                showSection={false}
+                maxFiles={3}
+                className="gap-1"
+                headingClassName="text-gray-900 font-semibold"
+              />
+            </div>
+          )}
         </div>
 
         <div className="flex justify-end gap-3">
