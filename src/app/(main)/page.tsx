@@ -42,15 +42,22 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const queryClient = new QueryClient()
 
   const initialData = await fetchProducts(filterParams)
-  if (initialData) {
+  const pageData = initialData?.data?.data
+  if (pageData) {
     queryClient.setQueryData(queryKey, {
-      pages: [initialData],
+      pages: [{
+        content: pageData.content,
+        page: pageData.page,
+        totalPages: pageData.totalPages,
+        totalElements: pageData.totalElements,
+        hasNext: pageData.hasNext,
+      }],
       pageParams: [0],
     })
   }
 
-  const products = initialData?.data?.data?.content ?? []
-  const totalElements = initialData?.data?.data?.totalElements ?? 0
+  const products = pageData?.content ?? []
+  const totalElements = pageData?.totalElements ?? 0
   const firstImageUrl = products[0]?.mainImageUrl
 
   const jsonLd = {
