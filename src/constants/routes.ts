@@ -34,6 +34,26 @@ export const ROUTES = {
   SIGNUP: '/auth/signup',
   SOCIAL_SIGNUP: '/auth/social-signup',
   FIND_PASSWORD: '/auth/find-password',
+
+  // Admin Auth
+  ADMIN_LOGIN: '/admin/login',
+
+  // Admin
+  ADMIN: '/admin',
+  ADMIN_PRODUCTS: '/admin/products',
+  // Admin - Members (2-depth)
+  ADMIN_MEMBERS_DASHBOARD: '/admin/members',
+  ADMIN_MEMBERS_USERS: '/admin/members/users',
+  ADMIN_MEMBERS_WITHDRAWALS: '/admin/members/withdrawals',
+
+  // Admin - Community
+  ADMIN_COMMUNITY: '/admin/community',
+
+  // Admin - Reports (2-depth)
+  ADMIN_REPORTS_USER: '/admin/reports/user',
+  ADMIN_REPORTS_PRODUCT_SELL: '/admin/reports/product-sell',
+  ADMIN_REPORTS_PRODUCT_REQUEST: '/admin/reports/product-request',
+  ADMIN_REPORTS_COMMUNITY: '/admin/reports/community',
 } as const
 
 // 로그인 필수 페이지 목록
