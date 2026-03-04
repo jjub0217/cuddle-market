@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils/cn'
-import { ChevronDown as DownArrow } from 'lucide-react'
+import { ChevronDown as DownArrow, Check } from 'lucide-react'
 import { Z_INDEX } from '@/constants/ui'
 
 interface SelectProps {
@@ -56,12 +56,13 @@ function SelectOption({ option, isSelected, onSelect, optionClassName, optionRef
       aria-selected={isSelected}
       onClick={() => onSelect(option.value)}
       className={cn(
-        'w-full rounded-md p-2 text-left text-sm transition hover:bg-gray-100 focus:bg-gray-100 focus:outline-none',
+        'flex w-full items-center justify-between rounded-md p-2 text-left text-sm transition hover:bg-gray-100 focus:bg-gray-100 focus:outline-none',
         isSelected && 'bg-gray-100 ring-1 ring-gray-300',
         optionClassName,
       )}
     >
-      {option.label}
+      <span>{option.label}</span>
+      {isSelected && <Check size={14} className="shrink-0 text-gray-600" />}
     </button>
   )
 }
