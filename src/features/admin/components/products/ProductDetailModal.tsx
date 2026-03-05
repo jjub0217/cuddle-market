@@ -191,7 +191,7 @@ export default function ProductDetailModal({ isOpen, product, onClose }: Product
 
                 {/* Sub images */}
                 <div className="mb-5 flex gap-2">
-                  {(product.subImages.length > 0 ? product.subImages : [null, null, null, null]).map(
+                  {(product.subImages?.length > 0 ? product.subImages : [null, null, null, null]).map(
                     (src, idx) => (
                       <div
                         key={idx}
@@ -219,7 +219,7 @@ export default function ProductDetailModal({ isOpen, product, onClose }: Product
                   <Field label="닉네임" value={product.nickname} />
                 </div>
                 <div className="mt-4">
-                  <Field label="상품명" value={product.description} />
+                  <Field label="상품명" value={product.name} />
                 </div>
                 <div className="mt-4">
                   <Field label="지역" value={`${product.addressSido} ${product.addressGugun}`} />
