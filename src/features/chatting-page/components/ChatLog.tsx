@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import Image from 'next/image'
 import type { Message } from '@/types'
 import { cn } from '@/lib/utils/cn'
@@ -126,15 +126,15 @@ export function ChatLog({
     }
   }
 
-  // 맨 아래 근처에 있을 때만 자동 스크롤
-  useEffect(() => {
+  // 맨 아래 근처에 있을 때만 자동 스크롤 (페인트 전에 실행하여 플리커 방지)
+  useLayoutEffect(() => {
     if (scrollRef.current && isNearBottom) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
   }, [roomMessages, isNearBottom])
 
-  // 이전 메시지 로드 후 스크롤 위치 복원
-  useEffect(() => {
+  // 이전 메시지 로드 후 스크롤 위치 복원 (페인트 전에 실행하여 플리커 방지)
+  useLayoutEffect(() => {
     if (scrollRef.current && prevScrollHeightRef.current > 0) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight - prevScrollHeightRef.current
       prevScrollHeightRef.current = 0
