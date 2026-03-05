@@ -192,7 +192,7 @@ export const MAX_FILES = 5
 export const IMAGE_PROCESSING_DELAY = 2000 // Lambda 이미지 리사이징 처리 대기 시간 (ms)
 
 // ========== 회원탈퇴 이유 관련 상수 ==========
-export const WiTH_DRAW_REASON = [
+export const WITHDRAW_REASON = [
   { id: 'SERVICE_DISSATISFACTION', label: '서비스 불만족' },
   { id: 'PRIVACY_CONCERN', label: '개인정보 우려' },
   { id: 'LOW_USAGE', label: '사용 빈도 낮음' },

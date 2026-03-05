@@ -1,5 +1,5 @@
 import Button from '../commons/button/Button'
-import { WITH_DRAW_ALERT_LIST, WiTH_DRAW_REASON } from '@/constants/constants'
+import { WITH_DRAW_ALERT_LIST, WITHDRAW_REASON } from '@/constants/constants'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import SelectDropdown from '../commons/select/SelectDropdown'
 import RequiredLabel from '../commons/RequiredLabel'
@@ -53,7 +53,7 @@ export default function WithdrawModal({ isOpen, onConfirm, onCancel, error, onCl
   }, [isOpen])
 
   const onSubmit = (data: WithDrawFormValues) => {
-    const koToEn = WiTH_DRAW_REASON.find((status) => status.label === data.reason)?.id ?? data.reason
+    const koToEn = WITHDRAW_REASON.find((status) => status.label === data.reason)?.id ?? data.reason
     onConfirm({ ...data, reason: koToEn })
   }
 
@@ -93,7 +93,7 @@ export default function WithdrawModal({ isOpen, onConfirm, onCancel, error, onCl
                 <SelectDropdown
                   value={field.value}
                   onChange={field.onChange}
-                  options={WiTH_DRAW_REASON.map((sort) => ({
+                  options={WITHDRAW_REASON.map((sort) => ({
                     value: sort.label,
                     label: sort.label,
                   }))}
