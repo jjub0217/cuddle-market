@@ -18,7 +18,10 @@ export default function AdminTableActions<T>({ actions, row }: AdminTableActions
       {visibleActions.map((action) => (
         <button
           key={action.label}
-          onClick={() => action.onClick(row)}
+          onClick={(e) => {
+            e.stopPropagation()
+            action.onClick(row)
+          }}
           className={cn(
             'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
             action.variant === 'danger'
