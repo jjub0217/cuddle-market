@@ -3,86 +3,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 import type { MockProductSellReport } from '../../mocks/mockProductSellReports'
+import { formatDate } from '../common/formatDate'
+import Field from '../common/Field'
+import DeleteConfirmDialog from '../common/DeleteConfirmDialog'
 
 interface ProductSellReportDetailModalProps {
   isOpen: boolean
   report: MockProductSellReport | null
   onClose: () => void
-}
-
-function formatDate(iso: string) {
-  const d = new Date(iso)
-  const yyyy = d.getFullYear()
-  const MM = String(d.getMonth() + 1).padStart(2, '0')
-  const dd = String(d.getDate()).padStart(2, '0')
-  return `${yyyy}-${MM}-${dd}`
-}
-
-function Field({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="mb-1.5 text-sm font-medium text-gray-500">{label}</p>
-      <div className="rounded-lg border border-gray-200 bg-gray-50/50 px-3 py-2.5 text-sm text-gray-900">
-        {value}
-      </div>
-    </div>
-  )
-}
-
-function DeleteConfirmDialog({
-  isOpen,
-  onConfirm,
-  onCancel,
-}: {
-  isOpen: boolean
-  onConfirm: () => void
-  onCancel: () => void
-}) {
-  const confirmRef = useRef<HTMLDialogElement>(null)
-
-  useEffect(() => {
-    const dialog = confirmRef.current
-    if (isOpen && !dialog?.open) {
-      dialog?.showModal()
-    } else if (!isOpen && dialog?.open) {
-      dialog?.close()
-    }
-  }, [isOpen])
-
-  return (
-    <dialog
-      ref={confirmRef}
-      className="m-auto w-full max-w-fit open:flex flex-col gap-4 rounded-xl bg-white p-6 shadow-2xl backdrop:bg-gray-900/50"
-      onClick={(e) => {
-        if (e.target === confirmRef.current) onCancel()
-      }}
-      onClose={(e) => {
-        e.stopPropagation()
-        onCancel()
-      }}
-    >
-      <h4 className="text-lg font-semibold text-gray-900">상품 삭제 확인</h4>
-      <p className="text-sm leading-relaxed text-gray-500">
-        삭제 시 해당 상품과 관련된 모든 데이터가 즉시 삭제되며 되돌릴 수 없습니다.
-      </p>
-      <div className="flex justify-end gap-3">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          취소
-        </button>
-        <button
-          type="button"
-          onClick={onConfirm}
-          className="cursor-pointer rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-        >
-          삭제
-        </button>
-      </div>
-    </dialog>
-  )
 }
 
 export default function ProductSellReportDetailModal({ isOpen, report, onClose }: ProductSellReportDetailModalProps) {
@@ -159,7 +87,7 @@ export default function ProductSellReportDetailModal({ isOpen, report, onClose }
               <p className="mb-1.5 text-sm font-medium text-gray-500">첨부 이미지</p>
               <div className="grid grid-cols-3 gap-3">
                 {Array.from({ length: 3 }, (_, idx) => {
-                  const src = report.images[idx]
+                  const src = report.images?.[idx]
                   return src ? (
                     <img
                       key={idx}
@@ -202,6 +130,8 @@ export default function ProductSellReportDetailModal({ isOpen, report, onClose }
 
           <DeleteConfirmDialog
             isOpen={showDeleteConfirm}
+            title="상품 삭제 확인"
+            description="삭제 시 해당 상품과 관련된 모든 데이터가 즉시 삭제되며 되돌릴 수 없습니다."
             onConfirm={() => {
               setShowDeleteConfirm(false)
               dialogRef.current?.close()

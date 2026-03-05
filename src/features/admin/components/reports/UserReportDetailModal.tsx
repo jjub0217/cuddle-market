@@ -3,86 +3,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 import type { MockUserReport } from '../../mocks/mockUserReports'
+import { formatDate } from '../common/formatDate'
+import Field from '../common/Field'
+import DeleteConfirmDialog from '../common/DeleteConfirmDialog'
 
 interface UserReportDetailModalProps {
   isOpen: boolean
   report: MockUserReport | null
   onClose: () => void
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  })
-}
-
-function Field({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="mb-1.5 text-sm font-medium text-gray-500">{label}</p>
-      <div className="rounded-lg border border-gray-200 bg-gray-50/50 px-3 py-2.5 text-sm text-gray-900">
-        {value}
-      </div>
-    </div>
-  )
-}
-
-function DeleteConfirmDialog({
-  isOpen,
-  onConfirm,
-  onCancel,
-}: {
-  isOpen: boolean
-  onConfirm: () => void
-  onCancel: () => void
-}) {
-  const confirmRef = useRef<HTMLDialogElement>(null)
-
-  useEffect(() => {
-    const dialog = confirmRef.current
-    if (isOpen && !dialog?.open) {
-      dialog?.showModal()
-    } else if (!isOpen && dialog?.open) {
-      dialog?.close()
-    }
-  }, [isOpen])
-
-  return (
-    <dialog
-      ref={confirmRef}
-      className="m-auto w-full max-w-fit open:flex flex-col gap-4 rounded-xl bg-white p-6 shadow-2xl backdrop:bg-gray-900/50"
-      onClick={(e) => {
-        if (e.target === confirmRef.current) onCancel()
-      }}
-      onClose={(e) => {
-        e.stopPropagation()
-        onCancel()
-      }}
-    >
-      <h4 className="text-lg font-semibold text-gray-900">유저 정지 확인</h4>
-      <p className="text-sm leading-relaxed text-gray-500">
-        정지 시 해당 유저의 계정이 즉시 정지되며 되돌릴 수 없습니다.
-      </p>
-      <div className="flex justify-end gap-3">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          취소
-        </button>
-        <button
-          type="button"
-          onClick={onConfirm}
-          className="cursor-pointer rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-        >
-          정지
-        </button>
-      </div>
-    </dialog>
-  )
 }
 
 export default function UserReportDetailModal({ isOpen, report, onClose }: UserReportDetailModalProps) {
@@ -155,7 +83,7 @@ export default function UserReportDetailModal({ isOpen, report, onClose }: UserR
               <p className="mb-1.5 text-sm font-medium text-gray-500">첨부 이미지</p>
               <div className="grid grid-cols-3 gap-3">
                 {Array.from({ length: 3 }, (_, idx) => {
-                  const src = report.images[idx]
+                  const src = report.images?.[idx]
                   return src ? (
                     <img
                       key={idx}
@@ -198,6 +126,9 @@ export default function UserReportDetailModal({ isOpen, report, onClose }: UserR
 
           <DeleteConfirmDialog
             isOpen={showDeleteConfirm}
+            title="유저 정지 확인"
+            description="정지 시 해당 유저의 계정이 즉시 정지되며 되돌릴 수 없습니다."
+            confirmLabel="정지"
             onConfirm={() => {
               setShowDeleteConfirm(false)
               dialogRef.current?.close()
