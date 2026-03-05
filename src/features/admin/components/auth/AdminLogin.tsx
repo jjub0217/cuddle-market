@@ -30,7 +30,7 @@ export default function AdminLogin() {
     try {
       const response = await login({ email: data.email, password: data.password })
       const { user, accessToken, refreshToken } = response.data
-      handleLogin(user as Parameters<typeof handleLogin>[0], accessToken, refreshToken)
+      handleLogin(user, accessToken, refreshToken)
       router.push(ROUTES.ADMIN)
     } catch {
       setError('아이디 또는 비밀번호가 올바르지 않습니다.')
@@ -54,6 +54,7 @@ export default function AdminLogin() {
             <input
               type="email"
               placeholder="아이디 (example@gmail.com)"
+              autoComplete="email"
               className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none transition-colors focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
               {...register('email', authValidationRules.email)}
             />
@@ -64,6 +65,7 @@ export default function AdminLogin() {
             <input
               type="password"
               placeholder="비밀번호 (6~15자의 영문 대소문자, 숫자, 특수문자 포함)"
+              autoComplete="current-password"
               className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none transition-colors focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
               {...register('password', { required: '비밀번호를 입력해주세요' })}
             />
