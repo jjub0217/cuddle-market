@@ -24,7 +24,7 @@ function aggregateByYear(data: MonthlyMemberStat[]) {
     const year = item.month.slice(0, 4)
     map.set(year, (map.get(year) ?? 0) + item.withdrawals)
   }
-  return Array.from(map, ([month, withdrawals]) => ({ month, withdrawals }))
+  return Array.from(map, ([year, withdrawals]) => ({ year, withdrawals }))
 }
 
 export default function WithdrawalTrendChart({ data }: WithdrawalTrendChartProps) {
@@ -53,7 +53,7 @@ export default function WithdrawalTrendChart({ data }: WithdrawalTrendChartProps
       <ResponsiveContainer width="100%" height={360}>
         <BarChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+          <XAxis dataKey={period === 'yearly' ? 'year' : 'month'} tick={{ fontSize: 12 }} />
           <YAxis tick={{ fontSize: 12 }} />
           <Tooltip />
           <Bar dataKey="withdrawals" name="탈퇴자 수" fill="#ef4444" radius={[4, 4, 0, 0]} />
