@@ -3,6 +3,7 @@ import type { MockUser } from '../mocks/mockUsers'
 
 export const userTableConfig: TableConfig<MockUser> = {
   title: '사용자 관리',
+  rowKey: 'id',
   searchable: true,
   searchPlaceholder: '닉네임 또는 이메일 검색...',
   columns: [
