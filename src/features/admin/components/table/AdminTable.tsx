@@ -69,6 +69,7 @@ export default function AdminTable<T extends object>({
             data={data}
             columns={config.columns}
             actions={config.actions}
+            rowKey={config.rowKey}
             isLoading={isLoading}
             onRowClick={onRowClick}
           />

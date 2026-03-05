@@ -12,6 +12,7 @@ interface AdminTableBodyProps<T> {
   data: T[]
   columns: ColumnConfig<T>[]
   actions: ActionConfig<T>[]
+  rowKey: keyof T & string
   isLoading: boolean
   onRowClick?: (row: T) => void
 }
@@ -41,6 +42,7 @@ export default function AdminTableBody<T extends object>({
   data,
   columns,
   actions,
+  rowKey,
   isLoading,
   onRowClick,
 }: AdminTableBodyProps<T>) {
@@ -82,9 +84,9 @@ export default function AdminTableBody<T extends object>({
 
   return (
     <tbody className="divide-y divide-gray-200 bg-white">
-      {data.map((row, rowIndex) => (
+      {data.map((row) => (
         <tr
-          key={rowIndex}
+          key={String((row as Record<string, unknown>)[rowKey])}
           className={`hover:bg-gray-50${onRowClick ? ' cursor-pointer' : ''}`}
           onClick={() => onRowClick?.(row)}
         >

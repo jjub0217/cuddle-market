@@ -57,6 +57,7 @@ export interface PaginationConfig {
 
 export interface TableConfig<T = Record<string, unknown>> {
   title: string
+  rowKey: keyof T & string
   columns: ColumnConfig<T>[]
   filters: FilterConfig[]
   actions: ActionConfig<T>[]
