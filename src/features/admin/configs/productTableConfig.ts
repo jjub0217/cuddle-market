@@ -3,6 +3,7 @@ import type { MockProduct } from '../mocks/mockProducts'
 
 export const productTableConfig: TableConfig<MockProduct> = {
   title: '상품 관리',
+  rowKey: 'id',
   searchable: true,
   searchPlaceholder: '상품명 검색...',
   columns: [
