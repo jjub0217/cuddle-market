@@ -1,4 +1,3 @@
-'use client'
 
 import AdminSidebar from '@/features/admin/components/layout/AdminSidebar'
 import AdminHeader from '@/features/admin/components/layout/AdminHeader'
