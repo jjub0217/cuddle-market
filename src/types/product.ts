@@ -2,7 +2,7 @@
 export interface Product {
   id: number
   productType: string
-  tradeStatus: string
+  tradeStatus: string | null
   petType?: string
   petDetailType: string
   productStatus: string
@@ -81,7 +81,7 @@ export interface ProductPostResponse {
   description: string
   price: number
   productStatus: string
-  tradeStatus: string
+  tradeStatus: string | null
   mainImageUrl: string
   subImageUrls: string[]
   addressSido: string

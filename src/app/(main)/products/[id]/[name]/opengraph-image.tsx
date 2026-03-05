@@ -29,7 +29,7 @@ export default async function OGImage({ params }: { params: Promise<{ id: string
     )
   }
 
-  const status = TRADE_STATUS_STYLE[product.tradeStatus] ?? TRADE_STATUS_STYLE.SELLING
+  const status = (product.tradeStatus ? TRADE_STATUS_STYLE[product.tradeStatus] : null) ?? TRADE_STATUS_STYLE.SELLING
   const price = `${Math.floor(product.price).toLocaleString()}원`
 
   let productImageSrc: string | null = null
