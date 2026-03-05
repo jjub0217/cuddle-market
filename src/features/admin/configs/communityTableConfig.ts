@@ -3,6 +3,7 @@ import type { MockCommunityPost } from '../mocks/mockCommunityPosts'
 
 export const communityTableConfig: TableConfig<MockCommunityPost> = {
   title: '커뮤니티 관리',
+  rowKey: 'id',
   searchable: true,
   searchPlaceholder: '제목 검색...',
   columns: [
