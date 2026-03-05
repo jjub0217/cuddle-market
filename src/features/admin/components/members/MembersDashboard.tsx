@@ -22,9 +22,15 @@ export default function MembersDashboard() {
   const [monthlyReasons, setMonthlyReasons] = useState<MonthlyWithdrawalReasonStat[]>([])
 
   useEffect(() => {
-    fetchMemberStats().then(setStats)
-    fetchWithdrawalReasons().then(setReasons)
-    fetchMonthlyWithdrawalReasons().then(setMonthlyReasons)
+    Promise.all([
+      fetchMemberStats(),
+      fetchWithdrawalReasons(),
+      fetchMonthlyWithdrawalReasons(),
+    ]).then(([statsData, reasonsData, monthlyData]) => {
+      setStats(statsData)
+      setReasons(reasonsData)
+      setMonthlyReasons(monthlyData)
+    })
   }, [])
 
   return (
