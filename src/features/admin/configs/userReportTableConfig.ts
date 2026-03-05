@@ -3,6 +3,7 @@ import type { MockUserReport } from '../mocks/mockUserReports'
 
 export const userReportTableConfig: TableConfig<MockUserReport> = {
   title: '유저 신고 관리',
+  rowKey: 'id',
   searchable: true,
   searchPlaceholder: '신고자 또는 신고 대상자 닉네임 검색...',
   columns: [

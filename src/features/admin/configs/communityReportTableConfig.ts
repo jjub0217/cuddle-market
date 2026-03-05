@@ -3,6 +3,7 @@ import type { MockCommunityReport } from '../mocks/mockCommunityReports'
 
 export const communityReportTableConfig: TableConfig<MockCommunityReport> = {
   title: '커뮤니티 신고 관리',
+  rowKey: 'id',
   searchable: true,
   searchPlaceholder: '게시글 제목 또는 작성자 검색...',
   columns: [

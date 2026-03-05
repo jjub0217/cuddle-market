@@ -3,6 +3,7 @@ import type { MockProductSellReport } from '../mocks/mockProductSellReports'
 
 export const productSellReportTableConfig: TableConfig<MockProductSellReport> = {
   title: '판매상품 신고 관리',
+  rowKey: 'id',
   searchable: true,
   searchPlaceholder: '상품명 검색...',
   columns: [
