@@ -31,9 +31,9 @@ export function ChatRooms({ rooms, handleSelectRoom, selectedRoomId, hasNextPage
     if (update) {
       return {
         ...room,
-        lastMessage: update.lastMessage,
-        lastMessageTime: update.lastMessageTime,
-        unreadCount: update.unreadCount,
+        lastMessage: update.lastMessage ?? room.lastMessage,
+        lastMessageTime: update.lastMessageTime ?? room.lastMessageTime,
+        unreadCount: update.unreadCount ?? room.unreadCount,
       }
     }
     return room
