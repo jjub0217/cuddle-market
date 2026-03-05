@@ -11,7 +11,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts'
-import { WiTH_DRAW_REASON } from '@/constants/constants'
+import { WITHDRAW_REASON } from '@/constants/constants'
 import type { MonthlyWithdrawalReasonStat } from '@/features/admin/mocks/mockMemberStats'
 
 const REASON_COLORS: Record<string, string> = {
@@ -22,7 +22,7 @@ const REASON_COLORS: Record<string, string> = {
   OTHER: '#6b7280',
 }
 
-const REASON_BARS = WiTH_DRAW_REASON.map((r) => ({
+const REASON_BARS = WITHDRAW_REASON.map((r) => ({
   dataKey: r.id,
   name: r.label,
   fill: REASON_COLORS[r.id] ?? '#6b7280',
