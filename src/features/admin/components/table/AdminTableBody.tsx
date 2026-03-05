@@ -1,5 +1,6 @@
 'use client'
 
+import { cn } from '@/lib/utils/cn'
 import type { ColumnConfig, ActionConfig } from '../../types/adminTable'
 import TextCell from './cells/TextCell'
 import CurrencyCell from './cells/CurrencyCell'
@@ -87,7 +88,7 @@ export default function AdminTableBody<T extends object>({
       {data.map((row) => (
         <tr
           key={String((row as Record<string, unknown>)[rowKey])}
-          className={`hover:bg-gray-50${onRowClick ? ' cursor-pointer' : ''}`}
+          className={cn('hover:bg-gray-50', onRowClick && 'cursor-pointer')}
           onClick={() => onRowClick?.(row)}
         >
           {columns.map((col) => (
