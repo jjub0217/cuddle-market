@@ -57,7 +57,7 @@ export default function Tabs({ tabs, activeTab, onTabChange, ariaLabel, excludeT
       role="tablist"
       aria-label={ariaLabel}
       onKeyDown={handleKeyDown}
-      className={cn('border-b-primary-200 flex gap-1 rounded-lg bg-[#F3F4F6] p-2 md:gap-1.5 md:border-b-2')}
+      className={cn('border-b-primary-200 flex gap-1 rounded-lg bg-gray-100 p-2 md:gap-1.5 md:border-b-2')}
     >
       {filteredTabs.map((tab) => (
         <Button
