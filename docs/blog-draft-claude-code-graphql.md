@@ -33,20 +33,39 @@
 
 | 파일 | 역할 |
 |------|------|
-| `src/graphql/schema.ts` | GraphQL 스키마 정의 (SDL) |
-| `src/graphql/resolvers.ts` | REST API 호출 리졸버 |
+| `src/graphql/schema.ts` | GraphQL 스키마 정의 (16 Query + 18 Mutation) |
+| `src/graphql/resolvers.ts` | REST API 호출 리졸버 (인증 헤더 전달) |
 | `src/app/api/graphql/route.ts` | Apollo Server + Next.js API Route |
-| `src/lib/apollo/client.ts` | Apollo Client 설정 |
-| `src/lib/apollo/ApolloWrapper.tsx` | Apollo Provider 래퍼 |
-| `src/app/(main)/graphql-demo/page.tsx` | 데모 페이지 |
-| `src/app/providers.tsx` | ApolloWrapper 추가 |
+| `src/lib/api/graphql.ts` | fetchGraphQL 유틸리티 (인증 토큰 자동 전달) |
 
 ### 전환한 기존 페이지들
 
-데모 페이지 외에 실제 서비스 페이지도 GraphQL로 전환했습니다:
+**거의 모든 서비스 페이지**를 GraphQL로 전환했습니다 (~25개 파일, 39파일 변경):
 
-- **ProductDetail** — 상품 상세 페이지 (TanStack Query → Apollo Client)
-- **CommunityDetail** — 커뮤니티 게시글 상세 (읽기만 전환, 쓰기는 REST 유지)
+- **Home** — 상품 목록 (무한 스크롤 포함)
+- **ProductDetail** — 상품 상세 + 판매자 정보 (Nested Query)
+- **CommunityPage / CommunityDetail** — 커뮤니티 목록 + 상세 + 댓글
+- **MyPage** — 마이페이지 (판매/구매/찜 목록)
+- **ChattingPage** — 채팅 목록
+- **ProfileUpdate** — 프로필 수정
+- **ProductPost** — 상품 등록/수정
+- **UserPage** — 유저 프로필 페이지
+- **기타** — 알림, 신고/차단 모달, 찜 기능 등
+
+> **REST 유지 항목**: 로그인/회원가입, 이미지 업로드(FormData), WebSocket 채팅, 비밀번호 찾기
+
+### 핵심 전환 — Apollo Client에서 fetchGraphQL로
+
+처음에는 **Apollo Client**를 사용해서 GraphQL을 연결했습니다. 하지만 문제가 생겼습니다.
+
+| 방법 | 설명 | 무한 스크롤 문제 |
+|---|---|---|
+| **A. TanStack Query + fetchGraphQL** | `queryFn`에서 GraphQL 요청 | **없음** — `useInfiniteQuery` 그대로 사용 |
+| **B. Apollo Client로 교체** | Apollo의 `useQuery`로 전부 교체 | **있음** — `fetchMore` + 캐시 병합으로 방식이 다름 |
+
+처음에 B 방법(Apollo Client)을 선택했더니, Home이나 CommunityPage처럼 `useInfiniteQuery`로 무한 스크롤을 구현한 페이지는 전환이 어려웠습니다. Apollo Client의 무한 스크롤 방식(`fetchMore` + 캐시 병합)은 설계 자체를 다시 해야 했기 때문입니다.
+
+그래서 **A 방법(TanStack Query + fetchGraphQL)**으로 전환했습니다. `queryFn` 안의 호출만 바꾸면 되니까, 무한 스크롤이든 일반 쿼리든 **기존 TanStack Query 코드를 그대로 유지**하면서 GraphQL을 적용할 수 있었습니다. 이 결정 덕분에 **전체 페이지 전환**이 가능해졌습니다.
 
 ### BFF 패턴의 솔직한 한계
 
@@ -131,7 +150,7 @@ query GetProduct($id: Int!) {
 
 #### Phase 2가 느렸던 이유
 
-1. **에이전트 이상치**: 5개 병렬 에이전트 중 데모 페이지 담당 에이전트 1개가 **10분 45초** 소요 (나머지 4개는 평균 15초)
+1. **에이전트 이상치**: 5개 병렬 에이전트 중 1개가 **10분 45초** 소요 (나머지 4개는 평균 15초)
 2. **API 스펙 불일치 디버깅**: 에이전트가 생성한 코드의 API 엔드포인트/필드명이 실제 백엔드와 달라서 디버깅에 **~15분** 소요
 3. **플러그인 세팅 시간**: omc-setup 초기 설정 과정이 포함됨
 
@@ -163,9 +182,9 @@ Claude: 수정
 플러그인: 작업 분석 → 5개 에이전트 동시 발사
   ├─ Agent 1 (Sonnet): schema.ts + resolvers.ts
   ├─ Agent 2 (Sonnet): route.ts
-  ├─ Agent 3 (Haiku): client.ts + ApolloWrapper.tsx
-  ├─ Agent 4 (Sonnet): demo page
-  └─ Agent 5 (Haiku): providers.tsx 수정
+  ├─ Agent 3 (Haiku): graphql.ts (fetchGraphQL 유틸리티)
+  ├─ Agent 4 (Sonnet): 기존 페이지 GraphQL 전환
+  └─ Agent 5 (Haiku): providers.tsx + 기존 페이지 import 수정
 ```
 
 **병렬 실행**이므로 이론적으로 빠르지만, 각 에이전트가 독립적이라 **에이전트 간 일관성 보장이 어렵습니다**.
@@ -177,7 +196,7 @@ Claude: 수정
 - 같은 컨텍스트에서 대화하므로 "아까 그 부분" 이라고 하면 바로 이해
 
 **oh-my-claudecode의 에러:**
-- 에이전트 A가 만든 스키마와 에이전트 B가 만든 데모 페이지의 필드명이 불일치
+- 에이전트 A가 만든 스키마와 에이전트 B가 만든 페이지의 필드명이 불일치
 - 각 에이전트가 독립적으로 API 스펙을 "추측"하므로 불일치 발생 가능
 - 디버깅 시 여러 파일을 교차 확인해야 함
 
@@ -189,9 +208,9 @@ oh-my-claudecode의 진짜 강점은 **모델 티어링**입니다:
 |------|------|------|
 | schema + resolvers | Sonnet (중간) | 설계 판단 필요 |
 | API route | Sonnet (중간) | 프레임워크 호환성 중요 |
-| client + wrapper | **Haiku (저가)** | 보일러플레이트 코드 |
-| demo page | Sonnet (중간) | UI + 로직 조합 |
-| providers 수정 | **Haiku (저가)** | 단순 import 추가 |
+| fetchGraphQL 유틸리티 | **Haiku (저가)** | 보일러플레이트 코드 |
+| 기존 페이지 전환 | Sonnet (중간) | UI + 로직 조합 |
+| providers + import 수정 | **Haiku (저가)** | 단순 수정 작업 |
 
 단순한 작업에는 저렴한 모델을, 복잡한 작업에는 고급 모델을 자동 배정합니다. 대규모 프로젝트에서 **토큰 비용을 절감**할 수 있는 구조입니다.
 
@@ -221,11 +240,11 @@ oh-my-claudecode의 진짜 강점은 **모델 티어링**입니다:
 
 ---
 
-## 🔄 실제 전환 — TanStack Query vs Apollo Client
+## 🔄 실제 전환 — REST 직접 호출 vs GraphQL BFF
 
 기존 코드와 전환 후 코드를 나란히 비교하면, GraphQL 전환이 실제로 "뭐가 바뀌는지" 더 직관적으로 보입니다.
 
-### Before: TanStack Query + REST
+### Before: REST API 직접 호출 (Axios)
 
 ```typescript
 import { useQuery } from '@tanstack/react-query'
@@ -240,44 +259,51 @@ const { data, isLoading, error } = useQuery({
 // data에 뭐가 들어있는지 → API 문서를 봐야 알 수 있음
 ```
 
-### After: Apollo Client + GraphQL
+### After: TanStack Query + fetchGraphQL
 
 ```typescript
-import { useQuery } from '@apollo/client/react'
-import { gql } from '@apollo/client'
+import { useQuery } from '@tanstack/react-query'
+import { fetchGraphQL } from '@/lib/api/graphql'
 
-const GET_PRODUCT = gql`
+const GET_PRODUCT = `
   query GetProduct($id: Int!) {
     product(id: $id) {
       title          # ← 필요한 필드만 명시적으로 선택
       price
       sellerInfo {
         sellerNickname
+        sellerProfileImageUrl
       }
     }
   }
 `
 
-const { data, loading, error } = useQuery(GET_PRODUCT, {
-  variables: { id: Number(id) },
-  skip: !id,        // TanStack의 enabled와 같은 역할
+const { data, isLoading, error } = useQuery({
+  queryKey: ['product', id],
+  queryFn: () => fetchGraphQL<GetProductData>(GET_PRODUCT, { id: Number(id) }),
+  enabled: !!id,
 })
 
 // data에 뭐가 들어있는지 → 쿼리 자체가 문서
 ```
 
+**핵심 포인트**: TanStack Query는 그대로 유지하고, `queryFn` 안의 호출만 Axios → fetchGraphQL로 바꿨습니다. 이 덕분에 `useInfiniteQuery`(무한 스크롤)도 동일한 방식으로 전환할 수 있었습니다.
+
 ### 달라진 점 정리
 
-| | TanStack Query (REST) | Apollo Client (GraphQL) |
+| | REST (Axios 직접 호출) | GraphQL BFF (fetchGraphQL) |
 |---|---|---|
-| **데이터 페칭** | `queryFn: () => fetch(...)` | `gql` 쿼리 문자열 |
+| **데이터 페칭** | `queryFn: () => axiosFn(...)` | `queryFn: () => fetchGraphQL(query, vars)` |
 | **필드 선택** | 서버가 정한 전체 응답 | 클라이언트가 필요한 필드만 |
-| **조건부 실행** | `enabled: !!id` | `skip: !id` |
-| **로딩 상태** | `isLoading` | `loading` |
+| **조건부 실행** | `enabled: !!id` | `enabled: !!id` (동일) |
+| **로딩 상태** | `isLoading` | `isLoading` (동일) |
 | **타입 정보** | 별도 인터페이스 정의 필요 | 쿼리 자체가 타입 문서 역할 |
-| **캐싱** | 쿼리 키 기반 | 타입 + id 기반 (정규화 캐시) |
+| **캐싱** | 쿼리 키 기반 | 쿼리 키 기반 (동일) |
+| **데이터 조합** | N번 호출 후 클라이언트 조합 | 1번 호출 (Nested Query) |
 
 가장 큰 체감 차이는 **쿼리가 곧 문서**라는 점입니다. REST에서는 `fetchProductById`가 어떤 데이터를 반환하는지 API 문서나 타입 정의를 따로 봐야 하지만, GraphQL에서는 쿼리 자체에 응답 구조가 보입니다.
+
+그리고 TanStack Query를 그대로 유지했기 때문에, **기존 코드 구조를 최소한으로 바꾸면서도 GraphQL의 장점을 취할 수 있었습니다**.
 
 ---
 
@@ -295,7 +321,7 @@ docs/graphql-frontend-concepts.md
 ├── Query, Resolver
 ├── Apollo Server / Client
 ├── 점진적 마이그레이션 전략
-└── ... (14개 섹션)
+└── ... (15개 섹션)
 ```
 
 ### 2. "비교 실험"으로 도구를 이해해라
@@ -310,13 +336,6 @@ AI에게 코드를 작성시킬 때 가장 흔한 문제는 **API 스펙 불일�
 # 이렇게 먼저 확인
 curl https://api.example.com/community/posts?page=0&size=1 | jq
 ```
-
-### 4. 점진적으로 전환해라
-
-전체 페이지를 한 번에 전환하려 하지 말고:
-- **읽기(Query)부터 전환** → 쓰기(Mutation)는 나중에
-- **단순한 페이지부터** → 복잡한 페이지(무한 스크롤 등)는 나중에
-- **initialData 패턴** 활용 → SSR 데이터를 폴백으로 사용하면 전환 리스크 최소화
 
 ---
 
@@ -349,5 +368,5 @@ oh-my-claudecode는 **"처음 배울 때"보다 "이미 알고 반복할 때"** 
 
 ---
 
-*작성일: 2026-02-26*
+*작성일: 2026-02-28 | 최종 수정: 2026-03-02*
 *프로젝트: [Cuddle Market](https://github.com/ExpectedAnnualSalaryOf4TrillionWon/cuddle-market) Next.js 마이그레이션*
