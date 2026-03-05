@@ -1,4 +1,5 @@
 import type { Province } from '@/constants/cities'
+import type { User } from './user'
 
 // ========== 인증 관련 타입 ==========
 export interface NicknameCheckResponse {
@@ -64,15 +65,7 @@ export interface LoginResponse {
   data: {
     accessToken: string
     refreshToken: string
-    user: {
-      id: number
-      email: string
-      name: string
-      nickname: string
-      birthDate: string
-      addressSido: string
-      addressGugun: string
-    }
+    user: User
   }
 }
 
