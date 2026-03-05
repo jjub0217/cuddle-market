@@ -234,8 +234,8 @@ export const typeDefs = gql`
     productId: Int
     productTitle: String
     productMainImageUrl: String
-    otherUserNickname: String
-    otherUserProfileImageUrl: String
+    opponentNickname: String
+    opponentProfileImageUrl: String
     lastMessage: String
     lastMessageTime: String
     unreadCount: Int
