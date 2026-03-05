@@ -130,7 +130,7 @@ export const typeDefs = gql`
     petDetailType: String!
     productStatus: String!
     productType: String!
-    tradeStatus: String!
+    tradeStatus: String
     createdAt: String!
     viewCount: Int!
     favoriteCount: Int!
@@ -151,7 +151,7 @@ export const typeDefs = gql`
     mainImageUrl: String
     subImageUrls: [String!]
     productType: String!
-    tradeStatus: String!
+    tradeStatus: String
     petType: String!
     petDetailType: String!
     category: String!

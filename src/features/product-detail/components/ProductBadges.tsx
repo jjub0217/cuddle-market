@@ -7,7 +7,7 @@ import Badge from '@/components/commons/badge/Badge'
 import { cn } from '@/lib/utils/cn'
 
 interface ProductBadgesProps {
-  tradeStatus: string
+  tradeStatus: string | null
   petDetailType: string
   category: string
   productStatus: string

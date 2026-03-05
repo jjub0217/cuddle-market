@@ -11,7 +11,7 @@ interface ProductThumbnailProps {
   petTypeName: string
   productStatusName: string
   productTypeName: string
-  tradeStatus: string
+  tradeStatus: string | null
   productTradeColor: string
   isFavorite: boolean
   onLikeClick: (e: React.MouseEvent) => void
@@ -35,7 +35,7 @@ export function ProductThumbnail({
       if (tradeStatus === '판매완료') return '요청완료'
       if (tradeStatus === null || tradeStatus === '') return '요청중'
     }
-    return tradeStatus
+    return tradeStatus || ''
   }
   const displayTradeStatus = getDisplayTradeStatus()
 
