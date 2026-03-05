@@ -245,6 +245,7 @@ export default function ChattingPage() {
               </div>
               <div className="bg-primary-50 min-h-0 flex-1 p-3.5 pb-20 md:pb-3.5">
                 <ChatLog
+                  key={chatRoomId}
                   isLoadingMessages={isLoadingMessages}
                   errorMessages={errorMessages}
                   roomMessages={allMessages}
