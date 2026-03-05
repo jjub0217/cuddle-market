@@ -163,8 +163,13 @@ export const resolvers = {
 
     chatRooms: async (_parent: unknown, args: { page: number; size: number }, context: Context) => {
       const json = await fetchAPIRaw(`/chat/rooms?page=${args.page}&size=${args.size}`, context)
+      const chatRooms = (json.data?.chatRooms || []).map((room: Record<string, unknown>) => ({
+        ...room,
+        opponentNickname: room.otherUserNickname ?? room.opponentNickname,
+        opponentProfileImageUrl: room.otherUserProfileImageUrl ?? room.opponentProfileImageUrl,
+      }))
       return {
-        chatRooms: json.data?.chatRooms || [],
+        chatRooms,
         currentPage: json.currentPage ?? json.data?.page ?? 0,
         hasNext: json.hasNext ?? json.data?.hasNext ?? false,
       }
