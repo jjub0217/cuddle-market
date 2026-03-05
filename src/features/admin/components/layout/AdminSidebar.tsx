@@ -51,10 +51,11 @@ export default function AdminSidebar() {
 
   // Auto-expand parent when child route is active
   useEffect(() => {
-    for (const item of NAV_ITEMS) {
-      if (item.children?.some((child) => pathname === child.href)) {
-        setOpenMenus((prev) => new Set(prev).add(item.label))
-      }
+    const activeParent = NAV_ITEMS.find((item) =>
+      item.children?.some((child) => pathname === child.href),
+    )
+    if (activeParent) {
+      setOpenMenus((prev) => new Set(prev).add(activeParent.label))
     }
   }, [pathname])
 
