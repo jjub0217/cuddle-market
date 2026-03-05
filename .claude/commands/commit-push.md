@@ -177,6 +177,8 @@ PR: [PR URL]
 - `--no-verify` 플래그 사용 금지 (사용자 명시 요청 시만)
 - force push 절대 금지
 - main/master에 직접 커밋 금지
+- **PR의 base 브랜치는 반드시 `develop`** — stacked PR(다른 feature 브랜치를 base로 지정) 절대 금지
+- **이 커맨드를 거치지 않고 임의로 브랜치 생성, PR 생성 금지** — 일괄 작업이라도 반드시 이 워크플로우를 따를 것
 
 ---
 
