@@ -154,7 +154,7 @@ export default function CommunityDetailModal({ isOpen, post, onClose }: Communit
                 {/* Sub images (always 4 cells) */}
                 <div className="mb-5 flex gap-2">
                   {Array.from({ length: 4 }, (_, idx) => {
-                    const src = post.subImages[idx]
+                    const src = post.subImages?.[idx]
                     return (
                       <div
                         key={idx}

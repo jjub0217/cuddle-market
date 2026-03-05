@@ -3,6 +3,7 @@ import type { MockWithdrawal } from '../mocks/mockWithdrawals'
 
 export const withdrawalTableConfig: TableConfig<MockWithdrawal> = {
   title: '탈퇴 관리',
+  rowKey: 'id',
   searchable: true,
   searchPlaceholder: '닉네임 또는 이메일 검색...',
   columns: [
