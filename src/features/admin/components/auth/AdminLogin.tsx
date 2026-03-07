@@ -28,10 +28,18 @@ export default function AdminLogin() {
 
   const onSubmit = async (data: AdminLoginForm) => {
     setError('')
-    try {
-      const response = await login({ email: data.email, password: data.password })
-      const { user, accessToken, refreshToken } = response.data
 
+    let loginResponse
+    try {
+      loginResponse = await login({ email: data.email, password: data.password })
+    } catch {
+      setError('아이디 또는 비밀번호가 올바르지 않습니다.')
+      return
+    }
+
+    const { user, accessToken, refreshToken } = loginResponse.data
+
+    try {
       // 토큰만 임시 세팅하여 /profile/me 호출 가능하게 함
       useUserStore.getState().setAccessToken(accessToken)
 
@@ -49,7 +57,7 @@ export default function AdminLogin() {
       router.push(ROUTES.ADMIN)
     } catch {
       useUserStore.getState().clearAll()
-      setError('아이디 또는 비밀번호가 올바르지 않습니다.')
+      setError('권한 확인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
     }
   }
 
