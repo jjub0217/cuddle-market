@@ -1,7 +1,14 @@
 import type { TableConfig } from '../types/adminTable'
-import type { MockCommunityPost } from '../mocks/mockCommunityPosts'
+import type { CommunityItem } from '@/types/community'
 
-export const communityTableConfig: TableConfig<MockCommunityPost> = {
+const BOARD_TYPE_EN_TO_KO: Record<string, string> = {
+  QUESTION: '질문있어요',
+  INFO: '정보공유',
+}
+
+export { BOARD_TYPE_EN_TO_KO }
+
+export const communityTableConfig: TableConfig<CommunityItem> = {
   title: '커뮤니티 관리',
   rowKey: 'id',
   searchable: true,
@@ -15,12 +22,19 @@ export const communityTableConfig: TableConfig<MockCommunityPost> = {
       sortable: true,
       width: '110px',
       badgeOptions: [
-        { value: '질문있어요', label: '질문있어요', color: 'bg-blue-100 text-blue-800' },
-        { value: '정보공유', label: '정보공유', color: 'bg-green-100 text-green-800' },
+        { value: 'QUESTION', label: '질문있어요', color: 'bg-blue-100 text-blue-800' },
+        { value: 'INFO', label: '정보공유', color: 'bg-green-100 text-green-800' },
       ],
     },
     { key: 'title', label: '제목', type: 'text', sortable: true },
-    { key: 'nickname', label: '닉네임', type: 'text', sortable: true, width: '120px' },
+    { key: 'authorNickname', label: '닉네임', type: 'text', sortable: true, width: '120px' },
+    {
+      key: 'commentCount',
+      label: '댓글',
+      type: 'number',
+      sortable: true,
+      width: '70px',
+    },
     {
       key: 'createdAt',
       label: '작성일자',
@@ -51,14 +65,6 @@ export const communityTableConfig: TableConfig<MockCommunityPost> = {
       options: [
         { value: '질문있어요', label: '질문있어요' },
         { value: '정보공유', label: '정보공유' },
-      ],
-    },
-    {
-      key: 'sortOrder',
-      label: '정렬',
-      options: [
-        { value: '최신순', label: '최신순' },
-        { value: '오래된 순', label: '오래된 순' },
       ],
     },
   ],

@@ -2,11 +2,18 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
-import type { MockProduct } from '../../mocks/mockProducts'
+import { useQuery } from '@tanstack/react-query'
+import { fetchAdminProductDetail } from '@/lib/api/admin'
+import {
+  PRODUCT_TYPE_EN_TO_KO,
+  TRADE_STATUS_EN_TO_KO,
+  PRODUCT_STATUS_EN_TO_KO,
+  CATEGORY_EN_TO_KO,
+} from '../../configs/productTableConfig'
 
 interface ProductDetailModalProps {
   isOpen: boolean
-  product: MockProduct | null
+  productId: number | null
   onClose: () => void
 }
 
@@ -24,7 +31,6 @@ function formatPrice(price: number) {
   return `${price.toLocaleString('ko-KR')}원`
 }
 
-/** Bordered field (left column) */
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <div>
@@ -36,7 +42,6 @@ function Field({ label, value }: { label: string; value: string }) {
   )
 }
 
-/** Plain label + value (right column) */
 function SimpleField({ label, value }: { label: string; value: string }) {
   return (
     <div>
@@ -46,7 +51,6 @@ function SimpleField({ label, value }: { label: string; value: string }) {
   )
 }
 
-/** Plain label + badge (right column) */
 function SimpleBadgeField({ label, value, color }: { label: string; value: string; color: string }) {
   return (
     <div>
@@ -59,23 +63,22 @@ function SimpleBadgeField({ label, value, color }: { label: string; value: strin
 }
 
 const TRADE_STATUS_COLORS: Record<string, string> = {
-  요청중: 'bg-[#DCFCE7] text-green-800',
-  요청완료: 'bg-[#F3F4F6] text-gray-800',
-  판매중: 'bg-[#DCFCE7] text-green-800',
-  예약중: 'bg-[#FEF9C3] text-yellow-800',
-  판매완료: 'bg-[#F3F4F6] text-gray-800',
+  SELLING: 'bg-[#DCFCE7] text-green-800',
+  BUYING: 'bg-[#DCFCE7] text-green-800',
+  RESERVED: 'bg-[#FEF9C3] text-yellow-800',
+  COMPLETED: 'bg-[#F3F4F6] text-gray-800',
 }
 
 const PRODUCT_TYPE_COLORS: Record<string, string> = {
-  팝니다: 'bg-[#7BA5D6] text-white',
-  삽니다: 'bg-[#FFF7ED] text-orange-800',
+  SELL: 'bg-[#7BA5D6] text-white',
+  REQUEST: 'bg-[#FFF7ED] text-orange-800',
 }
 
 const CONDITION_COLORS: Record<string, string> = {
-  '새 상품': 'bg-[#DCFCE7] text-green-800',
-  '거의 새것': 'bg-[#DBEAFE] text-blue-800',
-  '사용감 있음': 'bg-[#FEF9C3] text-yellow-800',
-  '수리 필요': 'bg-[#FEE2E2] text-red-800',
+  NEW: 'bg-[#DCFCE7] text-green-800',
+  LIKE_NEW: 'bg-[#DBEAFE] text-blue-800',
+  USED: 'bg-[#FEF9C3] text-yellow-800',
+  NEED_REPAIR: 'bg-[#FEE2E2] text-red-800',
 }
 
 function DeleteConfirmDialog({
@@ -134,18 +137,24 @@ function DeleteConfirmDialog({
   )
 }
 
-export default function ProductDetailModal({ isOpen, product, onClose }: ProductDetailModalProps) {
+export default function ProductDetailModal({ isOpen, productId, onClose }: ProductDetailModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
+  const { data: product, isLoading } = useQuery({
+    queryKey: ['admin-product-detail', productId],
+    queryFn: () => fetchAdminProductDetail(productId!),
+    enabled: isOpen && productId !== null,
+  })
+
   useEffect(() => {
     const dialog = dialogRef.current
-    if (isOpen && product && !dialog?.open) {
+    if (isOpen && productId && !dialog?.open) {
       dialog?.showModal()
     } else if (!isOpen && dialog?.open) {
       dialog?.close()
     }
-  }, [isOpen, product])
+  }, [isOpen, productId])
 
   const handleClose = () => {
     setShowDeleteConfirm(false)
@@ -161,6 +170,11 @@ export default function ProductDetailModal({ isOpen, product, onClose }: Product
       }}
       onClose={handleClose}
     >
+      {isLoading && (
+        <div className="flex items-center justify-center py-20">
+          <p className="text-sm text-gray-500">로딩 중...</p>
+        </div>
+      )}
       {product && (
         <>
           {/* Header */}
@@ -182,22 +196,25 @@ export default function ProductDetailModal({ isOpen, product, onClose }: Product
               <div className="flex w-1/2 shrink-0 flex-col">
                 {/* Main image */}
                 <div className="mb-2 flex h-[260px] w-full items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-100">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={product.image}
-                    alt={product.name}
+                    src={product.mainImageUrl}
+                    alt={product.title}
                     className="h-full w-full object-cover"
                   />
                 </div>
 
                 {/* Sub images */}
                 <div className="mb-5 flex gap-2">
-                  {(product.subImages?.length > 0 ? product.subImages : [null, null, null, null]).map(
-                    (src, idx) => (
+                  {Array.from({ length: 4 }, (_, idx) => {
+                    const src = product.subImageUrls?.[idx]
+                    return (
                       <div
                         key={idx}
                         className="flex h-[60px] w-[60px] items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-gray-50"
                       >
                         {src ? (
+                          // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={src}
                             alt={`서브이미지 ${idx + 1}`}
@@ -209,17 +226,17 @@ export default function ProductDetailModal({ isOpen, product, onClose }: Product
                           </svg>
                         )}
                       </div>
-                    ),
-                  )}
+                    )
+                  })}
                 </div>
 
                 {/* Left info fields */}
                 <div className="grid grid-cols-2 gap-x-4 gap-y-4">
                   <Field label="상품 ID" value={String(product.id)} />
-                  <Field label="닉네임" value={product.nickname} />
+                  <Field label="판매자" value={product.sellerInfo?.sellerNickname ?? '-'} />
                 </div>
                 <div className="mt-4">
-                  <Field label="상품명" value={product.name} />
+                  <Field label="상품명" value={product.title} />
                 </div>
                 <div className="mt-4">
                   <Field label="지역" value={`${product.addressSido} ${product.addressGugun}`} />
@@ -232,7 +249,7 @@ export default function ProductDetailModal({ isOpen, product, onClose }: Product
                 <div className="mb-5">
                   <p className="mb-1.5 text-sm font-medium text-gray-500">상품 설명</p>
                   <div className="max-h-[200px] overflow-y-auto rounded-lg border border-gray-200 bg-gray-50/50 px-3 py-2.5 text-sm leading-relaxed text-gray-900">
-                    {product.description}
+                    {product.description || '-'}
                   </div>
                 </div>
 
@@ -240,24 +257,24 @@ export default function ProductDetailModal({ isOpen, product, onClose }: Product
                 <div className="grid grid-cols-2 gap-x-5 gap-y-5">
                   <SimpleBadgeField
                     label="거래 상태"
-                    value={product.tradeStatus}
-                    color={TRADE_STATUS_COLORS[product.tradeStatus] ?? 'bg-gray-100 text-gray-800'}
+                    value={TRADE_STATUS_EN_TO_KO[product.tradeStatus ?? ''] ?? product.tradeStatus ?? '-'}
+                    color={TRADE_STATUS_COLORS[product.tradeStatus ?? ''] ?? 'bg-gray-100 text-gray-800'}
                   />
                   <SimpleBadgeField
                     label="상품 상태"
-                    value={product.condition}
-                    color={CONDITION_COLORS[product.condition] ?? 'bg-gray-100 text-gray-800'}
+                    value={PRODUCT_STATUS_EN_TO_KO[product.productStatus] ?? product.productStatus}
+                    color={CONDITION_COLORS[product.productStatus] ?? 'bg-gray-100 text-gray-800'}
                   />
                   <SimpleBadgeField
                     label="유형"
-                    value={product.productType}
+                    value={PRODUCT_TYPE_EN_TO_KO[product.productType] ?? product.productType}
                     color={PRODUCT_TYPE_COLORS[product.productType] ?? 'bg-gray-100 text-gray-800'}
                   />
+                  <SimpleField label="카테고리" value={CATEGORY_EN_TO_KO[product.category] ?? product.category ?? '-'} />
                   <SimpleField label="가격" value={formatPrice(product.price)} />
-                  <SimpleField label="조회수" value={String(product.viewCount)} />
-                  <SimpleField label="찜 갯수" value={String(product.likeCount)} />
+                  <SimpleField label="조회수" value={String(product.viewCount ?? 0)} />
+                  <SimpleField label="찜 수" value={String(product.favoriteCount)} />
                   <SimpleField label="작성일시" value={formatDateTime(product.createdAt)} />
-                  <SimpleField label="수정일시" value={formatDateTime(product.updatedAt)} />
                 </div>
               </div>
             </div>
