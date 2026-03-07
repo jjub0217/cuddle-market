@@ -7,36 +7,75 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ROUTES } from '@/constants/routes'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { Suspense, useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import IconButton from '@/components/commons/button/IconButton'
 import SearchBar from '@/components/header/components/SearchBar'
 import { Search } from 'lucide-react'
 import UserControls from '@/components/header/components/UserControls'
 import MobileNavigation from '@/components/header/components/MobileNavigation'
 
-interface HeaderProps {
-  hideSearchBar?: boolean
-  hideMenuButton?: boolean
-}
+// ========== 공통 동적 경로 패턴 ==========
+const COMMUNITY_DETAIL = /^\/community\/\d+$/
+const COMMUNITY_EDIT = /^\/community\/\d+\/edit$/
 
-export default function Header({ hideSearchBar = false, hideMenuButton = false }: HeaderProps) {
+// Header 숨김 패턴 (모바일에서만 숨김)
+const HIDE_HEADER_MOBILE_PATTERNS = [COMMUNITY_DETAIL, COMMUNITY_EDIT, new RegExp(`^${ROUTES.COMMUNITY_POST}$`)]
+
+// SearchBar 숨김 경로 - 모바일만 (정적 경로)
+const HIDE_SEARCHBAR_MOBILE_PATHS: string[] = [ROUTES.MYPAGE]
+
+// SearchBar 숨김 경로 - 항상 (정적 경로)
+const HIDE_SEARCHBAR_ALWAYS_PATHS: string[] = [
+  ROUTES.COMMUNITY,
+  ROUTES.COMMUNITY_POST,
+  ROUTES.LOGIN,
+  ROUTES.SIGNUP,
+  ROUTES.FIND_PASSWORD,
+  ROUTES.PROFILE_UPDATE,
+  ROUTES.PRODUCT_POST,
+  ROUTES.CHAT,
+]
+
+// 메뉴 버튼 숨김 경로
+const HIDE_MENU_BUTTON_PATHS: string[] = [ROUTES.LOGIN, ROUTES.SIGNUP]
+
+// SearchBar 숨김 패턴 - 모바일만 (동적 경로)
+const HIDE_SEARCHBAR_MOBILE_PATTERNS = [/^\/user-profile\/\d+$/]
+
+// SearchBar 숨김 패턴 - 항상 (동적 경로)
+const HIDE_SEARCHBAR_ALWAYS_PATTERNS = [COMMUNITY_DETAIL, COMMUNITY_EDIT, /^\/products\/\d+\/edit$/, /^\/chat\/\d+$/]
+
+export default function Header() {
   const isXl = useMediaQuery('(min-width: 1280px)')
   const [isSideOpen, setIsSideOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
-  const searchBarRef = useRef<HTMLDivElement>(null)
-  const [searchBarHeight, setSearchBarHeight] = useState(0)
+  // 검색바 높이: h-8(32px) 고정 디자인이므로 상수 사용 (scrollHeight 접근에 의한 강제 리플로우 방지)
+  const searchBarHeight = 32
   const pathname = usePathname()
+
+  // 가시성 계산
+  const hideHeaderMobile = !isXl && HIDE_HEADER_MOBILE_PATTERNS.some((pattern) => pattern.test(pathname))
+  const showHeader = !hideHeaderMobile
+  const hideSearchBarMobile =
+    !isXl &&
+    (HIDE_SEARCHBAR_MOBILE_PATHS.includes(pathname) || HIDE_SEARCHBAR_MOBILE_PATTERNS.some((pattern) => pattern.test(pathname)))
+  const hideSearchBarAlways =
+    HIDE_SEARCHBAR_ALWAYS_PATHS.includes(pathname) || HIDE_SEARCHBAR_ALWAYS_PATTERNS.some((pattern) => pattern.test(pathname))
+  const hideSearchBar = hideSearchBarMobile || hideSearchBarAlways
+  const hideMenuButton = HIDE_MENU_BUTTON_PATHS.includes(pathname)
+
   const isMarketActive = pathname === '/' || pathname.startsWith('/market')
   const isCommunityActive = pathname.startsWith('/community')
 
+  // 헤더 높이를 CSS 변수로 설정 (검색바 열림/닫힘 및 헤더 가시성에 따라)
   useEffect(() => {
-    if (searchBarRef.current) {
-      setSearchBarHeight(searchBarRef.current.scrollHeight)
+    if (!showHeader) {
+      document.documentElement.style.setProperty('--header-height', '0px')
+      return () => {
+        document.documentElement.style.removeProperty('--header-height')
+      }
     }
-  }, [])
 
-  // 헤더 높이를 CSS 변수로 설정 (검색바 열림/닫힘에 따라)
-  useEffect(() => {
     // 기본 헤더 높이: pt-3(12px) + h-12(48px) + pb-3(12px) = 72px
     // 검색바 열림 시: 72px + marginTop(12px) + searchBarHeight + marginBottom(12px)
     const baseHeight = 72
@@ -51,7 +90,9 @@ export default function Header({ hideSearchBar = false, hideMenuButton = false }
     return () => {
       document.documentElement.style.removeProperty('--header-height')
     }
-  }, [isSearchOpen, searchBarHeight, isXl])
+  }, [showHeader, isSearchOpen, isXl])
+
+  if (!showHeader) return null
 
   return (
     <>
@@ -100,7 +141,6 @@ export default function Header({ hideSearchBar = false, hideMenuButton = false }
           {/* 모바일 검색바 - 아코디언 */}
           {!hideSearchBar && (
             <div
-              ref={searchBarRef}
               className="overflow-hidden transition-all duration-300 xl:hidden"
               style={{
                 height: isSearchOpen ? `${searchBarHeight}px` : '0',
