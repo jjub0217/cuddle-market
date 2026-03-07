@@ -14,7 +14,7 @@ export const communityTableConfig: TableConfig<CommunityItem> = {
   searchable: true,
   searchPlaceholder: '제목 검색...',
   columns: [
-    { key: 'id', label: '게시글 ID', type: 'number', sortable: true, width: '90px' },
+    { key: 'id', label: '게시글 ID', type: 'number', sortable: true, width: '110px' },
     {
       key: 'boardType',
       label: '유형',
@@ -33,7 +33,7 @@ export const communityTableConfig: TableConfig<CommunityItem> = {
       label: '댓글',
       type: 'number',
       sortable: true,
-      width: '70px',
+      width: '80px',
     },
     {
       key: 'createdAt',
