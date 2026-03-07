@@ -11,6 +11,7 @@ export interface User {
   profileImageUrl?: string
   introduction?: string
   createdAt?: string
+  userRole?: 'USER' | 'ADMIN'
 }
 
 // ========== 마이페이지 관련 타입 ==========
