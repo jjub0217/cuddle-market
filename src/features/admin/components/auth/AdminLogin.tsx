@@ -39,23 +39,27 @@ export default function AdminLogin() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-200">
-      <div className="w-fit rounded-2xl bg-white p-10 shadow-lg">
-        <div className="mb-6 flex justify-center">
-          <Logo textClassname="text-gray-800" />
+      <div className="w-1/5 max-w-115 min-w-80 overflow-hidden rounded-lg bg-white shadow-lg">
+        <div className="bg-primary-50 flex flex-col gap-6 p-6">
+          <div className="flex flex-col gap-4">
+            <div className="flex justify-center">
+              <Logo textClassname="text-primary-200" />
+            </div>
+
+            <h2 className="text-center text-2xl font-bold text-gray-900">관리자 로그인</h2>
+          </div>
+          <p className="pt-5 text-center text-sm text-gray-500">
+            <span className="text-[#F6A818]">admin 계정</span>을 통해 로그인을 진행해주세요.
+          </p>
         </div>
 
-        <h2 className="mb-2 text-center text-xl font-bold text-gray-900">관리자 로그인</h2>
-        <p className="mb-8 text-center text-sm text-gray-500">
-          <span className="font-semibold text-blue-500">admin 계정</span>을 통해 로그인을 진행해주세요.
-        </p>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 p-5">
           <div>
             <input
               type="email"
               placeholder="아이디 (example@gmail.com)"
               autoComplete="email"
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none transition-colors focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+              className="w-full rounded border border-gray-300 px-4 py-2 text-sm transition-colors outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
               {...register('email', authValidationRules.email)}
             />
             {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>}
@@ -66,7 +70,7 @@ export default function AdminLogin() {
               type="password"
               placeholder="비밀번호 (6~15자의 영문 대소문자, 숫자, 특수문자 포함)"
               autoComplete="current-password"
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none transition-colors focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+              className="w-full rounded border border-gray-300 px-4 py-2 text-sm transition-colors outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
               {...register('password', { required: '비밀번호를 입력해주세요' })}
             />
             {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>}
@@ -77,7 +81,7 @@ export default function AdminLogin() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-lg bg-blue-200 py-3 text-sm font-semibold text-blue-900 transition-colors hover:bg-blue-300 disabled:opacity-50"
+            className="bg-primary-200 w-full rounded py-3 font-semibold text-white transition-colors hover:bg-blue-300 disabled:opacity-50"
           >
             {isSubmitting ? '로그인 중...' : '로그인'}
           </button>
