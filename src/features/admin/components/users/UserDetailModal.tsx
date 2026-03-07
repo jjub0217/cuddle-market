@@ -35,22 +35,12 @@ function Field({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className="mb-1.5 text-sm font-medium text-gray-500">{label}</p>
-      <div className="rounded-lg border border-gray-200 bg-gray-50/50 px-3 py-2.5 text-sm text-gray-900">
-        {value}
-      </div>
+      <div className="rounded-lg border border-gray-200 bg-gray-50/50 px-3 py-2.5 text-sm text-gray-900">{value}</div>
     </div>
   )
 }
 
-function DeleteConfirmDialog({
-  isOpen,
-  onConfirm,
-  onCancel,
-}: {
-  isOpen: boolean
-  onConfirm: () => void
-  onCancel: () => void
-}) {
+function DeleteConfirmDialog({ isOpen, onConfirm, onCancel }: { isOpen: boolean; onConfirm: () => void; onCancel: () => void }) {
   const confirmRef = useRef<HTMLDialogElement>(null)
 
   useEffect(() => {
@@ -65,7 +55,7 @@ function DeleteConfirmDialog({
   return (
     <dialog
       ref={confirmRef}
-      className="m-auto w-full max-w-fit open:flex flex-col gap-4 rounded-xl bg-white p-6 shadow-2xl backdrop:bg-gray-900/50"
+      className="m-auto w-full max-w-fit flex-col gap-4 rounded-xl bg-white p-6 shadow-2xl backdrop:bg-gray-900/50 open:flex"
       onClick={(e) => {
         if (e.target === confirmRef.current) onCancel()
       }}
@@ -125,7 +115,7 @@ function RoleConfirmDialog({
   return (
     <dialog
       ref={confirmRef}
-      className="m-auto w-full max-w-fit open:flex flex-col gap-4 rounded-xl bg-white p-6 shadow-2xl backdrop:bg-gray-900/50"
+      className="m-auto w-full max-w-fit flex-col gap-4 rounded-xl bg-white p-6 shadow-2xl backdrop:bg-gray-900/50 open:flex"
       onClick={(e) => {
         if (e.target === confirmRef.current) onCancel()
       }}
@@ -204,7 +194,7 @@ export default function UserDetailModal({ isOpen, user, onClose }: UserDetailMod
   return (
     <dialog
       ref={dialogRef}
-      className="m-auto w-full max-w-[680px] open:flex flex-col rounded-xl bg-white p-0 shadow-xl backdrop:bg-gray-900/70"
+      className="m-auto w-full max-w-170 flex-col rounded-xl bg-white p-0 shadow-xl backdrop:bg-gray-900/70 open:flex"
       onClick={(e) => {
         if (e.target === dialogRef.current) dialogRef.current.close()
       }}
