@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
 import type { AdminUser } from '../../types/adminApi'
+import { grantAdminRole } from '@/lib/api/admin'
 
 interface UserDetailModalProps {
   isOpen: boolean
@@ -96,12 +98,77 @@ function DeleteConfirmDialog({
   )
 }
 
+function RoleConfirmDialog({
+  isOpen,
+  userName,
+  isLoading,
+  onConfirm,
+  onCancel,
+}: {
+  isOpen: boolean
+  userName: string
+  isLoading: boolean
+  onConfirm: () => void
+  onCancel: () => void
+}) {
+  const confirmRef = useRef<HTMLDialogElement>(null)
+
+  useEffect(() => {
+    const dialog = confirmRef.current
+    if (isOpen && !dialog?.open) {
+      dialog?.showModal()
+    } else if (!isOpen && dialog?.open) {
+      dialog?.close()
+    }
+  }, [isOpen])
+
+  return (
+    <dialog
+      ref={confirmRef}
+      className="m-auto w-full max-w-fit open:flex flex-col gap-4 rounded-xl bg-white p-6 shadow-2xl backdrop:bg-gray-900/50"
+      onClick={(e) => {
+        if (e.target === confirmRef.current) onCancel()
+      }}
+      onClose={(e) => {
+        e.stopPropagation()
+        onCancel()
+      }}
+    >
+      <h4 className="text-lg font-semibold text-gray-900">관리자 권한 부여</h4>
+      <p className="text-sm leading-relaxed text-gray-500">
+        <strong>{userName}</strong> 님에게 관리자 권한을 부여하시겠습니까?
+      </p>
+      <div className="flex justify-end gap-3">
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={isLoading}
+          className="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+        >
+          취소
+        </button>
+        <button
+          type="button"
+          onClick={onConfirm}
+          disabled={isLoading}
+          className="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+        >
+          {isLoading ? '처리중...' : '확인'}
+        </button>
+      </div>
+    </dialog>
+  )
+}
+
 const ROLE_EN_TO_KO: Record<string, string> = { USER: '일반회원', ADMIN: '관리자' }
 const STATUS_EN_TO_KO: Record<string, string> = { ACTIVE: '활성', WITHDRAWN: '탈퇴' }
 
 export default function UserDetailModal({ isOpen, user, onClose }: UserDetailModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showRoleConfirm, setShowRoleConfirm] = useState(false)
+  const [isGranting, setIsGranting] = useState(false)
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     const dialog = dialogRef.current
@@ -114,7 +181,24 @@ export default function UserDetailModal({ isOpen, user, onClose }: UserDetailMod
 
   const handleClose = () => {
     setShowDeleteConfirm(false)
+    setShowRoleConfirm(false)
     onClose()
+  }
+
+  const handleGrantAdmin = async () => {
+    if (!user) return
+    setIsGranting(true)
+    try {
+      await grantAdminRole(user.id)
+      alert('관리자 권한이 부여되었습니다.')
+      await queryClient.invalidateQueries({ queryKey: ['admin-users'] })
+      setShowRoleConfirm(false)
+      handleClose()
+    } catch {
+      alert('권한 변경에 실패했습니다.')
+    } finally {
+      setIsGranting(false)
+    }
   }
 
   return (
@@ -171,13 +255,15 @@ export default function UserDetailModal({ isOpen, user, onClose }: UserDetailMod
 
           {/* Footer */}
           <div className="flex justify-end gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4">
-            <button
-              type="button"
-              onClick={() => dialogRef.current?.close()}
-              className="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-            >
-              수정하기
-            </button>
+            {user.role === 'USER' && (
+              <button
+                type="button"
+                onClick={() => setShowRoleConfirm(true)}
+                className="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              >
+                관리자 권한 부여
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setShowDeleteConfirm(true)}
@@ -194,6 +280,14 @@ export default function UserDetailModal({ isOpen, user, onClose }: UserDetailMod
               dialogRef.current?.close()
             }}
             onCancel={() => setShowDeleteConfirm(false)}
+          />
+
+          <RoleConfirmDialog
+            isOpen={showRoleConfirm}
+            userName={user.name}
+            isLoading={isGranting}
+            onConfirm={handleGrantAdmin}
+            onCancel={() => setShowRoleConfirm(false)}
           />
         </>
       )}
