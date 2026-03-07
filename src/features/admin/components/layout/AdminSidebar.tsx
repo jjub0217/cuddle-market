@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { LayoutDashboard, Package, Users, ChevronDown, ChevronRight, UserX, MessageSquare, Flag, ShieldAlert, AlertTriangle, FileWarning } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { ROUTES } from '@/constants/routes'
@@ -45,19 +45,25 @@ const NAV_ITEMS: NavItem[] = [
   },
 ]
 
+function getActiveParentLabel(pathname: string): string | null {
+  const activeParent = NAV_ITEMS.find((item) =>
+    item.children?.some((child) => pathname === child.href),
+  )
+  return activeParent?.label ?? null
+}
+
 export default function AdminSidebar() {
   const pathname = usePathname()
-  const [openMenus, setOpenMenus] = useState<Set<string>>(new Set())
+  const [openMenus, setOpenMenus] = useState<Set<string>>(() => {
+    const label = getActiveParentLabel(pathname)
+    return label ? new Set([label]) : new Set()
+  })
 
-  // Auto-expand parent when child route is active
-  useEffect(() => {
-    const activeParent = NAV_ITEMS.find((item) =>
-      item.children?.some((child) => pathname === child.href),
-    )
-    if (activeParent) {
-      setOpenMenus((prev) => new Set(prev).add(activeParent.label))
-    }
-  }, [pathname])
+  // pathname 변경 시 해당 부모 메뉴 자동 열기
+  const activeLabel = getActiveParentLabel(pathname)
+  if (activeLabel && !openMenus.has(activeLabel)) {
+    setOpenMenus((prev) => new Set(prev).add(activeLabel))
+  }
 
   const toggleMenu = (label: string) => {
     setOpenMenus((prev) => {
