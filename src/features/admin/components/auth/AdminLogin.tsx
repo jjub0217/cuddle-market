@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 import Logo from '@/components/Logo'
 import { login } from '@/lib/api/auth'
+import { api } from '@/lib/api/api'
 import { useUserStore } from '@/store/userStore'
 import { ROUTES } from '@/constants/routes'
 import { authValidationRules } from '@/lib/utils/validation/authValidationRules'
@@ -31,6 +32,16 @@ export default function AdminLogin() {
       const response = await login({ email: data.email, password: data.password })
       const { user, accessToken, refreshToken } = response.data
       handleLogin(user, accessToken, refreshToken)
+
+      const profileRes = await api.get('/profile/me')
+      const { userRole } = profileRes.data.data
+
+      if (userRole !== 'ADMIN') {
+        useUserStore.getState().clearAll()
+        setError('관리자 권한이 없는 계정입니다.')
+        return
+      }
+
       router.push(ROUTES.ADMIN)
     } catch {
       setError('아이디 또는 비밀번호가 올바르지 않습니다.')
