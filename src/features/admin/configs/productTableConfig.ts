@@ -1,7 +1,30 @@
 import type { TableConfig } from '../types/adminTable'
-import type { MockProduct } from '../mocks/mockProducts'
+import type { Product } from '@/types/product'
+import { STATUS_EN_TO_KO, PRODUCT_CATEGORIES, CONDITION_ITEMS } from '@/constants/constants'
 
-export const productTableConfig: TableConfig<MockProduct> = {
+const PRODUCT_TYPE_EN_TO_KO: Record<string, string> = {
+  SELL: '팝니다',
+  REQUEST: '삽니다',
+}
+
+const TRADE_STATUS_EN_TO_KO: Record<string, string> = {
+  SELLING: '판매중',
+  BUYING: '요청중',
+  RESERVED: '예약중',
+  COMPLETED: '완료',
+}
+
+const PRODUCT_STATUS_EN_TO_KO: Record<string, string> = Object.fromEntries(
+  CONDITION_ITEMS.map((item) => [item.value, item.title]),
+)
+
+const CATEGORY_EN_TO_KO: Record<string, string> = Object.fromEntries(
+  PRODUCT_CATEGORIES.map((cat) => [cat.code, cat.name]),
+)
+
+export { PRODUCT_TYPE_EN_TO_KO, TRADE_STATUS_EN_TO_KO, PRODUCT_STATUS_EN_TO_KO, CATEGORY_EN_TO_KO }
+
+export const productTableConfig: TableConfig<Product> = {
   title: '상품 관리',
   rowKey: 'id',
   searchable: true,
@@ -15,14 +38,24 @@ export const productTableConfig: TableConfig<MockProduct> = {
       sortable: true,
       width: '90px',
       badgeOptions: [
-        { value: '팝니다', label: '팝니다', color: 'bg-[#7BA5D6] text-white' },
-        { value: '삽니다', label: '삽니다', color: 'bg-[#FFF7ED] text-orange-800' },
+        { value: 'SELL', label: '팝니다', color: 'bg-[#7BA5D6] text-white' },
+        { value: 'REQUEST', label: '삽니다', color: 'bg-[#FFF7ED] text-orange-800' },
       ],
     },
-    { key: 'image', label: '이미지', type: 'image', width: '80px' },
-    { key: 'name', label: '상품명', type: 'text', sortable: true },
-    { key: 'nickname', label: '닉네임', type: 'text', sortable: true },
-    { key: 'category', label: '카테고리', type: 'text', sortable: true, width: '120px' },
+    { key: 'mainImageUrl', label: '이미지', type: 'image', width: '80px' },
+    { key: 'title', label: '상품명', type: 'text', sortable: true },
+    {
+      key: 'productStatus',
+      label: '상품 상태',
+      type: 'badge',
+      width: '110px',
+      badgeOptions: [
+        { value: 'NEW', label: '새 상품', color: 'bg-[#DCFCE7] text-green-800' },
+        { value: 'LIKE_NEW', label: '거의 새것', color: 'bg-[#DBEAFE] text-blue-800' },
+        { value: 'USED', label: '사용감 있음', color: 'bg-[#FEF9C3] text-yellow-800' },
+        { value: 'NEED_REPAIR', label: '수리 필요', color: 'bg-[#FEE2E2] text-red-800' },
+      ],
+    },
     { key: 'price', label: '가격', type: 'currency', sortable: true, width: '120px' },
     {
       key: 'tradeStatus',
@@ -31,27 +64,15 @@ export const productTableConfig: TableConfig<MockProduct> = {
       sortable: true,
       width: '100px',
       badgeOptions: [
-        { value: '요청중', label: '요청중', color: 'bg-[#DCFCE7] text-green-800' },
-        { value: '요청완료', label: '요청완료', color: 'bg-[#F3F4F6] text-gray-800' },
-        { value: '판매중', label: '판매중', color: 'bg-[#DCFCE7] text-green-800' },
-        { value: '예약중', label: '예약중', color: 'bg-[#FEF9C3] text-yellow-800' },
-        { value: '판매완료', label: '판매완료', color: 'bg-[#F3F4F6] text-gray-800' },
+        { value: 'SELLING', label: '판매중', color: 'bg-[#DCFCE7] text-green-800' },
+        { value: 'BUYING', label: '요청중', color: 'bg-[#DCFCE7] text-green-800' },
+        { value: 'RESERVED', label: '예약중', color: 'bg-[#FEF9C3] text-yellow-800' },
+        { value: 'COMPLETED', label: '완료', color: 'bg-[#F3F4F6] text-gray-800' },
       ],
     },
     {
       key: 'createdAt',
       label: '작성일자',
-      type: 'date',
-      sortable: true,
-      width: '120px',
-      format: (v) => {
-        const d = new Date(v as string)
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-      },
-    },
-    {
-      key: 'updatedAt',
-      label: '수정일자',
       type: 'date',
       sortable: true,
       width: '120px',
@@ -66,26 +87,14 @@ export const productTableConfig: TableConfig<MockProduct> = {
       key: 'tradeStatus',
       label: '거래 상태',
       options: [
+        ...STATUS_EN_TO_KO.map((s) => ({ value: s.name, label: s.name })),
         { value: '요청중', label: '요청중' },
-        { value: '요청완료', label: '요청완료' },
-        { value: '판매중', label: '판매중' },
-        { value: '예약중', label: '예약중' },
-        { value: '판매완료', label: '판매완료' },
       ],
     },
     {
       key: 'category',
       label: '카테고리',
-      options: [
-        { value: '사료/간식', label: '사료/간식' },
-        { value: '장난감', label: '장난감' },
-        { value: '사육장/하우스', label: '사육장/하우스' },
-        { value: '건강/위생', label: '건강/위생' },
-        { value: '의류/악세사리', label: '의류/악세사리' },
-        { value: '이동장/목줄', label: '이동장/목줄' },
-        { value: '미용용품', label: '미용용품' },
-        { value: '기타', label: '기타' },
-      ],
+      options: PRODUCT_CATEGORIES.map((cat) => ({ value: cat.name, label: cat.name })),
     },
     {
       key: 'productType',

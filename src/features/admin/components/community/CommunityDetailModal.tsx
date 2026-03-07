@@ -2,11 +2,15 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { X, Trash2 } from 'lucide-react'
-import type { MockCommunityPost } from '../../mocks/mockCommunityPosts'
+import { useQuery } from '@tanstack/react-query'
+import { fetchAdminCommunityDetail } from '@/lib/api/admin'
+import { api } from '@/lib/api/api'
+import type { Comment, CommentResponse } from '@/types/community'
+import { BOARD_TYPE_EN_TO_KO } from '../../configs/communityTableConfig'
 
 interface CommunityDetailModalProps {
   isOpen: boolean
-  post: MockCommunityPost | null
+  postId: number | null
   onClose: () => void
 }
 
@@ -90,23 +94,44 @@ function DeleteConfirmDialog({
 }
 
 const BOARD_TYPE_COLORS: Record<string, string> = {
-  '질문있어요': 'bg-blue-100 text-blue-800',
-  '정보공유': 'bg-green-100 text-green-800',
+  QUESTION: 'bg-blue-100 text-blue-800',
+  INFO: 'bg-green-100 text-green-800',
 }
 
-export default function CommunityDetailModal({ isOpen, post, onClose }: CommunityDetailModalProps) {
+async function fetchComments(postId: number): Promise<Comment[]> {
+  try {
+    const { data } = await api.get<CommentResponse>(`/community/posts/${postId}/comments`)
+    return data.data.comments
+  } catch {
+    return []
+  }
+}
+
+export default function CommunityDetailModal({ isOpen, postId, onClose }: CommunityDetailModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteCommentId, setDeleteCommentId] = useState<number | null>(null)
 
+  const { data: post, isLoading } = useQuery({
+    queryKey: ['admin-community-detail', postId],
+    queryFn: () => fetchAdminCommunityDetail(postId!),
+    enabled: isOpen && postId !== null,
+  })
+
+  const { data: comments = [] } = useQuery({
+    queryKey: ['admin-community-comments', postId],
+    queryFn: () => fetchComments(postId!),
+    enabled: isOpen && postId !== null,
+  })
+
   useEffect(() => {
     const dialog = dialogRef.current
-    if (isOpen && post && !dialog?.open) {
+    if (isOpen && postId && !dialog?.open) {
       dialog?.showModal()
     } else if (!isOpen && dialog?.open) {
       dialog?.close()
     }
-  }, [isOpen, post])
+  }, [isOpen, postId])
 
   const handleClose = () => {
     setShowDeleteConfirm(false)
@@ -123,6 +148,11 @@ export default function CommunityDetailModal({ isOpen, post, onClose }: Communit
       }}
       onClose={handleClose}
     >
+      {isLoading && (
+        <div className="flex items-center justify-center py-20">
+          <p className="text-sm text-gray-500">로딩 중...</p>
+        </div>
+      )}
       {post && (
         <>
           {/* Header */}
@@ -144,23 +174,31 @@ export default function CommunityDetailModal({ isOpen, post, onClose }: Communit
               <div className="flex w-1/2 shrink-0 flex-col">
                 {/* Main image */}
                 <div className="mb-2 flex h-[260px] w-full items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-100">
-                  <img
-                    src={post.image}
-                    alt={post.title}
-                    className="h-full w-full object-cover"
-                  />
+                  {post.imageUrls?.[0] ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={post.imageUrls[0]}
+                      alt={post.title}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <svg className="h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+                    </svg>
+                  )}
                 </div>
 
                 {/* Sub images (always 4 cells) */}
                 <div className="mb-5 flex gap-2">
                   {Array.from({ length: 4 }, (_, idx) => {
-                    const src = post.subImages?.[idx]
+                    const src = post.imageUrls?.[idx + 1]
                     return (
                       <div
                         key={idx}
                         className="flex h-[60px] w-[60px] items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-gray-50"
                       >
                         {src ? (
+                          // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={src}
                             alt={`서브이미지 ${idx + 1}`}
@@ -179,7 +217,7 @@ export default function CommunityDetailModal({ isOpen, post, onClose }: Communit
                 {/* Left info fields */}
                 <div className="grid grid-cols-2 gap-x-4 gap-y-4">
                   <Field label="게시글 ID" value={String(post.id)} />
-                  <Field label="닉네임" value={post.nickname} />
+                  <Field label="닉네임" value={post.authorNickname} />
                 </div>
                 <div className="mt-4">
                   <Field label="제목" value={post.title} />
@@ -204,25 +242,25 @@ export default function CommunityDetailModal({ isOpen, post, onClose }: Communit
                 <div className="mb-4">
                   <p className="mb-1.5 text-sm font-medium text-gray-500">유형</p>
                   <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${BOARD_TYPE_COLORS[post.boardType] ?? 'bg-gray-100 text-gray-800'}`}
+                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${BOARD_TYPE_COLORS[post.boardType ?? ''] ?? 'bg-gray-100 text-gray-800'}`}
                   >
-                    {post.boardType}
+                    {BOARD_TYPE_EN_TO_KO[post.boardType ?? ''] ?? post.boardType}
                   </span>
                 </div>
 
                 {/* 댓글 목록 */}
                 <div className="flex-1">
                   <p className="mb-1.5 text-sm font-medium text-gray-500">
-                    댓글 목록 ({post.comments.length})
+                    댓글 목록 ({comments.length})
                   </p>
                   <div className="max-h-[240px] overflow-y-auto rounded-lg border border-gray-200">
-                    {post.comments.length === 0 ? (
+                    {comments.length === 0 ? (
                       <div className="flex items-center justify-center py-8 text-sm text-gray-400">
                         댓글이 없습니다.
                       </div>
                     ) : (
                       <div className="divide-y divide-gray-100">
-                        {post.comments.map((comment) => (
+                        {comments.map((comment) => (
                           <div
                             key={comment.id}
                             className={`flex items-start justify-between gap-2 py-2.5 pr-3 ${comment.depth === 1 ? 'pl-7' : 'pl-3'}`}
@@ -230,7 +268,7 @@ export default function CommunityDetailModal({ isOpen, post, onClose }: Communit
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center gap-2">
                                 <span className="text-sm font-semibold text-gray-900">
-                                  {comment.nickname}
+                                  {comment.authorNickname}
                                 </span>
                                 <span className="text-xs text-gray-400">
                                   {formatDateTime(comment.createdAt)}

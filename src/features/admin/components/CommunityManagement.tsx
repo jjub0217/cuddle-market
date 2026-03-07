@@ -4,24 +4,24 @@ import { useState } from 'react'
 import AdminTable from './table/AdminTable'
 import { communityTableConfig } from '../configs/communityTableConfig'
 import { fetchAdminCommunityPosts } from '@/lib/api/admin'
-import type { MockCommunityPost } from '../mocks/mockCommunityPosts'
+import type { CommunityItem } from '@/types/community'
 import CommunityDetailModal from './community/CommunityDetailModal'
 
 export default function CommunityManagement() {
-  const [selectedPost, setSelectedPost] = useState<MockCommunityPost | null>(null)
+  const [selectedPostId, setSelectedPostId] = useState<number | null>(null)
 
   return (
     <>
-      <AdminTable<MockCommunityPost>
+      <AdminTable<CommunityItem>
         config={communityTableConfig}
         queryKey="admin-community"
         fetchFn={fetchAdminCommunityPosts}
-        onRowClick={(post) => setSelectedPost(post)}
+        onRowClick={(post) => setSelectedPostId(post.id)}
       />
       <CommunityDetailModal
-        isOpen={selectedPost !== null}
-        post={selectedPost}
-        onClose={() => setSelectedPost(null)}
+        isOpen={selectedPostId !== null}
+        postId={selectedPostId}
+        onClose={() => setSelectedPostId(null)}
       />
     </>
   )
