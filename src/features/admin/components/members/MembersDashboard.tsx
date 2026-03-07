@@ -6,8 +6,9 @@ import SignupTrendChart from './SignupTrendChart'
 import WithdrawalTrendChart from './WithdrawalTrendChart'
 import WithdrawalReasonChart from './WithdrawalReasonChart'
 import WithdrawalReasonTrendChart from './WithdrawalReasonTrendChart'
-import { fetchMemberStats, fetchWithdrawalReasons, fetchMonthlyWithdrawalReasons } from '@/lib/api/admin'
-import type { MonthlyMemberStat, WithdrawalReasonStat, MonthlyWithdrawalReasonStat } from '@/features/admin/mocks/mockMemberStats'
+import { fetchMemberStats, fetchWithdrawalReasons } from '@/lib/api/admin'
+import type { MemberTrendStat, WithdrawalReasonStat } from '@/features/admin/types/adminApi'
+import type { MonthlyWithdrawalReasonStat } from '@/features/admin/mocks/mockMemberStats'
 
 const DASHBOARD_TABS = [
   { id: 'signup', label: '회원 가입 추세', code: 'signup' },
@@ -17,7 +18,7 @@ const DASHBOARD_TABS = [
 
 export default function MembersDashboard() {
   const [activeTab, setActiveTab] = useState('signup')
-  const [stats, setStats] = useState<MonthlyMemberStat[]>([])
+  const [stats, setStats] = useState<MemberTrendStat[]>([])
   const [reasons, setReasons] = useState<WithdrawalReasonStat[]>([])
   const [monthlyReasons, setMonthlyReasons] = useState<MonthlyWithdrawalReasonStat[]>([])
 
@@ -25,11 +26,13 @@ export default function MembersDashboard() {
     Promise.all([
       fetchMemberStats(),
       fetchWithdrawalReasons(),
-      fetchMonthlyWithdrawalReasons(),
-    ]).then(([statsData, reasonsData, monthlyData]) => {
+    ]).then(([statsData, reasonsData]) => {
       setStats(statsData)
       setReasons(reasonsData)
-      setMonthlyReasons(monthlyData)
+    })
+    // Monthly withdrawal reasons - still mock only (no API endpoint)
+    import('@/features/admin/mocks/mockMemberStats').then(({ mockMonthlyWithdrawalReasons }) => {
+      setMonthlyReasons(mockMonthlyWithdrawalReasons)
     })
   }, [])
 

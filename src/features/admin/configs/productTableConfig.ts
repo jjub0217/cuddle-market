@@ -1,5 +1,5 @@
 import type { TableConfig } from '../types/adminTable'
-import type { Product } from '@/types/product'
+import type { AdminProduct } from '../types/adminApi'
 import { STATUS_EN_TO_KO, PRODUCT_CATEGORIES, CONDITION_ITEMS } from '@/constants/constants'
 
 const PRODUCT_TYPE_EN_TO_KO: Record<string, string> = {
@@ -24,7 +24,7 @@ const CATEGORY_EN_TO_KO: Record<string, string> = Object.fromEntries(
 
 export { PRODUCT_TYPE_EN_TO_KO, TRADE_STATUS_EN_TO_KO, PRODUCT_STATUS_EN_TO_KO, CATEGORY_EN_TO_KO }
 
-export const productTableConfig: TableConfig<Product> = {
+export const productTableConfig: TableConfig<AdminProduct> = {
   title: '상품 관리',
   rowKey: 'id',
   searchable: true,
@@ -42,8 +42,19 @@ export const productTableConfig: TableConfig<Product> = {
         { value: 'REQUEST', label: '삽니다', color: 'bg-[#FFF7ED] text-orange-800' },
       ],
     },
-    { key: 'mainImageUrl', label: '이미지', type: 'image', width: '80px' },
     { key: 'title', label: '상품명', type: 'text', sortable: true },
+    { key: 'sellerNickname', label: '판매자', type: 'text', sortable: true, width: '120px' },
+    {
+      key: 'category',
+      label: '카테고리',
+      type: 'badge',
+      width: '120px',
+      badgeOptions: PRODUCT_CATEGORIES.map((cat) => ({
+        value: cat.code,
+        label: cat.name,
+        color: 'bg-gray-100 text-gray-800',
+      })),
+    },
     {
       key: 'productStatus',
       label: '상품 상태',

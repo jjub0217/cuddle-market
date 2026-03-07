@@ -3,19 +3,19 @@
 import { useState } from 'react'
 import AdminTable from '../table/AdminTable'
 import { productSellReportTableConfig } from '../../configs/productSellReportTableConfig'
-import { fetchAdminProductSellReports } from '@/lib/api/admin'
-import type { MockProductSellReport } from '../../mocks/mockProductSellReports'
+import { fetchAdminProductReports } from '@/lib/api/admin'
+import type { AdminReport } from '../../types/adminApi'
 import ProductSellReportDetailModal from './ProductSellReportDetailModal'
 
 export default function ProductSellReportManagement() {
-  const [selectedReport, setSelectedReport] = useState<MockProductSellReport | null>(null)
+  const [selectedReport, setSelectedReport] = useState<AdminReport | null>(null)
 
   return (
     <>
-      <AdminTable<MockProductSellReport>
+      <AdminTable<AdminReport>
         config={productSellReportTableConfig}
         queryKey="admin-product-sell-reports"
-        fetchFn={fetchAdminProductSellReports}
+        fetchFn={fetchAdminProductReports}
         onRowClick={(report) => setSelectedReport(report)}
       />
       <ProductSellReportDetailModal

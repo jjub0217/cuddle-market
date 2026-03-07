@@ -1,16 +1,48 @@
 import type { TableConfig } from '../types/adminTable'
-import type { MockUserReport } from '../mocks/mockUserReports'
+import type { AdminReport } from '../types/adminApi'
 
-export const userReportTableConfig: TableConfig<MockUserReport> = {
+const USER_REPORT_REASON_EN_TO_KO: Record<string, string> = {
+  HARASSMENT: '욕설/비방/괴롭힘',
+  FRAUD: '사기/허위 거래',
+  INAPPROPRIATE_CONTENT: '음란물/불건전 행위',
+  SPAM: '스팸/광고성 메시지',
+  OFFENSIVE_PROFILE: '불쾌한 프로필',
+  UNDERAGE: '만 14세 미만',
+  OTHER: '기타',
+}
+
+export { USER_REPORT_REASON_EN_TO_KO }
+
+export const userReportTableConfig: TableConfig<AdminReport> = {
   title: '유저 신고 관리',
   rowKey: 'id',
-  searchable: true,
-  searchPlaceholder: '신고자 또는 신고 대상자 닉네임 검색...',
+  searchable: false,
   columns: [
     { key: 'id', label: '신고 ID', type: 'number', sortable: true, width: '90px' },
-    { key: 'reporterNickname', label: '신고자', type: 'text', sortable: true },
-    { key: 'targetNickname', label: '신고 대상자 닉네임', type: 'text', sortable: true },
-    { key: 'reasonCode', label: '신고 항목', type: 'text', sortable: true },
+    { key: 'reporterId', label: '신고자 ID', type: 'number', width: '100px' },
+    { key: 'targetId', label: '대상 ID', type: 'number', width: '100px' },
+    {
+      key: 'reasonCodes',
+      label: '신고 사유',
+      type: 'text',
+      format: (v) => {
+        const codes = v as string[]
+        return codes.map((c) => USER_REPORT_REASON_EN_TO_KO[c] || c).join(', ')
+      },
+    },
+    {
+      key: 'status',
+      label: '처리 상태',
+      type: 'badge',
+      sortable: true,
+      width: '110px',
+      badgeOptions: [
+        { value: 'PENDING', label: '대기중', color: 'bg-yellow-100 text-yellow-800' },
+        { value: 'REVIEWED', label: '검토완료', color: 'bg-green-100 text-green-800' },
+        { value: 'REJECTED', label: '거절', color: 'bg-gray-100 text-gray-800' },
+        { value: 'ACTION_TAKEN', label: '조치완료', color: 'bg-blue-100 text-blue-800' },
+      ],
+    },
     {
       key: 'createdAt',
       label: '신고일자',
@@ -25,24 +57,13 @@ export const userReportTableConfig: TableConfig<MockUserReport> = {
   ],
   filters: [
     {
-      key: 'reasonCode',
-      label: '신고 항목',
+      key: 'status',
+      label: '처리 상태',
       options: [
-        { value: '욕설, 비방, 괴롭힘', label: '욕설, 비방, 괴롭힘' },
-        { value: '사기, 허위 거래 시도', label: '사기, 허위 거래 시도' },
-        { value: '음란물 또는 불건전 행위', label: '음란물 또는 불건전 행위' },
-        { value: '스팸/광고성 메시지', label: '스팸/광고성 메시지' },
-        { value: '불쾌한 사용자 정보 내용', label: '불쾌한 사용자 정보 내용' },
-        { value: '만 14세 미만 유저', label: '만 14세 미만 유저' },
-        { value: '기타', label: '기타' },
-      ],
-    },
-    {
-      key: 'sort',
-      label: '정렬',
-      options: [
-        { value: '최신순', label: '최신순' },
-        { value: '오래된 순', label: '오래된 순' },
+        { value: '대기중', label: '대기중' },
+        { value: '검토완료', label: '검토완료' },
+        { value: '거절', label: '거절' },
+        { value: '조치완료', label: '조치완료' },
       ],
     },
   ],
