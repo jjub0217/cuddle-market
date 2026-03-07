@@ -31,7 +31,9 @@ export default function AdminLogin() {
     try {
       const response = await login({ email: data.email, password: data.password })
       const { user, accessToken, refreshToken } = response.data
-      handleLogin(user, accessToken, refreshToken)
+
+      // 토큰만 임시 세팅하여 /profile/me 호출 가능하게 함
+      useUserStore.getState().setAccessToken(accessToken)
 
       const profileRes = await api.get('/profile/me')
       const { userRole } = profileRes.data.data
@@ -42,8 +44,11 @@ export default function AdminLogin() {
         return
       }
 
+      // ADMIN 확인 후 최종 로그인 처리
+      handleLogin(user, accessToken, refreshToken)
       router.push(ROUTES.ADMIN)
     } catch {
+      useUserStore.getState().clearAll()
       setError('아이디 또는 비밀번호가 올바르지 않습니다.')
     }
   }
