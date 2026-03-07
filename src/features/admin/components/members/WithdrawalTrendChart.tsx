@@ -10,21 +10,21 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
-import type { MonthlyMemberStat } from '@/features/admin/mocks/mockMemberStats'
+import type { MemberTrendStat } from '@/features/admin/types/adminApi'
 
 type Period = 'monthly' | 'yearly'
 
 interface WithdrawalTrendChartProps {
-  data: MonthlyMemberStat[]
+  data: MemberTrendStat[]
 }
 
-function aggregateByYear(data: MonthlyMemberStat[]) {
+function aggregateByYear(data: MemberTrendStat[]) {
   const map = new Map<string, number>()
   for (const item of data) {
-    const year = item.month.slice(0, 4)
-    map.set(year, (map.get(year) ?? 0) + item.withdrawals)
+    const year = item.yearMonth.slice(0, 4)
+    map.set(year, (map.get(year) ?? 0) + item.withdrawalCount)
   }
-  return Array.from(map, ([year, withdrawals]) => ({ year, withdrawals }))
+  return Array.from(map, ([year, withdrawalCount]) => ({ year, withdrawalCount }))
 }
 
 export default function WithdrawalTrendChart({ data }: WithdrawalTrendChartProps) {
@@ -53,10 +53,10 @@ export default function WithdrawalTrendChart({ data }: WithdrawalTrendChartProps
       <ResponsiveContainer width="100%" height={360}>
         <BarChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey={period === 'yearly' ? 'year' : 'month'} tick={{ fontSize: 12 }} />
+          <XAxis dataKey={period === 'yearly' ? 'year' : 'yearMonth'} tick={{ fontSize: 12 }} />
           <YAxis tick={{ fontSize: 12 }} />
           <Tooltip />
-          <Bar dataKey="withdrawals" name="탈퇴자 수" fill="#ef4444" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="withdrawalCount" name="탈퇴자 수" fill="#ef4444" radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

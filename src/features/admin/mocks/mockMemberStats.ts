@@ -1,21 +1,6 @@
-export interface MonthlyMemberStat {
-  month: string
-  signups: number
-  withdrawals: number
-}
+import type { MemberTrendStat, WithdrawalReasonStat } from '../types/adminApi'
 
-export interface WithdrawalReasonStat {
-  reason: string
-  count: number
-}
-
-export const mockWithdrawalReasons: WithdrawalReasonStat[] = [
-  { reason: 'SERVICE_DISSATISFACTION', count: 8 },
-  { reason: 'PRIVACY_CONCERN', count: 6 },
-  { reason: 'LOW_USAGE', count: 7 },
-  { reason: 'COMPETITOR', count: 5 },
-  { reason: 'OTHER', count: 4 },
-]
+export type { MemberTrendStat, WithdrawalReasonStat }
 
 export interface MonthlyWithdrawalReasonStat {
   month: string
@@ -25,6 +10,14 @@ export interface MonthlyWithdrawalReasonStat {
   COMPETITOR: number
   OTHER: number
 }
+
+export const mockWithdrawalReasons: WithdrawalReasonStat[] = [
+  { reason: 'SERVICE_DISSATISFACTION', count: 8 },
+  { reason: 'PRIVACY_CONCERN', count: 6 },
+  { reason: 'LOW_USAGE', count: 7 },
+  { reason: 'COMPETITOR', count: 5 },
+  { reason: 'OTHER', count: 4 },
+]
 
 export const mockMonthlyWithdrawalReasons: MonthlyWithdrawalReasonStat[] = [
   { month: '2025-04', SERVICE_DISSATISFACTION: 3, PRIVACY_CONCERN: 1, LOW_USAGE: 2, COMPETITOR: 1, OTHER: 1 },
@@ -41,17 +34,17 @@ export const mockMonthlyWithdrawalReasons: MonthlyWithdrawalReasonStat[] = [
   { month: '2026-03', SERVICE_DISSATISFACTION: 4, PRIVACY_CONCERN: 2, LOW_USAGE: 3, COMPETITOR: 2, OTHER: 2 },
 ]
 
-export const mockMemberStats: MonthlyMemberStat[] = [
-  { month: '2025-04', signups: 120, withdrawals: 8 },
-  { month: '2025-05', signups: 135, withdrawals: 12 },
-  { month: '2025-06', signups: 98, withdrawals: 6 },
-  { month: '2025-07', signups: 142, withdrawals: 15 },
-  { month: '2025-08', signups: 160, withdrawals: 10 },
-  { month: '2025-09', signups: 175, withdrawals: 18 },
-  { month: '2025-10', signups: 155, withdrawals: 14 },
-  { month: '2025-11', signups: 190, withdrawals: 20 },
-  { month: '2025-12', signups: 210, withdrawals: 22 },
-  { month: '2026-01', signups: 185, withdrawals: 16 },
-  { month: '2026-02', signups: 200, withdrawals: 19 },
-  { month: '2026-03', signups: 225, withdrawals: 13 },
+export const mockMemberStats: MemberTrendStat[] = [
+  { yearMonth: '2025-04', signupCount: 120, withdrawalCount: 8 },
+  { yearMonth: '2025-05', signupCount: 135, withdrawalCount: 12 },
+  { yearMonth: '2025-06', signupCount: 98, withdrawalCount: 6 },
+  { yearMonth: '2025-07', signupCount: 142, withdrawalCount: 15 },
+  { yearMonth: '2025-08', signupCount: 160, withdrawalCount: 10 },
+  { yearMonth: '2025-09', signupCount: 175, withdrawalCount: 18 },
+  { yearMonth: '2025-10', signupCount: 155, withdrawalCount: 14 },
+  { yearMonth: '2025-11', signupCount: 190, withdrawalCount: 20 },
+  { yearMonth: '2025-12', signupCount: 210, withdrawalCount: 22 },
+  { yearMonth: '2026-01', signupCount: 185, withdrawalCount: 16 },
+  { yearMonth: '2026-02', signupCount: 200, withdrawalCount: 19 },
+  { yearMonth: '2026-03', signupCount: 225, withdrawalCount: 13 },
 ]

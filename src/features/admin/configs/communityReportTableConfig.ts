@@ -1,18 +1,47 @@
 import type { TableConfig } from '../types/adminTable'
-import type { MockCommunityReport } from '../mocks/mockCommunityReports'
+import type { AdminReport } from '../types/adminApi'
 
-export const communityReportTableConfig: TableConfig<MockCommunityReport> = {
+const COMMUNITY_REPORT_REASON_EN_TO_KO: Record<string, string> = {
+  ABUSE_OR_HATE: '욕설/비방/혐오',
+  SPAM_OR_AD: '스팸/광고',
+  INAPPROPRIATE_CONTENT: '음란물/불건전',
+  REPETITIVE_POST: '도배 게시물',
+  SELF_HARM_OR_SUICIDE: '자해/자살 의도',
+  ETC: '기타',
+}
+
+export { COMMUNITY_REPORT_REASON_EN_TO_KO }
+
+export const communityReportTableConfig: TableConfig<AdminReport> = {
   title: '커뮤니티 신고 관리',
   rowKey: 'id',
-  searchable: true,
-  searchPlaceholder: '게시글 제목 또는 작성자 검색...',
+  searchable: false,
   columns: [
     { key: 'id', label: '신고 ID', type: 'number', sortable: true, width: '90px' },
-    { key: 'boardType', label: '게시글 유형', type: 'text', sortable: true, width: '110px' },
-    { key: 'reporterNickname', label: '신고자', type: 'text', sortable: true },
-    { key: 'postTitle', label: '제목', type: 'text', sortable: true },
-    { key: 'authorNickname', label: '작성자', type: 'text', sortable: true },
-    { key: 'reasonCode', label: '신고 항목', type: 'text', sortable: true },
+    { key: 'reporterId', label: '신고자 ID', type: 'number', width: '100px' },
+    { key: 'targetId', label: '게시글 ID', type: 'number', width: '100px' },
+    {
+      key: 'reasonCodes',
+      label: '신고 사유',
+      type: 'text',
+      format: (v) => {
+        const codes = v as string[]
+        return codes.map((c) => COMMUNITY_REPORT_REASON_EN_TO_KO[c] || c).join(', ')
+      },
+    },
+    {
+      key: 'status',
+      label: '처리 상태',
+      type: 'badge',
+      sortable: true,
+      width: '110px',
+      badgeOptions: [
+        { value: 'PENDING', label: '대기중', color: 'bg-yellow-100 text-yellow-800' },
+        { value: 'REVIEWED', label: '검토완료', color: 'bg-green-100 text-green-800' },
+        { value: 'REJECTED', label: '거절', color: 'bg-gray-100 text-gray-800' },
+        { value: 'ACTION_TAKEN', label: '조치완료', color: 'bg-blue-100 text-blue-800' },
+      ],
+    },
     {
       key: 'createdAt',
       label: '신고일자',
@@ -27,23 +56,13 @@ export const communityReportTableConfig: TableConfig<MockCommunityReport> = {
   ],
   filters: [
     {
-      key: 'reasonCode',
-      label: '신고 항목',
+      key: 'status',
+      label: '처리 상태',
       options: [
-        { value: '욕설, 비방, 혐오 표현', label: '욕설, 비방, 혐오 표현' },
-        { value: '도배 게시물', label: '도배 게시물' },
-        { value: '음란물/불건전 콘텐츠', label: '음란물/불건전 콘텐츠' },
-        { value: '스팸/광고성 메시지', label: '스팸/광고성 메시지' },
-        { value: '자해 또는 자살 의도를 포함', label: '자해 또는 자살 의도를 포함' },
-        { value: '기타', label: '기타' },
-      ],
-    },
-    {
-      key: 'sort',
-      label: '정렬',
-      options: [
-        { value: '최신순', label: '최신순' },
-        { value: '오래된 순', label: '오래된 순' },
+        { value: '대기중', label: '대기중' },
+        { value: '검토완료', label: '검토완료' },
+        { value: '거절', label: '거절' },
+        { value: '조치완료', label: '조치완료' },
       ],
     },
   ],

@@ -4,15 +4,15 @@ import { useState } from 'react'
 import AdminTable from '../table/AdminTable'
 import { userReportTableConfig } from '../../configs/userReportTableConfig'
 import { fetchAdminUserReports } from '@/lib/api/admin'
-import type { MockUserReport } from '../../mocks/mockUserReports'
+import type { AdminReport } from '../../types/adminApi'
 import UserReportDetailModal from './UserReportDetailModal'
 
 export default function UserReportManagement() {
-  const [selectedReport, setSelectedReport] = useState<MockUserReport | null>(null)
+  const [selectedReport, setSelectedReport] = useState<AdminReport | null>(null)
 
   return (
     <>
-      <AdminTable<MockUserReport>
+      <AdminTable<AdminReport>
         config={userReportTableConfig}
         queryKey="admin-user-reports"
         fetchFn={fetchAdminUserReports}

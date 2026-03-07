@@ -3,19 +3,19 @@
 import { useState } from 'react'
 import AdminTable from '../table/AdminTable'
 import { productRequestReportTableConfig } from '../../configs/productRequestReportTableConfig'
-import { fetchAdminProductRequestReports } from '@/lib/api/admin'
-import type { MockProductRequestReport } from '../../mocks/mockProductRequestReports'
+import { fetchAdminProductReports } from '@/lib/api/admin'
+import type { AdminReport } from '../../types/adminApi'
 import ProductRequestReportDetailModal from './ProductRequestReportDetailModal'
 
 export default function ProductRequestReportManagement() {
-  const [selectedReport, setSelectedReport] = useState<MockProductRequestReport | null>(null)
+  const [selectedReport, setSelectedReport] = useState<AdminReport | null>(null)
 
   return (
     <>
-      <AdminTable<MockProductRequestReport>
+      <AdminTable<AdminReport>
         config={productRequestReportTableConfig}
         queryKey="admin-product-request-reports"
-        fetchFn={fetchAdminProductRequestReports}
+        fetchFn={fetchAdminProductReports}
         onRowClick={(report) => setSelectedReport(report)}
       />
       <ProductRequestReportDetailModal

@@ -8,7 +8,7 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import { WITHDRAW_REASON } from '@/constants/constants'
-import type { WithdrawalReasonStat } from '@/features/admin/mocks/mockMemberStats'
+import type { WithdrawalReasonStat } from '@/features/admin/types/adminApi'
 
 const REASON_COLORS: Record<string, string> = {
   SERVICE_DISSATISFACTION: '#ef4444',

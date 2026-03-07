@@ -2,14 +2,23 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
-import type { MockUserReport } from '../../mocks/mockUserReports'
+import type { AdminReport } from '../../types/adminApi'
 import { formatDate } from '../common/formatDate'
 import Field from '../common/Field'
 import DeleteConfirmDialog from '../common/DeleteConfirmDialog'
 
+const USER_REPORT_REASON_EN_TO_KO: Record<string, string> = {
+  ABUSE_OR_HATE: '욕설/비방/혐오',
+  SPAM_OR_AD: '스팸/광고',
+  INAPPROPRIATE_CONTENT: '음란물/불건전',
+  REPETITIVE_POST: '도배 게시물',
+  SELF_HARM_OR_SUICIDE: '자해/자살 의도',
+  ETC: '기타',
+}
+
 interface UserReportDetailModalProps {
   isOpen: boolean
-  report: MockUserReport | null
+  report: AdminReport | null
   onClose: () => void
 }
 
@@ -57,17 +66,12 @@ export default function UserReportDetailModal({ isOpen, report, onClose }: UserR
           {/* Body */}
           <div className="max-h-[60vh] overflow-y-auto px-6 py-5">
             <div className="grid grid-cols-2 gap-x-5 gap-y-4">
-              {/* Row 1 */}
               <Field label="신고 ID" value={String(report.id)} />
-              <Field label="신고자 닉네임" value={report.reporterNickname} />
-              {/* Row 2 */}
-              <Field label="신고 대상자 닉네임" value={report.targetNickname} />
-              <Field label="신고항목" value={report.reasonCode} />
-              {/* Row 3 */}
-              <div className="col-span-2">
-                <Field label="신고일자" value={formatDate(report.createdAt)} />
-              </div>
-              {/* 신고 상세 사유 */}
+              <Field label="신고자 ID" value={String(report.reporterId)} />
+              <Field label="신고 대상 ID" value={String(report.targetId)} />
+              <Field label="신고항목" value={report.reasonCodes.map((c) => USER_REPORT_REASON_EN_TO_KO[c] || c).join(', ')} />
+              <Field label="처리 상태" value={report.status} />
+              <Field label="신고일자" value={formatDate(report.createdAt)} />
               {report.detailReason && (
                 <div className="col-span-2">
                   <p className="mb-1.5 text-sm font-medium text-gray-500">신고 상세 사유</p>
@@ -79,31 +83,21 @@ export default function UserReportDetailModal({ isOpen, report, onClose }: UserR
             </div>
 
             {/* 첨부 이미지 */}
-            <div className="mt-4">
-              <p className="mb-1.5 text-sm font-medium text-gray-500">첨부 이미지</p>
-              <div className="grid grid-cols-3 gap-3">
-                {Array.from({ length: 3 }, (_, idx) => {
-                  const src = report.images?.[idx]
-                  return src ? (
+            {report.imageUrls && report.imageUrls.length > 0 && (
+              <div className="mt-4">
+                <p className="mb-1.5 text-sm font-medium text-gray-500">첨부 이미지</p>
+                <div className="grid grid-cols-3 gap-3">
+                  {report.imageUrls.map((src, idx) => (
                     <img
                       key={idx}
                       src={src}
                       alt={`첨부 이미지 ${idx + 1}`}
                       className="aspect-square w-full rounded-lg object-cover border border-gray-200"
                     />
-                  ) : (
-                    <div
-                      key={idx}
-                      className="flex aspect-square w-full items-center justify-center rounded-lg border border-gray-200 bg-gray-50"
-                    >
-                      <svg className="h-6 w-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
-                      </svg>
-                    </div>
-                  )
-                })}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Footer */}

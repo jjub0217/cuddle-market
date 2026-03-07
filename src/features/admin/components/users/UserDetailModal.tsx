@@ -2,11 +2,11 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
-import type { MockUser } from '../../mocks/mockUsers'
+import type { AdminUser } from '../../types/adminApi'
 
 interface UserDetailModalProps {
   isOpen: boolean
-  user: MockUser | null
+  user: AdminUser | null
   onClose: () => void
 }
 
@@ -96,6 +96,9 @@ function DeleteConfirmDialog({
   )
 }
 
+const ROLE_EN_TO_KO: Record<string, string> = { USER: '일반회원', ADMIN: '관리자' }
+const STATUS_EN_TO_KO: Record<string, string> = { ACTIVE: '활성', WITHDRAWN: '탈퇴' }
+
 export default function UserDetailModal({ isOpen, user, onClose }: UserDetailModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -141,17 +144,9 @@ export default function UserDetailModal({ isOpen, user, onClose }: UserDetailMod
           <div className="px-6 py-5">
             {/* Profile */}
             <div className="mb-6 flex items-center gap-4">
-              {user.profileImageUrl ? (
-                <img
-                  src={user.profileImageUrl}
-                  alt={user.nickname}
-                  className="h-16 w-16 shrink-0 rounded-full object-cover"
-                />
-              ) : (
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gray-200 text-xl font-bold text-gray-500">
-                  {user.nickname.charAt(0)}
-                </div>
-              )}
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gray-200 text-xl font-bold text-gray-500">
+                {user.nickname.charAt(0)}
+              </div>
               <div>
                 <p className="text-lg font-semibold text-gray-900">{user.name}</p>
                 <p className="text-sm text-gray-500">{user.email}</p>
@@ -164,14 +159,13 @@ export default function UserDetailModal({ isOpen, user, onClose }: UserDetailMod
               <Field label="이름" value={user.name} />
               <Field label="닉네임" value={user.nickname} />
               <Field label="이메일" value={user.email} />
-              <Field label="생년월일" value={formatDate(user.birthDate)} />
-              <Field label="지역" value={`${user.addressSido} ${user.addressGugun}`} />
-              <Field label="권한" value={user.role} />
-              <Field label="상태" value={user.status} />
-              <Field label="회원가입 일시" value={formatDateTime(user.joinedAt)} />
-              {user.withdrawalRequestedAt && (
-                <Field label="탈퇴요청 일시" value={formatDateTime(user.withdrawalRequestedAt)} />
+              {user.birthDate && <Field label="생년월일" value={formatDate(user.birthDate)} />}
+              {(user.addressSido || user.addressGugun) && (
+                <Field label="지역" value={`${user.addressSido ?? ''} ${user.addressGugun ?? ''}`.trim()} />
               )}
+              <Field label="권한" value={ROLE_EN_TO_KO[user.role] ?? user.role} />
+              <Field label="상태" value={STATUS_EN_TO_KO[user.status] ?? user.status} />
+              <Field label="회원가입 일시" value={formatDateTime(user.createdAt)} />
             </div>
           </div>
 
