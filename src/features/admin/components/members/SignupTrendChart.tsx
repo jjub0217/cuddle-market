@@ -42,6 +42,8 @@ export default function SignupTrendChart({ data }: SignupTrendChartProps) {
           {period === 'monthly' ? '월별' : '연별'} 회원 가입 추세
         </h3>
         <select
+          id="signup-trend-period"
+          name="signup-trend-period"
           value={period}
           onChange={(e) => setPeriod(e.target.value as Period)}
           className="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
