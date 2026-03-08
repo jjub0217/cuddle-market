@@ -47,6 +47,8 @@ export default function WithdrawalReasonTrendChart({ data }: WithdrawalReasonTre
           탈퇴 사유별 월별 추세
         </h3>
         <select
+          id="withdrawal-reason-filter"
+          name="withdrawal-reason-filter"
           value={selectedReason}
           onChange={(e) => setSelectedReason(e.target.value)}
           className="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
