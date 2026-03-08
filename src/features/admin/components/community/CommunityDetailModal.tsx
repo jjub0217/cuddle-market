@@ -96,10 +96,40 @@ const BOARD_TYPE_COLORS: Record<string, string> = {
   INFO: 'bg-green-100 text-green-800',
 }
 
-async function fetchComments(postId: number): Promise<Comment[]> {
+async function fetchReplies(commentId: number): Promise<Comment[]> {
+  try {
+    const { data } = await api.get<CommentResponse>(`/community/comments/${commentId}/replies`)
+    return data.data.comments
+  } catch {
+    return []
+  }
+}
+
+async function fetchCommentsWithReplies(postId: number): Promise<Comment[]> {
   try {
     const { data } = await api.get<CommentResponse>(`/community/posts/${postId}/comments`)
-    return data.data.comments
+    const parentComments = data.data.comments
+
+    // hasChildren인 댓글의 대댓글을 병렬로 가져옴
+    const withChildren = parentComments.filter((c) => c.hasChildren)
+    const repliesMap = new Map<number, Comment[]>()
+
+    if (withChildren.length > 0) {
+      const repliesResults = await Promise.all(withChildren.map((c) => fetchReplies(c.id)))
+      withChildren.forEach((c, i) => repliesMap.set(c.id, repliesResults[i]))
+    }
+
+    // 부모 댓글 뒤에 대댓글을 삽입하여 평탄화
+    const result: Comment[] = []
+    for (const comment of parentComments) {
+      result.push(comment)
+      const replies = repliesMap.get(comment.id)
+      if (replies) {
+        result.push(...replies)
+      }
+    }
+
+    return result
   } catch {
     return []
   }
@@ -118,7 +148,7 @@ export default function CommunityDetailModal({ isOpen, postId, onClose }: Commun
 
   const { data: comments = [] } = useQuery({
     queryKey: ['admin-community-comments', postId],
-    queryFn: () => fetchComments(postId!),
+    queryFn: () => fetchCommentsWithReplies(postId!),
     enabled: isOpen && postId !== null,
   })
 
@@ -259,7 +289,7 @@ export default function CommunityDetailModal({ isOpen, postId, onClose }: Commun
                         {comments.map((comment) => (
                           <div
                             key={comment.id}
-                            className={`flex items-start justify-between gap-2 py-2.5 pr-3 ${comment.depth === 1 ? 'pl-7' : 'pl-3'}`}
+                            className={`flex items-start justify-between gap-2 py-2.5 pr-3 ${comment.depth >= 2 ? 'pl-7' : 'pl-3'}`}
                           >
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center gap-2">
