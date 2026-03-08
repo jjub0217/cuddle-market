@@ -20,7 +20,7 @@ export default function AdminTableActions<T>({ actions, row }: AdminTableActions
           key={action.label}
           onClick={() => action.onClick(row)}
           className={cn(
-            'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
+            'cursor-pointer rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
             action.variant === 'danger'
               ? 'text-red-600 hover:bg-red-50'
               : 'text-gray-600 hover:bg-gray-100',
