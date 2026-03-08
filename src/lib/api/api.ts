@@ -39,7 +39,7 @@ async function fetchNewAccessToken(): Promise<string | null> {
     useUserStore.getState().clearAll()
 
     if (typeof window !== 'undefined') {
-      window.location.href = '/auth/login'
+      window.location.href = window.location.pathname.startsWith('/admin') ? '/admin/login' : '/auth/login'
     }
 
     return null
