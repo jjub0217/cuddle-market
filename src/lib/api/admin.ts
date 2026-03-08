@@ -113,7 +113,14 @@ export async function fetchAdminProducts(params: FetchParams): Promise<AdminTabl
   }
 
   const { data } = await api.get<ApiResponse<PageResponse<AdminProduct>>>(`/admin/products?${searchParams.toString()}`)
-  return toAdminTableResponse(data.data, params.page, params.pageSize)
+
+  // tradeStatus가 null인 경우 productType에 따라 기본값 설정
+  const normalized = data.data.content.map((item) => ({
+    ...item,
+    tradeStatus: item.tradeStatus ?? (item.productType === 'REQUEST' ? 'BUYING' : 'SELLING'),
+  }))
+
+  return toAdminTableResponse({ ...data.data, content: normalized }, params.page, params.pageSize)
 }
 
 export async function fetchAdminProductDetail(id: number): Promise<ProductDetailItem | null> {
