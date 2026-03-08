@@ -1,5 +1,4 @@
 import { api } from './api'
-import { useUserStore } from '@/store/userStore'
 import type { AdminTableResponse, SortState, FilterState } from '@/features/admin/types/adminTable'
 import type { Product, ProductResponse, ProductDetailItem, ProductDetailItemResponse } from '@/types/product'
 import type { CommunityItem, CommunityResponse, CommunityDetailItem, CommunityDetailItemResponse } from '@/types/community'
@@ -22,10 +21,6 @@ interface FetchParams {
   sort?: SortState
   filters?: FilterState
   search?: string
-}
-
-function hasAuth(): boolean {
-  return !!useUserStore.getState().accessToken
 }
 
 // ========== 응답 변환 ==========
@@ -102,35 +97,23 @@ const REPORT_STATUS_KO_TO_EN: Record<string, string> = {
 // ========== 상품 API ==========
 
 export async function fetchAdminProducts(params: FetchParams): Promise<AdminTableResponse<AdminProduct>> {
-  if (hasAuth()) {
-    try {
-      const searchParams = new URLSearchParams({
-        page: String(params.page - 1),
-        size: String(params.pageSize),
-      })
+  const searchParams = new URLSearchParams({
+    page: String(params.page - 1),
+    size: String(params.pageSize),
+  })
 
-      if (params.search) {
-        searchParams.set('keyword', params.search)
-      }
-      if (params.filters?.productType) {
-        searchParams.set('productType', PRODUCT_TYPE_KO_TO_EN[params.filters.productType] || params.filters.productType)
-      }
-      if (params.filters?.category) {
-        searchParams.set('category', CATEGORY_KO_TO_EN[params.filters.category] || params.filters.category)
-      }
-
-      const { data } = await api.get<ApiResponse<PageResponse<AdminProduct>>>(`/admin/products?${searchParams.toString()}`)
-      return toAdminTableResponse(data.data, params.page, params.pageSize)
-    } catch {
-      // fallback
-    }
+  if (params.search) {
+    searchParams.set('keyword', params.search)
   }
-  const { getMockProducts } = await import('@/features/admin/mocks/mockProducts')
-  const filters: Record<string, string> = {}
-  if (params.filters?.productType) filters.productType = PRODUCT_TYPE_KO_TO_EN[params.filters.productType] || params.filters.productType
-  if (params.filters?.tradeStatus) filters.tradeStatus = TRADE_STATUS_KO_TO_EN[params.filters.tradeStatus] || params.filters.tradeStatus
-  if (params.filters?.category) filters.category = CATEGORY_KO_TO_EN[params.filters.category] || params.filters.category
-  return getMockProducts({ ...params, filters: Object.keys(filters).length ? filters : undefined }) as unknown as AdminTableResponse<AdminProduct>
+  if (params.filters?.productType) {
+    searchParams.set('productType', PRODUCT_TYPE_KO_TO_EN[params.filters.productType] || params.filters.productType)
+  }
+  if (params.filters?.category) {
+    searchParams.set('category', CATEGORY_KO_TO_EN[params.filters.category] || params.filters.category)
+  }
+
+  const { data } = await api.get<ApiResponse<PageResponse<AdminProduct>>>(`/admin/products?${searchParams.toString()}`)
+  return toAdminTableResponse(data.data, params.page, params.pageSize)
 }
 
 export async function fetchAdminProductDetail(id: number): Promise<ProductDetailItem | null> {
@@ -145,34 +128,24 @@ export async function fetchAdminProductDetail(id: number): Promise<ProductDetail
 // ========== 커뮤니티 API ==========
 
 export async function fetchAdminCommunityPosts(params: FetchParams): Promise<AdminTableResponse<CommunityItem>> {
-  if (hasAuth()) {
-    try {
-      const searchParams = new URLSearchParams({
-        page: String(params.page - 1),
-        size: String(params.pageSize),
-      })
+  const searchParams = new URLSearchParams({
+    page: String(params.page - 1),
+    size: String(params.pageSize),
+  })
 
-      if (params.filters?.boardType) {
-        searchParams.set('boardType', BOARD_TYPE_KO_TO_EN[params.filters.boardType] || params.filters.boardType)
-      }
-      if (params.search) {
-        searchParams.set('keyword', params.search)
-        searchParams.set('searchType', 'TITLE')
-      }
-      if (params.sort?.direction) {
-        searchParams.set('sortBy', params.sort.key === 'createdAt' ? 'LATEST' : params.sort.key)
-      }
-
-      const { data } = await api.get<CommunityResponse>(`/community/posts?${searchParams.toString()}`)
-      return toAdminTableResponse(data.data, params.page, params.pageSize)
-    } catch {
-      // fallback
-    }
+  if (params.filters?.boardType) {
+    searchParams.set('boardType', BOARD_TYPE_KO_TO_EN[params.filters.boardType] || params.filters.boardType)
   }
-  const { getMockCommunityPosts } = await import('@/features/admin/mocks/mockCommunityPosts')
-  const communityFilters: Record<string, string> = {}
-  if (params.filters?.boardType) communityFilters.boardType = BOARD_TYPE_KO_TO_EN[params.filters.boardType] || params.filters.boardType
-  return getMockCommunityPosts({ ...params, filters: Object.keys(communityFilters).length ? communityFilters : undefined }) as unknown as AdminTableResponse<CommunityItem>
+  if (params.search) {
+    searchParams.set('keyword', params.search)
+    searchParams.set('searchType', 'TITLE')
+  }
+  if (params.sort?.direction) {
+    searchParams.set('sortBy', params.sort.key === 'createdAt' ? 'LATEST' : params.sort.key)
+  }
+
+  const { data } = await api.get<CommunityResponse>(`/community/posts?${searchParams.toString()}`)
+  return toAdminTableResponse(data.data, params.page, params.pageSize)
 }
 
 export async function fetchAdminCommunityDetail(id: number): Promise<CommunityDetailItem | null> {
@@ -187,34 +160,23 @@ export async function fetchAdminCommunityDetail(id: number): Promise<CommunityDe
 // ========== 회원 관리 API ==========
 
 export async function fetchAdminUsers(params: FetchParams): Promise<AdminTableResponse<AdminUser>> {
-  if (hasAuth()) {
-    try {
-      const searchParams = new URLSearchParams({
-        page: String(params.page - 1),
-        size: String(params.pageSize),
-      })
+  const searchParams = new URLSearchParams({
+    page: String(params.page - 1),
+    size: String(params.pageSize),
+  })
 
-      if (params.search) {
-        searchParams.set('keyword', params.search)
-      }
-      if (params.filters?.status) {
-        searchParams.set('status', USER_STATUS_KO_TO_EN[params.filters.status] || params.filters.status)
-      }
-      if (params.filters?.role) {
-        searchParams.set('role', USER_ROLE_KO_TO_EN[params.filters.role] || params.filters.role)
-      }
-
-      const { data } = await api.get<ApiResponse<PageResponse<AdminUser>>>(`/admin/users?${searchParams.toString()}`)
-      return toAdminTableResponse(data.data, params.page, params.pageSize)
-    } catch {
-      // fallback
-    }
+  if (params.search) {
+    searchParams.set('keyword', params.search)
   }
-  const { getMockUsers } = await import('@/features/admin/mocks/mockUsers')
-  const filters: Record<string, string> = {}
-  if (params.filters?.status) filters.status = USER_STATUS_KO_TO_EN[params.filters.status] || params.filters.status
-  if (params.filters?.role) filters.role = USER_ROLE_KO_TO_EN[params.filters.role] || params.filters.role
-  return getMockUsers({ ...params, filters: Object.keys(filters).length ? filters : undefined }) as unknown as AdminTableResponse<AdminUser>
+  if (params.filters?.status) {
+    searchParams.set('status', USER_STATUS_KO_TO_EN[params.filters.status] || params.filters.status)
+  }
+  if (params.filters?.role) {
+    searchParams.set('role', USER_ROLE_KO_TO_EN[params.filters.role] || params.filters.role)
+  }
+
+  const { data } = await api.get<ApiResponse<PageResponse<AdminUser>>>(`/admin/users?${searchParams.toString()}`)
+  return toAdminTableResponse(data.data, params.page, params.pageSize)
 }
 
 export async function grantAdminRole(userId: number): Promise<void> {
@@ -224,27 +186,17 @@ export async function grantAdminRole(userId: number): Promise<void> {
 // ========== 탈퇴 회원 API ==========
 
 export async function fetchAdminWithdrawals(params: FetchParams): Promise<AdminTableResponse<AdminWithdrawal>> {
-  if (hasAuth()) {
-    try {
-      const searchParams = new URLSearchParams({
-        page: String(params.page - 1),
-        size: String(params.pageSize),
-      })
+  const searchParams = new URLSearchParams({
+    page: String(params.page - 1),
+    size: String(params.pageSize),
+  })
 
-      if (params.search) {
-        searchParams.set('keyword', params.search)
-      }
-
-      const { data } = await api.get<ApiResponse<PageResponse<AdminWithdrawal>>>(`/admin/withdrawals?${searchParams.toString()}`)
-      return toAdminTableResponse(data.data, params.page, params.pageSize)
-    } catch {
-      // fallback
-    }
+  if (params.search) {
+    searchParams.set('keyword', params.search)
   }
-  const { getMockWithdrawals } = await import('@/features/admin/mocks/mockWithdrawals')
-  const filters: Record<string, string> = {}
-  if (params.filters?.withdrawalReason) filters.withdrawalReason = WITHDRAWAL_REASON_KO_TO_EN[params.filters.withdrawalReason] || params.filters.withdrawalReason
-  return getMockWithdrawals({ ...params, filters: Object.keys(filters).length ? filters : undefined }) as unknown as AdminTableResponse<AdminWithdrawal>
+
+  const { data } = await api.get<ApiResponse<PageResponse<AdminWithdrawal>>>(`/admin/withdrawals?${searchParams.toString()}`)
+  return toAdminTableResponse(data.data, params.page, params.pageSize)
 }
 
 export async function fetchAdminWithdrawalDetail(userId: number): Promise<AdminWithdrawalDetail | null> {
@@ -266,44 +218,24 @@ export async function fetchAdminReports(
   params: FetchParams,
   targetType?: 'USER' | 'PRODUCT' | 'COMMUNITY_POST',
 ): Promise<AdminTableResponse<AdminReport>> {
-  if (hasAuth()) {
-    try {
-      const searchParams = new URLSearchParams({
-        page: String(params.page - 1),
-        size: String(params.pageSize),
-      })
+  const searchParams = new URLSearchParams({
+    page: String(params.page - 1),
+    size: String(params.pageSize),
+  })
 
-      if (targetType) {
-        searchParams.set('targetType', targetType)
-      }
-      if (params.filters?.status) {
-        searchParams.set('status', REPORT_STATUS_KO_TO_EN[params.filters.status] || params.filters.status)
-      }
+  if (targetType) {
+    searchParams.set('targetType', targetType)
+  }
+  if (params.filters?.status) {
+    searchParams.set('status', REPORT_STATUS_KO_TO_EN[params.filters.status] || params.filters.status)
+  }
 
-      const { data } = await api.get<ApiResponse<PageResponse<AdminReport> & { total: number }>>(`/admin/reports?${searchParams.toString()}`)
-      return toAdminTableResponse(
-        { ...data.data, totalElements: data.data.totalElements ?? data.data.total },
-        params.page,
-        params.pageSize,
-      )
-    } catch {
-      // fallback
-    }
-  }
-  // Mock fallback: 각 targetType에 맞는 mock import
-  if (targetType === 'USER') {
-    const { getMockUserReports } = await import('@/features/admin/mocks/mockUserReports')
-    return getMockUserReports(params) as unknown as AdminTableResponse<AdminReport>
-  }
-  if (targetType === 'PRODUCT') {
-    const { getMockProductSellReports } = await import('@/features/admin/mocks/mockProductSellReports')
-    return getMockProductSellReports(params) as unknown as AdminTableResponse<AdminReport>
-  }
-  if (targetType === 'COMMUNITY_POST') {
-    const { getMockCommunityReports } = await import('@/features/admin/mocks/mockCommunityReports')
-    return getMockCommunityReports(params) as unknown as AdminTableResponse<AdminReport>
-  }
-  return { data: [], total: 0, page: params.page, pageSize: params.pageSize }
+  const { data } = await api.get<ApiResponse<PageResponse<AdminReport> & { total: number }>>(`/admin/reports?${searchParams.toString()}`)
+  return toAdminTableResponse(
+    { ...data.data, totalElements: data.data.totalElements ?? data.data.total },
+    params.page,
+    params.pageSize,
+  )
 }
 
 // 개별 신고 탭용 래퍼
@@ -329,47 +261,18 @@ export async function reviewReport(
 // ========== 통계 API ==========
 
 export async function fetchMemberStats(): Promise<MemberTrendStat[]> {
-  if (hasAuth()) {
-    try {
-      const { data } = await api.get<ApiResponse<MemberTrendStat[]>>('/admin/statistics/trends')
-      return data.data
-    } catch {
-      // fallback
-    }
-  }
-  const { mockMemberStats } = await import('@/features/admin/mocks/mockMemberStats')
-  return mockMemberStats
+  const { data } = await api.get<ApiResponse<MemberTrendStat[]>>('/admin/statistics/trends')
+  return data.data
 }
 
 export async function fetchWithdrawalReasons(): Promise<WithdrawalReasonStat[]> {
-  if (hasAuth()) {
-    try {
-      const { data } = await api.get<ApiResponse<WithdrawalReasonStat[]>>('/admin/statistics/withdrawal-reasons')
-      return data.data
-    } catch {
-      // fallback
-    }
-  }
-  const { mockWithdrawalReasons } = await import('@/features/admin/mocks/mockMemberStats')
-  return mockWithdrawalReasons
+  const { data } = await api.get<ApiResponse<WithdrawalReasonStat[]>>('/admin/statistics/withdrawal-reasons')
+  return data.data
 }
 
 // ========== 대시보드 API ==========
 
 export async function fetchDashboardStats(): Promise<DashboardSummary> {
-  if (hasAuth()) {
-    try {
-      const { data } = await api.get<ApiResponse<DashboardSummary>>('/admin/statistics/summary')
-      return data.data
-    } catch {
-      // fallback
-    }
-  }
-  return {
-    totalUserCount: 50,
-    activeUserCount: 45,
-    withdrawnUserCount: 5,
-    totalProductCount: 120,
-    activeProductCount: 100,
-  }
+  const { data } = await api.get<ApiResponse<DashboardSummary>>('/admin/statistics/summary')
+  return data.data
 }
