@@ -50,7 +50,7 @@ export default function AdminTablePagination({
         <select
           value={pageSize}
           onChange={(e) => onPageSizeChange(Number(e.target.value))}
-          className="rounded border border-gray-300 px-2 py-1 text-sm outline-none"
+          className="cursor-pointer rounded border border-gray-300 px-2 py-1 text-sm outline-none"
         >
           {paginationConfig.pageSizeOptions.map((size) => (
             <option key={size} value={size}>
@@ -64,7 +64,7 @@ export default function AdminTablePagination({
         <button
           onClick={() => onPageChange(page - 1)}
           disabled={page <= 1}
-          className="rounded p-1 hover:bg-gray-100 disabled:opacity-40"
+          className="cursor-pointer rounded p-1 hover:bg-gray-100 disabled:opacity-40"
         >
           <ChevronLeft size={18} />
         </button>
@@ -79,7 +79,7 @@ export default function AdminTablePagination({
               key={pageNum}
               onClick={() => onPageChange(pageNum)}
               className={cn(
-                'min-w-[32px] rounded px-2 py-1 text-sm',
+                'min-w-[32px] cursor-pointer rounded px-2 py-1 text-sm',
                 pageNum === page
                   ? 'bg-gray-900 text-white'
                   : 'text-gray-600 hover:bg-gray-100',
@@ -93,7 +93,7 @@ export default function AdminTablePagination({
         <button
           onClick={() => onPageChange(page + 1)}
           disabled={page >= totalPages}
-          className="rounded p-1 hover:bg-gray-100 disabled:opacity-40"
+          className="cursor-pointer rounded p-1 hover:bg-gray-100 disabled:opacity-40"
         >
           <ChevronRight size={18} />
         </button>

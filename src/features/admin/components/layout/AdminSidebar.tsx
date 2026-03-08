@@ -97,7 +97,7 @@ export default function AdminSidebar() {
                 <button
                   onClick={() => toggleMenu(item.label)}
                   className={cn(
-                    'flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                    'flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
                     hasActiveChild
                       ? 'bg-gray-100 text-gray-900'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
