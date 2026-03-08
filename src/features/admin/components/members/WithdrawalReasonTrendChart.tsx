@@ -11,6 +11,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts'
+import SelectDropdown from '@/components/commons/select/SelectDropdown'
 import { WITHDRAW_REASON } from '@/constants/constants'
 import type { MonthlyWithdrawalReasonStat } from '@/features/admin/mocks/mockMemberStats'
 
@@ -46,20 +47,18 @@ export default function WithdrawalReasonTrendChart({ data }: WithdrawalReasonTre
         <h3 className="text-base font-semibold text-gray-800">
           탈퇴 사유별 월별 추세
         </h3>
-        <select
-          id="withdrawal-reason-filter"
-          name="withdrawal-reason-filter"
-          value={selectedReason}
-          onChange={(e) => setSelectedReason(e.target.value)}
-          className="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-        >
-          <option value="all">전체 사유</option>
-          {REASON_BARS.map((bar) => (
-            <option key={bar.dataKey} value={bar.dataKey}>
-              {bar.name}
-            </option>
-          ))}
-        </select>
+        <div className="w-[140px]">
+          <SelectDropdown
+            id="withdrawal-reason-filter"
+            value={selectedReason}
+            onChange={setSelectedReason}
+            options={[
+              { value: 'all', label: '전체 사유' },
+              ...REASON_BARS.map((bar) => ({ value: bar.dataKey, label: bar.name })),
+            ]}
+            buttonClassName="py-1.5"
+          />
+        </div>
       </div>
       <ResponsiveContainer width="100%" height={360}>
         <BarChart data={data}>
