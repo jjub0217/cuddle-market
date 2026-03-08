@@ -10,6 +10,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
+import SelectDropdown from '@/components/commons/select/SelectDropdown'
 import type { MemberTrendStat } from '@/features/admin/types/adminApi'
 
 type Period = 'monthly' | 'yearly'
@@ -41,16 +42,18 @@ export default function WithdrawalTrendChart({ data }: WithdrawalTrendChartProps
         <h3 className="text-base font-semibold text-gray-800">
           {period === 'monthly' ? '월별' : '연별'} 회원 탈퇴 추세
         </h3>
-        <select
-          id="withdrawal-trend-period"
-          name="withdrawal-trend-period"
-          value={period}
-          onChange={(e) => setPeriod(e.target.value as Period)}
-          className="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-        >
-          <option value="monthly">월별</option>
-          <option value="yearly">연별</option>
-        </select>
+        <div className="w-[100px]">
+          <SelectDropdown
+            id="withdrawal-trend-period"
+            value={period}
+            onChange={(value) => setPeriod(value as Period)}
+            options={[
+              { value: 'monthly', label: '월별' },
+              { value: 'yearly', label: '연별' },
+            ]}
+            buttonClassName="py-1.5"
+          />
+        </div>
       </div>
       <ResponsiveContainer width="100%" height={360}>
         <BarChart data={chartData}>

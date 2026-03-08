@@ -2,6 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
+import SelectDropdown from '@/components/commons/select/SelectDropdown'
 import type { PaginationConfig, PaginationState } from '../../types/adminTable'
 
 interface AdminTablePaginationProps {
@@ -47,17 +48,18 @@ export default function AdminTablePagination({
         <span>
           {total > 0 ? `${start}-${end} / 총 ${total}건` : '데이터 없음'}
         </span>
-        <select
-          value={pageSize}
-          onChange={(e) => onPageSizeChange(Number(e.target.value))}
-          className="cursor-pointer rounded border border-gray-300 px-2 py-1 text-sm outline-none"
-        >
-          {paginationConfig.pageSizeOptions.map((size) => (
-            <option key={size} value={size}>
-              {size}개씩
-            </option>
-          ))}
-        </select>
+        <div className="w-[100px]">
+          <SelectDropdown
+            id="page-size"
+            value={String(pageSize)}
+            onChange={(value) => onPageSizeChange(Number(value))}
+            options={paginationConfig.pageSizeOptions.map((size) => ({
+              value: String(size),
+              label: `${size}개씩`,
+            }))}
+            buttonClassName="py-1"
+          />
+        </div>
       </div>
 
       <div className="flex items-center gap-1">
