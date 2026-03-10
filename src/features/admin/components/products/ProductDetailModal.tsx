@@ -35,9 +35,7 @@ function Field({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className="mb-1.5 text-sm font-medium text-gray-500">{label}</p>
-      <div className="rounded-lg border border-gray-200 bg-gray-50/50 px-3 py-2.5 text-sm text-gray-900">
-        {value}
-      </div>
+      <div className="rounded-lg border border-gray-200 bg-gray-50/50 px-3 py-2.5 text-sm text-gray-900">{value}</div>
     </div>
   )
 }
@@ -55,9 +53,7 @@ function SimpleBadgeField({ label, value, color }: { label: string; value: strin
   return (
     <div>
       <p className="mb-1.5 text-sm font-medium text-gray-500">{label}</p>
-      <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${color}`}>
-        {value}
-      </span>
+      <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${color}`}>{value}</span>
     </div>
   )
 }
@@ -81,15 +77,7 @@ const CONDITION_COLORS: Record<string, string> = {
   NEED_REPAIR: 'bg-[#FEE2E2] text-red-800',
 }
 
-function DeleteConfirmDialog({
-  isOpen,
-  onConfirm,
-  onCancel,
-}: {
-  isOpen: boolean
-  onConfirm: () => void
-  onCancel: () => void
-}) {
+function DeleteConfirmDialog({ isOpen, onConfirm, onCancel }: { isOpen: boolean; onConfirm: () => void; onCancel: () => void }) {
   const confirmRef = useRef<HTMLDialogElement>(null)
 
   useEffect(() => {
@@ -104,7 +92,7 @@ function DeleteConfirmDialog({
   return (
     <dialog
       ref={confirmRef}
-      className="m-auto w-full max-w-fit open:flex flex-col gap-4 rounded-xl bg-white p-6 shadow-2xl backdrop:bg-gray-900/50"
+      className="m-auto w-full max-w-fit flex-col gap-4 rounded-xl bg-white p-6 shadow-2xl backdrop:bg-gray-900/50 open:flex"
       onClick={(e) => {
         if (e.target === confirmRef.current) onCancel()
       }}
@@ -164,7 +152,7 @@ export default function ProductDetailModal({ isOpen, productId, onClose }: Produ
   return (
     <dialog
       ref={dialogRef}
-      className="m-auto w-full max-w-[900px] open:flex flex-col rounded-xl bg-white p-0 shadow-xl backdrop:bg-gray-900/70"
+      className="m-auto w-full max-w-225 flex-col rounded-xl bg-white p-0 shadow-xl backdrop:bg-gray-900/70 open:flex"
       onClick={(e) => {
         if (e.target === dialogRef.current) dialogRef.current.close()
       }}
@@ -195,13 +183,9 @@ export default function ProductDetailModal({ isOpen, productId, onClose }: Produ
               {/* Left Column: image + basic info */}
               <div className="flex w-1/2 shrink-0 flex-col">
                 {/* Main image */}
-                <div className="mb-2 flex h-[260px] w-full items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-100">
+                <div className="mb-2 flex h-65 w-full items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-100">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={product.mainImageUrl}
-                    alt={product.title}
-                    className="h-full w-full object-cover"
-                  />
+                  <img src={product.mainImageUrl} alt={product.title} className="h-full w-full object-cover" />
                 </div>
 
                 {/* Sub images */}
@@ -211,18 +195,19 @@ export default function ProductDetailModal({ isOpen, productId, onClose }: Produ
                     return (
                       <div
                         key={idx}
-                        className="flex h-[60px] w-[60px] items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-gray-50"
+                        className="flex h-15 w-15 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-gray-50"
                       >
                         {src ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={src}
-                            alt={`서브이미지 ${idx + 1}`}
-                            className="h-full w-full object-cover"
-                          />
+                          <img src={src} alt={`서브이미지 ${idx + 1}`} className="h-full w-full object-cover" />
                         ) : (
                           <svg className="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={1.5}
+                              d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"
+                            />
                           </svg>
                         )}
                       </div>
@@ -248,7 +233,7 @@ export default function ProductDetailModal({ isOpen, productId, onClose }: Produ
                 {/* 상품 설명 */}
                 <div className="mb-5">
                   <p className="mb-1.5 text-sm font-medium text-gray-500">상품 설명</p>
-                  <div className="max-h-[200px] overflow-y-auto rounded-lg border border-gray-200 bg-gray-50/50 px-3 py-2.5 text-sm leading-relaxed text-gray-900">
+                  <div className="max-h-50 overflow-y-auto rounded-lg border border-gray-200 bg-gray-50/50 px-3 py-2.5 text-sm leading-relaxed text-gray-900">
                     {product.description || '-'}
                   </div>
                 </div>

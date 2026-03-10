@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useLayoutEffect, useRef } from 'react'
+import { useState, useLayoutEffect, useRef } from 'react'
 import Image from 'next/image'
 import type { Message } from '@/types'
 import { cn } from '@/lib/utils/cn'
@@ -145,7 +145,11 @@ export function ChatLog({
     return (
       <div className="px-lg py-md tablet:py-xl mx-auto max-w-7xl">
         <div className="flex items-center justify-center py-20">
-          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" role="status" aria-label="상품 로딩 중"></div>
+          <div
+            className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"
+            role="status"
+            aria-label="상품 로딩 중"
+          ></div>
         </div>
       </div>
     )
@@ -188,7 +192,9 @@ export function ChatLog({
       {Object.entries(groupedMessages).map(([dateKey, messages]) => (
         <div key={dateKey} className="flex flex-col gap-2">
           <div className="flex justify-center">
-            <span className="rounded-full bg-[#8d99a3] px-3 py-2 text-sm font-semibold text-[#f0f9ff]">{chatFormatDate(messages[0].createdAt)}</span>
+            <span className="rounded-full bg-[#8d99a3] px-3 py-2 text-sm font-semibold text-[#f0f9ff]">
+              {chatFormatDate(messages[0].createdAt)}
+            </span>
           </div>
           <ul>
             {messages.map((message) => {
@@ -220,7 +226,9 @@ export function ChatLog({
                       {message.content}
                     </span>
                   )}
-                  <span className={cn('text-xs text-gray-500', isMine ? 'text-right' : 'text-left')}>{chatFormatTime(message.createdAt)}</span>
+                  <span className={cn('text-xs text-gray-500', isMine ? 'text-right' : 'text-left')}>
+                    {chatFormatTime(message.createdAt)}
+                  </span>
                 </li>
               )
             })}
