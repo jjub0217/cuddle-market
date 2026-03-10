@@ -7,7 +7,7 @@ import Button from '@/components/commons/button/Button'
 import { CircleAlert } from 'lucide-react'
 import InputField from '@/components/commons/InputField'
 import AlertBox from '@/components/modal/AlertBox'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { fetchGraphQL } from '@/lib/api/graphql'
 import InlineNotification from '@/components/commons/InlineNotification'
 import { AnimatePresence } from 'framer-motion'
@@ -39,12 +39,18 @@ export default function ProfileUpdatePasswordForm() {
   const [pwUpdateSuccess, setPwUpdateSuccess] = useState<React.ReactNode | null>(null)
   const [pwUpdateWarning, setPwUpdateWarning] = useState<React.ReactNode | null>(null)
 
-  const [checkResult, setCheckResult] = useState<{
-    status: 'idle' | 'success' | 'error'
-    message: string
-  }>({ status: 'idle', message: '' })
   const password = useWatch({ control, name: 'newPassword' })
   const passwordConfirm = useWatch({ control, name: 'confirmPassword' })
+
+  const checkResult = useMemo<{
+    status: 'idle' | 'success' | 'error'
+    message: string
+  }>(() => {
+    if (passwordConfirm && password && password === passwordConfirm) {
+      return { status: 'success', message: '비밀번호가 일치합니다.' }
+    }
+    return { status: 'idle', message: '' }
+  }, [password, passwordConfirm])
 
   const onSubmit = async (requestData: ProfileUpdatePasswordFormValues) => {
     if (requestData.currentPassword === requestData.newPassword) {
@@ -83,26 +89,13 @@ export default function ProfileUpdatePasswordForm() {
   useEffect(() => {
     if (passwordConfirm && password) {
       if (password === passwordConfirm) {
-        setCheckResult({
-          status: 'success',
-          message: '비밀번호가 일치합니다.',
-        })
         clearErrors('confirmPassword')
       } else {
-        setCheckResult({
-          status: 'idle',
-          message: '',
-        })
         setError('confirmPassword', {
           type: 'manual',
           message: '비밀번호가 일치하지 않습니다.',
         })
       }
-    } else {
-      setCheckResult({
-        status: 'idle',
-        message: '',
-      })
     }
   }, [password, passwordConfirm, setError, clearErrors])
 
