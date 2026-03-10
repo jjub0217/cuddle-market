@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import type { DragEndEvent } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
@@ -38,7 +38,7 @@ export default function DropzoneArea<T extends FieldValues>({
   initialImages,
   maxFiles = MAX_FILES,
 }: DropzoneAreaProps<T>) {
-  const [previewUrls, setPreviewUrls] = useState<string[]>([])
+  const [previewUrls, setPreviewUrls] = useState<string[]>(initialImages ?? [])
 
   const compressImage = async (file: File) => {
     const options = {
@@ -136,11 +136,6 @@ export default function DropzoneArea<T extends FieldValues>({
       }
     }
   }
-  useEffect(() => {
-    if (initialImages && initialImages.length > 0) {
-      setPreviewUrls(initialImages)
-    }
-  }, [initialImages])
 
   return (
     <div {...getRootProps()} className="cursor-pointer rounded-lg border border-dashed border-gray-400 px-4 py-4 md:px-6 md:py-10">
