@@ -1,15 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import SelectDropdown from '@/components/commons/select/SelectDropdown'
 import type { MemberTrendStat } from '@/features/admin/types/adminApi'
 
@@ -31,18 +23,13 @@ function aggregateByYear(data: MemberTrendStat[]) {
 export default function SignupTrendChart({ data }: SignupTrendChartProps) {
   const [period, setPeriod] = useState<Period>('monthly')
 
-  const chartData = useMemo(
-    () => (period === 'yearly' ? aggregateByYear(data) : data),
-    [data, period],
-  )
+  const chartData = useMemo(() => (period === 'yearly' ? aggregateByYear(data) : data), [data, period])
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-6">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-base font-semibold text-gray-800">
-          {period === 'monthly' ? '월별' : '연별'} 회원 가입 추세
-        </h3>
-        <div className="w-[100px]">
+        <h3 className="text-base font-semibold text-gray-800">{period === 'monthly' ? '월별' : '연별'} 회원 가입 추세</h3>
+        <div className="w-25">
           <SelectDropdown
             id="signup-trend-period"
             value={period}

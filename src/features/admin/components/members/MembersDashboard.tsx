@@ -23,10 +23,7 @@ export default function MembersDashboard() {
   const [monthlyReasons, setMonthlyReasons] = useState<MonthlyWithdrawalReasonStat[]>([])
 
   useEffect(() => {
-    Promise.all([
-      fetchMemberStats(),
-      fetchWithdrawalReasons(),
-    ]).then(([statsData, reasonsData]) => {
+    Promise.all([fetchMemberStats(), fetchWithdrawalReasons()]).then(([statsData, reasonsData]) => {
       setStats(statsData)
       setReasons(reasonsData)
     })
@@ -39,13 +36,8 @@ export default function MembersDashboard() {
   return (
     <div>
       <h2 className="mb-4 text-xl font-bold text-gray-800">회원 대시보드</h2>
-      <div className="w-fit [&_[role=tablist]]:border-b-0">
-        <Tabs
-          tabs={DASHBOARD_TABS}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          ariaLabel="회원 대시보드 탭"
-        />
+      <div className="w-fit **:[[role-tablist]]:border-b-0">
+        <Tabs tabs={DASHBOARD_TABS} activeTab={activeTab} onTabChange={setActiveTab} ariaLabel="회원 대시보드 탭" />
       </div>
       <div className="mt-6">
         {activeTab === 'signup' && <SignupTrendChart data={stats} />}

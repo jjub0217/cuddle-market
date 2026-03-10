@@ -1,16 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import SelectDropdown from '@/components/commons/select/SelectDropdown'
 import { WITHDRAW_REASON } from '@/constants/constants'
 import type { MonthlyWithdrawalReasonStat } from '@/features/admin/mocks/mockMemberStats'
@@ -36,18 +27,13 @@ interface WithdrawalReasonTrendChartProps {
 export default function WithdrawalReasonTrendChart({ data }: WithdrawalReasonTrendChartProps) {
   const [selectedReason, setSelectedReason] = useState<string>('all')
 
-  const visibleBars =
-    selectedReason === 'all'
-      ? REASON_BARS
-      : REASON_BARS.filter((bar) => bar.dataKey === selectedReason)
+  const visibleBars = selectedReason === 'all' ? REASON_BARS : REASON_BARS.filter((bar) => bar.dataKey === selectedReason)
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-6">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-base font-semibold text-gray-800">
-          탈퇴 사유별 월별 추세
-        </h3>
-        <div className="w-[140px]">
+        <h3 className="text-base font-semibold text-gray-800">탈퇴 사유별 월별 추세</h3>
+        <div className="w-35">
           <SelectDropdown
             id="withdrawal-reason-filter"
             value={selectedReason}
@@ -68,13 +54,7 @@ export default function WithdrawalReasonTrendChart({ data }: WithdrawalReasonTre
           <Tooltip />
           <Legend />
           {visibleBars.map((bar) => (
-            <Bar
-              key={bar.dataKey}
-              dataKey={bar.dataKey}
-              name={bar.name}
-              fill={bar.fill}
-              radius={[4, 4, 0, 0]}
-            />
+            <Bar key={bar.dataKey} dataKey={bar.dataKey} name={bar.name} fill={bar.fill} radius={[4, 4, 0, 0]} />
           ))}
         </BarChart>
       </ResponsiveContainer>

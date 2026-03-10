@@ -1,8 +1,7 @@
 'use client'
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { fetchGraphQL } from '@/lib/api/graphql'
 import MdPreview from './components/markdown/MdPreview'
 import { getBoardType } from '@/lib/utils/getBoardType'
@@ -140,10 +139,7 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
 
   const data = postQueryData?.communityPost ?? initialPostData
 
-  const {
-    data: commentQueryData,
-    isLoading: isLoadingCommentData,
-  } = useQuery({
+  const { data: commentQueryData, isLoading: isLoadingCommentData } = useQuery({
     queryKey: ['community', id, 'comments'],
     queryFn: () => fetchGraphQL<GetCommunityCommentsData>(GET_COMMUNITY_COMMENTS, { postId: Number(id), page: 0, size: 100 }),
     enabled: !!id,

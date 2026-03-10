@@ -45,10 +45,8 @@ export default function AdminTablePagination({
   return (
     <div className="flex items-center justify-between border-t border-gray-200 px-4 py-3">
       <div className="flex items-center gap-2 text-sm text-gray-600">
-        <span>
-          {total > 0 ? `${start}-${end} / 총 ${total}건` : '데이터 없음'}
-        </span>
-        <div className="w-[100px]">
+        <span>{total > 0 ? `${start}-${end} / 총 ${total}건` : '데이터 없음'}</span>
+        <div className="w-25">
           <SelectDropdown
             id="page-size"
             value={String(pageSize)}
@@ -82,14 +80,12 @@ export default function AdminTablePagination({
               onClick={() => onPageChange(pageNum)}
               className={cn(
                 'min-w-[32px] cursor-pointer rounded px-2 py-1 text-sm',
-                pageNum === page
-                  ? 'bg-gray-900 text-white'
-                  : 'text-gray-600 hover:bg-gray-100',
+                pageNum === page ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'
               )}
             >
               {pageNum}
             </button>
-          ),
+          )
         )}
 
         <button

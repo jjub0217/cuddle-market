@@ -14,11 +14,7 @@ interface CommunityReportDetailModalProps {
   onClose: () => void
 }
 
-export default function CommunityReportDetailModal({
-  isOpen,
-  report,
-  onClose,
-}: CommunityReportDetailModalProps) {
+export default function CommunityReportDetailModal({ isOpen, report, onClose }: CommunityReportDetailModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
@@ -39,7 +35,7 @@ export default function CommunityReportDetailModal({
   return (
     <dialog
       ref={dialogRef}
-      className="m-auto w-full max-w-[680px] open:flex flex-col rounded-xl bg-white p-0 shadow-xl backdrop:bg-gray-900/70"
+      className="m-auto w-full max-w-170 flex-col rounded-xl bg-white p-0 shadow-xl backdrop:bg-gray-900/70 open:flex"
       onClick={(e) => {
         if (e.target === dialogRef.current) dialogRef.current.close()
       }}
@@ -65,13 +61,16 @@ export default function CommunityReportDetailModal({
               <Field label="신고 ID" value={String(report.id)} />
               <Field label="신고자 ID" value={String(report.reporterId)} />
               <Field label="게시글 ID" value={String(report.targetId)} />
-              <Field label="신고항목" value={report.reasonCodes.map((c) => COMMUNITY_REPORT_REASON_EN_TO_KO[c] || c).join(', ')} />
+              <Field
+                label="신고항목"
+                value={report.reasonCodes.map((c) => COMMUNITY_REPORT_REASON_EN_TO_KO[c] || c).join(', ')}
+              />
               <Field label="처리 상태" value={report.status} />
               <Field label="신고 일자" value={formatDate(report.createdAt)} />
               {report.detailReason && (
                 <div className="col-span-2">
                   <p className="mb-1.5 text-sm font-medium text-gray-500">신고 상세 사유</p>
-                  <div className="max-h-[120px] overflow-y-auto whitespace-pre-line rounded-lg border border-gray-200 bg-gray-50/50 px-3 py-2.5 text-sm leading-relaxed text-gray-900">
+                  <div className="max-h-30 overflow-y-auto rounded-lg border border-gray-200 bg-gray-50/50 px-3 py-2.5 text-sm leading-relaxed whitespace-pre-line text-gray-900">
                     {report.detailReason}
                   </div>
                 </div>
@@ -88,7 +87,7 @@ export default function CommunityReportDetailModal({
                       key={idx}
                       src={src}
                       alt={`첨부 이미지 ${idx + 1}`}
-                      className="aspect-square w-full rounded-lg object-cover border border-gray-200"
+                      className="aspect-square w-full rounded-lg border border-gray-200 object-cover"
                     />
                   ))}
                 </div>

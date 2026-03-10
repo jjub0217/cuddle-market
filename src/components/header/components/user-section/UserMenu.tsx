@@ -2,7 +2,7 @@
 
 import { Z_INDEX } from '@/constants/ui'
 import { cn } from '@/lib/utils/cn'
-import { UserRound as UserRoundIcon, LogOut as LogOutIcon } from 'lucide-react'
+import { UserRound as UserRoundIcon, Menu, LogOut as LogOutIcon } from 'lucide-react'
 import { ROUTES } from '@/constants/routes'
 import { useUserStore } from '@/store/userStore'
 import ProfileAvatar from '@/components/commons/ProfileAvatar'
@@ -11,7 +11,6 @@ import { useRef } from 'react'
 import { useOutsideClick } from '@/hooks/useOutsideClick'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import IconButton from '@/components/commons/button/IconButton'
-import { Menu } from 'lucide-react'
 import { useLogout } from '@/hooks/useLogout'
 
 interface UserMenuProps {
@@ -58,11 +57,14 @@ export default function UserMenu({
         <div
           className={cn(
             'absolute top-12 right-0 flex w-32 flex-col divide-y divide-gray-100 rounded-lg border border-gray-200 bg-white shadow-lg md:w-48',
-            Z_INDEX.BUTTON,
+            Z_INDEX.BUTTON
           )}
           ref={modalRef}
         >
-          <Link href={ROUTES.MYPAGE} className="hover:bg-primary-50 flex w-full items-center gap-3 px-4 py-2.5 text-sm text-gray-700">
+          <Link
+            href={ROUTES.MYPAGE}
+            className="hover:bg-primary-50 flex w-full items-center gap-3 px-4 py-2.5 text-sm text-gray-700"
+          >
             <UserRoundIcon className="h-5 w-5" />
             마이페이지
           </Link>
