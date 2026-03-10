@@ -23,10 +23,13 @@ export default function MembersDashboard() {
   const [monthlyReasons, setMonthlyReasons] = useState<MonthlyWithdrawalReasonStat[]>([])
 
   useEffect(() => {
-    Promise.all([fetchMemberStats(), fetchWithdrawalReasons()]).then(([statsData, reasonsData]) => {
-      setStats(statsData)
-      setReasons(reasonsData)
-    })
+    fetchMemberStats()
+      .then((statsData) => setStats(statsData))
+      .catch((error) => console.error('회원 통계 조회 실패:', error))
+
+    fetchWithdrawalReasons()
+      .then((reasonsData) => setReasons(reasonsData))
+      .catch((error) => console.error('탈퇴 사유 조회 실패:', error))
     // Monthly withdrawal reasons - still mock only (no API endpoint)
     import('@/features/admin/mocks/mockMemberStats').then(({ mockMonthlyWithdrawalReasons }) => {
       setMonthlyReasons(mockMonthlyWithdrawalReasons)
