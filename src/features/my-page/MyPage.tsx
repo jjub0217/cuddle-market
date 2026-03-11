@@ -112,8 +112,14 @@ function MyPage() {
     queryFn: async ({ pageParam }) => {
       const response = await api.get('/profile/me/blocked-users', { params: { page: pageParam, size: 10 } })
       const data = response.data.data
+      const blockedList = data.blockedUsers || data.content || []
       return {
-        content: data.blockedUsers || data.content || [],
+        content: blockedList.map((u: { blockedUserId: number; blockedUserNickname?: string; nickname?: string; profileImageUrl?: string; blockedAt: string }) => ({
+          blockedUserId: u.blockedUserId,
+          nickname: u.nickname || u.blockedUserNickname || '',
+          profileImageUrl: u.profileImageUrl,
+          blockedAt: u.blockedAt,
+        })),
         page: data.page ?? 0,
         hasNext: data.hasNext ?? false,
         total: data.total ?? data.totalElements ?? 0,
