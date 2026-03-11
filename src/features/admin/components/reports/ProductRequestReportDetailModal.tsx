@@ -41,7 +41,7 @@ export default function ProductRequestReportDetailModal({ isOpen, report, onClos
       }}
       onClose={handleClose}
     >
-      {report && (
+      {report ? (
         <>
           {/* Header */}
           <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
@@ -64,18 +64,18 @@ export default function ProductRequestReportDetailModal({ isOpen, report, onClos
               <Field label="신고항목" value={report.reasonCodes.map((c) => PRODUCT_REPORT_REASON_EN_TO_KO[c] || c).join(', ')} />
               <Field label="처리 상태" value={report.status} />
               <Field label="신고 일자" value={formatDate(report.createdAt)} />
-              {report.detailReason && (
+              {report.detailReason ? (
                 <div className="col-span-2">
                   <p className="mb-1.5 text-sm font-medium text-gray-500">신고 상세 사유</p>
                   <div className="max-h-30 overflow-y-auto rounded-lg border border-gray-200 bg-gray-50/50 px-3 py-2.5 text-sm leading-relaxed whitespace-pre-line text-gray-900">
                     {report.detailReason}
                   </div>
                 </div>
-              )}
+              ) : null}
             </div>
 
             {/* 첨부 이미지 */}
-            {report.imageUrls && report.imageUrls.length > 0 && (
+            {report.imageUrls && report.imageUrls.length > 0 ? (
               <div className="mt-4">
                 <p className="mb-1.5 text-sm font-medium text-gray-500">첨부 이미지</p>
                 <div className="grid grid-cols-3 gap-3">
@@ -90,7 +90,7 @@ export default function ProductRequestReportDetailModal({ isOpen, report, onClos
                   ))}
                 </div>
               </div>
-            )}
+            ) : null}
           </div>
 
           {/* Footer */}
@@ -122,7 +122,7 @@ export default function ProductRequestReportDetailModal({ isOpen, report, onClos
             onCancel={() => setShowDeleteConfirm(false)}
           />
         </>
-      )}
+      ) : null}
     </dialog>
   )
 }

@@ -7,6 +7,7 @@ import { fetchAdminCommunityDetail } from '@/lib/api/admin'
 import { api } from '@/lib/api/api'
 import type { Comment, CommentResponse } from '@/types/community'
 import { BOARD_TYPE_EN_TO_KO } from '../../configs/communityTableConfig'
+import DeleteConfirmDialog from '../common/DeleteConfirmDialog'
 
 interface CommunityDetailModalProps {
   isOpen: boolean
@@ -30,64 +31,6 @@ function Field({ label, value }: { label: string; value: string }) {
       <p className="mb-1.5 text-sm font-medium text-gray-500">{label}</p>
       <div className="rounded-lg border border-gray-200 bg-gray-50/50 px-3 py-2.5 text-sm text-gray-900">{value}</div>
     </div>
-  )
-}
-
-function DeleteConfirmDialog({
-  isOpen,
-  title,
-  description,
-  onConfirm,
-  onCancel,
-}: {
-  isOpen: boolean
-  title: string
-  description: string
-  onConfirm: () => void
-  onCancel: () => void
-}) {
-  const confirmRef = useRef<HTMLDialogElement>(null)
-
-  useEffect(() => {
-    const dialog = confirmRef.current
-    if (isOpen && !dialog?.open) {
-      dialog?.showModal()
-    } else if (!isOpen && dialog?.open) {
-      dialog?.close()
-    }
-  }, [isOpen])
-
-  return (
-    <dialog
-      ref={confirmRef}
-      className="m-auto w-full max-w-fit flex-col gap-4 rounded-xl bg-white p-6 shadow-2xl backdrop:bg-gray-900/50 open:flex"
-      onClick={(e) => {
-        if (e.target === confirmRef.current) onCancel()
-      }}
-      onClose={(e) => {
-        e.stopPropagation()
-        onCancel()
-      }}
-    >
-      <h4 className="text-lg font-semibold text-gray-900">{title}</h4>
-      <p className="text-sm leading-relaxed text-gray-500">{description}</p>
-      <div className="flex justify-end gap-3">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          취소
-        </button>
-        <button
-          type="button"
-          onClick={onConfirm}
-          className="cursor-pointer rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-        >
-          삭제
-        </button>
-      </div>
-    </dialog>
   )
 }
 
@@ -176,12 +119,12 @@ export default function CommunityDetailModal({ isOpen, postId, onClose }: Commun
       }}
       onClose={handleClose}
     >
-      {isLoading && (
+      {isLoading ? (
         <div className="flex items-center justify-center py-20">
           <p className="text-sm text-gray-500">로딩 중...</p>
         </div>
-      )}
-      {post && (
+      ) : null}
+      {post ? (
         <>
           {/* Header */}
           <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
@@ -356,7 +299,7 @@ export default function CommunityDetailModal({ isOpen, postId, onClose }: Commun
             onCancel={() => setDeleteCommentId(null)}
           />
         </>
-      )}
+      ) : null}
     </dialog>
   )
 }
