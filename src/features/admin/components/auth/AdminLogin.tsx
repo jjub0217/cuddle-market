@@ -100,7 +100,7 @@ export default function AdminLogin() {
             {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>}
           </div>
 
-          {error && <p className="text-center text-sm text-red-500">{error}</p>}
+          {error && <p className="text-left text-sm text-red-500">{error}</p>}
 
           <button
             type="submit"
