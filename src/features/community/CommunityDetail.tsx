@@ -2,7 +2,7 @@
 
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
-import { fetchGraphQL } from '@/lib/api/graphql'
+import { api } from '@/lib/api/api'
 import dynamic from 'next/dynamic'
 
 const MdPreview = dynamic(() => import('./components/markdown/MdPreview'), {
@@ -32,69 +32,6 @@ import SimpleHeader from '@/components/header/SimpleHeader'
 import InlineNotification from '@/components/commons/InlineNotification'
 import { useOutsideClick } from '@/hooks/useOutsideClick'
 
-const GET_COMMUNITY_POST = `
-  query GetCommunityPost($id: Int!) {
-    communityPost(id: $id) {
-      id
-      title
-      content
-      authorNickname
-      authorProfileImageUrl
-      authorId
-      boardType
-      viewCount
-      commentCount
-      createdAt
-      updatedAt
-      imageUrls
-    }
-  }
-`
-
-const GET_COMMUNITY_COMMENTS = `
-  query GetCommunityComments($postId: Int!, $page: Int, $size: Int) {
-    communityPostComments(postId: $postId, page: $page, size: $size) {
-      comments {
-        id
-        content
-        authorId
-        authorNickname
-        authorProfileImageUrl
-        createdAt
-        depth
-        parentId
-        hasChildren
-        childrenCount
-      }
-    }
-  }
-`
-
-const CREATE_COMMENT = `
-  mutation CreateComment($postId: Int!, $content: String!) {
-    createComment(postId: $postId, content: $content) {
-      success
-    }
-  }
-`
-
-const DELETE_POST = `
-  mutation DeletePost($id: Int!) {
-    deletePost(id: $id) {
-      success
-    }
-  }
-`
-
-interface GetCommunityPostData {
-  communityPost: CommunityDetailItem
-}
-
-interface GetCommunityCommentsData {
-  communityPostComments: {
-    comments: Comment[]
-  }
-}
 
 interface CommunityDetailProps {
   initialPostData?: CommunityDetailItem
@@ -138,23 +75,29 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
     error,
   } = useQuery({
     queryKey: ['community', id],
-    queryFn: () => fetchGraphQL<GetCommunityPostData>(GET_COMMUNITY_POST, { id: Number(id) }),
+    queryFn: async () => {
+      const response = await api.get(`/community/posts/${id}`)
+      return response.data.data as CommunityDetailItem
+    },
     enabled: !!id,
   })
 
-  const data = postQueryData?.communityPost ?? initialPostData
+  const data = postQueryData ?? initialPostData
 
   const { data: commentQueryData, isLoading: isLoadingCommentData } = useQuery({
     queryKey: ['community', id, 'comments'],
-    queryFn: () => fetchGraphQL<GetCommunityCommentsData>(GET_COMMUNITY_COMMENTS, { postId: Number(id), page: 0, size: 100 }),
+    queryFn: async () => {
+      const response = await api.get(`/community/posts/${id}/comments`, { params: { page: 0, size: 100 } })
+      return response.data.data as { comments: Comment[] }
+    },
     enabled: !!id,
   })
 
-  const commentData = commentQueryData?.communityPostComments ?? initialCommentData ?? undefined
+  const commentData = commentQueryData ?? initialCommentData ?? undefined
 
   const replyMutation = useMutation({
     mutationFn: (requestData: CommentPostRequestData) =>
-      fetchGraphQL(CREATE_COMMENT, { postId: Number(id), content: requestData.content }),
+      api.post(`/community/posts/${id}/comments`, { content: requestData.content }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['community', id, 'comments'] })
       reset()
@@ -171,7 +114,7 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
 
   const handlePostDelete = async (postId: number) => {
     try {
-      await fetchGraphQL(DELETE_POST, { id: postId })
+      await api.delete(`/community/posts/${postId}`)
       queryClient.invalidateQueries({ queryKey: ['community'] })
       router.push('/community')
     } catch {
