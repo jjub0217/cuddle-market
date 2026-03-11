@@ -167,6 +167,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
 
   // const { title: headerTitle, description: headerDescription } = getHeaderContent()
   const { isLogin } = useUserStore()
+  const hasHydrated = useUserStore((state) => state._hasHydrated)
 
   // 페이지 진입 시 스크롤 최상단으로 이동
   useEffect(() => {
@@ -269,7 +270,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
                   onTabChange={handleTabChange}
                   ariaLabel="커뮤니티 타입"
                 />
-                {isLogin() ? (
+                {hasHydrated && isLogin() ? (
                   <Link
                     href={`${ROUTES.COMMUNITY_POST}?tab=${activeCommunityTypeTab}`}
                     className="bg-primary-300 rounded-lg px-3 py-2 text-white"
@@ -397,7 +398,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
           ) : null}
         </div>
       </div>
-      {!isMd && isLogin() ? (
+      {!isMd && hasHydrated && isLogin() ? (
         <Link
           href={`${ROUTES.COMMUNITY_POST}?tab=${activeCommunityTypeTab}`}
           className={`bg-primary-200 fixed right-4 bottom-4 rounded-full px-3 py-3 text-white ${Z_INDEX.FLOATING_BUTTON}`}

@@ -30,6 +30,7 @@ export default function MobileNavigation({ isOpen, onClose }: MobileNavigationPr
   useOutsideClick(isOpen, [sideNavRef], onClose)
 
   const { isLogin } = useUserStore()
+  const hasHydrated = useUserStore((state) => state._hasHydrated)
   const { openLogoutConfirm } = useLogout(onClose)
 
   useEffect(() => {
@@ -75,7 +76,7 @@ export default function MobileNavigation({ isOpen, onClose }: MobileNavigationPr
             </IconButton>
           </div>
           <div className="flex items-center gap-2">
-            {isLogin() ? (
+            {hasHydrated && isLogin() ? (
               <button
                 type="button"
                 onClick={openLogoutConfirm}
@@ -93,11 +94,11 @@ export default function MobileNavigation({ isOpen, onClose }: MobileNavigationPr
               </Link>
             )}
             <Link
-              href={isLogin() ? ROUTES.MYPAGE : ROUTES.SIGNUP}
+              href={hasHydrated && isLogin() ? ROUTES.MYPAGE : ROUTES.SIGNUP}
               onClick={onClose}
               className="border-primary-200 bg-primary-200 flex-1 rounded-sm border py-2 text-center text-sm font-bold text-white"
             >
-              {isLogin() ? '마이페이지' : '회원가입'}
+              {hasHydrated && isLogin() ? '마이페이지' : '회원가입'}
             </Link>
           </div>
         </div>

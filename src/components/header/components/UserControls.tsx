@@ -24,6 +24,7 @@ export default function UserControls({ isSideOpen, setIsSideOpen, hideMenuButton
   const user = useUserStore((state) => state.user)
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
   const { isLogin } = useUserStore()
+  const hasHydrated = useUserStore((state) => state._hasHydrated)
   useNotificationSSE()
   const handleBellToggle = () => {
     setIsNotificationOpen((prev) => !prev)
@@ -43,7 +44,7 @@ export default function UserControls({ isSideOpen, setIsSideOpen, hideMenuButton
 
   return (
     <div className="flex items-center gap-2 xl:gap-4">
-      {isLogin() ? (
+      {hasHydrated && isLogin() ? (
         <div className="flex items-center gap-1">
           <Link href={ROUTES.CHAT} className="ml-1" aria-label="채팅">
             <MessageCircleMore className="text-white" strokeWidth={1.5} />
