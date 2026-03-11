@@ -2,7 +2,7 @@
 
 import { useParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
-import { fetchGraphQL } from '@/lib/api/graphql'
+import { api } from '@/lib/api/api'
 import Footer from '@/components/footer/Footer'
 import MainImage from './components/MainImage'
 import SubImages from './components/SubImages'
@@ -15,51 +15,6 @@ import SellerOtherProducts from './components/SellerOtherProducts'
 import { useEffect } from 'react'
 import type { ProductDetailItem } from '@/types/product'
 
-const GET_PRODUCT = `
-  query GetProduct($id: Int!) {
-    product(id: $id) {
-      id
-      title
-      description
-      price
-      mainImageUrl
-      subImageUrls
-      productType
-      tradeStatus
-      petType
-      petDetailType
-      category
-      productStatus
-      addressSido
-      addressGugun
-      createdAt
-      viewCount
-      favoriteCount
-      isFavorite
-      sellerInfo {
-        sellerId
-        sellerNickname
-        sellerProfileImageUrl
-      }
-      sellerOtherProducts {
-        id
-        title
-        price
-        mainImageUrl
-        petDetailType
-        productStatus
-        tradeStatus
-        createdAt
-        favoriteCount
-      }
-    }
-  }
-`
-
-interface GetProductData {
-  product: ProductDetailItem
-}
-
 interface ProductDetailProps {
   initialData: ProductDetailItem
 }
@@ -68,13 +23,16 @@ function ProductDetail({ initialData }: ProductDetailProps) {
   const params = useParams<{ id: string }>()
   const id = params.id
 
-  const { data: apolloData, isLoading: loading } = useQuery({
+  const { data: restData } = useQuery({
     queryKey: ['product', id],
-    queryFn: () => fetchGraphQL<GetProductData>(GET_PRODUCT, { id: Number(id) }),
+    queryFn: async () => {
+      const response = await api.get(`/products/${id}`)
+      return response.data.data as ProductDetailItem
+    },
     enabled: !!id,
   })
 
-  const data = apolloData?.product ?? initialData
+  const data = restData ?? initialData
 
   useEffect(() => {
     window.scrollTo(0, 0)

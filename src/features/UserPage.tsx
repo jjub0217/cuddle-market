@@ -4,7 +4,7 @@ import ProfileData from '@/components/profile/ProfileData'
 import { useState } from 'react'
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter, useParams } from 'next/navigation'
-import { fetchGraphQL } from '@/lib/api/graphql'
+import { api } from '@/lib/api/api'
 import { ProductListItem } from '@/components/product/ProductListItem'
 import LoadMoreButton from '@/components/commons/button/LoadMoreButton'
 import EmptyState from '@/components/EmptyState'
@@ -35,12 +35,8 @@ function UserPage() {
   } = useQuery({
     queryKey: ['userPage', id],
     queryFn: async () => {
-      const data = await fetchGraphQL<{ userProfile: any }>(`
-        query UserProfile($userId: Int!) {
-          userProfile(userId: $userId) { id nickname profileImageUrl introduction rating isBlocked }
-        }
-      `, { userId: Number(id) })
-      return data.userProfile
+      const response = await api.get(`/profile/${id}`)
+      return response.data.data
     },
     enabled: !!id,
     refetchOnWindowFocus: false,
@@ -56,15 +52,10 @@ function UserPage() {
   } = useInfiniteQuery({
     queryKey: ['userProducts', id],
     queryFn: async ({ pageParam }) => {
-      const data = await fetchGraphQL<{ userProducts: any }>(`
-        query UserProducts($userId: Int!, $page: Int!, $size: Int!) {
-          userProducts(userId: $userId, page: $page, size: $size) {
-            content { id title price mainImageUrl petDetailType productStatus productType tradeStatus createdAt viewCount favoriteCount isFavorite }
-            page hasNext total totalElements
-          }
-        }
-      `, { userId: Number(id), page: pageParam, size: 10 })
-      return data.userProducts
+      const response = await api.get(`/profile/${id}/products`, {
+        params: { page: pageParam, size: 10 },
+      })
+      return response.data.data
     },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
     initialPageParam: 0,
@@ -74,11 +65,7 @@ function UserPage() {
   const isMyProfile = user?.id === userData?.id
 
   const { mutate: unblockUser } = useMutation({
-    mutationFn: () => fetchGraphQL(`
-      mutation UnblockUser($userId: Int!) {
-        unblockUser(userId: $userId) { success }
-      }
-    `, { userId: Number(userData?.id) }),
+    mutationFn: () => api.delete(`/reports/blocks/users/${userData?.id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userPage', id] })
     },
