@@ -1,14 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import Tabs from '@/components/Tabs'
 import SignupTrendChart from './SignupTrendChart'
 import WithdrawalTrendChart from './WithdrawalTrendChart'
 import WithdrawalReasonChart from './WithdrawalReasonChart'
 import WithdrawalReasonTrendChart from './WithdrawalReasonTrendChart'
 import { fetchMemberStats, fetchWithdrawalReasons } from '@/lib/api/admin'
-import type { MemberTrendStat, WithdrawalReasonStat } from '@/features/admin/types/adminApi'
-import type { MonthlyWithdrawalReasonStat } from '@/features/admin/mocks/mockMemberStats'
+import { mockMonthlyWithdrawalReasons } from '@/features/admin/mocks/mockMemberStats'
 
 const DASHBOARD_TABS = [
   { id: 'signup', label: '회원 가입 추세', code: 'signup' },
@@ -18,23 +18,16 @@ const DASHBOARD_TABS = [
 
 export default function MembersDashboard() {
   const [activeTab, setActiveTab] = useState('signup')
-  const [stats, setStats] = useState<MemberTrendStat[]>([])
-  const [reasons, setReasons] = useState<WithdrawalReasonStat[]>([])
-  const [monthlyReasons, setMonthlyReasons] = useState<MonthlyWithdrawalReasonStat[]>([])
 
-  useEffect(() => {
-    fetchMemberStats()
-      .then((statsData) => setStats(statsData))
-      .catch((error) => console.error('회원 통계 조회 실패:', error))
+  const { data: stats = [] } = useQuery({
+    queryKey: ['admin', 'member-stats'],
+    queryFn: fetchMemberStats,
+  })
 
-    fetchWithdrawalReasons()
-      .then((reasonsData) => setReasons(reasonsData))
-      .catch((error) => console.error('탈퇴 사유 조회 실패:', error))
-    // Monthly withdrawal reasons - still mock only (no API endpoint)
-    import('@/features/admin/mocks/mockMemberStats').then(({ mockMonthlyWithdrawalReasons }) => {
-      setMonthlyReasons(mockMonthlyWithdrawalReasons)
-    })
-  }, [])
+  const { data: reasons = [] } = useQuery({
+    queryKey: ['admin', 'withdrawal-reasons'],
+    queryFn: fetchWithdrawalReasons,
+  })
 
   return (
     <div>
@@ -43,14 +36,14 @@ export default function MembersDashboard() {
         <Tabs tabs={DASHBOARD_TABS} activeTab={activeTab} onTabChange={setActiveTab} ariaLabel="회원 대시보드 탭" />
       </div>
       <div className="mt-6">
-        {activeTab === 'signup' && <SignupTrendChart data={stats} />}
-        {activeTab === 'withdrawal' && <WithdrawalTrendChart data={stats} />}
-        {activeTab === 'reason' && (
+        {activeTab === 'signup' ? <SignupTrendChart data={stats} /> : null}
+        {activeTab === 'withdrawal' ? <WithdrawalTrendChart data={stats} /> : null}
+        {activeTab === 'reason' ? (
           <div className="flex flex-col gap-6">
             <WithdrawalReasonChart data={reasons} />
-            <WithdrawalReasonTrendChart data={monthlyReasons} />
+            <WithdrawalReasonTrendChart data={mockMonthlyWithdrawalReasons} />
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   )

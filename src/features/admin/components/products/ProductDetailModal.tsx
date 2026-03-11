@@ -10,6 +10,7 @@ import {
   PRODUCT_STATUS_EN_TO_KO,
   CATEGORY_EN_TO_KO,
 } from '../../configs/productTableConfig'
+import DeleteConfirmDialog from '../common/DeleteConfirmDialog'
 
 interface ProductDetailModalProps {
   isOpen: boolean
@@ -77,54 +78,6 @@ const CONDITION_COLORS: Record<string, string> = {
   NEED_REPAIR: 'bg-[#FEE2E2] text-red-800',
 }
 
-function DeleteConfirmDialog({ isOpen, onConfirm, onCancel }: { isOpen: boolean; onConfirm: () => void; onCancel: () => void }) {
-  const confirmRef = useRef<HTMLDialogElement>(null)
-
-  useEffect(() => {
-    const dialog = confirmRef.current
-    if (isOpen && !dialog?.open) {
-      dialog?.showModal()
-    } else if (!isOpen && dialog?.open) {
-      dialog?.close()
-    }
-  }, [isOpen])
-
-  return (
-    <dialog
-      ref={confirmRef}
-      className="m-auto w-full max-w-fit flex-col gap-4 rounded-xl bg-white p-6 shadow-2xl backdrop:bg-gray-900/50 open:flex"
-      onClick={(e) => {
-        if (e.target === confirmRef.current) onCancel()
-      }}
-      onClose={(e) => {
-        e.stopPropagation()
-        onCancel()
-      }}
-    >
-      <h4 className="text-lg font-semibold text-gray-900">상품 삭제 확인</h4>
-      <p className="text-sm leading-relaxed text-gray-500">
-        삭제 시 해당 상품과 관련된 모든 데이터가 즉시 삭제되며 되돌릴 수 없습니다.
-      </p>
-      <div className="flex justify-end gap-3">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          취소
-        </button>
-        <button
-          type="button"
-          onClick={onConfirm}
-          className="cursor-pointer rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-        >
-          삭제
-        </button>
-      </div>
-    </dialog>
-  )
-}
-
 export default function ProductDetailModal({ isOpen, productId, onClose }: ProductDetailModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -158,12 +111,12 @@ export default function ProductDetailModal({ isOpen, productId, onClose }: Produ
       }}
       onClose={handleClose}
     >
-      {isLoading && (
+      {isLoading ? (
         <div className="flex items-center justify-center py-20">
           <p className="text-sm text-gray-500">로딩 중...</p>
         </div>
-      )}
-      {product && (
+      ) : null}
+      {product ? (
         <>
           {/* Header */}
           <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
@@ -278,6 +231,8 @@ export default function ProductDetailModal({ isOpen, productId, onClose }: Produ
 
           <DeleteConfirmDialog
             isOpen={showDeleteConfirm}
+            title="상품 삭제 확인"
+            description="삭제 시 해당 상품과 관련된 모든 데이터가 즉시 삭제되며 되돌릴 수 없습니다."
             onConfirm={() => {
               setShowDeleteConfirm(false)
               dialogRef.current?.close()
@@ -285,7 +240,7 @@ export default function ProductDetailModal({ isOpen, productId, onClose }: Produ
             onCancel={() => setShowDeleteConfirm(false)}
           />
         </>
-      )}
+      ) : null}
     </dialog>
   )
 }
