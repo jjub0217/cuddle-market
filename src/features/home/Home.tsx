@@ -22,7 +22,8 @@ import { productListQueryKey, extractProductSearchParams } from '@/lib/queries/p
 
 function Home() {
   const { isLogin } = useUserStore()
-  const isLoggedIn = isLogin()
+  const hasHydrated = useUserStore((state) => state._hasHydrated)
+  const isLoggedIn = hasHydrated && isLogin()
   const isMd = useMediaQuery('(min-width: 768px)')
   const { searchParams, pathname, push } = useFilterNavigation()
   const router = useRouter()
