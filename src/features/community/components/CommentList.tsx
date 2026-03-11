@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { fetchGraphQL } from '@/lib/api/graphql'
+import { api } from '@/lib/api/api'
 import type { Comment, CommentPostRequestData } from '@/types'
 import { CommentItem } from './CommentItem'
 import { CommentForm } from './CommentForm'
@@ -46,24 +46,15 @@ export function CommentList({ comments, postId }: CommentListProps) {
   const { data: repliesData } = useQuery({
     queryKey: ['community', postId, 'replies', openRepliesCommentId],
     queryFn: async () => {
-      const data = await fetchGraphQL<{ communityReplies: { comments: Comment[] } }>(`
-        query CommunityReplies($commentId: Int!) {
-          communityReplies(commentId: $commentId) {
-            comments { id content authorId authorNickname authorProfileImageUrl createdAt depth parentId hasChildren childrenCount }
-          }
-        }
-      `, { commentId: openRepliesCommentId })
-      return data.communityReplies
+      const response = await api.get(`/community/comments/${openRepliesCommentId}/replies`)
+      return response.data.data as { comments: Comment[] }
     },
     enabled: !!openRepliesCommentId,
   })
 
   const replyMutation = useMutation({
-    mutationFn: (requestData: CommentPostRequestData) => fetchGraphQL(`
-      mutation CreateComment($postId: Int!, $content: String!, $parentId: Int) {
-        createComment(postId: $postId, content: $content, parentId: $parentId) { success }
-      }
-    `, { postId: Number(postId), content: requestData.content, parentId: requestData.parentId }),
+    mutationFn: (requestData: CommentPostRequestData) =>
+      api.post(`/community/posts/${postId}/comments`, { content: requestData.content, parentId: requestData.parentId }),
     onSuccess: (_data, variables) => {
       const parentId = variables.parentId
       // 대댓글 목록 refetch
@@ -87,11 +78,7 @@ export function CommentList({ comments, postId }: CommentListProps) {
   })
 
   const deleteMutation = useMutation({
-    mutationFn: (commentId: number) => fetchGraphQL(`
-      mutation DeleteComment($commentId: Int!) {
-        deleteComment(commentId: $commentId) { success }
-      }
-    `, { commentId }),
+    mutationFn: (commentId: number) => api.delete(`/community/comments/${commentId}`),
     onSuccess: () => {
       // 댓글 목록 refetch
       queryClient.invalidateQueries({ queryKey: ['community', postId, 'comments'] })
