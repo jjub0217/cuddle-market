@@ -53,7 +53,7 @@ export default function AdminLogin() {
       }
 
       // ADMIN 확인 후 최종 로그인 처리
-      handleLogin(user, accessToken, refreshToken)
+      handleLogin({ ...user, userRole }, accessToken, refreshToken)
       router.push(ROUTES.ADMIN)
     } catch {
       useUserStore.getState().clearAll()
