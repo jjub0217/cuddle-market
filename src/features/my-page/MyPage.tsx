@@ -4,7 +4,7 @@ import { useUserStore } from '@/store/userStore'
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { useMutation, useInfiniteQuery, useQueryClient, useQuery } from '@tanstack/react-query'
-import { fetchGraphQL } from '@/lib/api/graphql'
+import { api } from '@/lib/api/api'
 import Tabs from '@/components/Tabs'
 import { MY_PAGE_TABS, type MyPageTabId } from '@/constants/constants'
 import MyPagePanel from './components/MyPagePanel'
@@ -43,12 +43,8 @@ function MyPage() {
   } = useQuery({
     queryKey: ['mypage', user?.id],
     queryFn: async () => {
-      const data = await fetchGraphQL<{ myProfile: any }>(`
-        query MyProfile {
-          myProfile { id email name nickname birthDate profileImageUrl introduction addressSido addressGugun createdAt rating }
-        }
-      `)
-      return data.myProfile
+      const response = await api.get('/profile/me')
+      return response.data.data
     },
     enabled: !!user,
   })
@@ -63,15 +59,8 @@ function MyPage() {
   } = useInfiniteQuery({
     queryKey: ['myProducts', user?.id],
     queryFn: async ({ pageParam }) => {
-      const data = await fetchGraphQL<{ myProducts: any }>(`
-        query MyProducts($page: Int!, $size: Int!) {
-          myProducts(page: $page, size: $size) {
-            content { id title price mainImageUrl petDetailType productStatus productType tradeStatus createdAt viewCount favoriteCount isFavorite }
-            page hasNext total totalElements
-          }
-        }
-      `, { page: pageParam, size: 10 })
-      return data.myProducts
+      const response = await api.get('/profile/me/products', { params: { page: pageParam, size: 10 } })
+      return response.data.data
     },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
     initialPageParam: 0,
@@ -87,15 +76,8 @@ function MyPage() {
   } = useInfiniteQuery({
     queryKey: ['myRequest', user?.id],
     queryFn: async ({ pageParam }) => {
-      const data = await fetchGraphQL<{ myRequests: any }>(`
-        query MyRequests($page: Int!, $size: Int!) {
-          myRequests(page: $page, size: $size) {
-            content { id title price mainImageUrl petDetailType productStatus productType tradeStatus createdAt viewCount favoriteCount isFavorite }
-            page hasNext total totalElements
-          }
-        }
-      `, { page: pageParam, size: 10 })
-      return data.myRequests
+      const response = await api.get('/profile/me/purchase-requests', { params: { page: pageParam, size: 10 } })
+      return response.data.data
     },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
     initialPageParam: 0,
@@ -111,15 +93,8 @@ function MyPage() {
   } = useInfiniteQuery({
     queryKey: ['myFavorite', user?.id],
     queryFn: async ({ pageParam }) => {
-      const data = await fetchGraphQL<{ myFavorites: any }>(`
-        query MyFavorites($page: Int!, $size: Int!) {
-          myFavorites(page: $page, size: $size) {
-            content { id title price mainImageUrl petDetailType productStatus productType tradeStatus createdAt viewCount favoriteCount isFavorite }
-            page hasNext total totalElements
-          }
-        }
-      `, { page: pageParam, size: 10 })
-      return data.myFavorites
+      const response = await api.get('/profile/me/favorites', { params: { page: pageParam, size: 10 } })
+      return response.data.data
     },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
     initialPageParam: 0,
@@ -135,15 +110,14 @@ function MyPage() {
   } = useInfiniteQuery({
     queryKey: ['myBlocked', user?.id],
     queryFn: async ({ pageParam }) => {
-      const data = await fetchGraphQL<{ myBlockedUsers: any }>(`
-        query MyBlockedUsers($page: Int!, $size: Int!) {
-          myBlockedUsers(page: $page, size: $size) {
-            content { blockedUserId blockedUserNickname blockedAt }
-            page hasNext total
-          }
-        }
-      `, { page: pageParam, size: 10 })
-      return data.myBlockedUsers
+      const response = await api.get('/profile/me/blocked-users', { params: { page: pageParam, size: 10 } })
+      const data = response.data.data
+      return {
+        content: data.blockedUsers || data.content || [],
+        page: data.page ?? 0,
+        hasNext: data.hasNext ?? false,
+        total: data.total ?? data.totalElements ?? 0,
+      }
     },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
     initialPageParam: 0,
@@ -166,11 +140,7 @@ function MyPage() {
   }[activeMyPageTab]
 
   const { mutate: deleteProductMutate } = useMutation({
-    mutationFn: (id: number) => fetchGraphQL(`
-      mutation DeleteProduct($id: Int!) {
-        deleteProduct(id: $id) { success }
-      }
-    `, { id }),
+    mutationFn: (id: number) => api.delete(`/products/${id}`),
     onSuccess: () => {
       if (activeMyPageTab === 'tab-sales') {
         queryClient.invalidateQueries({ queryKey: ['myProducts', user?.id] })
@@ -207,11 +177,7 @@ function MyPage() {
 
   const handleWithdraw = async (data: WithDrawFormValues) => {
     try {
-      await fetchGraphQL(`
-        mutation Withdraw($reason: String!, $detailReason: String!) {
-          withdraw(reason: $reason, detailReason: $detailReason) { success }
-        }
-      `, { reason: data.reason, detailReason: data.detailReason })
+      await api.delete('/auth/withdraw', { data: { reason: data.reason, detailReason: data.detailReason } })
       clearAll()
       router.push('/')
     } catch {
@@ -225,11 +191,7 @@ function MyPage() {
   }
 
   const { mutate: unblockUser } = useMutation({
-    mutationFn: (blockedUserId: number) => fetchGraphQL(`
-      mutation UnblockUser($userId: Int!) {
-        unblockUser(userId: $userId) { success }
-      }
-    `, { userId: blockedUserId }),
+    mutationFn: (blockedUserId: number) => api.delete(`/reports/blocks/users/${blockedUserId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['myBlocked'] })
     },
