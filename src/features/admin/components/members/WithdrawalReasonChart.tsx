@@ -19,6 +19,15 @@ interface WithdrawalReasonChartProps {
 }
 
 export default function WithdrawalReasonChart({ data }: WithdrawalReasonChartProps) {
+  if (!data || data.length === 0) {
+    return (
+      <div className="rounded-lg border border-gray-200 bg-white p-6">
+        <h3 className="mb-4 text-base font-semibold text-gray-800">탈퇴 사유별 분포</h3>
+        <p className="py-12 text-center text-sm text-gray-500">데이터가 없습니다</p>
+      </div>
+    )
+  }
+
   const displayData = data.map((d) => ({
     ...d,
     label: reasonLabelMap[d.reason] ?? d.reason,
