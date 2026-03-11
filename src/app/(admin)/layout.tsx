@@ -1,6 +1,6 @@
 import AdminSidebar from '@/features/admin/components/layout/AdminSidebar'
 import AdminHeader from '@/features/admin/components/layout/AdminHeader'
-import AdminAuthGuard from '@/features/admin/components/layout/AdminStoreHydration'
+import AdminAuthGuard from '@/features/admin/components/layout/AdminAuthGuard'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
