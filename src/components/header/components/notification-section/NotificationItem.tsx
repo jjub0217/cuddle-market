@@ -33,11 +33,11 @@ export default function NotificationItem({ handleReadNotification, ...notificati
           <p className="line-clamp-2 text-left text-sm text-gray-900">{notification.content}</p>
           <p className="flex items-center text-xs text-gray-500">{getTimeAgo(notification.createdAt)}</p>
         </div>
-        {!notification.isRead && (
+        {!notification.isRead ? (
           <div className="flex pt-2">
             <div className="bg-primary-500 size-2 rounded-full" />
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   )

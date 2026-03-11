@@ -62,7 +62,7 @@ function SelectOption({ option, isSelected, onSelect, optionClassName, optionRef
       )}
     >
       <span>{option.label}</span>
-      {isSelected && <Check size={14} className="shrink-0 text-gray-600" />}
+      {isSelected ? <Check size={14} className="shrink-0 text-gray-600" /> : null}
     </button>
   )
 }
@@ -192,9 +192,9 @@ export default function SelectDropdown({
         placeholder={placeholder}
       />
 
-      {isOpen && !disabled && (
+      {isOpen && !disabled ? (
         <SelectOptions options={options} selectedValue={value} onSelect={handleSelect} placeholder={placeholder} optionClassName={optionClassName} />
-      )}
+      ) : null}
     </div>
   )
 }

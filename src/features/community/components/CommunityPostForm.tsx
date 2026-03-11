@@ -14,6 +14,7 @@ import Markdown from './markdown/Markdown'
 import { ArrowLeft } from 'lucide-react'
 import { fetchGraphQL } from '@/lib/api/graphql'
 import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import SimpleHeader from '@/components/header/SimpleHeader'
 import { Z_INDEX } from '@/constants/ui'
@@ -80,7 +81,6 @@ export default function CommunityPostForm() {
   const titleLength = useWatch({ control, name: 'title' })?.length ?? 0
 
   const [postError, setPostError] = useState<React.ReactNode | null>(null)
-  const [postLoadError, setPostLoadError] = useState(false)
 
   const handleCancel = () => {
     clearDraft(getValues('boardType'))
@@ -122,28 +122,27 @@ export default function CommunityPostForm() {
     }
   }
 
-  useEffect(() => {
-    const loadPost = async () => {
-      if (isEditMode && id) {
-        try {
-          const { communityPost: data } = await fetchGraphQL<{ communityPost: any }>(`
-            query CommunityPost($id: Int!) {
-              communityPost(id: $id) { id title content boardType imageUrls }
-            }
-          `, { id: Number(id) })
-          reset({
-            boardType: data.boardType,
-            title: data.title,
-            content: data.content,
-            imageUrls: data.imageUrls ?? [],
-          })
-        } catch {
-          setPostLoadError(true) // 에러 상태 설정
-        }
+  const { data: editPostData, isError: postLoadError } = useQuery({
+    queryKey: ['community-edit-post', id],
+    queryFn: () => fetchGraphQL<{ communityPost: any }>(`
+      query CommunityPost($id: Int!) {
+        communityPost(id: $id) { id title content boardType imageUrls }
       }
+    `, { id: Number(id!) }),
+    enabled: isEditMode && !!id,
+  })
+
+  useEffect(() => {
+    if (editPostData) {
+      const data = editPostData.communityPost
+      reset({
+        boardType: data.boardType,
+        title: data.title,
+        content: data.content,
+        imageUrls: data.imageUrls ?? [],
+      })
     }
-    loadPost()
-  }, [id, isEditMode, reset])
+  }, [editPostData, reset])
 
   // 새 글 작성 시 폼 데이터 변경마다 sessionStorage에 자동 저장
   useEffect(() => {
@@ -214,11 +213,11 @@ export default function CommunityPostForm() {
       <div className="bg-[#F3F4F6]">
         <div className="px-lg mx-auto max-w-7xl pt-5">
           <AnimatePresence>
-            {postError && (
+            {postError ? (
               <InlineNotification type="error" onClose={() => setPostError(null)}>
                 {postError}
               </InlineNotification>
-            )}
+            ) : null}
           </AnimatePresence>
         </div>
       </div>
@@ -246,7 +245,7 @@ export default function CommunityPostForm() {
                         optionClassName="text-base"
                         buttonClassName="border border-gray-400 bg-white text-gray-900 px-3 py-3 text-base"
                       />
-                      {fieldState.error && <p className="text-xs font-semibold text-red-500">{fieldState.error.message}</p>}
+                      {fieldState.error ? <p className="text-xs font-semibold text-red-500">{fieldState.error.message}</p> : null}
                     </div>
                   )}
                 />
@@ -274,9 +273,9 @@ export default function CommunityPostForm() {
                       <RequiredLabel labelClass="heading-h5">내용</RequiredLabel>
                       <Markdown value={field.value} onChange={field.onChange} placeholder="내용을 입력하세요" height={320} />
                       <div className="flex flex-col gap-1">
-                        {fieldState.error && (
+                        {fieldState.error ? (
                           <p className="pt-1.5 text-xs font-semibold text-red-500">{fieldState.error.message}</p>
-                        )}
+                        ) : null}
                         <p className="text-sm text-gray-500">{field.value?.length ?? 0}/1000자</p>
                       </div>
                     </div>
@@ -304,7 +303,7 @@ export default function CommunityPostForm() {
           </form>
         </div>
       </div>
-      {showDraftModal && (
+      {showDraftModal ? (
         <DraftModal
           initialBoardType={initialBoardType}
           setIsDraftChecked={setIsDraftChecked}
@@ -314,7 +313,7 @@ export default function CommunityPostForm() {
           getSavedDraft={getSavedDraft}
           reset={reset}
         />
-      )}
+      ) : null}
     </>
   )
 }

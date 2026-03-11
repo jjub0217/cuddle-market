@@ -3,7 +3,12 @@
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { fetchGraphQL } from '@/lib/api/graphql'
-import MdPreview from './components/markdown/MdPreview'
+import dynamic from 'next/dynamic'
+
+const MdPreview = dynamic(() => import('./components/markdown/MdPreview'), {
+  ssr: false,
+  loading: () => <div className="p-3 text-sm text-gray-400">로딩 중...</div>,
+})
 import { getBoardType } from '@/lib/utils/getBoardType'
 import Badge from '@/components/commons/badge/Badge'
 import { formatDate } from '@/lib/utils/formatDate'
@@ -179,7 +184,7 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
     }
   }
   const handleMoreToggle = () => {
-    setIsMoreMenuOpen(!isMoreMenuOpen)
+    setIsMoreMenuOpen((prev) => !prev)
   }
 
   const handlePostEdit = (postId: number) => {
@@ -267,7 +272,7 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
                 <IconButton aria-label="더보기" className="" size="sm" onClick={handleMoreToggle}>
                   <EllipsisVertical size={16} className="text-gray-500" />
                 </IconButton>
-                {isMoreMenuOpen && (
+                {isMoreMenuOpen ? (
                   <div
                     className="absolute top-7 right-0 flex flex-col rounded border border-gray-200 bg-white shadow-md md:min-w-14"
                     ref={modalRef}
@@ -312,7 +317,7 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
                       </button>
                     )}
                   </div>
-                )}
+                ) : null}
               </div>
               <div className="flex items-baseline justify-between md:items-center">
                 <div className="flex items-center gap-3.5">
@@ -338,13 +343,13 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
                 <span>{data.commentCount}</span>
               </div>
 
-              {commentData?.comments && <CommentList comments={commentData.comments} postId={id!} />}
+              {commentData?.comments ? <CommentList comments={commentData.comments} postId={id!} /> : null}
               <AnimatePresence>
-                {commentPostError && (
+                {commentPostError ? (
                   <InlineNotification type="error" onClose={() => setCommentPostError(null)}>
                     {commentPostError}
                   </InlineNotification>
-                )}
+                ) : null}
               </AnimatePresence>
               <CommentForm
                 id="comment-input"

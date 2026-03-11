@@ -170,21 +170,21 @@ export default function ProfileUpdatePasswordForm() {
             />
           </div>
           <AnimatePresence>
-            {pwUpdateError && (
+            {pwUpdateError ? (
               <InlineNotification type="error" onClose={() => setPwUpdateError(null)}>
                 {pwUpdateError}
               </InlineNotification>
-            )}
-            {pwUpdateSuccess && (
+            ) : null}
+            {pwUpdateSuccess ? (
               <InlineNotification type="success" onClose={() => setPwUpdateSuccess(null)}>
                 {pwUpdateSuccess}
               </InlineNotification>
-            )}
-            {pwUpdateWarning && (
+            ) : null}
+            {pwUpdateWarning ? (
               <InlineNotification type="warning" onClose={() => setPwUpdateWarning(null)}>
                 {pwUpdateWarning}
               </InlineNotification>
-            )}
+            ) : null}
           </AnimatePresence>
           <Button size="md" className="bg-primary-300 w-full cursor-pointer text-white" type="submit">
             비밀번호 변경

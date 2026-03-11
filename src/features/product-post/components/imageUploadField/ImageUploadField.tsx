@@ -48,7 +48,7 @@ export default function ImageUploadField<T extends FieldValues>({
         subImagesField={subImagesField}
         maxFiles={maxFiles}
       />
-      {errorMessage && <p className="text-danger-500 text-sm font-semibold">{errorMessage}</p>}
+      {errorMessage ? <p className="text-danger-500 text-sm font-semibold">{errorMessage}</p> : null}
     </div>
   )
 

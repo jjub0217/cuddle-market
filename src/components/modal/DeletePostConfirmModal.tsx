@@ -25,11 +25,11 @@ export default function DeletePostConfirmModal({ isOpen, postId, onConfirm, onCa
       <div className="flex w-11/12 flex-col gap-4 rounded-lg bg-white p-5 md:w-[16vw] md:min-w-96" ref={modalRef}>
         <ModalTitle heading="게시글 삭제" description="정말로 이 게시글을 삭제하시겠습니까?" />
         <AnimatePresence>
-          {error && (
+          {error ? (
             <InlineNotification type="error" onClose={() => onClearError?.()}>
               {error}
             </InlineNotification>
-          )}
+          ) : null}
         </AnimatePresence>
         <div className="flex justify-end gap-3">
           <Button onClick={onCancel} size="sm" className="cursor-pointer rounded-lg border border-gray-300 bg-white">

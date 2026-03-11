@@ -44,11 +44,11 @@ export default async function OGImage({ params }: { params: Promise<{ id: string
         <p style={{ fontSize: 40, fontWeight: 700, color: OG_COLORS.textPrimary, overflow: 'hidden' }}>
           {post.title.slice(0, 50)}
         </p>
-        {preview && (
+        {preview ? (
           <p style={{ fontSize: 24, color: OG_COLORS.textSecondary, overflow: 'hidden' }}>
             {preview}
           </p>
-        )}
+        ) : null}
         <div style={{ display: 'flex', gap: '8px', fontSize: 20, color: OG_COLORS.textSecondary, marginTop: '8px' }}>
           <span>{post.authorNickname}</span>
           <span style={{ color: 'rgba(0,0,0,0.2)' }}>·</span>

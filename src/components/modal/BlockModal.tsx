@@ -62,11 +62,11 @@ export default function BlockModal({ isOpen, onCancel, userNickname, userId }: B
     >
       <ModalTitle heading="사용자 차단하기" description={`정말로 ${userNickname}를 차단하시겠습니까?`} />
       <AnimatePresence>
-        {userBlockError && (
+        {userBlockError ? (
           <InlineNotification type="error" onClose={() => setUserBlockError(null)}>
             {userBlockError}
           </InlineNotification>
-        )}
+        ) : null}
       </AnimatePresence>
       <AlertBox alertList={USER_BLOCK_ALERT_LIST} />
       <div className="flex justify-end gap-3">

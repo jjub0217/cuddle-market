@@ -171,7 +171,7 @@ export function ChatLog({
   return (
     <div ref={scrollRef} onScroll={handleScroll} className="flex h-full flex-col gap-4 overflow-y-auto">
       <AnimatePresence>
-        {connectionError && (
+        {connectionError ? (
           <div className="sticky top-0 left-1/2 z-10 w-fit -translate-x-1/2">
             <InlineNotification type="error" onClose={() => onClearConnectionError?.()}>
               <div className="flex flex-col gap-0.5">
@@ -180,14 +180,14 @@ export function ChatLog({
               </div>
             </InlineNotification>
           </div>
-        )}
-        {imageUploadError && (
+        ) : null}
+        {imageUploadError ? (
           <div className="sticky top-0 left-1/2 z-10 w-fit -translate-x-1/2">
             <InlineNotification type="error" onClose={() => onClearImageUploadError?.()}>
               {imageUploadError}
             </InlineNotification>
           </div>
-        )}
+        ) : null}
       </AnimatePresence>
       {Object.entries(groupedMessages).map(([dateKey, messages]) => (
         <div key={dateKey} className="flex flex-col gap-2">

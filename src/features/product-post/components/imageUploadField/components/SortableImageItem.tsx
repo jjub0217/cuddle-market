@@ -35,7 +35,7 @@ export default function SortableImageItem({ url, index, onRemove }: SortableImag
       <div className="h-full w-full cursor-grab active:cursor-grabbing" {...listeners}>
         <Image src={url} alt={`preview-${index}`} fill className="object-cover" unoptimized />
       </div>
-      {index === 0 && <Badge className="absolute top-1 left-1 bg-gray-900 text-white">대표</Badge>}
+      {index === 0 ? <Badge className="absolute top-1 left-1 bg-gray-900 text-white">대표</Badge> : null}
     </div>
   )
 }

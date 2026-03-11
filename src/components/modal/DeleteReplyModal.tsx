@@ -49,11 +49,11 @@ export default function DeleteReplyModal({ isOpen, onCancel, replyId, onConfirm 
     >
       <ModalTitle heading="댓글 삭제하기" description="정말로 이 댓글을 삭제하시겠습니까?" />
       <AnimatePresence>
-        {replyDeleteError && (
+        {replyDeleteError ? (
           <InlineNotification type="error" onClose={() => setReplyDeleteError(null)}>
             {replyDeleteError}
           </InlineNotification>
-        )}
+        ) : null}
       </AnimatePresence>
       <div className="flex justify-end gap-3">
         <Button type="button" onClick={() => dialogRef.current?.close()} size="sm" className="cursor-pointer rounded-lg border border-gray-300 bg-white">

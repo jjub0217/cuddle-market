@@ -121,13 +121,13 @@ function UserPage() {
       <div className="pb-4xl relative bg-white pt-0 md:pt-8">
         <div className="mx-auto max-w-7xl">
           <AnimatePresence>
-            {unblockError && (
+            {unblockError ? (
               <div className="absolute top-4 left-1/2 z-50 -translate-x-1/2 md:pt-8">
                 <InlineNotification type="error" onClose={() => setUnblockError(null)}>
                   {unblockError}
                 </InlineNotification>
               </div>
-            )}
+            ) : null}
           </AnimatePresence>
         </div>
         <div className="mx-auto flex max-w-7xl flex-col gap-0 md:flex-row md:gap-8">
@@ -154,7 +154,7 @@ function UserPage() {
                       <ProductListItem key={product.id} product={product} />
                     ))}
                   </ul>
-                  {hasNextPage && <LoadMoreButton onClick={() => fetchNextPage()} isLoading={isFetchingNextPage} />}
+                  {hasNextPage ? <LoadMoreButton onClick={() => fetchNextPage()} isLoading={isFetchingNextPage} /> : null}
                 </>
               ) : (
                 <EmptyState icon={Package} title={'등록한 상품이 없습니다'} />

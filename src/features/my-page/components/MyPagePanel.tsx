@@ -155,10 +155,10 @@ export default function MyPagePanel({
                   <MyList key={product.id} {...product} activeTab={activeMyPageTab} handleConfirmModal={handleConfirmModal} />
                 ))}
               </ul>
-              {hasNextPage && <LoadMoreButton onClick={() => fetchNextPage()} isLoading={isFetchingNextPage} />}
+              {hasNextPage ? <LoadMoreButton onClick={() => fetchNextPage()} isLoading={isFetchingNextPage} /> : null}
             </>
           ) : (
-            config && <EmptyState icon={config.emptyIcon} title={config.emptyTitle} description={config.emptyDescription} />
+            config ? <EmptyState icon={config.emptyIcon} title={config.emptyTitle} description={config.emptyDescription} /> : null
           )
         ) : myBlockedData?.length ? (
           <>
@@ -177,7 +177,7 @@ export default function MyPagePanel({
                 </li>
               ))}
             </ul>
-            {hasNextPage && <LoadMoreButton onClick={() => fetchNextPage()} isLoading={isFetchingNextPage} />}
+            {hasNextPage ? <LoadMoreButton onClick={() => fetchNextPage()} isLoading={isFetchingNextPage} /> : null}
           </>
         ) : null}
       </div>

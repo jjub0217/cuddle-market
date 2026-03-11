@@ -11,7 +11,7 @@ export default function RequiredLabel({ htmlFor, children, labelClass, required 
   return (
     <label htmlFor={htmlFor} className={cn('text-gray-900', labelClass)}>
       <span>{children}</span>
-      {required && <span className="text-danger-500">*</span>}
+      {required ? <span className="text-danger-500">*</span> : null}
     </label>
   )
 }

@@ -132,11 +132,11 @@ export function SocialSignUpForm() {
           <BirthDateField control={control} />
         </div>
         <AnimatePresence>
-          {signupNotification && (
+          {signupNotification ? (
             <InlineNotification type={signupNotification.type} onClose={() => setSignupNotification(null)}>
               {signupNotification.message}
             </InlineNotification>
-          )}
+          ) : null}
         </AnimatePresence>
         <Button size="md" className="bg-primary-300 w-full cursor-pointer text-white" type="submit" disabled={isSubmitting}>
           {isSubmitting ? '가입 중...' : '회원가입'}

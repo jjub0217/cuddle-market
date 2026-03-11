@@ -25,8 +25,8 @@ export default function Button({ children, icon: Icon, iconSrc, variant, size = 
       className={cn(buttonVariants({ variant, size, iconPosition, disabled: disabled || undefined }), className)}
       {...rest}
     >
-      {Icon && <Icon size={iconSize} {...iconProps} />}
-      {iconSrc && <Image src={iconSrc} alt="" width={iconSize ?? 16} height={iconSize ?? 16} className="object-contain" />}
+      {Icon ? <Icon size={iconSize} {...iconProps} /> : null}
+      {iconSrc ? <Image src={iconSrc} alt="" width={iconSize ?? 16} height={iconSize ?? 16} className="object-contain" /> : null}
       {children}
     </button>
   )

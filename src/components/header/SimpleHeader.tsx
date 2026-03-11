@@ -18,7 +18,7 @@ export default function SimpleHeader({ title, description, href, layoutClassname
       ) : (
         <span className="heading-h2">{title}</span>
       )}
-      {description && <p>{description}</p>}
+      {description ? <p>{description}</p> : null}
     </div>
   )
 }

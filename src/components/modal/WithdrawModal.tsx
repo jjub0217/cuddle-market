@@ -71,11 +71,11 @@ export default function WithdrawModal({ isOpen, onConfirm, onCancel, error, onCl
     >
       <ModalTitle heading="회원탈퇴" description="정말로 탈퇴하시겠습니까?" />
       <AnimatePresence>
-        {error && (
+        {error ? (
           <InlineNotification type="error" onClose={() => onClearError?.()}>
             {error}
           </InlineNotification>
-        )}
+        ) : null}
       </AnimatePresence>
       <AlertBox alertList={WITH_DRAW_ALERT_LIST} />
 
@@ -118,7 +118,7 @@ export default function WithdrawModal({ isOpen, onConfirm, onCancel, error, onCl
                 })}
               />
               <p className="text-sm font-semibold text-gray-400">{titleLength}/500자</p>
-              {errors.detailReason && <p className="text-danger-500 text-xs font-semibold"> {errors.detailReason.message}</p>}
+              {errors.detailReason ? <p className="text-danger-500 text-xs font-semibold"> {errors.detailReason.message}</p> : null}
             </div>
           </div>
 

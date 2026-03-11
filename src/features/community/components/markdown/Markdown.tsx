@@ -4,7 +4,12 @@ import { useRef, useState, type DragEvent, type ClipboardEvent, type ChangeEvent
 import { useMdCommands } from './useMdCommands'
 import { useMdImageUpload } from './useMdImageUpload'
 import MdToolbar from './MdToolbar'
-import MdPreview from './MdPreview'
+import dynamic from 'next/dynamic'
+
+const MdPreview = dynamic(() => import('./MdPreview'), {
+  ssr: false,
+  loading: () => <div className="p-3 text-sm text-gray-400">로딩 중...</div>,
+})
 import MdFooter from './MdFooter'
 
 interface MarkDownProps {
@@ -118,7 +123,7 @@ export default function Markdown({ value, onChange, placeholder = DEFAULT_PLACEH
         <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
 
         {/* 편집 모드: textarea */}
-        {currentTab === 'edit' && (
+        {currentTab === 'edit' ? (
           <div className="relative">
             <textarea
               ref={textareaRef}
@@ -132,16 +137,16 @@ export default function Markdown({ value, onChange, placeholder = DEFAULT_PLACEH
               className="w-full resize-none bg-white p-3 outline-none"
               disabled={isUploading}
             />
-            {isUploading && (
+            {isUploading ? (
               <div className="absolute inset-0 flex items-center justify-center bg-white/70">
                 <span className="text-sm text-gray-500">이미지 업로드 중...</span>
               </div>
-            )}
+            ) : null}
           </div>
-        )}
+        ) : null}
 
         {/* 미리보기 모드: 렌더링된 마크다운 */}
-        {currentTab === 'preview' && <MdPreview value={value} height={height} />}
+        {currentTab === 'preview' ? <MdPreview value={value} height={height} /> : null}
 
         {/* 푸터: 마크다운 문법 안내 */}
         <MdFooter>

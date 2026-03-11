@@ -159,7 +159,7 @@ export function CommentList({ comments, postId }: CommentListProps) {
           {/* 대댓글 목록 */}
           <div className={`grid transition-all duration-300 ${openRepliesCommentId === comment.id ? 'mt-3.5 grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
             <div className="overflow-hidden">
-              {openRepliesCommentId === comment.id && repliesData?.comments && (
+              {openRepliesCommentId === comment.id && repliesData?.comments ? (
                 <ul className="flex flex-col gap-2 pb-3.5 pl-10">
                   {repliesData.comments.map((reply, index) => (
                     <li key={reply.id}>
@@ -167,17 +167,17 @@ export function CommentList({ comments, postId }: CommentListProps) {
                     </li>
                   ))}
                 </ul>
-              )}
+              ) : null}
             </div>
           </div>
-          {replyingToId === comment.id && (
+          {replyingToId === comment.id ? (
             <div className="pb-3.5 pl-10">
               <AnimatePresence>
-                {replyPostError && (
+                {replyPostError ? (
                   <InlineNotification type="error" onClose={() => setReplyPostError(null)}>
                     {replyPostError}
                   </InlineNotification>
-                )}
+                ) : null}
               </AnimatePresence>
               <CommentForm
                 id={String(comment.id)}
@@ -188,7 +188,7 @@ export function CommentList({ comments, postId }: CommentListProps) {
                 onCancel={() => handleOpenReplyForm(comment.id)}
               />
             </div>
-          )}
+          ) : null}
         </li>
       ))}
     </ul>

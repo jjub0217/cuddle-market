@@ -139,39 +139,39 @@ export default function GraphQLDemoPage() {
       {/* Profile Section */}
       <section className="bg-white rounded-lg border border-gray-200 p-6">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">User Profile</h2>
-        {profileLoading && (
+        {profileLoading ? (
           <p className="text-gray-500 text-sm">Loading profile...</p>
-        )}
-        {profileError && (
+        ) : null}
+        {profileError ? (
           <p className="text-red-500 text-sm">
             Error loading profile: {profileError.message}
           </p>
-        )}
-        {profileData?.userProfile && (
+        ) : null}
+        {profileData?.userProfile ? (
           <div className="flex items-start gap-4">
-            {profileData.userProfile.profileImageUrl && (
+            {profileData.userProfile.profileImageUrl ? (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img
                 src={profileData.userProfile.profileImageUrl}
                 alt={profileData.userProfile.nickname}
                 className="w-16 h-16 rounded-full object-cover"
               />
-            )}
+            ) : null}
             <div className="space-y-1">
               <p className="font-semibold text-gray-900">
                 {profileData.userProfile.nickname}
               </p>
-              {profileData.userProfile.introduction && (
+              {profileData.userProfile.introduction ? (
                 <p className="text-gray-600 text-sm">
                   {profileData.userProfile.introduction}
                 </p>
-              )}
+              ) : null}
               <p className="text-yellow-500 text-sm font-medium">
                 Rating: {profileData.userProfile.rating}
               </p>
             </div>
           </div>
-        )}
+        ) : null}
       </section>
 
       {/* Community Posts Section */}
@@ -190,15 +190,15 @@ export default function GraphQLDemoPage() {
           />
         </div>
 
-        {postsLoading && (
+        {postsLoading ? (
           <p className="text-gray-500 text-sm">Loading posts...</p>
-        )}
-        {postsError && (
+        ) : null}
+        {postsError ? (
           <p className="text-red-500 text-sm">
             Error loading posts: {postsError.message}
           </p>
-        )}
-        {postsData?.communityPosts && (
+        ) : null}
+        {postsData?.communityPosts ? (
           <>
             <p className="text-gray-500 text-xs mb-3">
               Total: {postsData.communityPosts.total} posts
@@ -227,21 +227,21 @@ export default function GraphQLDemoPage() {
               ))}
             </ul>
           </>
-        )}
+        ) : null}
       </section>
 
       {/* Products Section */}
       <section className="bg-white rounded-lg border border-gray-200 p-6">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">Products</h2>
-        {productsLoading && (
+        {productsLoading ? (
           <p className="text-gray-500 text-sm">Loading products...</p>
-        )}
-        {productsError && (
+        ) : null}
+        {productsError ? (
           <p className="text-red-500 text-sm">
             Error loading products: {productsError.message}
           </p>
-        )}
-        {productsData?.products && (
+        ) : null}
+        {productsData?.products ? (
           <>
             <p className="text-gray-500 text-xs mb-3">
               Total: {productsData.products.totalElements} products
@@ -275,7 +275,7 @@ export default function GraphQLDemoPage() {
               ))}
             </ul>
           </>
-        )}
+        ) : null}
       </section>
     </div>
   );

@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import Link from 'next/link'
 import { ROUTES } from '@/constants/routes'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
@@ -8,7 +9,7 @@ import IconButton from '@/components/commons/button/IconButton'
 
 interface AuthMenuProps {
   isSideOpen: boolean
-  setIsSideOpen: (isSideOpen: boolean) => void
+  setIsSideOpen: React.Dispatch<React.SetStateAction<boolean>>
   hideMenuButton?: boolean
 }
 
@@ -21,7 +22,7 @@ export default function AuthMenu({ isSideOpen, setIsSideOpen, hideMenuButton = f
       </Link>
     </div>
   ) : hideMenuButton ? null : (
-    <IconButton aria-label="메뉴" onClick={() => setIsSideOpen(!isSideOpen)}>
+    <IconButton aria-label="메뉴" onClick={() => setIsSideOpen((prev) => !prev)}>
       <Menu className="text-white" />
     </IconButton>
   )

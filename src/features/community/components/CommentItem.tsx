@@ -40,7 +40,7 @@ export function CommentItem({
   const [isReplyDeleteModalOpen, setIsReplyDeleteModalOpen] = useState(false)
 
   const handleMoreToggle = () => {
-    setIsMoreMenuOpen(!isMoreMenuOpen)
+    setIsMoreMenuOpen((prev) => !prev)
   }
 
   const modalRef = useRef<HTMLButtonElement>(null)
@@ -68,9 +68,9 @@ export function CommentItem({
           <div className="flex items-center gap-3.5">
             <div className="flex items-center gap-1.5">
               <p>{comment.authorNickname}</p>
-              {Number(comment.authorId) === user?.id && (
+              {Number(comment.authorId) === user?.id ? (
                 <p className="bg-primary-200 rounded-full px-2.5 py-1 text-xs font-semibold text-white">작성자</p>
-              )}
+              ) : null}
             </div>
             <p className="text-sm text-gray-400">{formatDate(comment.createdAt)}</p>
           </div>
@@ -81,20 +81,20 @@ export function CommentItem({
               답글
             </button>
             {/* 답글 버튼 (대댓글이 아니고, hasChildren이 있을 때만) */}
-            {!isReply && hasChildren && (
+            {!isReply && hasChildren ? (
               <button className="cursor-pointer self-start text-sm text-blue-500 hover:underline" type="button" onClick={onToggleReplies}>
                 {isRepliesOpen ? '답글 접기' : `답글 ${childrenCount}개`}
               </button>
-            )}
+            ) : null}
           </div>
         </div>
 
-        {isMyComment && (
+        {isMyComment ? (
           <div className="relative ml-auto">
             <IconButton aria-label="더보기" className="" size="sm" onClick={handleMoreToggle}>
               <EllipsisVertical size={16} className="text-gray-500" />
             </IconButton>
-            {isMoreMenuOpen && (
+            {isMoreMenuOpen ? (
               <button
                 className="absolute top-7 right-0 cursor-pointer rounded border border-gray-200 bg-white px-3 py-1.5 text-sm whitespace-nowrap shadow-md hover:bg-gray-50"
                 type="button"
@@ -103,9 +103,9 @@ export function CommentItem({
               >
                 삭제
               </button>
-            )}
+            ) : null}
           </div>
-        )}
+        ) : null}
       </div>
       <DeleteReplyModal
         isOpen={isReplyDeleteModalOpen}

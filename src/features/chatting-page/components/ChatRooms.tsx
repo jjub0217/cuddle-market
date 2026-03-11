@@ -68,14 +68,14 @@ export function ChatRooms({ rooms, handleSelectRoom, selectedRoomId, hasNextPage
                         </p>
                       </div>
                       <div className="flex items-center gap-1">
-                        {roomData.lastMessageTime && (
+                        {roomData.lastMessageTime ? (
                           <span className="text-sm leading-none font-medium text-gray-500">{getTimeAgo(roomData.lastMessageTime)}</span>
-                        )}
-                        {roomData.unreadCount >= 1 && (
+                        ) : null}
+                        {roomData.unreadCount >= 1 ? (
                           <p className="bg-danger-500 tex-sm flex size-5 items-center justify-center rounded-full text-white">
                             {roomData.unreadCount}
                           </p>
-                        )}
+                        ) : null}
                       </div>
                     </div>
                     <div className="border-primary-100 bg-primary-50 flex items-center gap-2 overflow-hidden rounded-lg border px-2.5 py-3">
@@ -92,11 +92,11 @@ export function ChatRooms({ rooms, handleSelectRoom, selectedRoomId, hasNextPage
             })}
         </ul>
         <div ref={targetRef} className="h-10" aria-hidden="true" />
-        {isFetchingNextPage && (
+        {isFetchingNextPage ? (
           <div className="flex items-center justify-center py-8">
             <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" aria-label="채팅방 로딩 중" role="status" />
           </div>
-        )}
+        ) : null}
       </div>
     </section>
   )

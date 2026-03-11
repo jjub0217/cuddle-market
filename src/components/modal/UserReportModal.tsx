@@ -30,7 +30,7 @@ export default function UserReportModal({ isOpen, userNickname, userId, onCancel
       setUserReportError(
         <div className="flex flex-col gap-0.5">
           <p className="text-base font-semibold">{isDuplicate ? '이미 신고한 사용자입니다.' : '사용자 신고에 실패했습니다.'}</p>
-          {!isDuplicate && <p>잠시 후 다시 시도해주세요.</p>}
+          {!isDuplicate ? <p>잠시 후 다시 시도해주세요.</p> : null}
         </div>,
       )
     }

@@ -30,7 +30,7 @@ export function ProductDescriptionFiled({
         )}
         {...register('description', productPostValidationRules.description)}
       />
-      {errors.description && <p className="text-xs font-semibold text-red-500">{errors.description.message}</p>}
+      {errors.description ? <p className="text-xs font-semibold text-red-500">{errors.description.message}</p> : null}
     </div>
   )
 }

@@ -135,7 +135,7 @@ export default function MyList({ id, title, price, mainImageUrl, tradeStatus, vi
   const handleMoreToggle = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    setIsMoreMenuOpen(!isMoreMenuOpen)
+    setIsMoreMenuOpen((prev) => !prev)
   }
   return (
     <li id={id.toString()} className="w-full pt-5 pb-5 md:p-0">
@@ -154,21 +154,21 @@ export default function MyList({ id, title, price, mainImageUrl, tradeStatus, vi
             onError={handleImageError}
             unoptimized={imgError || usePlaceholder || !mainImageUrl}
           />
-          {!isMd && trade_status && <Badge className={cn('absolute top-2 left-2 bg-[#48BB78] text-white', productTradeColor)}>{trade_status}</Badge>}
+          {!isMd && trade_status ? <Badge className={cn('absolute top-2 left-2 bg-[#48BB78] text-white', productTradeColor)}>{trade_status}</Badge> : null}
         </div>
         <div className="flex flex-1 items-start">
           <div className="flex h-fit flex-1 flex-col items-start gap-2">
-            {isMd && trade_status && <Badge className={cn('bg-[#48BB78] text-white', productTradeColor)}>{trade_status}</Badge>}
+            {isMd && trade_status ? <Badge className={cn('bg-[#48BB78] text-white', productTradeColor)}>{trade_status}</Badge> : null}
             <div className="flex w-full items-start justify-between">
               <div className="flex w-full flex-col gap-1">
-                {isMd && <h3 className="heading-h5 line-clamp-2 w-96 truncate">{title}</h3>}
-                {!isMd && (
+                {isMd ? <h3 className="heading-h5 line-clamp-2 w-96 truncate">{title}</h3> : null}
+                {!isMd ? (
                   <div className="relative flex w-full items-start justify-between gap-2">
                     <h3 className="line-clamp-2 w-full text-[17px] font-bold">{title}</h3>
                     <IconButton size="sm" onClick={handleMoreToggle} aria-label="상품 옵션 메뉴 열기">
                       <EllipsisVertical size={16} className="text-gray-500" />
                     </IconButton>
-                    {isMoreMenuOpen && (
+                    {isMoreMenuOpen ? (
                       <div
                         className={cn(
                           'absolute top-7 right-0 flex w-fit flex-col items-end rounded-lg border border-gray-300 bg-white',
@@ -176,7 +176,7 @@ export default function MyList({ id, title, price, mainImageUrl, tradeStatus, vi
                         )}
                         ref={modalRef}
                       >
-                        {isMyProductTab && !isCompleted && (
+                        {isMyProductTab && !isCompleted ? (
                           <Button
                             size="sm"
                             className="hover:bg-primary-300 w-fit cursor-pointer gap-3 rounded-none border-b border-gray-300 hover:font-bold hover:text-white"
@@ -185,7 +185,7 @@ export default function MyList({ id, title, price, mainImageUrl, tradeStatus, vi
                             <SquarePen size={16} />
                             <span>수정</span>
                           </Button>
-                        )}
+                        ) : null}
                         <Button
                           size="sm"
                           className="text-danger-500 hover:bg-primary-300 w-fit cursor-pointer gap-3 rounded-none hover:font-bold hover:text-white"
@@ -197,12 +197,12 @@ export default function MyList({ id, title, price, mainImageUrl, tradeStatus, vi
                           <span>삭제</span>
                         </Button>
                       </div>
-                    )}
+                    ) : null}
                   </div>
-                )}
+                ) : null}
                 <span className="font-bold text-gray-500 md:font-medium">{formatPrice(price)} 원</span>
-                {!isMd && !isCompleted && isSalesTab && <StatusDropdown className="w-full" value={currentTradeStatusKo} onChange={handleProductType} />}
-                {!isMd && !isCompleted && isPurchasesTab && (
+                {!isMd && !isCompleted && isSalesTab ? <StatusDropdown className="w-full" value={currentTradeStatusKo} onChange={handleProductType} /> : null}
+                {!isMd && !isCompleted && isPurchasesTab ? (
                   <Button
                     size="sm"
                     className="h-fit w-32 flex-1 cursor-pointer border border-gray-300 hover:bg-gray-300"
@@ -210,14 +210,14 @@ export default function MyList({ id, title, price, mainImageUrl, tradeStatus, vi
                   >
                     구매완료
                   </Button>
-                )}
+                ) : null}
               </div>
             </div>
             <ProductMetaItem icon={Eye} label={`조회 ${viewCount}`} className="text-sm text-gray-400" />
           </div>
           <div className="flex flex-col items-end gap-2">
-            {isMd && !isCompleted && isSalesTab && <StatusDropdown className="w-32" value={currentTradeStatusKo} onChange={handleProductType} />}
-            {isMd && !isCompleted && isPurchasesTab && (
+            {isMd && !isCompleted && isSalesTab ? <StatusDropdown className="w-32" value={currentTradeStatusKo} onChange={handleProductType} /> : null}
+            {isMd && !isCompleted && isPurchasesTab ? (
               <Button
                 size="sm"
                 className="h-fit w-32 flex-1 cursor-pointer border border-gray-300 hover:bg-gray-300"
@@ -225,10 +225,10 @@ export default function MyList({ id, title, price, mainImageUrl, tradeStatus, vi
               >
                 구매완료
               </Button>
-            )}
-            {isMd && (
+            ) : null}
+            {isMd ? (
               <div className="flex w-full min-w-32 gap-1">
-                {isMyProductTab && !isCompleted && (
+                {isMyProductTab && !isCompleted ? (
                   <Button
                     size="sm"
                     className="hover:bg-primary-300 flex-1 cursor-pointer border border-gray-300 hover:font-bold hover:text-white"
@@ -236,7 +236,7 @@ export default function MyList({ id, title, price, mainImageUrl, tradeStatus, vi
                   >
                     수정
                   </Button>
-                )}
+                ) : null}
                 <Button
                   size="sm"
                   className="hover:bg-primary-300 flex-1 cursor-pointer border border-gray-300 hover:font-bold hover:text-white"
@@ -245,7 +245,7 @@ export default function MyList({ id, title, price, mainImageUrl, tradeStatus, vi
                   {isWishlistTab ? '찜 취소' : '삭제'}
                 </Button>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
       </Link>

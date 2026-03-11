@@ -88,7 +88,7 @@ export function ProductStateFilter({
               )}
             >
               <span>{item.title}</span>
-              {subTitle && <span className="text-xs font-medium">{item.subtitle}</span>}
+              {subTitle ? <span className="text-xs font-medium">{item.subtitle}</span> : null}
             </label>
           </div>
         ))}

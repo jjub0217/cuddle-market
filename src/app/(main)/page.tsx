@@ -83,7 +83,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      {firstImageUrl && (
+      {firstImageUrl ? (
         <link
           rel="preload"
           as="image"
@@ -91,7 +91,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           imageSizes={IMAGE_SIZES.productThumbnail}
           fetchPriority="high"
         />
-      )}
+      ) : null}
       <HydrationBoundary state={dehydrate(queryClient)}>
         <Suspense fallback={<StaticHomeFallback products={products} totalElements={totalElements} />}>
           <FilterNavigationProvider>

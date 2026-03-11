@@ -7,7 +7,7 @@ import { ROUTES } from '@/constants/routes'
 import { useUserStore } from '@/store/userStore'
 import ProfileAvatar from '@/components/commons/ProfileAvatar'
 import Link from 'next/link'
-import { useRef } from 'react'
+import React, { useRef } from 'react'
 import { useOutsideClick } from '@/hooks/useOutsideClick'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import IconButton from '@/components/commons/button/IconButton'
@@ -15,11 +15,11 @@ import { useLogout } from '@/hooks/useLogout'
 
 interface UserMenuProps {
   isNotificationOpen: boolean
-  setIsNotificationOpen: (isNotificationOpen: boolean) => void
+  setIsNotificationOpen: React.Dispatch<React.SetStateAction<boolean>>
   isUserMenuOpen: boolean
-  setIsUserMenuOpen: (isUserMenuOpen: boolean) => void
+  setIsUserMenuOpen: React.Dispatch<React.SetStateAction<boolean>>
   isSideOpen: boolean
-  setIsSideOpen: (isSideOpen: boolean) => void
+  setIsSideOpen: React.Dispatch<React.SetStateAction<boolean>>
   userNickname?: string
 }
 
@@ -41,7 +41,7 @@ export default function UserMenu({
     if (isNotificationOpen) {
       setIsNotificationOpen(false)
     }
-    setIsUserMenuOpen(!isUserMenuOpen)
+    setIsUserMenuOpen((prev) => !prev)
   }
 
   // 로그아웃 버튼 클릭 시 확인 모달 열기
@@ -53,7 +53,7 @@ export default function UserMenu({
   return isMd ? (
     <div className="relative flex cursor-pointer items-center gap-2" onClick={handleAvatarToggle}>
       <ProfileAvatar imageUrl={user?.profileImageUrl} nickname={user?.nickname || ''} size="sm" />
-      {isUserMenuOpen && (
+      {isUserMenuOpen ? (
         <div
           className={cn(
             'absolute top-12 right-0 flex w-32 flex-col divide-y divide-gray-100 rounded-lg border border-gray-200 bg-white shadow-lg md:w-48',
@@ -76,10 +76,10 @@ export default function UserMenu({
             로그아웃
           </button>
         </div>
-      )}
+      ) : null}
     </div>
   ) : (
-    <IconButton aria-label="메뉴" onClick={() => setIsSideOpen(!isSideOpen)}>
+    <IconButton aria-label="메뉴" onClick={() => setIsSideOpen((prev) => !prev)}>
       <Menu className="text-white" />
     </IconButton>
   )

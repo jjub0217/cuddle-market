@@ -205,12 +205,12 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
     <form className="flex w-full flex-col gap-6 rounded-xl border border-gray-200 bg-white p-5 md:p-7" onSubmit={handleSubmit(onSubmit)}>
       <fieldset className="flex flex-col gap-8">
         <legend className="sr-only">프로필 정보 수정 폼</legend>
-        {isMd && (
+        {isMd ? (
           <div className="flex flex-col gap-2">
             <h2 className="heading-h3">기본 정보</h2>
             <p className="text-gray-500">프로필 이미지, 닉네임, 거주지를 수정할 수 있습니다</p>
           </div>
-        )}
+        ) : null}
 
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-10">
@@ -243,7 +243,7 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
                   <Camera className="" size={20} />
                 </button>
               </div>
-              {errors.profileImageUrl && <p className="text-danger-500 text-xs font-semibold">{errors.profileImageUrl.message}</p>}
+              {errors.profileImageUrl ? <p className="text-danger-500 text-xs font-semibold">{errors.profileImageUrl.message}</p> : null}
               <p className="text-sm">프로필 사진을 변경하려면 카메라 아이콘을 클릭하세요</p>
             </div>
 
@@ -324,7 +324,7 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
                       {...register('introduction', profileValidationRules.introduction)}
                     />
                     <p className="text-sm font-semibold text-gray-400">{titleLength}/1000자</p>
-                    {errors.introduction && <p className="text-danger-500 text-xs font-semibold"> {errors.introduction.message}</p>}
+                    {errors.introduction ? <p className="text-danger-500 text-xs font-semibold"> {errors.introduction.message}</p> : null}
                   </div>
                 </div>
               </div>
@@ -334,21 +334,21 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
               본인 인증 정보의 변경이 필요한 경우, 고객센터 1:1 문의를 통해 문의주세요.
             </p>
             <AnimatePresence>
-              {updateError && (
+              {updateError ? (
                 <InlineNotification type="error" onClose={() => setUpdateError(null)}>
                   {updateError}
                 </InlineNotification>
-              )}
-              {updateSuccess && (
+              ) : null}
+              {updateSuccess ? (
                 <InlineNotification type="success" onClose={() => setUpdateSuccess(null)}>
                   {updateSuccess}
                 </InlineNotification>
-              )}
-              {updateWarning && (
+              ) : null}
+              {updateWarning ? (
                 <InlineNotification type="warning" onClose={() => setUpdateWarning(null)}>
                   {updateWarning}
                 </InlineNotification>
-              )}
+              ) : null}
             </AnimatePresence>
           </div>
           <Button size="md" className="bg-primary-300 w-full cursor-pointer text-white" type="submit">

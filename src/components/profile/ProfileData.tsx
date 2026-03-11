@@ -103,10 +103,10 @@ export default function ProfileData({
           </div>
           <p className="w-full text-sm font-semibold text-gray-500">{data?.introduction || '소개글을 작성해주세요'}</p>
           {/* 데스크탑 내 정보 */}
-          {isMyProfile && (
+          {isMyProfile ? (
             <>
               <div className="flex flex-col gap-3.5">
-                {isMd && (
+                {isMd ? (
                   <div className="flex flex-col gap-2.5">
                     <ProductMetaItem
                       icon={MapPin}
@@ -117,8 +117,8 @@ export default function ProfileData({
                     <ProductMetaItem icon={Calendar} iconSize={17} label={`가입일: ${formattedJoinDate}`} className="gap-2" />
                     <ProductMetaItem icon={Route} iconSize={17} label={`가입 경로: ${provider}`} className="gap-2" />
                   </div>
-                )}
-                {!isProfileEditPage && (
+                ) : null}
+                {!isProfileEditPage ? (
                   <Link
                     href={ROUTES.PROFILE_UPDATE}
                     className="bg-primary-200 flex items-center justify-center gap-2.5 rounded-lg px-3 py-2 text-white transition-all"
@@ -126,7 +126,7 @@ export default function ProfileData({
                     <Settings size={19} />
                     <span className="lg:text-sm lg:font-bold">내 정보 수정</span>
                   </Link>
-                )}
+                ) : null}
               </div>
               <button
                 type="button"
@@ -136,12 +136,12 @@ export default function ProfileData({
                 회원탈퇴
               </button>
             </>
-          )}
+          ) : null}
 
           {/* 다른 유저 프로필 */}
-          {!isMyProfile && (
+          {!isMyProfile ? (
             <>
-              {data?.isBlocked && (
+              {data?.isBlocked ? (
                 <div className="flex flex-col gap-3.5">
                   <div className="bg-danger-100/30 border-danger-100 text-danger-800 flex items-center justify-center gap-2 rounded-lg border p-2.5 font-medium">
                     <ShieldAlert />
@@ -155,7 +155,7 @@ export default function ProfileData({
                     차단 해제하기
                   </Button>
                 </div>
-              )}
+              ) : null}
               <div className="flex items-center justify-between">
                 {data?.isReported ? (
                   <div className="flex w-full items-center justify-start gap-2 px-3 py-1.5 text-sm text-gray-500">
@@ -173,7 +173,7 @@ export default function ProfileData({
                   </button>
                 )}
 
-                {!data?.isBlocked && (
+                {!data?.isBlocked ? (
                   <button
                     type="button"
                     className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-transparent px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-100 md:py-1.5"
@@ -182,10 +182,10 @@ export default function ProfileData({
                     <Ban size={16} />
                     차단하기
                   </button>
-                )}
+                ) : null}
               </div>
             </>
-          )}
+          ) : null}
         </div>
       </div>
     </aside>
