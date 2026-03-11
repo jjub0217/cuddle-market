@@ -80,11 +80,11 @@ export default function ReportModalBase({ isOpen, heading, description, reasons,
     >
       <ModalTitle heading={heading} description={description} />
       <AnimatePresence>
-        {error && (
+        {error ? (
           <InlineNotification type="error" onClose={() => onClearError?.()}>
             {error}
           </InlineNotification>
-        )}
+        ) : null}
       </AnimatePresence>
       <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col gap-4">
         <div className="flex flex-col gap-6 pt-2">
@@ -121,11 +121,11 @@ export default function ReportModalBase({ isOpen, heading, description, reasons,
                 })}
               />
               <p className="text-sm font-semibold text-gray-400">{titleLength}/300자</p>
-              {errors.detailReason && <p className="text-danger-500 text-xs font-semibold"> {errors.detailReason.message}</p>}
+              {errors.detailReason ? <p className="text-danger-500 text-xs font-semibold"> {errors.detailReason.message}</p> : null}
             </div>
           </div>
 
-          {isOpen && (
+          {isOpen ? (
             <div className="flex w-full flex-col gap-3">
               <ImageUploadField
                 setValue={setValue}
@@ -140,7 +140,7 @@ export default function ReportModalBase({ isOpen, heading, description, reasons,
                 headingClassName="text-gray-900 font-semibold"
               />
             </div>
-          )}
+          ) : null}
         </div>
 
         <div className="flex justify-end gap-3">

@@ -231,7 +231,7 @@ export default async function HtmlSitemapPage() {
         </ul>
       </section>
 
-      {products.length > 0 && (
+      {products.length > 0 ? (
         <section className="mb-8">
           <h2 className="mb-3 text-lg font-semibold">중고거래 상품 ({products.length})</h2>
           <ul className="space-y-1 pl-4">
@@ -244,9 +244,9 @@ export default async function HtmlSitemapPage() {
             ))}
           </ul>
         </section>
-      )}
+      ) : null}
 
-      {questionPosts.length > 0 && (
+      {questionPosts.length > 0 ? (
         <section className="mb-8">
           <h2 className="mb-3 text-lg font-semibold">질문 게시글 ({questionPosts.length})</h2>
           <ul className="space-y-1 pl-4">
@@ -259,9 +259,9 @@ export default async function HtmlSitemapPage() {
             ))}
           </ul>
         </section>
-      )}
+      ) : null}
 
-      {infoPosts.length > 0 && (
+      {infoPosts.length > 0 ? (
         <section className="mb-8">
           <h2 className="mb-3 text-lg font-semibold">정보 게시글 ({infoPosts.length})</h2>
           <ul className="space-y-1 pl-4">
@@ -274,7 +274,7 @@ export default async function HtmlSitemapPage() {
             ))}
           </ul>
         </section>
-      )}
+      ) : null}
     </div>
   )
 }

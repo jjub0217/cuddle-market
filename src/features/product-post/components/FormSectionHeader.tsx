@@ -8,7 +8,7 @@ export default function FormSectionHeader({ heading, description, headingClassNa
   return (
     <div className="flex flex-col gap-1">
       <h2 className={headingClassName ?? 'heading-h3'}>{heading}</h2>
-      {description && <p>{description}</p>}
+      {description ? <p>{description}</p> : null}
     </div>
   )
 }

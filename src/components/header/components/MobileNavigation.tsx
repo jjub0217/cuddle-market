@@ -108,7 +108,7 @@ export default function MobileNavigation({ isOpen, onClose }: MobileNavigationPr
           <div>
             <button
               type="button"
-              onClick={() => setIsCommunityOpen(!isCommunityOpen)}
+              onClick={() => setIsCommunityOpen((prev) => !prev)}
               className="flex w-full cursor-pointer items-center justify-between py-2"
             >
               <span className="font-bold">커뮤니티</span>
@@ -130,7 +130,7 @@ export default function MobileNavigation({ isOpen, onClose }: MobileNavigationPr
             </div>
           </div>
           <div>
-            <button type="button" onClick={() => setIsCustomerOpen(!isCustomerOpen)} className="flex w-full items-center justify-between py-2">
+            <button type="button" onClick={() => setIsCustomerOpen((prev) => !prev)} className="flex w-full items-center justify-between py-2">
               <span className="font-bold">고객센터</span>
               <ChevronDown className={cn('h-5 w-5 transition-transform', isCustomerOpen && 'rotate-180')} />
             </button>

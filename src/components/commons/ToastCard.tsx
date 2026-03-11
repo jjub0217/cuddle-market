@@ -36,10 +36,10 @@ export default function ToastCard({ type, title, children, durationMs, showBar, 
           </div>
 
           <div className="min-w-0 flex-1">
-            {title && <strong className={cn('truncate text-[15px] font-semibold', TOAST_COLORS[type].text)}>{title}</strong>}
-            {children && (
+            {title ? <strong className={cn('truncate text-[15px] font-semibold', TOAST_COLORS[type].text)}>{title}</strong> : null}
+            {children ? (
               <div className={cn('mt-0.5 text-sm leading-5 wrap-break-word', TOAST_COLORS[type].text)}>{children}</div>
-            )}
+            ) : null}
           </div>
 
           <button
@@ -56,14 +56,14 @@ export default function ToastCard({ type, title, children, durationMs, showBar, 
           </button>
         </div>
 
-        {showBar && (
+        {showBar ? (
           <ToastProgress
             trackClass={TOAST_COLORS[type].bar}
             fillClass={TOAST_COLORS[type].text}
             durationMs={durationMs}
             onEnd={onClose}
           />
-        )}
+        ) : null}
       </div>
     </motion.div>
   )

@@ -43,11 +43,11 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
     <div className="flex flex-col gap-2.5 bg-white p-3.5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          {onBack && (
+          {onBack ? (
             <button onClick={onBack} className="p-1 md:hidden">
               <ArrowLeft size={24} />
             </button>
-          )}
+          ) : null}
           <SellerAvatar profileImageUrl={data?.opponentProfileImageUrl} nickname={data?.opponentNickname} />
           <p>{data?.opponentNickname}</p>
         </div>

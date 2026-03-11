@@ -85,7 +85,7 @@ export default function CascadingSelectField<T extends FieldValues>({
                     buttonClassName={buttonClassName}
                     optionClassName={optionClassName}
                   />
-                  {fieldState.error && <p className="text-xs font-semibold text-red-500">{fieldState.error.message}</p>}
+                  {fieldState.error ? <p className="text-xs font-semibold text-red-500">{fieldState.error.message}</p> : null}
                 </div>
 
                 <Controller
@@ -103,7 +103,7 @@ export default function CascadingSelectField<T extends FieldValues>({
                         buttonClassName={buttonClassName}
                         optionClassName={optionClassName}
                       />
-                      {secondaryFieldState.error && <p className="text-xs font-semibold text-red-500">{secondaryFieldState.error.message}</p>}
+                      {secondaryFieldState.error ? <p className="text-xs font-semibold text-red-500">{secondaryFieldState.error.message}</p> : null}
                     </div>
                   )}
                 />

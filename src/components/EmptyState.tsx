@@ -17,7 +17,7 @@ export default function EmptyState({ icon: Icon, title, description, className =
       </div>
       <div className="flex flex-col items-center gap-2">
         <p className="heading-h4">{title}</p>
-        {description && <p className="text-gray-500">{description}</p>}
+        {description ? <p className="text-gray-500">{description}</p> : null}
       </div>
     </div>
   )

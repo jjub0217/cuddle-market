@@ -299,13 +299,13 @@ function MyPage() {
           <ProfileData setIsWithdrawModalOpen={setIsWithdrawModalOpen} data={myData!} isMyProfile />
           <section className="relative flex flex-1 flex-col gap-3.5 md:gap-7">
             <AnimatePresence>
-              {unblockError && (
+              {unblockError ? (
                 <div className="absolute top-11 left-1/2 z-50 w-11/12 -translate-x-1/2 md:w-auto md:pt-8">
                   <InlineNotification type="error" onClose={() => setUnblockError(null)}>
                     {unblockError}
                   </InlineNotification>
                 </div>
-              )}
+              ) : null}
             </AnimatePresence>
             <Tabs
               tabs={MY_PAGE_TABS}

@@ -107,7 +107,7 @@ export default function Header() {
           <div className="flex h-12 items-center justify-between gap-4">
             <nav className="flex items-center gap-8" aria-label="주 메뉴">
               <Logo />
-              {isXl && (
+              {isXl ? (
                 <>
                   <Link
                     href={ROUTES.HOME}
@@ -122,24 +122,24 @@ export default function Header() {
                     커뮤니티
                   </Link>
                 </>
-              )}
+              ) : null}
             </nav>
             <div className="flex items-center gap-1 xl:gap-8">
-              {!hideSearchBar && (
+              {!hideSearchBar ? (
                 <Suspense>
                   <SearchBar className="hidden md:h-9 xl:block" inputClass="text-sm py-0" />
                 </Suspense>
-              )}
-              {!hideSearchBar && !isXl && (
-                <IconButton aria-label="검색" onClick={() => setIsSearchOpen(!isSearchOpen)}>
+              ) : null}
+              {!hideSearchBar && !isXl ? (
+                <IconButton aria-label="검색" onClick={() => setIsSearchOpen((prev) => !prev)}>
                   <Search className="text-white" />
                 </IconButton>
-              )}
+              ) : null}
               <UserControls isSideOpen={isSideOpen} setIsSideOpen={setIsSideOpen} hideMenuButton={hideMenuButton} />
             </div>
           </div>
           {/* 모바일 검색바 - 아코디언 */}
-          {!hideSearchBar && (
+          {!hideSearchBar ? (
             <div
               className="overflow-hidden transition-all duration-300 xl:hidden"
               style={{
@@ -152,7 +152,7 @@ export default function Header() {
                 <SearchBar className="h-8 xl:hidden" inputClass="py-1 text-sm" />
               </Suspense>
             </div>
-          )}
+          ) : null}
         </div>
       </header>
       <MobileNavigation isOpen={isSideOpen} onClose={() => setIsSideOpen(false)} />

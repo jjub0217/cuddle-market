@@ -25,9 +25,9 @@ export default function MyPageTitle({ heading, count, description, buttonLabel, 
     <div className="flex justify-between">
       <div>
         <h2 className="flex items-center gap-2 text-lg font-bold">{heading}</h2>
-        {description && <p>{count !== undefined ? `총 ${count}${description}` : description}</p>}
+        {description ? <p>{count !== undefined ? `총 ${count}${description}` : description}</p> : null}
       </div>
-      {buttonLabel && (
+      {buttonLabel ? (
         <Button
           size="sm"
           icon={Plus}
@@ -37,7 +37,7 @@ export default function MyPageTitle({ heading, count, description, buttonLabel, 
         >
           {buttonLabel}
         </Button>
-      )}
+      ) : null}
     </div>
   )
 }

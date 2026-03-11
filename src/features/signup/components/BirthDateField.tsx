@@ -105,7 +105,7 @@ export function BirthDateField<T extends FieldValues>({ control }: BirthDateFiel
                   className="focus:border-primary-500 w-full rounded-lg border border-gray-400 px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none md:py-3"
                 />
               </div>
-              {fieldState.error && <p className="text-danger-500 text-xs font-semibold">{fieldState.error.message}</p>}
+              {fieldState.error ? <p className="text-danger-500 text-xs font-semibold">{fieldState.error.message}</p> : null}
             </div>
           )
         }}

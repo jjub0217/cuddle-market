@@ -40,11 +40,11 @@ export default function Input({
         Icon && 'pl-9',
       )}
     >
-      {Icon && (
+      {Icon ? (
         <div className="absolute left-0 flex h-full w-9 items-center justify-center">
           <Icon className="h-4 w-4 text-gray-400" strokeWidth={2} />
         </div>
-      )}
+      ) : null}
       <input
         id={id}
         type={type}
@@ -61,12 +61,12 @@ export default function Input({
         )}
         {...rest}
       />
-      {suffix && <span className="absolute top-1/2 right-3 -translate-y-1/2 text-sm text-gray-500">{suffix}</span>}
-      {value && onClear && (
+      {suffix ? <span className="absolute top-1/2 right-3 -translate-y-1/2 text-sm text-gray-500">{suffix}</span> : null}
+      {value && onClear ? (
         <button onClick={onClear} type="button" aria-label="입력 내용 지우기" className="mr-2 cursor-pointer rounded-full bg-gray-300 p-0.5">
           <X size={14} />
         </button>
-      )}
+      ) : null}
     </div>
   )
 }

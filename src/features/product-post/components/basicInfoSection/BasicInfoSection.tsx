@@ -52,7 +52,7 @@ export default function BasicInfoSection({
               placeholder="카테고리를 선택해주세요"
               buttonClassName="border-gray-400 bg-white border text-gray-900 px-3 py-3 border"
             />
-            {fieldState.error && <p className="text-xs font-semibold text-red-500">{fieldState.error.message}</p>}
+            {fieldState.error ? <p className="text-xs font-semibold text-red-500">{fieldState.error.message}</p> : null}
           </div>
         )}
       />

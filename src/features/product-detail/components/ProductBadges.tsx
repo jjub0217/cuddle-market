@@ -22,7 +22,7 @@ export default function ProductBadges({ tradeStatus, petDetailType, category, pr
 
   return (
     <div className="flex items-center gap-2 md:gap-1">
-      {tradeStatus && <Badge className={cn('px-2.5 py-1.5 text-sm font-semibold text-white', productTradeColor)}>{productTradeName}</Badge>}
+      {tradeStatus ? <Badge className={cn('px-2.5 py-1.5 text-sm font-semibold text-white', productTradeColor)}>{productTradeName}</Badge> : null}
       <Badge className={cn('bg-primary-700 px-2.5 py-1.5 text-sm font-semibold text-white')}>{petTypeName}</Badge>
       <Badge className={cn('border bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900')}>{categoryName}</Badge>
       <Badge className={cn('bg-primary-200 px-2.5 py-1.5 text-sm font-semibold')}>{productStatusName}</Badge>

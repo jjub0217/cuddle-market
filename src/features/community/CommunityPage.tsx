@@ -200,7 +200,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
       <div className="pb-4xl mx-auto max-w-7xl px-0 md:px-4">
         <div className="flex w-full flex-col">
           {/* 모바일: 필터 영역 */}
-          {!isMd && (
+          {!isMd ? (
             <div className={cn(!isFilterCollapsed && `sticky top-16 ${Z_INDEX.DROPDOWN}`)}>
               {/* 접히는 필터 영역 */}
               <div
@@ -257,10 +257,10 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
                 </div>
               </div>
             </div>
-          )}
+          ) : null}
 
           {/* 데스크탑 */}
-          {isMd && (
+          {isMd ? (
             <div className="mb-7 flex w-full flex-col gap-4">
               <div className="flex items-center justify-between">
                 <CommunityTabs
@@ -269,14 +269,14 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
                   onTabChange={handleTabChange}
                   ariaLabel="커뮤니티 타입"
                 />
-                {isLogin() && (
+                {isLogin() ? (
                   <Link
                     href={`${ROUTES.COMMUNITY_POST}?tab=${activeCommunityTypeTab}`}
                     className="bg-primary-300 rounded-lg px-3 py-2 text-white"
                   >
                     글쓰기
                   </Link>
-                )}
+                ) : null}
               </div>
 
               <div className="flex flex-row items-center justify-between gap-5">
@@ -310,7 +310,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
                 </div>
               </div>
             </div>
-          )}
+          ) : null}
           <div
             id={`panel-${COMMUNITY_TABS.find((tab) => tab.id === activeCommunityTypeTab)?.code}`}
             role="tabpanel"
@@ -386,24 +386,25 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
               </ul>
             )}
           </div>
-          {hasNextPage &&
-            (isMd ? (
+          {hasNextPage ? (
+            isMd ? (
               <LoadMoreButton onClick={() => fetchNextPage()} isLoading={isFetchingNextPage} className="border-0" />
             ) : (
               <div className="px-3.5">
                 <LoadMoreButton onClick={() => fetchNextPage()} isLoading={isFetchingNextPage} className="border-0" />
               </div>
-            ))}
+            )
+          ) : null}
         </div>
       </div>
-      {!isMd && isLogin() && (
+      {!isMd && isLogin() ? (
         <Link
           href={`${ROUTES.COMMUNITY_POST}?tab=${activeCommunityTypeTab}`}
           className={`bg-primary-200 fixed right-4 bottom-4 rounded-full px-3 py-3 text-white ${Z_INDEX.FLOATING_BUTTON}`}
         >
           <Plus />
         </Link>
-      )}
+      ) : null}
     </div>
   )
 }

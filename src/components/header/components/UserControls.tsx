@@ -2,7 +2,7 @@
 
 import UserMenu from '../components/user-section/UserMenu'
 import AuthMenu from '../components/user-section/AuthMenu'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useUserStore } from '@/store/userStore'
 import Link from 'next/link'
 import { ROUTES } from '@/constants/routes'
@@ -15,7 +15,7 @@ import { useNotificationSSE } from '@/hooks/useNotifications'
 
 interface UserControlsProps {
   isSideOpen: boolean
-  setIsSideOpen: (isSideOpen: boolean) => void
+  setIsSideOpen: React.Dispatch<React.SetStateAction<boolean>>
   hideMenuButton?: boolean
 }
 
@@ -26,7 +26,7 @@ export default function UserControls({ isSideOpen, setIsSideOpen, hideMenuButton
   const { isLogin } = useUserStore()
   useNotificationSSE()
   const handleBellToggle = () => {
-    setIsNotificationOpen(!isNotificationOpen)
+    setIsNotificationOpen((prev) => !prev)
   }
   const { data: unreadCountData } = useQuery({
     queryKey: ['notifications', 'unreadCount'],
@@ -52,12 +52,12 @@ export default function UserControls({ isSideOpen, setIsSideOpen, hideMenuButton
             <IconButton aria-label="알림" size="lg" className="hover:bg-transparent">
               <Bell size={24} className="stroke-white" />
             </IconButton>
-            {(unreadCountData?.unreadCount ?? 0) > 0 && (
+            {(unreadCountData?.unreadCount ?? 0) > 0 ? (
               <span className="bg-danger-500 absolute top-0 -right-2 flex size-5 items-center justify-center rounded-full p-2 text-sm text-white">
                 {unreadCountData?.unreadCount}
               </span>
-            )}
-            {isNotificationOpen && <NotificationsDropdown isNotificationOpen={isNotificationOpen} setIsNotificationOpen={setIsNotificationOpen} />}
+            ) : null}
+            {isNotificationOpen ? <NotificationsDropdown isNotificationOpen={isNotificationOpen} setIsNotificationOpen={setIsNotificationOpen} /> : null}
           </div>
           <UserMenu
             isNotificationOpen={false}

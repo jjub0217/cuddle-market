@@ -256,17 +256,17 @@ function Home() {
           {/* 무한 스크롤 감지용 요소 */}
           <div ref={targetRef} className="h-10" aria-hidden="true" />
 
-          {isFetchingNextPage && (
+          {isFetchingNextPage ? (
             <div className="flex items-center justify-center py-8">
               <div role="status" aria-live="polite">
                 <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" aria-hidden="true"></div>
                 <span className="sr-only">상품 로딩 중</span>
               </div>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
-      {isLoggedIn && (
+      {isLoggedIn ? (
         <div className={`fixed right-10 bottom-5 ${Z_INDEX.FLOATING_BUTTON}`}>
           <Button
             size={isMd ? 'lg' : 'md'}
@@ -277,7 +277,7 @@ function Home() {
             상품등록
           </Button>
         </div>
-      )}
+      ) : null}
     </>
   )
 }

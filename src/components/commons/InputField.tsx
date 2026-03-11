@@ -28,12 +28,12 @@ export default function InputField({ error, checkResult, registration, className
   return (
     <div className={cn('flex flex-col gap-1', className)}>
       <Input {...inputProps} {...registration} inputClass={inputClass} id={id} suffix={suffix} />
-      {error && <p className="text-danger-500 text-xs font-semibold">{error.message}</p>}
-      {checkResult?.message && (
+      {error ? <p className="text-danger-500 text-xs font-semibold">{error.message}</p> : null}
+      {checkResult?.message ? (
         <p className={cn('text-xs font-semibold', checkResult.status === 'error' ? 'text-danger-500' : 'text-success-500')}>
           {checkResult.message}
         </p>
-      )}
+      ) : null}
     </div>
   )
 }

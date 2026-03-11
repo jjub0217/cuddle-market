@@ -35,13 +35,13 @@ export function LocationFilter({ headingClassName }: LocationFilterProps) {
   // 선택된 시/도에 따른 구/군 목록
   const availableGugun = selectedSido ? CITIES[selectedSido] || [] : []
 
-  // 시/도나 구/군이 변경되면 URL 업데이트
-  useEffect(() => {
+  // URL 업데이트 헬퍼
+  const updateURL = (sido: Province | '', gugun: string) => {
     const params = new URLSearchParams(searchParams.toString())
-    if (selectedSido) {
-      params.set('addressSido', selectedSido)
-      if (selectedGugun) {
-        params.set('addressGugun', selectedGugun)
+    if (sido) {
+      params.set('addressSido', sido)
+      if (gugun) {
+        params.set('addressGugun', gugun)
       } else {
         params.delete('addressGugun')
       }
@@ -50,13 +50,20 @@ export function LocationFilter({ headingClassName }: LocationFilterProps) {
       params.delete('addressGugun')
     }
     push(`${pathname}?${params.toString()}`)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedSido, selectedGugun])
+  }
 
-  // 시/도가 변경되면 구/군 초기화
+  // 시/도가 변경되면 구/군 초기화 + URL 업데이트
   const handleSidoChange = (value: string) => {
-    setSelectedSido(value as Province | '')
-    setSelectedGugun('') // 구/군 초기화
+    const newSido = value as Province | ''
+    setSelectedSido(newSido)
+    setSelectedGugun('')
+    updateURL(newSido, '')
+  }
+
+  // 구/군 변경 시 URL 업데이트
+  const handleGugunChange = (value: string) => {
+    setSelectedGugun(value)
+    updateURL(selectedSido, value)
   }
 
   return (
@@ -86,7 +93,7 @@ export function LocationFilter({ headingClassName }: LocationFilterProps) {
           </span>
           <SelectDropdown
             value={selectedGugun}
-            onChange={(value: string) => setSelectedGugun(value)}
+            onChange={handleGugunChange}
             options={availableGugun.map((gugun) => ({
               value: gugun,
               label: gugun,

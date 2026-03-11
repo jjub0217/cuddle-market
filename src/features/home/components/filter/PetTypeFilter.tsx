@@ -83,7 +83,7 @@ export function PetTypeFilter({ activeTab, headingClassName, selectedDetailPet, 
               {pet.name}
             </Button>
           ))}
-          {hasMoreItems && !showAll && (
+          {hasMoreItems && !showAll ? (
             <Button
               type="button"
               size="sm"
@@ -92,7 +92,7 @@ export function PetTypeFilter({ activeTab, headingClassName, selectedDetailPet, 
             >
               더보기 ({filteredPetDetails.length - INITIAL_DISPLAY_COUNT}개)
             </Button>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

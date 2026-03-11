@@ -61,9 +61,9 @@ export function ProductPetTypeTabs({ activeTab, onTabChange }: ProductPetTypeTab
           </Button>
         ))}
       </div>
-      {showFade && (
+      {showFade ? (
         <div className="pointer-events-none absolute top-0 right-0 bottom-0 w-12 bg-linear-to-l from-white via-white/80 to-transparent md:hidden" />
-      )}
+      ) : null}
     </div>
   )
 }

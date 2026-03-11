@@ -31,7 +31,7 @@ export const DetailFilter = memo(function DetailFilterSection({
         ariaControls="detail-filter-content"
         filterReset={filterReset}
       />
-      {isOpen && (
+      {isOpen ? (
         <div
           className="bg-primary-100 flex flex-col gap-3.5 rounded-lg px-3 py-2.5 md:flex-row md:gap-10"
           role="group"
@@ -42,7 +42,7 @@ export const DetailFilter = memo(function DetailFilterSection({
           <PriceFilter selectedPriceRange={selectedPriceRange} headingClassName={headingClassName} />
           <LocationFilter headingClassName={headingClassName} />
         </div>
-      )}
+      ) : null}
     </div>
   )
 })

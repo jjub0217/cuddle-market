@@ -38,15 +38,15 @@ export default function DeleteConfirmModal({ isOpen, product, onConfirm, onCance
       }}
       onClose={onCancel}
     >
-      {product && (
+      {product ? (
         <>
           <ModalTitle heading="상품 삭제" description="정말로 이 상품을 삭제하시겠습니까?" />
           <AnimatePresence>
-            {error && (
+            {error ? (
               <InlineNotification type="error" onClose={() => onClearError?.()}>
                 {error}
               </InlineNotification>
-            )}
+            ) : null}
           </AnimatePresence>
           <AlertBox alertList={PRODUCT_DELETE_ALERT_LIST} />
           <ul>
@@ -89,7 +89,7 @@ export default function DeleteConfirmModal({ isOpen, product, onConfirm, onCance
             </Button>
           </div>
         </>
-      )}
+      ) : null}
     </dialog>
   )
 }

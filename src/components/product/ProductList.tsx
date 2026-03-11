@@ -33,7 +33,7 @@ export default function ProductList({ products, showMoreButton = false, sellerId
           <ProductCard data-index={index} data={product} />
         </li>
       ))}
-      {showMoreButton && sellerId && products.length >= 4 && (
+      {showMoreButton && sellerId && products.length >= 4 ? (
         <button
           type="button"
           onClick={() => goToUserPage(sellerId)}
@@ -41,7 +41,7 @@ export default function ProductList({ products, showMoreButton = false, sellerId
         >
           더보기
         </button>
-      )}
+      ) : null}
     </ul>
   )
 }

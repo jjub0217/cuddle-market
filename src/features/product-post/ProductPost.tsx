@@ -88,7 +88,7 @@ function ProductPost() {
       <div className="bg-[#F3F4F6] pt-5">
         <div className="px-lg pb-4xl mx-auto max-w-7xl">
           <div className="gap-2xl flex w-full flex-col">
-            {!isEditMode && (
+            {!isEditMode ? (
               <Tabs
                 tabs={PRODUCT_TYPE_TABS}
                 activeTab={activeProductTypeTab}
@@ -96,13 +96,13 @@ function ProductPost() {
                 ariaLabel="상품 타입"
                 excludeTabId="tab-all"
               />
-            )}
-            {activeProductTypeTab === 'tab-sales' && (
+            ) : null}
+            {activeProductTypeTab === 'tab-sales' ? (
               <ProductPostForm isEditMode={isEditMode} productId={id} initialData={productData} />
-            )}
-            {activeProductTypeTab === 'tab-purchases' && (
+            ) : null}
+            {activeProductTypeTab === 'tab-purchases' ? (
               <ProductRequestForm isEditMode={isEditMode} productId={id} initialData={productData} />
-            )}
+            ) : null}
           </div>
         </div>
       </div>

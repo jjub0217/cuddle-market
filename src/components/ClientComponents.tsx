@@ -29,8 +29,8 @@ export default function ClientComponents() {
   return (
     <>
       <AuthValidator />
-      {isLoginModalOpen && <LoginModal />}
-      {hasToasts && <ToastContainer />}
+      {isLoginModalOpen ? <LoginModal /> : null}
+      {hasToasts ? <ToastContainer /> : null}
     </>
   )
 }

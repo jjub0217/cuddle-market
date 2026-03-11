@@ -33,11 +33,11 @@ export function DetailFilterButton({ isOpen, onClick, ariaControls, filterReset 
       <div className={cn('flex items-center gap-2')}>
         <FilterIcon className={cn('h-4 w-4')} aria-hidden="true" />
         <span className={cn('font-sm font-bold')}>세부 필터</span>
-        {isMd && (
+        {isMd ? (
           <p className={cn('bg-primary-50 items-center justify-center overflow-hidden rounded-md px-3 py-1 text-sm')} aria-hidden="true">
             상품상태 · 가격대 · 지역
           </p>
-        )}
+        ) : null}
       </div>
 
       <div className="flex items-center gap-4">

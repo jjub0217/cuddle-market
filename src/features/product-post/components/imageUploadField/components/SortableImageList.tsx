@@ -20,9 +20,9 @@ export default function SortableImageList({ previewUrls, onDragEnd, onRemoveImag
           {previewUrls.map((imgUrl, i) => (
             <SortableImageItem key={imgUrl} url={imgUrl} index={i} onRemove={() => onRemoveImage(i)} />
           ))}
-          {previewUrls.length < 5 && (
+          {previewUrls.length < 5 ? (
             <Button size={isMd ? 'lg' : 'sm'} className="bg-primary-300 flex cursor-pointer flex-col rounded-full text-white" icon={Plus} />
-          )}
+          ) : null}
         </div>
       </SortableContext>
     </DndContext>
