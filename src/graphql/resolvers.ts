@@ -320,7 +320,7 @@ export const resolvers = {
     ) => {
       await fetchAPI(`/reports/community-posts/${args.postId}`, context, {
         method: 'POST',
-        body: JSON.stringify({ reason: args.reason, details: args.details }),
+        body: JSON.stringify({ reasonCode: args.reason, detailReason: args.details }),
       })
       return { success: true }
     },
