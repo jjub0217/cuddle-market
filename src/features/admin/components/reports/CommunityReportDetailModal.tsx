@@ -7,6 +7,7 @@ import { COMMUNITY_REPORT_REASON_EN_TO_KO } from '../../configs/communityReportT
 import { formatDate } from '../common/formatDate'
 import Field from '../common/Field'
 import DeleteConfirmDialog from '../common/DeleteConfirmDialog'
+import { api } from '@/lib/api/api'
 
 interface CommunityReportDetailModalProps {
   isOpen: boolean
@@ -17,6 +18,7 @@ interface CommunityReportDetailModalProps {
 export default function CommunityReportDetailModal({ isOpen, report, onClose }: CommunityReportDetailModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [postDetail, setPostDetail] = useState<{ title: string; content: string; authorNickname: string; boardType: string } | null>(null)
 
   useEffect(() => {
     const dialog = dialogRef.current
@@ -27,10 +29,22 @@ export default function CommunityReportDetailModal({ isOpen, report, onClose }: 
     }
   }, [isOpen, report])
 
+  useEffect(() => {
+    if (isOpen && report) {
+      api.get(`/community/posts/${report.targetId}`)
+        .then((res) => setPostDetail(res.data.data))
+        .catch(() => setPostDetail(null))
+    } else {
+      setPostDetail(null)
+    }
+  }, [isOpen, report])
+
   const handleClose = () => {
     setShowDeleteConfirm(false)
     onClose()
   }
+
+  const targetTypeMap: Record<string, string> = { COMMUNITY_POST: '커뮤니티 게시글' }
 
   return (
     <dialog
@@ -59,22 +73,38 @@ export default function CommunityReportDetailModal({ isOpen, report, onClose }: 
           <div className="max-h-[60vh] overflow-y-auto px-6 py-5">
             <div className="grid grid-cols-2 gap-x-5 gap-y-4">
               <Field label="신고 ID" value={String(report.id)} />
-              <Field label="신고자 ID" value={String(report.reporterId)} />
-              <Field label="게시글 ID" value={String(report.targetId)} />
+              <Field label="신고자" value={String(report.reporterId)} />
+              <Field label="작성자" value={postDetail?.authorNickname ?? '-'} />
               <Field
                 label="신고항목"
                 value={report.reasonCodes.map((c) => COMMUNITY_REPORT_REASON_EN_TO_KO[c] || c).join(', ')}
               />
-              <Field label="처리 상태" value={report.status} />
-              <Field label="신고 일자" value={formatDate(report.createdAt)} />
-              {report.detailReason ? (
-                <div className="col-span-2">
-                  <p className="mb-1.5 text-sm font-medium text-gray-500">신고 상세 사유</p>
-                  <div className="max-h-30 overflow-y-auto rounded-lg border border-gray-200 bg-gray-50/50 px-3 py-2.5 text-sm leading-relaxed whitespace-pre-line text-gray-900">
-                    {report.detailReason}
-                  </div>
+              <Field label="신고일자" value={formatDate(report.createdAt)} />
+              <Field label="게시글 유형" value={targetTypeMap[report.targetType] || report.targetType} />
+
+              {/* 게시글 제목 */}
+              <div className="col-span-2">
+                <p className="mb-1.5 text-sm font-medium text-gray-500">게시글 제목</p>
+                <div className="max-h-30 overflow-y-auto rounded-lg border border-gray-200 bg-gray-50/50 px-3 py-2.5 text-sm leading-relaxed whitespace-pre-line text-gray-900">
+                  {postDetail?.title ?? '-'}
                 </div>
-              ) : null}
+              </div>
+
+              {/* 게시글 내용 */}
+              <div className="col-span-2">
+                <p className="mb-1.5 text-sm font-medium text-gray-500">게시글 내용</p>
+                <div className="max-h-30 overflow-y-auto rounded-lg border border-gray-200 bg-gray-50/50 px-3 py-2.5 text-sm leading-relaxed whitespace-pre-line text-gray-900">
+                  {postDetail?.content ?? '-'}
+                </div>
+              </div>
+
+              {/* 신고 상세 사유 */}
+              <div className="col-span-2">
+                <p className="mb-1.5 text-sm font-medium text-gray-500">신고 상세 사유</p>
+                <div className="max-h-30 overflow-y-auto rounded-lg border border-gray-200 bg-gray-50/50 px-3 py-2.5 text-sm leading-relaxed whitespace-pre-line text-gray-900">
+                  {report.detailReason || '-'}
+                </div>
+              </div>
             </div>
 
             {/* 첨부 이미지 */}
