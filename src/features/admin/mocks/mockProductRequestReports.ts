@@ -18,8 +18,12 @@ function generateProductRequestReports(count: number): AdminReport[] {
   return Array.from({ length: count }, (_, i) => ({
     id: i + 1,
     reporterId: 100 + i,
+    reporterNickname: `신고자${100 + i}`,
     targetType: 'PRODUCT' as const,
     targetId: 400 + i,
+    targetNickname: `판매자${400 + i}`,
+    title: null,
+    boardType: null,
     reasonCodes: [REASON_CODES[i % REASON_CODES.length]],
     detailReason: i % 3 === 0 ? '판매요청 상품 신고 상세 사유입니다.' : null,
     imageUrls: i % 4 === 0 ? [`https://picsum.photos/seed/prreport${i + 1}/200/200`] : null,
