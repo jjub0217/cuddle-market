@@ -75,9 +75,9 @@ export default function ProductSellReportDetailModal({ isOpen, report, onClose }
             </div>
 
             {/* 첨부 이미지 */}
-            {report.imageUrls && report.imageUrls.length > 0 ? (
-              <div className="mt-4">
-                <p className="mb-1.5 text-sm font-medium text-gray-500">첨부 이미지</p>
+            <div className="mt-4">
+              <p className="mb-1.5 text-sm font-medium text-gray-500">첨부 이미지</p>
+              {report.imageUrls && report.imageUrls.length > 0 ? (
                 <div className="grid grid-cols-3 gap-3">
                   {report.imageUrls.map((src, idx) => (
                     /* eslint-disable-next-line @next/next/no-img-element */
@@ -85,12 +85,14 @@ export default function ProductSellReportDetailModal({ isOpen, report, onClose }
                       key={idx}
                       src={src}
                       alt={`첨부 이미지 ${idx + 1}`}
-                      className="aspect-square w-full rounded-lg border border-gray-200 object-cover"
+                      className="aspect-square w-full rounded-lg border border-gray-200 bg-gray-100 object-cover"
                     />
                   ))}
                 </div>
-              </div>
-            ) : null}
+              ) : (
+                <p className="text-sm text-gray-400">첨부된 이미지가 없습니다.</p>
+              )}
+            </div>
           </div>
 
           {/* Footer */}
