@@ -238,8 +238,9 @@ export async function fetchAdminReports(
   }
 
   const { data } = await api.get<ApiResponse<PageResponse<AdminReport> & { total: number }>>(`/admin/reports?${searchParams.toString()}`)
+  const reportData = data.data
   return toAdminTableResponse(
-    { ...data.data, totalElements: data.data.totalElements ?? data.data.total },
+    { ...reportData, content: reportData.content ?? (reportData as any).reports ?? [], totalElements: reportData.totalElements ?? reportData.total },
     params.page,
     params.pageSize,
   )
