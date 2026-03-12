@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 import type { AdminReport } from '../../types/adminApi'
-import { COMMUNITY_REPORT_REASON_EN_TO_KO } from '../../configs/communityReportTableConfig'
+import { COMMUNITY_REPORT_REASON_EN_TO_KO, TARGET_TYPE_EN_TO_KO } from '../../configs/communityReportTableConfig'
 import { formatDate } from '../common/formatDate'
 import Field from '../common/Field'
 import DeleteConfirmDialog from '../common/DeleteConfirmDialog'
@@ -30,7 +30,7 @@ export default function CommunityReportDetailModal({ isOpen, report, onClose }: 
   }, [isOpen, report])
 
   useEffect(() => {
-    if (isOpen && report) {
+    if (isOpen && report?.targetId) {
       api.get(`/community/posts/${report.targetId}`)
         .then((res) => setPostDetail(res.data.data))
         .catch(() => setPostDetail(null))
@@ -43,8 +43,6 @@ export default function CommunityReportDetailModal({ isOpen, report, onClose }: 
     setShowDeleteConfirm(false)
     onClose()
   }
-
-  const targetTypeMap: Record<string, string> = { COMMUNITY_POST: '커뮤니티 게시글' }
 
   return (
     <dialog
@@ -80,7 +78,7 @@ export default function CommunityReportDetailModal({ isOpen, report, onClose }: 
                 value={report.reasonCodes.map((c) => COMMUNITY_REPORT_REASON_EN_TO_KO[c] || c).join(', ')}
               />
               <Field label="신고일자" value={formatDate(report.createdAt)} />
-              <Field label="게시글 유형" value={targetTypeMap[report.targetType] || report.targetType} />
+              <Field label="게시글 유형" value={TARGET_TYPE_EN_TO_KO[report.targetType] || report.targetType} />
 
               {/* 게시글 제목 */}
               <div className="col-span-2">
