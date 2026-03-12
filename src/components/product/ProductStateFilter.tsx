@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { CONDITION_ITEMS } from '@/constants/constants'
 import { cn } from '@/lib/utils/cn'
 import { useFilterNavigation } from '@/hooks/useFilterNavigation'
-import RequiredLabel from '@/components/commons/RequiredLabel'
+
 
 interface ProductStateFilterProps {
   headingClassName?: string
@@ -56,9 +56,9 @@ export function ProductStateFilter({
           상품 상태
         </h4>
       ) : (
-        <RequiredLabel htmlFor="signup-name" labelClass="heading-h5">
-          상품 상태
-        </RequiredLabel>
+        <span id="condition-filter-heading" className="heading-h5 text-gray-900">
+          상품 상태 <span className="text-red-500">*</span>
+        </span>
       )}
       <div
         className={cn('grid grid-cols-2 flex-wrap gap-2.5 md:flex')}

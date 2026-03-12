@@ -89,10 +89,14 @@ export default function ReportModalBase({ isOpen, heading, description, reasons,
       <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col gap-4">
         <div className="flex flex-col gap-6 pt-2">
           <div className="flex flex-col gap-1">
-            <RequiredLabel htmlFor="reportReason" labelClass="font-semibold">
-              신고 사유
-            </RequiredLabel>
-            <div className="flex flex-col gap-1 rounded-lg border border-gray-300 px-3 py-2.5">
+            <span id="report-reason-heading" className="font-semibold text-gray-900">
+              신고 사유 <span className="text-red-500">*</span>
+            </span>
+            <div
+              className="flex flex-col gap-1 rounded-lg border border-gray-300 px-3 py-2.5"
+              role="radiogroup"
+              aria-labelledby="report-reason-heading"
+            >
               {reasons.map((reason) => (
                 <div key={reason.id} className="flex items-center gap-3">
                   <input

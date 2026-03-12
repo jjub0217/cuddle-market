@@ -91,6 +91,7 @@ export default function WithdrawModal({ isOpen, onConfirm, onCancel, error, onCl
               rules={{ required: true }}
               render={({ field }) => (
                 <SelectDropdown
+                  id="withdrawReason"
                   value={field.value}
                   onChange={field.onChange}
                   options={WITHDRAW_REASON.map((sort) => ({
