@@ -112,7 +112,8 @@ function MyPage() {
     queryFn: async ({ pageParam }) => {
       const response = await api.get('/profile/me/blocked-users', { params: { page: pageParam, size: 10 } })
       const data = response.data.data
-      const blockedList = data.blockedUsers || data.content || []
+      const paged = data.blockedUsers ?? data
+      const blockedList = paged.content ?? []
       return {
         content: blockedList.map((u: { blockedUserId: number; blockedUserNickname?: string; nickname?: string; profileImageUrl?: string; blockedAt: string }) => ({
           blockedUserId: u.blockedUserId,
@@ -120,9 +121,9 @@ function MyPage() {
           profileImageUrl: u.profileImageUrl,
           blockedAt: u.blockedAt,
         })),
-        page: data.page ?? 0,
-        hasNext: data.hasNext ?? false,
-        total: data.total ?? data.totalElements ?? 0,
+        page: paged.page ?? 0,
+        hasNext: paged.hasNext ?? false,
+        total: paged.total ?? paged.totalElements ?? 0,
       }
     },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
