@@ -19,29 +19,16 @@ export const userReportTableConfig: TableConfig<AdminReport> = {
   searchable: false,
   columns: [
     { key: 'id', label: '신고 ID', type: 'number', sortable: true, width: '90px' },
-    { key: 'reporterId', label: '신고자 ID', type: 'number', width: '100px' },
-    { key: 'targetId', label: '대상 ID', type: 'number', width: '100px' },
+    { key: 'reporterNickname', label: '신고자', type: 'text', width: '100px' },
+    { key: 'targetNickname', label: '신고 대상자', type: 'text', width: '100px' },
     {
       key: 'reasonCodes',
-      label: '신고 사유',
+      label: '신고항목',
       type: 'text',
       format: (v) => {
         const codes = v as string[]
         return codes.map((c) => USER_REPORT_REASON_EN_TO_KO[c] || c).join(', ')
       },
-    },
-    {
-      key: 'status',
-      label: '처리 상태',
-      type: 'badge',
-      sortable: true,
-      width: '110px',
-      badgeOptions: [
-        { value: 'PENDING', label: '대기중', color: 'bg-yellow-100 text-yellow-800' },
-        { value: 'REVIEWED', label: '검토완료', color: 'bg-green-100 text-green-800' },
-        { value: 'REJECTED', label: '거절', color: 'bg-gray-100 text-gray-800' },
-        { value: 'ACTION_TAKEN', label: '조치완료', color: 'bg-blue-100 text-blue-800' },
-      ],
     },
     {
       key: 'createdAt',
