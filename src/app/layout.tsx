@@ -7,6 +7,13 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://cuddle-market.vercel.app'),
   title: '커들마켓',
   description: '반려동물 용품을 사고팔 수 있는 커들마켓',
+  manifest: '/manifest.json',
+  themeColor: '#FF6F0F',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: '커들마켓',
+  },
   verification: {
     google: 'QwSeEYXUKCcLgTD8CtBEEpERKpp34sHBD_6r8dvKM2Q',
   },
