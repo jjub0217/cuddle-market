@@ -8,6 +8,7 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { ROUTES } from '@/constants/routes'
 
 interface SearchBarProps {
+  id?: string
   placeholder?: string
   className?: string
   borderColor?: string
@@ -16,6 +17,7 @@ interface SearchBarProps {
 }
 
 export default function SearchBar({
+  id,
   placeholder = '원하는 반려동물 용품을 검색해보세요',
   borderColor = 'border-gray-100',
   className,
@@ -73,6 +75,8 @@ export default function SearchBar({
   return (
     <div className={cn('h-5 flex-1 md:h-10 md:min-w-120', className)} role="search" aria-label={placeholder}>
       <Input
+        id={id}
+        name={paramName}
         type="text"
         value={keyword}
         placeholder={placeholder}

@@ -222,6 +222,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
                     />
                   </div>
                   <SearchBar
+                    id="community-search-mobile"
                     placeholder="게시글 검색"
                     borderColor="border-gray-300"
                     className="h-11 max-w-full"
@@ -283,6 +284,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
                   />
                 </div>
                 <SearchBar
+                  id="community-search-desktop"
                   placeholder="게시글 제목이나 내용, 작성자로 검색해보세요"
                   borderColor="border-gray-300"
                   className="h-11 max-w-full"

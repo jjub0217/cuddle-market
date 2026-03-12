@@ -127,7 +127,7 @@ export default function Header() {
             <div className="flex items-center gap-1 xl:gap-8">
               {!hideSearchBar ? (
                 <Suspense>
-                  <SearchBar className="hidden md:h-9 xl:block" inputClass="text-sm py-0" />
+                  <SearchBar id="search-desktop" className="hidden md:h-9 xl:block" inputClass="text-sm py-0" />
                 </Suspense>
               ) : null}
               {!hideSearchBar && !isXl ? (
@@ -149,7 +149,7 @@ export default function Header() {
               }}
             >
               <Suspense>
-                <SearchBar className="h-8 xl:hidden" inputClass="py-1 text-sm" />
+                <SearchBar id="search-mobile" className="h-8 xl:hidden" inputClass="py-1 text-sm" />
               </Suspense>
             </div>
           ) : null}
