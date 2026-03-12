@@ -51,8 +51,12 @@ export interface AdminProduct {
 export interface AdminReport {
   id: number
   reporterId: number
+  reporterNickname: string | null
   targetType: 'USER' | 'PRODUCT' | 'COMMUNITY_POST'
   targetId: number
+  targetNickname: string | null
+  title: string | null
+  boardType: string | null
   reasonCodes: string[]
   detailReason: string | null
   imageUrls: string[] | null

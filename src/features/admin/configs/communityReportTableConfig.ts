@@ -14,7 +14,12 @@ const TARGET_TYPE_EN_TO_KO: Record<string, string> = {
   COMMUNITY_POST: '커뮤니티 게시글',
 }
 
-export { COMMUNITY_REPORT_REASON_EN_TO_KO, TARGET_TYPE_EN_TO_KO }
+const BOARD_TYPE_EN_TO_KO: Record<string, string> = {
+  QUESTION: '질문있어요',
+  INFO: '정보 공유',
+}
+
+export { COMMUNITY_REPORT_REASON_EN_TO_KO, TARGET_TYPE_EN_TO_KO, BOARD_TYPE_EN_TO_KO }
 
 export const communityReportTableConfig: TableConfig<AdminReport> = {
   title: '커뮤니티 신고 관리',
@@ -23,14 +28,15 @@ export const communityReportTableConfig: TableConfig<AdminReport> = {
   columns: [
     { key: 'id', label: '신고 ID', type: 'number', sortable: true, width: '90px' },
     {
-      key: 'targetType',
+      key: 'boardType',
       label: '게시글 유형',
       type: 'text',
       width: '110px',
-      format: (v) => TARGET_TYPE_EN_TO_KO[v as string] || (v as string),
+      format: (v) => BOARD_TYPE_EN_TO_KO[v as string] || (v as string),
     },
-    { key: 'reporterId', label: '신고자', type: 'number', width: '80px' },
-    { key: 'targetId', label: '게시글 ID', type: 'number', width: '100px' },
+    { key: 'reporterNickname', label: '신고자', type: 'text', width: '100px' },
+    { key: 'title', label: '게시글 제목', type: 'text' },
+    { key: 'targetNickname', label: '작성자', type: 'text', width: '100px' },
     {
       key: 'reasonCodes',
       label: '신고항목',

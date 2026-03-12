@@ -17,8 +17,12 @@ function generateCommunityReports(count: number): AdminReport[] {
   return Array.from({ length: count }, (_, i) => ({
     id: i + 1,
     reporterId: 100 + i,
+    reporterNickname: `신고자${100 + i}`,
     targetType: 'COMMUNITY_POST' as const,
     targetId: 500 + i,
+    targetNickname: `작성자${500 + i}`,
+    title: `테스트 게시글 제목 ${i + 1}`,
+    boardType: i % 2 === 0 ? 'QUESTION' : 'INFO',
     reasonCodes: [REASON_CODES[i % REASON_CODES.length]],
     detailReason: i % 3 === 0 ? '커뮤니티 게시글 신고 상세 사유입니다.' : null,
     imageUrls: i % 4 === 0 ? [`https://picsum.photos/seed/creport${i + 1}/200/200`] : null,
