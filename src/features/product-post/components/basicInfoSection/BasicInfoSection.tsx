@@ -43,6 +43,7 @@ export default function BasicInfoSection({
               상품 카테고리
             </RequiredLabel>
             <SelectDropdown
+              id="category"
               value={field.value || ''}
               onChange={field.onChange}
               options={PRODUCT_CATEGORIES.map((category) => ({

@@ -112,7 +112,7 @@ export default function ProfileUpdatePasswordForm() {
           <div className="flex flex-col gap-8">
             <div className="flex flex-1 flex-col gap-1">
               <div className="flex flex-col gap-2">
-                <span className="font-medium text-gray-600">현재 비밀번호</span>
+                <label htmlFor="current-password" className="font-medium text-gray-600">현재 비밀번호</label>
                 <InputField
                   id="current-password"
                   type="password"
@@ -128,7 +128,7 @@ export default function ProfileUpdatePasswordForm() {
 
             <div className="flex flex-1 flex-col gap-1">
               <div className="flex flex-col gap-2">
-                <span className="font-medium text-gray-600">새 비밀번호</span>
+                <label htmlFor="new-password" className="font-medium text-gray-600">새 비밀번호</label>
                 <InputField
                   id="new-password"
                   type="password"
@@ -144,7 +144,7 @@ export default function ProfileUpdatePasswordForm() {
 
             <div className="flex flex-1 flex-col gap-1">
               <div className="flex flex-col gap-2">
-                <span className="font-medium text-gray-600">새 비밀번호 확인</span>
+                <label htmlFor="confirm-password" className="font-medium text-gray-600">새 비밀번호 확인</label>
                 <InputField
                   id="confirm-password"
                   type="password"

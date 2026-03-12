@@ -289,7 +289,7 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
                 <h3 className="heading-h5">활동 정보</h3>
                 <div className="flex flex-col gap-1">
                   <div className="flex flex-col justify-center gap-2">
-                    <RequiredLabel required={false}>닉네임</RequiredLabel>
+                    <RequiredLabel htmlFor="update-nickname" required={false}>닉네임</RequiredLabel>
                     <InputWithButton
                       id="update-nickname"
                       type="text"
@@ -314,7 +314,7 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
                 />
                 <div className="flex flex-col gap-1">
                   <div className="flex flex-col gap-2">
-                    <RequiredLabel required={false}>자기소개</RequiredLabel>
+                    <RequiredLabel htmlFor="profile-introduction" required={false}>자기소개</RequiredLabel>
                     <textarea
                       id="profile-introduction"
                       placeholder="소개글을 작성해주세요"
