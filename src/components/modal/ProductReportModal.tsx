@@ -23,9 +23,8 @@ export default function ProductReportModal({ isOpen, productId, productTitle, on
         formData.append('detailReason', data.detailReason)
       }
 
-      if (data.imageFiles) {
-        const files = [data.imageFiles].flat()
-        for (const file of files) {
+      if (data.imageFiles && data.imageFiles.length > 0) {
+        for (const file of data.imageFiles) {
           formData.append('imageFiles', file)
         }
       }

@@ -10,7 +10,6 @@ import InlineNotification from '../commons/InlineNotification'
 
 export interface ReportFormValues {
   reasonCode: string
-  reasonCodes?: string[]
   detailReason?: string
   imageFiles?: string[]
 }
@@ -25,14 +24,13 @@ interface ReportModalBaseProps {
   heading: string
   description: ReactNode
   reasons: ReportReason[]
-  multiSelect?: boolean
   onCancel: () => void
   onSubmit: (data: ReportFormValues) => Promise<void>
   error?: React.ReactNode
   onClearError?: () => void
 }
 
-export default function ReportModalBase({ isOpen, heading, description, reasons, multiSelect = false, onCancel, onSubmit, error, onClearError }: ReportModalBaseProps) {
+export default function ReportModalBase({ isOpen, heading, description, reasons, onCancel, onSubmit, error, onClearError }: ReportModalBaseProps) {
   const {
     handleSubmit,
     register,
@@ -45,8 +43,7 @@ export default function ReportModalBase({ isOpen, heading, description, reasons,
   } = useForm<ReportFormValues>({
     mode: 'onChange',
     defaultValues: {
-      reasonCode: multiSelect ? '' : '서비스 불만족',
-      reasonCodes: [],
+      reasonCode: '',
       detailReason: '',
       imageFiles: [],
     },
@@ -97,28 +94,18 @@ export default function ReportModalBase({ isOpen, heading, description, reasons,
             </span>
             <div
               className="flex flex-col gap-1 rounded-lg border border-gray-300 px-3 py-2.5"
-              role={multiSelect ? 'group' : 'radiogroup'}
+              role="radiogroup"
               aria-labelledby="report-reason-heading"
             >
               {reasons.map((reason) => (
                 <div key={reason.id} className="flex items-center gap-3">
-                  {multiSelect ? (
-                    <input
-                      type="checkbox"
-                      id={`reportReason-${reason.id}`}
-                      value={reason.id}
-                      className="h-3 w-3 border-gray-500"
-                      {...register('reasonCodes', { validate: (v) => (v && v.length > 0) || '최소 1개의 사유를 선택해주세요' })}
-                    />
-                  ) : (
-                    <input
-                      type="radio"
-                      id={`reportReason-${reason.id}`}
-                      value={reason.id}
-                      className="h-3 w-3 border-gray-500"
-                      {...register('reasonCode', { required: true })}
-                    />
-                  )}
+                  <input
+                    type="radio"
+                    id={`reportReason-${reason.id}`}
+                    value={reason.id}
+                    className="h-3 w-3 border-gray-500"
+                    {...register('reasonCode', { required: true })}
+                  />
                   <label htmlFor={`reportReason-${reason.id}`}>{reason.label}</label>
                 </div>
               ))}
