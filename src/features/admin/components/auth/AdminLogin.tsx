@@ -86,7 +86,7 @@ export default function AdminLogin() {
               className="w-full rounded border border-gray-300 px-4 py-2 text-sm transition-colors outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
               {...register('email', authValidationRules.email)}
             />
-            {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>}
+            {errors.email ? <p className="mt-1 text-xs text-red-500">{errors.email.message}</p> : null}
           </div>
 
           <div>
@@ -97,10 +97,10 @@ export default function AdminLogin() {
               className="w-full rounded border border-gray-300 px-4 py-2 text-sm transition-colors outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
               {...register('password', { required: '비밀번호를 입력해주세요' })}
             />
-            {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>}
+            {errors.password ? <p className="mt-1 text-xs text-red-500">{errors.password.message}</p> : null}
           </div>
 
-          {error && <p className="text-left text-sm text-red-500">{error}</p>}
+          {error ? <p className="text-left text-sm text-red-500">{error}</p> : null}
 
           <button
             type="submit"
