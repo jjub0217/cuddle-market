@@ -234,6 +234,18 @@ export const USER_BLOCK_ALERT_LIST = [
   `차단은 언제든 '마이페이지 > 차단 목록'에서 해제할 수 있습니다`,
 ]
 
+// ========== 상품신고 이유 관련 상수 ==========
+export const PRODUCT_REPORT_REASON = [
+  { id: 'FALSE_OR_SCAM', label: '허위/사기성 상품' },
+  { id: 'ILLEGAL_ITEM', label: '불법 또는 금지 품목' },
+  { id: 'INAPPROPRIATE_IMAGE', label: '부적절한 이미지' },
+  { id: 'DUPLICATE_POST', label: '중복 게시물' },
+  { id: 'SPAM_OR_AD', label: '스팸/광고성 게시물' },
+  { id: 'PROXY_PAYMENT_OR_TRADE', label: '대리 결제/구매/판매 행위' },
+  { id: 'PROFESSIONAL_SELLER', label: '전문 판매 업자' },
+  { id: 'ETC', label: '기타' },
+]
+
 // ========== 게시글 이유 관련 상수 ==========
 export const POST_REPORT_REASON = [
   { id: 'ABUSE_OR_HATE', label: '욕설, 비방, 혐오 표현' },
