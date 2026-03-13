@@ -43,6 +43,7 @@ export default function ReportModalBase({ isOpen, heading, description, reasons,
   } = useForm<ReportFormValues>({
     mode: 'onChange',
     defaultValues: {
+      reasonCode: '',
       detailReason: '',
       imageFiles: [],
     },
