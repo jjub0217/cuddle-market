@@ -23,7 +23,10 @@ function aggregateByYear(data: MemberTrendStat[]) {
 export default function WithdrawalTrendChart({ data }: WithdrawalTrendChartProps) {
   const [period, setPeriod] = useState<Period>('monthly')
 
-  const chartData = useMemo(() => (period === 'yearly' ? aggregateByYear(data) : data), [data, period])
+  const chartData = useMemo(
+    () => (period === 'yearly' ? aggregateByYear(data) : data.map((d) => ({ year: d.yearMonth, withdrawalCount: d.withdrawalCount }))),
+    [data, period],
+  )
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-6">
@@ -45,7 +48,7 @@ export default function WithdrawalTrendChart({ data }: WithdrawalTrendChartProps
       <ResponsiveContainer width="100%" height={360}>
         <BarChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey={period === 'yearly' ? 'year' : 'yearMonth'} tick={{ fontSize: 12 }} />
+          <XAxis dataKey="year" tick={{ fontSize: 12 }} />
           <YAxis tick={{ fontSize: 12 }} />
           <Tooltip />
           <Bar dataKey="withdrawalCount" name="탈퇴자 수" fill="#ef4444" radius={[4, 4, 0, 0]} />
