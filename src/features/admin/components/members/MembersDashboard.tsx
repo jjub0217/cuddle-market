@@ -8,7 +8,6 @@ import WithdrawalTrendChart from './WithdrawalTrendChart'
 import WithdrawalReasonChart from './WithdrawalReasonChart'
 import WithdrawalReasonTrendChart from './WithdrawalReasonTrendChart'
 import { fetchMemberStats, fetchWithdrawalReasons } from '@/lib/api/admin'
-import { mockMonthlyWithdrawalReasons } from '@/features/admin/mocks/mockMemberStats'
 
 const DASHBOARD_TABS = [
   { id: 'signup', label: '회원 가입 추세', code: 'signup' },
@@ -41,7 +40,7 @@ export default function MembersDashboard() {
         {activeTab === 'reason' ? (
           <div className="flex flex-col gap-6">
             <WithdrawalReasonChart data={reasons} />
-            <WithdrawalReasonTrendChart data={mockMonthlyWithdrawalReasons} />
+            <WithdrawalReasonTrendChart data={[]} />
           </div>
         ) : null}
       </div>

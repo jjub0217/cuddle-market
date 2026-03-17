@@ -79,6 +79,16 @@ export interface WithdrawalReasonStat {
   count: number
 }
 
+/** 탈퇴 사유별 월별 추세 데이터 */
+export interface MonthlyWithdrawalReasonStat {
+  month: string
+  SERVICE_DISSATISFACTION: number
+  PRIVACY_CONCERN: number
+  LOW_USAGE: number
+  COMPETITOR: number
+  OTHER: number
+}
+
 /** GET /api/admin/statistics/summary 응답 */
 export interface DashboardSummary {
   totalUserCount: number
