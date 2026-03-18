@@ -77,7 +77,7 @@ export function LoginForm() {
               type="email"
               placeholder="이메일 (example@cuddle.com)"
               backgroundColor="bg-primary-50"
-              size="text-sm"
+              size="text-xs"
               error={errors.email}
               registration={register('email', authValidationRules.email)}
             />
@@ -85,17 +85,17 @@ export function LoginForm() {
               type="password"
               placeholder="비밀번호 (10~30자의 영문 대소문자, 숫자, 특수문자 포함)"
               backgroundColor="bg-primary-50"
-              size="text-sm"
+              size="text-xs"
               error={errors.password}
               registration={register('password', authValidationRules.password)}
             />
             {errors.root ? <p className="text-danger-500 text-sm">{errors.root.message}</p> : null}
           </div>
-          <Link href={ROUTES.FIND_PASSWORD} className="text-primary-300 text-sm font-medium">
+          <Link href={ROUTES.FIND_PASSWORD} className="text-primary-300 text-xs font-medium">
             비밀번호를 잊으셨나요?
           </Link>
         </div>
-        <Button size="md" className="bg-primary-300 w-full cursor-pointer text-white" type="submit">
+        <Button size="sm" className="bg-primary-300 w-full cursor-pointer text-white" type="submit">
           로그인
         </Button>
       </fieldset>
