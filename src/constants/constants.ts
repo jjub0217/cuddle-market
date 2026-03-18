@@ -62,12 +62,52 @@ export const PETS = [
   },
   {
     code: 'AMPHIBIAN',
-    name: '양서류',
+    name: '곤충/절지동물',
     details: [
       { code: 'CRICKET', name: '귀뚜라미' },
       { code: 'MANTIS', name: '사마귀' },
       { code: 'BEETLE', name: '딱정벌레' },
       { code: 'SPIDER', name: '거미' },
+    ],
+  },
+  {
+    code: 'AMPHIBIAN_REAL',
+    name: '양서류',
+    details: [
+      { code: 'FROG', name: '개구리' },
+      { code: 'SALAMANDER', name: '도롱뇽' },
+      { code: 'AXOLOTL', name: '우파루파' },
+      { code: 'NEWT', name: '트리프로그' },
+    ],
+  },
+  {
+    code: 'RODENT',
+    name: '설치류',
+    details: [
+      { code: 'SQUIRREL', name: '다람쥐' },
+      { code: 'MOUSE', name: '마우스' },
+      { code: 'RAT', name: '랫' },
+      { code: 'GERBIL', name: '저빌' },
+    ],
+  },
+  {
+    code: 'CRUSTACEAN',
+    name: '갑각류',
+    details: [
+      { code: 'CRAYFISH', name: '가재' },
+      { code: 'HERMIT_CRAB', name: '소라게' },
+      { code: 'CRAB', name: '크랩' },
+      { code: 'GIANT_CRAB', name: '대게' },
+    ],
+  },
+  {
+    code: 'PLANT',
+    name: '식물/수초',
+    details: [
+      { code: 'AQUATIC_PLANT', name: '수초' },
+      { code: 'MOSS', name: '이끼' },
+      { code: 'SUCCULENT', name: '다육이' },
+      { code: 'PET_PLANT', name: '반려식물' },
     ],
   },
 ] as const
@@ -79,6 +119,10 @@ export const PET_TYPE_TABS = [
   { id: 'pet-tab-reptile', label: '파충류', code: 'REPTILE' },
   { id: 'pet-tab-fish', label: '수생동물', code: 'FISH' },
   { id: 'pet-tab-amphibian', label: '곤충/절지동물', code: 'AMPHIBIAN' },
+  { id: 'pet-tab-amphibian-real', label: '양서류', code: 'AMPHIBIAN_REAL' },
+  { id: 'pet-tab-rodent', label: '설치류', code: 'RODENT' },
+  { id: 'pet-tab-crustacean', label: '갑각류', code: 'CRUSTACEAN' },
+  { id: 'pet-tab-plant', label: '식물/수초', code: 'PLANT' },
   { id: 'pet-tab-etc', label: '기타', code: 'ETC' },
 ] as const
 export type PetTypeTabId = (typeof PET_TYPE_TABS)[number]['id']
