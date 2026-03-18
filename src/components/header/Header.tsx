@@ -111,13 +111,13 @@ export default function Header() {
                 <>
                   <Link
                     href={ROUTES.HOME}
-                    className={cn('text-md font-extrabold', isMarketActive ? 'border-white text-white' : 'text-gray-700')}
+                    className={cn('text-md font-medium', isMarketActive ? 'border-white text-white' : 'text-gray-700')}
                   >
                     마켓
                   </Link>
                   <Link
                     href={ROUTES.COMMUNITY}
-                    className={cn('text-md font-extrabold', isCommunityActive ? 'border-white text-white' : 'text-gray-700')}
+                    className={cn('text-md font-medium', isCommunityActive ? 'border-white text-white' : 'text-gray-700')}
                   >
                     커뮤니티
                   </Link>
