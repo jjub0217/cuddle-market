@@ -11,7 +11,7 @@ export function ProductMetaItem({ icon: Icon, label, iconSize = 16, className = 
   return (
     <div className={`flex items-center gap-1 ${className}`}>
       <Icon size={iconSize} aria-hidden="true" />
-      <span className="font-medium whitespace-nowrap lg:text-sm">{label}</span>
+      <span className="text-xs font-semibold whitespace-nowrap">{label}</span>
     </div>
   )
 }

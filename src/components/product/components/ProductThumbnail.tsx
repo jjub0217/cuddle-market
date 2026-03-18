@@ -56,7 +56,7 @@ export function ProductThumbnail({
           onClick={onLikeClick}
         />
       </div>
-      <Badge className={cn('bottom-sm right-sm absolute z-1 text-white', productTradeColor)}>{displayTradeStatus}</Badge>
+      <Badge className={cn('bottom-sm right-sm absolute z-1 text-xs text-white', productTradeColor)}>{displayTradeStatus}</Badge>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         alt={title}
