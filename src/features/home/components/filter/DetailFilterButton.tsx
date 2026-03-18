@@ -32,16 +32,16 @@ export function DetailFilterButton({ isOpen, onClick, ariaControls, filterReset 
     >
       <div className={cn('flex items-center gap-2')}>
         <FilterIcon className={cn('h-4 w-4')} aria-hidden="true" />
-        <span className={cn('font-sm font-bold')}>세부 필터</span>
+        <span className={cn('text-sm font-bold')}>세부 필터</span>
         {isMd ? (
-          <p className={cn('bg-primary-50 items-center justify-center overflow-hidden rounded-md px-3 py-1 text-sm')} aria-hidden="true">
+          <p className={cn('bg-primary-50 items-center justify-center overflow-hidden rounded-md px-3 py-1 text-xs')} aria-hidden="true">
             상품상태 · 가격대 · 지역
           </p>
         ) : null}
       </div>
 
       <div className="flex items-center gap-4">
-        <Button size="xs" type="button" className="bg-primary-50 cursor-pointer" onClick={filterReset}>
+        <Button size="xs" type="button" className="bg-primary-50 cursor-pointer py-[3px]" onClick={filterReset}>
           필터 초기화
         </Button>
         <DownArrow className={cn('h-6 w-6 text-gray-900 transition-transform', isOpen && 'rotate-180')} strokeWidth={2} aria-hidden="true" />

@@ -62,17 +62,17 @@ export function PetTypeFilter({ activeTab, headingClassName, selectedDetailPet, 
 
   return (
     <div className="flex flex-col gap-2.5">
-      <h2 className={cn('heading-h4', headingClassName)}>반려동물 종류</h2>
+      <h2 className={headingClassName ?? 'heading-h4'}>반려동물 종류</h2>
       <div className="flex flex-col gap-4">
         <ProductPetTypeTabs activeTab={activeTab} onTabChange={onTabChange} />
-        <div className="flex flex-wrap gap-2.5" role="tabpanel" id={`panel-${selectedPetTypeCode}`} aria-labelledby={activeTab}>
+        <div className="flex flex-wrap gap-1.5" role="tabpanel" id={`panel-${selectedPetTypeCode}`} aria-labelledby={activeTab}>
           {displayedPetDetails.map((pet) => (
             <Button
               key={pet.code}
               type="button"
               size="sm"
               className={cn(
-                'border-primary-200 cursor-pointer border',
+                'border-primary-200 cursor-pointer border px-2.5 py-0.75',
                 selectedDetailPet === pet.code
                   ? 'bg-primary-300 font-bold text-white'
                   : 'hover:bg-primary-300 text-gray-900 hover:text-white'
