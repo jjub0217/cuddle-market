@@ -222,9 +222,9 @@ function Home() {
                 activeTab={activePetTypeTab}
                 onTabChange={handlePetTypeTabChange}
                 selectedDetailPet={selectedDetailPet}
-                headingClassName="heading-h6 font-semibold"
+                headingClassName="text-base font-semibold"
               />
-              <CategoryFilter selectedCategory={selectedCategory} headingClassName="heading-h6 font-semibold" />
+              <CategoryFilter selectedCategory={selectedCategory} headingClassName="text-base font-semibold" />
               <DetailFilter
                 isOpen={isDetailFilterOpen}
                 onToggle={handleDetailFilterToggle}
