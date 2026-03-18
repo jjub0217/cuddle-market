@@ -13,7 +13,7 @@ export default function ProductTitle({ title, productType, price }: ProductTitle
     <div className="flex flex-col gap-3.5">
       <h1 className="heading-h2_5 text-gray-900">{title}</h1>
       <div className="flex flex-col">
-        <span className="text-lg font-semibold text-gray-500">{productTypeName}</span>
+        <span className="text-base font-semibold text-gray-500">{productTypeName}</span>
         <strong className="text-primary-300 heading-h3 max-w-[90%] overflow-hidden">
           <span>{formatPrice(price)}</span>원
         </strong>
