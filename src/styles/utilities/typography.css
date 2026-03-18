@@ -21,6 +21,13 @@
     letter-spacing: var(--text-h2_5--tracking);
   }
 
+  .heading-h2_7 {
+    font-size: var(--text-h2_7);
+    line-height: var(--text-h2_7--line-height);
+    font-weight: var(--text-h2_7--weight);
+    letter-spacing: var(--text-h2_7--tracking);
+  }
+
   .heading-h3 {
     font-size: var(--text-h3);
     line-height: var(--text-h3--line-height);

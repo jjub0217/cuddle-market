@@ -10,13 +10,19 @@ interface ProductMetadataListProps {
   favoriteCount: number
 }
 
-export default function ProductMetadataList({ addressSido, addressGugun, createdAt, viewCount, favoriteCount }: ProductMetadataListProps) {
+export default function ProductMetadataList({
+  addressSido,
+  addressGugun,
+  createdAt,
+  viewCount,
+  favoriteCount,
+}: ProductMetadataListProps) {
   return (
-    <div className="flex flex-wrap items-center gap-2 md:gap-5">
-      <ProductMetaItem icon={MapPin} label={`${addressSido} ${addressGugun}`} />
-      <ProductMetaItem icon={Clock} label={getTimeAgo(createdAt)} />
-      <ProductMetaItem icon={Eye} label={`조회 ${viewCount}`} />
-      <ProductMetaItem icon={Heart} label={`찜 ${favoriteCount}`} />
+    <div className="flex flex-wrap items-center gap-2 md:gap-3">
+      <ProductMetaItem icon={MapPin} iconSize={14} label={`${addressSido} ${addressGugun}`} textClassName="text-sm font-normal" />
+      <ProductMetaItem icon={Clock} iconSize={14} label={getTimeAgo(createdAt)} textClassName="text-sm font-normal" />
+      <ProductMetaItem icon={Eye} iconSize={14} label={`조회 ${viewCount}`} textClassName="text-sm font-normal" />
+      <ProductMetaItem icon={Heart} iconSize={14} label={`찜 ${favoriteCount}`} textClassName="text-sm font-normal" />
     </div>
   )
 }

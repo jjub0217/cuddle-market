@@ -43,7 +43,7 @@ function ProductDetail({ initialData }: ProductDetailProps) {
       <div className="px-lg pb-4xl mx-auto max-w-7xl bg-white pt-8">
         <div className="flex flex-col gap-20">
           <div className="flex flex-col justify-center gap-8 md:flex-row">
-            <div className="flex flex-1 flex-col gap-4">
+            <div className="flex flex-1 flex-col gap-4 md:max-w-150">
               <MainImage {...data} />
               <SubImages {...data} />
               <SellerProfileCard sellerInfo={data.sellerInfo} />
