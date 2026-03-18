@@ -12,7 +12,7 @@ interface ProductListHeaderProps {
 
 function ProductListHeader({ totalElements }: ProductListHeaderProps) {
   return (
-    <p className="text-text-secondary" aria-live="polite">
+    <p className="text-text-secondary text-sm" aria-live="polite">
       {`총 ${totalElements}개의 상품`}
     </p>
   )
@@ -58,7 +58,7 @@ export function ProductsSection({
 
   return (
     <section role="tabpanel" id={`panel-${activeTabCode}`} aria-labelledby={activeTab} className="flex flex-col gap-5">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between">
         <ProductListHeader totalElements={totalElements} />
         <div className="w-36">
           <SelectDropdown
@@ -69,7 +69,7 @@ export function ProductsSection({
               label: sort.label,
             }))}
             placeholder="최신순"
-            buttonClassName="border-0 bg-primary-50 text-gray-900 px-3 py-2"
+            buttonClassName="border-0 bg-primary-50 text-gray-900 px-3 py-2 text-[13px]"
           />
         </div>
       </div>

@@ -57,7 +57,7 @@ export default function Tabs({ tabs, activeTab, onTabChange, ariaLabel, excludeT
       role="tablist"
       aria-label={ariaLabel}
       onKeyDown={handleKeyDown}
-      className={cn('border-b-primary-200 flex gap-1 md:gap-2.5 md:border-b-2 md:pb-1')}
+      className={cn('flex w-fit gap-1 md:gap-2.5')}
     >
       {filteredTabs.map((tab) => (
         <Button
@@ -70,8 +70,8 @@ export default function Tabs({ tabs, activeTab, onTabChange, ariaLabel, excludeT
           className={cn(
             'flex-1 cursor-pointer rounded-full bg-white text-base whitespace-nowrap md:rounded-2xl md:bg-transparent',
             activeTab === tab.id
-              ? 'md:bg-primary-300 bg-primary-500 font-bold text-white'
-              : 'md:hover:bg-primary-100 bg-gray-100 text-gray-900'
+              ? 'md:bg-primary-300 bg-primary-500 py-1.5 font-bold text-white'
+              : 'md:hover:bg-primary-100 bg-gray-100 py-1.5 text-gray-900'
           )}
           aria-selected={activeTab === tab.id}
           aria-controls={`panel-${tab.code}`}

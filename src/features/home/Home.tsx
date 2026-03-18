@@ -32,8 +32,7 @@ function Home() {
   const urlPetType = searchParams.get('petType')
   const urlProductType = searchParams.get('productType')
   const initialPetTab = (urlPetType && PET_TYPE_TABS.find((tab) => tab.code === urlPetType)?.id) || 'pet-tab-all'
-  const initialProductTab =
-    (urlProductType && PRODUCT_TYPE_TABS.find((tab) => tab.code === urlProductType)?.id) || 'tab-all'
+  const initialProductTab = (urlProductType && PRODUCT_TYPE_TABS.find((tab) => tab.code === urlProductType)?.id) || 'tab-all'
 
   const [activePetTypeTab, setActivePetTypeTab] = useState<PetTypeTabId>(initialPetTab)
   const [activeProductTypeTab, setActiveProductTypeTab] = useState<ProductTypeTabId>(initialProductTab)
@@ -107,8 +106,7 @@ function Home() {
       setActivePetTypeTab(newPetTab)
     }
     const newProductType = searchParams.get('productType')
-    const newProductTab =
-      (newProductType && PRODUCT_TYPE_TABS.find((tab) => tab.code === newProductType)?.id) || 'tab-all'
+    const newProductTab = (newProductType && PRODUCT_TYPE_TABS.find((tab) => tab.code === newProductType)?.id) || 'tab-all'
     if (newProductTab !== activeProductTypeTab) {
       setActiveProductTypeTab(newProductTab)
     }
@@ -126,29 +124,32 @@ function Home() {
     queryKey,
 
     queryFn: async ({ pageParam = 0 }) => {
-      const data = await fetchGraphQL<{ products: any }>(`
+      const data = await fetchGraphQL<{ products: any }>(
+        `
         query Products($page: Int!, $size: Int!, $productType: String, $productStatuses: String, $minPrice: Int, $maxPrice: Int, $addressSido: String, $addressGugun: String, $categories: String, $petType: String, $petDetailType: String, $keyword: String, $sortBy: String, $sortOrder: String) {
           products(page: $page, size: $size, productType: $productType, productStatuses: $productStatuses, minPrice: $minPrice, maxPrice: $maxPrice, addressSido: $addressSido, addressGugun: $addressGugun, categories: $categories, petType: $petType, petDetailType: $petDetailType, keyword: $keyword, sortBy: $sortBy, sortOrder: $sortOrder) {
             content { id title price mainImageUrl petDetailType productStatus productType tradeStatus createdAt viewCount favoriteCount isFavorite }
             page totalPages totalElements hasNext
           }
         }
-      `, {
-        page: pageParam,
-        size: 20,
-        productType: filterParams.productType || undefined,
-        productStatuses: filterParams.productStatuses || undefined,
-        minPrice: filterParams.minPrice ? Number(filterParams.minPrice) : undefined,
-        maxPrice: filterParams.maxPrice ? Number(filterParams.maxPrice) : undefined,
-        addressSido: filterParams.addressSido || undefined,
-        addressGugun: filterParams.addressGugun || undefined,
-        categories: filterParams.categories || undefined,
-        petType: filterParams.petType || undefined,
-        petDetailType: filterParams.petDetailType || undefined,
-        keyword: filterParams.keyword || undefined,
-        sortBy: filterParams.sortBy || undefined,
-        sortOrder: filterParams.sortOrder || undefined,
-      })
+      `,
+        {
+          page: pageParam,
+          size: 20,
+          productType: filterParams.productType || undefined,
+          productStatuses: filterParams.productStatuses || undefined,
+          minPrice: filterParams.minPrice ? Number(filterParams.minPrice) : undefined,
+          maxPrice: filterParams.maxPrice ? Number(filterParams.maxPrice) : undefined,
+          addressSido: filterParams.addressSido || undefined,
+          addressGugun: filterParams.addressGugun || undefined,
+          categories: filterParams.categories || undefined,
+          petType: filterParams.petType || undefined,
+          petDetailType: filterParams.petDetailType || undefined,
+          keyword: filterParams.keyword || undefined,
+          sortBy: filterParams.sortBy || undefined,
+          sortOrder: filterParams.sortOrder || undefined,
+        }
+      )
       return data.products
     },
 
@@ -221,9 +222,9 @@ function Home() {
                 activeTab={activePetTypeTab}
                 onTabChange={handlePetTypeTabChange}
                 selectedDetailPet={selectedDetailPet}
-                headingClassName="heading-h5"
+                headingClassName="text-base font-semibold"
               />
-              <CategoryFilter selectedCategory={selectedCategory} headingClassName="heading-h5" />
+              <CategoryFilter selectedCategory={selectedCategory} headingClassName="text-base font-semibold" />
               <DetailFilter
                 isOpen={isDetailFilterOpen}
                 onToggle={handleDetailFilterToggle}
@@ -233,8 +234,8 @@ function Home() {
                 headingClassName="lg:text-base!"
               />
             </section>
-            <section aria-label="상품 목록" className="flex flex-col gap-3">
-              <div data-nosnippet>
+            <section aria-label="상품 목록" className="flex flex-col gap-2.5">
+              <div className="border-b-[1.5px] border-b-primary-200 pb-1" data-nosnippet>
                 <Tabs
                   tabs={PRODUCT_TYPE_TABS}
                   activeTab={activeProductTypeTab}
