@@ -39,7 +39,7 @@ export function CategoryFilter({ headingClassName, selectedCategory }: CategoryF
             type="button"
             size="sm"
             className={cn(
-              'border-primary-200 cursor-pointer border px-2.5 py-0.75',
+              'border-primary-200 cursor-pointer border px-2.5 py-0.75 text-[13px] font-normal md:font-medium',
               selectedCategory === category.code
                 ? 'bg-primary-300 font-bold text-white'
                 : 'hover:bg-primary-300 text-gray-900 hover:text-white'
