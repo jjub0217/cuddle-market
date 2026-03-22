@@ -37,7 +37,7 @@ interface StaticHomeFallbackProps {
 
 export default function StaticHomeFallback({ products, totalElements }: StaticHomeFallbackProps) {
   return (
-    <div className="pb-4xl bg-white pt-6">
+    <div className="pb-4xl pt-6">
       <div className="px-lg mx-auto max-w-7xl">
         <div className="flex flex-col gap-12">
           {/* 필터 영역 플레이스홀더 (Home의 PetTypeFilter + CategoryFilter + DetailFilter 자리) */}

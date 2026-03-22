@@ -60,7 +60,7 @@ export default function ProfileData({
   const provider = getProvider(user?.email)
 
   return (
-    <aside aria-label="프로필" className="flex h-fit flex-col rounded-none border-b border-gray-200 px-5 py-0 pt-5 md:max-w-72 md:min-w-72 md:rounded-xl md:border md:py-5">
+    <aside aria-label="프로필" className="flex h-fit flex-col rounded-none border-b border-gray-200 bg-white px-5 py-0 pt-5 md:max-w-72 md:min-w-72 md:rounded-xl md:border md:py-5">
       <div className="text-text-primary sticky top-24 flex flex-col rounded-xl">
         <div className="flex flex-col gap-3 md:gap-6">
           <div className="flex flex-row items-center gap-3.5 md:flex-col">

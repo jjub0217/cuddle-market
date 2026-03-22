@@ -6,7 +6,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen flex-col">
       <Header />
       <main
-        className="w-full flex-1 transition-[padding-top] duration-300"
+        className="w-full flex-1 bg-white transition-[padding-top] duration-300"
         style={{ paddingTop: 'var(--header-height, 72px)' }}
       >
         {children}

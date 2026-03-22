@@ -105,7 +105,7 @@ function UserPage() {
 
   return (
     <>
-      <div className="pb-4xl relative bg-white pt-0 md:pt-8">
+      <div className="pb-4xl relative pt-0 md:pt-8">
         <div className="mx-auto max-w-7xl">
           <AnimatePresence>
             {unblockError ? (

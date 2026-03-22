@@ -213,7 +213,7 @@ function Home() {
 
   return (
     <>
-      <div className="pb-4xl bg-white pt-6">
+      <div className="pb-4xl pt-6">
         <h1 className="sr-only">커들마켓</h1>
         <div className="px-lg mx-auto max-w-7xl">
           <div className="flex flex-col gap-12">
