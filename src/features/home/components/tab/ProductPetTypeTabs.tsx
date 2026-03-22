@@ -54,7 +54,7 @@ export function ProductPetTypeTabs({ activeTab, onTabChange }: ProductPetTypeTab
               'bg-primary-100 flex-1 cursor-pointer rounded-full px-4 py-2 text-sm whitespace-nowrap md:text-base xl:rounded-2xl xl:bg-white',
               activeTab === tab.id
                 ? 'bg-primary-500 xl:bg-primary-300 font-bold text-white'
-                : 'hover:bg-primary-100 text-gray-900'
+                : 'hover:bg-primary-500 hover:text-white text-gray-900'
             )}
             role="tab"
             aria-selected={activeTab === tab.id}
