@@ -1,6 +1,7 @@
 'use client'
 
 import ProfileData from '@/components/profile/ProfileData'
+import Footer from '@/components/footer/Footer'
 import { useState } from 'react'
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter, useParams } from 'next/navigation'
@@ -152,6 +153,7 @@ function UserPage() {
       </div>
       <UserReportModal isOpen={isReportModalOpen} onCancel={() => setIsReportModalOpen(false)} userNickname={userData.nickname} userId={Number(id)} />
       <BlockModal isOpen={isBlockModalOpen} onCancel={() => setIsBlockModalOpen(false)} userNickname={userData.nickname} userId={Number(id)} />
+      <Footer />
     </>
   )
 }
