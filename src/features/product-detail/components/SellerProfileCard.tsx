@@ -33,7 +33,7 @@ export default function SellerProfileCard({ sellerInfo }: SellerProfileCardProps
 
   return (
     sellerInfo?.sellerId !== user?.id && (
-      <div className="flex justify-between rounded-lg border border-gray-300 p-5">
+      <div className="flex items-center justify-between rounded-lg border border-gray-300 p-3">
         <div className="flex items-center gap-2">
           <div className="bg-primary-50 relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full">
             {sellerInfo.sellerProfileImageUrl ? (
@@ -51,11 +51,11 @@ export default function SellerProfileCard({ sellerInfo }: SellerProfileCardProps
               <div className="heading-h5 font-normal!">{sellerInfo?.sellerNickname.charAt(0).toUpperCase()}</div>
             )}
           </div>
-          <h2 className="text-gray-900">{sellerInfo?.sellerNickname}</h2>
+          <h2 className="font-medium text-gray-900">{sellerInfo?.sellerNickname}</h2>
         </div>
         <Button
           size="sm"
-          className="h-fit cursor-pointer border border-gray-300 bg-white text-sm text-gray-900"
+          className="h-fit cursor-pointer border border-gray-300 bg-white text-xs md:text-sm text-gray-900"
           onClick={() => goToUserPage(sellerInfo.sellerId)}
         >
           판매자 프로필 보기

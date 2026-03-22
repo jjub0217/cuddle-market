@@ -37,7 +37,7 @@ export default function ProductSummary({ data }: ProductHeaderProps) {
         <button
           type="button"
           onClick={() => setIsReportOpen(true)}
-          className="flex cursor-pointer items-center gap-1 text-sm text-gray-400 hover:text-red-500"
+          className="hidden cursor-pointer items-center gap-1 text-sm text-gray-400 hover:text-red-500 md:flex"
         >
           <Flag size={14} />
           <span>신고하기</span>

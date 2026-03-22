@@ -14,7 +14,7 @@ export function ProductHeading({ title, price, productTypeName }: ProductHeading
         <span className="text-primary-300 max-w-[90%] overflow-hidden font-bold">
           <span>{formatPrice(price)}</span>원
         </span>
-        <span className="text-[13px] md:text-sm font-normal md:font-semibold text-gray-500">{productTypeName}</span>
+        {productTypeName ? <span className="text-[13px] md:text-sm font-normal md:font-semibold text-gray-500">{productTypeName}</span> : null}
       </p>
     </div>
   )
