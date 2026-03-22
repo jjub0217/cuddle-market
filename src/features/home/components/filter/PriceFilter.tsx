@@ -35,7 +35,7 @@ export function PriceFilter({ headingClassName, selectedPriceRange }: PriceFilte
   }
   return (
     <div className="flex flex-col gap-2">
-      <h4 id="price-filter-heading" className={cn('heading-h5', headingClassName)}>
+      <h4 id="price-filter-heading" className={headingClassName ?? 'heading-h4'}>
         가격대
       </h4>
       <div className="gap-sm grid grid-cols-2 flex-wrap md:flex" role="group" aria-labelledby="price-filter-heading">
@@ -45,7 +45,7 @@ export function PriceFilter({ headingClassName, selectedPriceRange }: PriceFilte
             type="button"
             size="sm"
             className={cn(
-              'bg-primary-50 cursor-pointer',
+              'bg-primary-50 cursor-pointer text-xs md:text-sm font-medium',
               selectedPriceRange?.min === item.value.min && selectedPriceRange?.max === item.value.max
                 ? 'bg-primary-300 font-bold text-white'
                 : 'hover:bg-primary-300 text-gray-900 hover:text-white'

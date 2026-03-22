@@ -32,7 +32,7 @@ export function DetailFilterButton({ isOpen, onClick, ariaControls, filterReset 
     >
       <div className={cn('flex items-center gap-2')}>
         <FilterIcon className={cn('h-4 w-4')} aria-hidden="true" />
-        <span className={cn('text-sm font-bold')}>세부 필터</span>
+        <span className={cn('text-sm font-semibold')}>세부 필터</span>
         {isMd ? (
           <p
             className={cn('bg-primary-50 items-center justify-center overflow-hidden rounded-md px-3 py-1 text-xs')}
@@ -43,7 +43,7 @@ export function DetailFilterButton({ isOpen, onClick, ariaControls, filterReset 
         ) : null}
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-1 md:gap-4">
         <Button size="xs" type="button" className="bg-primary-50 cursor-pointer py-0.75" onClick={filterReset}>
           필터 초기화
         </Button>

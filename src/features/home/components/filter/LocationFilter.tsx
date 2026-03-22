@@ -68,7 +68,7 @@ export function LocationFilter({ headingClassName }: LocationFilterProps) {
 
   return (
     <div className="flex flex-1 flex-col gap-2">
-      <h4 id="location-filter-heading" className={cn('heading-h5', headingClassName)}>
+      <h4 id="location-filter-heading" className={headingClassName ?? 'heading-h4'}>
         지역
       </h4>
       <div className="flex flex-col gap-2.5 md:flex-row" role="group" aria-labelledby="location-filter-heading">

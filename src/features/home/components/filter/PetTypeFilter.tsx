@@ -8,7 +8,7 @@ import { useFilterNavigation } from '@/hooks/useFilterNavigation'
 import { useState } from 'react'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 
-const INITIAL_DISPLAY_COUNT = 9
+const INITIAL_DISPLAY_COUNT = 13
 
 interface PetTypeFilterProps {
   activeTab: PetTypeTabId
@@ -63,7 +63,7 @@ export function PetTypeFilter({ activeTab, headingClassName, selectedDetailPet, 
   return (
     <div className="flex flex-col gap-2.5">
       <h2 className={headingClassName ?? 'heading-h4'}>반려동물 종류</h2>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1 md:gap-4">
         <ProductPetTypeTabs activeTab={activeTab} onTabChange={onTabChange} />
         <div className="flex flex-wrap gap-1.5" role="tabpanel" id={`panel-${selectedPetTypeCode}`} aria-labelledby={activeTab}>
           {displayedPetDetails.map((pet) => (
@@ -72,7 +72,7 @@ export function PetTypeFilter({ activeTab, headingClassName, selectedDetailPet, 
               type="button"
               size="sm"
               className={cn(
-                'border-primary-200 cursor-pointer border px-2.5 py-0.75',
+                'border-primary-200 cursor-pointer border px-2.5 py-0.75 text-[13px] font-normal md:font-medium',
                 selectedDetailPet === pet.code
                   ? 'bg-primary-300 font-bold text-white'
                   : 'hover:bg-primary-300 text-gray-900 hover:text-white'
@@ -87,7 +87,7 @@ export function PetTypeFilter({ activeTab, headingClassName, selectedDetailPet, 
             <Button
               type="button"
               size="sm"
-              className="cursor-pointer bg-gray-100 py-0.75 px-2.5 text-gray-600 md:hidden"
+              className="cursor-pointer bg-gray-100 py-0.75 px-2.5 text-[13px] text-gray-600 md:hidden"
               onClick={() => setShowAll(true)}
             >
               더보기 ({filteredPetDetails.length - INITIAL_DISPLAY_COUNT}개)

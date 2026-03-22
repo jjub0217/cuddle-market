@@ -52,7 +52,7 @@ export function ProductStateFilter({
   return (
     <div className="flex flex-col gap-2">
       {useUrlSync ? (
-        <h4 id="condition-filter-heading" className={cn('heading-h5', headingClassName)}>
+        <h4 id="condition-filter-heading" className={headingClassName ?? 'heading-h5'}>
           상품 상태
         </h4>
       ) : (
@@ -80,7 +80,7 @@ export function ProductStateFilter({
               htmlFor={`productStatus-${item.value}`}
               className={cn(
                 'flex cursor-pointer flex-col gap-1 rounded-lg px-4 py-2 text-center',
-                'bg-primary-50 text-sm font-medium',
+                'bg-primary-50 text-xs md:text-sm font-medium',
                 labelClassname,
                 selectedProductStatus === item.value
                   ? 'bg-primary-300 text-white'

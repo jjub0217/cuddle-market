@@ -231,7 +231,7 @@ function Home() {
                 selectedProductStatus={selectedProductStatus}
                 selectedPriceRange={selectedProductPrice}
                 filterReset={filterReset}
-                headingClassName="lg:text-base!"
+                headingClassName="text-sm font-medium"
               />
             </section>
             <section aria-label="상품 목록" className="flex flex-col gap-2.5">
