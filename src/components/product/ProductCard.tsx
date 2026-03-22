@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import type { Product } from '@/types/product'
 import { ProductThumbnail } from './components/ProductThumbnail'
@@ -31,9 +32,11 @@ function ProductCard({ data, 'data-index': dataIndex }: ProductCardProps) {
   const productTradeName = getTradeStatus(tradeStatus)
   const productTypeName = getProductType(productType)
   const productTradeColor = getTradeStatusColor(tradeStatus)
-  const handleCardClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
+  const router = useRouter()
+  const handleContentClick = (e: React.MouseEvent) => {
+    if (window.getSelection()?.toString()) return
     window.scrollTo({ top: 0, behavior: 'smooth' })
+    router.push(ROUTES.DETAIL_ID(id, title))
   }
 
   return (
@@ -45,10 +48,9 @@ function ProductCard({ data, 'data-index': dataIndex }: ProductCardProps) {
         href={ROUTES.DETAIL_ID(id, title)}
         className="absolute inset-0 z-0"
         aria-label={`${title}, ${price}원, ${productStatusName}, ${petTypeName}, ${productTradeName}`}
-        onClick={handleCardClick}
       />
-      <div className="pointer-events-none relative z-1 flex cursor-pointer flex-row-reverse md:flex-col-reverse">
-        <ProductInfo title={title} price={price} createdAt={createdAt} favoriteCount={favoriteCount} productTypeName={productTypeName} />
+      <div className="relative z-1 flex cursor-pointer flex-row-reverse md:flex-col-reverse" onClick={handleContentClick}>
+        <ProductInfo title={title} price={price} createdAt={createdAt} favoriteCount={favoriteCount} productTypeName={productTypeName} isFavorite={isFavorite} onLikeClick={handleToggleFavorite} />
         <ProductThumbnail
           imageUrl={mainImageUrl}
           title={title}
@@ -57,8 +59,6 @@ function ProductCard({ data, 'data-index': dataIndex }: ProductCardProps) {
           productStatusName={productStatusName}
           tradeStatus={productTradeName}
           productTradeColor={productTradeColor}
-          isFavorite={isFavorite}
-          onLikeClick={handleToggleFavorite}
           priority={dataIndex !== undefined && dataIndex < 4}
         />
       </div>

@@ -25,12 +25,7 @@ interface ProductsSectionProps {
   selectedSort?: string
 }
 
-export function ProductsSection({
-  products,
-  totalElements,
-  activeTab,
-  selectedSort = '최신순',
-}: ProductsSectionProps) {
+export function ProductsSection({ products, totalElements, activeTab, selectedSort = '최신순' }: ProductsSectionProps) {
   const { searchParams, pathname, push } = useFilterNavigation()
 
   const activeTabCode = PRODUCT_TYPE_TABS.find((tab) => tab.id === activeTab)?.code

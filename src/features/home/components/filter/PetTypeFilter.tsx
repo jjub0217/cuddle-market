@@ -87,7 +87,7 @@ export function PetTypeFilter({ activeTab, headingClassName, selectedDetailPet, 
             <Button
               type="button"
               size="sm"
-              className="cursor-pointer bg-gray-100 text-gray-600 md:hidden"
+              className="cursor-pointer bg-gray-100 py-0.75 px-2.5 text-gray-600 md:hidden"
               onClick={() => setShowAll(true)}
             >
               더보기 ({filteredPetDetails.length - INITIAL_DISPLAY_COUNT}개)
