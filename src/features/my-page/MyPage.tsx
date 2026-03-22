@@ -262,7 +262,7 @@ function MyPage() {
 
   return (
     <>
-      <div className="pb-4xl bg-white pt-0 md:pt-8">
+      <div className="pb-4xl pt-0 md:pt-8">
         <h1 className="sr-only">마이페이지</h1>
         <div className="mx-auto flex max-w-7xl flex-col gap-3.5 md:flex-row md:gap-8">
           <ProfileData setIsWithdrawModalOpen={setIsWithdrawModalOpen} data={myData!} isMyProfile />
