@@ -13,6 +13,7 @@ const MdPreview = dynamic(() => import('./components/markdown/MdPreview'), {
 import { getBoardType } from '@/lib/utils/getBoardType'
 import Badge from '@/components/commons/badge/Badge'
 import { formatDate } from '@/lib/utils/formatDate'
+import { getTimeAgo } from '@/lib/utils/getTimeAgo'
 import { CommentList, type ReplyRequestFormValues } from './components/CommentList'
 import { CommentForm } from './components/CommentForm'
 import ProfileAvatar from '@/components/commons/ProfileAvatar'
@@ -263,18 +264,18 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
                   </div>
                 ) : null}
               </div>
-              <div className="flex items-baseline justify-between md:items-center">
+              <div className="flex items-end justify-between">
                 <div className="flex items-center gap-3.5">
-                  <ProfileAvatar imageUrl={data.authorProfileImageUrl} nickname={data.authorNickname} size="lg" />
+                  <ProfileAvatar imageUrl={data.authorProfileImageUrl} nickname={data.authorNickname} size="lg" className="h-10 w-10 md:h-12 md:w-12" />
                   {/* 유저 정보 */}
                   <div className="flex flex-col justify-center gap-0.5">
-                    <p>{data.authorNickname}</p>
-                    <p>{formatDate(data.createdAt)}</p>
+                    <p className="text-sm md:text-base font-semibold">{data.authorNickname}</p>
+                    <p className="text-sm text-gray-500">{getTimeAgo(data.createdAt)}</p>
                   </div>
                 </div>
-                <p>조회 {data.viewCount}</p>
+                <p className="text-sm text-gray-500">조회 {data.viewCount}</p>
               </div>
-              <h1 className="border-b border-gray-300 pb-3.5 text-lg font-semibold">{data.title}</h1>
+              <h1 className="border-b border-gray-300 pb-3.5 text-lg font-bold">{data.title}</h1>
               <MdPreview value={data.content} className="p-0" />
             </div>
 
@@ -282,9 +283,9 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
               aria-label="댓글"
               className="flex flex-col gap-3.5 rounded-lg border border-gray-400 bg-white px-6 py-5 shadow-xl"
             >
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 text-sm font-semibold text-gray-500">
                 <span>댓글</span>
-                <span>{data.commentCount}</span>
+                <span className="font-normal">{data.commentCount}</span>
               </div>
 
               {commentData?.comments ? <CommentList comments={commentData.comments} postId={id!} /> : null}

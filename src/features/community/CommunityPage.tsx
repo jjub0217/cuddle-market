@@ -218,7 +218,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
                         value: sort.label,
                         label: sort.label,
                       }))}
-                      buttonClassName="border border-gray-300 bg-primary-50 text-gray-900 text-base px-3 py-2"
+                      buttonClassName="border border-gray-300 bg-primary-50 text-gray-900 text-[13px] px-3 py-2"
                     />
                   </div>
                   <SearchBar
@@ -323,21 +323,22 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
                     >
                       <Link href={ROUTES.COMMUNITY_DETAIL_ID(post.id, post.title)} className="flex flex-col gap-1">
                         <p className="font-semibold">{post.title}</p>
-                        <div className="flex items-center gap-2.5">
-                          <div className="flex items-center gap-1 text-gray-500">
-                            <UserRound size={16} className="text-gray-500" strokeWidth={2.3} />
+                        <p className="line-clamp-1 text-gray-600">{post.contentPreview}</p>
+                        <div className="mt-3 flex items-center gap-2.5 text-sm">
+                          <div className="flex items-center gap-1 text-gray-400">
+                            <UserRound size={14} className="text-gray-400" strokeWidth={2.3} />
                             <p>{post.authorNickname}</p>
                           </div>
-                          <div className="flex items-center gap-1 text-gray-500">
-                            <Clock size={16} className="text-gray-500" strokeWidth={2.3} />
+                          <div className="flex items-center gap-1 text-gray-400">
+                            <Clock size={14} className="text-gray-400" strokeWidth={2.3} />
                             <p>{getTimeAgo(post.createdAt)}</p>
                           </div>
-                          <div className="flex items-center gap-1 text-gray-500">
-                            <MessageSquare size={16} className="text-gray-500" strokeWidth={2.3} />
+                          <div className="flex items-center gap-1 text-gray-400">
+                            <MessageSquare size={14} className="text-gray-400" strokeWidth={2.3} />
                             <p>{post.commentCount}</p>
                           </div>
-                          <div className="flex items-center gap-1 text-gray-500">
-                            <Eye size={16} className="text-gray-500" strokeWidth={2.3} />
+                          <div className="flex items-center gap-1 text-gray-400">
+                            <Eye size={14} className="text-gray-400" strokeWidth={2.3} />
                             <span>조회</span>
                             <span>{post.viewCount}</span>
                           </div>
@@ -347,27 +348,27 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
                   ) : (
                     <li
                       key={post.id}
-                      className="flex flex-col justify-center gap-2.5 rounded-lg border border-gray-400 bg-white px-3.5 pt-3.5 pb-5 shadow-xl"
+                      className="flex flex-col justify-center gap-2.5 rounded-lg border border-gray-400 bg-white px-3.5 pt-3.5 pb-3.5 shadow-xl"
                     >
                       <Link href={ROUTES.COMMUNITY_DETAIL_ID(post.id, post.title)} className="flex flex-col gap-4">
-                        <div className="flex flex-col gap-2">
-                          <p className="text-lg font-semibold">{post.title}</p>
+                        <div className="flex flex-col gap-1 md:gap-2">
+                          <p className="line-clamp-1 text-base md:text-lg font-bold md:font-semibold">{post.title}</p>
 
                           <p className="line-clamp-1">{post.contentPreview}</p>
                         </div>
-                        <div className="flex items-center justify-between gap-2.5">
-                          <div className="flex items-center text-gray-500">
+                        <div className="flex items-center justify-between gap-2.5 text-sm">
+                          <div className="flex items-center text-gray-400">
                             <p>{post.authorNickname}</p>
                             <Dot size={12} />
                             <p>{getTimeAgo(post.createdAt)}</p>
                           </div>
                           <div className="flex items-center gap-2.5">
-                            <div className="flex items-center gap-1 text-gray-500">
-                              <MessageSquare size={16} className="text-gray-500" strokeWidth={2.3} />
+                            <div className="flex items-center gap-1 text-gray-400">
+                              <MessageSquare size={14} className="text-gray-400" strokeWidth={2.3} />
                               <p>{post.commentCount}</p>
                             </div>
-                            <div className="flex items-center gap-1 text-gray-500">
-                              <Eye size={16} className="text-gray-500" strokeWidth={2.3} />
+                            <div className="flex items-center gap-1 text-gray-400">
+                              <Eye size={14} className="text-gray-400" strokeWidth={2.3} />
                               <span>{post.viewCount}</span>
                             </div>
                           </div>
@@ -381,9 +382,9 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
           </div>
           {hasNextPage ? (
             isMd ? (
-              <LoadMoreButton onClick={() => fetchNextPage()} isLoading={isFetchingNextPage} className="border-0" />
+              <LoadMoreButton onClick={() => fetchNextPage()} isLoading={isFetchingNextPage} className="mt-4 border-0" />
             ) : (
-              <div className="px-3.5">
+              <div className="mt-4 px-3.5">
                 <LoadMoreButton onClick={() => fetchNextPage()} isLoading={isFetchingNextPage} className="border-0" />
               </div>
             )

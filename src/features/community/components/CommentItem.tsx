@@ -1,6 +1,7 @@
 'use client'
 
 import { formatDate } from '@/lib/utils/formatDate'
+import { getTimeAgo } from '@/lib/utils/getTimeAgo'
 import { cn } from '@/lib/utils/cn'
 import type { Comment } from '@/types'
 import { EllipsisVertical } from 'lucide-react'
@@ -65,14 +66,14 @@ export function CommentItem({
 
         {/* 유저 정보 및 내용 */}
         <div className="flex flex-col justify-center gap-1">
-          <div className="flex items-center gap-3.5">
+          <div className="flex flex-col gap-0.5">
             <div className="flex items-center gap-1.5">
-              <p>{comment.authorNickname}</p>
+              <p className="text-sm md:text-base font-semibold">{comment.authorNickname}</p>
               {Number(comment.authorId) === user?.id ? (
                 <p className="bg-primary-200 rounded-full px-2.5 py-1 text-xs font-semibold text-white">작성자</p>
               ) : null}
             </div>
-            <p className="text-sm text-gray-400">{formatDate(comment.createdAt)}</p>
+            <p className="text-xs md:text-sm text-gray-500">{getTimeAgo(comment.createdAt)}</p>
           </div>
           <p>{comment.content}</p>
 
