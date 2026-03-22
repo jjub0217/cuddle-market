@@ -39,7 +39,9 @@ export function ProductPetTypeTabs({ activeTab, onTabChange }: ProductPetTypeTab
         ref={scrollRef}
         role="tablist"
         aria-label="반려동물 타입 대분류"
-        className={cn('border-b-primary-200 scrollbar-hide flex gap-1.5 overflow-x-auto pb-1 md:gap-2.5 md:overflow-visible md:border-b-[1.5px]')}
+        className={cn(
+          'border-b-primary-200 scrollbar-hide flex gap-1.5 overflow-x-auto pb-1 md:gap-2.5 md:overflow-visible md:border-b-[1.5px]'
+        )}
       >
         {PET_TYPE_TABS.map((tab) => (
           <Button
@@ -49,8 +51,10 @@ export function ProductPetTypeTabs({ activeTab, onTabChange }: ProductPetTypeTab
             type="button"
             onClick={() => onTabChange(tab.id)}
             className={cn(
-              'bg-primary-100 text-base flex-1 cursor-pointer rounded-full py-1.5 whitespace-nowrap xl:rounded-2xl xl:bg-white',
-              activeTab === tab.id ? 'bg-primary-500 xl:bg-primary-300 font-bold text-white' : 'hover:bg-primary-100 text-gray-900',
+              'bg-primary-100 flex-1 cursor-pointer rounded-full py-1.5 text-sm whitespace-nowrap md:text-base xl:rounded-2xl xl:bg-white',
+              activeTab === tab.id
+                ? 'bg-primary-500 xl:bg-primary-300 font-bold text-white'
+                : 'hover:bg-primary-100 text-gray-900'
             )}
             role="tab"
             aria-selected={activeTab === tab.id}

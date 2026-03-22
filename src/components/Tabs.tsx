@@ -53,12 +53,7 @@ export default function Tabs({ tabs, activeTab, onTabChange, ariaLabel, excludeT
   }
 
   return (
-    <div
-      role="tablist"
-      aria-label={ariaLabel}
-      onKeyDown={handleKeyDown}
-      className={cn('flex w-fit gap-1 md:gap-2.5')}
-    >
+    <div role="tablist" aria-label={ariaLabel} onKeyDown={handleKeyDown} className={cn('flex w-fit gap-1 md:gap-2.5')}>
       {filteredTabs.map((tab) => (
         <Button
           key={tab.id}
@@ -68,7 +63,7 @@ export default function Tabs({ tabs, activeTab, onTabChange, ariaLabel, excludeT
           type="button"
           onClick={() => onTabChange(tab.id)}
           className={cn(
-            'flex-1 cursor-pointer rounded-full bg-white text-base whitespace-nowrap md:rounded-2xl md:bg-transparent',
+            'flex-1 cursor-pointer rounded-full bg-white text-sm whitespace-nowrap md:rounded-2xl md:bg-transparent md:text-base',
             activeTab === tab.id
               ? 'md:bg-primary-300 bg-primary-500 py-1.5 font-bold text-white'
               : 'md:hover:bg-primary-100 bg-gray-100 py-1.5 text-gray-900'
