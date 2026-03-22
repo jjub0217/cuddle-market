@@ -21,8 +21,8 @@ export default function ProductMetadataList({
     <div className="flex flex-wrap items-center gap-2 md:gap-3">
       <ProductMetaItem icon={MapPin} iconSize={14} label={`${addressSido} ${addressGugun}`} textClassName="text-sm font-normal" />
       <ProductMetaItem icon={Clock} iconSize={14} label={getTimeAgo(createdAt)} textClassName="text-sm font-normal" />
-      <ProductMetaItem icon={Eye} iconSize={14} label={`조회 ${viewCount}`} textClassName="text-sm font-normal" />
-      <ProductMetaItem icon={Heart} iconSize={14} label={`찜 ${favoriteCount}`} textClassName="text-sm font-normal" />
+      <span className="hidden md:flex"><ProductMetaItem icon={Eye} iconSize={14} label={`조회 ${viewCount}`} textClassName="text-sm font-normal" /></span>
+      <span className="hidden md:flex"><ProductMetaItem icon={Heart} iconSize={14} label={`찜 ${favoriteCount}`} textClassName="text-sm font-normal" /></span>
     </div>
   )
 }

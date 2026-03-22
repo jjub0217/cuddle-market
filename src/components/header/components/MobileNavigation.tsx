@@ -62,7 +62,7 @@ export default function MobileNavigation({ isOpen, onClose }: MobileNavigationPr
       />
       <nav
         className={cn(
-          'fixed top-0 left-0 h-full w-9/12 -translate-x-full overflow-y-auto bg-white px-4 py-5 transition-transform data-[open=true]:translate-x-0',
+          'fixed top-0 right-0 h-full w-full translate-x-full overflow-y-auto bg-white px-4 py-5 transition-transform duration-300 data-[open=true]:translate-x-0',
           Z_INDEX.SIDEBAR,
         )}
         data-open={isOpen}
@@ -80,7 +80,7 @@ export default function MobileNavigation({ isOpen, onClose }: MobileNavigationPr
               <button
                 type="button"
                 onClick={openLogoutConfirm}
-                className="border-primary-200 text-primary-200 flex-1 cursor-pointer rounded-sm border py-2 text-center text-sm font-bold"
+                className="border-primary-200 text-primary-200 flex-1 cursor-pointer rounded-sm border py-2 text-center text-sm font-semibold"
               >
                 로그아웃
               </button>
@@ -88,7 +88,7 @@ export default function MobileNavigation({ isOpen, onClose }: MobileNavigationPr
               <Link
                 href={ROUTES.LOGIN}
                 onClick={onClose}
-                className="border-primary-200 text-primary-200 flex-1 rounded-sm border py-2 text-center text-sm font-bold"
+                className="border-primary-200 text-primary-200 flex-1 rounded-sm border py-2 text-center text-sm font-semibold"
               >
                 로그인
               </Link>
@@ -96,7 +96,7 @@ export default function MobileNavigation({ isOpen, onClose }: MobileNavigationPr
             <Link
               href={hasHydrated && isLogin() ? ROUTES.MYPAGE : ROUTES.SIGNUP}
               onClick={onClose}
-              className="border-primary-200 bg-primary-200 flex-1 rounded-sm border py-2 text-center text-sm font-bold text-white"
+              className="border-primary-200 bg-primary-200 flex-1 rounded-sm border py-2 text-center text-sm font-normal text-white"
             >
               {hasHydrated && isLogin() ? '마이페이지' : '회원가입'}
             </Link>
@@ -104,7 +104,7 @@ export default function MobileNavigation({ isOpen, onClose }: MobileNavigationPr
         </div>
         <div className="pt-5">
           <Link href={ROUTES.HOME} onClick={onClose} className="flex w-full items-center justify-between py-2">
-            <span className="font-bold">마켓</span>
+            <span className="font-normal">마켓</span>
           </Link>
           <div>
             <button
@@ -112,7 +112,7 @@ export default function MobileNavigation({ isOpen, onClose }: MobileNavigationPr
               onClick={() => setIsCommunityOpen((prev) => !prev)}
               className="flex w-full cursor-pointer items-center justify-between py-2"
             >
-              <span className="font-bold">커뮤니티</span>
+              <span className="font-normal">커뮤니티</span>
               <ChevronDown className={cn('h-5 w-5 transition-transform', isCommunityOpen && 'rotate-180')} />
             </button>
             <div
@@ -120,7 +120,7 @@ export default function MobileNavigation({ isOpen, onClose }: MobileNavigationPr
               className="overflow-hidden transition-[height] duration-300"
               style={{ height: isCommunityOpen ? `${communityHeight}px` : '0' }}
             >
-              <div className="flex flex-col gap-2 pt-2 pl-4">
+              <div className="flex flex-col gap-2 pl-4">
                 <Link href={`${ROUTES.COMMUNITY}?tab=tab-question`} onClick={onClose}>
                   질문 있어요
                 </Link>
@@ -132,7 +132,7 @@ export default function MobileNavigation({ isOpen, onClose }: MobileNavigationPr
           </div>
           <div>
             <button type="button" onClick={() => setIsCustomerOpen((prev) => !prev)} className="flex w-full items-center justify-between py-2">
-              <span className="font-bold">고객센터</span>
+              <span className="font-normal">고객센터</span>
               <ChevronDown className={cn('h-5 w-5 transition-transform', isCustomerOpen && 'rotate-180')} />
             </button>
             <div
@@ -140,7 +140,7 @@ export default function MobileNavigation({ isOpen, onClose }: MobileNavigationPr
               className="overflow-hidden transition-[height] duration-300"
               style={{ height: isCustomerOpen ? `${customerHeight}px` : '0' }}
             >
-              <div className="flex flex-col gap-2 pt-2 pl-4">
+              <div className="flex flex-col gap-2 pl-4">
                 <a href="mailto:support@cuddlemarket.com?subject=허들마켓 1:1 문의">1:1 문의</a>
               </div>
             </div>

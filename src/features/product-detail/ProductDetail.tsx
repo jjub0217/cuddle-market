@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api/api'
 import Footer from '@/components/footer/Footer'
+import ProductDetailMobileMeta from './components/ProductDetailMobileMeta'
 import MainImage from './components/MainImage'
 import SubImages from './components/SubImages'
 import SellerProfileCard from './components/SellerProfileCard'
@@ -49,13 +50,14 @@ function ProductDetail({ initialData }: ProductDetailProps) {
               <SellerProfileCard sellerInfo={data.sellerInfo} />
             </div>
 
-            <div className="flex flex-1 flex-col gap-3.5">
-              <div className="flex flex-col gap-6">
+            <div className="flex flex-1 flex-col gap-5">
+              <div className="flex flex-col gap-3 md:gap-6">
                 <div className="flex flex-col gap-3.5">
                   <ProductBadges {...data} />
                   <ProductSummary data={data} />
                 </div>
                 <ProductDescription description={data.description} />
+                <ProductDetailMobileMeta productId={data.id} productTitle={data.title} viewCount={data.viewCount} favoriteCount={data.favoriteCount} />
               </div>
               <ProductActions {...data} />
             </div>
