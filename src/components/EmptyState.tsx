@@ -15,9 +15,9 @@ export default function EmptyState({ icon: Icon, title, description, className =
       <div className="bg-primary-50 flex h-25 w-25 items-center justify-center rounded-full">
         <Icon size={50} strokeWidth={1} className="text-primary-300" />
       </div>
-      <div className="flex flex-col items-center gap-2">
-        <p className="heading-h4">{title}</p>
-        {description ? <p className="text-gray-500">{description}</p> : null}
+      <div className="flex flex-col items-center gap-1 md:gap-2">
+        <p className="text-base font-semibold md:heading-h5">{title}</p>
+        {description ? <p className="text-sm text-gray-500">{description}</p> : null}
       </div>
     </div>
   )
