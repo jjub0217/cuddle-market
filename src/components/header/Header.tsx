@@ -50,7 +50,7 @@ export default function Header() {
   const [isSideOpen, setIsSideOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   // 검색바 높이: h-8(32px) 고정 디자인이므로 상수 사용 (scrollHeight 접근에 의한 강제 리플로우 방지)
-  const searchBarHeight = 32
+  const searchBarHeight = 40
   const pathname = usePathname()
 
   // 가시성 계산
@@ -149,7 +149,7 @@ export default function Header() {
               }}
             >
               <Suspense>
-                <SearchBar id="search-mobile" className="h-8 xl:hidden" inputClass="py-1 text-sm" />
+                <SearchBar id="search-mobile" className="h-10 xl:hidden" inputClass="py-1 text-[15px]" />
               </Suspense>
             </div>
           ) : null}
