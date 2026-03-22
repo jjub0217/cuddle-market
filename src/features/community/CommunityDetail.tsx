@@ -3,6 +3,7 @@
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api/api'
+import Footer from '@/components/footer/Footer'
 import dynamic from 'next/dynamic'
 
 const MdPreview = dynamic(() => import('./components/markdown/MdPreview'), {
@@ -321,6 +322,7 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
         error={postDeleteError}
         onClearError={() => setIsPostDeleteError(null)}
       />
+      <Footer />
     </>
   )
 }
