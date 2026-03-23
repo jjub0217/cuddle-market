@@ -12,6 +12,7 @@ interface CommentFormProps {
   legendText: string
   register: UseFormRegister<CommentFormValues>
   onSubmit: () => void
+  onCancel?: () => void
 }
 
 const MAX_ROWS = 4
@@ -20,7 +21,7 @@ const PADDING_Y = 16 // py-2 = 8px * 2
 const BASE_HEIGHT = LINE_HEIGHT + PADDING_Y // 1행 높이 (36px)
 const MAX_HEIGHT = LINE_HEIGHT * MAX_ROWS + PADDING_Y // 5행 높이 (116px)
 
-export function CommentForm({ id, placeholder, legendText, register, onSubmit }: CommentFormProps) {
+export function CommentForm({ id, placeholder, legendText, register, onSubmit, onCancel }: CommentFormProps) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
   const { ref, onChange, ...rest } = register('content')
 
@@ -51,7 +52,12 @@ export function CommentForm({ id, placeholder, legendText, register, onSubmit }:
           }}
           {...rest}
         />
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-end gap-3.5">
+          {onCancel ? (
+            <Button size="md" className="cursor-pointer rounded-full bg-gray-100 text-sm shadow" type="button" onClick={onCancel}>
+              취소
+            </Button>
+          ) : null}
           <Button size="md" className="cursor-pointer rounded-full bg-white text-sm shadow" type="submit">
             등록
           </Button>
