@@ -26,13 +26,13 @@ function Select({ isOpen, disabled, onClick, id, buttonClassName, selectedLabel,
       onClick={onClick}
       id={id}
       className={cn(
-        'relative flex w-full cursor-pointer rounded-lg border border-gray-400 px-3 py-3 pr-10 text-sm disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100/30 disabled:text-gray-300',
+        'relative flex w-full items-center cursor-pointer rounded-lg border border-gray-400 px-3 py-3 pr-10 text-sm disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100/30 disabled:text-gray-300',
         buttonClassName,
       )}
     >
       <span>{selectedLabel || placeholder}</span>
       <div className="absolute top-0 right-3 flex h-full w-9 items-center justify-end">
-        <DownArrow className="h-4 w-4 text-gray-400" strokeWidth={2} />
+        <DownArrow className={cn('h-4 w-4 text-gray-400 transition-transform', isOpen && 'rotate-180')} strokeWidth={2} />
       </div>
     </button>
   )
@@ -56,7 +56,7 @@ function SelectOption({ option, isSelected, onSelect, optionClassName, optionRef
       aria-selected={isSelected}
       onClick={() => onSelect(option.value)}
       className={cn(
-        'flex w-full items-center justify-between rounded-md p-2 text-left text-sm transition hover:bg-gray-100 focus:bg-gray-100 focus:outline-none',
+        'flex w-full items-center justify-between gap-2 rounded-md p-2 text-left text-sm transition hover:bg-gray-100 focus:bg-gray-100 focus:outline-none',
         isSelected && 'bg-gray-100 ring-1 ring-gray-300',
         optionClassName,
       )}
@@ -99,7 +99,7 @@ function SelectOptions({ options, selectedValue, onSelect, placeholder, optionCl
       role="listbox"
       aria-label={placeholder}
       className={cn(
-        'absolute top-full left-0 mt-0.5 flex max-h-56 w-full flex-col gap-1 overflow-auto rounded-md border border-gray-400 bg-white p-1 shadow-md',
+        'absolute top-full left-0 mt-0.5 flex max-h-56 min-w-fit w-full flex-col gap-1 overflow-auto rounded-md border border-gray-400 bg-white p-1 shadow-md',
         Z_INDEX.DROPDOWN,
       )}
     >
@@ -129,6 +129,7 @@ interface SelectDropdownProps {
   id?: string
   buttonClassName?: string
   optionClassName?: string
+  displayValue?: string
 }
 
 export default function SelectDropdown({
@@ -140,6 +141,7 @@ export default function SelectDropdown({
   id,
   buttonClassName,
   optionClassName,
+  displayValue,
 }: SelectDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const selectRef = useRef<HTMLDivElement>(null)
@@ -188,7 +190,7 @@ export default function SelectDropdown({
         onClick={handleToggle}
         id={id}
         buttonClassName={buttonClassName}
-        selectedLabel={selectedOption?.label}
+        selectedLabel={displayValue || selectedOption?.label}
         placeholder={placeholder}
       />
 
