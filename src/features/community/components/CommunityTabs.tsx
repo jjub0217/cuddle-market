@@ -28,9 +28,9 @@ export function CommunityTabs({ tabs, activeTab, onTabChange, ariaLabel, exclude
           type="button"
           onClick={() => onTabChange(tab.id)}
           className={cn(
-            'cursor-pointer rounded-full bg-white text-base md:rounded-2xl md:bg-transparent',
+            'cursor-pointer rounded-full bg-white text-sm md:text-base md:rounded-2xl md:bg-transparent',
             activeTab === tab.id
-              ? 'md:bg-primary-300 bg-primary-500 font-bold text-white'
+              ? 'md:bg-primary-300 bg-primary-500 font-medium text-white'
               : 'hover:bg-primary-100 bg-gray-100 text-gray-900 md:bg-transparent'
           )}
           aria-selected={activeTab === tab.id}

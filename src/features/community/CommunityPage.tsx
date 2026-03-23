@@ -200,7 +200,18 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
                   isFilterCollapsed ? 'max-h-0 overflow-hidden' : 'max-h-75 overflow-visible'
                 )}
               >
-                <div className="flex items-center justify-between border-b border-gray-200 p-3.5">
+                <div className="flex items-center gap-2 border-b border-gray-200 p-3.5">
+                  <SelectDropdown
+                    value={selectedSort}
+                    onChange={handleSortChange}
+                    displayValue={selectedSort.replace('순', '')}
+                    options={COMMUNITY_SORT_TYPE.map((sort) => ({
+                      value: sort.label,
+                      label: sort.label,
+                    }))}
+                    buttonClassName="border-0 bg-primary-500 text-white text-sm font-medium rounded-full px-4 pr-8 py-2"
+                    optionClassName="whitespace-nowrap"
+                  />
                   <CommunityTabs
                     tabs={COMMUNITY_TABS}
                     activeTab={activeCommunityTypeTab}
@@ -210,7 +221,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
                 </div>
 
                 <div className="flex flex-row-reverse items-center justify-between gap-3 border-b border-gray-200 px-3.5 pt-4 pb-3.5">
-                  <div className="h-11 w-24">
+                  <div className="h-11 w-32">
                     <SelectDropdown
                       value={selectSearchType}
                       onChange={handleSearchTypeChange}
@@ -218,7 +229,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
                         value: sort.label,
                         label: sort.label,
                       }))}
-                      buttonClassName="border border-gray-300 bg-primary-50 text-gray-900 text-[13px] px-3 py-2"
+                      buttonClassName="border border-gray-300 bg-primary-50 text-gray-900 text-base px-3 py-2 h-11"
                     />
                   </div>
                   <SearchBar
@@ -228,24 +239,6 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
                     className="h-11 max-w-full"
                     paramName="communityKeyword"
                   />
-                </div>
-                <div className="flex gap-2 border-b border-gray-200 bg-white px-3.5 py-3.5">
-                  {COMMUNITY_SORT_TYPE.map((sortType) => (
-                    <Button
-                      key={sortType.id}
-                      type="button"
-                      size="sm"
-                      onClick={() => handleSortChange(sortType.label)}
-                      className={cn(
-                        'cursor-pointer rounded-full whitespace-nowrap',
-                        selectedSort === sortType.label
-                          ? 'bg-primary-500 font-bold text-white'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      )}
-                    >
-                      {sortType.label}
-                    </Button>
-                  ))}
                 </div>
               </div>
             </div>
