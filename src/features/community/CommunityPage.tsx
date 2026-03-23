@@ -190,7 +190,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
       <div className="pb-4xl mx-auto max-w-7xl px-0 md:px-4">
         <div className="flex w-full flex-col">
           {/* 모바일: 필터 영역 */}
-          <div className={cn('md:hidden', !isFilterCollapsed && `sticky top-16 ${Z_INDEX.DROPDOWN}`)}>
+          <div className={cn('md:hidden sticky top-16 bg-white', Z_INDEX.DROPDOWN)}>
             {/* 접히는 필터 영역 */}
             <div
               className={cn(
@@ -298,11 +298,11 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
             aria-labelledby={activeCommunityTypeTab}
           >
             {communityPosts.length === 0 ? (
-              <div className={cn('px-3.5 md:px-0', isFilterCollapsed ? 'mt-20 md:mt-0' : 'mt-4 md:mt-0')}>
+              <div className={cn('px-3.5 md:px-0', 'mt-4 md:mt-0')}>
                 <EmptyState icon={MessageSquareText} title="아직 게시글이 없어요" description="첫 번째 이야기를 나눠보세요!" />
               </div>
             ) : (
-              <ul className={cn('flex flex-col gap-2.5 px-3.5 md:p-0', isFilterCollapsed ? 'mt-20 md:mt-0' : 'mt-4 md:mt-0')}>
+              <ul className={cn('flex flex-col gap-2.5 px-3.5 md:p-0', 'mt-4 md:mt-0')}>
                 {communityPosts.map((post) => (
                   <li key={post.id}>
                     {/* 데스크탑 카드 */}
