@@ -14,7 +14,7 @@ import { UserRound, Clock, MessageSquare, Eye, Dot, Plus, MessageSquareText } fr
 import LoadMoreButton from '@/components/commons/button/LoadMoreButton'
 import { getTimeAgo } from '@/lib/utils/getTimeAgo'
 import { useUserStore } from '@/store/userStore'
-import { useMediaQuery } from '@/hooks/useMediaQuery'
+
 import { useScrollDirection } from '@/hooks/useScrollDirection'
 import Button from '@/components/commons/button/Button'
 import { cn } from '@/lib/utils/cn'
@@ -44,7 +44,6 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
   const tabParam = searchParams.get('tab') as CommunityTabId | null
   // URL 파라미터에서 직접 계산 (상태 불필요)
   const activeCommunityTypeTab: CommunityTabId = tabParam === 'tab-info' ? 'tab-info' : 'tab-question'
-  const isMd = useMediaQuery('(min-width: 768px)')
   const { isCollapsed: isFilterCollapsed } = useScrollDirection()
 
   const sortBy = searchParams.get('sortBy')
@@ -191,81 +190,36 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
       <div className="pb-4xl mx-auto max-w-7xl px-0 md:px-4">
         <div className="flex w-full flex-col">
           {/* 모바일: 필터 영역 */}
-          {!isMd ? (
-            <div className={cn(!isFilterCollapsed && `sticky top-16 ${Z_INDEX.DROPDOWN}`)}>
-              {/* 접히는 필터 영역 */}
-              <div
-                className={cn(
-                  'bg-white transition-all duration-300 ease-out',
-                  isFilterCollapsed ? 'max-h-0 overflow-hidden' : 'max-h-75 overflow-visible'
-                )}
-              >
-                <div className="flex items-center gap-2 border-b border-gray-200 p-3.5">
-                  <SelectDropdown
-                    value={selectedSort}
-                    onChange={handleSortChange}
-                    displayValue={selectedSort.replace(/ ?순$/, '')}
-                    options={COMMUNITY_SORT_TYPE.map((sort) => ({
-                      value: sort.label,
-                      label: sort.label,
-                    }))}
-                    buttonClassName="border-0 bg-primary-500 text-white text-sm font-medium rounded-full px-4 pr-8 py-2"
-                    optionClassName="whitespace-nowrap"
-                  />
-                  <CommunityTabs
-                    tabs={COMMUNITY_TABS}
-                    activeTab={activeCommunityTypeTab}
-                    onTabChange={handleTabChange}
-                    ariaLabel="커뮤니티 타입"
-                  />
-                </div>
-
-                <div className="flex flex-row-reverse items-center justify-between gap-3 border-b border-gray-200 px-3.5 pt-4 pb-3.5">
-                  <div className="h-11 w-32">
-                    <SelectDropdown
-                      value={selectSearchType}
-                      onChange={handleSearchTypeChange}
-                      options={COMMUNITY_SEARCH_TYPE.map((sort) => ({
-                        value: sort.label,
-                        label: sort.label,
-                      }))}
-                      buttonClassName="border border-gray-300 bg-primary-50 text-gray-900 text-base px-3 py-2 h-11"
-                    />
-                  </div>
-                  <SearchBar
-                    id="community-search-mobile"
-                    placeholder="게시글 검색"
-                    borderColor="border-gray-300"
-                    className="h-11 max-w-full"
-                    paramName="communityKeyword"
-                  />
-                </div>
-              </div>
-            </div>
-          ) : null}
-
-          {/* 데스크탑 */}
-          {isMd ? (
-            <div className="mb-7 flex w-full flex-col gap-4">
-              <div className="flex items-center justify-between">
+          <div className={cn('md:hidden', !isFilterCollapsed && `sticky top-16 ${Z_INDEX.DROPDOWN}`)}>
+            {/* 접히는 필터 영역 */}
+            <div
+              className={cn(
+                'bg-white transition-all duration-300 ease-out',
+                isFilterCollapsed ? 'max-h-0 overflow-hidden' : 'max-h-75 overflow-visible'
+              )}
+            >
+              <div className="flex items-center gap-2 border-b border-gray-200 p-3.5">
+                <SelectDropdown
+                  value={selectedSort}
+                  onChange={handleSortChange}
+                  displayValue={selectedSort.replace(/ ?순$/, '')}
+                  options={COMMUNITY_SORT_TYPE.map((sort) => ({
+                    value: sort.label,
+                    label: sort.label,
+                  }))}
+                  buttonClassName="border-0 bg-primary-500 text-white text-sm font-medium rounded-full px-4 pr-8 py-2"
+                  optionClassName="whitespace-nowrap"
+                />
                 <CommunityTabs
                   tabs={COMMUNITY_TABS}
                   activeTab={activeCommunityTypeTab}
                   onTabChange={handleTabChange}
                   ariaLabel="커뮤니티 타입"
                 />
-                {hasHydrated && isLogin() ? (
-                  <Link
-                    href={`${ROUTES.COMMUNITY_POST}?tab=${activeCommunityTypeTab}`}
-                    className="bg-primary-300 rounded-lg px-3 py-2 text-white"
-                  >
-                    글쓰기
-                  </Link>
-                ) : null}
               </div>
 
-              <div className="flex flex-row items-center justify-between gap-5">
-                <div className="h-auto w-36">
+              <div className="flex flex-row-reverse items-center justify-between gap-3 border-b border-gray-200 px-3.5 pt-4 pb-3.5">
+                <div className="h-11 w-32">
                   <SelectDropdown
                     value={selectSearchType}
                     onChange={handleSearchTypeChange}
@@ -273,121 +227,161 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
                       value: sort.label,
                       label: sort.label,
                     }))}
-                    buttonClassName="border border-gray-300 bg-primary-50 text-gray-900 text-base px-3 py-2 "
+                    buttonClassName="border border-gray-300 bg-primary-50 text-gray-900 text-base px-3 py-2 h-11"
                   />
                 </div>
                 <SearchBar
-                  id="community-search-desktop"
-                  placeholder="게시글 제목이나 내용, 작성자로 검색해보세요"
+                  id="community-search-mobile"
+                  placeholder="게시글 검색"
                   borderColor="border-gray-300"
                   className="h-11 max-w-full"
                   paramName="communityKeyword"
                 />
-                <div className="w-36">
-                  <SelectDropdown
-                    value={selectedSort}
-                    onChange={handleSortChange}
-                    options={COMMUNITY_SORT_TYPE.map((category) => ({
-                      value: category.label,
-                      label: category.label,
-                    }))}
-                    buttonClassName="border border-gray-300 bg-primary-50 text-gray-900 text-base px-3 py-2"
-                  />
-                </div>
               </div>
             </div>
-          ) : null}
+          </div>
+
+          {/* 데스크탑 */}
+          <div className="hidden md:flex mb-7 w-full flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <CommunityTabs
+                tabs={COMMUNITY_TABS}
+                activeTab={activeCommunityTypeTab}
+                onTabChange={handleTabChange}
+                ariaLabel="커뮤니티 타입"
+              />
+              {hasHydrated && isLogin() ? (
+                <Link
+                  href={`${ROUTES.COMMUNITY_POST}?tab=${activeCommunityTypeTab}`}
+                  className="bg-primary-300 rounded-lg px-3 py-2 text-white"
+                >
+                  글쓰기
+                </Link>
+              ) : null}
+            </div>
+
+            <div className="flex flex-row items-center justify-between gap-5">
+              <div className="h-auto w-36">
+                <SelectDropdown
+                  value={selectSearchType}
+                  onChange={handleSearchTypeChange}
+                  options={COMMUNITY_SEARCH_TYPE.map((sort) => ({
+                    value: sort.label,
+                    label: sort.label,
+                  }))}
+                  buttonClassName="border border-gray-300 bg-primary-50 text-gray-900 text-base px-3 py-2 "
+                />
+              </div>
+              <SearchBar
+                id="community-search-desktop"
+                placeholder="게시글 제목이나 내용, 작성자로 검색해보세요"
+                borderColor="border-gray-300"
+                className="h-11 max-w-full"
+                paramName="communityKeyword"
+              />
+              <div className="w-36">
+                <SelectDropdown
+                  value={selectedSort}
+                  onChange={handleSortChange}
+                  options={COMMUNITY_SORT_TYPE.map((category) => ({
+                    value: category.label,
+                    label: category.label,
+                  }))}
+                  buttonClassName="border border-gray-300 bg-primary-50 text-gray-900 text-base px-3 py-2"
+                />
+              </div>
+            </div>
+          </div>
           <div
             id={`panel-${COMMUNITY_TABS.find((tab) => tab.id === activeCommunityTypeTab)?.code}`}
             role="tabpanel"
             aria-labelledby={activeCommunityTypeTab}
           >
             {communityPosts.length === 0 ? (
-              <div className={cn('px-3.5 md:px-0', !isMd && (isFilterCollapsed ? 'mt-20' : 'mt-4'))}>
+              <div className={cn('px-3.5 md:px-0', isFilterCollapsed ? 'mt-20 md:mt-0' : 'mt-4 md:mt-0')}>
                 <EmptyState icon={MessageSquareText} title="아직 게시글이 없어요" description="첫 번째 이야기를 나눠보세요!" />
               </div>
             ) : (
-              <ul className={cn('flex flex-col gap-2.5 px-3.5 md:p-0', !isMd && (isFilterCollapsed ? 'mt-20' : 'mt-4'))}>
-                {communityPosts.map((post) =>
-                  isMd ? (
-                    <li
-                      key={post.id}
-                      className="flex flex-col justify-center gap-2.5 rounded-lg border border-gray-400 bg-white px-3.5 pt-3.5 pb-3.5 shadow-xl"
-                    >
-                      <Link href={ROUTES.COMMUNITY_DETAIL_ID(post.id, post.title)} className="flex flex-col gap-1">
-                        <p className="font-semibold">{post.title}</p>
-                        <p className="line-clamp-1 text-gray-600">{post.contentPreview}</p>
-                        <div className="mt-3 flex items-center gap-2.5 text-sm">
-                          <div className="flex items-center gap-1 text-gray-400">
-                            <UserRound size={14} className="text-gray-400" strokeWidth={2.3} />
-                            <p>{post.authorNickname}</p>
-                          </div>
-                          <div className="flex items-center gap-1 text-gray-400">
-                            <Clock size={14} className="text-gray-400" strokeWidth={2.3} />
-                            <p>{getTimeAgo(post.createdAt)}</p>
-                          </div>
-                          <div className="flex items-center gap-1 text-gray-400">
-                            <MessageSquare size={14} className="text-gray-400" strokeWidth={2.3} />
-                            <p>{post.commentCount}</p>
-                          </div>
-                          <div className="flex items-center gap-1 text-gray-400">
-                            <Eye size={14} className="text-gray-400" strokeWidth={2.3} />
-                            <span>조회</span>
-                            <span>{post.viewCount}</span>
-                          </div>
-                        </div>
-                      </Link>
-                    </li>
-                  ) : (
-                    <li
-                      key={post.id}
-                      className="flex flex-col justify-center gap-2.5 rounded-lg border border-gray-400 bg-white px-3.5 pt-3.5 pb-3.5 shadow-xl"
-                    >
-                      <Link href={ROUTES.COMMUNITY_DETAIL_ID(post.id, post.title)} className="flex flex-col gap-4">
-                        <div className="flex flex-col gap-1 md:gap-2">
-                          <p className="line-clamp-1 text-base md:text-lg font-bold md:font-semibold">{post.title}</p>
-
-                          <p className="line-clamp-1">{post.contentPreview}</p>
-                        </div>
-                        <div className="flex items-center justify-between gap-2.5 text-sm">
-                          <div className="flex items-center text-gray-400">
-                            <p>{post.authorNickname}</p>
-                            <Dot size={12} />
-                            <p>{getTimeAgo(post.createdAt)}</p>
-                          </div>
-                          <div className="flex items-center gap-2.5">
+              <ul className={cn('flex flex-col gap-2.5 px-3.5 md:p-0', isFilterCollapsed ? 'mt-20 md:mt-0' : 'mt-4 md:mt-0')}>
+                {communityPosts.map((post) => (
+                  <li key={post.id}>
+                    {/* 데스크탑 카드 */}
+                    <div className="hidden md:block">
+                      <div className="flex flex-col justify-center gap-2.5 rounded-lg border border-gray-400 bg-white px-3.5 pt-3.5 pb-3.5 shadow-xl">
+                        <Link href={ROUTES.COMMUNITY_DETAIL_ID(post.id, post.title)} className="flex flex-col gap-1">
+                          <p className="font-semibold">{post.title}</p>
+                          <p className="line-clamp-1 text-gray-600">{post.contentPreview}</p>
+                          <div className="mt-3 flex items-center gap-2.5 text-sm">
+                            <div className="flex items-center gap-1 text-gray-400">
+                              <UserRound size={14} className="text-gray-400" strokeWidth={2.3} />
+                              <p>{post.authorNickname}</p>
+                            </div>
+                            <div className="flex items-center gap-1 text-gray-400">
+                              <Clock size={14} className="text-gray-400" strokeWidth={2.3} />
+                              <p>{getTimeAgo(post.createdAt)}</p>
+                            </div>
                             <div className="flex items-center gap-1 text-gray-400">
                               <MessageSquare size={14} className="text-gray-400" strokeWidth={2.3} />
                               <p>{post.commentCount}</p>
                             </div>
                             <div className="flex items-center gap-1 text-gray-400">
                               <Eye size={14} className="text-gray-400" strokeWidth={2.3} />
+                              <span>조회</span>
                               <span>{post.viewCount}</span>
                             </div>
                           </div>
-                        </div>
-                      </Link>
-                    </li>
-                  )
-                )}
+                        </Link>
+                      </div>
+                    </div>
+                    {/* 모바일 카드 */}
+                    <div className="md:hidden">
+                      <div className="flex flex-col justify-center gap-2.5 rounded-lg border border-gray-400 bg-white px-3.5 pt-3.5 pb-3.5 shadow-xl">
+                        <Link href={ROUTES.COMMUNITY_DETAIL_ID(post.id, post.title)} className="flex flex-col gap-4">
+                          <div className="flex flex-col gap-1">
+                            <p className="line-clamp-1 text-base font-bold">{post.title}</p>
+                            <p className="line-clamp-1">{post.contentPreview}</p>
+                          </div>
+                          <div className="flex items-center justify-between gap-2.5 text-sm">
+                            <div className="flex items-center text-gray-400">
+                              <p>{post.authorNickname}</p>
+                              <Dot size={12} />
+                              <p>{getTimeAgo(post.createdAt)}</p>
+                            </div>
+                            <div className="flex items-center gap-2.5">
+                              <div className="flex items-center gap-1 text-gray-400">
+                                <MessageSquare size={14} className="text-gray-400" strokeWidth={2.3} />
+                                <p>{post.commentCount}</p>
+                              </div>
+                              <div className="flex items-center gap-1 text-gray-400">
+                                <Eye size={14} className="text-gray-400" strokeWidth={2.3} />
+                                <span>{post.viewCount}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </Link>
+                      </div>
+                    </div>
+                  </li>
+                ))}
               </ul>
             )}
           </div>
           {hasNextPage ? (
-            isMd ? (
-              <LoadMoreButton onClick={() => fetchNextPage()} isLoading={isFetchingNextPage} className="mt-4 border-0" />
-            ) : (
-              <div className="mt-4 px-3.5">
+            <>
+              <div className="hidden md:block">
+                <LoadMoreButton onClick={() => fetchNextPage()} isLoading={isFetchingNextPage} className="mt-4 border-0" />
+              </div>
+              <div className="mt-4 px-3.5 md:hidden">
                 <LoadMoreButton onClick={() => fetchNextPage()} isLoading={isFetchingNextPage} className="border-0" />
               </div>
-            )
+            </>
           ) : null}
         </div>
       </div>
-      {!isMd && hasHydrated && isLogin() ? (
+      {hasHydrated && isLogin() ? (
         <Link
           href={`${ROUTES.COMMUNITY_POST}?tab=${activeCommunityTypeTab}`}
-          className={`bg-primary-200 fixed right-4 bottom-4 rounded-full px-3 py-3 text-white ${Z_INDEX.FLOATING_BUTTON}`}
+          className={`bg-primary-200 fixed right-4 bottom-4 rounded-full px-3 py-3 text-white md:hidden ${Z_INDEX.FLOATING_BUTTON}`}
         >
           <Plus />
         </Link>
