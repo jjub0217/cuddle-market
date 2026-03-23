@@ -275,12 +275,23 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
                   </InlineNotification>
                 ) : null}
               </AnimatePresence>
+
+              {/* 데스크톱용 댓글 입력: 카드 안에 배치 */}
+              <div className="hidden md:block">
+                <CommentForm
+                  id="comment-input-desktop"
+                  placeholder="댓글을 입력하세요"
+                  legendText="댓글 작성폼"
+                  register={register}
+                  onSubmit={handleSubmit(onSubmit)}
+                />
+              </div>
             </section>
 
-            {/* 댓글 입력: 모바일은 하단 고정, 데스크톱은 정상 위치 */}
-            <div className="fixed right-0 bottom-0 left-0 border-t border-gray-200 bg-white px-3 py-2 md:relative md:border-t-0 md:px-0 md:py-0" style={{ zIndex: 30 }}>
+            {/* 모바일용 댓글 입력: 하단 고정 */}
+            <div className="fixed right-0 bottom-0 left-0 border-t border-gray-200 bg-white px-3 py-2 md:hidden" style={{ zIndex: 30 }}>
               <CommentForm
-                id="comment-input"
+                id="comment-input-mobile"
                 placeholder="댓글을 입력하세요"
                 legendText="댓글 작성폼"
                 register={register}
