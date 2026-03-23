@@ -204,7 +204,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
                   <SelectDropdown
                     value={selectedSort}
                     onChange={handleSortChange}
-                    displayValue={selectedSort.replace('순', '')}
+                    displayValue={selectedSort.replace(/ ?순$/, '')}
                     options={COMMUNITY_SORT_TYPE.map((sort) => ({
                       value: sort.label,
                       label: sort.label,
