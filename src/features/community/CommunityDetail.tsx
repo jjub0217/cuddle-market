@@ -24,13 +24,9 @@ import PostReportModal from '@/components/modal/PostReportModal'
 import DeletePostConfirmModal from '@/components/modal/DeletePostConfirmModal'
 import { useUserStore } from '@/store/userStore'
 import { useLoginModalStore } from '@/store/modalStore'
-import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { ArrowLeft, EllipsisVertical } from 'lucide-react'
+import { EllipsisVertical } from 'lucide-react'
 import IconButton from '@/components/commons/button/IconButton'
-import { cn } from '@/lib/utils/cn'
-import { Z_INDEX } from '@/constants/ui'
 import { AnimatePresence } from 'framer-motion'
-import SimpleHeader from '@/components/header/SimpleHeader'
 import InlineNotification from '@/components/commons/InlineNotification'
 import { useOutsideClick } from '@/hooks/useOutsideClick'
 
@@ -57,7 +53,6 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
   const openLoginModal = useLoginModalStore((state) => state.openLoginModal)
   const pathname = usePathname()
   const searchParamsHook = useSearchParams()
-  const isMd = useMediaQuery('(min-width: 768px)')
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false)
   const [isReportModalOpen, setIsReportModalOpen] = useState(false)
   const [isPostDeleteModalOpen, setIsPostDeleteModalOpen] = useState(false)
@@ -136,18 +131,6 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
     router.push(`/community/${postId}/edit`)
   }
 
-  const getHeaderContent = () => {
-    switch (data?.boardType) {
-      case 'QUESTION':
-        return { title: '질문 있어요', description: '궁금한 점을 질문해보세요!', tabId: 'tab-question' }
-      case 'INFO':
-        return { title: '정보 공유', description: '유용한 정보를 공유해보세요!', tabId: 'tab-info' }
-      default:
-        return { title: '질문 있어요', description: '궁금한 점을 질문해보세요!', tabId: 'tab-question' }
-    }
-  }
-  const { title: headerTitle, description: headerDescription } = getHeaderContent()
-
   const onSubmit = (data: ReplyRequestFormValues) => {
     if (!data.content.trim()) return
     if (!user) {
@@ -185,33 +168,12 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
 
   return (
     <>
-      {/* 모바일 영역 */}
-      {!isMd ? (
-        <div
-          className={cn('bg-primary-200 sticky top-0 mx-auto flex w-full max-w-7xl justify-between px-3.5 py-4', Z_INDEX.HEADER)}
-        >
-          <button type="button" onClick={() => router.back()} className="flex cursor-pointer items-center gap-1 text-gray-600">
-            <ArrowLeft size={23} className="text-white" />
-          </button>
-          <span className="heading-h4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg font-extrabold! text-white">
-            {headerTitle}
-          </span>
-        </div>
-      ) : (
-        //  데스크탑
-        <SimpleHeader
-          title={headerTitle}
-          description={isMd ? headerDescription : undefined}
-          href={`/community?tab=${getHeaderContent().tabId}`}
-          layoutClassname="py-5 flex-col justify-between border-b border-gray-200"
-        />
-      )}
       <div className="min-h-screen bg-[#F3F4F6] pt-5">
         <div className="px-lg pb-4xl mx-auto max-w-7xl">
           <div className="flex flex-col justify-center gap-3.5">
-            <div className="flex flex-col gap-3.5 rounded-lg border border-gray-400 bg-white px-6 py-5 shadow-xl">
+            <div className="flex flex-col gap-3.5 rounded-lg border border-gray-400 bg-white px-4 md:px-6 py-5 shadow-xl">
               <div className="relative flex items-center justify-between">
-                <Badge className="bg-primary-400 w-fit rounded-full text-white">
+                <Badge className="bg-primary-400 w-fit rounded-full text-xs md:font-semibold text-white">
                   {getBoardType(data.boardType as 'QUESTION' | 'INFO')}
                 </Badge>
                 <IconButton aria-label="더보기" className="" size="sm" onClick={handleMoreToggle}>
@@ -270,18 +232,18 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
                   {/* 유저 정보 */}
                   <div className="flex flex-col justify-center gap-0.5">
                     <p className="text-sm md:text-base font-semibold">{data.authorNickname}</p>
-                    <p className="text-sm text-gray-500">{getTimeAgo(data.createdAt)}</p>
+                    <p className="text-xs md:text-sm text-gray-500">{getTimeAgo(data.createdAt)}</p>
                   </div>
                 </div>
-                <p className="text-sm text-gray-500">조회 {data.viewCount}</p>
+                <p className="text-xs md:text-sm text-gray-500">조회 {data.viewCount}</p>
               </div>
-              <h1 className="border-b border-gray-300 pb-3.5 text-lg font-bold">{data.title}</h1>
+              <h1 className="text-lg leading-snug font-bold">{data.title}</h1>
               <MdPreview value={data.content} className="p-0" />
             </div>
 
             <section
               aria-label="댓글"
-              className="flex flex-col gap-3.5 rounded-lg border border-gray-400 bg-white px-6 py-5 shadow-xl"
+              className="flex flex-col gap-3.5 rounded-lg border border-gray-400 bg-white px-3 md:px-6 py-5 shadow-xl"
             >
               <div className="flex items-center gap-1 text-sm font-semibold text-gray-500">
                 <span>댓글</span>
@@ -302,7 +264,6 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
                 legendText="댓글 작성폼"
                 register={register}
                 onSubmit={handleSubmit(onSubmit)}
-                onCancel={() => reset()}
               />
             </section>
           </div>
