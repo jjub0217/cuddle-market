@@ -6,28 +6,15 @@ interface CommentFormValues {
   content: string
 }
 
-interface CommentFormPropsBase {
+interface CommentFormProps {
   id: string
   placeholder: string
   legendText: string
+  register: UseFormRegister<CommentFormValues>
   onSubmit: () => void
   onCancel?: () => void
   textareaRef?: RefObject<HTMLTextAreaElement | null>
 }
-
-interface RegisterProps extends CommentFormPropsBase {
-  register: UseFormRegister<CommentFormValues>
-  value?: never
-  onChange?: never
-}
-
-interface ControlledProps extends CommentFormPropsBase {
-  register?: never
-  value: string
-  onChange: (value: string) => void
-}
-
-type CommentFormProps = RegisterProps | ControlledProps
 
 const MAX_ROWS = 4
 const LINE_HEIGHT = 20
@@ -35,12 +22,10 @@ const PADDING_Y = 16
 const BASE_HEIGHT = LINE_HEIGHT + PADDING_Y
 const MAX_HEIGHT = LINE_HEIGHT * MAX_ROWS + PADDING_Y
 
-export function CommentForm({ id, placeholder, legendText, onSubmit, onCancel, textareaRef: externalRef, ...props }: CommentFormProps) {
+export function CommentForm({ id, placeholder, legendText, register, onSubmit, onCancel, textareaRef: externalRef }: CommentFormProps) {
   const internalRef = useRef<HTMLTextAreaElement | null>(null)
   const textareaRef = externalRef || internalRef
-
-  const isControlled = 'value' in props && props.value !== undefined
-  const registerResult = !isControlled && props.register ? props.register('content') : null
+  const { ref, onChange, ...rest } = register('content')
 
   const handleAutoResize = useCallback(() => {
     const textarea = textareaRef.current
@@ -60,19 +45,14 @@ export function CommentForm({ id, placeholder, legendText, onSubmit, onCancel, t
           className="flex-1 rounded-lg bg-[#f0f4ff] px-3 py-2 leading-tight scrollbar-hide md:h-auto md:leading-normal md:bg-primary-50 md:rounded-none md:px-0 md:py-0 w-full resize-none focus:outline-none"
           style={{ height: `${BASE_HEIGHT}px`, maxHeight: `${MAX_HEIGHT}px`, overflowY: 'auto' }}
           ref={(e) => {
-            if (registerResult) registerResult.ref(e)
+            ref(e)
             textareaRef.current = e
           }}
-          value={isControlled ? props.value : undefined}
           onChange={(e) => {
-            if (isControlled) {
-              props.onChange(e.target.value)
-            } else if (registerResult) {
-              registerResult.onChange(e)
-            }
+            onChange(e)
             handleAutoResize()
           }}
-          {...(registerResult ? { name: registerResult.name, onBlur: registerResult.onBlur } : {})}
+          {...rest}
         />
         <div className="flex items-center justify-end gap-3.5">
           {onCancel ? (

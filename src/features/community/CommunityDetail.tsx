@@ -40,16 +40,14 @@ interface CommunityDetailProps {
 export default function CommunityDetail({ initialPostData, initialCommentData }: CommunityDetailProps) {
   const {
     handleSubmit,
+    register,
     reset,
-    watch,
-    setValue,
   } = useForm<ReplyRequestFormValues>({
     mode: 'onChange',
     defaultValues: {
       content: '',
     },
   })
-  const commentValue = watch('content')
 
   const user = useUserStore((state) => state.user)
   const setRedirectUrl = useUserStore((state) => state.setRedirectUrl)
@@ -277,31 +275,15 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
                   </InlineNotification>
                 ) : null}
               </AnimatePresence>
-
-              {/* 데스크톱: 기존 위치에 CommentForm */}
-              <div className="hidden md:block">
-                <CommentForm
-                  id="comment-input-desktop"
-                  placeholder="댓글을 입력하세요"
-                  legendText="댓글 작성폼"
-                  value={commentValue}
-                  onChange={(val) => setValue('content', val)}
-                  onSubmit={handleSubmit(onSubmit)}
-                />
-              </div>
             </section>
 
-            {/* 모바일: 하단 고정 입력바 */}
-            <div
-              className="fixed right-0 bottom-0 left-0 border-t border-gray-200 bg-white px-3 py-2 md:hidden"
-              style={{ zIndex: 30 }}
-            >
+            {/* 댓글 입력: 모바일은 하단 고정, 데스크톱은 정상 위치 */}
+            <div className="fixed right-0 bottom-0 left-0 border-t border-gray-200 bg-white px-3 py-2 md:relative md:border-t-0 md:px-0 md:py-0" style={{ zIndex: 30 }}>
               <CommentForm
-                id="comment-input-mobile"
+                id="comment-input"
                 placeholder="댓글을 입력하세요"
                 legendText="댓글 작성폼"
-                value={commentValue}
-                onChange={(val) => setValue('content', val)}
+                register={register}
                 onSubmit={handleSubmit(onSubmit)}
                 textareaRef={mobileInputRef}
               />
