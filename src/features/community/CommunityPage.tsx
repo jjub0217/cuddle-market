@@ -310,7 +310,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
                       <div className="flex flex-col justify-center gap-2.5 rounded-lg border border-gray-400 bg-white px-3.5 pt-3.5 pb-3.5 shadow-xl">
                         <Link href={ROUTES.COMMUNITY_DETAIL_ID(post.id, post.title)} className="flex flex-col gap-1">
                           <p className="font-semibold">{post.title}</p>
-                          <p className="line-clamp-1 text-gray-600">{post.contentPreview}</p>
+                          <p className="line-clamp-1 whitespace-pre-line text-gray-600">{post.contentPreview}</p>
                           <div className="mt-3 flex items-center gap-2.5 text-sm">
                             <div className="flex items-center gap-1 text-gray-400">
                               <UserRound size={14} className="text-gray-400" strokeWidth={2.3} />
@@ -339,7 +339,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
                         <Link href={ROUTES.COMMUNITY_DETAIL_ID(post.id, post.title)} className="flex flex-col gap-4">
                           <div className="flex flex-col gap-1">
                             <p className="line-clamp-1 text-base font-bold">{post.title}</p>
-                            <p className="line-clamp-1">{post.contentPreview}</p>
+                            <p className="line-clamp-1 whitespace-pre-line">{post.contentPreview}</p>
                           </div>
                           <div className="flex items-center justify-between gap-2.5 text-sm">
                             <div className="flex items-center text-gray-400">
