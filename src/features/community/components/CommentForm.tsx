@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef, type RefObject } from 'react'
 import type { UseFormRegister } from 'react-hook-form'
 import Button from '@/components/commons/button/Button'
 
@@ -13,6 +13,7 @@ interface CommentFormProps {
   register: UseFormRegister<CommentFormValues>
   onSubmit: () => void
   onCancel?: () => void
+  textareaRef?: RefObject<HTMLTextAreaElement | null>
 }
 
 const MAX_ROWS = 4
@@ -21,8 +22,9 @@ const PADDING_Y = 16 // py-2 = 8px * 2
 const BASE_HEIGHT = LINE_HEIGHT + PADDING_Y // 1행 높이 (36px)
 const MAX_HEIGHT = LINE_HEIGHT * MAX_ROWS + PADDING_Y // 5행 높이 (116px)
 
-export function CommentForm({ id, placeholder, legendText, register, onSubmit, onCancel }: CommentFormProps) {
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+export function CommentForm({ id, placeholder, legendText, register, onSubmit, onCancel, textareaRef: externalRef }: CommentFormProps) {
+  const internalRef = useRef<HTMLTextAreaElement | null>(null)
+  const textareaRef = externalRef || internalRef
   const { ref, onChange, ...rest } = register('content')
 
   const handleAutoResize = useCallback(() => {
