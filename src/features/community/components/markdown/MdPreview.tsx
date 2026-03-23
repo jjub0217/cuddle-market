@@ -20,7 +20,7 @@ export default function MdPreview({ value, height, className }: MdPreviewProps) 
           h1: (p) => <h1 {...p} className="mt-2 mb-2 text-2xl font-semibold" />,
           h2: (p) => <h2 {...p} className="mt-2 mb-2 text-xl font-semibold" />,
           h3: (p) => <h3 {...p} className="mt-2 mb-1 text-lg font-semibold" />,
-          p: (p) => <p {...p} className="my-3" />,
+          p: (p) => <p {...p} className="mb-3 first:mt-0 mt-3" />,
           ul: (p) => <ul {...p} className="my-2 ml-5 list-disc" />,
           ol: (p) => <ol {...p} className="my-2 ml-5 list-decimal" />,
           li: (p) => <li {...p} className="my-1" />,
