@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef, type RefObject } from 'react'
 import type { UseFormRegister } from 'react-hook-form'
 import Button from '@/components/commons/button/Button'
 
@@ -13,16 +13,18 @@ interface CommentFormProps {
   register: UseFormRegister<CommentFormValues>
   onSubmit: () => void
   onCancel?: () => void
+  textareaRef?: RefObject<HTMLTextAreaElement | null>
 }
 
 const MAX_ROWS = 4
-const LINE_HEIGHT = 20 // leading-tight (1.25) * 16px
-const PADDING_Y = 16 // py-2 = 8px * 2
-const BASE_HEIGHT = LINE_HEIGHT + PADDING_Y // 1행 높이 (36px)
-const MAX_HEIGHT = LINE_HEIGHT * MAX_ROWS + PADDING_Y // 5행 높이 (116px)
+const LINE_HEIGHT = 20
+const PADDING_Y = 16
+const BASE_HEIGHT = LINE_HEIGHT + PADDING_Y
+const MAX_HEIGHT = LINE_HEIGHT * MAX_ROWS + PADDING_Y
 
-export function CommentForm({ id, placeholder, legendText, register, onSubmit, onCancel }: CommentFormProps) {
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+export function CommentForm({ id, placeholder, legendText, register, onSubmit, onCancel, textareaRef: externalRef }: CommentFormProps) {
+  const internalRef = useRef<HTMLTextAreaElement | null>(null)
+  const textareaRef = externalRef || internalRef
   const { ref, onChange, ...rest } = register('content')
 
   const handleAutoResize = useCallback(() => {
@@ -31,7 +33,7 @@ export function CommentForm({ id, placeholder, legendText, register, onSubmit, o
     textarea.style.height = `${BASE_HEIGHT}px`
     const newHeight = Math.min(textarea.scrollHeight, MAX_HEIGHT)
     textarea.style.height = `${newHeight}px`
-  }, [])
+  }, [textareaRef])
 
   return (
     <form className="bg-transparent p-0 md:bg-primary-50 md:rounded-lg md:pt-5 md:pr-6 md:pb-4 md:pl-4" onSubmit={onSubmit}>

@@ -20,6 +20,7 @@ import ProfileAvatar from '@/components/commons/ProfileAvatar'
 import { useForm } from 'react-hook-form'
 import type { CommentPostRequestData, CommunityDetailItem, Comment } from '@/types'
 import { useEffect, useRef, useState } from 'react'
+import { MessageSquareText } from 'lucide-react'
 import PostReportModal from '@/components/modal/PostReportModal'
 import DeletePostConfirmModal from '@/components/modal/DeletePostConfirmModal'
 import { useUserStore } from '@/store/userStore'
@@ -38,8 +39,8 @@ interface CommunityDetailProps {
 
 export default function CommunityDetail({ initialPostData, initialCommentData }: CommunityDetailProps) {
   const {
-    handleSubmit, // form onSubmit에 들어가는 함수 : 제출 시 실행할 함수를 감싸주는 함수
-    register, // onChange 등의 이벤트 객체 생성 : input에 "이 필드는 폼의 어떤 이름이다"라고 연결해주는 함수
+    handleSubmit,
+    register,
     reset,
   } = useForm<ReplyRequestFormValues>({
     mode: 'onChange',
@@ -58,6 +59,7 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
   const [isPostDeleteModalOpen, setIsPostDeleteModalOpen] = useState(false)
   const [postDeleteError, setIsPostDeleteError] = useState<React.ReactNode | null>(null)
   const [commentPostError, setCommentPostError] = useState<React.ReactNode | null>(null)
+  const mobileInputRef = useRef<HTMLTextAreaElement>(null)
   const modalRef = useRef<HTMLDivElement>(null)
   useOutsideClick(isMoreMenuOpen, [modalRef], () => setIsMoreMenuOpen(false))
 
@@ -168,7 +170,7 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
 
   return (
     <>
-      <div className="min-h-screen bg-[#F3F4F6] pt-5">
+      <div className="min-h-screen bg-[#F3F4F6] pt-5 pb-16 md:pb-0">
         <div className="px-lg pb-4xl mx-auto max-w-7xl">
           <div className="flex flex-col justify-center gap-3.5">
             <div className="flex flex-col gap-3.5 rounded-lg border border-gray-400 bg-white px-4 md:px-6 py-5 shadow-xl">
@@ -250,7 +252,22 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
                 <span className="font-normal">{data.commentCount}</span>
               </div>
 
-              {commentData?.comments ? <CommentList comments={commentData.comments} postId={id!} /> : null}
+              {commentData?.comments && commentData.comments.length > 0 ? (
+                <CommentList comments={commentData.comments} postId={id!} />
+              ) : (
+                <div className="flex flex-col items-center gap-3 py-6 md:hidden">
+                  <MessageSquareText size={32} className="text-gray-300" />
+                  <p className="text-sm text-gray-400">첫 댓글을 남겨보세요</p>
+                  <button
+                    type="button"
+                    className="bg-primary-500 cursor-pointer rounded-full px-4 py-2 text-sm font-medium text-white"
+                    onClick={() => mobileInputRef.current?.focus()}
+                  >
+                    댓글 쓰기
+                  </button>
+                </div>
+              )}
+
               <AnimatePresence>
                 {commentPostError ? (
                   <InlineNotification type="error" onClose={() => setCommentPostError(null)}>
@@ -258,14 +275,19 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
                   </InlineNotification>
                 ) : null}
               </AnimatePresence>
+            </section>
+
+            {/* 댓글 입력: 모바일은 하단 고정, 데스크톱은 정상 위치 */}
+            <div className="fixed right-0 bottom-0 left-0 border-t border-gray-200 bg-white px-3 py-2 md:relative md:border-t-0 md:px-0 md:py-0" style={{ zIndex: 30 }}>
               <CommentForm
                 id="comment-input"
                 placeholder="댓글을 입력하세요"
                 legendText="댓글 작성폼"
                 register={register}
                 onSubmit={handleSubmit(onSubmit)}
+                textareaRef={mobileInputRef}
               />
-            </section>
+            </div>
           </div>
         </div>
       </div>
