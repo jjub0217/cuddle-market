@@ -1,7 +1,11 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import Providers from './providers'
 import ClientComponents from '@/components/ClientComponents'
 import './globals.css'
+
+export const viewport: Viewport = {
+  interactiveWidget: 'resizes-content',
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://cuddle-market.vercel.app'),
