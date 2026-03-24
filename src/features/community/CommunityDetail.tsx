@@ -40,7 +40,8 @@ interface CommunityDetailProps {
 export default function CommunityDetail({ initialPostData, initialCommentData }: CommunityDetailProps) {
   const {
     handleSubmit,
-    register,
+    watch,
+    setValue,
     reset,
   } = useForm<ReplyRequestFormValues>({
     mode: 'onChange',
@@ -48,6 +49,8 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
       content: '',
     },
   })
+
+  const commentContent = watch('content')
 
   const user = useUserStore((state) => state.user)
   const setRedirectUrl = useUserStore((state) => state.setRedirectUrl)
@@ -283,7 +286,8 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
                   id="comment-input-desktop"
                   placeholder="댓글을 입력하세요"
                   legendText="댓글 작성폼"
-                  register={register}
+                  value={commentContent}
+                  onChangeValue={(v) => setValue('content', v)}
                   onSubmit={handleSubmit(onSubmit)}
                 />
               </div>
@@ -295,7 +299,8 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
                 id="comment-input-mobile"
                 placeholder="댓글을 입력하세요"
                 legendText="댓글 작성폼"
-                register={register}
+                value={commentContent}
+                onChangeValue={(v) => setValue('content', v)}
                 onSubmit={handleSubmit(onSubmit)}
                 textareaRef={mobileInputRef}
               />
