@@ -186,17 +186,22 @@ export function CommentList({ comments, postId }: CommentListProps) {
     </ul>
 
     {/* 모바일: 답글 오버레이 */}
-    {replyingToId ? (
-      <div className="md:hidden">
-        <ReplyOverlay
-          comment={comments.find((c) => c.id === replyingToId)!}
-          replies={openRepliesCommentId === replyingToId ? repliesData?.comments : undefined}
-          register={register}
-          onSubmit={handleSubmit(onSubmit)}
-          onClose={() => handleOpenReplyForm(replyingToId)}
-        />
-      </div>
-    ) : null}
+    {(() => {
+      if (!replyingToId) return null
+      const targetComment = comments.find((c) => c.id === replyingToId)
+      if (!targetComment) return null
+      return (
+        <div className="md:hidden">
+          <ReplyOverlay
+            comment={targetComment}
+            replies={openRepliesCommentId === replyingToId ? repliesData?.comments : undefined}
+            register={register}
+            onSubmit={handleSubmit(onSubmit)}
+            onClose={() => handleOpenReplyForm(replyingToId)}
+          />
+        </div>
+      )
+    })()}
     </>
   )
 }
