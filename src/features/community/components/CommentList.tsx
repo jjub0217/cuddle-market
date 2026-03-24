@@ -87,6 +87,8 @@ export function CommentList({ comments, postId }: CommentListProps) {
       queryClient.invalidateQueries({ queryKey: ['community', postId, 'comments'] })
       // 대댓글 목록도 refetch
       queryClient.invalidateQueries({ queryKey: ['community', postId, 'replies'] })
+      // 게시글 상세 refetch (commentCount 업데이트를 위해)
+      queryClient.invalidateQueries({ queryKey: ['community', postId] })
     },
   })
 
