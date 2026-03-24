@@ -80,7 +80,7 @@ export function CommentItem({
           <div className="flex items-center gap-3.5">
             {onHandleReply ? (
               <button className="cursor-pointer text-sm text-blue-500" type="button" onClick={onHandleReply}>
-                답글
+                답글쓰기
               </button>
             ) : null}
             {/* 답글 버튼 (대댓글이 아니고, hasChildren이 있을 때만) */}
