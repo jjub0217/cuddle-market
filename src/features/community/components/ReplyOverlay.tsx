@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import type { Comment } from '@/types'
 import type { UseFormRegister } from 'react-hook-form'
@@ -19,10 +19,25 @@ interface ReplyOverlayProps {
 export function ReplyOverlay({ comment, replies, register, onSubmit, onClose }: ReplyOverlayProps) {
   const totalCount = 1 + (replies?.length ?? 0)
 
+  const onCloseRef = useRef(onClose)
+  onCloseRef.current = onClose
+
   useEffect(() => {
     document.body.classList.add('overflow-hidden')
+
+    // 히스토리에 오버레이 상태 추가
+    history.pushState({ replyOverlay: true }, '')
+
+    // 뒤로가기 감지
+    const handlePopState = () => {
+      onCloseRef.current()
+    }
+
+    window.addEventListener('popstate', handlePopState)
+
     return () => {
       document.body.classList.remove('overflow-hidden')
+      window.removeEventListener('popstate', handlePopState)
     }
   }, [])
 
@@ -30,7 +45,7 @@ export function ReplyOverlay({ comment, replies, register, onSubmit, onClose }: 
     <div className="fixed inset-0 z-50 flex flex-col bg-white">
       {/* 헤더 */}
       <div className="flex items-center gap-3 border-b border-gray-200 px-4 py-3">
-        <button type="button" onClick={onClose} className="cursor-pointer">
+        <button type="button" onClick={() => history.back()} className="cursor-pointer">
           <ArrowLeft size={20} />
         </button>
         <span className="text-base font-bold">댓글 {totalCount}</span>
