@@ -86,6 +86,7 @@ export default function SearchBar({
         border
         borderColor={borderColor}
         backgroundColor="bg-white"
+        enterKeyHint="search"
         inputClass={inputClass}
         onClear={handleClearKeyword}
       />
