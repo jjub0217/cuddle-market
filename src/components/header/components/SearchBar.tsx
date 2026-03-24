@@ -35,9 +35,10 @@ export default function SearchBar({
     if (e.key === 'Enter') {
       const target = e.currentTarget
       const searchKeyword = target.value.trim()
+      const isCurrentPageSearch = isHomePage || paramName !== 'keyword'
 
-      if (isHomePage) {
-        // 메인페이지에서는 현재 URL에 쿼리 파라미터만 추가
+      if (isCurrentPageSearch) {
+        // 현재 페이지에서 검색 (메인페이지 또는 커스텀 paramName 사용 시)
         const params = new URLSearchParams(searchParams.toString())
         if (searchKeyword) {
           params.set(paramName, searchKeyword)
