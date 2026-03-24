@@ -5,6 +5,7 @@ import SelectDropdown from '@/components/commons/select/SelectDropdown'
 import { PRODUCT_TYPE_TABS, SORT_TYPE, type ProductTypeTabId } from '@/constants/constants'
 import type { Product } from '@/types/product'
 import { useFilterNavigation } from '@/hooks/useFilterNavigation'
+import { SearchX } from 'lucide-react'
 
 interface ProductListHeaderProps {
   totalElements: number
@@ -68,7 +69,19 @@ export function ProductsSection({ products, totalElements, activeTab, selectedSo
           />
         </div>
       </div>
-      <ProductList products={products} />
+      {products.length > 0 ? (
+        <ProductList products={products} />
+      ) : (
+        <div className="flex flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed border-gray-300 bg-white px-7 py-12 md:gap-6 md:py-16">
+          <div className="bg-primary-50 flex h-16 w-16 items-center justify-center rounded-full md:h-25 md:w-25">
+            <SearchX size={32} strokeWidth={1} className="text-primary-300 md:size-[50px]" />
+          </div>
+          <div className="flex flex-col items-center gap-1 md:gap-2">
+            <p className="text-base font-semibold md:heading-h5">검색 결과가 없습니다</p>
+            <p className="text-sm text-gray-500">다른 필터 조건으로 검색해보세요</p>
+          </div>
+        </div>
+      )}
     </section>
   )
 }
