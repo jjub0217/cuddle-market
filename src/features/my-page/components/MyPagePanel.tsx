@@ -66,7 +66,7 @@ const TAB_CONFIG: {
 } = {
   'tab-sales': {
     heading: '내가 등록한 상품',
-    description: '개의 상품을 등록했습니다',
+    description: '상품',
     emptyIcon: Package,
     emptyTitle: '등록한 상품이 없습니다',
     emptyDescription: '상품을 등록해보세요',
@@ -75,7 +75,7 @@ const TAB_CONFIG: {
   },
   'tab-purchases': {
     heading: '내가 등록한 상품',
-    description: '개의 상품을 등록했습니다',
+    description: '상품',
     emptyIcon: Package,
     emptyTitle: '등록한 구매 요청이 없습니다',
     emptyDescription: '구매 요청을 등록해보세요',
@@ -84,7 +84,7 @@ const TAB_CONFIG: {
   },
   'tab-wishlist': {
     heading: '내가 찜한 상품',
-    description: '개의 상품을 찜했습니다',
+    description: '상품',
     emptyIcon: Heart,
     emptyTitle: '찜한 상품이 없습니다',
     emptyDescription: '마음에 드는 상품을 찜해보세요',

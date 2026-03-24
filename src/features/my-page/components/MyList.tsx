@@ -153,10 +153,10 @@ export default function MyList({ id, title, price, mainImageUrl, tradeStatus, vi
             {isMd && trade_status ? <Badge className={cn('bg-[#48BB78] text-white', productTradeColor)}>{trade_status}</Badge> : null}
             <div className="flex w-full items-start justify-between">
               <div className="flex w-full flex-col gap-1">
-                {isMd ? <h3 className="heading-h5 line-clamp-2 w-96 truncate">{title}</h3> : null}
+                {isMd ? <h3 className="line-clamp-2 w-96 truncate text-[17px] leading-[26px] font-bold">{title}</h3> : null}
                 {!isMd ? (
                   <div className="relative flex w-full items-start justify-between gap-2">
-                    <h3 className="line-clamp-2 w-full text-[17px] font-bold">{title}</h3>
+                    <h3 className="line-clamp-2 w-full text-sm font-normal">{title}</h3>
                     <IconButton size="sm" onClick={handleMoreToggle} aria-label="상품 옵션 메뉴 열기">
                       <EllipsisVertical size={16} className="text-gray-500" />
                     </IconButton>
