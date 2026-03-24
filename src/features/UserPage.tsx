@@ -7,6 +7,8 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tansta
 import { useRouter, useParams } from 'next/navigation'
 import { api } from '@/lib/api/api'
 import { ProductListItem } from '@/components/product/ProductListItem'
+import ProductCard from '@/components/product/ProductCard'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 import LoadMoreButton from '@/components/commons/button/LoadMoreButton'
 import EmptyState from '@/components/EmptyState'
 import { Package } from 'lucide-react'
@@ -18,6 +20,7 @@ import InlineNotification from '@/components/commons/InlineNotification'
 import { ROUTES } from '@/constants/routes'
 
 function UserPage() {
+  const isMd = useMediaQuery('(min-width: 768px)')
   const { user } = useUserStore()
   const params = useParams()
   const id = params.id as string
@@ -130,18 +133,28 @@ function UserPage() {
           <section className="flex w-full flex-col gap-6 rounded-xl border-gray-200 p-5 md:border">
             <div className="flex justify-between">
               <div className="flex flex-col items-start">
-                <h4 className="font-bold">{userData?.nickname}님의 판매상품</h4>
-                <p>총 {totalProducts}개의 상품이 있습니다</p>
+                <h4 className="text-sm font-bold md:text-base">{userData?.nickname}님의 판매상품</h4>
+                <p className="text-sm text-gray-500">상품 {totalProducts}</p>
               </div>
             </div>
             <div className="gap-lg flex max-h-[60vh] flex-col overflow-y-auto">
               {allProducts.length ? (
                 <>
-                  <ul className="flex flex-col items-center justify-start gap-2.5">
-                    {allProducts.map((product) => (
-                      <ProductListItem key={product.id} product={product} />
-                    ))}
-                  </ul>
+                  {isMd ? (
+                    <ul className="flex flex-col items-center justify-start gap-2.5">
+                      {allProducts.map((product) => (
+                        <ProductListItem key={product.id} product={product} />
+                      ))}
+                    </ul>
+                  ) : (
+                    <ul className="grid grid-cols-2 gap-4">
+                      {allProducts.map((product) => (
+                        <li key={product.id}>
+                          <ProductCard data={product} vertical />
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                   {hasNextPage ? <LoadMoreButton onClick={() => fetchNextPage()} isLoading={isFetchingNextPage} /> : null}
                 </>
               ) : (
