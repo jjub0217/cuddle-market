@@ -7,12 +7,13 @@ interface ProductMetaItemProps {
   label: string | number
   className?: string // 색상 커스터마이징
   textClassName?: string
+  strokeWidth?: number
 }
 
-export function ProductMetaItem({ icon: Icon, label, iconSize = 16, className = 'text-gray-500', textClassName }: ProductMetaItemProps) {
+export function ProductMetaItem({ icon: Icon, label, iconSize = 16, className = 'text-gray-500', textClassName, strokeWidth }: ProductMetaItemProps) {
   return (
     <div className={`flex items-center gap-1 ${className}`}>
-      <Icon size={iconSize} aria-hidden="true" />
+      <Icon size={iconSize} strokeWidth={strokeWidth} aria-hidden="true" />
       <span className={cn('text-xs font-semibold whitespace-nowrap', textClassName)}>{label}</span>
     </div>
   )
