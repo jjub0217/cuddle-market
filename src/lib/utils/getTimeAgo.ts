@@ -2,9 +2,9 @@ import { TIME_UNITS } from '@/constants/constants'
 
 export const getTimeAgo = (createdAt: string): string => {
   const now = new Date()
-  // 서버가 KST 시간을 타임존 정보 없이 반환하므로, 타임존이 없는 경우 +09:00을 명시
-  const hasTimezone = /Z|[+-]\d{2}:\d{2}$/.test(createdAt)
-  const dateString = hasTimezone ? createdAt : `${createdAt}+09:00`
+  // 서버가 UTC 시간을 타임존 정보 없이 반환하므로, 타임존이 없는 경우 Z(UTC)를 명시
+  const hasTimezone = /Z|[+-]\d{2}:\d{2}/.test(createdAt)
+  const dateString = hasTimezone ? createdAt : `${createdAt}Z`
   const created = new Date(dateString)
   const diffMs = now.getTime() - created.getTime()
 
