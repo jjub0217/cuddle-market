@@ -60,11 +60,11 @@ export default function ProfileData({
   const provider = getProvider(user?.email)
 
   return (
-    <aside aria-label="프로필" className="flex h-fit flex-col rounded-none border-b border-gray-200 bg-white px-5 py-0 pt-5 md:max-w-72 md:min-w-72 md:rounded-xl md:border md:py-5">
+    <aside aria-label="프로필" className="flex h-fit flex-col rounded-none border-b border-gray-200 bg-white px-5 py-5 md:max-w-72 md:min-w-72 md:rounded-xl md:border">
       <div className="text-text-primary sticky top-24 flex flex-col rounded-xl">
         <div className="flex flex-col gap-3 md:gap-6">
           <div className="flex flex-row items-center gap-3.5 md:flex-col">
-            <div className="bg-primary-50 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full">
+            <div className="bg-primary-50 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full">
               {data?.profileImageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -89,19 +89,35 @@ export default function ProfileData({
 
             {isMd ? (
               // 데스크탑 공통 표시
-              <p className="heading-h5 text-text-primary">{data?.nickname}</p>
+              <div className="flex flex-col items-center gap-1">
+                {!isMyProfile && data?.isBlocked ? (
+                  <span className="flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-600">
+                    <ShieldAlert size={12} />
+                    차단 유저
+                  </span>
+                ) : null}
+                <p className="heading-h5 text-text-primary">{data?.nickname}</p>
+              </div>
             ) : (
               // 모바일 내 정보
               <div>
-                <p className="heading-h5 text-text-primary pb-0.5">{data?.nickname}</p>
-                <p className="text-sm font-semibold text-gray-500">
+                <div className="flex items-center gap-2 pb-0.5">
+                  <p className="heading-h5 text-text-primary">{data?.nickname}</p>
+                  {!isMyProfile && data?.isBlocked ? (
+                    <span className="flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-600">
+                      <ShieldAlert size={12} />
+                      차단 유저
+                    </span>
+                  ) : null}
+                </div>
+                <p className="text-sm font-normal text-gray-500">
                   {data?.addressSido} {data?.addressGugun}
                 </p>
-                <p className="text-sm font-semibold text-gray-500">{formattedJoinDate} 가입</p>
+                <p className="text-sm font-normal text-gray-500">{formattedJoinDate} 가입</p>
               </div>
             )}
           </div>
-          <p className="w-full text-sm font-semibold text-gray-500">{data?.introduction || '소개글을 작성해주세요'}</p>
+          <p className="w-full text-sm font-normal text-gray-500">{data?.introduction || '소개글을 작성해주세요'}</p>
           {/* 데스크탑 내 정보 */}
           {isMyProfile ? (
             <>
@@ -111,11 +127,13 @@ export default function ProfileData({
                     <ProductMetaItem
                       icon={MapPin}
                       iconSize={17}
+                      strokeWidth={1}
                       label={`${data?.addressSido} ${data?.addressGugun}`}
                       className="gap-2"
+                      textClassName="text-sm font-normal"
                     />
-                    <ProductMetaItem icon={Calendar} iconSize={17} label={`가입일: ${formattedJoinDate}`} className="gap-2" />
-                    <ProductMetaItem icon={Route} iconSize={17} label={`가입 경로: ${provider}`} className="gap-2" />
+                    <ProductMetaItem icon={Calendar} iconSize={17} strokeWidth={1} label={`가입일: ${formattedJoinDate}`} className="gap-2" textClassName="text-sm font-normal" />
+                    <ProductMetaItem icon={Route} iconSize={17} strokeWidth={1} label={`가입 경로: ${provider}`} className="gap-2" textClassName="text-sm font-normal" />
                   </div>
                 ) : null}
                 {!isProfileEditPage ? (
@@ -124,13 +142,13 @@ export default function ProfileData({
                     className="bg-primary-200 flex items-center justify-center gap-2.5 rounded-lg px-3 py-2 text-white transition-all"
                   >
                     <Settings size={19} />
-                    <span className="lg:text-sm lg:font-bold">내 정보 수정</span>
+                    <span className="text-sm font-semibold">내 정보 수정</span>
                   </Link>
                 ) : null}
               </div>
               <button
                 type="button"
-                className="w-full cursor-pointer border-gray-300 pb-5 text-right text-sm text-gray-500 hover:underline md:border-t md:pt-6 md:pb-0 md:text-left"
+                className="w-full cursor-pointer border-gray-300 pb-0 text-right text-xs text-gray-500 hover:underline md:border-t md:pt-6 md:text-left"
                 onClick={() => setIsWithdrawModalOpen?.(true)}
               >
                 회원탈퇴
@@ -141,48 +159,42 @@ export default function ProfileData({
           {/* 다른 유저 프로필 */}
           {!isMyProfile ? (
             <>
-              {data?.isBlocked ? (
-                <div className="flex flex-col gap-3.5">
-                  <div className="bg-danger-100/30 border-danger-100 text-danger-800 flex items-center justify-center gap-2 rounded-lg border p-2.5 font-medium">
-                    <ShieldAlert />
-                    <span>이 사용자를 차단했습니다</span>
-                  </div>
-                  <Button
-                    icon={LockOpen}
+              <div className="flex items-center justify-between gap-[15px]">
+                {data?.isBlocked ? (
+                  <button
+                    type="button"
                     onClick={() => unblockUser?.()}
-                    className="bg-primary-200 flex cursor-pointer items-center justify-center gap-2.5 rounded-lg px-3 py-2 text-white transition-all"
+                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-gray-100/50 px-3 py-2 text-sm font-semibold text-black hover:bg-gray-100 md:bg-transparent md:py-1.5 md:text-gray-500 md:hover:bg-gray-100"
                   >
-                    차단 해제하기
-                  </Button>
-                </div>
-              ) : null}
-              <div className="flex items-center justify-between">
+                    <LockOpen size={16} />
+                    차단 해제
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-gray-100/50 px-3 py-2 text-sm font-semibold text-black hover:bg-gray-100 md:bg-transparent md:py-1.5 md:text-gray-500 md:hover:bg-gray-100"
+                    onClick={() => setIsBlockModalOpen?.(true)}
+                  >
+                    <Ban size={16} />
+                    차단하기
+                  </button>
+                )}
+
                 {data?.isReported ? (
-                  <div className="flex w-full items-center justify-start gap-2 px-3 py-1.5 text-sm text-gray-500">
-                    <Flag size={16} className="text-gray-500" />
+                  <div className="flex w-full items-center justify-center gap-2 rounded-lg bg-gray-100/50 px-3 py-2 text-sm text-gray-500 md:py-1.5">
+                    <Flag size={16} />
                     <span>신고완료</span>
                   </div>
                 ) : (
                   <button
                     type="button"
-                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-transparent px-4 pt-4 pb-3 text-sm text-gray-500 hover:bg-gray-100 md:py-1.5"
+                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-gray-100/50 px-3 py-2 text-sm font-semibold text-black hover:bg-gray-100 md:bg-transparent md:py-1.5 md:text-gray-500 md:hover:bg-gray-100"
                     onClick={() => setIsReportModalOpen?.(true)}
                   >
                     <Flag size={16} />
                     신고하기
                   </button>
                 )}
-
-                {!data?.isBlocked ? (
-                  <button
-                    type="button"
-                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-transparent px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-100 md:py-1.5"
-                    onClick={() => setIsBlockModalOpen?.(true)}
-                  >
-                    <Ban size={16} />
-                    차단하기
-                  </button>
-                ) : null}
               </div>
             </>
           ) : null}
