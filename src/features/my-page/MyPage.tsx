@@ -276,12 +276,14 @@ function MyPage() {
                 </div>
               ) : null}
             </AnimatePresence>
-            <Tabs
-              tabs={MY_PAGE_TABS}
-              activeTab={activeMyPageTab}
-              onTabChange={(tabId) => handleTabChange(tabId as MyPageTabId)}
-              ariaLabel="마이페이지 메뉴"
-            />
+            <div className="px-5 md:px-0">
+              <Tabs
+                tabs={MY_PAGE_TABS}
+                activeTab={activeMyPageTab}
+                onTabChange={(tabId) => handleTabChange(tabId as MyPageTabId)}
+                ariaLabel="마이페이지 메뉴"
+              />
+            </div>
             <MyPagePanel
               activeTabCode={activeTabCode}
               activeMyPageTab={activeMyPageTab}
