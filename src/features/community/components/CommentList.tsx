@@ -62,6 +62,8 @@ export function CommentList({ comments, postId }: CommentListProps) {
       queryClient.invalidateQueries({ queryKey: ['community', postId, 'replies', parentId] })
       // 댓글 목록도 refetch (childrenCount 업데이트를 위해)
       queryClient.invalidateQueries({ queryKey: ['community', postId, 'comments'] })
+      // 게시글 상세 refetch (commentCount 업데이트를 위해)
+      queryClient.invalidateQueries({ queryKey: ['community', postId] })
       // 폼 초기화 및 닫기
       reset()
       setReplyingToId(null)
