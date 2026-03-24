@@ -99,6 +99,7 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
       api.post(`/community/posts/${id}/comments`, { content: requestData.content }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['community', id, 'comments'] })
+      queryClient.invalidateQueries({ queryKey: ['community', id] })
       reset()
     },
     onError: () => {
