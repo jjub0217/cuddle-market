@@ -62,7 +62,7 @@ export function CommentItem({
   return (
     <>
       <div className={cn('flex items-start gap-3.5', showBorder && 'border-t border-gray-300 pt-3.5', !isReply && !isRepliesOpen && 'pb-3.5')}>
-        <ProfileAvatar imageUrl={comment.authorProfileImageUrl} nickname={comment.authorNickname} size="sm" />
+        <ProfileAvatar imageUrl={comment.authorProfileImageUrl} nickname={comment.authorNickname} size="sm" className="shrink-0" />
 
         {/* 유저 정보 및 내용 */}
         <div className="flex flex-col justify-center gap-1">
