@@ -7,6 +7,7 @@ import { api } from '@/lib/api/api'
 import type { Comment, CommentPostRequestData } from '@/types'
 import { CommentItem } from './CommentItem'
 import { CommentForm } from './CommentForm'
+import { ReplyOverlay } from './ReplyOverlay'
 import { useForm } from 'react-hook-form'
 import { useUserStore } from '@/store/userStore'
 import { useLoginModalStore } from '@/store/modalStore'
@@ -106,6 +107,8 @@ export function CommentList({ comments, postId }: CommentListProps) {
       reset() // 폼 초기화
     } else {
       setReplyingToId(commentId)
+      // 답글 목록도 함께 열어서 오버레이에 기존 답글 표시
+      setOpenRepliesCommentId(commentId)
     }
   }
 
@@ -129,6 +132,7 @@ export function CommentList({ comments, postId }: CommentListProps) {
   }
 
   return (
+    <>
     <ul className="flex flex-col">
       {comments.map((comment, index) => (
         <li key={comment.id} className="flex flex-col">
@@ -157,8 +161,9 @@ export function CommentList({ comments, postId }: CommentListProps) {
               ) : null}
             </div>
           </div>
+          {/* 데스크톱: 인라인 답글 폼 */}
           {replyingToId === comment.id ? (
-            <div className="pb-3.5 pl-10">
+            <div className="hidden pb-3.5 pl-10 md:block">
               <AnimatePresence>
                 {replyPostError ? (
                   <InlineNotification type="error" onClose={() => setReplyPostError(null)}>
@@ -179,5 +184,24 @@ export function CommentList({ comments, postId }: CommentListProps) {
         </li>
       ))}
     </ul>
+
+    {/* 모바일: 답글 오버레이 */}
+    {(() => {
+      if (!replyingToId) return null
+      const targetComment = comments.find((c) => c.id === replyingToId)
+      if (!targetComment) return null
+      return (
+        <div className="md:hidden">
+          <ReplyOverlay
+            comment={targetComment}
+            replies={openRepliesCommentId === replyingToId ? repliesData?.comments : undefined}
+            register={register}
+            onSubmit={handleSubmit(onSubmit)}
+            onClose={() => handleOpenReplyForm(replyingToId)}
+          />
+        </div>
+      )
+    })()}
+    </>
   )
 }

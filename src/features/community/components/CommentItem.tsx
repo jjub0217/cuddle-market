@@ -78,9 +78,11 @@ export function CommentItem({
           <p>{comment.content}</p>
 
           <div className="flex items-center gap-3.5">
-            <button className="cursor-pointer text-sm text-blue-500" type="button" onClick={onHandleReply}>
-              답글
-            </button>
+            {onHandleReply ? (
+              <button className="cursor-pointer text-sm text-blue-500" type="button" onClick={onHandleReply}>
+                답글
+              </button>
+            ) : null}
             {/* 답글 버튼 (대댓글이 아니고, hasChildren이 있을 때만) */}
             {!isReply && hasChildren ? (
               <button className="cursor-pointer self-start text-sm text-blue-500 hover:underline" type="button" onClick={onToggleReplies}>
