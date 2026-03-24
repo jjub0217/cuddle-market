@@ -12,6 +12,7 @@ interface ProductThumbnailProps {
   tradeStatus: string | null
   productTradeColor: string
   priority?: boolean
+  vertical?: boolean
 }
 
 export function ProductThumbnail({
@@ -23,6 +24,7 @@ export function ProductThumbnail({
   productTypeName,
   productTradeColor,
   priority = false,
+  vertical = false,
 }: ProductThumbnailProps) {
   const getDisplayTradeStatus = () => {
     if (productTypeName === '판매요청') {
@@ -34,7 +36,7 @@ export function ProductThumbnail({
   const displayTradeStatus = getDisplayTradeStatus()
 
   return (
-    <div className="relative flex-[2] overflow-hidden pb-[35%] md:flex-none md:pb-[75%]">
+    <div className={cn("relative overflow-hidden", vertical ? "flex-none pb-[75%]" : "flex-[2] pb-[35%] md:flex-none md:pb-[75%]")}>
       <div className="top-sm px-sm absolute z-1">
         <ProductBadge petTypeName={petTypeName} productStatusName={productStatusName} productTypeName={productTypeName} />
       </div>

@@ -12,13 +12,15 @@ import { getProductStatus } from '@/lib/utils/getProductStatus'
 import { getProductType } from '@/lib/utils/getProductType'
 import { getTradeStatusColor } from '@/lib/utils/getTradeStatusColor'
 import { useFavorite } from '@/hooks/useFavorite'
+import { cn } from '@/lib/utils/cn'
 
 export interface ProductCardProps {
   data: Product
   'data-index'?: number
+  vertical?: boolean
 }
 
-function ProductCard({ data, 'data-index': dataIndex }: ProductCardProps) {
+function ProductCard({ data, 'data-index': dataIndex, vertical = false }: ProductCardProps) {
   const { isFavorite, handleToggleFavorite } = useFavorite({
     productId: data?.id,
     initialIsFavorite: data?.isFavorite ?? false,
@@ -26,7 +28,7 @@ function ProductCard({ data, 'data-index': dataIndex }: ProductCardProps) {
 
   if (!data) return null
 
-  const { id, title, price, mainImageUrl, petDetailType, productStatus, tradeStatus, createdAt, favoriteCount, productType } = data
+  const { id, title, price, mainImageUrl, petDetailType, productStatus, tradeStatus, createdAt, favoriteCount, viewCount, productType } = data
   const petTypeName = getPetTypeName(petDetailType)
   const productStatusName = getProductStatus(productStatus)
   const productTradeName = getTradeStatus(tradeStatus)
@@ -49,8 +51,8 @@ function ProductCard({ data, 'data-index': dataIndex }: ProductCardProps) {
         className="absolute inset-0 z-0"
         aria-label={`${title}, ${price}원, ${productStatusName}, ${petTypeName}, ${productTradeName}`}
       />
-      <div className="relative z-1 flex cursor-pointer flex-row-reverse md:flex-col-reverse" onClick={handleContentClick}>
-        <ProductInfo title={title} price={price} createdAt={createdAt} favoriteCount={favoriteCount} productTypeName={productTypeName} isFavorite={isFavorite} onLikeClick={handleToggleFavorite} />
+      <div className={cn("relative z-1 flex cursor-pointer", vertical ? "flex-col-reverse" : "flex-row-reverse md:flex-col-reverse")} onClick={handleContentClick}>
+        <ProductInfo title={title} price={price} createdAt={createdAt} favoriteCount={favoriteCount} viewCount={viewCount} productTypeName={productTypeName} isFavorite={isFavorite} onLikeClick={handleToggleFavorite} hideProductType={vertical} />
         <ProductThumbnail
           imageUrl={mainImageUrl}
           title={title}
@@ -60,6 +62,7 @@ function ProductCard({ data, 'data-index': dataIndex }: ProductCardProps) {
           tradeStatus={productTradeName}
           productTradeColor={productTradeColor}
           priority={dataIndex !== undefined && dataIndex < 4}
+          vertical={vertical}
         />
       </div>
     </article>
