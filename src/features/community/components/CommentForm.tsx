@@ -10,7 +10,9 @@ interface CommentFormProps {
   id: string
   placeholder: string
   legendText: string
-  register: UseFormRegister<CommentFormValues>
+  register?: UseFormRegister<CommentFormValues>
+  value?: string
+  onChangeValue?: (value: string) => void
   onSubmit: () => void
   onCancel?: () => void
   textareaRef?: RefObject<HTMLTextAreaElement | null>
@@ -22,10 +24,11 @@ const PADDING_Y = 16
 const BASE_HEIGHT = LINE_HEIGHT + PADDING_Y
 const MAX_HEIGHT = LINE_HEIGHT * MAX_ROWS + PADDING_Y
 
-export function CommentForm({ id, placeholder, legendText, register, onSubmit, onCancel, textareaRef: externalRef }: CommentFormProps) {
+export function CommentForm({ id, placeholder, legendText, register, value, onChangeValue, onSubmit, onCancel, textareaRef: externalRef }: CommentFormProps) {
   const internalRef = useRef<HTMLTextAreaElement | null>(null)
   const textareaRef = externalRef || internalRef
-  const { ref, onChange, ...rest } = register('content')
+  const registerProps = register ? register('content') : null
+  const { ref, onChange, ...rest } = registerProps ?? { ref: undefined, onChange: undefined }
 
   const handleAutoResize = useCallback(() => {
     const textarea = textareaRef.current
@@ -45,11 +48,13 @@ export function CommentForm({ id, placeholder, legendText, register, onSubmit, o
           className="flex-1 rounded-lg bg-[#f0f4ff] px-3 py-2 leading-tight scrollbar-hide md:h-auto md:leading-normal md:bg-primary-50 md:rounded-none md:px-0 md:py-0 w-full resize-none focus:outline-none"
           style={{ height: `${BASE_HEIGHT}px`, maxHeight: `${MAX_HEIGHT}px`, overflowY: 'auto' }}
           ref={(e) => {
-            ref(e)
+            if (ref) ref(e)
             textareaRef.current = e
           }}
+          value={onChangeValue ? value : undefined}
           onChange={(e) => {
-            onChange(e)
+            if (onChange) onChange(e)
+            if (onChangeValue) onChangeValue(e.target.value)
             handleAutoResize()
           }}
           {...rest}
