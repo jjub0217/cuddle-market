@@ -22,10 +22,11 @@ export default function NotificationItem({ handleReadNotification, ...notificati
     >
       <div className={cn(notificationIconClass({ type: notification.notificationType as NotificationType }))}>
         <Icon
-          className={cn('h-5 w-5', notificationIconStrokeClass({ type: notification.notificationType as NotificationType }))}
+          className={cn('h-4.5 w-4.5', notificationIconStrokeClass({ type: notification.notificationType as NotificationType }))}
+          strokeWidth={2}
         />
       </div>
-      <div className="flex min-w-72 justify-between gap-1">
+      <div className="flex min-w-64 flex-1 justify-between gap-1">
         <div className="flex flex-col gap-1">
           <p className="line-clamp-2 text-left text-sm font-semibold text-gray-900">
             {NOTIFICATION_MESSAGES[notification.notificationType] ?? '알림이 도착했습니다'}

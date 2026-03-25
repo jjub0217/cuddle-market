@@ -7,7 +7,7 @@ export default function NotificationsSkeleton() {
           <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gray-200" />
 
           {/* 콘텐츠 자리 */}
-          <div className="flex min-w-72 gap-1">
+          <div className="flex min-w-64 gap-1">
             <div className="flex flex-1 flex-col gap-1">
               <div className="h-4 w-full rounded bg-gray-200" />
               <div className="h-4 w-3/4 rounded bg-gray-200" />

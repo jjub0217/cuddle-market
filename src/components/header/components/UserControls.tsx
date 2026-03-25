@@ -5,6 +5,7 @@ import AuthMenu from '../components/user-section/AuthMenu'
 import React, { useState } from 'react'
 import { useUserStore } from '@/store/userStore'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { ROUTES } from '@/constants/routes'
 import { MessageCircleMore, Bell } from 'lucide-react'
 import IconButton from '@/components/commons/button/IconButton'
@@ -12,6 +13,7 @@ import NotificationsDropdown from './notification-section/NotificationsDropdown'
 import { useQuery } from '@tanstack/react-query'
 import { fetchGraphQL } from '@/lib/api/graphql'
 import { useNotificationSSE } from '@/hooks/useNotifications'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 
 interface UserControlsProps {
   isSideOpen: boolean
@@ -25,9 +27,15 @@ export default function UserControls({ isSideOpen, setIsSideOpen, hideMenuButton
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
   const { isLogin } = useUserStore()
   const hasHydrated = useUserStore((state) => state._hasHydrated)
+  const router = useRouter()
+  const isMobile = useMediaQuery('(max-width: 767px)')
   useNotificationSSE()
   const handleBellToggle = () => {
-    setIsNotificationOpen((prev) => !prev)
+    if (isMobile) {
+      router.push(ROUTES.NOTIFICATIONS)
+    } else {
+      setIsNotificationOpen((prev) => !prev)
+    }
   }
   const { data: unreadCountData } = useQuery({
     queryKey: ['notifications', 'unreadCount'],
