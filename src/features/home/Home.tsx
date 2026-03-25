@@ -1,7 +1,7 @@
 'use client'
 
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import Tabs from '@/components/Tabs'
 import { DetailFilter } from '@/features/home/components/filter/DetailFilter'
 import { ProductsSection } from '@/features/home/components/product-section/ProductsSection'
@@ -24,6 +24,8 @@ function Home() {
   const { isLogin } = useUserStore()
   const hasHydrated = useUserStore((state) => state._hasHydrated)
   const isLoggedIn = hasHydrated && isLogin()
+  const [isHydrated, setIsHydrated] = useState(false)
+  useEffect(() => { setIsHydrated(true) }, [])
   const isMd = useMediaQuery('(min-width: 768px)')
   const { searchParams, pathname, push } = useFilterNavigation()
   const router = useRouter()
@@ -197,6 +199,40 @@ function Home() {
   }
 
   const totalElements = data?.pages?.[0]?.totalElements || 0
+
+  if (!isHydrated) {
+    return (
+      <div className="pb-4xl pt-6">
+        <h1 className="sr-only">커들마켓</h1>
+        <div className="px-lg mx-auto max-w-7xl">
+          <div className="flex flex-col gap-12">
+            <section className="flex flex-col gap-7">
+              {/* 필터 스켈레톤 */}
+              <div className="flex flex-col gap-3">
+                <div className="h-5 w-20 animate-pulse rounded bg-gray-200" />
+                <div className="flex gap-2">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="h-10 w-16 animate-pulse rounded-full bg-gray-200" />
+                  ))}
+                </div>
+              </div>
+              <div className="flex flex-col gap-3">
+                <div className="h-5 w-20 animate-pulse rounded bg-gray-200" />
+                <div className="flex gap-2">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="h-10 w-20 animate-pulse rounded-full bg-gray-200" />
+                  ))}
+                </div>
+              </div>
+            </section>
+            <section className="flex flex-col gap-2.5">
+              <HomeSkeleton />
+            </section>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   if (error && !isLoading) {
     return (

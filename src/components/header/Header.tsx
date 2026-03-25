@@ -46,6 +46,8 @@ const HIDE_SEARCHBAR_MOBILE_PATTERNS = [/^\/user-profile\/\d+$/]
 const HIDE_SEARCHBAR_ALWAYS_PATTERNS = [COMMUNITY_DETAIL, COMMUNITY_EDIT, /^\/products\/\d+\/edit$/, /^\/chat\/\d+$/]
 
 export default function Header() {
+  const [isHydrated, setIsHydrated] = useState(false)
+  useEffect(() => { setIsHydrated(true) }, [])
   const isXl = useMediaQuery('(min-width: 1280px)')
   const [isSideOpen, setIsSideOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
@@ -93,6 +95,18 @@ export default function Header() {
   }, [showHeader, isSearchOpen, isXl])
 
   if (!showHeader) return null
+
+  if (!isHydrated) {
+    return (
+      <header className={cn('bg-primary-200 fixed top-0 flex w-full items-center justify-center pt-3 pb-3', Z_INDEX.HEADER)}>
+        <div className="flex w-full flex-col px-4 xl:block xl:max-w-7xl xl:px-3.5">
+          <div className="flex h-12 items-center">
+            <Logo />
+          </div>
+        </div>
+      </header>
+    )
+  }
 
   return (
     <>
