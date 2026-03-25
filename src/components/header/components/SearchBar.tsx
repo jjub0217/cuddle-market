@@ -34,6 +34,7 @@ export default function SearchBar({
   function handleKeywordChange(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter') {
       const target = e.currentTarget
+      target.blur()
       const searchKeyword = target.value.trim()
       const isCurrentPageSearch = isHomePage || paramName !== 'keyword'
 
