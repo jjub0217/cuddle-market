@@ -32,6 +32,7 @@ export default function SearchBar({
   const isHomePage = pathname === ROUTES.HOME
 
   function handleKeywordChange(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.nativeEvent.isComposing) return
     if (e.key === 'Enter') {
       const target = e.currentTarget
       target.blur()
