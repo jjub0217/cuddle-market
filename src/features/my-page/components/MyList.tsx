@@ -150,7 +150,7 @@ export default function MyList({ id, title, price, mainImageUrl, tradeStatus, vi
         </div>
         <div className="flex flex-1 items-start">
           <div className="flex h-fit flex-1 flex-col items-start gap-2">
-            {isMd && trade_status ? <Badge className={cn('bg-[#48BB78] text-white', productTradeColor)}>{trade_status}</Badge> : null}
+            {isMd && trade_status ? <Badge className={cn('bg-[#48BB78] text-xs text-white', productTradeColor)}>{trade_status}</Badge> : null}
             <div className="flex w-full items-start justify-between">
               <div className="flex w-full flex-col gap-1">
                 {isMd ? <h3 className="line-clamp-2 w-96 text-[17px] leading-[26px] font-bold">{title}</h3> : null}
