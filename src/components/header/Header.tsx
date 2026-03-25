@@ -100,8 +100,22 @@ export default function Header() {
     return (
       <header className={cn('bg-primary-200 fixed top-0 flex w-full items-center justify-center pt-3 pb-3', Z_INDEX.HEADER)}>
         <div className="flex w-full flex-col px-4 xl:block xl:max-w-7xl xl:px-3.5">
-          <div className="flex h-12 items-center">
-            <Logo />
+          <div className="flex h-12 items-center justify-between gap-4">
+            <nav className="flex items-center gap-8">
+              <Logo />
+              <div className="hidden xl:flex items-center gap-8">
+                <div className="h-5 w-10 animate-pulse rounded bg-white/30" />
+                <div className="h-5 w-16 animate-pulse rounded bg-white/30" />
+              </div>
+            </nav>
+            <div className="flex items-center gap-1 xl:gap-8">
+              <div className="hidden xl:block h-9 w-80 animate-pulse rounded-full bg-white/20" />
+              <div className="flex items-center gap-2">
+                <div className="h-6 w-6 animate-pulse rounded-full bg-white/30" />
+                <div className="h-6 w-6 animate-pulse rounded-full bg-white/30" />
+                <div className="h-8 w-8 animate-pulse rounded-full bg-white/30" />
+              </div>
+            </div>
           </div>
         </div>
       </header>
