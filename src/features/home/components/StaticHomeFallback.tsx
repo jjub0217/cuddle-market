@@ -1,11 +1,6 @@
 import type { Product } from '@/types/product'
-import {
-  getImageSrcSet,
-  IMAGE_SIZES,
-  toResizedWebpUrl,
-  PLACEHOLDER_IMAGES,
-  PLACEHOLDER_SRCSET,
-} from '@/lib/utils/imageUrl'
+import { IMAGE_SIZES } from '@/lib/utils/imageUrl'
+import { FallbackImage } from './FallbackImage'
 import { getPetTypeName } from '@/lib/utils/getPetTypeName'
 import { getProductStatus } from '@/lib/utils/getProductStatus'
 import { getProductType } from '@/lib/utils/getProductType'
@@ -167,14 +162,11 @@ function StaticProductCard({ product, index }: { product: Product; index: number
         <Badge className={cn('bottom-sm right-sm absolute z-1 text-white', productTradeColor)}>
           {displayTradeStatus}
         </Badge>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <FallbackImage
+          imageUrl={mainImageUrl}
           alt={title}
-          src={mainImageUrl ? toResizedWebpUrl(mainImageUrl, 800) : PLACEHOLDER_IMAGES[800]}
-          srcSet={mainImageUrl ? getImageSrcSet(mainImageUrl) : PLACEHOLDER_SRCSET}
           sizes={IMAGE_SIZES.productThumbnail}
-          fetchPriority={priority ? 'high' : 'auto'}
-          loading={priority ? 'eager' : 'lazy'}
+          priority={priority}
           className="t-0 l-0 absolute h-full w-full object-cover"
         />
       </div>
