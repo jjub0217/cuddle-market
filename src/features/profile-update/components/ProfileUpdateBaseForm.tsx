@@ -207,8 +207,8 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
         <legend className="sr-only">프로필 정보 수정 폼</legend>
         {isMd ? (
           <div className="flex flex-col gap-2">
-            <h2 className="heading-h3">기본 정보</h2>
-            <p className="text-gray-500">프로필 이미지, 닉네임, 거주지를 수정할 수 있습니다</p>
+            <h2 className="text-[20px] font-bold">기본 정보</h2>
+            <p className="text-sm text-gray-500">프로필 이미지, 닉네임, 거주지를 수정할 수 있습니다</p>
           </div>
         ) : null}
 
@@ -244,61 +244,62 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
                 </button>
               </div>
               {errors.profileImageUrl ? <p className="text-danger-500 text-xs font-semibold">{errors.profileImageUrl.message}</p> : null}
-              <p className="text-sm">프로필 사진을 변경하려면 카메라 아이콘을 클릭하세요</p>
+              <p className="text-xs text-gray-500">프로필 사진을 변경하려면 카메라 아이콘을 클릭하세요</p>
             </div>
 
             {/* 정보 영역 */}
             <div className="flex flex-col gap-8">
               {/* 본인 인증 정보 */}
-              <div className="flex flex-col gap-3.5">
-                <h3 className="heading-h5">본인 인증 정보</h3>
+              <div className="flex flex-col gap-1 md:gap-1">
+                <h3 className="text-base font-semibold md:heading-h5">본인 인증 정보</h3>
 
                 <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
                   <div className="flex w-full flex-1 flex-col gap-1">
                     <div className="flex flex-col gap-2">
-                      <span className="font-medium text-gray-600">이름</span>
-                      <div className="bg-primary-50/50 rounded-lg p-3 font-medium text-gray-400">{myData?.name}</div>
+                      <span className="text-sm font-medium text-gray-600">이름</span>
+                      <div className="bg-primary-50/50 rounded-lg px-3 py-[10px] text-sm font-medium text-gray-400">{myData?.name}</div>
                     </div>
-                    <p className="text-sm font-bold text-gray-400">본인 인증 정보로 변경할 수 없습니다.</p>
+                    <p className="text-xs font-bold text-gray-400">본인 인증 정보로 변경할 수 없습니다.</p>
                   </div>
 
                   <div className="flex w-full flex-1 flex-col gap-1">
                     <div className="flex flex-col gap-2">
-                      <span className="font-medium text-gray-600">생년월일</span>
-                      <div className="bg-primary-50/50 rounded-lg p-3 font-medium text-gray-400">{formatBirthDate(myData?.birthDate)}</div>
+                      <span className="text-sm font-medium text-gray-600">생년월일</span>
+                      <div className="bg-primary-50/50 rounded-lg px-3 py-[10px] text-sm font-medium text-gray-400">{formatBirthDate(myData?.birthDate)}</div>
                     </div>
-                    <p className="text-sm font-bold text-gray-400">본인 인증 정보로 변경할 수 없습니다.</p>
+                    <p className="text-xs font-bold text-gray-400">본인 인증 정보로 변경할 수 없습니다.</p>
                   </div>
                 </div>
               </div>
 
               {/* 계정 정보 */}
-              <div className="flex flex-col gap-3.5">
-                <h3 className="heading-h5">계정 정보</h3>
+              <div className="flex flex-col gap-1 md:gap-1">
+                <h3 className="text-base font-semibold md:heading-h5">계정 정보</h3>
                 <div className="flex flex-col gap-1">
                   <div className="flex flex-col gap-2">
-                    <span className="font-medium text-gray-600">이메일</span>
-                    <div className="bg-primary-50/50 rounded-lg p-3 font-medium text-gray-400">{myData?.email}</div>
+                    <span className="text-sm font-medium text-gray-600">이메일</span>
+                    <div className="bg-primary-50/50 rounded-lg px-3 py-[10px] text-sm font-medium text-gray-400">{myData?.email}</div>
                   </div>
-                  <p className="text-sm font-bold text-gray-400">이메일은 변경할 수 없습니다.</p>
+                  <p className="text-xs font-bold text-gray-400">이메일은 변경할 수 없습니다.</p>
                 </div>
               </div>
 
               {/* 활동 정보 */}
               <div className="flex flex-col gap-3.5">
-                <h3 className="heading-h5">활동 정보</h3>
-                <div className="flex flex-col gap-1">
+                <h3 className="text-base font-semibold md:heading-h5">활동 정보</h3>
+                <div className="flex flex-col gap-1 md:-mt-2.5">
                   <div className="flex flex-col justify-center gap-2">
-                    <RequiredLabel htmlFor="update-nickname" required={false}>닉네임</RequiredLabel>
+                    <RequiredLabel htmlFor="update-nickname" required={false} labelClass="text-sm">닉네임</RequiredLabel>
                     <InputWithButton
                       id="update-nickname"
                       type="text"
                       placeholder="cuddle market"
                       registration={register('nickname', profileValidationRules.nickname)}
                       buttonText="중복체크"
-                      size="text-base"
-                      buttonSize="lg"
-                      buttonClassName="bg-primary-200 text-white cursor-pointer font-semibold py-[13px]"
+                      size="text-sm"
+                      buttonSize="md"
+                      buttonClassName="bg-primary-200 text-sm text-white cursor-pointer font-semibold py-[10px]"
+                      inputClass="md:py-[10px]"
                       checkResult={checkResult}
                       onButtonClick={handleNicknameCheck}
                     />
@@ -311,10 +312,12 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
                   secondaryName="addressGugun"
                   required={false}
                   layoutClass="gap-2"
+                  labelClass="text-sm"
+                  buttonClassName="py-[10px]"
                 />
                 <div className="flex flex-col gap-1">
                   <div className="flex flex-col gap-2">
-                    <RequiredLabel htmlFor="profile-introduction" required={false}>자기소개</RequiredLabel>
+                    <RequiredLabel htmlFor="profile-introduction" required={false} labelClass="text-sm">자기소개</RequiredLabel>
                     <textarea
                       id="profile-introduction"
                       placeholder="소개글을 작성해주세요"
@@ -323,14 +326,14 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
                       )}
                       {...register('introduction', profileValidationRules.introduction)}
                     />
-                    <p className="text-sm font-semibold text-gray-400">{titleLength}/1000자</p>
+                    <p className="text-xs font-semibold text-gray-400">{titleLength}/1000자</p>
                     {errors.introduction ? <p className="text-danger-500 text-xs font-semibold"> {errors.introduction.message}</p> : null}
                   </div>
                 </div>
               </div>
             </div>
 
-            <p className="border-t border-gray-300 pt-2.5 text-sm text-gray-400">
+            <p className="border-t border-gray-300 pt-2.5 text-xs text-gray-400">
               본인 인증 정보의 변경이 필요한 경우, 고객센터 1:1 문의를 통해 문의주세요.
             </p>
             <AnimatePresence>

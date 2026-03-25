@@ -21,6 +21,7 @@ interface AddressFieldProps<T extends FieldValues> {
   label?: string
   labelClass?: string
   layoutClass?: string
+  buttonClassName?: string
   required?: boolean
 }
 
@@ -32,6 +33,7 @@ export default function AddressField<T extends FieldValues>({
   label = '거주지',
   labelClass,
   layoutClass,
+  buttonClassName,
   required,
 }: AddressFieldProps<T>) {
   const handlePrimaryChange = () => {
@@ -55,6 +57,7 @@ export default function AddressField<T extends FieldValues>({
       label={label}
       labelClass={labelClass}
       layoutClass={layoutClass}
+      buttonClassName={buttonClassName}
       labelHtmlFor="address-sido"
       onPrimaryChange={handlePrimaryChange}
       required={required}
