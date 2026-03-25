@@ -12,16 +12,16 @@ interface FallbackImageProps {
 }
 
 export function FallbackImage({ imageUrl, alt, sizes, priority, className }: FallbackImageProps) {
-  const [imgError, setImgError] = useState(false)
+  const [imgErrorStep, setImgErrorStep] = useState(0) // 0: CDN, 1: 원본, 2: placeholder
 
   const getSrc = () => {
-    if (!imageUrl) return PLACEHOLDER_IMAGES[800]
-    if (imgError) return imageUrl
+    if (!imageUrl || imgErrorStep >= 2) return PLACEHOLDER_IMAGES[800]
+    if (imgErrorStep === 1) return imageUrl
     return toResizedWebpUrl(imageUrl, 800)
   }
 
   const getSrcSet = () => {
-    if (!imageUrl || imgError) return ''
+    if (!imageUrl || imgErrorStep > 0) return ''
     return getImageSrcSet(imageUrl)
   }
 
@@ -35,8 +35,8 @@ export function FallbackImage({ imageUrl, alt, sizes, priority, className }: Fal
       fetchPriority={priority ? 'high' : 'auto'}
       loading={priority ? 'eager' : 'lazy'}
       onError={() => {
-        if (!imgError && imageUrl) {
-          setImgError(true)
+        if (imgErrorStep < 2) {
+          setImgErrorStep((prev) => prev + 1)
         }
       }}
       className={className}

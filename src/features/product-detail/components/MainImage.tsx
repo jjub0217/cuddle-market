@@ -9,16 +9,16 @@ interface MainImageProps {
 }
 
 export default function MainImage({ mainImageUrl, title }: MainImageProps) {
-  const [imgError, setImgError] = useState(false)
+  const [imgErrorStep, setImgErrorStep] = useState(0) // 0: CDN, 1: 원본, 2: placeholder
 
   const getSrc = () => {
-    if (!mainImageUrl) return PLACEHOLDER_IMAGES[800]
-    if (imgError) return mainImageUrl
+    if (!mainImageUrl || imgErrorStep >= 2) return PLACEHOLDER_IMAGES[800]
+    if (imgErrorStep === 1) return mainImageUrl
     return toResizedWebpUrl(mainImageUrl, 800)
   }
 
   const getSrcSet = () => {
-    if (!mainImageUrl || imgError) return ''
+    if (!mainImageUrl || imgErrorStep > 0) return ''
     return getImageSrcSet(mainImageUrl)
   }
 
@@ -33,8 +33,8 @@ export default function MainImage({ mainImageUrl, title }: MainImageProps) {
         fetchPriority="high"
         className="absolute inset-0 h-full w-full object-cover"
         onError={() => {
-          if (!imgError && mainImageUrl) {
-            setImgError(true)
+          if (imgErrorStep < 2) {
+            setImgErrorStep((prev) => prev + 1)
           }
         }}
       />
