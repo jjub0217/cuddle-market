@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { getImageSrcSet, toResizedWebpUrl, PLACEHOLDER_IMAGES } from '@/lib/utils/imageUrl'
 
 interface FallbackImageProps {
@@ -28,6 +28,11 @@ export function FallbackImage({ imageUrl, alt, sizes, priority, className }: Fal
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
+      ref={useCallback((img: HTMLImageElement | null) => {
+        if (img && img.complete && img.naturalWidth === 0 && imgErrorStep < 2) {
+          setImgErrorStep((prev) => prev + 1)
+        }
+      }, [imgErrorStep])}
       alt={alt}
       src={getSrc()}
       srcSet={getSrcSet()}

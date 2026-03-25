@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { getImageSrcSet, IMAGE_SIZES, toResizedWebpUrl, PLACEHOLDER_IMAGES } from '@/lib/utils/imageUrl'
 
 interface MainImageProps {
@@ -26,6 +26,11 @@ export default function MainImage({ mainImageUrl, title }: MainImageProps) {
     <div className="relative overflow-hidden rounded-xl pb-[100%]">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
+        ref={useCallback((img: HTMLImageElement | null) => {
+          if (img && img.complete && img.naturalWidth === 0 && imgErrorStep < 2) {
+            setImgErrorStep((prev) => prev + 1)
+          }
+        }, [imgErrorStep])}
         src={getSrc()}
         srcSet={getSrcSet()}
         sizes={IMAGE_SIZES.mainImage}
