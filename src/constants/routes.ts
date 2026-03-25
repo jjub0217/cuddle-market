@@ -24,6 +24,9 @@ export const ROUTES = {
   USER_PROFILE: '/user-profile/:id',
   USER_ID: (id: string | number) => `/user-profile/${id}`,
 
+  // Notifications
+  NOTIFICATIONS: '/notifications',
+
   // Chat
   CHAT: '/chat',
   CHAT_ROOM: '/chat/:id',
@@ -57,4 +60,4 @@ export const ROUTES = {
 } as const
 
 // 로그인 필수 페이지 목록
-export const AUTH_REQUIRED_ROUTES = [ROUTES.MYPAGE, ROUTES.PROFILE_UPDATE, ROUTES.CHAT] as const
+export const AUTH_REQUIRED_ROUTES = [ROUTES.MYPAGE, ROUTES.PROFILE_UPDATE, ROUTES.CHAT, ROUTES.NOTIFICATIONS] as const
