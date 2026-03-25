@@ -60,8 +60,9 @@ export default function SearchBar({
 
   function handleClearKeyword() {
     setKeyword('')
+    const isCurrentPageSearch = isHomePage || paramName !== 'keyword'
 
-    if (isHomePage) {
+    if (isCurrentPageSearch) {
       const params = new URLSearchParams(searchParams.toString())
       params.delete(paramName)
       const query = params.toString()
