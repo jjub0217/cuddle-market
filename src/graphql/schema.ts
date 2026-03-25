@@ -207,14 +207,14 @@ export const typeDefs = gql`
 
   type Notification {
     notificationId: Int!
-    type: String
-    message: String
+    notificationType: String!
+    title: String!
+    content: String!
+    relatedEntityType: String!
+    relatedEntityId: Int!
     isRead: Boolean!
-    relatedEntityType: String
-    relatedEntityId: Int
+    readAt: String
     createdAt: String!
-    senderNickname: String
-    senderProfileImageUrl: String
   }
 
   type NotificationConnection {
