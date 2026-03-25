@@ -41,7 +41,7 @@ export default function NotificationsDropdown({ isNotificationOpen, setIsNotific
       const data = await fetchGraphQL<{ notifications: any }>(`
         query Notifications($page: Int!, $size: Int!) {
           notifications(page: $page, size: $size) {
-            content { notificationId type message isRead relatedEntityType relatedEntityId createdAt senderNickname senderProfileImageUrl }
+            content { notificationId notificationType title content relatedEntityType relatedEntityId isRead readAt createdAt }
             page hasNext
           }
         }
