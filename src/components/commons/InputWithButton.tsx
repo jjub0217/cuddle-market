@@ -18,6 +18,7 @@ interface InputWithButtonProps {
   size?: string
   buttonSize?: 'xs' | 'sm' | 'md' | 'lg'
   borderColor?: string
+  inputClass?: string
 }
 
 export default function InputWithButton({
@@ -34,6 +35,7 @@ export default function InputWithButton({
   size = 'text-sm',
   buttonSize = 'md',
   borderColor = 'border-gray-400',
+  inputClass,
 }: InputWithButtonProps) {
   return (
     <div className="flex items-start gap-4">
@@ -47,6 +49,7 @@ export default function InputWithButton({
         error={error}
         checkResult={checkResult}
         className="flex-1"
+        inputClass={inputClass}
         registration={registration}
       />
       <Button size={buttonSize} className={buttonClassName} type="button" onClick={onButtonClick} disabled={buttonDisabled}>
