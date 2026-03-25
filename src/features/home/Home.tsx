@@ -224,26 +224,8 @@ function Home() {
                   ))}
                 </div>
               </div>
-              {/* 세부 필터 스켈레톤 */}
-              <div className="flex items-center justify-between rounded-lg border border-gray-200 px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <div className="h-5 w-5 animate-pulse rounded bg-gray-200" />
-                  <div className="h-5 w-24 animate-pulse rounded bg-gray-200" />
-                  <div className="h-5 w-32 animate-pulse rounded bg-gray-200" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-5 w-16 animate-pulse rounded bg-gray-200" />
-                  <div className="h-5 w-5 animate-pulse rounded bg-gray-200" />
-                </div>
-              </div>
             </section>
             <section className="flex flex-col gap-2.5">
-              {/* 탭 스켈레톤 */}
-              <div className="flex gap-4 border-b-[1.5px] border-b-primary-200 pb-1">
-                {['전체', '판매', '판매요청'].map((label) => (
-                  <div key={label} className="h-8 w-16 animate-pulse rounded bg-gray-200" />
-                ))}
-              </div>
               <HomeSkeleton />
             </section>
           </div>
