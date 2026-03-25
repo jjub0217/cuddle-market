@@ -3,20 +3,19 @@
 import { useEffect, useRef } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import type { Comment } from '@/types'
-import type { UseFormRegister } from 'react-hook-form'
 import { CommentItem } from './CommentItem'
 import { CommentForm } from './CommentForm'
-import type { ReplyRequestFormValues } from './CommentList'
 
 interface ReplyOverlayProps {
   comment: Comment
   replies?: Comment[]
-  register: UseFormRegister<ReplyRequestFormValues>
+  value: string
+  onChangeValue: (value: string) => void
   onSubmit: () => void
   onClose: () => void
 }
 
-export function ReplyOverlay({ comment, replies, register, onSubmit, onClose }: ReplyOverlayProps) {
+export function ReplyOverlay({ comment, replies, value, onChangeValue, onSubmit, onClose }: ReplyOverlayProps) {
   const totalCount = 1 + (replies?.length ?? 0)
 
   const onCloseRef = useRef(onClose)
@@ -71,7 +70,8 @@ export function ReplyOverlay({ comment, replies, register, onSubmit, onClose }: 
           id={`reply-overlay-${comment.id}`}
           placeholder="답글을 입력하세요"
           legendText="답글 작성폼"
-          register={register}
+          value={value}
+          onChangeValue={onChangeValue}
           onSubmit={onSubmit}
         />
       </div>
