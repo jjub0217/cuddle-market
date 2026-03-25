@@ -32,7 +32,8 @@ export function CommentList({ comments, postId }: CommentListProps) {
   const searchParams = useSearchParams()
   const {
     handleSubmit, // form onSubmit에 들어가는 함수 : 제출 시 실행할 함수를 감싸주는 함수
-    register, // onChange 등의 이벤트 객체 생성 : input에 "이 필드는 폼의 어떤 이름이다"라고 연결해주는 함수
+    watch, // 필드 값을 구독하여 실시간으로 가져오는 함수
+    setValue, // 필드 값을 수동으로 설정하는 함수
     reset,
   } = useForm<ReplyRequestFormValues>({
     mode: 'onChange',
@@ -40,6 +41,7 @@ export function CommentList({ comments, postId }: CommentListProps) {
       content: '',
     },
   })
+  const replyContent = watch('content')
   const [openRepliesCommentId, setOpenRepliesCommentId] = useState<number | null>(null)
   const [replyingToId, setReplyingToId] = useState<number | null>(null)
   const [replyPostError, setReplyPostError] = useState<React.ReactNode | null>(null)
@@ -179,7 +181,8 @@ export function CommentList({ comments, postId }: CommentListProps) {
                 id={String(comment.id)}
                 placeholder="답글을 입력하세요"
                 legendText="대댓글 작성폼"
-                register={register}
+                value={replyContent}
+                onChangeValue={(v) => setValue('content', v)}
                 onSubmit={handleSubmit(onSubmit)}
                 onCancel={() => handleOpenReplyForm(comment.id)}
               />
@@ -199,7 +202,8 @@ export function CommentList({ comments, postId }: CommentListProps) {
           <ReplyOverlay
             comment={targetComment}
             replies={openRepliesCommentId === replyingToId ? repliesData?.comments : undefined}
-            register={register}
+            value={replyContent}
+            onChangeValue={(v) => setValue('content', v)}
             onSubmit={handleSubmit(onSubmit)}
             onClose={() => handleOpenReplyForm(replyingToId)}
           />
