@@ -53,7 +53,7 @@ export default function StaticHomeFallback({ products, totalElements }: StaticHo
                   <div className="bg-primary-50 rounded px-3 py-2 text-gray-900 text-sm">최신순</div>
                 </div>
               </div>
-              <ul className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
+              <ul className="grid grid-cols-1 gap-4 md:grid-cols-4 lg:grid-cols-5">
                 {products.map((product, index) => (
                   <li key={product.id}>
                     <StaticProductCard product={product} index={index} />

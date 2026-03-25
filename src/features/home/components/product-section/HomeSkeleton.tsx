@@ -10,7 +10,7 @@ export default function HomeSkeleton() {
         <div className="h-10 w-36 animate-pulse rounded bg-gray-200" />
       </div>
       {/* 상품 그리드 스켈레톤 */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4 lg:grid-cols-5">
         {[...Array(8)].map((_, i) => (
           <div key={i} className="animate-pulse">
             <div className="aspect-square rounded-xl bg-gray-200" />
