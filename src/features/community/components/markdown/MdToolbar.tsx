@@ -22,14 +22,14 @@ export default function MdToolbar({ tab, setTab, onBold, onItalic, onCode, onLin
         <button
           type="button"
           onClick={() => setTab('edit')}
-          className={`rounded-lg px-3 py-1 text-sm hover:cursor-pointer ${tab === 'edit' ? 'bg-gray-100 text-gray-900 shadow-sm' : 'text-gray-600 hover:bg-gray-50'}`}
+          className={`rounded-lg px-2.5 py-1 text-xs hover:cursor-pointer ${tab === 'edit' ? 'bg-gray-100 text-gray-900 shadow-sm' : 'text-gray-600 hover:bg-gray-50'}`}
         >
           작성
         </button>
         <button
           type="button"
           onClick={() => setTab('preview')}
-          className={`rounded-lg px-3 py-1 text-sm ${tab === 'preview' ? 'bg-gray-100 text-gray-900 shadow-sm' : 'text-gray-600 hover:cursor-pointer hover:bg-gray-50'}`}
+          className={`rounded-lg px-2.5 py-1 text-xs ${tab === 'preview' ? 'bg-gray-100 text-gray-900 shadow-sm' : 'text-gray-600 hover:cursor-pointer hover:bg-gray-50'}`}
         >
           미리보기
         </button>

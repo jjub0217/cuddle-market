@@ -17,6 +17,7 @@ interface TitleFieldProps<T extends FieldValues> {
   placeholder?: string
   size?: string
   counterClassName?: string
+  labelClassName?: string
 }
 
 export default function TitleField<T extends FieldValues>({
@@ -31,10 +32,11 @@ export default function TitleField<T extends FieldValues>({
   placeholder = '제목을 입력해주세요',
   size = 'text-sm',
   counterClassName,
+  labelClassName = 'heading-h5',
 }: TitleFieldProps<T>) {
   return (
     <div className="flex flex-col gap-1">
-      <RequiredLabel htmlFor={id} labelClass="heading-h5">
+      <RequiredLabel htmlFor={id} labelClass={labelClassName}>
         {label}
       </RequiredLabel>
       <InputField

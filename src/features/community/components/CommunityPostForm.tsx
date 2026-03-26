@@ -15,7 +15,6 @@ import { ArrowLeft } from 'lucide-react'
 import { fetchGraphQL } from '@/lib/api/graphql'
 import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useMediaQuery } from '@/hooks/useMediaQuery'
 import SimpleHeader from '@/components/header/SimpleHeader'
 import { Z_INDEX } from '@/constants/ui'
 import { AnimatePresence } from 'framer-motion'
@@ -53,7 +52,6 @@ const getSavedDraft = (boardType: string): CommunityPostFormValues => {
 
 export default function CommunityPostForm() {
   const router = useRouter()
-  const isMd = useMediaQuery('(min-width: 768px)')
   const params = useParams()
   const id = params.id as string | undefined
   const isEditMode = !!id
@@ -192,24 +190,27 @@ export default function CommunityPostForm() {
   return (
     <>
       <h1 className="sr-only">{isEditMode ? '게시글 수정' : '커뮤니티 글쓰기'}</h1>
-      {!isMd ? (
-        <div
-          className={cn('bg-primary-200 sticky top-0 mx-auto flex w-full max-w-7xl justify-between px-3.5 py-4', Z_INDEX.HEADER)}
-        >
-          <button type="button" onClick={() => router.back()} className="flex cursor-pointer items-center gap-1 text-gray-600">
-            <ArrowLeft size={23} className="text-white" />
-          </button>
-          <span className="heading-h4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg font-extrabold! text-white">
-            커뮤니티
-          </span>
-        </div>
-      ) : (
+      {/* 모바일 서브헤더 */}
+      <div
+        className={cn('bg-primary-200 sticky top-0 mx-auto flex w-full max-w-7xl justify-between px-3.5 py-4 md:hidden', Z_INDEX.HEADER)}
+      >
+        <button type="button" onClick={() => router.back()} className="flex cursor-pointer items-center gap-1 text-gray-600">
+          <ArrowLeft size={23} className="text-white" />
+        </button>
+        <span className="heading-h4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg font-extrabold! text-white">
+          커뮤니티
+        </span>
+      </div>
+      {/* 데스크톱 서브헤더 */}
+      <div className="hidden md:block">
         <SimpleHeader
           title="커뮤니티 글쓰기"
           description="일상 이야기를 마음껏 나눠보세요!"
-          layoutClassname="py-5 flex-col justify-between border-b border-gray-200"
+          layoutClassname="py-5 gap-0 flex-col justify-between border-b border-gray-200"
+          titleClassName="text-[22px] leading-[1.5] font-bold"
+          descriptionClassName="text-sm"
         />
-      )}
+      </div>
       <div className="bg-[#F3F4F6]">
         <div className="px-lg mx-auto max-w-7xl pt-5">
           <AnimatePresence>
@@ -226,14 +227,14 @@ export default function CommunityPostForm() {
           <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
             <fieldset className="flex flex-col gap-5">
               <legend className="sr-only">커뮤니티 등록폼</legend>
-              <div className="flex flex-col gap-6 rounded-lg border border-gray-400 bg-white px-3.5 py-5 shadow-xl md:px-6">
+              <div className="flex flex-col gap-3.5 rounded-lg border border-gray-400 bg-white px-5 py-3.5 shadow-xl">
                 <Controller
                   name="boardType"
                   control={control}
                   rules={{ required: '카테고리를 선택해주세요' }}
                   render={({ field, fieldState }) => (
                     <div className="flex flex-col gap-1">
-                      <RequiredLabel labelClass="heading-h5">카테고리</RequiredLabel>
+                      <RequiredLabel labelClass="text-base font-semibold">카테고리</RequiredLabel>
                       <SelectDropdown
                         value={field.value || ''}
                         onChange={field.onChange}
@@ -260,23 +261,24 @@ export default function CommunityPostForm() {
                   id="community-title"
                   placeholder="제목을 입력해주세요"
                   size="text-base"
-                  counterClassName="text-sm text-gray-500"
+                  counterClassName="text-xs text-gray-500"
+                  labelClassName="text-base font-semibold"
                 />
               </div>
-              <div className="rounded-lg border border-gray-400 bg-white px-3.5 py-5 shadow-xl md:px-6">
+              <div className="rounded-lg border border-gray-400 bg-white px-5 py-3.5 shadow-xl">
                 <Controller
                   name="content"
                   control={control}
                   rules={communityContentValidationRules}
                   render={({ field, fieldState }) => (
                     <div className="flex flex-col gap-1">
-                      <RequiredLabel labelClass="heading-h5">내용</RequiredLabel>
+                      <RequiredLabel labelClass="text-base font-semibold">내용</RequiredLabel>
                       <Markdown value={field.value} onChange={field.onChange} placeholder="내용을 입력하세요" height={320} />
                       <div className="flex flex-col gap-1">
                         {fieldState.error ? (
                           <p className="pt-1.5 text-xs font-semibold text-red-500">{fieldState.error.message}</p>
                         ) : null}
-                        <p className="text-sm text-gray-500">{field.value?.length ?? 0}/1000자</p>
+                        <p className="text-xs text-gray-500">{field.value?.length ?? 0}/1000자</p>
                       </div>
                     </div>
                   )}
