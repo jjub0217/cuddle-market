@@ -40,7 +40,7 @@ export function ChatRooms({ rooms, handleSelectRoom, selectedRoomId, hasNextPage
   }
 
   return (
-    <section className="relative flex flex-col rounded-none border-t border-l border-gray-300 md:max-w-96 md:min-w-96 md:border-b">
+    <section className="relative flex flex-col rounded-none border-t border-l border-gray-300 md:max-w-120 md:min-w-120 md:border-b">
       <h2 className={cn('sticky top-16 border-b border-gray-300 bg-white p-5 md:static', Z_INDEX.HEADER)}>채팅목록</h2>
       <div className="scrollbar-hide flex-1 overflow-y-scroll">
         <ul className="flex flex-col gap-2">
@@ -79,7 +79,7 @@ export function ChatRooms({ rooms, handleSelectRoom, selectedRoomId, hasNextPage
                   </div>
                   <div className="border-primary-100 bg-primary-50 flex w-full items-center gap-2 overflow-hidden rounded-lg border p-1.5">
                     <ChatProductCard
-                      productImageUrl={roomData?.productMainImageUrl}
+                      productImageUrl={roomData?.productImageUrl}
                       productTitle={roomData?.productTitle}
                       productPrice={roomData?.productPrice}
                       size="sm"
