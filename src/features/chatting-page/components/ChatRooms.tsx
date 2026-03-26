@@ -42,7 +42,7 @@ export function ChatRooms({ rooms, handleSelectRoom, selectedRoomId, hasNextPage
   return (
     <section className="relative flex flex-col rounded-none border-t border-l border-gray-300 md:max-w-96 md:min-w-96 md:border-b">
       <h2 className={cn('sticky top-16 border-b border-gray-300 bg-white p-5 md:static', Z_INDEX.HEADER)}>채팅목록</h2>
-      <div className="scrollbar-hide flex-1 overflow-y-scroll px-3 py-3">
+      <div className="scrollbar-hide flex-1 overflow-y-scroll">
         <ul className="flex flex-col gap-2">
           {rooms &&
             rooms.map((room) => {
@@ -51,41 +51,39 @@ export function ChatRooms({ rooms, handleSelectRoom, selectedRoomId, hasNextPage
                 <li
                   key={roomData.chatRoomId}
                   className={cn(
-                    'flex cursor-pointer items-start gap-2 rounded-lg p-3',
-                    roomData.chatRoomId === selectedRoomId ? 'border-gray-300 md:border md:bg-[#E5E7EB]/50' : 'border border-transparent'
+                    'flex cursor-pointer flex-col gap-2 p-3',
+                    roomData.chatRoomId === selectedRoomId && 'md:bg-[#E5E7EB]/50'
                   )}
                   onClick={() => handleSelectRoom(room)}
                 >
-                  <div className="shrink-0">
-                    <SellerAvatar profileImageUrl={roomData?.opponentProfileImageUrl} nickname={roomData?.opponentNickname} />
-                  </div>
-                  <div className="flex min-w-0 flex-1 flex-col gap-2">
-                    <div className="flex w-full items-start justify-between">
-                      <div className="flex flex-col gap-1">
-                        <p className="leading-none font-semibold">{roomData?.opponentNickname}</p>
-                        <p className={cn('text-sm', roomData.lastMessage ? '' : 'text-blue-600')}>
+                  <div className="flex w-full items-center gap-2.5">
+                    <div className="shrink-0">
+                      <SellerAvatar profileImageUrl={roomData?.opponentProfileImageUrl} nickname={roomData?.opponentNickname} />
+                    </div>
+                    <div className="flex w-full flex-col gap-1">
+                      <p className="leading-none font-semibold">{roomData?.opponentNickname}</p>
+                      <div className="flex items-center gap-1">
+                        <p className={cn('text-xs', roomData.lastMessage ? '' : 'text-blue-600')}>
                           {roomData.lastMessage ? roomData.lastMessage : '채팅방에 입장해주세요'}
                         </p>
-                      </div>
-                      <div className="flex items-center gap-1">
                         {roomData.lastMessageTime ? (
-                          <span className="text-sm leading-none font-medium text-gray-500">{getTimeAgo(roomData.lastMessageTime)}</span>
-                        ) : null}
-                        {roomData.unreadCount >= 1 ? (
-                          <p className="bg-danger-500 tex-sm flex size-5 items-center justify-center rounded-full text-white">
-                            {roomData.unreadCount}
-                          </p>
+                          <span className="text-xs leading-none font-medium text-gray-500">{getTimeAgo(roomData.lastMessageTime)}</span>
                         ) : null}
                       </div>
                     </div>
-                    <div className="border-primary-100 bg-primary-50 flex items-center gap-2 overflow-hidden rounded-lg border px-2.5 py-3">
-                      <ChatProductCard
-                        productImageUrl={roomData?.productMainImageUrl}
-                        productTitle={roomData?.productTitle}
-                        productPrice={roomData?.productPrice}
-                        size="sm"
-                      />
-                    </div>
+                    {roomData.unreadCount >= 1 ? (
+                      <p className="bg-danger-500 flex size-5 shrink-0 items-center justify-center rounded-full text-xs text-white">
+                        {roomData.unreadCount}
+                      </p>
+                    ) : null}
+                  </div>
+                  <div className="border-primary-100 bg-primary-50 flex w-full items-center gap-2 overflow-hidden rounded-lg border p-1.5">
+                    <ChatProductCard
+                      productImageUrl={roomData?.productMainImageUrl}
+                      productTitle={roomData?.productTitle}
+                      productPrice={roomData?.productPrice}
+                      size="sm"
+                    />
                   </div>
                 </li>
               )
