@@ -234,7 +234,8 @@ export const typeDefs = gql`
     productId: Int
     productTitle: String
     productPrice: Int
-    productMainImageUrl: String
+    productImageUrl: String
+    opponentId: Int
     opponentNickname: String
     opponentProfileImageUrl: String
     lastMessage: String

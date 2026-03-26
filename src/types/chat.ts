@@ -51,7 +51,7 @@ export interface fetchChatRoom {
   productId: number
   productTitle: string
   productPrice: number
-  productMainImageUrl: string
+  productImageUrl: string
   opponentId: number
   opponentNickname: string
   opponentProfileImageUrl: string
@@ -79,7 +79,7 @@ export interface ChatRoomUpdateResponse {
   productId: number
   productTitle: string
   productPrice: number
-  productMainImageUrl: string
+  productImageUrl: string
   opponentId: number
   opponentNickname: string
   opponentProfileImageUrl: string

@@ -15,6 +15,11 @@ const sizeClasses = {
   md: 'w-16',
 }
 
+const priceClasses = {
+  sm: 'text-sm font-bold',
+  md: 'font-bold',
+}
+
 export default function ChatProductCard({ productImageUrl, productTitle, productPrice, size = 'sm' }: ChatProductCardProps) {
   return (
     <>
@@ -40,8 +45,8 @@ export default function ChatProductCard({ productImageUrl, productTitle, product
         />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-xs font-medium">{productTitle}</p>
-        <p className="font-bold">{productPrice != null ? `${formatPrice(productPrice)}원` : ''}</p>
+        <p className={`truncate font-medium ${size === 'sm' ? 'text-xs' : 'text-sm'}`}>{productTitle}</p>
+        <p className={priceClasses[size]}>{productPrice != null ? `${formatPrice(productPrice)}원` : ''}</p>
       </div>
     </>
   )

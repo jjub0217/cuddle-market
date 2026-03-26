@@ -192,7 +192,7 @@ export function ChatLog({
       {Object.entries(groupedMessages).map(([dateKey, messages]) => (
         <div key={dateKey} className="flex flex-col gap-2">
           <div className="flex justify-center">
-            <span className="rounded-full bg-[#8d99a3] px-3 py-2 text-sm font-semibold text-[#f0f9ff]">
+            <span className="rounded-full bg-[#8d99a3] px-3 py-1 text-xs font-semibold text-[#f0f9ff]">
               {chatFormatDate(messages[0].createdAt)}
             </span>
           </div>
@@ -213,7 +213,6 @@ export function ChatLog({
                   key={message.messageId}
                   className={cn('flex max-w-64 min-w-60 flex-col gap-1 rounded-lg px-3 py-2', isMine ? 'ml-auto' : 'mr-auto')}
                 >
-                  {!isMine ? <p className="text-sm text-gray-600">{message.senderNickname}</p> : null}
                   {message.messageType === 'IMAGE' ? (
                     <ChatImageMessage imageUrl={message.imageUrl ?? undefined} alt={message.senderNickname} />
                   ) : (
