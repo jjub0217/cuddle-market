@@ -86,7 +86,7 @@ export default function ChattingPage() {
       const data = await fetchGraphQL<{ chatRooms: any }>(`
         query ChatRooms($page: Int!, $size: Int!) {
           chatRooms(page: $page, size: $size) {
-            chatRooms { chatRoomId productId productTitle productMainImageUrl opponentNickname opponentProfileImageUrl lastMessage lastMessageTime unreadCount }
+            chatRooms { chatRoomId productId productTitle productPrice productMainImageUrl opponentNickname opponentProfileImageUrl lastMessage lastMessageTime unreadCount }
             currentPage hasNext
           }
         }

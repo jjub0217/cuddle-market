@@ -80,7 +80,7 @@ export function ChatRooms({ rooms, handleSelectRoom, selectedRoomId, hasNextPage
                     </div>
                     <div className="border-primary-100 bg-primary-50 flex items-center gap-2 overflow-hidden rounded-lg border px-2.5 py-3">
                       <ChatProductCard
-                        productImageUrl={roomData?.productImageUrl}
+                        productImageUrl={roomData?.productMainImageUrl}
                         productTitle={roomData?.productTitle}
                         productPrice={roomData?.productPrice}
                         size="sm"
