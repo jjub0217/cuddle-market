@@ -42,7 +42,7 @@ function ChatImageMessage({ imageUrl, alt }: { imageUrl?: string; alt: string })
   }
 
   return (
-    <div className="relative aspect-square w-32 shrink-0 overflow-hidden rounded-lg md:static">
+    <div className="relative aspect-square w-72 shrink-0 overflow-hidden rounded-lg">
       <Image
         src={getImageSrc()}
         loader={imgError || usePlaceholder || !imageUrl ? undefined : imageLoader}
@@ -211,7 +211,7 @@ export function ChatLog({
               ) : (
                 <li
                   key={message.messageId}
-                  className={cn('flex max-w-64 min-w-60 flex-col gap-1 rounded-lg px-3 py-2', isMine ? 'ml-auto' : 'mr-auto')}
+                  className={cn('flex w-fit items-end gap-1 px-3 py-1', isMine ? 'ml-auto flex-row-reverse' : 'mr-auto')}
                 >
                   {message.messageType === 'IMAGE' ? (
                     <ChatImageMessage imageUrl={message.imageUrl ?? undefined} alt={message.senderNickname} />
@@ -225,9 +225,7 @@ export function ChatLog({
                       {message.content}
                     </span>
                   )}
-                  <span className={cn('text-xs text-gray-500', isMine ? 'text-right' : 'text-left')}>
-                    {chatFormatTime(message.createdAt)}
-                  </span>
+                  <span className={cn('shrink-0 text-xs text-gray-500')}>{chatFormatTime(message.createdAt)}</span>
                 </li>
               )
             })}
