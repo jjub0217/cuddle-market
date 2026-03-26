@@ -65,7 +65,7 @@ const getIsMine = (message: Message, userId?: number): boolean => {
 }
 
 const chatFormatTime = (dateString: string): string => {
-  const date = new Date(dateString)
+  const date = new Date(dateString.endsWith('Z') ? dateString : `${dateString}Z`)
   const hours = date.getHours()
   const minutes = String(date.getMinutes()).padStart(2, '0')
   const period = hours < 12 ? '오전' : '오후'
@@ -74,7 +74,7 @@ const chatFormatTime = (dateString: string): string => {
 }
 
 const chatFormatDate = (dateString: string): string => {
-  const date = new Date(dateString)
+  const date = new Date(dateString.endsWith('Z') ? dateString : `${dateString}Z`)
   const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일']
   const year = date.getFullYear()
   const month = date.getMonth() + 1
@@ -86,7 +86,7 @@ const chatFormatDate = (dateString: string): string => {
 const groupMessagesByDate = (messages: Message[]) => {
   const groups: Record<string, Message[]> = {}
   messages.forEach((message) => {
-    const dateKey = new Date(message.createdAt).toDateString()
+    const dateKey = new Date(message.createdAt.endsWith('Z') ? message.createdAt : `${message.createdAt}Z`).toDateString()
     if (!groups[dateKey]) {
       groups[dateKey] = []
     }
