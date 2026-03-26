@@ -6,19 +6,21 @@ interface SimpleHeaderProps {
   description?: string
   href?: string
   layoutClassname?: string
+  titleClassName?: string
+  descriptionClassName?: string
 }
 
-export default function SimpleHeader({ title, description, href, layoutClassname }: SimpleHeaderProps) {
+export default function SimpleHeader({ title, description, href, layoutClassname, titleClassName, descriptionClassName }: SimpleHeaderProps) {
   return (
     <div className={cn('mx-auto flex max-w-7xl flex-col gap-2 bg-white px-3.5 py-2.5', layoutClassname)}>
       {href ? (
-        <Link href={href} className="heading-h2 hover:text-primary-200 w-fit cursor-pointer transition-all">
+        <Link href={href} className={cn(titleClassName || 'heading-h2', 'hover:text-primary-200 w-fit cursor-pointer transition-all')}>
           {title}
         </Link>
       ) : (
-        <span className="heading-h2">{title}</span>
+        <span className={titleClassName || 'heading-h2'}>{title}</span>
       )}
-      {description ? <p>{description}</p> : null}
+      {description ? <p className={descriptionClassName}>{description}</p> : null}
     </div>
   )
 }
