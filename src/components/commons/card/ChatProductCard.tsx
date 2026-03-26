@@ -40,7 +40,7 @@ export default function ChatProductCard({ productImageUrl, productTitle, product
         />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate">{productTitle}</p>
+        <p className="truncate text-xs font-medium">{productTitle}</p>
         <p className="font-bold">{productPrice != null ? `${formatPrice(productPrice)}원` : ''}</p>
       </div>
     </>
