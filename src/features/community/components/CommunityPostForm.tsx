@@ -227,7 +227,7 @@ export default function CommunityPostForm() {
           <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
             <fieldset className="flex flex-col gap-5">
               <legend className="sr-only">커뮤니티 등록폼</legend>
-              <div className="flex flex-col gap-3.5 rounded-lg border border-gray-400 bg-white px-5 py-3.5 shadow-xl">
+              <div className="flex flex-col gap-3.5 rounded-lg border border-gray-400 bg-white px-3.5 py-3.5 md:px-5 shadow-xl">
                 <Controller
                   name="boardType"
                   control={control}
@@ -265,7 +265,7 @@ export default function CommunityPostForm() {
                   labelClassName="text-base font-semibold"
                 />
               </div>
-              <div className="rounded-lg border border-gray-400 bg-white px-5 py-3.5 shadow-xl">
+              <div className="rounded-lg border border-gray-400 bg-white px-3.5 py-3.5 md:px-5 shadow-xl">
                 <Controller
                   name="content"
                   control={control}
