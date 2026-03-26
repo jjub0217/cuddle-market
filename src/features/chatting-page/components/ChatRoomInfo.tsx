@@ -59,7 +59,7 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
         href={ROUTES.DETAIL_ID(Number(data?.productId), data?.productTitle)}
         className="flex items-center gap-2 rounded-lg border border-gray-200 px-2.5 py-3 hover:bg-gray-50"
       >
-        <ChatProductCard productImageUrl={data?.productImageUrl} productTitle={data?.productTitle} productPrice={data?.productPrice} size="md" />
+        <ChatProductCard productImageUrl={data?.productMainImageUrl} productTitle={data?.productTitle} productPrice={data?.productPrice} size="md" />
       </Link>
     </div>
   )

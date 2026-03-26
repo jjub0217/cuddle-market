@@ -233,6 +233,7 @@ export const typeDefs = gql`
     chatRoomId: Int!
     productId: Int
     productTitle: String
+    productPrice: Int
     productMainImageUrl: String
     opponentNickname: String
     opponentProfileImageUrl: String
