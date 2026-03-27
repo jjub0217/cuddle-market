@@ -51,16 +51,7 @@ type MyListProps = Product & {
   handleConfirmModal: (e: React.MouseEvent, id: number, title: string, price: number, mainImageUrl: string) => void
 }
 
-export default function MyList({
-  id,
-  title,
-  price,
-  mainImageUrl,
-  tradeStatus,
-  viewCount,
-  activeTab,
-  handleConfirmModal,
-}: MyListProps) {
+export default function MyList({ id, title, price, mainImageUrl, tradeStatus, viewCount, activeTab, handleConfirmModal }: MyListProps) {
   const [currentTradeStatus, setCurrentTradeStatus] = useState(tradeStatus)
   const currentTradeStatusKo = STATUS_EN_TO_KO.find((s) => s.value === currentTradeStatus)?.name ?? '판매중'
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false)
@@ -155,18 +146,14 @@ export default function MyList({
             onError={handleImageError}
             unoptimized={imgError || usePlaceholder || !mainImageUrl}
           />
-          {!isMd && trade_status ? (
-            <Badge className={cn('absolute top-2 left-2 bg-[#48BB78] text-white', productTradeColor)}>{trade_status}</Badge>
-          ) : null}
+          {!isMd && trade_status ? <Badge className={cn('absolute top-2 left-2 bg-[#48BB78] text-white', productTradeColor)}>{trade_status}</Badge> : null}
         </div>
         <div className="flex flex-1 items-start">
           <div className="flex h-fit flex-1 flex-col items-start gap-2">
-            {isMd && trade_status ? (
-              <Badge className={cn('bg-[#48BB78] text-xs text-white', productTradeColor)}>{trade_status}</Badge>
-            ) : null}
+            {isMd && trade_status ? <Badge className={cn('bg-[#48BB78] text-xs text-white', productTradeColor)}>{trade_status}</Badge> : null}
             <div className="flex w-full items-start justify-between">
               <div className="flex w-full flex-col gap-1">
-                {isMd ? <h3 className="line-clamp-2 w-96 text-[17px] leading-6.5 font-bold">{title}</h3> : null}
+                {isMd ? <h3 className="line-clamp-2 w-96 text-[17px] leading-[26px] font-bold">{title}</h3> : null}
                 {!isMd ? (
                   <div className="relative flex w-full items-start justify-between gap-2">
                     <h3 className="line-clamp-2 w-full text-sm font-normal">{title}</h3>
@@ -195,9 +182,7 @@ export default function MyList({
                           size="sm"
                           className="text-danger-500 hover:bg-primary-300 w-fit cursor-pointer gap-3 rounded-none hover:font-bold hover:text-white"
                           onClick={
-                            isWishlistTab
-                              ? handleCancelFavorite
-                              : (e: React.MouseEvent) => handleConfirmModal(e, id, title, price, mainImageUrl)
+                            isWishlistTab ? handleCancelFavorite : (e: React.MouseEvent) => handleConfirmModal(e, id, title, price, mainImageUrl)
                           }
                         >
                           <Trash2 size={16} />
@@ -208,9 +193,7 @@ export default function MyList({
                   </div>
                 ) : null}
                 <span className="font-bold text-gray-500 md:font-medium">{formatPrice(price)} 원</span>
-                {!isMd && !isCompleted && isSalesTab ? (
-                  <StatusDropdown className="w-full" value={currentTradeStatusKo} onChange={handleProductType} />
-                ) : null}
+                {!isMd && !isCompleted && isSalesTab ? <StatusDropdown className="w-full" value={currentTradeStatusKo} onChange={handleProductType} /> : null}
                 {!isMd && !isCompleted && isPurchasesTab ? (
                   <Button
                     size="sm"
@@ -225,9 +208,7 @@ export default function MyList({
             <ProductMetaItem icon={Eye} label={`조회 ${viewCount}`} className="text-sm text-gray-400" />
           </div>
           <div className="flex flex-col items-end gap-2">
-            {isMd && !isCompleted && isSalesTab ? (
-              <StatusDropdown className="w-32" value={currentTradeStatusKo} onChange={handleProductType} />
-            ) : null}
+            {isMd && !isCompleted && isSalesTab ? <StatusDropdown className="w-32" value={currentTradeStatusKo} onChange={handleProductType} /> : null}
             {isMd && !isCompleted && isPurchasesTab ? (
               <Button
                 size="sm"
@@ -251,11 +232,7 @@ export default function MyList({
                 <Button
                   size="sm"
                   className="hover:bg-primary-300 flex-1 cursor-pointer border border-gray-300 hover:font-bold hover:text-white"
-                  onClick={
-                    isWishlistTab
-                      ? handleCancelFavorite
-                      : (e: React.MouseEvent) => handleConfirmModal(e, id, title, price, mainImageUrl)
-                  }
+                  onClick={isWishlistTab ? handleCancelFavorite : (e: React.MouseEvent) => handleConfirmModal(e, id, title, price, mainImageUrl)}
                 >
                   {isWishlistTab ? '찜 취소' : '삭제'}
                 </Button>
