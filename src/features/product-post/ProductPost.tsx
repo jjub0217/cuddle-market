@@ -94,7 +94,7 @@ function ProductPost() {
         <button type="button" onClick={() => router.back()} className="flex cursor-pointer items-center gap-1 text-gray-600">
           <ArrowLeft size={23} className="text-white" />
         </button>
-        <span className="heading-h4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg font-extrabold! text-white">
+        <span className="heading-h4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg !font-extrabold text-white">
           {isSalesTab ? (isEditMode ? '상품 수정' : '상품 등록') : (isEditMode ? '판매요청 수정' : '판매요청 등록')}
         </span>
       </div>

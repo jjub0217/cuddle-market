@@ -198,7 +198,7 @@ export default function CommunityPostForm() {
         <button type="button" onClick={() => router.back()} className="flex cursor-pointer items-center gap-1 text-gray-600">
           <ArrowLeft size={23} className="text-white" />
         </button>
-        <span className="heading-h4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg font-extrabold! text-white">
+        <span className="heading-h4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg !font-extrabold text-white">
           커뮤니티
         </span>
       </div>
