@@ -10,7 +10,8 @@ import ProfileAvatar from '@/components/commons/ProfileAvatar'
 import { useRef, useState } from 'react'
 import { useUserStore } from '@/store/userStore'
 import { useOutsideClick } from '@/hooks/useOutsideClick'
-import DeleteReplyModal from '@/components/modal/DeleteReplyModal'
+import dynamic from 'next/dynamic'
+const DeleteReplyModal = dynamic(() => import('@/components/modal/DeleteReplyModal'))
 
 interface CommentItemProps {
   comment: Comment

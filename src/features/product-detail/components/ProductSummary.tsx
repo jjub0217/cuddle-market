@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { Flag } from 'lucide-react'
 import ProductMetadataList from './ProductMetadataList'
 import ProductTitle from './ProductTitle'
-import ProductReportModal from '@/components/modal/ProductReportModal'
+import dynamic from 'next/dynamic'
+const ProductReportModal = dynamic(() => import('@/components/modal/ProductReportModal'))
 
 interface ProductHeaderProps {
   data: {

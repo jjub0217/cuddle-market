@@ -45,14 +45,11 @@ function SubImageItem({ image, title, idx }: { image: string; title: string; idx
 }
 
 export default function SubImages({ mainImageUrl, subImageUrls, title }: SubImagesProps) {
-  return (
-    mainImageUrl &&
-    subImageUrls.length > 0 && (
-      <div className="grid grid-cols-4 gap-2">
-        {subImageUrls.map((image, idx) => (
-          <SubImageItem key={idx} image={image} title={title} idx={idx} />
-        ))}
-      </div>
-    )
-  )
+  return mainImageUrl && subImageUrls.length > 0 ? (
+    <div className="grid grid-cols-4 gap-2">
+      {subImageUrls.map((image, idx) => (
+        <SubImageItem key={idx} image={image} title={title} idx={idx} />
+      ))}
+    </div>
+  ) : null
 }

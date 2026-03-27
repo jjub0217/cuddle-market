@@ -12,8 +12,9 @@ import { useMediaQuery } from '@/hooks/useMediaQuery'
 import LoadMoreButton from '@/components/commons/button/LoadMoreButton'
 import EmptyState from '@/components/EmptyState'
 import { Package } from 'lucide-react'
-import UserReportModal from '@/components/modal/UserReportModal'
-import BlockModal from '@/components/modal/BlockModal'
+import dynamic from 'next/dynamic'
+const UserReportModal = dynamic(() => import('@/components/modal/UserReportModal'))
+const BlockModal = dynamic(() => import('@/components/modal/BlockModal'))
 import { useUserStore } from '@/store/userStore'
 import { AnimatePresence } from 'framer-motion'
 import InlineNotification from '@/components/commons/InlineNotification'

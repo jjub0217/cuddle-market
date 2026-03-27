@@ -21,8 +21,8 @@ import { useForm } from 'react-hook-form'
 import type { CommentPostRequestData, CommunityDetailItem, Comment } from '@/types'
 import { useEffect, useRef, useState } from 'react'
 import { MessageSquareText } from 'lucide-react'
-import PostReportModal from '@/components/modal/PostReportModal'
-import DeletePostConfirmModal from '@/components/modal/DeletePostConfirmModal'
+const PostReportModal = dynamic(() => import('@/components/modal/PostReportModal'))
+const DeletePostConfirmModal = dynamic(() => import('@/components/modal/DeletePostConfirmModal'))
 import { useUserStore } from '@/store/userStore'
 import { useLoginModalStore } from '@/store/modalStore'
 import { EllipsisVertical } from 'lucide-react'

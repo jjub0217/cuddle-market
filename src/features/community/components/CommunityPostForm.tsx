@@ -20,7 +20,8 @@ import { Z_INDEX } from '@/constants/ui'
 import { AnimatePresence } from 'framer-motion'
 import InlineNotification from '@/components/commons/InlineNotification'
 import { useUserStore } from '@/store/userStore'
-import DraftModal from '@/components/modal/DraftModal'
+import dynamic from 'next/dynamic'
+const DraftModal = dynamic(() => import('@/components/modal/DraftModal'))
 
 export interface CommunityPostFormValues {
   boardType: string
