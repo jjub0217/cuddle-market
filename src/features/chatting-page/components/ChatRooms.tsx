@@ -16,7 +16,14 @@ interface ChatRoomsProps {
   fetchNextPage: () => void
 }
 
-export function ChatRooms({ rooms, handleSelectRoom, selectedRoomId, hasNextPage, isFetchingNextPage, fetchNextPage }: ChatRoomsProps) {
+export function ChatRooms({
+  rooms,
+  handleSelectRoom,
+  selectedRoomId,
+  hasNextPage,
+  isFetchingNextPage,
+  fetchNextPage,
+}: ChatRoomsProps) {
   const { chatRoomUpdates } = chatSocketStore()
   const targetRef = useIntersectionObserver({
     enabled: rooms.length > 0,
@@ -40,7 +47,7 @@ export function ChatRooms({ rooms, handleSelectRoom, selectedRoomId, hasNextPage
   }
 
   return (
-    <section className="relative flex flex-col rounded-none border-t border-l border-gray-300 md:max-w-120 md:min-w-120 md:border-b">
+    <section className="relative flex flex-col rounded-none border-t border-l border-gray-300 md:max-w-112 md:min-w-112 md:border-b">
       <h2 className={cn('sticky top-16 border-b border-gray-300 bg-white p-5 md:static', Z_INDEX.HEADER)}>채팅목록</h2>
       <div className="scrollbar-hide flex-1 overflow-y-scroll">
         <ul className="flex flex-col gap-2">
@@ -63,11 +70,13 @@ export function ChatRooms({ rooms, handleSelectRoom, selectedRoomId, hasNextPage
                     <div className="flex w-full flex-col gap-1">
                       <p className="leading-none font-semibold">{roomData?.opponentNickname}</p>
                       <div className="flex items-center gap-1">
-                        <p className={cn('text-xs', roomData.lastMessage ? '' : 'text-blue-600')}>
-                          {roomData.lastMessage ? roomData.lastMessage : '채팅방에 입장해주세요'}
+                        <p className={cn('line-clamp-1 text-xs', roomData.lastMessage == null ? 'text-blue-600' : '')}>
+                          {roomData.lastMessage == null ? '채팅방에 입장해주세요' : roomData.lastMessage === '' ? '사진' : roomData.lastMessage}
                         </p>
                         {roomData.lastMessageTime ? (
-                          <span className="text-xs leading-none font-medium text-gray-500">{getTimeAgo(roomData.lastMessageTime)}</span>
+                          <span className="text-xs leading-none font-medium text-gray-500">
+                            {getTimeAgo(roomData.lastMessageTime)}
+                          </span>
                         ) : null}
                       </div>
                     </div>
@@ -92,7 +101,11 @@ export function ChatRooms({ rooms, handleSelectRoom, selectedRoomId, hasNextPage
         <div ref={targetRef} className="h-10" aria-hidden="true" />
         {isFetchingNextPage ? (
           <div className="flex items-center justify-center py-8">
-            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" aria-label="채팅방 로딩 중" role="status" />
+            <div
+              className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"
+              aria-label="채팅방 로딩 중"
+              role="status"
+            />
           </div>
         ) : null}
       </div>
