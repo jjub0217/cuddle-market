@@ -6,9 +6,9 @@ interface FormSectionHeaderProps {
 
 export default function FormSectionHeader({ heading, description, headingClassName }: FormSectionHeaderProps) {
   return (
-    <div className="flex flex-col gap-1">
-      <h2 className={headingClassName ?? 'heading-h3'}>{heading}</h2>
-      {description ? <p>{description}</p> : null}
+    <div className="flex flex-col gap-0">
+      <h2 className={headingClassName ?? 'text-[20px] font-bold'}>{heading}</h2>
+      {description ? <p className="text-sm">{description}</p> : null}
     </div>
   )
 }
