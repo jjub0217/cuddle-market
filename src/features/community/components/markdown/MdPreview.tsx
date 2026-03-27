@@ -27,6 +27,7 @@ export default function MdPreview({ value, height, className }: MdPreviewProps) 
           a: (p) => <a {...p} className="text-blue-600 underline" target="_blank" rel="noopener noreferrer" />,
           code: (p) => <code {...p} className="rounded bg-gray-100 px-1 py-0.5" />,
           blockquote: (p) => <blockquote {...p} className="my-2 border-l-4 pl-3 text-gray-700 italic" />,
+          img: (p) => <img {...p} className="my-2 h-auto w-full max-w-[50%] rounded-lg" />,
         }}
       >
         {value || '미리보기 내용이 없습니다.'}
