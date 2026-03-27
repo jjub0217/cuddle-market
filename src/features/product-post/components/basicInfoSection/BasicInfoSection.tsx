@@ -30,7 +30,7 @@ export default function BasicInfoSection({
   titleLength,
 }: BasicInfoSectionProps) {
   return (
-    <section className="flex flex-col gap-2 rounded-xl border border-gray-100 bg-white px-5 pt-3.5 pb-5">
+    <section className="flex flex-col gap-2 rounded-xl border border-gray-400 bg-white px-5 pt-3.5 pb-5 shadow-xl">
       <FormSectionHeader heading="기본 정보" />
       <div className="flex flex-col gap-3.5">
       <PetTypeField<ProductPostFormValues> control={control} setValue={setValue} primaryName="petType" secondaryName="petDetailType" />

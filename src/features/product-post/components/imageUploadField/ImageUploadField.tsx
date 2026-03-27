@@ -56,5 +56,5 @@ export default function ImageUploadField<T extends FieldValues>({
     return content
   }
 
-  return <section className="flex flex-col gap-6 rounded-xl border border-gray-100 bg-white px-5 pt-3.5 pb-5">{content}</section>
+  return <section className="flex flex-col gap-6 rounded-xl border border-gray-400 bg-white px-5 pt-3.5 pb-5 shadow-xl">{content}</section>
 }
