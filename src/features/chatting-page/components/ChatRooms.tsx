@@ -70,7 +70,7 @@ export function ChatRooms({
                     <div className="flex w-full flex-col gap-1">
                       <p className="leading-none font-semibold">{roomData?.opponentNickname}</p>
                       <div className="flex items-center gap-1">
-                        <p className={cn('line-clamp line-1 text-xs', roomData.lastMessage == null ? 'text-blue-600' : '')}>
+                        <p className={cn('line-clamp-1 text-xs', roomData.lastMessage == null ? 'text-blue-600' : '')}>
                           {roomData.lastMessage == null ? '채팅방에 입장해주세요' : roomData.lastMessage === '' ? '사진' : roomData.lastMessage}
                         </p>
                         {roomData.lastMessageTime ? (
