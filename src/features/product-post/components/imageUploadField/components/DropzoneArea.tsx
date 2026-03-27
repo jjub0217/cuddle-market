@@ -138,7 +138,7 @@ export default function DropzoneArea<T extends FieldValues>({
   }
 
   return (
-    <div {...getRootProps()} className="cursor-pointer rounded-lg border border-dashed border-gray-400 px-4 py-4 md:px-6 md:py-10">
+    <div {...getRootProps()} className="cursor-pointer rounded-lg border border-dashed border-gray-400 px-2.5 py-2.5 md:px-6 md:py-10">
       <input {...getInputProps()} />
       {previewUrls.length === 0 ? (
         <DropzoneGuide maxFiles={maxFiles} />

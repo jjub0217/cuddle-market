@@ -198,7 +198,7 @@ export default function CommunityPostForm() {
         <button type="button" onClick={() => router.back()} className="flex cursor-pointer items-center gap-1 text-gray-600">
           <ArrowLeft size={23} className="text-white" />
         </button>
-        <span className="heading-h4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg font-extrabold! text-white">
+        <span className="heading-h4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg !font-extrabold text-white">
           커뮤니티
         </span>
       </div>
@@ -231,7 +231,7 @@ export default function CommunityPostForm() {
                   rules={{ required: '카테고리를 선택해주세요' }}
                   render={({ field, fieldState }) => (
                     <div className="flex flex-col gap-1">
-                      <RequiredLabel labelClass="text-base font-semibold">카테고리</RequiredLabel>
+                      <RequiredLabel labelClass="text-sm md:text-base font-semibold">카테고리</RequiredLabel>
                       <SelectDropdown
                         value={field.value || ''}
                         onChange={field.onChange}
@@ -259,7 +259,7 @@ export default function CommunityPostForm() {
                   placeholder="제목을 입력해주세요"
                   size="text-base"
                   counterClassName="text-xs text-gray-500"
-                  labelClassName="text-base font-semibold"
+                  labelClassName="text-sm md:text-base font-semibold"
                 />
               </div>
               <div className="rounded-lg border border-gray-400 bg-white px-3.5 py-3.5 md:px-5 shadow-xl">
@@ -269,7 +269,7 @@ export default function CommunityPostForm() {
                   rules={communityContentValidationRules}
                   render={({ field, fieldState }) => (
                     <div className="flex flex-col gap-1">
-                      <RequiredLabel labelClass="text-base font-semibold">내용</RequiredLabel>
+                      <RequiredLabel labelClass="text-sm md:text-base font-semibold">내용</RequiredLabel>
                       <Markdown value={field.value} onChange={field.onChange} placeholder="내용을 입력하세요" height={320} />
                       <div className="flex flex-col gap-1">
                         {fieldState.error ? (

@@ -18,7 +18,7 @@ export default function TradeInfoSection({ control, setValue }: TradeInfoSection
         primaryName="addressSido"
         secondaryName="addressGugun"
         label="거래 희망 지역"
-        labelClass="text-base font-semibold"
+        labelClass="text-sm md:text-base font-semibold"
         layoutClass="gap-1"
       />
     </section>

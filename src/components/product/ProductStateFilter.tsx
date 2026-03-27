@@ -81,7 +81,6 @@ export function ProductStateFilter({
               className={cn(
                 'flex cursor-pointer flex-col gap-1 rounded-lg px-4 py-2 text-center',
                 'bg-primary-50 text-xs md:text-sm font-medium',
-                labelClassname,
                 selectedProductStatus === item.value
                   ? 'bg-primary-300 text-white'
                   : 'hover:bg-primary-300 text-gray-900 hover:text-white'
