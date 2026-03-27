@@ -84,7 +84,13 @@ function ProductPost() {
   return (
     <>
       <h1 className="sr-only">{headerTitle}</h1>
-      <SimpleHeader title={headerTitle} description={headerDescription} />
+      <SimpleHeader
+        title={headerTitle}
+        description={headerDescription}
+        layoutClassname="py-3.5 gap-0 flex-col justify-between border-b border-gray-200"
+        titleClassName="text-[22px] leading-[1.5] font-bold"
+        descriptionClassName="text-sm"
+      />
       <div className="bg-[#F3F4F6] pt-5">
         <div className="px-lg pb-4xl mx-auto max-w-7xl">
           <div className="gap-2xl flex w-full flex-col">

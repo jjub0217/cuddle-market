@@ -56,7 +56,7 @@ export function ProductStateFilter({
           상품 상태
         </h4>
       ) : (
-        <span id="condition-filter-heading" className="heading-h5 text-gray-900">
+        <span id="condition-filter-heading" className={cn(labelClassname ?? 'heading-h5', 'text-gray-900')}>
           상품 상태 <span className="text-red-500">*</span>
         </span>
       )}

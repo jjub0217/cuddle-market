@@ -22,6 +22,8 @@ export function ProductNameField({ register, errors, label = '상품명', titleL
       maxLength={50}
       id="product-title"
       placeholder="예: 강아지 사료 10kg 상품"
+      labelClassName="text-base font-semibold"
+      counterClassName="text-xs text-gray-500"
     />
   )
 }

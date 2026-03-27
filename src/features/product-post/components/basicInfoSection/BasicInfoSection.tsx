@@ -30,8 +30,9 @@ export default function BasicInfoSection({
   titleLength,
 }: BasicInfoSectionProps) {
   return (
-    <section className="flex flex-col gap-5 rounded-xl border border-gray-100 bg-white px-6 py-5">
-      <FormSectionHeader heading="기본 정보" description="상품의 기본 정보를 입력해주세요. *는 필수 항목입니다." />
+    <section className="flex flex-col gap-2 rounded-xl border border-gray-100 bg-white px-5 pt-3.5 pb-5">
+      <FormSectionHeader heading="기본 정보" />
+      <div className="flex flex-col gap-3.5">
       <PetTypeField<ProductPostFormValues> control={control} setValue={setValue} primaryName="petType" secondaryName="petDetailType" />
       <Controller
         name="category"
@@ -39,7 +40,7 @@ export default function BasicInfoSection({
         rules={{ required: '카테고리를 선택해주세요' }}
         render={({ field, fieldState }) => (
           <div className="flex flex-col gap-1">
-            <RequiredLabel htmlFor="category" labelClass="heading-h5">
+            <RequiredLabel htmlFor="category" labelClass="text-base font-semibold">
               상품 카테고리
             </RequiredLabel>
             <SelectDropdown
@@ -59,6 +60,7 @@ export default function BasicInfoSection({
       />
       <ProductNameField register={register} errors={errors} label={productNameLabel} titleLength={titleLength} />
       <ProductDescriptionFiled register={register} errors={errors} label={productDescriptionLabel} placeholder={productDescriptionPlaceHolder} />
+      </div>
     </section>
   )
 }

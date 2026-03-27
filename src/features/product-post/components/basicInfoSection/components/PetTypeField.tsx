@@ -48,7 +48,7 @@ export function PetTypeField<T extends FieldValues>({
       secondaryId="pet-detail"
       secondaryRule="소분류를 선택해주세요"
       label={label}
-      labelClass="heading-h5"
+      labelClass="text-base font-semibold"
       layoutClass="gap-1"
       buttonClassName="px-3 py-3"
       optionClassName=""

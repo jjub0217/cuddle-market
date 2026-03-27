@@ -207,7 +207,7 @@ export default function CommunityPostForm() {
         <SimpleHeader
           title="커뮤니티 글쓰기"
           description="일상 이야기를 마음껏 나눠보세요!"
-          layoutClassname="py-5 gap-0 flex-col justify-between border-b border-gray-200"
+          layoutClassname="py-3.5 gap-0 flex-col justify-between border-b border-gray-200"
           titleClassName="text-[22px] leading-[1.5] font-bold"
           descriptionClassName="text-sm"
         />

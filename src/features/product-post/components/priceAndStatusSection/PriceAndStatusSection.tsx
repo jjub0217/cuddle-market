@@ -22,8 +22,9 @@ export default function PriceAndStatusSection({
   priceLabel,
 }: PriceAndStatusSectionProps) {
   return (
-    <section className="flex flex-col gap-5 rounded-xl border border-gray-100 bg-white px-6 py-5">
+    <section className="flex flex-col gap-2 rounded-xl border border-gray-100 bg-white px-5 pt-3.5 pb-5">
       <FormSectionHeader heading={heading} />
+      <div className="flex flex-col gap-3.5">
       <PriceField register={register} errors={errors} label={priceLabel} suffix="원" />
       {showProductStateFilter ? (
         <Controller
@@ -34,7 +35,7 @@ export default function PriceAndStatusSection({
             <>
               <ProductStateFilter
                 inputClassname="flex-1"
-                labelClassname="py-4 font-semibold"
+                labelClassname="text-base font-semibold"
                 subTitle
                 selectedProductStatus={field.value || null}
                 onProductStatusChange={(status) => field.onChange(status ?? '')}
@@ -44,6 +45,7 @@ export default function PriceAndStatusSection({
           )}
         />
       ) : null}
+      </div>
     </section>
   )
 }
