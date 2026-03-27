@@ -1,9 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import SelectDropdown from '@/components/commons/select/SelectDropdown'
 import { CITIES, PROVINCES, type Province } from '@/constants/cities'
-import { cn } from '@/lib/utils/cn'
 import { useFilterNavigation } from '@/hooks/useFilterNavigation'
 
 interface LocationFilterProps {
@@ -17,20 +15,11 @@ export function LocationFilter({ headingClassName }: LocationFilterProps) {
     return PROVINCES.includes(value as Province)
   }
 
-  // URL에서 초기값 읽기
-  const initialSido = searchParams.get('addressSido') || ''
-  const initialGugun = searchParams.get('addressGugun') || ''
-
-  const [selectedSido, setSelectedSido] = useState<Province | ''>(isValidProvince(initialSido) ? initialSido : '')
-  const [selectedGugun, setSelectedGugun] = useState(initialGugun)
-
-  // URL이 변경될 때 state 동기화 (뒤로가기 대응)
-  useEffect(() => {
-    const urlSido = searchParams.get('addressSido') || ''
-    const urlGugun = searchParams.get('addressGugun') || ''
-    setSelectedSido(isValidProvince(urlSido) ? urlSido : '')
-    setSelectedGugun(urlGugun)
-  }, [searchParams])
+  // URL에서 직접 파생 (state 불필요)
+  const urlSido = searchParams.get('addressSido') || ''
+  const urlGugun = searchParams.get('addressGugun') || ''
+  const selectedSido: Province | '' = isValidProvince(urlSido) ? urlSido : ''
+  const selectedGugun = urlGugun
 
   // 선택된 시/도에 따른 구/군 목록
   const availableGugun = selectedSido ? CITIES[selectedSido] || [] : []
@@ -55,14 +44,11 @@ export function LocationFilter({ headingClassName }: LocationFilterProps) {
   // 시/도가 변경되면 구/군 초기화 + URL 업데이트
   const handleSidoChange = (value: string) => {
     const newSido = value as Province | ''
-    setSelectedSido(newSido)
-    setSelectedGugun('')
     updateURL(newSido, '')
   }
 
   // 구/군 변경 시 URL 업데이트
   const handleGugunChange = (value: string) => {
-    setSelectedGugun(value)
     updateURL(selectedSido, value)
   }
 

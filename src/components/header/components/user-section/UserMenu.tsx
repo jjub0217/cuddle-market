@@ -28,7 +28,6 @@ export default function UserMenu({
   setIsNotificationOpen,
   isUserMenuOpen,
   setIsUserMenuOpen,
-  isSideOpen,
   setIsSideOpen,
 }: UserMenuProps) {
   const { user } = useUserStore()

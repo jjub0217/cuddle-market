@@ -1,10 +1,10 @@
 'use client'
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { ProductBadge } from './ProductBadge'
 import Badge from '@/components/commons/badge/Badge'
 import { cn } from '@/lib/utils/cn'
-import { getImageSrcSet, IMAGE_SIZES, toResizedWebpUrl, PLACEHOLDER_IMAGES, PLACEHOLDER_SRCSET } from '@/lib/utils/imageUrl'
+import { getImageSrcSet, IMAGE_SIZES, toResizedWebpUrl, PLACEHOLDER_IMAGES } from '@/lib/utils/imageUrl'
 
 interface ProductThumbnailProps {
   imageUrl: string
@@ -52,18 +52,21 @@ export function ProductThumbnail({
   }
 
   return (
-    <div className={cn("relative overflow-hidden", vertical ? "flex-none pb-[75%]" : "flex-[2] pb-[35%] md:flex-none md:pb-[75%]")}>
+    <div className={cn('relative overflow-hidden', vertical ? 'flex-none pb-[75%]' : 'flex-2 pb-[35%] md:flex-none md:pb-[75%]')}>
       <div className="top-sm px-sm absolute z-1">
         <ProductBadge petTypeName={petTypeName} productStatusName={productStatusName} productTypeName={productTypeName} />
       </div>
       <Badge className={cn('bottom-sm right-sm absolute z-1 text-xs text-white', productTradeColor)}>{displayTradeStatus}</Badge>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        ref={useCallback((img: HTMLImageElement | null) => {
-          if (img && img.complete && img.naturalWidth === 0 && imgErrorStep < 2) {
-            setImgErrorStep((prev) => prev + 1)
-          }
-        }, [imgErrorStep])}
+        ref={useCallback(
+          (img: HTMLImageElement | null) => {
+            if (img && img.complete && img.naturalWidth === 0 && imgErrorStep < 2) {
+              setImgErrorStep((prev) => prev + 1)
+            }
+          },
+          [imgErrorStep]
+        )}
         alt={title}
         src={getSrc()}
         srcSet={getSrcSet()}

@@ -12,25 +12,22 @@ const MdPreview = dynamic(() => import('./components/markdown/MdPreview'), {
 })
 import { getBoardType } from '@/lib/utils/getBoardType'
 import Badge from '@/components/commons/badge/Badge'
-import { formatDate } from '@/lib/utils/formatDate'
 import { getTimeAgo } from '@/lib/utils/getTimeAgo'
 import { CommentList, type ReplyRequestFormValues } from './components/CommentList'
 import { CommentForm } from './components/CommentForm'
 import ProfileAvatar from '@/components/commons/ProfileAvatar'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import type { CommentPostRequestData, CommunityDetailItem, Comment } from '@/types'
 import { useEffect, useRef, useState } from 'react'
-import { MessageSquareText } from 'lucide-react'
+import { MessageSquareText, EllipsisVertical } from 'lucide-react'
 const PostReportModal = dynamic(() => import('@/components/modal/PostReportModal'))
 const DeletePostConfirmModal = dynamic(() => import('@/components/modal/DeletePostConfirmModal'))
 import { useUserStore } from '@/store/userStore'
 import { useLoginModalStore } from '@/store/modalStore'
-import { EllipsisVertical } from 'lucide-react'
 import IconButton from '@/components/commons/button/IconButton'
 import { AnimatePresence } from 'framer-motion'
 import InlineNotification from '@/components/commons/InlineNotification'
 import { useOutsideClick } from '@/hooks/useOutsideClick'
-
 
 interface CommunityDetailProps {
   initialPostData?: CommunityDetailItem
@@ -38,19 +35,14 @@ interface CommunityDetailProps {
 }
 
 export default function CommunityDetail({ initialPostData, initialCommentData }: CommunityDetailProps) {
-  const {
-    handleSubmit,
-    watch,
-    setValue,
-    reset,
-  } = useForm<ReplyRequestFormValues>({
+  const { handleSubmit, control, setValue, reset } = useForm<ReplyRequestFormValues>({
     mode: 'onChange',
     defaultValues: {
       content: '',
     },
   })
 
-  const commentContent = watch('content')
+  const commentContent = useWatch({ control, name: 'content' }) ?? ''
 
   const user = useUserStore((state) => state.user)
   const setRedirectUrl = useUserStore((state) => state.setRedirectUrl)
@@ -177,9 +169,9 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
       <div className="min-h-screen bg-[#F3F4F6] pt-5 pb-16 md:pb-0">
         <div className="px-lg pb-4xl mx-auto max-w-7xl">
           <div className="flex flex-col justify-center gap-3.5">
-            <div className="flex flex-col gap-3.5 rounded-lg border border-gray-400 bg-white px-4 md:px-6 py-5 shadow-xl">
+            <div className="flex flex-col gap-3.5 rounded-lg border border-gray-400 bg-white px-4 py-5 shadow-xl md:px-6">
               <div className="relative flex items-center justify-between">
-                <Badge className="bg-primary-400 w-fit rounded-full text-xs md:font-semibold text-white">
+                <Badge className="bg-primary-400 w-fit rounded-full text-xs text-white md:font-semibold">
                   {getBoardType(data.boardType as 'QUESTION' | 'INFO')}
                 </Badge>
                 <IconButton aria-label="더보기" className="" size="sm" onClick={handleMoreToggle}>
@@ -234,14 +226,19 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
               </div>
               <div className="flex items-end justify-between">
                 <div className="flex items-center gap-3.5">
-                  <ProfileAvatar imageUrl={data.authorProfileImageUrl} nickname={data.authorNickname} size="lg" className="h-10 w-10 md:h-12 md:w-12" />
+                  <ProfileAvatar
+                    imageUrl={data.authorProfileImageUrl}
+                    nickname={data.authorNickname}
+                    size="lg"
+                    className="h-10 w-10 md:h-12 md:w-12"
+                  />
                   {/* 유저 정보 */}
                   <div className="flex flex-col justify-center gap-0.5">
-                    <p className="text-sm md:text-base font-semibold">{data.authorNickname}</p>
-                    <p className="text-xs md:text-sm text-gray-500">{getTimeAgo(data.createdAt)}</p>
+                    <p className="text-sm font-semibold md:text-base">{data.authorNickname}</p>
+                    <p className="text-xs text-gray-500 md:text-sm">{getTimeAgo(data.createdAt)}</p>
                   </div>
                 </div>
-                <p className="text-xs md:text-sm text-gray-500">조회 {data.viewCount}</p>
+                <p className="text-xs text-gray-500 md:text-sm">조회 {data.viewCount}</p>
               </div>
               <h1 className="text-lg leading-snug font-bold">{data.title}</h1>
               <MdPreview value={data.content} className="p-0" />
@@ -249,7 +246,7 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
 
             <section
               aria-label="댓글"
-              className="flex flex-col gap-3.5 rounded-lg border border-gray-400 bg-white px-3 md:px-6 py-5 shadow-xl"
+              className="flex flex-col gap-3.5 rounded-lg border border-gray-400 bg-white px-3 py-5 shadow-xl md:px-6"
             >
               <div className="flex items-center gap-1 text-sm font-semibold text-gray-500">
                 <span>댓글</span>
@@ -294,7 +291,10 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
             </section>
 
             {/* 모바일용 댓글 입력: 하단 고정 */}
-            <div className="fixed right-0 bottom-0 left-0 border-t border-gray-200 bg-white px-3 py-2 md:hidden" style={{ zIndex: 30 }}>
+            <div
+              className="fixed right-0 bottom-0 left-0 border-t border-gray-200 bg-white px-3 py-2 md:hidden"
+              style={{ zIndex: 30 }}
+            >
               <CommentForm
                 id="comment-input-mobile"
                 placeholder="댓글을 입력하세요"

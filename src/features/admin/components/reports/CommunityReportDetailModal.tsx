@@ -34,9 +34,8 @@ export default function CommunityReportDetailModal({ isOpen, report, onClose }: 
       api.get(`/community/posts/${report.targetId}`)
         .then((res) => setPostContent(res.data.data.content))
         .catch(() => setPostContent(null))
-    } else {
-      setPostContent(null)
     }
+    return () => setPostContent(null)
   }, [isOpen, report])
 
   const handleClose = () => {
