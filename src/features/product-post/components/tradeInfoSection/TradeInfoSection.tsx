@@ -10,7 +10,7 @@ interface TradeInfoSectionProps {
 
 export default function TradeInfoSection({ control, setValue }: TradeInfoSectionProps) {
   return (
-    <div className="flex flex-col gap-2 rounded-xl border border-gray-400 bg-white px-5 pt-3.5 pb-5 shadow-xl">
+    <section className="flex flex-col gap-2 rounded-xl border border-gray-400 bg-white px-5 pt-3.5 pb-5 shadow-xl">
       <FormSectionHeader heading="거래 정보" />
       <AddressField<ProductPostFormValues>
         control={control}
@@ -21,6 +21,6 @@ export default function TradeInfoSection({ control, setValue }: TradeInfoSection
         labelClass="text-base font-semibold"
         layoutClass="gap-1"
       />
-    </div>
+    </section>
   )
 }
