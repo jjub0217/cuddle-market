@@ -212,8 +212,8 @@ export default function CommunityPostForm() {
           descriptionClassName="text-sm"
         />
       </div>
-      <div className="bg-[#F3F4F6]">
-        <div className="px-lg mx-auto max-w-7xl pt-5">
+      <div className="min-h-screen bg-[#F3F4F6] pt-5">
+        <div className="px-lg pb-4xl mx-auto max-w-7xl">
           <AnimatePresence>
             {postError ? (
               <InlineNotification type="error" onClose={() => setPostError(null)}>
@@ -221,10 +221,6 @@ export default function CommunityPostForm() {
               </InlineNotification>
             ) : null}
           </AnimatePresence>
-        </div>
-      </div>
-      <div className="min-h-screen bg-[#F3F4F6] pt-5">
-        <div className="px-lg pb-4xl mx-auto max-w-7xl">
           <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
             <fieldset className="flex flex-col gap-5">
               <legend className="sr-only">커뮤니티 등록폼</legend>
