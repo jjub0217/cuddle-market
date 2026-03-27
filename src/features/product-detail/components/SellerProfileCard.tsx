@@ -31,8 +31,7 @@ export default function SellerProfileCard({ sellerInfo }: SellerProfileCardProps
     router.push(`/user-profile/${sellerId}`)
   }
 
-  return (
-    sellerInfo?.sellerId !== user?.id && (
+  return sellerInfo?.sellerId !== user?.id ? (
       <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3">
         <div className="flex items-center gap-2">
           <div className="bg-primary-50 relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full">
@@ -61,6 +60,5 @@ export default function SellerProfileCard({ sellerInfo }: SellerProfileCardProps
           판매자 프로필 보기
         </Button>
       </div>
-    )
-  )
+  ) : null
 }

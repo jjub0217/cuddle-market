@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { Eye, Heart, Flag } from 'lucide-react'
 import { ProductMetaItem } from '@/components/product/ProductMetaItem'
-import ProductReportModal from '@/components/modal/ProductReportModal'
+import dynamic from 'next/dynamic'
+const ProductReportModal = dynamic(() => import('@/components/modal/ProductReportModal'))
 
 interface ProductDetailMobileMetaProps {
   productId: number

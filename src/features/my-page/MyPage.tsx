@@ -8,8 +8,10 @@ import { api } from '@/lib/api/api'
 import Tabs from '@/components/Tabs'
 import { MY_PAGE_TABS, type MyPageTabId } from '@/constants/constants'
 import MyPagePanel from './components/MyPagePanel'
-import DeleteConfirmModal from '@/components/modal/DeleteConfirmModal'
-import WithdrawModal, { type WithDrawFormValues } from '@/components/modal/WithdrawModal'
+import dynamic from 'next/dynamic'
+import type { WithDrawFormValues } from '@/components/modal/WithdrawModal'
+const DeleteConfirmModal = dynamic(() => import('@/components/modal/DeleteConfirmModal'))
+const WithdrawModal = dynamic(() => import('@/components/modal/WithdrawModal'))
 import ProfileData from '@/components/profile/ProfileData'
 import { AnimatePresence } from 'framer-motion'
 import InlineNotification from '@/components/commons/InlineNotification'
