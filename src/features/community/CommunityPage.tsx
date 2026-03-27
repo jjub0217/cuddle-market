@@ -16,7 +16,6 @@ import { getTimeAgo } from '@/lib/utils/getTimeAgo'
 import { useUserStore } from '@/store/userStore'
 
 import { useScrollDirection } from '@/hooks/useScrollDirection'
-import Button from '@/components/commons/button/Button'
 import { cn } from '@/lib/utils/cn'
 import { Z_INDEX } from '@/constants/ui'
 import EmptyState from '@/components/EmptyState'

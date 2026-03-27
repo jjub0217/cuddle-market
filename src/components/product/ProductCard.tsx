@@ -21,6 +21,7 @@ export interface ProductCardProps {
 }
 
 function ProductCard({ data, 'data-index': dataIndex, vertical = false }: ProductCardProps) {
+  const router = useRouter()
   const { isFavorite, handleToggleFavorite } = useFavorite({
     productId: data?.id,
     initialIsFavorite: data?.isFavorite ?? false,
@@ -34,8 +35,7 @@ function ProductCard({ data, 'data-index': dataIndex, vertical = false }: Produc
   const productTradeName = getTradeStatus(tradeStatus)
   const productTypeName = getProductType(productType)
   const productTradeColor = getTradeStatusColor(tradeStatus)
-  const router = useRouter()
-  const handleContentClick = (e: React.MouseEvent) => {
+  const handleContentClick = () => {
     if (window.getSelection()?.toString()) return
     window.scrollTo({ top: 0, behavior: 'smooth' })
     router.push(ROUTES.DETAIL_ID(id, title))

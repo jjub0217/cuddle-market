@@ -1,6 +1,5 @@
 'use client'
 
-import { formatDate } from '@/lib/utils/formatDate'
 import { getTimeAgo } from '@/lib/utils/getTimeAgo'
 import { cn } from '@/lib/utils/cn'
 import type { Comment } from '@/types'

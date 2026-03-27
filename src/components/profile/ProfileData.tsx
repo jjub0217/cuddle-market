@@ -7,7 +7,6 @@ import { getImageSrcSet, IMAGE_SIZES, toResizedWebpUrl } from '@/lib/utils/image
 import { ProductMetaItem } from '@/components/product/ProductMetaItem'
 import { type Dispatch, type SetStateAction } from 'react'
 import { formatJoinDate } from '@/lib/utils/formatJoinDate'
-import Button from '@/components/commons/button/Button'
 import { ROUTES } from '@/constants/routes'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useUserStore } from '@/store/userStore'

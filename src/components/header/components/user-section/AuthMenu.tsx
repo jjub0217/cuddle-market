@@ -13,7 +13,7 @@ interface AuthMenuProps {
   hideMenuButton?: boolean
 }
 
-export default function AuthMenu({ isSideOpen, setIsSideOpen, hideMenuButton = false }: AuthMenuProps) {
+export default function AuthMenu({ setIsSideOpen, hideMenuButton = false }: AuthMenuProps) {
   const isXl = useMediaQuery('(min-width: 1280px)')
   return isXl ? (
     <div className="flex items-center gap-5">
