@@ -19,7 +19,7 @@ export function ProductDescriptionFiled({
 }: ProductDescriptionFiledProps) {
   return (
     <div className="flex flex-col gap-1">
-      <RequiredLabel htmlFor="product-description" labelClass="text-base font-semibold">
+      <RequiredLabel htmlFor="product-description" labelClass="text-sm md:text-base font-semibold">
         {label}
       </RequiredLabel>
       <textarea

@@ -40,7 +40,7 @@ export default function BasicInfoSection({
         rules={{ required: '카테고리를 선택해주세요' }}
         render={({ field, fieldState }) => (
           <div className="flex flex-col gap-1">
-            <RequiredLabel htmlFor="category" labelClass="text-base font-semibold">
+            <RequiredLabel htmlFor="category" labelClass="text-sm md:text-base font-semibold">
               상품 카테고리
             </RequiredLabel>
             <SelectDropdown

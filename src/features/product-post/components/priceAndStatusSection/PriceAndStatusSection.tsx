@@ -35,7 +35,7 @@ export default function PriceAndStatusSection({
             <>
               <ProductStateFilter
                 inputClassname="flex-1"
-                labelClassname="text-base font-semibold"
+                labelClassname="text-sm md:text-base font-semibold"
                 subTitle
                 selectedProductStatus={field.value || null}
                 onProductStatusChange={(status) => field.onChange(status ?? '')}

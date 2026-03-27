@@ -14,7 +14,7 @@ interface PriceFieldProps {
 export function PriceField({ register, errors, suffix, label = '판매 가격' }: PriceFieldProps) {
   return (
     <div className="flex flex-col gap-1">
-      <RequiredLabel htmlFor="price" labelClass="text-base font-semibold">
+      <RequiredLabel htmlFor="price" labelClass="text-sm md:text-base font-semibold">
         {label}
       </RequiredLabel>
       <div className="relative">
