@@ -116,7 +116,7 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
             <EllipsisVertical size={20} className="text-gray-500" />
           </IconButton>
           {isMenuOpen ? (
-            <div className="absolute top-8 right-0 flex flex-col rounded border border-gray-200 bg-white shadow-md">
+            <div className="absolute top-8 right-0 z-50 flex flex-col rounded border border-gray-200 bg-white shadow-md">
               {menuItems.map((item) => (
                 <button
                   key={item.label}

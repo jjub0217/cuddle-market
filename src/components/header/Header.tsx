@@ -20,7 +20,8 @@ const COMMUNITY_EDIT = /^\/community\/\d+\/edit$/
 const PRODUCT_EDIT = /^\/products\/\d+\/edit$/
 
 // Header 숨김 패턴 (모바일에서만 숨김)
-const HIDE_HEADER_MOBILE_PATTERNS = [COMMUNITY_DETAIL, COMMUNITY_EDIT, PRODUCT_EDIT, new RegExp(`^${ROUTES.COMMUNITY_POST}$`), new RegExp(`^${ROUTES.PRODUCT_POST}$`), new RegExp(`^${ROUTES.NOTIFICATIONS}$`)]
+const CHAT_ROOM = /^\/chat(\/\d+)?$/
+const HIDE_HEADER_MOBILE_PATTERNS = [COMMUNITY_DETAIL, COMMUNITY_EDIT, PRODUCT_EDIT, CHAT_ROOM, new RegExp(`^${ROUTES.COMMUNITY_POST}$`), new RegExp(`^${ROUTES.PRODUCT_POST}$`), new RegExp(`^${ROUTES.NOTIFICATIONS}$`)]
 
 // SearchBar 숨김 경로 - 모바일만 (정적 경로)
 const HIDE_SEARCHBAR_MOBILE_PATHS: string[] = [ROUTES.MYPAGE]
