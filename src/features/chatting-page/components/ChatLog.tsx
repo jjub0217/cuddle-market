@@ -42,7 +42,7 @@ function ChatImageMessage({ imageUrl, alt }: { imageUrl?: string; alt: string })
   }
 
   return (
-    <div className="relative aspect-square w-72 shrink-0 overflow-hidden rounded-lg">
+    <div className="relative aspect-square w-48 shrink-0 overflow-hidden rounded-lg md:w-72">
       <Image
         src={getImageSrc()}
         loader={imgError || usePlaceholder || !imageUrl ? undefined : imageLoader}
@@ -191,7 +191,7 @@ export function ChatLog({
       </AnimatePresence>
       {Object.entries(groupedMessages).map(([dateKey, messages]) => (
         <div key={dateKey} className="flex flex-col gap-2">
-          <div className="flex justify-center">
+          <div className="mt-3.5 flex justify-center">
             <span className="rounded-full bg-[#8d99a3] px-3 py-1 text-xs font-semibold text-[#f0f9ff]">
               {chatFormatDate(messages[0].createdAt)}
             </span>

@@ -5,7 +5,7 @@ import { useUserStore } from '@/store/userStore'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter, useParams } from 'next/navigation'
 import type { fetchChatRoom } from '@/types'
-import { Send, Paperclip } from 'lucide-react'
+import { Send, Paperclip, ArrowLeft } from 'lucide-react'
 import IconButton from '@/components/commons/button/IconButton'
 import { ChatRooms } from '@/features/chatting-page/components/ChatRooms'
 import { ChatRoomInfo } from '@/features/chatting-page/components/ChatRoomInfo'
@@ -55,14 +55,17 @@ export default function ChattingPage() {
   } = useInfiniteQuery({
     queryKey: ['messages', chatRoomId],
     queryFn: async ({ pageParam }) => {
-      const data = await fetchGraphQL<{ chatMessages: any }>(`
+      const data = await fetchGraphQL<{ chatMessages: any }>(
+        `
         query ChatMessages($chatRoomId: Int!, $page: Int!, $size: Int!) {
           chatMessages(chatRoomId: $chatRoomId, page: $page, size: $size) {
             messages { messageId senderId senderNickname content messageType imageUrl createdAt }
             currentPage hasNext
           }
         }
-      `, { chatRoomId: Number(chatRoomId), page: pageParam, size: 50 })
+      `,
+        { chatRoomId: Number(chatRoomId), page: pageParam, size: 50 }
+      )
       return data.chatMessages
     },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.currentPage + 1 : undefined),
@@ -83,14 +86,17 @@ export default function ChattingPage() {
   } = useInfiniteQuery({
     queryKey: ['chatRooms'],
     queryFn: async ({ pageParam }) => {
-      const data = await fetchGraphQL<{ chatRooms: any }>(`
+      const data = await fetchGraphQL<{ chatRooms: any }>(
+        `
         query ChatRooms($page: Int!, $size: Int!) {
           chatRooms(page: $page, size: $size) {
             chatRooms { chatRoomId productId productTitle productPrice productImageUrl opponentId opponentNickname opponentProfileImageUrl lastMessage lastMessageTime unreadCount }
             currentPage hasNext
           }
         }
-      `, { page: pageParam, size: 10 })
+      `,
+        { page: pageParam, size: 10 }
+      )
       return data.chatRooms
     },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.currentPage + 1 : undefined),
@@ -224,9 +230,27 @@ export default function ChattingPage() {
   }
 
   return (
-    <div className="md:pb-4xl md:h-auto md:pt-8">
+    <div
+      className={cn(
+        'md:pb-4xl fixed inset-0 z-50 flex flex-col bg-white md:static md:z-auto md:h-auto md:bg-transparent md:pt-8'
+      )}
+    >
       <h1 className="sr-only">채팅 페이지</h1>
-      <div className="mx-auto flex h-full max-w-7xl flex-col md:h-[80vh] md:flex-row">
+      {/* 모바일 상단 헤더 (채팅 목록에서만 표시) */}
+      {!isChatOpen ? (
+        <div className="flex items-center gap-3 border-b border-gray-200 px-4 py-3 md:hidden">
+          <button type="button" onClick={() => router.back()} className="cursor-pointer">
+            <ArrowLeft size={20} />
+          </button>
+          <span className="text-base font-bold">채팅</span>
+        </div>
+      ) : null}
+      <div
+        className={cn(
+          'flex h-full flex-col md:mx-auto md:h-[80vh] md:max-w-7xl md:flex-row',
+          isChatOpen ? 'flex-1 overflow-hidden' : ''
+        )}
+      >
         <div className={cn('md:flex', isChatOpen ? 'hidden' : 'block')}>
           <ChatRooms
             rooms={allRooms ?? []}
@@ -237,13 +261,13 @@ export default function ChattingPage() {
             fetchNextPage={fetchNextRooms}
           />
         </div>
-        <section className={cn('relative flex flex-1 flex-col border border-gray-300 md:flex', isChatOpen ? 'flex' : 'hidden')}>
+        <section className={cn('relative flex flex-1 flex-col overflow-hidden border border-gray-300 md:flex', isChatOpen ? 'flex' : 'hidden')}>
           {selectedRoom ? (
             <>
-              <div className="sticky top-16 shrink-0 md:static">
+              <div className="sticky top-0 shrink-0 md:static md:top-16">
                 <ChatRoomInfo data={selectedRoom} onLeaveRoom={handleLeaveRoom} onBack={handleBack} />
               </div>
-              <div className="bg-primary-50 min-h-0 flex-1 p-3.5 pb-20 md:pb-3.5">
+              <div className="bg-primary-50 min-h-0 flex-1 overflow-y-auto px-3.5 pt-0 pb-20 md:pt-3.5 md:pb-3.5">
                 <ChatLog
                   key={chatRoomId}
                   isLoadingMessages={isLoadingMessages}

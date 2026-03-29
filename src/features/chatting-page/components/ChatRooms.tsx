@@ -47,8 +47,8 @@ export function ChatRooms({
   }
 
   return (
-    <section className="relative flex flex-col rounded-none border-t border-l border-gray-300 md:max-w-112 md:min-w-112 md:border-b">
-      <h2 className={cn('sticky top-16 border-b border-gray-300 bg-white p-5 md:static', Z_INDEX.HEADER)}>채팅목록</h2>
+    <section className="relative flex flex-col rounded-none border-gray-300 md:max-w-112 md:min-w-112 md:border-t md:border-b md:border-l">
+      <h2 className={cn('hidden border-b border-gray-300 bg-white p-5 md:static md:block', Z_INDEX.HEADER)}>채팅목록</h2>
       <div className="scrollbar-hide flex-1 overflow-y-scroll">
         <ul className="flex flex-col gap-2">
           {rooms &&
@@ -58,7 +58,7 @@ export function ChatRooms({
                 <li
                   key={roomData.chatRoomId}
                   className={cn(
-                    'flex cursor-pointer flex-col gap-2 p-3',
+                    'flex cursor-pointer flex-col gap-2 p-4 md:p-3',
                     roomData.chatRoomId === selectedRoomId && 'md:bg-[#E5E7EB]/50'
                   )}
                   onClick={() => handleSelectRoom(room)}
@@ -71,7 +71,11 @@ export function ChatRooms({
                       <p className="leading-none font-semibold">{roomData?.opponentNickname}</p>
                       <div className="flex items-center gap-1">
                         <p className={cn('line-clamp-1 text-xs', roomData.lastMessage == null ? 'text-blue-600' : '')}>
-                          {roomData.lastMessage == null ? '채팅방에 입장해주세요' : roomData.lastMessage === '' ? '사진' : roomData.lastMessage}
+                          {roomData.lastMessage == null
+                            ? '채팅방에 입장해주세요'
+                            : roomData.lastMessage === ''
+                              ? '사진'
+                              : roomData.lastMessage}
                         </p>
                         {roomData.lastMessageTime ? (
                           <span className="text-xs leading-none font-medium text-gray-500">
