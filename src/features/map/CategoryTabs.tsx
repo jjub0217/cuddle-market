@@ -1,0 +1,27 @@
+'use client'
+
+import { CATEGORIES } from '@/constants/map'
+import { useMapStore } from '@/store/mapStore'
+
+export default function CategoryTabs() {
+  const selectedCategory = useMapStore((s) => s.selectedCategory)
+  const setSelectedCategory = useMapStore((s) => s.setSelectedCategory)
+
+  return (
+    <div className="flex gap-2 overflow-x-auto px-4 py-3">
+      {CATEGORIES.map(({ key, label }) => (
+        <button
+          key={key}
+          onClick={() => setSelectedCategory(key)}
+          className={`shrink-0 cursor-pointer rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+            selectedCategory === key
+              ? 'bg-orange-500 text-white'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  )
+}
