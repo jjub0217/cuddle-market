@@ -52,6 +52,9 @@ export default function MapContainer() {
   useEffect(() => {
     if (!mapReady || !mapBounds) return
     fetchPlaces()
+    return () => {
+      abortRef.current?.abort()
+    }
   }, [fetchPlaces, mapReady, mapBounds])
 
   useEffect(() => {
