@@ -43,8 +43,8 @@ function shortenAddress(address: string): string {
     if (/^.+도$/.test(part) && !/(시|구|동|읍|면)/.test(part)) continue
 
     // 시 축약 ("고양시" → "고양", "서울특별시" → "서울")
-    if (/(특별시|광역시|특별자치시|특별자치도|시)$/.test(part)) {
-      result.push(part.replace(/(특별시|광역시|특별자치시|특별자치도|시)$/, ''))
+    if (/(특별시|광역시|특별자치시|특별자치도|특별자치시|시)$/.test(part)) {
+      result.push(part.replace(/(특별자치도|특별자치시|특별시|광역시|시)$/, ''))
       continue
     }
 
