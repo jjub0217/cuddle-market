@@ -147,6 +147,13 @@ export default function NaverMap() {
     } else {
       updateBounds()
     }
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+      markersRef.current.forEach((m) => m.setMap(null))
+      markersRef.current = []
+      mapInstanceRef.current = null
+    }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // 외부에서 지도 중심 이동 요청 처리
