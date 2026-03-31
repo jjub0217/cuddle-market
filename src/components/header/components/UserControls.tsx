@@ -54,7 +54,7 @@ export default function UserControls({ isSideOpen, setIsSideOpen, hideMenuButton
     <div className="flex items-center gap-2 xl:gap-4">
       {hasHydrated && isLogin() ? (
         <div className="flex items-center gap-1">
-          <Link href={ROUTES.CHAT} className="ml-1" aria-label="채팅">
+          <Link href={ROUTES.CHAT} className="ml-1 hidden xl:block" aria-label="채팅">
             <MessageCircleMore className="text-white" strokeWidth={1.5} />
           </Link>
           <div className="relative mr-2.5" onClick={handleBellToggle}>

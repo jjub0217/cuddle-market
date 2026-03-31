@@ -8,7 +8,7 @@ export default function CategoryTabs() {
   const setSelectedCategory = useMapStore((s) => s.setSelectedCategory)
 
   return (
-    <div className="flex gap-2 overflow-x-auto px-4 py-3">
+    <div className="sticky top-0 z-10 flex gap-2 overflow-x-auto bg-white px-4 py-3">
       {CATEGORIES.map(({ key, label }) => (
         <button
           key={key}
