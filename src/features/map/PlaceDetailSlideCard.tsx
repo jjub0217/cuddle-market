@@ -1,19 +1,12 @@
 'use client'
 
 import { useMapStore } from '@/store/mapStore'
-import { FiPhone, FiClock, FiMapPin, FiStar, FiX, FiNavigation } from 'react-icons/fi'
+import { FiPhone, FiClock, FiMapPin, FiStar, FiX } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function PlaceDetailSlideCard() {
   const selectedPlace = useMapStore((s) => s.selectedPlace)
   const setSelectedPlace = useMapStore((s) => s.setSelectedPlace)
-
-  const naverMapUrl = selectedPlace
-    ? `nmap://place?lat=${selectedPlace.latitude}&lng=${selectedPlace.longitude}&name=${encodeURIComponent(selectedPlace.name)}&appname=cuddle-market`
-    : ''
-  const naverMapWebUrl = selectedPlace
-    ? `https://map.naver.com/v5/search/${encodeURIComponent(selectedPlace.name)}?c=${selectedPlace.longitude},${selectedPlace.latitude},15,0,0,0,dh`
-    : ''
 
   return (
     <AnimatePresence>
@@ -23,7 +16,7 @@ export default function PlaceDetailSlideCard() {
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="absolute inset-x-0 bottom-0 z-20 rounded-t-2xl bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.15)] md:hidden"
+          className="absolute inset-x-0 bottom-0 z-[100] rounded-t-2xl border-b border-gray-200 bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.15)] md:hidden"
         >
           <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-gray-300" />
 
@@ -96,19 +89,6 @@ export default function PlaceDetailSlideCard() {
               </div>
             )}
 
-            <a
-              href={naverMapUrl}
-              onClick={(e) => {
-                if (!/iPhone|iPad|Android/i.test(navigator.userAgent)) {
-                  e.preventDefault()
-                  window.open(naverMapWebUrl, '_blank')
-                }
-              }}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-green-500 py-2.5 text-sm font-medium text-white"
-            >
-              <FiNavigation className="h-4 w-4" />
-              네이버 지도에서 보기
-            </a>
           </div>
         </motion.div>
       )}
