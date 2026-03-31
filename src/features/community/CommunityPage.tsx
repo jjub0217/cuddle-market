@@ -380,7 +380,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
       {hasHydrated && isLogin() ? (
         <Link
           href={`${ROUTES.COMMUNITY_POST}?tab=${activeCommunityTypeTab}`}
-          className={`bg-primary-200 fixed right-4 bottom-4 rounded-full px-3 py-3 text-white md:hidden ${Z_INDEX.FLOATING_BUTTON}`}
+          className={`bg-primary-200 fixed right-4 bottom-18 rounded-full px-3 py-3 text-white md:hidden ${Z_INDEX.FLOATING_BUTTON}`}
         >
           <Plus />
         </Link>

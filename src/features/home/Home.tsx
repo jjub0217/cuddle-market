@@ -323,7 +323,7 @@ function Home() {
         </div>
       </div>
       {isLoggedIn ? (
-        <div className={`fixed right-10 bottom-5 ${Z_INDEX.FLOATING_BUTTON}`}>
+        <div className={`fixed right-10 bottom-5 max-md:bottom-18 max-md:right-4 ${Z_INDEX.FLOATING_BUTTON}`}>
           <Button
             size={isMd ? 'lg' : 'md'}
             className="bg-primary-300 cursor-pointer text-white"

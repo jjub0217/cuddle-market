@@ -12,16 +12,13 @@ import IconButton from '@/components/commons/button/IconButton'
 import { useUserStore } from '@/store/userStore'
 import { useLogout } from '@/hooks/useLogout'
 
+
 interface MobileNavigationProps {
   isOpen: boolean
   onClose: () => void
 }
 
 export default function MobileNavigation({ isOpen, onClose }: MobileNavigationProps) {
-  const [isCommunityOpen, setIsCommunityOpen] = useState(false)
-  const [communityHeight, setCommunityHeight] = useState(0)
-  const communityRef = useRef<HTMLDivElement>(null)
-
   const [isCustomerOpen, setIsCustomerOpen] = useState(false)
   const [customerHeight, setCustomerHeight] = useState(0)
   const customerRef = useRef<HTMLDivElement>(null)
@@ -34,9 +31,6 @@ export default function MobileNavigation({ isOpen, onClose }: MobileNavigationPr
   const { openLogoutConfirm } = useLogout(onClose)
 
   useEffect(() => {
-    if (communityRef.current) {
-      setCommunityHeight(communityRef.current.scrollHeight)
-    }
     if (customerRef.current) {
       setCustomerHeight(customerRef.current.scrollHeight)
     }
@@ -103,33 +97,6 @@ export default function MobileNavigation({ isOpen, onClose }: MobileNavigationPr
           </div>
         </div>
         <div className="pt-5">
-          <Link href={ROUTES.HOME} onClick={onClose} className="flex w-full items-center justify-between py-2">
-            <span className="font-normal">마켓</span>
-          </Link>
-          <div>
-            <button
-              type="button"
-              onClick={() => setIsCommunityOpen((prev) => !prev)}
-              className="flex w-full cursor-pointer items-center justify-between py-2"
-            >
-              <span className="font-normal">커뮤니티</span>
-              <ChevronDown className={cn('h-5 w-5 transition-transform', isCommunityOpen && 'rotate-180')} />
-            </button>
-            <div
-              ref={communityRef}
-              className="overflow-hidden transition-[height] duration-300"
-              style={{ height: isCommunityOpen ? `${communityHeight}px` : '0' }}
-            >
-              <div className="flex flex-col gap-2 pl-4">
-                <Link href={`${ROUTES.COMMUNITY}?tab=tab-question`} onClick={onClose}>
-                  질문 있어요
-                </Link>
-                <Link href={`${ROUTES.COMMUNITY}?tab=tab-info`} onClick={onClose}>
-                  정보 공유
-                </Link>
-              </div>
-            </div>
-          </div>
           <div>
             <button type="button" onClick={() => setIsCustomerOpen((prev) => !prev)} className="flex w-full items-center justify-between py-2">
               <span className="font-normal">고객센터</span>

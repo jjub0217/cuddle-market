@@ -71,7 +71,7 @@ export default function MapContainer() {
         onLoad={() => setMapReady(true)}
       />
 
-      <div className="flex h-[calc(100vh-var(--header-height,72px))] flex-col">
+      <div className="flex h-[calc(100vh-var(--header-height,72px)-56px)] flex-col xl:h-[calc(100vh-var(--header-height,72px))]">
         <CategoryTabs />
 
         <div className="flex flex-1 overflow-hidden">
