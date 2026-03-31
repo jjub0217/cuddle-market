@@ -112,14 +112,17 @@ export default function NaverMap() {
   useEffect(() => {
     if (!mapRef.current || !window.naver?.maps) return
 
+    const isXl = window.innerWidth >= 1280
+
     const map = new naver.maps.Map(mapRef.current, {
       center: new naver.maps.LatLng(mapCenter.lat, mapCenter.lng),
       zoom: 15,
-      zoomControl: true,
+      zoomControl: isXl,
       zoomControlOptions: {
         position: naver.maps.Position.TOP_RIGHT,
       },
-    })
+      scaleControl: false,
+    } as naver.maps.MapOptions & { scaleControl: boolean })
 
     mapInstanceRef.current = map
 

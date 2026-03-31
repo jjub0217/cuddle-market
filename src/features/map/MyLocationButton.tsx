@@ -5,6 +5,7 @@ import { FiCrosshair } from 'react-icons/fi'
 
 export default function MyLocationButton() {
   const setMapCenter = useMapStore((s) => s.setMapCenter)
+  const selectedPlace = useMapStore((s) => s.selectedPlace)
 
   const handleClick = () => {
     if (!navigator.geolocation) return
@@ -32,7 +33,7 @@ export default function MyLocationButton() {
   return (
     <button
       onClick={handleClick}
-      className="absolute bottom-6 right-4 z-10 cursor-pointer rounded-full bg-white p-3 shadow-md transition-colors hover:bg-gray-50"
+      className={`absolute right-4 z-10 cursor-pointer rounded-full bg-white p-3 shadow-md transition-all hover:bg-gray-50 ${selectedPlace ? 'bottom-48' : 'bottom-10'}`}
       title="내 위치"
     >
       <FiCrosshair className="h-5 w-5 text-gray-700" />
