@@ -68,6 +68,7 @@ export default function Header() {
 
   const isMarketActive = pathname === '/' || pathname.startsWith('/market')
   const isCommunityActive = pathname.startsWith('/community')
+  const isMapActive = pathname.startsWith('/map')
 
   // 헤더 높이를 CSS 변수로 설정 (검색바 열림/닫힘 및 헤더 가시성에 따라)
   useEffect(() => {
@@ -122,6 +123,12 @@ export default function Header() {
                     className={cn('text-md font-medium', isCommunityActive ? 'border-white text-white' : 'text-gray-700')}
                   >
                     커뮤니티
+                  </Link>
+                  <Link
+                    href={ROUTES.MAP}
+                    className={cn('text-md font-medium', isMapActive ? 'border-white text-white' : 'text-gray-700')}
+                  >
+                    플레이스
                   </Link>
                 </>
               ) : null}

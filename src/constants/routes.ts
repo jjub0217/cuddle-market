@@ -7,6 +7,9 @@ export const ROUTES = {
   DETAIL_ID: (id: string | number, name?: string) =>
     name ? `/products/${id}/${toUrlName(name)}` : `/products/${id}`,
 
+  // Map
+  MAP: '/map',
+
   // Community
   COMMUNITY: '/community',
   COMMUNITY_POST: '/community-post',
