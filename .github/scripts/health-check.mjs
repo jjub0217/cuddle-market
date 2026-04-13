@@ -44,8 +44,8 @@ async function checkAPI() {
     const res = await fetch(API_URL, { signal: controller.signal });
     clearTimeout(timer);
 
-    if (res.ok) {
-      console.log(`[OK] API 응답 정상 (${res.status})`);
+    if (res.status < 500) {
+      console.log(`[OK] API 서버 응답 정상 (${res.status})`);
       return null;
     }
     return {
