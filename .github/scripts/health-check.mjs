@@ -22,11 +22,15 @@ async function sendDiscord(embeds) {
     console.error('[SKIP] DISCORD_WEBHOOK_URL이 설정되지 않았습니다.');
     return;
   }
-  await fetch(DISCORD_WEBHOOK_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ embeds }),
-  });
+  try {
+    await fetch(DISCORD_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ embeds }),
+    });
+  } catch (err) {
+    console.error('[ERROR] 디스코드 전송 실패:', err.message);
+  }
 }
 
 // ============================================================
@@ -67,7 +71,7 @@ async function checkAPI() {
 // ============================================================
 function checkSSL() {
   return new Promise((resolve) => {
-    const socket = tls.connect(443, HOST, { servername: HOST }, () => {
+    const socket = tls.connect({ port: 443, host: HOST, servername: HOST, timeout: TIMEOUT_MS }, () => {
       const cert = socket.getPeerCertificate();
       socket.end();
 
@@ -115,7 +119,7 @@ function checkSSL() {
       });
     });
 
-    socket.setTimeout(TIMEOUT_MS, () => {
+    socket.on('timeout', () => {
       socket.destroy();
       resolve({
         type: 'SSL 체크 타임아웃',
