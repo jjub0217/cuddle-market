@@ -1,7 +1,7 @@
 'use client'
 
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import Tabs from '@/components/Tabs'
 import { DetailFilter } from '@/features/home/components/filter/DetailFilter'
 import { ProductsSection } from '@/features/home/components/product-section/ProductsSection'
@@ -24,8 +24,6 @@ function Home() {
   const { isLogin } = useUserStore()
   const hasHydrated = useUserStore((state) => state._hasHydrated)
   const isLoggedIn = hasHydrated && isLogin()
-  const [isHydrated, setIsHydrated] = useState(false)
-  useEffect(() => { setIsHydrated(true) }, [])
   const isMd = useMediaQuery('(min-width: 768px)')
   const { searchParams, pathname, push } = useFilterNavigation()
   const router = useRouter()
@@ -200,7 +198,7 @@ function Home() {
 
   const totalElements = data?.pages?.[0]?.totalElements || 0
 
-  if (!isHydrated) {
+  if (!hasHydrated) {
     return (
       <div className="pb-4xl pt-6">
         <h1 className="sr-only">커들마켓</h1>
