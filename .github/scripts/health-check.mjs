@@ -71,12 +71,19 @@ async function checkAPI() {
 // ============================================================
 function checkSSL() {
   return new Promise((resolve) => {
+    let resolved = false;
+    const safeResolve = (val) => {
+      if (resolved) return;
+      resolved = true;
+      socket.destroy();
+      resolve(val);
+    };
+
     const socket = tls.connect({ port: 443, host: HOST, servername: HOST, timeout: TIMEOUT_MS }, () => {
       const cert = socket.getPeerCertificate();
-      socket.end();
 
       if (!cert || !cert.valid_to) {
-        resolve({
+        safeResolve({
           type: 'SSL 인증서 오류',
           detail: '인증서 정보를 가져올 수 없습니다.',
           color: 0xff0000,
@@ -88,31 +95,33 @@ function checkSSL() {
       const daysLeft = Math.floor((expiryDate - Date.now()) / (1000 * 60 * 60 * 24));
 
       if (daysLeft < 0) {
-        resolve({
+        safeResolve({
           type: 'SSL 인증서 만료',
           detail: `인증서가 이미 만료되었습니다. (만료일: ${cert.valid_to})`,
           color: 0xff0000,
         });
       } else if (daysLeft <= SSL_DANGER_DAYS) {
-        resolve({
+        safeResolve({
           type: 'SSL 인증서 위험',
           detail: `만료까지 ${daysLeft}일 남음 (만료일: ${cert.valid_to})`,
           color: 0xff0000,
         });
       } else if (daysLeft <= SSL_WARN_DAYS) {
-        resolve({
+        safeResolve({
           type: 'SSL 인증서 경고',
           detail: `만료까지 ${daysLeft}일 남음 (만료일: ${cert.valid_to})`,
           color: 0xffaa00,
         });
       } else {
         console.log(`[OK] SSL 인증서 정상 (만료까지 ${daysLeft}일)`);
-        resolve(null);
+        safeResolve(null);
       }
     });
 
+    socket.setTimeout(TIMEOUT_MS);
+
     socket.on('error', (err) => {
-      resolve({
+      safeResolve({
         type: 'SSL 연결 오류',
         detail: err.message,
         color: 0xff0000,
@@ -120,8 +129,7 @@ function checkSSL() {
     });
 
     socket.on('timeout', () => {
-      socket.destroy();
-      resolve({
+      safeResolve({
         type: 'SSL 체크 타임아웃',
         detail: `${TIMEOUT_MS / 1000}초 내 응답 없음`,
         color: 0xff0000,
