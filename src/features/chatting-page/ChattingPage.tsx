@@ -247,8 +247,8 @@ export default function ChattingPage() {
       ) : null}
       <div
         className={cn(
-          'flex h-full flex-col md:mx-auto md:h-[80vh] md:max-w-7xl md:flex-row',
-          isChatOpen ? 'flex-1 overflow-hidden' : ''
+          'flex h-full flex-col md:mx-auto md:h-[80vh] md:w-full md:max-w-7xl md:flex-row',
+          isChatOpen ? 'flex-1 md:flex-none overflow-hidden' : ''
         )}
       >
         <div className={cn('md:flex', isChatOpen ? 'hidden' : 'block')}>
