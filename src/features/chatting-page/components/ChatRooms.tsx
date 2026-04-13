@@ -67,10 +67,10 @@ export function ChatRooms({
                     <div className="shrink-0">
                       <SellerAvatar profileImageUrl={roomData?.opponentProfileImageUrl} nickname={roomData?.opponentNickname} />
                     </div>
-                    <div className="flex w-full flex-col gap-1">
+                    <div className="flex min-w-0 flex-1 flex-col gap-1">
                       <p className="leading-none font-semibold">{roomData?.opponentNickname}</p>
                       <div className="flex items-center gap-1">
-                        <p className={cn('line-clamp-1 text-xs', roomData.lastMessage == null ? 'text-blue-600' : '')}>
+                        <p className={cn('min-w-0 flex-1 truncate text-xs', roomData.lastMessage == null ? 'text-blue-600' : '')}>
                           {roomData.lastMessage == null
                             ? '채팅방에 입장해주세요'
                             : roomData.lastMessage === ''
@@ -78,7 +78,7 @@ export function ChatRooms({
                               : roomData.lastMessage}
                         </p>
                         {roomData.lastMessageTime ? (
-                          <span className="text-xs leading-none font-medium text-gray-500">
+                          <span className="shrink-0 text-xs leading-none font-medium text-gray-500">
                             {getTimeAgo(roomData.lastMessageTime)}
                           </span>
                         ) : null}
