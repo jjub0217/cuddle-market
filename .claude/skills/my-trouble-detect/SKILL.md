@@ -220,14 +220,14 @@ Step 2의 3개 에이전트 결과를 모두 받은 뒤, 패턴 분석을 실행
 ### 선택지 (multiSelect: true)
 
 - **바로 해결 시도**: 분석 결과를 바탕으로 에러 수정을 시도
-- **리포트 저장**: `docs/troubles/YYYY-MM-DD-제목.md`로 저장 (나중에 패턴 분석에 활용)
+- **리포트 저장**: `docs/troubles/YYYY-MM-DD-제목.md`로 저장 + Notion Trouble Shooting DB에 페이지 생성
 - **건너뛰기**: 리포트만 확인하고 종료
 
 ### 실행 규칙
 
 1. 사용자가 선택한 작업**만** 실행한다
 2. "바로 해결 시도"를 선택하면, 분석 결과의 해결 방향을 바탕으로 코드 수정을 진행한다
-3. "리포트 저장"을 선택하면, `docs/troubles/` 폴더에 마크다운 파일로 저장한다
+3. "리포트 저장"을 선택하면, `docs/troubles/` 폴더에 마크다운 파일로 저장하고, **Notion에도 페이지를 생성**한다
 4. "건너뛰기"를 선택하면 리포트만 출력하고 종료한다
 
 ### 리포트 저장 형식
@@ -253,3 +253,73 @@ Step 2의 3개 에이전트 결과를 모두 받은 뒤, 패턴 분석을 실행
 ## 배운 점
 (이 에러에서 배운 것)
 ```
+
+### Notion 연동
+
+"리포트 저장" 선택 시, `docs/troubles/` 저장과 함께 **Notion Trouble Shooting DB**에도 페이지를 생성한다.
+
+**Notion DB 정보**:
+- Data Source ID: `30ff2b30-7961-81d6-841d-000bd103ca4f`
+- DB ID: `30ff2b30-7961-81ef-9e09-c0b983057b31`
+- 템플릿 ID: `30ff2b30-7961-814e-9706-ea1c6a1a0e01`
+- 사용자 ID (강주현): `7c32774b-0096-4545-a9fe-7cfec90faa15`
+
+**Notion 페이지 생성 순서**:
+
+1. `mcp__claude_ai_Notion__notion-create-pages`로 **템플릿을 적용하여** 페이지 생성:
+```
+parent: { type: "data_source_id", data_source_id: "30ff2b30-7961-81d6-841d-000bd103ca4f" }
+pages: [{
+  properties: {
+    "제목": "(에러 키워드)",
+    "Tag": "(관련 태그 1개)",
+    "작성자": "7c32774b-0096-4545-a9fe-7cfec90faa15",
+    "date:작성일:start": "YYYY-MM-DD"
+  },
+  template_id: "30ff2b30-7961-814e-9706-ea1c6a1a0e01"
+}]
+```
+
+2. `mcp__claude_ai_Notion__notion-update-page`로 템플릿 예시 내용을 **실제 내용으로 교체**:
+```
+page_id: (생성된 페이지 ID)
+command: "replace_content"
+new_str: (아래 양식에 맞춘 Notion Markdown)
+```
+
+**페이지 본문 양식** (Notion Markdown):
+```
+##  🧩 문제 상황 (What Happened) {color="purple_bg"}
+---
+- (에러 발생 상황 설명)
+` ` `
+(에러 메시지)
+` ` `
+- (추가 설명)
+
+## ⚙️  환경 정보 (Environment) {color="purple_bg"}
+---
+- **OS**: (운영체제)
+- **Language/Tool**: (언어/도구 버전)
+- **Framework**: (프레임워크 버전)
+- **기타**: (추가 환경 정보)
+
+## **💡 시도한 해결 방법 (Tried Solutions)** {color="purple_bg"}
+---
+1.	(시도 1)
+2.	(시도 2)
+3.	(시도 3)
+
+## **✅ 최종 해결 방법 (Solution)** {color="purple_bg"}
+---
+- (해결 방법 설명)
+
+## **📚 참고 자료 (References)** {color="purple_bg"}
+---
+- (참고 링크 또는 문서)
+```
+
+**Tag 옵션** (기존 옵션에서 선택):
+SSR, Hydration, Zustand, UX, React, react-hook-form, React Compiler, WebSocket, STOMP, TanStack Query, Performance, SEO, Sitemap, Google Search Console, GraphQL, API, BFF
+
+**주의**: Tag는 한 번에 1개만 설정 가능 (multi_select API 제한). 추가 태그는 Notion에서 직접 추가.

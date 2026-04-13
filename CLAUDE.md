@@ -26,6 +26,7 @@ NEXT_PUBLIC_WS_URL=https://cmarket-api.duckdns.org/ws-stomp
 
 - **DAILY SCRUM DB**: `30ff2b30-7961-817e-9601-d836505c5b04`
 - **Schedule List DB**: `30ff2b30-7961-8138-990e-e9ea63d1c151`
+- **Trouble Shooting DB**: `30ff2b30-7961-81ef-9e09-c0b983057b31`
 - **사용자 ID (강주현)**: `7c32774b-0096-4545-a9fe-7cfec90faa15`
 
 ## 마이그레이션 가이드
