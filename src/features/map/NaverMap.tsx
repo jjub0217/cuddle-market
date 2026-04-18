@@ -75,6 +75,7 @@ export default function NaverMap() {
   const setMapCenter = useMapStore((s) => s.setMapCenter)
   const setMapBounds = useMapStore((s) => s.setMapBounds)
   const setSelectedPlace = useMapStore((s) => s.setSelectedPlace)
+  const setNeedsSearch = useMapStore((s) => s.setNeedsSearch)
 
   const createMarkerIcon = useCallback((isRecommended: boolean) => {
     const color = isRecommended ? '#FF6F0F' : '#3B82F6'
@@ -105,8 +106,11 @@ export default function NaverMap() {
   // 지도 이동/줌 변경 시 debounce 후 bounds 업데이트
   const handleMapChanged = useCallback(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(updateBounds, 500)
-  }, [updateBounds])
+    debounceRef.current = setTimeout(() => {
+      updateBounds()
+      setNeedsSearch(true)
+    }, 500)
+  }, [updateBounds, setNeedsSearch])
 
   // 지도 초기화
   useEffect(() => {
