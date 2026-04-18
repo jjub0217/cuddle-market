@@ -19,6 +19,7 @@ interface MapStore {
   mapBounds: MapBounds | null
   markers: PlaceListItem[]
   isLoading: boolean
+  needsSearch: boolean
 
   setSelectedCategory: (category: PlaceCategory) => void
   toggleFilter: (filter: HospitalFilter) => void
@@ -27,6 +28,7 @@ interface MapStore {
   setMapBounds: (bounds: MapBounds) => void
   setMarkers: (markers: PlaceListItem[]) => void
   setIsLoading: (loading: boolean) => void
+  setNeedsSearch: (needs: boolean) => void
 }
 
 export const useMapStore = create<MapStore>((set) => ({
@@ -37,6 +39,7 @@ export const useMapStore = create<MapStore>((set) => ({
   mapBounds: null,
   markers: [],
   isLoading: false,
+  needsSearch: false,
 
   setSelectedCategory: (category) =>
     set({ selectedCategory: category, activeFilters: [], selectedPlace: null }),
@@ -53,6 +56,7 @@ export const useMapStore = create<MapStore>((set) => ({
   setMapBounds: (mapBounds) => set({ mapBounds }),
   setMarkers: (markers) => set({ markers }),
   setIsLoading: (isLoading) => set({ isLoading }),
+  setNeedsSearch: (needsSearch) => set({ needsSearch }),
 }))
 
 export function getFilterParams(activeFilters: HospitalFilter[]) {

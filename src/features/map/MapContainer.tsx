@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import Script from 'next/script'
 import CategoryTabs from './CategoryTabs'
 import MyLocationButton from './MyLocationButton'
+import SearchInMapButton from './SearchInMapButton'
 import NaverMap from './NaverMap'
 import PlaceListSidebar from './PlaceListSidebar'
 import PlaceDetailSidebar from './PlaceDetailSidebar'
@@ -22,8 +23,11 @@ export default function MapContainer() {
   const isLoading = useMapStore((s) => s.isLoading)
   const setMarkers = useMapStore((s) => s.setMarkers)
   const setIsLoading = useMapStore((s) => s.setIsLoading)
+  const setNeedsSearch = useMapStore((s) => s.setNeedsSearch)
 
   const fetchPlaces = useCallback(async () => {
+    const { mapBounds, selectedCategory, activeFilters } =
+      useMapStore.getState()
     if (!mapBounds) return
 
     abortRef.current?.abort()
@@ -46,16 +50,27 @@ export default function MapContainer() {
     } finally {
       setIsLoading(false)
     }
-  }, [selectedCategory, activeFilters, mapBounds, setMarkers, setIsLoading])
+  }, [setMarkers, setIsLoading])
 
-  // bounds, 카테고리, 필터 변경 시 자동 재조회
+  const initialLoadRef = useRef(true)
+
+  // 초기 로드 시 자동 검색
   useEffect(() => {
     if (!mapReady || !mapBounds) return
+    if (!initialLoadRef.current) return
+    initialLoadRef.current = false
     fetchPlaces()
     return () => {
       abortRef.current?.abort()
     }
   }, [fetchPlaces, mapReady, mapBounds])
+
+  // 카테고리, 필터 변경 시 자동 재검색
+  useEffect(() => {
+    if (!mapReady || initialLoadRef.current) return
+    fetchPlaces()
+    setNeedsSearch(false)
+  }, [selectedCategory, activeFilters, fetchPlaces, mapReady, setNeedsSearch])
 
   useEffect(() => {
     if (window.naver?.maps) {
@@ -97,6 +112,7 @@ export default function MapContainer() {
               </div>
             )}
 
+            <SearchInMapButton onSearch={() => { fetchPlaces(); setNeedsSearch(false) }} />
             <MyLocationButton />
             <PlaceDetailSlideCard />
           </div>

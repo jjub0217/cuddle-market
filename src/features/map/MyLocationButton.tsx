@@ -33,7 +33,7 @@ export default function MyLocationButton() {
   return (
     <button
       onClick={handleClick}
-      className={`absolute right-4 z-10 cursor-pointer rounded-full bg-white p-3 shadow-md transition-all hover:bg-gray-50 ${selectedPlace ? 'bottom-48' : 'bottom-10'}`}
+      className={`absolute right-4 z-10 cursor-pointer rounded-full bg-white p-3 shadow-md transition-all hover:bg-gray-50 ${selectedPlace ? 'bottom-48' : 'bottom-16 xl:bottom-10'}`}
       title="내 위치"
     >
       <FiCrosshair className="h-5 w-5 text-gray-700" />
