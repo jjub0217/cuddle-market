@@ -23,8 +23,11 @@ export default function MapContainer() {
   const isLoading = useMapStore((s) => s.isLoading)
   const setMarkers = useMapStore((s) => s.setMarkers)
   const setIsLoading = useMapStore((s) => s.setIsLoading)
+  const setNeedsSearch = useMapStore((s) => s.setNeedsSearch)
 
   const fetchPlaces = useCallback(async () => {
+    const { mapBounds, selectedCategory, activeFilters } =
+      useMapStore.getState()
     if (!mapBounds) return
 
     abortRef.current?.abort()
@@ -47,10 +50,9 @@ export default function MapContainer() {
     } finally {
       setIsLoading(false)
     }
-  }, [selectedCategory, activeFilters, mapBounds, setMarkers, setIsLoading])
+  }, [setMarkers, setIsLoading])
 
   const initialLoadRef = useRef(true)
-  const setNeedsSearch = useMapStore((s) => s.setNeedsSearch)
 
   // 초기 로드 시 자동 검색
   useEffect(() => {
@@ -65,10 +67,10 @@ export default function MapContainer() {
 
   // 카테고리, 필터 변경 시 자동 재검색
   useEffect(() => {
-    if (!mapReady || !mapBounds || initialLoadRef.current) return
+    if (!mapReady || initialLoadRef.current) return
     fetchPlaces()
     setNeedsSearch(false)
-  }, [selectedCategory, activeFilters]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedCategory, activeFilters, fetchPlaces, mapReady, setNeedsSearch])
 
   useEffect(() => {
     if (window.naver?.maps) {
