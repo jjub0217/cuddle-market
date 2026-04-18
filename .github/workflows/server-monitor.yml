@@ -17,7 +17,22 @@ jobs:
         with:
           node-version: 24
 
+      - name: Restore alert state
+        uses: actions/cache/restore@v4
+        with:
+          path: .github/scripts/alert-state.json
+          key: alert-state-${{ github.run_id }}
+          restore-keys: alert-state-
+
       - name: Run health check
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          ALERT_STATE_PATH: .github/scripts/alert-state.json
         run: node .github/scripts/health-check.mjs
+
+      - name: Save alert state
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: .github/scripts/alert-state.json
+          key: alert-state-${{ github.run_id }}
