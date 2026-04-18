@@ -4,7 +4,7 @@ import fs from 'node:fs';
 // ============================================================
 // Configuration
 // ============================================================
-const API_URL = 'https://cmarket-api.duckdns.org/api';
+const HEALTH_URL = 'https://cmarket-api.duckdns.org/actuator/health';
 const HOST = 'cmarket-api.duckdns.org';
 const TIMEOUT_MS = 10_000;
 const SSL_WARN_DAYS = 7;
@@ -12,6 +12,7 @@ const SSL_DANGER_DAYS = 3;
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 const ALERT_STATE_PATH = process.env.ALERT_STATE_PATH || '.github/scripts/alert-state.json';
 const SUPPRESS_HOURS = 3;
+const CONSECUTIVE_FAILURES_THRESHOLD = 2;
 
 // ============================================================
 // Helpers
@@ -34,7 +35,7 @@ function readState() {
   try {
     return JSON.parse(fs.readFileSync(ALERT_STATE_PATH, 'utf-8'));
   } catch {
-    return { status: 'ok', firstAlertAt: null, lastAlertAt: null, alertCount: 0 };
+    return { status: 'ok', firstAlertAt: null, lastAlertAt: null, alertCount: 0, consecutiveFailures: 0 };
   }
 }
 
@@ -69,12 +70,20 @@ async function checkAPI() {
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   try {
-    const res = await fetch(API_URL, { signal: controller.signal });
+    const res = await fetch(HEALTH_URL, { signal: controller.signal });
     clearTimeout(timer);
 
-    if (res.status < 500) {
-      console.log(`[OK] API 서버 응답 정상 (${res.status})`);
-      return null;
+    if (res.ok) {
+      const body = await res.json();
+      if (body.status === 'UP') {
+        console.log(`[OK] API 서버 응답 정상 (${res.status}, status: UP)`);
+        return null;
+      }
+      return {
+        type: 'API 장애',
+        detail: `Actuator 상태: ${body.status}`,
+        color: 0xff0000,
+      };
     }
     return {
       type: 'API 장애',
@@ -187,27 +196,36 @@ async function main() {
         description: '모든 서비스가 정상 응답합니다.',
         color: 0x00ff00,
         fields: [
-          { name: '대상', value: API_URL, inline: true },
+          { name: '대상', value: HEALTH_URL, inline: true },
           { name: '장애 지속 시간', value: duration, inline: true },
           { name: '복구 시각', value: nowKST(), inline: false },
         ],
         footer: { text: 'Cuddle Market 서버 모니터링' },
       }]);
     }
-    writeState({ status: 'ok', firstAlertAt: null, lastAlertAt: null, alertCount: 0 });
+    writeState({ status: 'ok', firstAlertAt: null, lastAlertAt: null, alertCount: 0, consecutiveFailures: 0 });
     console.log('\n[결과] 모든 체크 통과 — 알림 없음\n');
     process.exit(0);
   }
 
-  // ── 장애: 첫 감지 ──
+  // ── 장애 감지: 연속 실패 카운트 ──
+  const consecutiveFailures = (state.consecutiveFailures || 0) + 1;
+
+  if (state.status === 'ok' && consecutiveFailures < CONSECUTIVE_FAILURES_THRESHOLD) {
+    console.log(`\n[대기] ${problems.length}건의 문제 감지 — 연속 ${consecutiveFailures}/${CONSECUTIVE_FAILURES_THRESHOLD}회 (알림 보류)\n`);
+    writeState({ ...state, consecutiveFailures });
+    process.exit(1);
+  }
+
+  // ── 장애: 첫 알림 (연속 실패 임계값 도달) ──
   if (state.status === 'ok') {
-    console.log(`\n[결과] ${problems.length}건의 문제 감지 — 디스코드 알림 발송\n`);
+    console.log(`\n[결과] ${problems.length}건의 문제 ${consecutiveFailures}회 연속 감지 — 디스코드 알림 발송\n`);
     const embeds = problems.map((p) => ({
       title: `🚨 ${p.type}`,
       description: p.detail,
       color: p.color,
       fields: [
-        { name: '대상', value: API_URL, inline: true },
+        { name: '대상', value: HEALTH_URL, inline: true },
         { name: '시각', value: nowKST(), inline: true },
       ],
       footer: { text: 'Cuddle Market 서버 모니터링' },
@@ -218,6 +236,7 @@ async function main() {
       firstAlertAt: new Date().toISOString(),
       lastAlertAt: new Date().toISOString(),
       alertCount: 1,
+      consecutiveFailures,
     });
     console.log('[알림] 디스코드 전송 완료');
     process.exit(1);
@@ -234,7 +253,7 @@ async function main() {
       description: `${p.detail}\n\n⏱️ 장애 지속 시간: ${duration}`,
       color: p.color,
       fields: [
-        { name: '대상', value: API_URL, inline: true },
+        { name: '대상', value: HEALTH_URL, inline: true },
         { name: '시각', value: nowKST(), inline: true },
       ],
       footer: { text: `Cuddle Market 서버 모니터링 · 알림 ${state.alertCount + 1}회째` },
@@ -244,11 +263,12 @@ async function main() {
       ...state,
       lastAlertAt: new Date().toISOString(),
       alertCount: state.alertCount + 1,
+      consecutiveFailures,
     });
     console.log('[알림] 리마인더 전송 완료');
   } else {
     console.log(`\n[SKIP] 알림 억제 중 (마지막 알림: ${hoursSinceLastAlert.toFixed(1)}시간 전, ${SUPPRESS_HOURS}시간 간격)\n`);
-    writeState(state);
+    writeState({ ...state, consecutiveFailures });
   }
 
   process.exit(1);
