@@ -10,10 +10,11 @@ import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import { PRODUCT_TYPE_TABS, PET_TYPE_TABS, type ProductTypeTabId, SORT_TYPE, type PetTypeTabId } from '@/constants/constants'
 import { PetTypeFilter } from './components/filter/PetTypeFilter'
 import { CategoryFilter } from './components/filter/CategoryFilter'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useFilterNavigation } from '@/hooks/useFilterNavigation'
 import { Plus } from 'lucide-react'
-import Button from '@/components/commons/button/Button'
+import { buttonVariants, iconSizeMap } from '@/components/commons/button/buttonClass'
+import { cn } from '@/lib/utils/cn'
 import { useUserStore } from '@/store/userStore'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { Z_INDEX } from '@/constants/ui'
@@ -26,7 +27,6 @@ function Home() {
   const isLoggedIn = hasHydrated && isLogin()
   const isMd = useMediaQuery('(min-width: 768px)')
   const { searchParams, pathname, push } = useFilterNavigation()
-  const router = useRouter()
 
   // URL에서 탭 초기값 결정 (시각적 표시용)
   const urlPetType = searchParams.get('petType')
@@ -191,11 +191,6 @@ function Home() {
     [push, pathname]
   )
 
-  const toGoProductPostPage = (e: React.MouseEvent) => {
-    e.preventDefault()
-    router.push('/product-post')
-  }
-
   const totalElements = data?.pages?.[0]?.totalElements || 0
 
   if (!hasHydrated) {
@@ -322,14 +317,16 @@ function Home() {
       </div>
       {isLoggedIn ? (
         <div className={`fixed right-10 bottom-5 max-md:bottom-18 max-md:right-4 ${Z_INDEX.FLOATING_BUTTON}`}>
-          <Button
-            size={isMd ? 'lg' : 'md'}
-            className="bg-primary-300 cursor-pointer text-white"
-            icon={Plus}
-            onClick={toGoProductPostPage}
+          <Link
+            href="/product-post"
+            className={cn(
+              buttonVariants({ size: isMd ? 'lg' : 'md', iconPosition: 'left' }),
+              'bg-primary-300 cursor-pointer text-white'
+            )}
           >
+            <Plus size={iconSizeMap[isMd ? 'lg' : 'md']} />
             상품등록
-          </Button>
+          </Link>
         </div>
       ) : null}
     </>
