@@ -1,5 +1,9 @@
 import tls from 'node:tls';
 import fs from 'node:fs';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+
+const execFileAsync = promisify(execFile);
 
 // ============================================================
 // Configuration
@@ -13,9 +17,9 @@ const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 const ALERT_STATE_PATH = process.env.ALERT_STATE_PATH || '.github/scripts/alert-state.json';
 const SUPPRESS_HOURS = 3;
 const CONSECUTIVE_FAILURES_THRESHOLD = 2;
-const LOGFILE_URL = 'https://cmarket-api.duckdns.org/actuator/logfile';
-const LOGFILE_BASIC_AUTH = process.env.LOGFILE_BASIC_AUTH; // "user:pass" 평문
-const LOG_TAIL_BYTES = 3500;
+const AWS_REGION = process.env.AWS_REGION;
+const LOG_GROUP_NAME = process.env.LOG_GROUP_NAME;
+const LOG_FETCH_MINUTES = 15;
 const BACKEND_ROLE_ID = process.env.BACKEND_ROLE_ID;
 
 // ============================================================
@@ -188,31 +192,24 @@ function checkSSL() {
 }
 
 // ============================================================
-// 3. Log Tail
+// 3. CloudWatch Log Tail
 // ============================================================
 async function fetchLogTail() {
-  if (!LOGFILE_URL) return null;
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  if (!AWS_REGION || !LOG_GROUP_NAME) return null;
   try {
-    const headers = { Range: `bytes=-${LOG_TAIL_BYTES}` };
-    if (LOGFILE_BASIC_AUTH) {
-      headers.Authorization = `Basic ${Buffer.from(LOGFILE_BASIC_AUTH).toString('base64')}`;
-    }
-    const res = await fetch(LOGFILE_URL, { signal: controller.signal, headers });
-    clearTimeout(timer);
-    if (!res.ok) {
-      console.log(`[WARN] 로그 조회 실패 (HTTP ${res.status})`);
-      return null;
-    }
-    const text = await res.text();
-    // 206 Partial Content는 바이트 경계에서 잘려 첫 줄이 불완전하므로 drop. 200은 파일 전체라 유지.
-    if (res.status !== 206) return text;
-    const lines = text.split('\n');
-    return lines.length > 1 ? lines.slice(1).join('\n') : text;
+    const { stdout } = await execFileAsync(
+      'aws',
+      [
+        'logs', 'tail', LOG_GROUP_NAME,
+        '--since', `${LOG_FETCH_MINUTES}m`,
+        '--format', 'short',
+        '--region', AWS_REGION,
+      ],
+      { timeout: TIMEOUT_MS, maxBuffer: 10 * 1024 * 1024 },
+    );
+    return stdout.trim() || null;
   } catch (err) {
-    clearTimeout(timer);
-    console.log(`[WARN] 로그 조회 실패: ${err.message}`);
+    console.log(`[WARN] CloudWatch 로그 조회 실패: ${err.message}`);
     return null;
   }
 }
@@ -227,7 +224,7 @@ function buildLogEmbed(logText) {
     title: '📋 서버 로그 (최근)',
     description: '```\n' + safe + '\n```',
     color: 0x808080,
-    footer: { text: '/actuator/logfile tail' },
+    footer: { text: `CloudWatch Logs · ${LOG_GROUP_NAME} · 최근 ${LOG_FETCH_MINUTES}분` },
   };
 }
 
