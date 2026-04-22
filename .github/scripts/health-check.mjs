@@ -203,6 +203,7 @@ async function fetchLogTail() {
         'logs', 'tail', LOG_GROUP_NAME,
         '--since', `${LOG_FETCH_MINUTES}m`,
         '--format', 'short',
+        '--color', 'off',
         '--region', AWS_REGION,
       ],
       { timeout: TIMEOUT_MS, maxBuffer: 10 * 1024 * 1024 },
