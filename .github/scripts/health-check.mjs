@@ -201,12 +201,13 @@ async function fetchLogTail() {
     }
     const res = await fetch(LOGFILE_URL, { signal: controller.signal, headers });
     clearTimeout(timer);
-    if (!res.ok && res.status !== 206) {
+    if (!res.ok) {
       console.log(`[WARN] 로그 조회 실패 (HTTP ${res.status})`);
       return null;
     }
     const text = await res.text();
-    // Range 요청은 바이트 경계에서 잘리므로 첫 줄은 불완전할 수 있음
+    // 206 Partial Content는 바이트 경계에서 잘려 첫 줄이 불완전하므로 drop. 200은 파일 전체라 유지.
+    if (res.status !== 206) return text;
     const lines = text.split('\n');
     return lines.length > 1 ? lines.slice(1).join('\n') : text;
   } catch (err) {
@@ -220,9 +221,11 @@ function buildLogEmbed(logText) {
   if (!logText) return null;
   const maxLen = 3900;
   const trimmed = logText.length > maxLen ? '...\n' + logText.slice(-maxLen) : logText;
+  // 로그 본문의 triple backtick이 Discord 코드 블록을 조기 종료시키는 것 방지
+  const safe = trimmed.replace(/```/g, '`​``');
   return {
     title: '📋 서버 로그 (최근)',
-    description: '```\n' + trimmed + '\n```',
+    description: '```\n' + safe + '\n```',
     color: 0x808080,
     footer: { text: '/actuator/logfile tail' },
   };
@@ -286,8 +289,9 @@ async function main() {
       footer: { text: 'Cuddle Market 서버 모니터링' },
     }));
     const hasApiFailure = problems.some((p) => p.type === 'API 장애');
+    const isUrgent = problems.some((p) => p.color === 0xff0000);
     const logEmbed = hasApiFailure ? buildLogEmbed(await fetchLogTail()) : null;
-    await sendDiscord(logEmbed ? [...baseEmbeds, logEmbed] : baseEmbeds);
+    await sendDiscord(logEmbed ? [...baseEmbeds, logEmbed] : baseEmbeds, { ping: isUrgent });
     writeState({
       status: 'alerting',
       firstAlertAt: new Date().toISOString(),
@@ -316,8 +320,9 @@ async function main() {
       footer: { text: `Cuddle Market 서버 모니터링 · 알림 ${state.alertCount + 1}회째` },
     }));
     const hasApiFailure = problems.some((p) => p.type === 'API 장애');
+    const isUrgent = problems.some((p) => p.color === 0xff0000);
     const logEmbed = hasApiFailure ? buildLogEmbed(await fetchLogTail()) : null;
-    await sendDiscord(logEmbed ? [...baseEmbeds, logEmbed] : baseEmbeds);
+    await sendDiscord(logEmbed ? [...baseEmbeds, logEmbed] : baseEmbeds, { ping: isUrgent });
     writeState({
       ...state,
       lastAlertAt: new Date().toISOString(),
