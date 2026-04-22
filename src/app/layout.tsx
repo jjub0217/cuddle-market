@@ -20,6 +20,9 @@ export const metadata: Metadata = {
   },
   verification: {
     google: 'QwSeEYXUKCcLgTD8CtBEEpERKpp34sHBD_6r8dvKM2Q',
+    other: {
+      'naver-site-verification': '765503856b8ad106fd6d4890a149f0a5bc5de581',
+    },
   },
 }
 
