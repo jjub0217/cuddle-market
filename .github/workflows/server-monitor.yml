@@ -28,6 +28,8 @@ jobs:
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           ALERT_STATE_PATH: .github/scripts/alert-state.json
+          LOGFILE_BASIC_AUTH: ${{ secrets.LOGFILE_BASIC_AUTH }}
+          BACKEND_ROLE_ID: ${{ secrets.BACKEND_ROLE_ID }}
         run: node .github/scripts/health-check.mjs
 
       - name: Save alert state
