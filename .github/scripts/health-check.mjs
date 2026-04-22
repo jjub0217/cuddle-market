@@ -13,6 +13,10 @@ const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 const ALERT_STATE_PATH = process.env.ALERT_STATE_PATH || '.github/scripts/alert-state.json';
 const SUPPRESS_HOURS = 3;
 const CONSECUTIVE_FAILURES_THRESHOLD = 2;
+const LOGFILE_URL = 'https://cmarket-api.duckdns.org/actuator/logfile';
+const LOGFILE_BASIC_AUTH = process.env.LOGFILE_BASIC_AUTH; // "user:pass" 평문
+const LOG_TAIL_BYTES = 3500;
+const BACKEND_ROLE_ID = process.env.BACKEND_ROLE_ID;
 
 // ============================================================
 // Helpers
@@ -46,16 +50,24 @@ function writeState(state) {
 // ============================================================
 // Discord
 // ============================================================
-async function sendDiscord(embeds) {
+async function sendDiscord(embeds, { ping = true } = {}) {
   if (!DISCORD_WEBHOOK_URL) {
     console.error('[SKIP] DISCORD_WEBHOOK_URL이 설정되지 않았습니다.');
     return;
   }
+  const shouldPing = ping && BACKEND_ROLE_ID;
   try {
     await fetch(DISCORD_WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ embeds }),
+      body: JSON.stringify({
+        ...(shouldPing && {
+          content: `<@&${BACKEND_ROLE_ID}>`,
+          // role.mentionable=false여도 webhook에서 멘션 허용
+          allowed_mentions: { roles: [BACKEND_ROLE_ID] },
+        }),
+        embeds,
+      }),
     });
   } catch (err) {
     console.error('[ERROR] 디스코드 전송 실패:', err.message);
@@ -176,6 +188,47 @@ function checkSSL() {
 }
 
 // ============================================================
+// 3. Log Tail
+// ============================================================
+async function fetchLogTail() {
+  if (!LOGFILE_URL) return null;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  try {
+    const headers = { Range: `bytes=-${LOG_TAIL_BYTES}` };
+    if (LOGFILE_BASIC_AUTH) {
+      headers.Authorization = `Basic ${Buffer.from(LOGFILE_BASIC_AUTH).toString('base64')}`;
+    }
+    const res = await fetch(LOGFILE_URL, { signal: controller.signal, headers });
+    clearTimeout(timer);
+    if (!res.ok && res.status !== 206) {
+      console.log(`[WARN] 로그 조회 실패 (HTTP ${res.status})`);
+      return null;
+    }
+    const text = await res.text();
+    // Range 요청은 바이트 경계에서 잘리므로 첫 줄은 불완전할 수 있음
+    const lines = text.split('\n');
+    return lines.length > 1 ? lines.slice(1).join('\n') : text;
+  } catch (err) {
+    clearTimeout(timer);
+    console.log(`[WARN] 로그 조회 실패: ${err.message}`);
+    return null;
+  }
+}
+
+function buildLogEmbed(logText) {
+  if (!logText) return null;
+  const maxLen = 3900;
+  const trimmed = logText.length > maxLen ? '...\n' + logText.slice(-maxLen) : logText;
+  return {
+    title: '📋 서버 로그 (최근)',
+    description: '```\n' + trimmed + '\n```',
+    color: 0x808080,
+    footer: { text: '/actuator/logfile tail' },
+  };
+}
+
+// ============================================================
 // Main
 // ============================================================
 async function main() {
@@ -191,7 +244,7 @@ async function main() {
     if (state.status === 'alerting') {
       const duration = formatDuration(now - new Date(state.firstAlertAt).getTime());
       console.log(`\n[복구] 서버 복구 감지 — 복구 알림 발송 (장애 지속: ${duration})\n`);
-      await sendDiscord([{
+      const recoveryEmbed = {
         title: '✅ 서버 복구',
         description: '모든 서비스가 정상 응답합니다.',
         color: 0x00ff00,
@@ -201,7 +254,9 @@ async function main() {
           { name: '복구 시각', value: nowKST(), inline: false },
         ],
         footer: { text: 'Cuddle Market 서버 모니터링' },
-      }]);
+      };
+      const logEmbed = buildLogEmbed(await fetchLogTail());
+      await sendDiscord(logEmbed ? [recoveryEmbed, logEmbed] : [recoveryEmbed], { ping: false });
     }
     writeState({ status: 'ok', firstAlertAt: null, lastAlertAt: null, alertCount: 0, consecutiveFailures: 0 });
     console.log('\n[결과] 모든 체크 통과 — 알림 없음\n');
@@ -220,7 +275,7 @@ async function main() {
   // ── 장애: 첫 알림 (연속 실패 임계값 도달) ──
   if (state.status === 'ok') {
     console.log(`\n[결과] ${problems.length}건의 문제 ${consecutiveFailures}회 연속 감지 — 디스코드 알림 발송\n`);
-    const embeds = problems.map((p) => ({
+    const baseEmbeds = problems.map((p) => ({
       title: `🚨 ${p.type}`,
       description: p.detail,
       color: p.color,
@@ -230,7 +285,9 @@ async function main() {
       ],
       footer: { text: 'Cuddle Market 서버 모니터링' },
     }));
-    await sendDiscord(embeds);
+    const hasApiFailure = problems.some((p) => p.type === 'API 장애');
+    const logEmbed = hasApiFailure ? buildLogEmbed(await fetchLogTail()) : null;
+    await sendDiscord(logEmbed ? [...baseEmbeds, logEmbed] : baseEmbeds);
     writeState({
       status: 'alerting',
       firstAlertAt: new Date().toISOString(),
@@ -248,7 +305,7 @@ async function main() {
   if (hoursSinceLastAlert >= SUPPRESS_HOURS) {
     const duration = formatDuration(now - new Date(state.firstAlertAt).getTime());
     console.log(`\n[결과] 장애 지속 중 (${duration}) — 리마인더 알림 발송\n`);
-    const embeds = problems.map((p) => ({
+    const baseEmbeds = problems.map((p) => ({
       title: `🔔 ${p.type} (지속 중)`,
       description: `${p.detail}\n\n⏱️ 장애 지속 시간: ${duration}`,
       color: p.color,
@@ -258,7 +315,9 @@ async function main() {
       ],
       footer: { text: `Cuddle Market 서버 모니터링 · 알림 ${state.alertCount + 1}회째` },
     }));
-    await sendDiscord(embeds);
+    const hasApiFailure = problems.some((p) => p.type === 'API 장애');
+    const logEmbed = hasApiFailure ? buildLogEmbed(await fetchLogTail()) : null;
+    await sendDiscord(logEmbed ? [...baseEmbeds, logEmbed] : baseEmbeds);
     writeState({
       ...state,
       lastAlertAt: new Date().toISOString(),
