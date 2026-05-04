@@ -10,7 +10,8 @@ const execFileAsync = promisify(execFile);
 // ============================================================
 const HEALTH_URL = 'https://cmarket-api.duckdns.org/actuator/health';
 const HOST = 'cmarket-api.duckdns.org';
-const TIMEOUT_MS = 10_000;
+const TIMEOUT_MS = 15_000;
+const RETRY_DELAY_MS = 2_000;
 const SSL_WARN_DAYS = 7;
 const SSL_DANGER_DAYS = 3;
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
@@ -34,6 +35,14 @@ function formatDuration(ms) {
   const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
   if (hours > 0) return `${hours}시간 ${minutes}분`;
   return `${minutes}분`;
+}
+
+async function withRetry(checkFn, name) {
+  const first = await checkFn();
+  if (!first) return null;
+  console.log(`[RETRY] ${name} 1차 실패 — ${RETRY_DELAY_MS / 1000}초 후 재시도`);
+  await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+  return await checkFn();
 }
 
 // ============================================================
@@ -237,7 +246,10 @@ async function main() {
 
   const state = readState();
   const now = Date.now();
-  const [apiResult, sslResult] = await Promise.all([checkAPI(), checkSSL()]);
+  const [apiResult, sslResult] = await Promise.all([
+    withRetry(checkAPI, 'API'),
+    withRetry(checkSSL, 'SSL'),
+  ]);
   const problems = [apiResult, sslResult].filter(Boolean);
 
   // ── 정상: 문제 없음 ──
@@ -270,7 +282,7 @@ async function main() {
   if (state.status === 'ok' && consecutiveFailures < CONSECUTIVE_FAILURES_THRESHOLD) {
     console.log(`\n[대기] ${problems.length}건의 문제 감지 — 연속 ${consecutiveFailures}/${CONSECUTIVE_FAILURES_THRESHOLD}회 (알림 보류)\n`);
     writeState({ ...state, consecutiveFailures });
-    process.exit(1);
+    process.exit(0);
   }
 
   // ── 장애: 첫 알림 (연속 실패 임계값 도달) ──
@@ -328,12 +340,12 @@ async function main() {
       consecutiveFailures,
     });
     console.log('[알림] 리마인더 전송 완료');
-  } else {
-    console.log(`\n[SKIP] 알림 억제 중 (마지막 알림: ${hoursSinceLastAlert.toFixed(1)}시간 전, ${SUPPRESS_HOURS}시간 간격)\n`);
-    writeState({ ...state, consecutiveFailures });
+    process.exit(1);
   }
 
-  process.exit(1);
+  console.log(`\n[SKIP] 알림 억제 중 (마지막 알림: ${hoursSinceLastAlert.toFixed(1)}시간 전, ${SUPPRESS_HOURS}시간 간격)\n`);
+  writeState({ ...state, consecutiveFailures });
+  process.exit(0);
 }
 
 main();
