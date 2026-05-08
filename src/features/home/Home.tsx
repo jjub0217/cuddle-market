@@ -2,7 +2,6 @@
 
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useState, useCallback, useMemo } from 'react'
-import Tabs from '@/components/Tabs'
 import { DetailFilter } from '@/features/home/components/filter/DetailFilter'
 import { ProductsSection } from '@/features/home/components/product-section/ProductsSection'
 import { fetchGraphQL } from '@/lib/api/graphql'
@@ -10,13 +9,13 @@ import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import { PRODUCT_TYPE_TABS, PET_TYPE_TABS, type ProductTypeTabId, SORT_TYPE, type PetTypeTabId } from '@/constants/constants'
 import { PetTypeFilter } from './components/filter/PetTypeFilter'
 import { CategoryFilter } from './components/filter/CategoryFilter'
+import HomeHero from './components/HomeHero'
+import HomeLoadingState from './components/HomeLoadingState'
 import Link from 'next/link'
 import { useFilterNavigation } from '@/hooks/useFilterNavigation'
 import { Plus } from 'lucide-react'
-import { buttonVariants, iconSizeMap } from '@/components/commons/button/buttonClass'
-import { cn } from '@/lib/utils/cn'
+import Button from '@/components/commons/button/Button'
 import { useUserStore } from '@/store/userStore'
-import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { Z_INDEX } from '@/constants/ui'
 import HomeSkeleton from './components/product-section/HomeSkeleton'
 import { productListQueryKey, extractProductSearchParams } from '@/lib/queries/productQueryKeys'
@@ -25,7 +24,6 @@ function Home() {
   const { isLogin } = useUserStore()
   const hasHydrated = useUserStore((state) => state._hasHydrated)
   const isLoggedIn = hasHydrated && isLogin()
-  const isMd = useMediaQuery('(min-width: 768px)')
   const { searchParams, pathname, push } = useFilterNavigation()
 
   // URL에서 탭 초기값 결정 (시각적 표시용)
@@ -91,7 +89,7 @@ function Home() {
   }, [sortBy, sortOrder])
 
   const hasDetailFilter = searchParams.has('productStatuses') || searchParams.has('minPrice') || searchParams.has('addressSido')
-  const [isDetailFilterOpen, setIsDetailFilterOpen] = useState(hasDetailFilter)
+  const [isDetailFilterOpen, setIsDetailFilterOpen] = useState(true)
   const [prevSearchParams, setPrevSearchParams] = useState(searchParams)
 
   if (searchParams !== prevSearchParams) {
@@ -128,7 +126,7 @@ function Home() {
         `
         query Products($page: Int!, $size: Int!, $productType: String, $productStatuses: String, $minPrice: Int, $maxPrice: Int, $addressSido: String, $addressGugun: String, $categories: String, $petType: String, $petDetailType: String, $keyword: String, $sortBy: String, $sortOrder: String) {
           products(page: $page, size: $size, productType: $productType, productStatuses: $productStatuses, minPrice: $minPrice, maxPrice: $maxPrice, addressSido: $addressSido, addressGugun: $addressGugun, categories: $categories, petType: $petType, petDetailType: $petDetailType, keyword: $keyword, sortBy: $sortBy, sortOrder: $sortOrder) {
-            content { id title price mainImageUrl petDetailType productStatus productType tradeStatus createdAt viewCount favoriteCount isFavorite }
+            content { id title price mainImageUrl petDetailType productStatus productType tradeStatus createdAt viewCount favoriteCount isFavorite addressSido addressGugun }
             page totalPages totalElements hasNext
           }
         }
@@ -194,102 +192,62 @@ function Home() {
   const totalElements = data?.pages?.[0]?.totalElements || 0
 
   if (!hasHydrated) {
-    return (
-      <div className="pb-4xl pt-6">
-        <h1 className="sr-only">커들마켓</h1>
-        <div className="px-lg mx-auto max-w-7xl">
-          <div className="flex flex-col gap-12">
-            <section className="flex flex-col gap-7">
-              {/* 필터 스켈레톤 */}
-              <div className="flex flex-col gap-3">
-                <div className="h-5 w-20 animate-pulse rounded bg-gray-200" />
-                <div className="flex gap-2">
-                  {[...Array(6)].map((_, i) => (
-                    <div key={i} className="h-10 w-16 animate-pulse rounded-full bg-gray-200" />
-                  ))}
-                </div>
-              </div>
-              <div className="flex flex-col gap-3">
-                <div className="h-5 w-20 animate-pulse rounded bg-gray-200" />
-                <div className="flex gap-2">
-                  {[...Array(5)].map((_, i) => (
-                    <div key={i} className="h-10 w-20 animate-pulse rounded-full bg-gray-200" />
-                  ))}
-                </div>
-              </div>
-              {/* 세부 필터 스켈레톤 */}
-              <div className="flex items-center justify-between rounded-lg border border-gray-200 px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <div className="h-5 w-5 animate-pulse rounded bg-gray-200" />
-                  <div className="h-5 w-24 animate-pulse rounded bg-gray-200" />
-                  <div className="h-5 w-32 animate-pulse rounded bg-gray-200" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-5 w-16 animate-pulse rounded bg-gray-200" />
-                  <div className="h-5 w-5 animate-pulse rounded bg-gray-200" />
-                </div>
-              </div>
-            </section>
-            <section className="flex flex-col gap-2.5">
-              {/* 탭 스켈레톤 */}
-              <div className="flex gap-4 border-b-[1.5px] border-b-primary-200 pb-1">
-                {['전체', '판매', '판매요청'].map((label) => (
-                  <div key={label} className="h-8 w-16 animate-pulse rounded bg-gray-200" />
-                ))}
-              </div>
-              <HomeSkeleton />
-            </section>
-          </div>
-        </div>
-      </div>
-    )
+    return <HomeLoadingState />
   }
 
   if (error && !isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <p>상품을 불러올 수 없습니다</p>
-          <button onClick={() => refetch()} className="text-blue-600 hover:text-blue-800">
-            다시 시도
-          </button>
+      <>
+        <HomeHero />
+        <div className="flex min-h-100 items-center justify-center bg-white">
+          <div className="flex flex-col items-center gap-4">
+            <p>상품을 불러올 수 없습니다</p>
+            <Button variant="link" onClick={() => refetch()} className="font-bold text-[#825500] hover:text-[#633f00]">
+              다시 시도
+            </Button>
+          </div>
         </div>
-      </div>
+      </>
     )
   }
 
   return (
     <>
-      <div className="pb-4xl pt-6">
-        <h1 className="sr-only">커들마켓</h1>
-        <div className="px-lg mx-auto max-w-7xl">
-          <div className="flex flex-col gap-12">
-            <section aria-label="상품 필터" className="flex flex-col gap-7" data-nosnippet>
+      <HomeHero />
+      <div className="bg-white">
+        <div className="mx-auto max-w-[1280px] px-6 pt-12 pb-24 md:px-8 md:pt-16">
+          <h1 className="sr-only">커들마켓</h1>
+          <div className="flex flex-col gap-10">
+            {/* Pet category & filters section */}
+            <section aria-label="상품 필터" className="flex flex-col gap-6" data-nosnippet>
+              <div className="flex flex-col gap-1">
+                <h2 className="text-md flex flex-wrap items-center gap-2 font-medium text-gray-900">
+                  우리 아이 맞춤 검색
+                  <span className="text-sm font-normal text-[#825500]/70">어떤 아이와 함께하시나요?</span>
+                </h2>
+              </div>
               <PetTypeFilter
                 activeTab={activePetTypeTab}
                 onTabChange={handlePetTypeTabChange}
                 selectedDetailPet={selectedDetailPet}
-                headingClassName="text-base font-semibold"
               />
-              <CategoryFilter selectedCategory={selectedCategory} headingClassName="text-base font-semibold" />
+              <CategoryFilter selectedCategory={selectedCategory} />
+            </section>
+
+            {/* Detail filter section */}
+            <section aria-label="세부 필터" data-nosnippet>
               <DetailFilter
                 isOpen={isDetailFilterOpen}
                 onToggle={handleDetailFilterToggle}
                 selectedProductStatus={selectedProductStatus}
                 selectedPriceRange={selectedProductPrice}
                 filterReset={filterReset}
-                headingClassName="text-sm font-medium"
               />
             </section>
-            <section aria-label="상품 목록" className="flex flex-col gap-2.5">
-              <div className="border-b-[1.5px] border-b-primary-200 pb-1" data-nosnippet>
-                <Tabs
-                  tabs={PRODUCT_TYPE_TABS}
-                  activeTab={activeProductTypeTab}
-                  onTabChange={handleProductTypeTabChange}
-                  ariaLabel="상품 타입 분류"
-                />
-              </div>
+
+            {/* Product list section */}
+            <section aria-label="상품 목록" className="flex flex-col gap-6">
+              <h2 className="heading-h3 text-gray-900">상품 목록</h2>
               {isLoading && allProducts.length === 0 ? (
                 <HomeSkeleton />
               ) : (
@@ -298,6 +256,7 @@ function Home() {
                   totalElements={totalElements}
                   activeTab={activeProductTypeTab}
                   selectedSort={selectedSort}
+                  onTabChange={handleProductTypeTabChange}
                 />
               )}
             </section>
@@ -308,26 +267,23 @@ function Home() {
           {isFetchingNextPage ? (
             <div className="flex items-center justify-center py-8">
               <div role="status" aria-live="polite">
-                <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" aria-hidden="true"></div>
+                <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-[#825500]" aria-hidden="true"></div>
                 <span className="sr-only">상품 로딩 중</span>
               </div>
             </div>
           ) : null}
         </div>
       </div>
+
       {isLoggedIn ? (
-        <div className={`fixed right-10 bottom-5 max-md:bottom-18 max-md:right-4 ${Z_INDEX.FLOATING_BUTTON}`}>
-          <Link
-            href="/product-post"
-            className={cn(
-              buttonVariants({ size: isMd ? 'lg' : 'md', iconPosition: 'left' }),
-              'bg-primary-300 cursor-pointer text-white'
-            )}
-          >
-            <Plus size={iconSizeMap[isMd ? 'lg' : 'md']} />
-            상품등록
-          </Link>
-        </div>
+        <Link
+          href="/product-post"
+          className={`fixed right-8 bottom-8 flex items-center gap-2 rounded-full bg-[#825500] px-5 py-3.5 text-white shadow-lg transition-all hover:brightness-110 active:scale-95 max-md:right-4 max-md:bottom-20 md:px-6 md:py-4 ${Z_INDEX.FLOATING_BUTTON}`}
+          aria-label="상품 등록"
+        >
+          <Plus size={20} strokeWidth={2.5} />
+          <span className="text-sm font-bold md:text-base">상품 등록</span>
+        </Link>
       ) : null}
     </>
   )

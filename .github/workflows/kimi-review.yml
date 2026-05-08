@@ -55,7 +55,7 @@ jobs:
             --arg pr_body "$PR_BODY" \
             --arg diff "$DIFF_CONTENT" \
             '{
-              model: "moonshotai/kimi-k2.5",
+              model: "moonshotai/kimi-k2-0905",
               messages: [
                 {
                   role: "system",
@@ -81,6 +81,7 @@ jobs:
 
           # 응답에서 리뷰 내용 추출
           REVIEW_CONTENT=$(echo "$REVIEW_RESPONSE" | jq -r '.choices[0].message.content // "리뷰 생성에 실패했습니다."')
+          echo "$REVIEW_RESPONSE" | jq -r '.error // empty'
 
           # GitHub PR에 코멘트 작성
           printf "## 🤖 Kimi Code Review (via OpenRouter)\n\n%s\n\n---\n*Powered by Moonshot AI (kimi-k2.5) via OpenRouter*" "$REVIEW_CONTENT" | gh pr comment "$PR_NUMBER" --repo "$REPO" --body-file -

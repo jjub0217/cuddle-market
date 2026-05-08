@@ -13,6 +13,8 @@ export interface Product {
   favoriteCount: number
   isFavorite: boolean
   viewCount?: number
+  addressSido?: string
+  addressGugun?: string
 }
 
 export interface ProductResponse {

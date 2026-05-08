@@ -135,6 +135,8 @@ export const typeDefs = gql`
     viewCount: Int!
     favoriteCount: Int!
     isFavorite: Boolean
+    addressSido: String
+    addressGugun: String
   }
 
   type SellerInfo {
