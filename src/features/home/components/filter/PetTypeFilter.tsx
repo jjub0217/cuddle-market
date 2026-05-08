@@ -1,12 +1,12 @@
 'use client'
 
-import Button from '@/components/commons/button/Button'
 import { PET_DETAILS, PET_TYPE_TABS, PETS, type PetTypeTabId } from '@/constants/constants'
 import { cn } from '@/lib/utils/cn'
 import { ProductPetTypeTabs } from '../tab/ProductPetTypeTabs'
 import { useFilterNavigation } from '@/hooks/useFilterNavigation'
 import { useState } from 'react'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
+import Button from '@/components/commons/button/Button'
 
 const INITIAL_DISPLAY_COUNT = 13
 
@@ -17,27 +17,27 @@ interface PetTypeFilterProps {
   selectedDetailPet?: string | null
 }
 
-export function PetTypeFilter({ activeTab, headingClassName, selectedDetailPet, onTabChange }: PetTypeFilterProps) {
+// "전체" pill을 맨 앞에 두기 위한 sentinel — code: null
+const ALL_ITEM = { code: null, name: '전체' } as const
+
+export function PetTypeFilter({ activeTab, selectedDetailPet, onTabChange }: PetTypeFilterProps) {
   const { searchParams, pathname, push } = useFilterNavigation()
   const [showAll, setShowAll] = useState(false)
   const isMobile = useMediaQuery('(max-width: 767px)')
 
-  const handleProductPetDetailType = (e: React.MouseEvent, pet: string) => {
-    e.stopPropagation() // 이벤트 버블링 방지
-
-    // 같은 반려동물 클릭 시 선택 해제, 다른 반려동물 클릭 시 선택
-    const isDeselecting = selectedDetailPet === pet
-
+  // null 입력 → 필터 클리어, 같은 code 재클릭 → 토글로 클리어, 다른 code → set
+  const handleSelect = (e: React.MouseEvent, code: string | null) => {
+    e.stopPropagation()
     const params = new URLSearchParams(searchParams.toString())
-    if (isDeselecting) {
-      params.delete('petDetailType') // 선택 해제 시 URL에서 제거
+    if (code === null || selectedDetailPet === code) {
+      params.delete('petDetailType')
     } else {
-      params.set('petDetailType', pet) // 선택 시 URL에 추가
+      params.set('petDetailType', code)
     }
     push(`${pathname}?${params.toString()}`)
   }
-  const selectedPetTypeCode = PET_TYPE_TABS.find((tab) => tab.id === activeTab)?.code
 
+  const selectedPetTypeCode = PET_TYPE_TABS.find((tab) => tab.id === activeTab)?.code
   // 선택된 반려동물 타입에 해당하는 details만 필터링
   const filteredPetDetails =
     selectedPetTypeCode === 'ALL'
@@ -54,6 +54,9 @@ export function PetTypeFilter({ activeTab, headingClassName, selectedDetailPet, 
 
   const hasMoreItems = isMobile && selectedPetTypeCode === 'ALL' && filteredPetDetails.length > INITIAL_DISPLAY_COUNT
 
+  // "전체" pill을 첫 항목으로 prepend
+  const items: ReadonlyArray<{ code: string | null; name: string }> = [ALL_ITEM, ...displayedPetDetails]
+
   const [prevActiveTab, setPrevActiveTab] = useState(activeTab)
   if (prevActiveTab !== activeTab) {
     setPrevActiveTab(activeTab)
@@ -61,39 +64,39 @@ export function PetTypeFilter({ activeTab, headingClassName, selectedDetailPet, 
   }
 
   return (
-    <div className="flex flex-col gap-2.5">
-      <h2 className={headingClassName ?? 'heading-h4'}>반려동물 종류</h2>
-      <div className="flex flex-col gap-1 md:gap-4">
-        <ProductPetTypeTabs activeTab={activeTab} onTabChange={onTabChange} />
-        <div className="flex flex-wrap gap-1.5" role="tabpanel" id={`panel-${selectedPetTypeCode}`} aria-labelledby={activeTab}>
-          {displayedPetDetails.map((pet) => (
+    <div className="flex flex-col gap-5">
+      <ProductPetTypeTabs activeTab={activeTab} onTabChange={onTabChange} />
+      <div className="flex flex-wrap gap-2" role="tabpanel" id={`panel-${selectedPetTypeCode}`} aria-labelledby={activeTab}>
+        {items.map((pet) => {
+          const isActive = pet.code === null ? !selectedDetailPet : selectedDetailPet === pet.code
+          return (
             <Button
-              key={pet.code}
+              key={pet.code ?? 'all'}
               type="button"
               size="sm"
+              onClick={(e) => handleSelect(e, pet.code)}
+              aria-pressed={isActive}
               className={cn(
-                'border-primary-200 cursor-pointer border px-2.5 py-0.75 text-[13px] font-normal md:font-medium',
-                selectedDetailPet === pet.code
-                  ? 'bg-primary-300 font-bold text-white'
-                  : 'hover:bg-primary-300 text-gray-900 hover:text-white'
+                'cursor-pointer rounded-full px-6 py-2.5 whitespace-nowrap transition-all',
+                isActive
+                  ? 'bg-[#825500] font-bold text-white shadow-sm'
+                  : 'border border-[#d4c4b2] bg-white font-medium text-gray-600 hover:border-[#825500] hover:text-[#825500]'
               )}
-              onClick={(e) => handleProductPetDetailType(e, pet.code)}
-              aria-pressed={selectedDetailPet === pet.code}
             >
               {pet.name}
             </Button>
-          ))}
-          {hasMoreItems && !showAll ? (
-            <Button
-              type="button"
-              size="sm"
-              className="cursor-pointer bg-gray-100 py-0.75 px-2.5 text-[13px] text-gray-600 md:hidden"
-              onClick={() => setShowAll(true)}
-            >
-              더보기 ({filteredPetDetails.length - INITIAL_DISPLAY_COUNT}개)
-            </Button>
-          ) : null}
-        </div>
+          )
+        })}
+        {hasMoreItems && !showAll ? (
+          <Button
+            type="button"
+            size="sm"
+            onClick={() => setShowAll(true)}
+            className="cursor-pointer rounded-full bg-gray-100 px-5 py-2.5 text-gray-600 hover:bg-gray-200 md:hidden"
+          >
+            더보기 ({filteredPetDetails.length - INITIAL_DISPLAY_COUNT}개)
+          </Button>
+        ) : null}
       </div>
     </div>
   )

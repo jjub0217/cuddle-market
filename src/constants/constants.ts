@@ -211,9 +211,9 @@ export interface LocationFilter {
 // ========== 상품상태 관련 상수 ==========
 export const SORT_TYPE = [
   { id: 'createdAt', label: '최신순' },
-  { id: 'orderedLowPriced', label: '가격 낮은순' },
-  { id: 'orderedHighPriced', label: '가격 높은순' },
-  { id: 'favoriteCount', label: '찜 많은순' },
+  { id: 'orderedLowPriced', label: '저가순' },
+  { id: 'orderedHighPriced', label: '고가순' },
+  { id: 'favoriteCount', label: '찜 많은 순' },
 ]
 export type SORT_LABELS = (typeof SORT_TYPE)[number]['label']
 

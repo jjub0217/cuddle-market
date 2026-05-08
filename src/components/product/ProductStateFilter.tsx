@@ -4,7 +4,9 @@ import { useState } from 'react'
 import { CONDITION_ITEMS } from '@/constants/constants'
 import { cn } from '@/lib/utils/cn'
 import { useFilterNavigation } from '@/hooks/useFilterNavigation'
+import { CARD_CHIP_STYLES } from './filterChipStyles'
 
+type ProductStateFilterVariant = 'default' | 'card-chip'
 
 interface ProductStateFilterProps {
   headingClassName?: string
@@ -14,6 +16,26 @@ interface ProductStateFilterProps {
   selectedProductStatus?: string | null
   onProductStatusChange?: (status: string | null) => void
   useUrlSync?: boolean // true: URL 동기화 (DetailFilter용), false: 로컬 state (ProductPostForm용)
+  variant?: ProductStateFilterVariant
+}
+
+const VARIANT_STYLES: Record<
+  ProductStateFilterVariant,
+  { container: string; label: string; activeLabel: string; inactiveLabel: string }
+> = {
+  default: {
+    container: 'grid grid-cols-2 flex-wrap gap-2.5 md:flex',
+    label:
+      'flex cursor-pointer flex-col gap-1 rounded-lg bg-primary-50 px-4 py-2 text-center text-xs font-medium md:text-sm',
+    activeLabel: 'bg-primary-300 text-white',
+    inactiveLabel: 'text-gray-900 hover:bg-primary-300 hover:text-white',
+  },
+  'card-chip': {
+    container: CARD_CHIP_STYLES.container,
+    label: CARD_CHIP_STYLES.chip,
+    activeLabel: CARD_CHIP_STYLES.chipActive,
+    inactiveLabel: CARD_CHIP_STYLES.chipInactive,
+  },
 }
 
 export function ProductStateFilter({
@@ -24,30 +46,38 @@ export function ProductStateFilter({
   selectedProductStatus: externalSelectedStatus,
   onProductStatusChange,
   useUrlSync = false,
+  variant = 'default',
 }: ProductStateFilterProps) {
   const { searchParams, pathname, push } = useFilterNavigation()
   const [internalSelectedStatus, setInternalSelectedStatus] = useState<string | null>(null)
 
   // 외부에서 전달된 값이 있으면 사용, 없으면 내부 state 사용
-  const selectedProductStatus = externalSelectedStatus !== undefined ? externalSelectedStatus : internalSelectedStatus
+  const selectedProductStatus =
+    externalSelectedStatus !== undefined ? externalSelectedStatus : internalSelectedStatus
 
   const handleStatusChange = (value: string) => {
-    if (selectedProductStatus === value) return
+    // card-chip variant은 토글 동작 (다시 클릭 시 해제), default는 단방향 선택
+    const nextValue = variant === 'card-chip' && selectedProductStatus === value ? null : value
 
     // URL 동기화 모드일 때만 URL 업데이트
     if (useUrlSync) {
       const params = new URLSearchParams(searchParams.toString())
-      params.set('productStatuses', value)
+      if (nextValue === null) {
+        params.delete('productStatuses')
+      } else {
+        params.set('productStatuses', nextValue)
+      }
       push(`${pathname}?${params.toString()}`)
     }
 
-    // 외부 콜백이 있으면 호출, 없으면 내부 state 업데이트
     if (onProductStatusChange) {
-      onProductStatusChange(value)
+      onProductStatusChange(nextValue)
     } else {
-      setInternalSelectedStatus(value)
+      setInternalSelectedStatus(nextValue)
     }
   }
+
+  const styles = VARIANT_STYLES[variant]
 
   return (
     <div className="flex flex-col gap-2">
@@ -60,37 +90,32 @@ export function ProductStateFilter({
           상품 상태 <span className="text-red-500">*</span>
         </span>
       )}
-      <div
-        className={cn('grid grid-cols-2 flex-wrap gap-2.5 md:flex')}
-        role="radiogroup"
-        aria-labelledby="condition-filter-heading"
-      >
-        {CONDITION_ITEMS.map((item) => (
-          <div key={item.value} className={inputClassname}>
-            <input
-              type="radio"
-              id={`productStatus-${item.value}`}
-              name="productStatus"
-              value={item.value}
-              checked={selectedProductStatus === item.value}
-              onChange={() => handleStatusChange(item.value)}
-              className={cn('peer sr-only')}
-            />
-            <label
-              htmlFor={`productStatus-${item.value}`}
-              className={cn(
-                'flex cursor-pointer flex-col gap-1 rounded-lg px-4 py-2 text-center',
-                'bg-primary-50 text-xs md:text-sm font-medium',
-                selectedProductStatus === item.value
-                  ? 'bg-primary-300 text-white'
-                  : 'hover:bg-primary-300 text-gray-900 hover:text-white'
-              )}
-            >
-              <span>{item.title}</span>
-              {subTitle ? <span className="text-xs font-medium">{item.subtitle}</span> : null}
-            </label>
-          </div>
-        ))}
+      <div className={styles.container} role="radiogroup" aria-labelledby="condition-filter-heading">
+        {CONDITION_ITEMS.map((item) => {
+          const isActive = selectedProductStatus === item.value
+          return (
+            <div key={item.value} className={inputClassname}>
+              <input
+                type="radio"
+                id={`productStatus-${item.value}`}
+                name="productStatus"
+                value={item.value}
+                checked={isActive}
+                onChange={() => handleStatusChange(item.value)}
+                className="peer sr-only"
+              />
+              <label
+                htmlFor={`productStatus-${item.value}`}
+                className={cn(styles.label, isActive ? styles.activeLabel : styles.inactiveLabel)}
+              >
+                <span>{item.title}</span>
+                {subTitle && variant === 'default' ? (
+                  <span className="text-xs font-medium">{item.subtitle}</span>
+                ) : null}
+              </label>
+            </div>
+          )
+        })}
       </div>
     </div>
   )

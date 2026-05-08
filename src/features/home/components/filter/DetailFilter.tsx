@@ -1,9 +1,13 @@
+'use client'
+
 import { memo } from 'react'
-import { DetailFilterButton } from './DetailFilterButton'
+import { type PriceRange } from '@/constants/constants'
+import { RotateCcw } from 'lucide-react'
+import Button from '@/components/commons/button/Button'
 import { ProductStateFilter } from '@/components/product/ProductStateFilter'
 import { PriceFilter } from './PriceFilter'
 import { LocationFilter } from './LocationFilter'
-import type { PriceRange } from '@/constants/constants'
+import { DetailFilterButton } from './DetailFilterButton'
 
 interface DetailFilterProps {
   isOpen: boolean
@@ -14,33 +18,58 @@ interface DetailFilterProps {
   headingClassName?: string
 }
 
+const SECTION_HEADING_CLASS = 'mb-1 text-[13px] font-bold text-gray-900'
+const FILTER_CONTENT_ID = 'detail-filter-content'
+
 export const DetailFilter = memo(function DetailFilterSection({
   isOpen,
   onToggle,
   selectedProductStatus,
   selectedPriceRange,
   filterReset,
-  headingClassName,
 }: DetailFilterProps) {
   return (
-    <div className="flex flex-col gap-2.5">
-      <h3 className="sr-only">세부필터</h3>
+    <div className="flex flex-col gap-3">
       <DetailFilterButton
         isOpen={isOpen}
-        onClick={() => onToggle(!isOpen)}
-        ariaControls="detail-filter-content"
+        onToggle={() => onToggle(!isOpen)}
         filterReset={filterReset}
+        ariaControls={FILTER_CONTENT_ID}
       />
+
       {isOpen ? (
         <div
-          className="bg-primary-100 flex flex-col gap-3.5 rounded-lg px-3 py-2.5 md:flex-row md:gap-10"
+          id={FILTER_CONTENT_ID}
           role="group"
-          id="detail-filter-content"
           aria-label="세부 필터 옵션"
+          className="relative rounded-3xl border border-[#d4c4b2] bg-white px-6 py-6 shadow-sm md:px-10 md:py-8"
         >
-          <ProductStateFilter selectedProductStatus={selectedProductStatus} useUrlSync headingClassName={headingClassName} />
-          <PriceFilter selectedPriceRange={selectedPriceRange} headingClassName={headingClassName} />
-          <LocationFilter headingClassName={headingClassName} />
+          {/* 데스크탑 필터 초기화 (카드 우상단 액션) */}
+          <Button
+            type="button"
+            variant="link"
+            size="sm"
+            onClick={filterReset}
+            className="absolute top-6 right-6 hidden cursor-pointer items-center gap-1 p-0 text-xs font-medium text-gray-500 hover:text-[#825500] hover:no-underline md:flex md:top-8 md:right-10"
+          >
+            <RotateCcw size={12} aria-hidden="true" />
+            필터 초기화
+          </Button>
+
+          <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between md:gap-10">
+            <ProductStateFilter
+              variant="card-chip"
+              useUrlSync
+              selectedProductStatus={selectedProductStatus}
+              headingClassName={SECTION_HEADING_CLASS}
+            />
+            <PriceFilter
+              variant="card-chip"
+              selectedPriceRange={selectedPriceRange}
+              headingClassName={SECTION_HEADING_CLASS}
+            />
+            <LocationFilter variant="card-chip" headingClassName={SECTION_HEADING_CLASS} />
+          </div>
         </div>
       ) : null}
     </div>

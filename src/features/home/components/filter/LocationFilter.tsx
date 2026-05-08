@@ -4,11 +4,28 @@ import SelectDropdown from '@/components/commons/select/SelectDropdown'
 import { CITIES, PROVINCES, type Province } from '@/constants/cities'
 import { useFilterNavigation } from '@/hooks/useFilterNavigation'
 
+type LocationFilterVariant = 'default' | 'card-chip'
+
 interface LocationFilterProps {
   headingClassName?: string
+  variant?: LocationFilterVariant
 }
 
-export function LocationFilter({ headingClassName }: LocationFilterProps) {
+const VARIANT_STYLES: Record<LocationFilterVariant, { sidoButton: string; gugunButton: string }> = {
+  default: {
+    sidoButton: 'border-0 bg-primary-50 text-gray-900 px-3 py-2',
+    gugunButton:
+      'border-0 disabled:bg-primary-50 bg-primary-50 text-gray-900 px-3 py-2 disabled:text-gray-500',
+  },
+  'card-chip': {
+    sidoButton:
+      'border border-[#d4c4b2] bg-white text-gray-900 px-4 py-2 text-[13px] focus:border-[#825500] focus:ring-2 focus:ring-[#825500]/20',
+    gugunButton:
+      'border border-[#d4c4b2] bg-white text-gray-900 px-4 py-2 text-[13px] disabled:bg-[#f6f3f2] disabled:text-gray-400 focus:border-[#825500] focus:ring-2 focus:ring-[#825500]/20',
+  },
+}
+
+export function LocationFilter({ headingClassName, variant = 'default' }: LocationFilterProps) {
   const { searchParams, pathname, push } = useFilterNavigation()
 
   const isValidProvince = (value: string): value is Province => {
@@ -52,12 +69,18 @@ export function LocationFilter({ headingClassName }: LocationFilterProps) {
     updateURL(selectedSido, value)
   }
 
+  const styles = VARIANT_STYLES[variant]
+
   return (
     <div className="flex flex-1 flex-col gap-2">
       <h4 id="location-filter-heading" className={headingClassName ?? 'heading-h4'}>
         지역
       </h4>
-      <div className="flex flex-col gap-2.5 md:flex-row" role="group" aria-labelledby="location-filter-heading">
+      <div
+        className="flex flex-col gap-2.5 md:flex-row"
+        role="group"
+        aria-labelledby="location-filter-heading"
+      >
         {/* 시/도 선택 */}
         <div className="flex-1">
           <SelectDropdown
@@ -68,7 +91,7 @@ export function LocationFilter({ headingClassName }: LocationFilterProps) {
               label: province,
             }))}
             placeholder="시/도 선택"
-            buttonClassName="border-0 bg-primary-50 text-gray-900 px-3 py-2"
+            buttonClassName={styles.sidoButton}
           />
         </div>
 
@@ -86,7 +109,7 @@ export function LocationFilter({ headingClassName }: LocationFilterProps) {
             }))}
             placeholder={selectedSido ? '시/군/구 선택' : '시/도를 먼저 선택해주세요'}
             disabled={!selectedSido}
-            buttonClassName="border-0 disabled:bg-primary-50 bg-primary-50 text-gray-900 px-3 py-2 disabled:text-gray-500"
+            buttonClassName={styles.gugunButton}
           />
         </div>
       </div>

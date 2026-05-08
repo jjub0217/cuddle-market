@@ -1,10 +1,9 @@
 'use client'
 
-import Button from '@/components/commons/button/Button'
 import { PET_TYPE_TABS, type PetTypeTabId } from '@/constants/constants'
 import { cn } from '@/lib/utils/cn'
 import { useRef, useState, useEffect } from 'react'
-import { useMediaQuery } from '@/hooks/useMediaQuery'
+import Button from '@/components/commons/button/Button'
 
 interface ProductPetTypeTabsProps {
   activeTab: PetTypeTabId
@@ -14,24 +13,26 @@ interface ProductPetTypeTabsProps {
 export function ProductPetTypeTabs({ activeTab, onTabChange }: ProductPetTypeTabsProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [showFade, setShowFade] = useState(true)
-  const isMd = useMediaQuery('(min-width: 768px)')
 
   useEffect(() => {
     const el = scrollRef.current
     if (!el) return
 
-    const handleScroll = () => {
+    const recomputeFade = () => {
       const isAtEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1
       setShowFade(!isAtEnd)
     }
 
-    const rafId = requestAnimationFrame(handleScroll)
-    el.addEventListener('scroll', handleScroll, { passive: true })
+    const rafId = requestAnimationFrame(recomputeFade)
+    el.addEventListener('scroll', recomputeFade, { passive: true })
+    // 뷰포트 변경 시 scrollWidth/clientWidth가 달라질 수 있어 재계산
+    window.addEventListener('resize', recomputeFade)
     return () => {
       cancelAnimationFrame(rafId)
-      el.removeEventListener('scroll', handleScroll)
+      el.removeEventListener('scroll', recomputeFade)
+      window.removeEventListener('resize', recomputeFade)
     }
-  }, [isMd])
+  }, [])
 
   return (
     <div className="relative">
@@ -39,31 +40,32 @@ export function ProductPetTypeTabs({ activeTab, onTabChange }: ProductPetTypeTab
         ref={scrollRef}
         role="tablist"
         aria-label="반려동물 타입 대분류"
-        className={cn(
-          'border-b-primary-200 scrollbar-hide flex gap-1.5 overflow-x-auto pb-1 md:gap-2.5 md:overflow-visible md:border-b-[1.5px]'
-        )}
+        className="scrollbar-hide flex overflow-x-auto border-b border-[#d4c4b2]"
       >
-        {PET_TYPE_TABS.map((tab) => (
-          <Button
-            key={tab.id}
-            size={isMd ? 'md' : 'sm'}
-            id={tab.id}
-            type="button"
-            onClick={() => onTabChange(tab.id)}
-            className={cn(
-              'bg-primary-100 flex-1 cursor-pointer rounded-full px-4 py-2 text-sm whitespace-nowrap md:text-base xl:rounded-2xl xl:bg-white',
-              activeTab === tab.id
-                ? 'bg-primary-500 xl:bg-primary-300 font-bold text-white'
-                : 'hover:bg-primary-500 hover:text-white text-gray-900'
-            )}
-            role="tab"
-            aria-selected={activeTab === tab.id}
-            aria-controls={`panel-${tab.code}`}
-            tabIndex={activeTab === tab.id ? 0 : -1}
-          >
-            {tab.label}
-          </Button>
-        ))}
+        {PET_TYPE_TABS.map((tab) => {
+          const isActive = activeTab === tab.id
+          return (
+            <Button
+              key={tab.id}
+              id={tab.id}
+              type="button"
+              size="sm"
+              onClick={() => onTabChange(tab.id)}
+              className={cn(
+                '-mb-px cursor-pointer rounded-none border-b-2 px-6 py-3 whitespace-nowrap md:px-8 md:text-base',
+                isActive
+                  ? 'border-[#825500] font-bold text-[#825500]'
+                  : 'border-transparent font-medium text-gray-500 hover:text-[#825500]'
+              )}
+              role="tab"
+              aria-selected={isActive}
+              aria-controls={`panel-${tab.code}`}
+              tabIndex={isActive ? 0 : -1}
+            >
+              {tab.label}
+            </Button>
+          )
+        })}
       </div>
       {showFade ? (
         <div className="pointer-events-none absolute top-0 right-0 bottom-0 w-12 bg-linear-to-l from-white via-white/80 to-transparent md:hidden" />

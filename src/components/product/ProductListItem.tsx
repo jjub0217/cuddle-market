@@ -16,7 +16,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { getPetTypeName } from '@/lib/utils/getPetTypeName'
 import { getProductStatus } from '@/lib/utils/getProductStatus'
 import { getProductType } from '@/lib/utils/getProductType'
-import { ProductBadge } from './components/ProductBadge'
+import { ProductBadge, type ProductBadgeItem } from './components/ProductBadge'
 
 interface ProductListItemProps {
   product: Product
@@ -43,6 +43,13 @@ export function ProductListItem({ product, children }: ProductListItemProps) {
   const tradeStatusText = getTradeStatus(tradeStatus)
   const tradeStatusColor = getTradeStatusColor(tradeStatus)
   const isMd = useMediaQuery('(min-width: 768px)')
+
+  const badgeItems: ProductBadgeItem[] = [
+    { label: petTypeName, tone: 'primary' },
+    ...(productTypeName !== '판매요청'
+      ? [{ label: productStatusName, tone: 'light' as const }]
+      : []),
+  ]
   return (
     <li id={id.toString()} className="w-full">
       <Link
@@ -80,9 +87,7 @@ export function ProductListItem({ product, children }: ProductListItemProps) {
         </div>
         <div className="flex flex-1 items-start">
           <div className="flex h-fit flex-1 flex-col items-start gap-2">
-            {isMd && (
-              <ProductBadge petTypeName={petTypeName} productStatusName={productStatusName} productTypeName={productTypeName} />
-            )}
+            {isMd && <ProductBadge items={badgeItems} />}
             <div className="flex w-full items-start justify-between">
               <div className="flex flex-col gap-1">
                 <h3 className="line-clamp-2 w-full text-[17px] leading-6.5 font-bold md:line-clamp-none md:w-96 md:truncate">
