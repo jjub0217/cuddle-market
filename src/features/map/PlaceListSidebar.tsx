@@ -1,7 +1,8 @@
 'use client'
 
 import { useMapStore } from '@/store/mapStore'
-import { CATEGORIES, HOSPITAL_FILTERS, ANIMAL_TYPE_LABELS } from '@/constants/map'
+import { CATEGORIES, HOSPITAL_FILTERS } from '@/constants/map'
+// import { ANIMAL_TYPE_LABELS } from '@/constants/map'  // TODO: 특수동물 진료 데이터 추가 시 활성화
 import { getPlaceDetail } from '@/lib/api/places'
 import { FiStar } from 'react-icons/fi'
 import Spinner from '@/components/commons/spinner/Spinner'
@@ -102,7 +103,7 @@ export default function PlaceListSidebar() {
               onClick={() => toggleFilter(key)}
               className={`cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                 activeFilters.includes(key)
-                  ? 'bg-orange-500 text-white'
+                  ? 'bg-primary-container text-on-primary-container'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -136,9 +137,10 @@ export default function PlaceListSidebar() {
             const tags: string[] = []
             if (place.detail?.is24Hours) tags.push('24시간 진료')
             if (place.detail?.isEmergencyAvailable) tags.push('응급 진료')
-            place.detail?.animalTypes.forEach((type) => {
-              tags.push(ANIMAL_TYPE_LABELS[type] ?? type)
-            })
+            // TODO: 특수동물 진료 데이터 추가 시 활성화
+            // place.detail?.animalTypes.forEach((type) => {
+            //   tags.push(ANIMAL_TYPE_LABELS[type] ?? type)
+            // })
 
             const isSelected = selectedPlace?.id === place.id
 
@@ -148,7 +150,7 @@ export default function PlaceListSidebar() {
                   onClick={() => handleClickPlace(place.id)}
                   className={`flex w-full cursor-pointer gap-3 px-4 py-4 text-left transition-colors ${
                     isSelected
-                      ? 'bg-orange-50 border-l-2 border-orange-500'
+                      ? 'bg-surface-container-low border-l-2 border-primary-container'
                       : 'hover:bg-gray-50'
                   }`}
                 >
@@ -161,7 +163,7 @@ export default function PlaceListSidebar() {
                         {categoryLabel}
                       </span>
                       {place.isRecommended && (
-                        <span className="mt-0.5 ml-auto shrink-0 rounded-full bg-orange-100 px-2 py-0.5 text-xs text-orange-600">
+                        <span className="bg-badge-yellow-container text-badge-yellow mt-0.5 ml-auto shrink-0 rounded-full px-2 py-0.5 text-xs">
                           추천
                         </span>
                       )}
