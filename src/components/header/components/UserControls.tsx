@@ -55,11 +55,11 @@ export default function UserControls({ isSideOpen, setIsSideOpen, hideMenuButton
       {hasHydrated && isLogin() ? (
         <div className="flex items-center gap-1">
           <Link href={ROUTES.CHAT} className="ml-1 hidden xl:block" aria-label="채팅">
-            <MessageCircleMore className="text-white" strokeWidth={1.5} />
+            <MessageCircleMore className="text-[#633f00]" strokeWidth={1.5} />
           </Link>
           <div className="relative mr-2.5" onClick={handleBellToggle}>
             <IconButton aria-label="알림" size="lg" className="hover:bg-transparent">
-              <Bell size={24} className="stroke-white" />
+              <Bell size={24} className="stroke-[#633f00]" />
             </IconButton>
             {(unreadCountData?.unreadCount ?? 0) > 0 ? (
               <span className="bg-danger-500 absolute top-0 -right-2 flex size-5 items-center justify-center rounded-full p-2 text-sm text-white">

@@ -8,7 +8,7 @@ export default function Footer() {
       <div className="px-lg mx-auto max-w-7xl py-12">
         <div className="flex flex-wrap justify-baseline gap-x-10 gap-y-5 md:justify-between md:gap-0">
           <div className="flex flex-col gap-2">
-            <Logo logoClassname="h-12" textClassname="text-gray-400" />
+            <Logo logoClassname="h-12" />
             <p className="text-sm text-gray-500">반려동물과 함께하는 행복한 반려동물 용품 거래를 경험하세요.</p>
           </div>
 

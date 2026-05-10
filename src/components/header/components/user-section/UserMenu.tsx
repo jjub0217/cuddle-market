@@ -79,7 +79,7 @@ export default function UserMenu({
     </div>
   ) : (
     <IconButton aria-label="메뉴" onClick={() => setIsSideOpen((prev) => !prev)}>
-      <Menu className="text-white" />
+      <Menu className="text-[#633f00]" />
     </IconButton>
   )
 }

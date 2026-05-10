@@ -67,7 +67,7 @@ export default function AdminLogin() {
         <div className="bg-primary-50 flex flex-col gap-6 p-6">
           <div className="flex flex-col gap-4">
             <div className="flex justify-center">
-              <Logo textClassname="text-primary-200" />
+              <Logo />
             </div>
 
             <h2 className="text-center text-2xl font-bold text-gray-900">관리자 로그인</h2>
