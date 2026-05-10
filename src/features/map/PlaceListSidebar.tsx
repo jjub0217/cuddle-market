@@ -101,7 +101,7 @@ export default function PlaceListSidebar() {
               onClick={() => toggleFilter(key)}
               className={`cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                 activeFilters.includes(key)
-                  ? 'bg-orange-500 text-white'
+                  ? 'bg-primary-container text-on-primary-container'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -147,7 +147,7 @@ export default function PlaceListSidebar() {
                   onClick={() => handleClickPlace(place.id)}
                   className={`flex w-full cursor-pointer gap-3 px-4 py-4 text-left transition-colors ${
                     isSelected
-                      ? 'bg-orange-50 border-l-2 border-orange-500'
+                      ? 'bg-surface-container-low border-l-2 border-primary-container'
                       : 'hover:bg-gray-50'
                   }`}
                 >
@@ -160,7 +160,7 @@ export default function PlaceListSidebar() {
                         {categoryLabel}
                       </span>
                       {place.isRecommended && (
-                        <span className="mt-0.5 ml-auto shrink-0 rounded-full bg-orange-100 px-2 py-0.5 text-xs text-orange-600">
+                        <span className="bg-badge-yellow-container text-badge-yellow mt-0.5 ml-auto shrink-0 rounded-full px-2 py-0.5 text-xs">
                           추천
                         </span>
                       )}

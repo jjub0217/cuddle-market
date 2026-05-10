@@ -18,7 +18,7 @@ export default function FilterButtons() {
           onClick={() => toggleFilter(key)}
           className={`rounded-full px-3 py-1.5 text-xs font-medium shadow-md transition-colors ${
             activeFilters.includes(key)
-              ? 'bg-orange-500 text-white'
+              ? 'bg-primary-container text-on-primary-container'
               : 'bg-white text-gray-700 hover:bg-gray-50'
           }`}
         >

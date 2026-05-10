@@ -34,24 +34,24 @@ export default function PlaceDetailSidebar() {
 
         <div className="flex flex-wrap gap-2">
           {selectedPlace.isRecommended && (
-            <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-medium text-orange-600">
+            <span className="bg-badge-yellow-container text-badge-yellow rounded-full px-3 py-1 text-xs font-medium">
               추천
             </span>
           )}
           {selectedPlace.detail?.is24Hours && (
-            <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs text-blue-700">
+            <span className="bg-badge-blue-container text-badge-blue rounded-full px-2.5 py-1 text-xs">
               24시간
             </span>
           )}
           {selectedPlace.detail?.isEmergencyAvailable && (
-            <span className="rounded-full bg-red-100 px-2.5 py-1 text-xs text-red-700">
+            <span className="bg-badge-red-container text-badge-red rounded-full px-2.5 py-1 text-xs">
               응급진료
             </span>
           )}
           {selectedPlace.detail?.animalTypes.map((type) => (
             <span
               key={type}
-              className="rounded-full bg-green-100 px-2.5 py-1 text-xs text-green-700"
+              className="bg-badge-green-container text-badge-green rounded-full px-2.5 py-1 text-xs"
             >
               {ANIMAL_TYPE_LABELS[type] ?? type}
             </span>
@@ -69,7 +69,7 @@ export default function PlaceDetailSidebar() {
               <FiPhone className="h-4 w-4 shrink-0 text-gray-400" />
               <a
                 href={`tel:${selectedPlace.phone}`}
-                className="text-blue-600 underline"
+                className="text-primary-container underline"
               >
                 {selectedPlace.phone}
               </a>

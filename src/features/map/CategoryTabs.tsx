@@ -15,7 +15,7 @@ export default function CategoryTabs() {
           onClick={() => setSelectedCategory(key)}
           className={`shrink-0 cursor-pointer rounded-full px-4 py-2 text-sm font-medium transition-colors ${
             selectedCategory === key
-              ? 'bg-orange-500 text-white'
+              ? 'bg-primary-container text-on-primary-container'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >

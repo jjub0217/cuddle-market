@@ -25,7 +25,7 @@ export default function PlaceDetailSlideCard() {
               <div>
                 <h3 className="text-base font-bold">{selectedPlace.name}</h3>
                 {selectedPlace.isRecommended && (
-                  <span className="mt-1 inline-block rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-600">
+                  <span className="bg-badge-yellow-container text-badge-yellow mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium">
                     추천
                   </span>
                 )}
@@ -41,12 +41,12 @@ export default function PlaceDetailSlideCard() {
             {selectedPlace.detail && (
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {selectedPlace.detail.is24Hours && (
-                  <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-700">
+                  <span className="bg-badge-blue-container text-badge-blue rounded-full px-2 py-0.5 text-xs">
                     24시간
                   </span>
                 )}
                 {selectedPlace.detail.isEmergencyAvailable && (
-                  <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs text-red-700">
+                  <span className="bg-badge-red-container text-badge-red rounded-full px-2 py-0.5 text-xs">
                     응급진료
                   </span>
                 )}
@@ -63,7 +63,7 @@ export default function PlaceDetailSlideCard() {
                   <FiPhone className="h-3.5 w-3.5 shrink-0 text-gray-400" />
                   <a
                     href={`tel:${selectedPlace.phone}`}
-                    className="text-blue-600"
+                    className="text-primary-container"
                   >
                     {selectedPlace.phone}
                   </a>
