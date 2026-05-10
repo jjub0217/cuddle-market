@@ -1,5 +1,5 @@
-@layer utilities {
-  /* 헤딩 */
+/* 헤딩 — components layer에 둬서 Tailwind utility(leading-*, text-* 등)로 자유롭게 덮어쓸 수 있게 함 */
+@layer components {
   .heading-h1 {
     font-size: var(--text-h1);
     line-height: var(--text-h1--line-height);
@@ -48,7 +48,10 @@
     font-weight: var(--text-h5--weight);
     letter-spacing: var(--text-h5--tracking);
   }
+}
 
+/* 진짜 utility 클래스들 — 그대로 utilities layer 유지 */
+@layer utilities {
   .blind {
     position: absolute;
     border: 0px;

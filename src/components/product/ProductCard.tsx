@@ -17,9 +17,10 @@ export interface ProductCardProps {
   data: Product
   'data-index'?: number
   vertical?: boolean
+  hideProductType?: boolean
 }
 
-function ProductCard({ data, 'data-index': dataIndex, vertical = false }: ProductCardProps) {
+function ProductCard({ data, 'data-index': dataIndex, vertical = false, hideProductType }: ProductCardProps) {
   const router = useRouter()
   const { isFavorite, handleToggleFavorite } = useFavorite({
     productId: data?.id,
@@ -79,7 +80,7 @@ function ProductCard({ data, 'data-index': dataIndex, vertical = false }: Produc
           productTypeName={productTypeName}
           productStatusName={productStatusName}
           isFavorite={isFavorite}
-          hideProductType={vertical}
+          hideProductType={hideProductType ?? vertical}
           location={location}
         />
         <ProductThumbnail

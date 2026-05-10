@@ -38,6 +38,7 @@
     "rehype-sanitize": "^6.0.0",
     "remark-breaks": "^4.0.0",
     "sockjs-client": "^1.6.1",
+    "swiper": "^12.1.4",
     "tailwind-merge": "^3.4.0",
     "zustand": "^5.0.11"
   },

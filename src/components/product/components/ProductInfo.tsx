@@ -25,12 +25,12 @@ export function ProductInfo({
   hideProductType = false,
   location,
 }: ProductInfoProps) {
-  const badgeItems: ProductBadgeItem[] = hideProductType
-    ? []
-    : [
-        { label: productTypeName, tone: productTypeName === '판매요청' ? 'warning' : 'info' },
-        { label: productStatusName, tone: 'outline' },
-      ]
+  const badgeItems: ProductBadgeItem[] = [
+    ...(hideProductType
+      ? []
+      : [{ label: productTypeName, tone: (productTypeName === '판매요청' ? 'warning' : 'info') as ProductBadgeItem['tone'] }]),
+    { label: productStatusName, tone: 'outline' },
+  ]
 
   const metaTextClass = 'text-xs font-medium'
 

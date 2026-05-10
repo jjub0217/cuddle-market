@@ -34,11 +34,14 @@ export default function ProductActions({ id, isFavorite: initialIsFavorite, sell
 
   const handleChat = async () => {
     try {
-      const { createChatRoom: chatRoom } = await fetchGraphQL<{ createChatRoom: { chatRoomId: number } }>(`
+      const { createChatRoom: chatRoom } = await fetchGraphQL<{ createChatRoom: { chatRoomId: number } }>(
+        `
         mutation CreateChatRoom($productId: Int!) {
           createChatRoom(productId: $productId) { chatRoomId }
         }
-      `, { productId: id })
+      `,
+        { productId: id }
+      )
       sessionStorage.setItem('chatRoom', JSON.stringify(chatRoom))
       router.push(ROUTES.CHAT_ROOM_ID(chatRoom.chatRoomId))
     } catch {
@@ -49,19 +52,23 @@ export default function ProductActions({ id, isFavorite: initialIsFavorite, sell
   return (
     <div className="gap-sm flex">
       <Button
+        size="md"
+        className="bg-primary-400 flex-1 cursor-pointer text-white"
+        onClick={isMyProduct ? () => handleEdit(id) : handleChat}
+      >
+        {isMyProduct ? '수정하기' : '채팅하기'}
+      </Button>
+      <Button
         icon={Heart}
         iconProps={{
           color: isFavorite ? '#fc8181' : undefined,
           fill: isFavorite ? '#fc8181' : 'none',
         }}
         size="md"
-        className="cursor-pointer border border-gray-300 bg-white"
+        className="cursor-pointer rounded-full border border-gray-300 bg-white"
         aria-label="찜하기"
         onClick={handleToggleFavorite}
       />
-      <Button size="md" className="bg-primary-400 flex-1 cursor-pointer text-white" onClick={isMyProduct ? () => handleEdit(id) : handleChat}>
-        {isMyProduct ? '수정하기' : '채팅하기'}
-      </Button>
     </div>
   )
 }
