@@ -1,5 +1,65 @@
 /* utilities 에서, @apply 키워드와 함께 사용하면 하나의 클래스네임의 Tailwind 클래스가 자동 생성됩니다. */
 /* 예시: @apply text-heading1; =>  --text-heading1 이라는 텍스트가 포함된 속성들은 전부 반영됩니다. */
+
+/* ===== MD Design System Typography (Pretendard 기반) ===== */
+@theme {
+  /* Hero / 큰 타이틀 */
+  --text-hero-title: 36px;
+  --text-hero-title--line-height: 1.2;
+  --text-hero-title--weight: 700;
+  --text-hero-title--tracking: -0.02em;
+
+  /* Headlines */
+  --text-headline-md: 24px;
+  --text-headline-md--line-height: 32px;
+  --text-headline-md--weight: 700;
+  --text-headline-md--tracking: 0;
+
+  --text-headline-sm: 18px;
+  --text-headline-sm--line-height: 24px;
+  --text-headline-sm--weight: 700;
+  --text-headline-sm--tracking: 0;
+
+  /* Body */
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 28px;
+  --text-body-lg--weight: 500;
+  --text-body-lg--tracking: 0;
+
+  --text-body-md: 16px;
+  --text-body-md--line-height: 24px;
+  --text-body-md--weight: 400;
+  --text-body-md--tracking: 0;
+
+  --text-body-sm: 14px; /* 가장 자주 사용 (text-sm 대체 가능) */
+  --text-body-sm--line-height: 20px;
+  --text-body-sm--weight: 400;
+  --text-body-sm--tracking: 0;
+
+  --text-body-xs: 12px; /* 칩, 보조 텍스트 (text-xs 대체 가능) */
+  --text-body-xs--line-height: 16px;
+  --text-body-xs--weight: 500;
+  --text-body-xs--tracking: 0;
+
+  /* Labels */
+  --text-label-semibold: 14px; /* font-weight 600 */
+  --text-label-semibold--line-height: 20px;
+  --text-label-semibold--weight: 600;
+  --text-label-semibold--tracking: 0;
+
+  --text-label-bold: 11px;
+  --text-label-bold--line-height: 1;
+  --text-label-bold--weight: 700;
+  --text-label-bold--tracking: 0;
+
+  /* Special */
+  --text-price-display: 18px;
+  --text-price-display--line-height: 1;
+  --text-price-display--weight: 700;
+  --text-price-display--tracking: 0;
+}
+
+/* ===== Legacy headings (레거시 호환 유지) ===== */
 @theme {
   /* H1 */
   --text-h1: 36px;
@@ -44,7 +104,7 @@
   --text-h5--tracking: 0;
 }
 
-/* theme 레이어에 타이포그래피 토큰 정의 */
+/* theme 레이어에 폰트 패밀리 토큰 정의 */
 @theme {
   /* 폰트 패밀리 */
   --font-pretendard: 'Pretendard Variable';

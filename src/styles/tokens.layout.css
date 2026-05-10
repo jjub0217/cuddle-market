@@ -1,6 +1,7 @@
 @theme {
   /* Container */
   --container-max-width: 1280px;
+  --container-gutter: 16px; /* 모바일 px-4 / xl px-3.5 (14px) */
 
   /* Breakpoints */
   /* Tailwind는 모바일 퍼스트이므로, 기본 스타일을 모바일(768 이하)로 두고
