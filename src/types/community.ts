@@ -3,6 +3,7 @@ export interface CommunityItem {
   id: number
   title: string
   contentPreview?: string
+  thumbnailImageUrl?: string | null
   authorNickname: string
   boardType?: string
   searchType: string

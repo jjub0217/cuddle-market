@@ -19,7 +19,7 @@ function focusHeaderSearch() {
 
 export default function HomeHero() {
   return (
-    <section aria-label="히어로" className="relative h-100 w-full bg-[#e3c19b] md:h-100">
+    <section aria-label="히어로" className="bg-hero-surface relative h-100 w-full md:h-100">
       <div className="relative mx-auto h-full xl:max-w-7xl xl:px-3.5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img

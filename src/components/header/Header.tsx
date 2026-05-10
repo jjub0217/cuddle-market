@@ -143,7 +143,7 @@ export default function Header() {
           'fixed top-0 flex w-full items-center justify-center pt-3 transition-colors duration-300 xl:pb-3',
           !isXl && (isSearchOpen ? 'pb-0' : 'pb-3'),
           // 홈 페이지 상단: 투명 (hero 위에 떠있음). 그 외: 솔리드 (cream bg + 보더)
-          showSolid ? 'border-b border-[#d4c4b2]/40 bg-[#fcf9f8]/95 backdrop-blur-sm' : 'bg-transparent',
+          showSolid ? 'border-outline-variant/40 bg-surface/95 border-b backdrop-blur-sm' : 'bg-transparent',
           Z_INDEX.HEADER
         )}
       >
@@ -185,7 +185,7 @@ export default function Header() {
               ) : null}
             </div>
 
-            {/* 가운데: 검색바 (xl+에서 중앙 배치) */}
+            {/* 가운데: 검색바 (xl+에서 중앙 배치). 검색바가 숨겨진 경우엔 spacer로 우측 컨트롤을 끝으로 push */}
             {!hideSearchBar && isXl ? (
               <div className="mx-auto max-w-130 flex-1">
                 <Suspense>
@@ -197,10 +197,9 @@ export default function Header() {
                   />
                 </Suspense>
               </div>
-            ) : null}
-
-            {/* xl 미만에서는 search/controls를 우측으로 push */}
-            {!isXl ? <div className="flex-1" /> : null}
+            ) : (
+              <div className="flex-1" aria-hidden="true" />
+            )}
 
             {/* 오른쪽: 검색 토글(모바일) + 사용자 컨트롤 */}
             <div className="flex shrink-0 items-center gap-1 xl:gap-4">

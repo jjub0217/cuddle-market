@@ -42,7 +42,7 @@ export const DetailFilter = memo(function DetailFilterSection({
           id={FILTER_CONTENT_ID}
           role="group"
           aria-label="세부 필터 옵션"
-          className="relative rounded-3xl border border-[#d4c4b2] bg-white px-6 py-6 shadow-sm md:px-6 md:py-5"
+          className="border-outline-variant relative rounded-3xl border bg-white px-6 py-6 shadow-sm md:px-6 md:py-5"
         >
           {/* 데스크탑 필터 초기화 (카드 우상단 액션) */}
           <Button

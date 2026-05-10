@@ -13,9 +13,18 @@ interface ReplyOverlayProps {
   onChangeValue: (value: string) => void
   onSubmit: () => void
   onClose: () => void
+  onReplyToReply?: (reply: Comment) => void
 }
 
-export function ReplyOverlay({ comment, replies, value, onChangeValue, onSubmit, onClose }: ReplyOverlayProps) {
+export function ReplyOverlay({
+  comment,
+  replies,
+  value,
+  onChangeValue,
+  onSubmit,
+  onClose,
+  onReplyToReply,
+}: ReplyOverlayProps) {
   const totalCount = 1 + (replies?.length ?? 0)
 
   const onCloseRef = useRef(onClose)
@@ -57,7 +66,12 @@ export function ReplyOverlay({ comment, replies, value, onChangeValue, onSubmit,
           <ul className="mt-3 flex flex-col gap-2 pl-10">
             {replies.map((reply, index) => (
               <li key={reply.id}>
-                <CommentItem comment={reply} isReply showBorder={index !== 0} />
+                <CommentItem
+                  comment={reply}
+                  isReply
+                  showBorder={index !== 0}
+                  onHandleReply={onReplyToReply ? () => onReplyToReply(reply) : undefined}
+                />
               </li>
             ))}
           </ul>
@@ -73,6 +87,7 @@ export function ReplyOverlay({ comment, replies, value, onChangeValue, onSubmit,
           value={value}
           onChangeValue={onChangeValue}
           onSubmit={onSubmit}
+          variant="compact"
         />
       </div>
     </div>

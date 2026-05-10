@@ -40,7 +40,7 @@ export function ProductPetTypeTabs({ activeTab, onTabChange }: ProductPetTypeTab
         ref={scrollRef}
         role="tablist"
         aria-label="반려동물 타입 대분류"
-        className="scrollbar-hide flex overflow-x-auto border-b border-[#d4c4b2]"
+        className="scrollbar-hide border-outline-variant flex overflow-x-auto border-b"
       >
         {PET_TYPE_TABS.map((tab) => {
           const isActive = activeTab === tab.id

@@ -3,14 +3,23 @@
 import { getTimeAgo } from '@/lib/utils/getTimeAgo'
 import { cn } from '@/lib/utils/cn'
 import type { Comment } from '@/types'
-import { EllipsisVertical } from 'lucide-react'
-import IconButton from '@/components/commons/button/IconButton'
 import ProfileAvatar from '@/components/commons/ProfileAvatar'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useUserStore } from '@/store/userStore'
-import { useOutsideClick } from '@/hooks/useOutsideClick'
 import dynamic from 'next/dynamic'
 const DeleteReplyModal = dynamic(() => import('@/components/modal/DeleteReplyModal'))
+
+function renderContentWithMention(content: string) {
+  const match = content.match(/^(@\S+)([\s\S]*)$/)
+  if (!match) return content
+  const [, mention, rest] = match
+  return (
+    <>
+      <span className="text-primary-container">{mention}</span>
+      {rest}
+    </>
+  )
+}
 
 interface CommentItemProps {
   comment: Comment
@@ -37,20 +46,10 @@ export function CommentItem({
 }: CommentItemProps) {
   const user = useUserStore((state) => state.user)
   const isMyComment = user?.id === Number(comment.authorId)
-  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false)
   const [isReplyDeleteModalOpen, setIsReplyDeleteModalOpen] = useState(false)
-
-  const handleMoreToggle = () => {
-    setIsMoreMenuOpen((prev) => !prev)
-  }
-
-  const modalRef = useRef<HTMLButtonElement>(null)
-
-  useOutsideClick(isMoreMenuOpen, [modalRef], () => setIsMoreMenuOpen(false))
 
   const handleDelete = () => {
     setIsReplyDeleteModalOpen(true)
-    setIsMoreMenuOpen(false)
   }
 
   const handleConfirmDelete = async (id: number) => {
@@ -61,54 +60,81 @@ export function CommentItem({
 
   return (
     <>
-      <div className={cn('flex items-start gap-3.5', showBorder && 'border-t border-gray-300 pt-3.5', !isReply && !isRepliesOpen && 'pb-3.5')}>
-        <ProfileAvatar imageUrl={comment.authorProfileImageUrl} nickname={comment.authorNickname} size="sm" className="shrink-0" />
+      <div
+        className={cn(
+          'flex items-start gap-3.5',
+          isReply
+            ? 'bg-surface-container-low rounded-lg px-4.5 py-4.5'
+            : cn(showBorder && 'border-t border-gray-300 pt-3.5', !isRepliesOpen && 'pb-3.5')
+        )}
+      >
+        <ProfileAvatar
+          imageUrl={comment.authorProfileImageUrl}
+          nickname={comment.authorNickname}
+          size="sm"
+          className="shrink-0"
+        />
 
         {/* 유저 정보 및 내용 */}
-        <div className="flex flex-col justify-center gap-1">
-          <div className="flex flex-col gap-0.5">
+        <div className="flex flex-col justify-center gap-2">
+          <div className="flex flex-col gap-2">
             <div className="flex items-center gap-1.5">
-              <p className="text-sm md:text-base font-semibold">{comment.authorNickname}</p>
+              <p className="text-sm font-semibold md:text-base">{comment.authorNickname}</p>
               {Number(comment.authorId) === user?.id ? (
-                <p className="bg-primary-200 rounded-full px-2.5 py-1 text-xs font-semibold text-white">작성자</p>
+                <p className="bg-primary-200 rounded-full px-2 py-0.5 text-xs font-semibold text-white">내 댓글</p>
               ) : null}
             </div>
-            <p className="text-xs md:text-sm text-gray-500">{getTimeAgo(comment.createdAt)}</p>
+            <p className="whitespace-pre-wrap">{renderContentWithMention(comment.content)}</p>
           </div>
-          <p>{comment.content}</p>
+          <div className="flex items-center gap-1">
+            <p className="text-xs font-medium text-gray-500">{getTimeAgo(comment.createdAt)}</p>
+            <span aria-hidden="true" className="text-xs">
+              ·
+            </span>
+            <div className="flex items-center gap-1">
+              {onHandleReply ? (
+                <button
+                  className="text-primary-container cursor-pointer text-xs font-medium hover:underline"
+                  type="button"
+                  onClick={onHandleReply}
+                >
+                  답글 달기
+                </button>
+              ) : null}
 
-          <div className="flex items-center gap-3.5">
-            {onHandleReply ? (
-              <button className="cursor-pointer text-sm text-blue-500" type="button" onClick={onHandleReply}>
-                답글쓰기
-              </button>
-            ) : null}
-            {/* 답글 버튼 (대댓글이 아니고, hasChildren이 있을 때만) */}
-            {!isReply && hasChildren ? (
-              <button className="cursor-pointer self-start text-sm text-blue-500 hover:underline" type="button" onClick={onToggleReplies}>
-                {isRepliesOpen ? '답글 접기' : `답글 ${childrenCount}개`}
-              </button>
-            ) : null}
+              {/* 답글 버튼 (대댓글이 아니고, hasChildren이 있을 때만) */}
+              {!isReply && hasChildren ? (
+                <>
+                  <span aria-hidden="true" className="text-xs">
+                    ·
+                  </span>
+                  <button
+                    className="text-primary-container cursor-pointer self-start text-xs font-medium hover:underline"
+                    type="button"
+                    onClick={onToggleReplies}
+                  >
+                    {isRepliesOpen ? '답글 접기' : `답글 ${childrenCount}개`}
+                  </button>
+                </>
+              ) : null}
+
+              {isMyComment ? (
+                <>
+                  <span aria-hidden="true" className="text-xs">
+                    ·
+                  </span>
+                  <button
+                    className="text-primary-container cursor-pointer text-xs font-medium hover:underline"
+                    type="button"
+                    onClick={handleDelete}
+                  >
+                    삭제
+                  </button>
+                </>
+              ) : null}
+            </div>
           </div>
         </div>
-
-        {isMyComment ? (
-          <div className="relative ml-auto">
-            <IconButton aria-label="더보기" className="" size="sm" onClick={handleMoreToggle}>
-              <EllipsisVertical size={16} className="text-gray-500" />
-            </IconButton>
-            {isMoreMenuOpen ? (
-              <button
-                className="absolute top-7 right-0 cursor-pointer rounded border border-gray-200 bg-white px-3 py-1.5 text-sm whitespace-nowrap shadow-md hover:bg-gray-50"
-                type="button"
-                onClick={() => handleDelete()}
-                ref={modalRef}
-              >
-                삭제
-              </button>
-            ) : null}
-          </div>
-        ) : null}
       </div>
       <DeleteReplyModal
         isOpen={isReplyDeleteModalOpen}

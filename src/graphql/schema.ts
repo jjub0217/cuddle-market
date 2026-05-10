@@ -7,6 +7,7 @@ export const typeDefs = gql`
     id: Int!
     title: String!
     contentPreview: String
+    thumbnailImageUrl: String
     authorNickname: String!
     boardType: String!
     viewCount: Int!
