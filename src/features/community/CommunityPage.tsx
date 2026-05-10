@@ -8,13 +8,14 @@ import { CommunityTabs } from './components/CommunityTabs'
 import { ROUTES } from '@/constants/routes'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api/api'
-import { Eye, Loader2, MessageSquare, MessageSquareText, PenLine, Plus, Search } from 'lucide-react'
+import { Eye, MessageSquare, MessageSquareText, PenLine, Plus, Search } from 'lucide-react'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import { getTimeAgo } from '@/lib/utils/getTimeAgo'
 import { useUserStore } from '@/store/userStore'
 import { cn } from '@/lib/utils/cn'
 import { Z_INDEX } from '@/constants/ui'
 import EmptyState from '@/components/EmptyState'
+import Spinner from '@/components/commons/spinner/Spinner'
 import type { CommunityItem } from '@/types'
 import { CommunityPostThumbnail } from './components/CommunityPostThumbnail'
 
@@ -168,7 +169,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
   if (isLoading && !currentData) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-[#633f00]"></div>
+        <Spinner size="md" />
       </div>
     )
   }
@@ -313,7 +314,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
         {/* 무한스크롤 sentinel + 로딩 인디케이터 */}
         {hasNextPage ? (
           <div ref={sentinelRef} className="mt-8 flex justify-center" aria-hidden="true">
-            {isFetchingNextPage ? <Loader2 size={24} className="animate-spin text-[#633f00]" /> : null}
+            {isFetchingNextPage ? <Spinner size="sm" /> : null}
           </div>
         ) : null}
       </main>

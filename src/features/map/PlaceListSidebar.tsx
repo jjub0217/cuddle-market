@@ -4,6 +4,7 @@ import { useMapStore } from '@/store/mapStore'
 import { CATEGORIES, HOSPITAL_FILTERS, ANIMAL_TYPE_LABELS } from '@/constants/map'
 import { getPlaceDetail } from '@/lib/api/places'
 import { FiStar } from 'react-icons/fi'
+import Spinner from '@/components/commons/spinner/Spinner'
 
 function getCategoryLabel(category: string) {
   return CATEGORIES.find((c) => c.key === category)?.label ?? category
@@ -113,7 +114,7 @@ export default function PlaceListSidebar() {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-200 border-t-orange-500" />
+          <Spinner size="sm" />
         </div>
       ) : markers.length === 0 ? (
         <div className="px-4 py-20 text-center">

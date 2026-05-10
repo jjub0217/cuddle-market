@@ -18,6 +18,7 @@ const BlockModal = dynamic(() => import('@/components/modal/BlockModal'))
 import { useUserStore } from '@/store/userStore'
 import { AnimatePresence } from 'framer-motion'
 import InlineNotification from '@/components/commons/InlineNotification'
+import Spinner from '@/components/commons/spinner/Spinner'
 import { ROUTES } from '@/constants/routes'
 
 function UserPage() {
@@ -90,7 +91,7 @@ function UserPage() {
   if ((isLoadingUserData && !userData) || (isLoadingUserProductData && !userProductData)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
+        <Spinner size="md" />
       </div>
     )
   }

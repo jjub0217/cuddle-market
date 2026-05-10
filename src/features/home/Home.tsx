@@ -18,6 +18,7 @@ import Button from '@/components/commons/button/Button'
 import { useUserStore } from '@/store/userStore'
 import { Z_INDEX } from '@/constants/ui'
 import HomeSkeleton from './components/product-section/HomeSkeleton'
+import Spinner from '@/components/commons/spinner/Spinner'
 import { productListQueryKey, extractProductSearchParams } from '@/lib/queries/productQueryKeys'
 
 function Home() {
@@ -265,11 +266,8 @@ function Home() {
           <div ref={targetRef} className="h-10" aria-hidden="true" />
 
           {isFetchingNextPage ? (
-            <div className="flex items-center justify-center py-8">
-              <div role="status" aria-live="polite">
-                <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-[#825500]" aria-hidden="true"></div>
-                <span className="sr-only">상품 로딩 중</span>
-              </div>
+            <div className="flex items-center justify-center py-8" aria-live="polite">
+              <Spinner size="md" label="상품 로딩 중" />
             </div>
           ) : null}
         </div>

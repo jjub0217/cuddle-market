@@ -10,6 +10,7 @@ import ProfileUpdatePasswordForm from './components/ProfileUpdatePasswordForm'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useRouter, usePathname } from 'next/navigation'
 import WithdrawModal, { type WithDrawFormValues } from '@/components/modal/WithdrawModal'
+import Spinner from '@/components/commons/spinner/Spinner'
 import { ROUTES } from '@/constants/routes'
 
 function ProfileUpdate() {
@@ -86,7 +87,7 @@ function ProfileUpdate() {
   if (isLoadingMyData) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
+        <Spinner size="md" />
       </div>
     )
   }

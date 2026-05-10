@@ -11,6 +11,7 @@ import PlaceDetailSidebar from './PlaceDetailSidebar'
 import PlaceDetailSlideCard from './PlaceDetailSlideCard'
 import { useMapStore, getFilterParams } from '@/store/mapStore'
 import { getPlaces } from '@/lib/api/places'
+import Spinner from '@/components/commons/spinner/Spinner'
 
 export default function MapContainer() {
   const [mapReady, setMapReady] = useState(false)
@@ -104,7 +105,7 @@ export default function MapContainer() {
             ) : (
               <div className="flex h-full items-center justify-center bg-gray-50">
                 <div className="text-center">
-                  <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-orange-500" />
+                  <Spinner size="md" className="mx-auto mb-3" label="지도 로딩 중" />
                   <p className="text-sm text-gray-500">
                     지도를 불러오는 중...
                   </p>
