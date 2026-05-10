@@ -64,7 +64,7 @@ export default function MobileNavigation({ isOpen, onClose }: MobileNavigationPr
       >
         <div className="flex flex-col gap-5 border-b border-gray-200 pb-5">
           <div className="flex items-center justify-between">
-            <Logo textClassname="text-gray-600" onClick={onClose} />
+            <Logo onClick={onClose} />
             <IconButton onClick={onClose} aria-label="메뉴 닫기">
               <X className="text-gray-500" />
             </IconButton>

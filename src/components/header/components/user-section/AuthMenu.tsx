@@ -16,14 +16,14 @@ interface AuthMenuProps {
 export default function AuthMenu({ setIsSideOpen, hideMenuButton = false }: AuthMenuProps) {
   const isXl = useMediaQuery('(min-width: 1280px)')
   return isXl ? (
-    <div className="flex items-center gap-5">
-      <Link href={ROUTES.LOGIN} className="rounded-lg bg-white px-2 py-1 text-center text-sm xl:min-w-20 xl:px-3 xl:py-2">
+    <div className="flex items-center">
+      <Link href={ROUTES.LOGIN} className="text-sm font-bold text-[#633f00]/70 transition-colors hover:text-[#633f00]">
         로그인 / 회원가입
       </Link>
     </div>
   ) : hideMenuButton ? null : (
     <IconButton aria-label="메뉴" onClick={() => setIsSideOpen((prev) => !prev)}>
-      <Menu className="text-white" />
+      <Menu className="text-[#633f00]" />
     </IconButton>
   )
 }

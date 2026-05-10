@@ -10,6 +10,7 @@ interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, '
   backgroundColor?: string
   size?: string
   inputClass?: string
+  wrapperClassName?: string // outer wrapper className 오버라이드 (rounded, bg, border 등)
   suffix?: string
   onClear?: () => void
 }
@@ -26,6 +27,7 @@ export default function Input({
   onChange,
   id,
   inputClass,
+  wrapperClassName,
   suffix,
   onClear,
   ...rest
@@ -38,6 +40,7 @@ export default function Input({
         border && borderColor,
         backgroundColor,
         Icon && 'pl-9',
+        wrapperClassName,
       )}
     >
       {Icon ? (

@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ROUTES } from '@/constants/routes'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useState, useSyncExternalStore } from 'react'
 import IconButton from '@/components/commons/button/IconButton'
 import SearchBar from '@/components/header/components/SearchBar'
 import { Search } from 'lucide-react'
@@ -21,7 +21,15 @@ const PRODUCT_EDIT = /^\/products\/\d+\/edit$/
 
 // Header 숨김 패턴 (모바일에서만 숨김)
 const CHAT_ROOM = /^\/chat(\/\d+)?$/
-const HIDE_HEADER_MOBILE_PATTERNS = [COMMUNITY_DETAIL, COMMUNITY_EDIT, PRODUCT_EDIT, CHAT_ROOM, new RegExp(`^${ROUTES.COMMUNITY_POST}$`), new RegExp(`^${ROUTES.PRODUCT_POST}$`), new RegExp(`^${ROUTES.NOTIFICATIONS}$`)]
+const HIDE_HEADER_MOBILE_PATTERNS = [
+  COMMUNITY_DETAIL,
+  COMMUNITY_EDIT,
+  PRODUCT_EDIT,
+  CHAT_ROOM,
+  new RegExp(`^${ROUTES.COMMUNITY_POST}$`),
+  new RegExp(`^${ROUTES.PRODUCT_POST}$`),
+  new RegExp(`^${ROUTES.NOTIFICATIONS}$`),
+]
 
 // SearchBar 숨김 경로 - 모바일만 (정적 경로)
 const HIDE_SEARCHBAR_MOBILE_PATHS: string[] = [ROUTES.MYPAGE]
@@ -47,11 +55,23 @@ const HIDE_SEARCHBAR_MOBILE_PATTERNS = [/^\/user-profile\/\d+$/]
 // SearchBar 숨김 패턴 - 항상 (동적 경로)
 const HIDE_SEARCHBAR_ALWAYS_PATTERNS = [COMMUNITY_DETAIL, COMMUNITY_EDIT, /^\/products\/\d+\/edit$/, /^\/chat\/\d+$/]
 
+// 홈 페이지에서 hero를 헤더 뒤로 깔기 위한 스크롤 임계값 (px)
+// 80px 정도 스크롤하면 솔리드 배경으로 전환 — 헤더 자신의 높이만큼
+const SOLID_BG_SCROLL_THRESHOLD = 80
+
+// useSyncExternalStore용 subscribe 함수 (모듈 스코프 — 안정적 참조)
+const subscribeToScroll = (callback: () => void) => {
+  window.addEventListener('scroll', callback, { passive: true })
+  return () => window.removeEventListener('scroll', callback)
+}
+
+const getScrollPastSnapshot = () => window.scrollY > SOLID_BG_SCROLL_THRESHOLD
+const getScrollServerSnapshot = () => false
+
 export default function Header() {
   const isXl = useMediaQuery('(min-width: 1280px)')
   const [isSideOpen, setIsSideOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
-  // 검색바 높이: h-8(32px) 고정 디자인이므로 상수 사용 (scrollHeight 접근에 의한 강제 리플로우 방지)
   const searchBarHeight = 40
   const pathname = usePathname()
 
@@ -66,11 +86,26 @@ export default function Header() {
   const hideSearchBar = hideSearchBarMobile || hideSearchBarAlways
   const hideMenuButton = HIDE_MENU_BUTTON_PATHS.includes(pathname)
 
+  const isHome = pathname === ROUTES.HOME
   const isMarketActive = pathname === '/' || pathname.startsWith('/market')
   const isCommunityActive = pathname.startsWith('/community')
   const isMapActive = pathname.startsWith('/map')
 
-  // 헤더 높이를 CSS 변수로 설정 (검색바 열림/닫힘 및 헤더 가시성에 따라)
+  // 스크롤 위치를 외부 스토어로 구독 (useSyncExternalStore — hydration-safe, cascade render 없음)
+  const scrolledPast = useSyncExternalStore(subscribeToScroll, getScrollPastSnapshot, getScrollServerSnapshot)
+
+  // 비-홈 페이지는 항상 솔리드, 홈은 스크롤 임계값 통과 시 솔리드
+  const showSolid = !isHome || scrolledPast
+
+  // hero CTA 등 외부에서 모바일 검색 아코디언을 열기 위한 이벤트 리스너
+  useEffect(() => {
+    const openMobileSearch = () => setIsSearchOpen(true)
+    window.addEventListener('cuddle:open-search', openMobileSearch)
+    return () => window.removeEventListener('cuddle:open-search', openMobileSearch)
+  }, [])
+
+  // 헤더 높이를 CSS 변수로 설정
+  // 홈 페이지에서는 0으로 설정해 hero가 헤더 뒤까지 차오르도록 함
   useEffect(() => {
     if (!showHeader) {
       document.documentElement.style.setProperty('--header-height', '0px')
@@ -79,21 +114,25 @@ export default function Header() {
       }
     }
 
-    // 기본 헤더 높이: pt-3(12px) + h-12(48px) + pb-3(12px) = 72px
-    // 검색바 열림 시: 72px + marginTop(12px) + searchBarHeight + marginBottom(12px)
     const baseHeight = 72
     const expandedHeight = baseHeight + 12 + searchBarHeight + 12
 
-    if (!isXl && isSearchOpen) {
-      document.documentElement.style.setProperty('--header-height', `${expandedHeight}px`)
+    let nextHeight: number
+    if (isHome) {
+      // 홈: hero가 헤더 영역까지 차지하도록 padding-top 0
+      nextHeight = 0
+    } else if (!isXl && isSearchOpen) {
+      nextHeight = expandedHeight
     } else {
-      document.documentElement.style.setProperty('--header-height', `${baseHeight}px`)
+      nextHeight = baseHeight
     }
+
+    document.documentElement.style.setProperty('--header-height', `${nextHeight}px`)
 
     return () => {
       document.documentElement.style.removeProperty('--header-height')
     }
-  }, [showHeader, isSearchOpen, isXl])
+  }, [showHeader, isSearchOpen, isXl, isHome])
 
   if (!showHeader) return null
 
@@ -101,52 +140,79 @@ export default function Header() {
     <>
       <header
         className={cn(
-          'bg-primary-200 fixed top-0 flex w-full items-center justify-center pt-3 xl:pb-3',
+          'fixed top-0 flex w-full items-center justify-center pt-3 transition-colors duration-300 xl:pb-3',
           !isXl && (isSearchOpen ? 'pb-0' : 'pb-3'),
+          // 홈 페이지 상단: 투명 (hero 위에 떠있음). 그 외: 솔리드 (cream bg + 보더)
+          showSolid ? 'border-b border-[#d4c4b2]/40 bg-[#fcf9f8]/95 backdrop-blur-sm' : 'bg-transparent',
           Z_INDEX.HEADER
         )}
       >
         <div className="flex w-full flex-col px-4 xl:block xl:max-w-7xl xl:gap-3 xl:px-3.5">
-          <div className="flex h-12 items-center justify-between gap-4">
-            <nav className="flex items-center gap-8" aria-label="주 메뉴">
+          <div className="flex h-12 items-center gap-4 xl:gap-8">
+            {/* 왼쪽: 로고 + 데스크탑 메뉴 */}
+            <div className="flex shrink-0 items-center gap-8 xl:gap-12">
               <Logo />
               {isXl ? (
-                <>
+                <nav className="flex items-center gap-8" aria-label="주 메뉴">
                   <Link
                     href={ROUTES.HOME}
-                    className={cn('text-md font-medium', isMarketActive ? 'border-white text-white' : 'text-gray-700')}
+                    className={cn(
+                      'pb-1 text-sm font-bold transition-colors',
+                      isMarketActive ? 'border-b-2 border-[#633f00] text-[#633f00]' : 'text-[#633f00]/70 hover:text-[#633f00]'
+                    )}
                   >
-                    마켓
+                    중고거래
                   </Link>
                   <Link
                     href={ROUTES.COMMUNITY}
-                    className={cn('text-md font-medium', isCommunityActive ? 'border-white text-white' : 'text-gray-700')}
+                    className={cn(
+                      'pb-1 text-sm font-bold transition-colors',
+                      isCommunityActive ? 'border-b-2 border-[#633f00] text-[#633f00]' : 'text-[#633f00]/70 hover:text-[#633f00]'
+                    )}
                   >
-                    커뮤니티
+                    질문·정보
                   </Link>
                   <Link
                     href={ROUTES.MAP}
-                    className={cn('text-md font-medium', isMapActive ? 'border-white text-white' : 'text-gray-700')}
+                    className={cn(
+                      'pb-1 text-sm font-bold transition-colors',
+                      isMapActive ? 'border-b-2 border-[#633f00] text-[#633f00]' : 'text-[#633f00]/70 hover:text-[#633f00]'
+                    )}
                   >
-                    플레이스
+                    펫지도
                   </Link>
-                </>
+                </nav>
               ) : null}
-            </nav>
-            <div className="flex items-center gap-1 xl:gap-8">
-              {!hideSearchBar ? (
+            </div>
+
+            {/* 가운데: 검색바 (xl+에서 중앙 배치) */}
+            {!hideSearchBar && isXl ? (
+              <div className="mx-auto max-w-130 flex-1">
                 <Suspense>
-                  <SearchBar id="search-desktop" className="hidden md:h-9 xl:block" inputClass="text-sm py-0" />
+                  <SearchBar
+                    id="search-desktop"
+                    className="h-10"
+                    inputClass="text-sm py-0 bg-white"
+                    wrapperClassName={cn('rounded-full bg-white', showSolid ? 'border border-[#bfa890]/40' : 'border-0')}
+                  />
                 </Suspense>
-              ) : null}
+              </div>
+            ) : null}
+
+            {/* xl 미만에서는 search/controls를 우측으로 push */}
+            {!isXl ? <div className="flex-1" /> : null}
+
+            {/* 오른쪽: 검색 토글(모바일) + 사용자 컨트롤 */}
+            <div className="flex shrink-0 items-center gap-1 xl:gap-4">
               {!hideSearchBar && !isXl ? (
                 <IconButton aria-label="검색" onClick={() => setIsSearchOpen((prev) => !prev)}>
-                  <Search className="text-white" />
+                  <Search className="text-[#633f00]" />
                 </IconButton>
               ) : null}
               <UserControls isSideOpen={isSideOpen} setIsSideOpen={setIsSideOpen} hideMenuButton={hideMenuButton} />
             </div>
           </div>
+
           {/* 모바일 검색바 - 아코디언 */}
           {!hideSearchBar ? (
             <div
@@ -158,7 +224,12 @@ export default function Header() {
               }}
             >
               <Suspense>
-                <SearchBar id="search-mobile" className="h-10 xl:hidden" inputClass="py-1 text-[15px]" />
+                <SearchBar
+                  id="search-mobile"
+                  className="h-10 xl:hidden"
+                  inputClass="py-1 text-[15px] bg-white"
+                  wrapperClassName={cn('rounded-full bg-white', showSolid ? 'border border-[#d4c4b2]' : 'border-0')}
+                />
               </Suspense>
             </div>
           ) : null}

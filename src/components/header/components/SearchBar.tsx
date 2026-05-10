@@ -14,6 +14,7 @@ interface SearchBarProps {
   borderColor?: string
   paramName?: string // URL 파라미터 이름 (기본값: 'keyword')
   inputClass?: string
+  wrapperClassName?: string // Input wrapper className 오버라이드 (rounded, bg, border 등)
 }
 
 export default function SearchBar({
@@ -23,6 +24,7 @@ export default function SearchBar({
   className,
   paramName = 'keyword',
   inputClass,
+  wrapperClassName,
 }: SearchBarProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -92,6 +94,7 @@ export default function SearchBar({
         backgroundColor="bg-white"
         enterKeyHint="search"
         inputClass={inputClass}
+        wrapperClassName={wrapperClassName}
         onClear={handleClearKeyword}
       />
     </div>
