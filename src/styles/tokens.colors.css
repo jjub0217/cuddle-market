@@ -1,54 +1,70 @@
 /* --color-변수명 → 유틸리티명 변환 규칙이 Tailwind v4에 내장되어 있습니다. */
-/* 예시: text-primary, text-text-primary */
+/* 예시: bg-surface, text-on-surface, border-outline-variant */
 
+/* ===== MD Design System Tokens (메인페이지/헤더 리뉴얼 기준) ===== */
 @theme {
-  /* 브랜드 색상 */
-  /* --color-primary: #a7c5eb; */
-  /* 시그니처 */
-  --color-secondary: #c8d9f0; /* 보조 */
-  --color-dark: #7ba5d6; /* 어두운 요소 */
-  --color-point: #fff8f0; /* 포인트 컬러 */
-  --color-dark-point: #2b7fff;
+  /* Surface */
+  --color-surface: #fcf9f8; /* 페이지 배경, 헤더 솔리드 */
+  --color-surface-container-lowest: #ffffff; /* 흰 카드 (검색바, ProductCard) */
+  --color-surface-container-low: #f6f3f2; /* 가벼운 surface */
+  --color-hero-surface: #e3c19b; /* HomeHero 베이지 배경 */
+  --color-chip-surface: #f6efe2; /* 필터 칩 비활성 배경 */
 
-  /* 텍스트 색상 */
-  --color-text-primary: #2d3748; /* 제목과 주요 텍스트 */
-  --color-text-secondary: #718096; /* 설명, 캡션 */
+  /* Foreground */
+  --color-on-surface: #633f00; /* 본문/제목 텍스트 (브라운) */
+  --color-on-surface-muted: rgba(99, 63, 0, 0.7); /* 비활성 메뉴, 보조 텍스트 */
 
-  /* 구분선/테두리 */
-  --color-border: #e2e8f0;
+  /* Outline */
+  --color-outline-variant: #d4c4b2; /* 일반 보더 (베이지) */
+  --color-outline-strong: #bfa890; /* 진한 보더 (헤더 솔리드 상태) */
 
-  /* 카드 배경 */
-  --color-light: #f7fafc;
+  /* Primary action (브라운) */
+  --color-primary-container: #825500; /* 메인 액션 배경 (활성 칩, CTA) */
+  --color-on-primary-container: #ffffff; /* 활성 액션 위 텍스트 */
 
-  /* 상태 컬러 */
-  /* --color-sale: #00c951; */
-  /* --color-complete: #6a7282; */
-  /* --color-reserved: #ff6900; */
+  /* Secondary (참고) */
+  --color-secondary-container: #cbe2fa; /* 파랑 톤 카드 bg */
+  --color-on-secondary-container: #33495c;
 
-  /* 알림 */
-  --color-alert: #fc8181;
+  /* Status */
+  --color-warning-container: #fff5e0;
+  --color-on-warning-container: #825500;
+  --color-error: #db202a;
+  --color-error-container: #fff1f1;
+  --color-heart-red: #fc8181;
 
-  /* 필요 시 기존 변수 유지 (레거시 호환) */
-  --color-bg: #fff;
+  /* Badge palette (4 tones) */
+  --color-badge-green: #48bb78;
+  --color-badge-green-container: #ddfae3;
+  --color-badge-red: #db202a;
+  --color-badge-red-container: #fff1f1;
+  --color-badge-yellow: #d9ac2c;
+  --color-badge-yellow-container: #fff5e0;
+  --color-badge-blue: #33495c;
+  --color-badge-blue-container: #cbe2fa;
 }
 
-/* --color-변수명 → 유틸리티명 변환 규칙이 Tailwind v4에 내장되어 있습니다. */
-/* 예시: text-primary, text-text-primary */
-
+/* ===== Brown brand palette (구 파랑 → 브라운 교체) ===== */
+/* 기존 코드의 bg-primary-300, text-primary-500 등이 브라운 톤으로 동작 */
 @theme {
-  /* 브랜드 컬러 */
-  --color-primary-50: #f0f4ff;
-  --color-primary-100: #c8d9f0;
-  --color-primary-200: #a7c5eb;
-  --color-primary-300: #7ba5d6;
-  --color-primary-400: #5a8bc7;
-  --color-primary-500: #4a7bb8;
-  --color-primary-600: #3d6ba8;
-  --color-primary-700: #315a98;
-  --color-primary-800: #264a88;
-  --color-primary-900: #1c3a78;
+  --color-primary-50: #faf3e6;
+  --color-primary-100: #f4e3bf;
+  --color-primary-200: #ecc88e;
+  --color-primary-300: #e2a958;
+  --color-primary-400: #d28a32;
+  --color-primary-500: #b06f15;
+  --color-primary-600: #825500; /* primary-container와 동일 */
+  --color-primary-700: #633f00; /* primary와 동일 */
+  --color-primary-800: #4a2f00;
+  --color-primary-900: #2a1a00;
 
-  /* 중성 컬러 */
+  /* 단일 primary alias (= primary-700) */
+  --color-primary: #633f00;
+}
+
+/* ===== Neutral / Gray (Tailwind 표준, 유지) ===== */
+/* 회색은 브랜드 색이 아닌 universal utility — 텍스트/보더/배경 등 모든 페이지에서 필수 */
+@theme {
   --color-gray-50: #f9fafb;
   --color-gray-100: #e5e7eb;
   --color-gray-200: #e2e8f0;
@@ -59,23 +75,34 @@
   --color-gray-700: #2d3748;
   --color-gray-800: #1a202c;
   --color-gray-900: #171923;
+}
 
-  /* 시스템 컬러 */
+/* ===== Status palette (레거시 호환 유지) ===== */
+/* MD에는 단일 error/warning만 있지만 코드 전반에서 5단계 스케일 사용 중 */
+@theme {
   --color-onsale: #00c951;
   --color-complete: #a0aec0;
   --color-reserved: #ed8936;
   --color-requesting: #4299e1;
   --color-notification: #facc15;
 
-  /* 성공 컬러 */
   --color-success-100: #dcfce7;
   --color-success-500: #22c55e;
   --color-success-600: #16a34a;
   --color-success-800: #166534;
 
-  /* 에러 컬러 */
   --color-danger-100: #fca5a5;
   --color-danger-500: #ef4444;
   --color-danger-600: #dc2626;
   --color-danger-800: #991b1b;
+}
+
+/* ===== Legacy aliases (레거시 호환) ===== */
+@theme {
+  --color-text-primary: #2d3748; /* 진한 회색 (레거시) — 신규는 on-surface 사용 */
+  --color-text-secondary: #718096; /* 보조 회색 (레거시) */
+  --color-border: #e2e8f0; /* 일반 보더 (레거시) — 신규는 outline-variant 사용 */
+  --color-light: #f7fafc;
+  --color-alert: #fc8181; /* heart-red와 동일 */
+  --color-bg: #ffffff;
 }
