@@ -24,7 +24,7 @@ export default function HomeHero() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           alt="반려동물과 함께하는 따뜻한 마켓"
-          src="/images/1800.webp"
+          src="/images/hero.webp"
           className="pointer-events-none absolute bottom-0 left-4 z-10 h-97.5 w-auto translate-y-[29.5%] md:h-90 xl:left-3.5"
         />
         <div className="absolute top-[15%] z-20 flex h-full flex-col px-4 pt-8 text-[#633f00] md:justify-center md:pt-0 md:pl-[52%] xl:pl-[40%]">
