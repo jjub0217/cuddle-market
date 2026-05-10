@@ -64,9 +64,9 @@ export function PetTypeFilter({ activeTab, selectedDetailPet, onTabChange }: Pet
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-3.5">
       <ProductPetTypeTabs activeTab={activeTab} onTabChange={onTabChange} />
-      <div className="flex flex-wrap gap-2" role="tabpanel" id={`panel-${selectedPetTypeCode}`} aria-labelledby={activeTab}>
+      <div className="flex flex-wrap gap-1.5" role="tabpanel" id={`panel-${selectedPetTypeCode}`} aria-labelledby={activeTab}>
         {items.map((pet) => {
           const isActive = pet.code === null ? !selectedDetailPet : selectedDetailPet === pet.code
           return (
@@ -77,10 +77,10 @@ export function PetTypeFilter({ activeTab, selectedDetailPet, onTabChange }: Pet
               onClick={(e) => handleSelect(e, pet.code)}
               aria-pressed={isActive}
               className={cn(
-                'cursor-pointer rounded-full px-6 py-2.5 whitespace-nowrap transition-all',
+                'cursor-pointer rounded-full border px-3 py-1 text-xs font-medium whitespace-nowrap transition-all',
                 isActive
-                  ? 'bg-[#825500] font-bold text-white shadow-sm'
-                  : 'border border-[#d4c4b2] bg-white font-medium text-gray-600 hover:border-[#825500] hover:text-[#825500]'
+                  ? 'border-[#825500] bg-[#825500] text-white shadow-sm'
+                  : 'border-[#d4c4b2] bg-white text-gray-600 hover:border-[#825500] hover:text-[#825500]'
               )}
             >
               {pet.name}

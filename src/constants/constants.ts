@@ -147,14 +147,14 @@ export const CONDITION_ITEMS: Array<{ value: string; title: string; subtitle: st
 
 // ========== 상품 카테고리 관련 상수 ==========
 export const PRODUCT_CATEGORIES = [
-  { code: 'FOOD', name: '사료/간식' },
-  { code: 'TOY', name: '장난감' },
-  { code: 'HOUSE', name: '사육장/하우스' },
-  { code: 'HEALTH', name: '건강/위생' },
-  { code: 'CLOTHING', name: '의류/악세사리' },
-  { code: 'WALKING', name: '이동장/목줄' },
-  { code: 'GROOMING', name: '미용용품' },
-  { code: 'ETC', name: '기타' },
+  { code: 'FOOD', name: '사료/간식', iconImage: '/images/category/food.webp' },
+  { code: 'TOY', name: '장난감', iconImage: '/images/category/toy.webp' },
+  { code: 'HOUSE', name: '하우스', iconImage: '/images/category/house.webp' },
+  { code: 'HEALTH', name: '건강/위생', iconImage: '/images/category/health.webp' },
+  { code: 'CLOTHING', name: '의류/잡화', iconImage: '/images/category/clothing.webp' },
+  { code: 'WALKING', name: '외출용품', iconImage: '/images/category/walking.webp' },
+  { code: 'GROOMING', name: '미용/목욕', iconImage: '/images/category/grooming.webp' },
+  { code: 'ETC', name: '기타', iconImage: '/images/category/etc.webp' },
 ] as const
 export type CategoryFilter = string | null
 

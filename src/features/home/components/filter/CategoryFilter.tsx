@@ -1,20 +1,8 @@
 'use client'
 
+import Image from 'next/image'
 import { PRODUCT_CATEGORIES } from '@/constants/constants'
-import { cn } from '@/lib/utils/cn'
 import { useFilterNavigation } from '@/hooks/useFilterNavigation'
-import {
-  Cookie,
-  Gamepad2,
-  Home,
-  HeartPulse,
-  Shirt,
-  Backpack,
-  Scissors,
-  MoreHorizontal,
-  Sparkles,
-  type LucideIcon,
-} from 'lucide-react'
 import Button from '@/components/commons/button/Button'
 
 interface CategoryFilterProps {
@@ -22,33 +10,14 @@ interface CategoryFilterProps {
   selectedCategory?: string | null
 }
 
-const CATEGORY_ICONS: Record<string, LucideIcon> = {
-  FOOD: Cookie,
-  TOY: Gamepad2,
-  HOUSE: Home,
-  HEALTH: HeartPulse,
-  CLOTHING: Shirt,
-  WALKING: Backpack,
-  GROOMING: Scissors,
-  ETC: MoreHorizontal,
-}
-
-// "전체" 항목을 맨 앞에 두기 위한 sentinel — code: null
-const ALL_ITEM = { code: null, name: '전체', icon: Sparkles } as const
-
-interface CategoryItem {
-  code: string | null
-  name: string
-  icon: LucideIcon
-}
-
 export function CategoryFilter({ selectedCategory }: CategoryFilterProps) {
   const { searchParams, pathname, push } = useFilterNavigation()
 
-  const handleSelect = (e: React.MouseEvent, code: string | null) => {
+  // 같은 카테고리 재클릭 시 해제(toggle), 다른 카테고리 클릭 시 set
+  const handleSelect = (e: React.MouseEvent, code: string) => {
     e.stopPropagation()
     const params = new URLSearchParams(searchParams.toString())
-    if (code === null || selectedCategory === code) {
+    if (selectedCategory === code) {
       params.delete('categories')
     } else {
       params.set('categories', code)
@@ -56,49 +25,29 @@ export function CategoryFilter({ selectedCategory }: CategoryFilterProps) {
     push(`${pathname}?${params.toString()}`)
   }
 
-  const items: CategoryItem[] = [
-    ALL_ITEM,
-    ...PRODUCT_CATEGORIES.map((category) => ({
-      code: category.code,
-      name: category.name,
-      icon: CATEGORY_ICONS[category.code] ?? MoreHorizontal,
-    })),
-  ]
-
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 md:pt-2">
       <div
-        className="scrollbar-hide -mx-2 flex items-start gap-4 overflow-x-auto px-2 pb-2 md:gap-6"
+        className="scrollbar-hide -mx-2 flex items-start gap-5 overflow-x-auto px-2 pb-2"
         role="group"
         aria-label="상품 카테고리"
       >
-        {items.map((item) => {
-          const Icon = item.icon
-          const isActive = item.code === null ? !selectedCategory : selectedCategory === item.code
+        {PRODUCT_CATEGORIES.map((category) => {
+          const isActive = selectedCategory === category.code
           return (
             <Button
-              key={item.code ?? 'all'}
+              key={category.code}
               type="button"
               size="sm"
-              onClick={(e) => handleSelect(e, item.code)}
+              onClick={(e) => handleSelect(e, category.code)}
               aria-pressed={isActive}
-              className="group flex min-w-18 shrink-0 flex-col items-center gap-2 rounded-none bg-transparent p-0 transition-all hover:bg-transparent"
+              className="group flex min-w-20 shrink-0 flex-col items-center rounded-none bg-transparent p-0 transition-all hover:bg-transparent"
             >
-              <span
-                className={cn(
-                  'flex h-16 w-16 items-center justify-center rounded-2xl transition-all group-hover:-translate-y-1 md:h-18 md:w-18',
-                  isActive ? 'bg-[#825500] text-white shadow-md' : 'bg-[#f6efe2] text-[#825500] group-hover:bg-[#ecdcc3]'
-                )}
-              >
-                <Icon size={28} strokeWidth={2} />
+              <span className="flex h-20 w-20 items-center justify-center transition-all group-hover:-translate-y-1">
+                <Image src={category.iconImage} alt="" width={64} height={64} className="h-16 w-16 object-contain" />
               </span>
-              <span
-                className={cn(
-                  'whitespace-nowrap transition-colors md:text-sm',
-                  isActive ? 'font-bold text-[#825500]' : 'font-medium text-gray-600 group-hover:text-[#825500]'
-                )}
-              >
-                {item.name}
+              <span className="text-sm font-bold whitespace-nowrap text-gray-600 transition-colors group-hover:text-[#825500]">
+                {category.name}
               </span>
             </Button>
           )
