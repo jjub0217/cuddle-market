@@ -72,7 +72,7 @@ export function ProductsSection({
   return (
     <section role="tabpanel" id={`panel-${activeTabCode}`} aria-labelledby={activeTab} className="flex flex-col gap-2">
       {/* 탭 + 토글 + 정렬 */}
-      <div className="flex flex-col justify-between gap-4 border-b border-[#d4c4b2] pb-2 md:flex-row md:items-center md:pt-15">
+      <div className="border-outline-variant flex flex-col justify-between gap-4 border-b pb-2 md:flex-row md:items-center md:pt-15">
         <Tabs
           tabs={PRODUCT_TYPE_TABS}
           activeTab={activeTab}
@@ -96,7 +96,7 @@ export function ProductsSection({
             <span className="text-sm font-bold text-gray-600 group-hover:text-[#825500]">판매중만 보기</span>
           </label>
 
-          <div className="hidden h-4 w-px bg-[#d4c4b2]/60 md:block" />
+          <div className="bg-outline-variant/60 hidden h-4 w-px md:block" />
 
           {/* 모바일: SelectDropdown — 공간 효율 + 프로젝트 컨벤션 일치 */}
           <div className="w-32 md:hidden">
@@ -127,7 +127,7 @@ export function ProductsSection({
                   >
                     {sort.label}
                   </Button>
-                  {idx < SORT_TYPE.length - 1 ? <span className="h-3 w-px bg-[#d4c4b2]/60" /> : null}
+                  {idx < SORT_TYPE.length - 1 ? <span className="bg-outline-variant/60 h-3 w-px" /> : null}
                 </span>
               )
             })}

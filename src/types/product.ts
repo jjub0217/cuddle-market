@@ -47,6 +47,8 @@ export interface ProductDetailItem extends Product {
     sellerId: number
     sellerNickname: string
     sellerProfileImageUrl: string
+    addressSido: string | null
+    addressGugun: string | null
   }
   sellerOtherProducts: Product[]
 }

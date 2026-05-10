@@ -91,3 +91,10 @@ input[type='date']::-webkit-calendar-picker-indicator {
   animation-fill-mode: forwards;
   animation-duration: var(--toast-duration, 4500ms);
 }
+
+/* 상품 상세 페이지 이미지 Swiper - 기본 navigation SVG 숨김 (Lucide 아이콘으로 대체) */
+.swiper-detail-image .swiper-button-prev,
+.swiper-detail-image .swiper-button-next {
+  display: none;
+}
+

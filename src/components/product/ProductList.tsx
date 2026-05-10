@@ -11,9 +11,10 @@ interface ProductListProps {
   products: Product[]
   showMoreButton?: boolean
   sellerId?: number
+  hideProductType?: boolean
 }
 
-export default function ProductList({ products, showMoreButton = false, sellerId }: ProductListProps) {
+export default function ProductList({ products, showMoreButton = false, sellerId, hideProductType }: ProductListProps) {
   const { isLogin, setRedirectUrl } = useUserStore()
   const { openLoginModal } = useLoginModalStore()
   const router = useRouter()
@@ -32,7 +33,7 @@ export default function ProductList({ products, showMoreButton = false, sellerId
     >
       {products.map((product, index) => (
         <li key={product.id}>
-          <ProductCard data-index={index} data={product} />
+          <ProductCard data-index={index} data={product} hideProductType={hideProductType} />
         </li>
       ))}
       {showMoreButton && sellerId && products.length >= 4 ? (
