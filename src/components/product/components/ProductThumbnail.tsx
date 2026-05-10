@@ -69,7 +69,7 @@ export function ProductThumbnail({
   return (
     <div
       className={cn(
-        'relative overflow-hidden bg-[#f6efe2]',
+        'bg-chip-surface relative overflow-hidden',
         vertical ? 'flex-none pb-[75%]' : 'flex-2 pb-[35%] md:flex-none md:pb-[75%]'
       )}
     >

@@ -80,7 +80,7 @@ export function PetTypeFilter({ activeTab, selectedDetailPet, onTabChange }: Pet
                 'cursor-pointer rounded-full border px-3 py-1 text-xs font-medium whitespace-nowrap transition-all',
                 isActive
                   ? 'border-[#825500] bg-[#825500] text-white shadow-sm'
-                  : 'border-[#d4c4b2] bg-white text-gray-600 hover:border-[#825500] hover:text-[#825500]'
+                  : 'border-outline-variant bg-white text-gray-600 hover:border-[#825500] hover:text-[#825500]'
               )}
             >
               {pet.name}

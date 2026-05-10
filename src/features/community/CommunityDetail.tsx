@@ -19,15 +19,13 @@ import ProfileAvatar from '@/components/commons/ProfileAvatar'
 import { useForm, useWatch } from 'react-hook-form'
 import type { CommentPostRequestData, CommunityDetailItem, Comment } from '@/types'
 import { useEffect, useRef, useState } from 'react'
-import { MessageSquareText, EllipsisVertical } from 'lucide-react'
+import { MessageSquareText } from 'lucide-react'
 const PostReportModal = dynamic(() => import('@/components/modal/PostReportModal'))
 const DeletePostConfirmModal = dynamic(() => import('@/components/modal/DeletePostConfirmModal'))
 import { useUserStore } from '@/store/userStore'
 import { useLoginModalStore } from '@/store/modalStore'
-import IconButton from '@/components/commons/button/IconButton'
 import { AnimatePresence } from 'framer-motion'
 import InlineNotification from '@/components/commons/InlineNotification'
-import { useOutsideClick } from '@/hooks/useOutsideClick'
 
 interface CommunityDetailProps {
   initialPostData?: CommunityDetailItem
@@ -49,14 +47,11 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
   const openLoginModal = useLoginModalStore((state) => state.openLoginModal)
   const pathname = usePathname()
   const searchParamsHook = useSearchParams()
-  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false)
   const [isReportModalOpen, setIsReportModalOpen] = useState(false)
   const [isPostDeleteModalOpen, setIsPostDeleteModalOpen] = useState(false)
   const [postDeleteError, setIsPostDeleteError] = useState<React.ReactNode | null>(null)
   const [commentPostError, setCommentPostError] = useState<React.ReactNode | null>(null)
   const mobileInputRef = useRef<HTMLTextAreaElement>(null)
-  const modalRef = useRef<HTMLDivElement>(null)
-  useOutsideClick(isMoreMenuOpen, [modalRef], () => setIsMoreMenuOpen(false))
 
   const router = useRouter()
   const queryClient = useQueryClient()
@@ -121,10 +116,6 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
       )
     }
   }
-  const handleMoreToggle = () => {
-    setIsMoreMenuOpen((prev) => !prev)
-  }
-
   const handlePostEdit = (postId: number) => {
     router.push(`/community/${postId}/edit`)
   }
@@ -166,91 +157,80 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
 
   return (
     <>
-      <div className="min-h-screen bg-[#F3F4F6] pt-5 pb-16 md:pb-0">
+      <div className="min-h-screen bg-white pt-8 pb-16 md:pb-0">
         <div className="px-lg pb-4xl mx-auto max-w-7xl">
           <div className="flex flex-col justify-center gap-3.5">
-            <div className="flex flex-col gap-3.5 rounded-lg border border-gray-400 bg-white px-4 py-5 shadow-xl md:px-6">
-              <div className="relative flex items-center justify-between">
-                <Badge className="bg-primary-400 w-fit rounded-full text-xs text-white md:font-semibold">
-                  {getBoardType(data.boardType as 'QUESTION' | 'INFO')}
-                </Badge>
-                <IconButton aria-label="더보기" className="" size="sm" onClick={handleMoreToggle}>
-                  <EllipsisVertical size={16} className="text-gray-500" />
-                </IconButton>
-                {isMoreMenuOpen ? (
-                  <div
-                    className="absolute top-7 right-0 flex flex-col rounded border border-gray-200 bg-white shadow-md md:min-w-14"
-                    ref={modalRef}
-                  >
-                    {user?.id === data?.authorId ? (
-                      <>
-                        <button
-                          className="cursor-pointer px-3 py-1.5 text-sm whitespace-nowrap hover:bg-gray-50"
-                          type="button"
-                          onClick={() => {
-                            setIsMoreMenuOpen(false)
-                            handlePostEdit(Number(id))
-                          }}
-                        >
-                          수정
-                        </button>
-                        <button
-                          className="cursor-pointer px-3 py-1.5 text-sm whitespace-nowrap hover:bg-gray-50"
-                          type="button"
-                          onClick={() => {
-                            setIsMoreMenuOpen(false)
-                            setIsPostDeleteModalOpen(true)
-                          }}
-                        >
-                          삭제
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        className="cursor-pointer px-3 py-1.5 text-sm whitespace-nowrap hover:bg-gray-50"
-                        type="button"
-                        onClick={() => {
-                          setIsMoreMenuOpen(false)
-                          if (!user) {
-                            openLoginModal()
-                          } else {
-                            setIsReportModalOpen(true)
-                          }
-                        }}
-                      >
-                        신고하기
-                      </button>
-                    )}
-                  </div>
-                ) : null}
-              </div>
-              <div className="flex items-end justify-between">
+            <div className="flex flex-col gap-3.5 rounded-lg py-5">
+              <Badge className="bg-primary-400 w-fit rounded-full text-xs text-white md:font-semibold">
+                {getBoardType(data.boardType as 'QUESTION' | 'INFO')}
+              </Badge>
+              <h1 className="text-2xl leading-snug font-bold">{data.title}</h1>
+              <div className="border-outline-variant/40 flex items-end justify-between border-b pb-4">
                 <div className="flex items-center gap-3.5">
                   <ProfileAvatar
                     imageUrl={data.authorProfileImageUrl}
                     nickname={data.authorNickname}
                     size="lg"
-                    className="h-10 w-10 md:h-12 md:w-12"
+                    className="h-10 w-10 md:h-10 md:w-10"
                   />
                   {/* 유저 정보 */}
-                  <div className="flex flex-col justify-center gap-0.5">
-                    <p className="text-sm font-semibold md:text-base">{data.authorNickname}</p>
-                    <p className="text-xs text-gray-500 md:text-sm">{getTimeAgo(data.createdAt)}</p>
+                  <div className="flex flex-col gap-2">
+                    <p className="text-sm leading-none font-medium md:text-base">{data.authorNickname}</p>
+                    <div className="flex items-center gap-1">
+                      <p className="text-xs leading-none text-gray-500">{getTimeAgo(data.createdAt)}</p>
+                      <span aria-hidden="true" className="text-xs">
+                        ·
+                      </span>
+                      <p className="text-xs leading-none text-gray-500">조회 {data.viewCount}</p>
+                    </div>
                   </div>
                 </div>
-                <p className="text-xs text-gray-500 md:text-sm">조회 {data.viewCount}</p>
+                <div className="flex items-center gap-1">
+                  {user?.id === data?.authorId ? (
+                    <>
+                      <button
+                        className="text-primary-container cursor-pointer text-xs font-medium hover:underline"
+                        type="button"
+                        onClick={() => handlePostEdit(Number(id))}
+                      >
+                        수정
+                      </button>
+                      <span aria-hidden="true" className="text-xs">
+                        ·
+                      </span>
+                      <button
+                        className="text-primary-container cursor-pointer text-xs font-medium hover:underline"
+                        type="button"
+                        onClick={() => setIsPostDeleteModalOpen(true)}
+                      >
+                        삭제
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      className="cursor-pointer text-xs font-medium text-gray-500 hover:underline"
+                      type="button"
+                      onClick={() => {
+                        if (!user) {
+                          openLoginModal()
+                        } else {
+                          setIsReportModalOpen(true)
+                        }
+                      }}
+                    >
+                      신고하기
+                    </button>
+                  )}
+                </div>
               </div>
-              <h1 className="text-lg leading-snug font-bold">{data.title}</h1>
+              {/* <h1 className="text-lg leading-snug font-bold">{data.title}</h1> */}
               <MdPreview value={data.content} className="p-0" />
             </div>
 
-            <section
-              aria-label="댓글"
-              className="flex flex-col gap-3.5 rounded-lg border border-gray-400 bg-white px-3 py-5 shadow-xl md:px-6"
-            >
-              <div className="flex items-center gap-1 text-sm font-semibold text-gray-500">
+            <section aria-label="댓글" className="flex flex-col gap-3.5 py-5">
+              <div className="text-md flex items-center gap-1 font-semibold">
                 <span>댓글</span>
-                <span className="font-normal">{data.commentCount}</span>
+                <span className="text-primary-container font-semibold">{data.commentCount}</span>
               </div>
 
               {commentData?.comments && commentData.comments.length > 0 ? (
@@ -290,10 +270,13 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
               </div>
             </section>
 
-            {/* 모바일용 댓글 입력: 하단 고정 */}
+            {/* 모바일용 댓글 입력: BottomNav(h-14 + iOS safe-area) 바로 위에 고정 */}
             <div
-              className="fixed right-0 bottom-0 left-0 border-t border-gray-200 bg-white px-3 py-2 md:hidden"
-              style={{ zIndex: 30 }}
+              className="fixed right-0 left-0 border-t border-gray-200 bg-white px-3 py-2 md:hidden"
+              style={{
+                bottom: 'calc(3.5rem + env(safe-area-inset-bottom))',
+                zIndex: 30,
+              }}
             >
               <CommentForm
                 id="comment-input-mobile"
