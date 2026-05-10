@@ -1,19 +1,52 @@
 'use client'
 
+import { Search } from 'lucide-react'
+
+const XL_BREAKPOINT = '(min-width: 1280px)'
+const MOBILE_ACCORDION_OPEN_DELAY_MS = 320
+
+function focusHeaderSearch() {
+  const isXl = window.matchMedia(XL_BREAKPOINT).matches
+  if (isXl) {
+    document.getElementById('search-desktop')?.focus()
+    return
+  }
+  window.dispatchEvent(new CustomEvent('cuddle:open-search'))
+  window.setTimeout(() => {
+    document.getElementById('search-mobile')?.focus()
+  }, MOBILE_ACCORDION_OPEN_DELAY_MS)
+}
+
 export default function HomeHero() {
   return (
-    <section
-      aria-label="히어로"
-      className="relative h-130 w-full overflow-hidden md:h-162.5"
-      style={{ backgroundColor: '#e2cbb2' }}
-    >
-      <div className="pointer-events-none absolute inset-0 flex items-end justify-center">
+    <section aria-label="히어로" className="relative h-100 w-full bg-[#e3c19b] md:h-100">
+      <div className="relative mx-auto h-full xl:max-w-7xl xl:px-3.5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           alt="반려동물과 함께하는 따뜻한 마켓"
-          src="https://lh3.googleusercontent.com/aida-public/AB6AXuDxuIgWc6PX7n6vl_OVSBIn92DU2D7zwOVChB9mNdgVh-eKQln4K4hdS2e0bKV7TE-QvJ55mbChSzWsvS6S56fri1iH9jGIPNYog400flI7tXFX3_SOM4F6o3avX-LVPv0FgXnNISCGnA3-pJ0_BNIRWfh6FJvqPTHldSAXHYRmTLO8F-Dr_REELfi_jH2X2PjvHtPNWI8zN2m8_0wuwciJ8P2WQN4N972ETvicm7qrvxLkuZwZM0U0wtm20SC-7Z3bsd8Emu8q1E5H"
-          className="h-full w-full object-cover object-bottom"
+          src="/images/1800.webp"
+          className="pointer-events-none absolute bottom-0 left-4 z-10 h-97.5 w-auto translate-y-[29.5%] md:h-90 xl:left-3.5"
         />
+        <div className="absolute top-[15%] z-20 flex h-full flex-col px-4 pt-8 text-[#633f00] md:justify-center md:pt-0 md:pl-[52%] xl:pl-[40%]">
+          <h1 className="text-xl leading-tight font-bold md:text-3xl xl:text-4xl">
+            우리 동네 반려인들과 함께하는
+            <br />
+            가장 따뜻한 중고 마켓
+          </h1>
+          <p className="mt-3 text-xs leading-relaxed md:text-sm xl:text-base">
+            내 주변 이웃과 함께하는 Cuddle Market에서
+            <br />
+            믿을 수 있는 중고 거래를 시작해보세요.
+          </p>
+          <button
+            type="button"
+            onClick={focusHeaderSearch}
+            className="mt-5 inline-flex w-fit cursor-pointer items-center gap-2 rounded-full bg-[#825500] px-5 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#633f00] md:text-base"
+          >
+            <Search className="h-4 w-4" />
+            검색하러 가기
+          </button>
+        </div>
       </div>
     </section>
   )
