@@ -12,6 +12,7 @@ import { fetchGraphQL } from '@/lib/api/graphql'
 import { cn } from '@/lib/utils/cn'
 import { useEffect, useMemo, useState } from 'react'
 import TradeInfoSection from './tradeInfoSection/TradeInfoSection'
+import Spinner from '@/components/commons/spinner/Spinner'
 import { IMAGE_PROCESSING_DELAY } from '@/constants/constants'
 
 export interface ProductPostFormValues {
@@ -136,7 +137,7 @@ export function ProductPostForm({ isEditMode, productId: id, initialData }: Prod
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
+          <Spinner size="md" />
           <p className="text-gray-600">상품을 {isEditMode ? '수정' : '등록'}하고 있습니다...</p>
         </div>
       </div>

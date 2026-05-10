@@ -15,6 +15,7 @@ const WithdrawModal = dynamic(() => import('@/components/modal/WithdrawModal'))
 import ProfileData from '@/components/profile/ProfileData'
 import { AnimatePresence } from 'framer-motion'
 import InlineNotification from '@/components/commons/InlineNotification'
+import Spinner from '@/components/commons/spinner/Spinner'
 
 function MyPage() {
   const [deleteError, setDeleteError] = useState<React.ReactNode | null>(null)
@@ -240,7 +241,7 @@ function MyPage() {
   if ((isLoadingMyData && !myData) || (isLoadingMyProductData && !myProductsData)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
+        <Spinner size="md" />
       </div>
     )
   }

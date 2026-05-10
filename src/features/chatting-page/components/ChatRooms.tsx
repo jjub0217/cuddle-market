@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils/cn'
 import { chatSocketStore } from '@/store/chatSocketStore'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import { Z_INDEX } from '@/constants/ui'
+import Spinner from '@/components/commons/spinner/Spinner'
 
 interface ChatRoomsProps {
   rooms: fetchChatRoom[]
@@ -105,11 +106,7 @@ export function ChatRooms({
         <div ref={targetRef} className="h-10" aria-hidden="true" />
         {isFetchingNextPage ? (
           <div className="flex items-center justify-center py-8">
-            <div
-              className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"
-              aria-label="채팅방 로딩 중"
-              role="status"
-            />
+            <Spinner size="md" label="채팅방 로딩 중" />
           </div>
         ) : null}
       </div>

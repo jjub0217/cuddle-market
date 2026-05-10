@@ -8,6 +8,7 @@ import { useUserStore } from '@/store/userStore'
 import { IMAGE_SIZES, imageLoader, toResizedWebpUrl, PLACEHOLDER_IMAGES } from '@/lib/utils/imageUrl'
 import { AnimatePresence } from 'framer-motion'
 import InlineNotification from '@/components/commons/InlineNotification'
+import Spinner from '@/components/commons/spinner/Spinner'
 
 interface ChatLogProps {
   isLoadingMessages: boolean
@@ -145,11 +146,7 @@ export function ChatLog({
     return (
       <div className="px-lg py-md tablet:py-xl mx-auto max-w-7xl">
         <div className="flex items-center justify-center py-20">
-          <div
-            className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"
-            role="status"
-            aria-label="상품 로딩 중"
-          ></div>
+          <Spinner size="md" label="상품 로딩 중" />
         </div>
       </div>
     )

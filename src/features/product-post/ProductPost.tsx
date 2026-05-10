@@ -12,6 +12,7 @@ import type { ProductDetailItem } from '@/types'
 import { useUserStore } from '@/store/userStore'
 import { ArrowLeft } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
+import Spinner from '@/components/commons/spinner/Spinner'
 import { Z_INDEX } from '@/constants/ui'
 
 function ProductPost() {
@@ -79,7 +80,7 @@ function ProductPost() {
   if (isEditMode && !productData) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" />
+        <Spinner size="md" />
       </div>
     )
   }

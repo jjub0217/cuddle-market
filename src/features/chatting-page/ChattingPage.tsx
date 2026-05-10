@@ -16,6 +16,7 @@ import ChatInput from './components/ChatInput'
 import { uploadImage } from '@/lib/api/products'
 import { cn } from '@/lib/utils/cn'
 import { Z_INDEX } from '@/constants/ui'
+import Spinner from '@/components/commons/spinner/Spinner'
 import imageCompression from 'browser-image-compression'
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:8080/ws-stomp'
@@ -211,7 +212,7 @@ export default function ChattingPage() {
   if (isLoadingRooms && !rooms) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
+        <Spinner size="md" />
       </div>
     )
   }

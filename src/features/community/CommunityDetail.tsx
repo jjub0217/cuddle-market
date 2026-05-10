@@ -26,6 +26,7 @@ import { useUserStore } from '@/store/userStore'
 import { useLoginModalStore } from '@/store/modalStore'
 import { AnimatePresence } from 'framer-motion'
 import InlineNotification from '@/components/commons/InlineNotification'
+import Spinner from '@/components/commons/spinner/Spinner'
 
 interface CommunityDetailProps {
   initialPostData?: CommunityDetailItem
@@ -137,7 +138,7 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
   if (isLoadingCommunityData || isLoadingCommentData) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
+        <Spinner size="md" />
       </div>
     )
   }
