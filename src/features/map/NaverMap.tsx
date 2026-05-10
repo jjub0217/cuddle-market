@@ -78,7 +78,10 @@ export default function NaverMap() {
   const setNeedsSearch = useMapStore((s) => s.setNeedsSearch)
 
   const createMarkerIcon = useCallback((isRecommended: boolean) => {
-    const color = isRecommended ? '#FF6F0F' : '#3B82F6'
+    // 디자인 토큰과 동기화 (src/styles/tokens.colors.css):
+    // #825500 = --color-primary-container (메인 브랜드, 추천 강조)
+    // #d9ac2c = --color-badge-yellow (밝은 골드, 일반 마커)
+    const color = isRecommended ? '#825500' : '#d9ac2c'
     return {
       content: `<div style="width:28px;height:28px;border-radius:50%;background:${color};border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);cursor:pointer;"></div>`,
       anchor: new naver.maps.Point(14, 14),

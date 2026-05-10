@@ -38,14 +38,14 @@ export default function PlaceDetailSlideCard() {
               </button>
             </div>
 
-            {selectedPlace.detail && (
+            {(selectedPlace.detail?.is24Hours || selectedPlace.detail?.isEmergencyAvailable) && (
               <div className="mt-2 flex flex-wrap gap-1.5">
-                {selectedPlace.detail.is24Hours && (
+                {selectedPlace.detail?.is24Hours && (
                   <span className="bg-badge-blue-container text-badge-blue rounded-full px-2 py-0.5 text-xs">
                     24시간
                   </span>
                 )}
-                {selectedPlace.detail.isEmergencyAvailable && (
+                {selectedPlace.detail?.isEmergencyAvailable && (
                   <span className="bg-badge-red-container text-badge-red rounded-full px-2 py-0.5 text-xs">
                     응급진료
                   </span>

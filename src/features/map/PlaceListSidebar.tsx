@@ -1,7 +1,8 @@
 'use client'
 
 import { useMapStore } from '@/store/mapStore'
-import { CATEGORIES, HOSPITAL_FILTERS, ANIMAL_TYPE_LABELS } from '@/constants/map'
+import { CATEGORIES, HOSPITAL_FILTERS } from '@/constants/map'
+// import { ANIMAL_TYPE_LABELS } from '@/constants/map'  // TODO: 특수동물 진료 데이터 추가 시 활성화
 import { getPlaceDetail } from '@/lib/api/places'
 import { FiStar } from 'react-icons/fi'
 
@@ -135,9 +136,10 @@ export default function PlaceListSidebar() {
             const tags: string[] = []
             if (place.detail?.is24Hours) tags.push('24시간 진료')
             if (place.detail?.isEmergencyAvailable) tags.push('응급 진료')
-            place.detail?.animalTypes.forEach((type) => {
-              tags.push(ANIMAL_TYPE_LABELS[type] ?? type)
-            })
+            // TODO: 특수동물 진료 데이터 추가 시 활성화
+            // place.detail?.animalTypes.forEach((type) => {
+            //   tags.push(ANIMAL_TYPE_LABELS[type] ?? type)
+            // })
 
             const isSelected = selectedPlace?.id === place.id
 
