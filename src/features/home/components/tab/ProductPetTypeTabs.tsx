@@ -52,7 +52,7 @@ export function ProductPetTypeTabs({ activeTab, onTabChange }: ProductPetTypeTab
               size="sm"
               onClick={() => onTabChange(tab.id)}
               className={cn(
-                '-mb-px cursor-pointer rounded-none border-b-2 px-6 py-3 whitespace-nowrap md:px-8 md:text-base',
+                '-mb-px cursor-pointer rounded-none border-b-2 px-3 py-3 whitespace-nowrap md:px-3',
                 isActive
                   ? 'border-[#825500] font-bold text-[#825500]'
                   : 'border-transparent font-medium text-gray-500 hover:text-[#825500]'

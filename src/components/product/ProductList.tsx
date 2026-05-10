@@ -27,7 +27,9 @@ export default function ProductList({ products, showMoreButton = false, sellerId
     router.push(`/user-profile/${sellerId}`)
   }
   return (
-    <ul className={cn('grid grid-cols-1 gap-4 md:grid-cols-4 lg:grid-cols-5', showMoreButton && sellerId && 'items-center')}>
+    <ul
+      className={cn('grid grid-cols-1 gap-4 md:grid-cols-4 md:pt-5 lg:grid-cols-5', showMoreButton && sellerId && 'items-center')}
+    >
       {products.map((product, index) => (
         <li key={product.id}>
           <ProductCard data-index={index} data={product} />

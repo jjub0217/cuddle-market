@@ -22,10 +22,7 @@ interface TabsProps {
   variant?: TabsVariant
 }
 
-const VARIANT_STYLES: Record<
-  TabsVariant,
-  { container: string; tab: string; tabActive: string; tabInactive: string }
-> = {
+const VARIANT_STYLES: Record<TabsVariant, { container: string; tab: string; tabActive: string; tabInactive: string }> = {
   default: {
     container: 'flex w-fit gap-1 md:gap-2.5',
     tab: 'bg-primary-100 flex-1 cursor-pointer rounded-full px-4 py-2 text-sm whitespace-nowrap md:text-base xl:rounded-2xl xl:bg-white',
@@ -34,20 +31,13 @@ const VARIANT_STYLES: Record<
   },
   'card-pill': {
     container: 'flex flex-wrap items-center gap-2',
-    tab: 'cursor-pointer rounded-full px-6 py-2.5 font-bold whitespace-nowrap transition-all md:px-8 md:text-base',
+    tab: 'cursor-pointer rounded-full px-5 py-1.5 text-sm  whitespace-nowrap transition-all',
     tabActive: 'bg-[#825500] text-white shadow-sm',
     tabInactive: 'border border-[#d4c4b2] bg-white text-gray-600 hover:border-[#825500] hover:text-[#825500]',
   },
 }
 
-export default function Tabs({
-  tabs,
-  activeTab,
-  onTabChange,
-  ariaLabel,
-  excludeTabId,
-  variant = 'default',
-}: TabsProps) {
+export default function Tabs({ tabs, activeTab, onTabChange, ariaLabel, excludeTabId, variant = 'default' }: TabsProps) {
   const filteredTabs = excludeTabId ? tabs.filter((tab) => tab.id !== excludeTabId) : tabs
   const isMd = useMediaQuery('(min-width: 768px)')
 

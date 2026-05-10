@@ -42,7 +42,7 @@ export const DetailFilter = memo(function DetailFilterSection({
           id={FILTER_CONTENT_ID}
           role="group"
           aria-label="세부 필터 옵션"
-          className="relative rounded-3xl border border-[#d4c4b2] bg-white px-6 py-6 shadow-sm md:px-10 md:py-8"
+          className="relative rounded-3xl border border-[#d4c4b2] bg-white px-6 py-6 shadow-sm md:px-6 md:py-5"
         >
           {/* 데스크탑 필터 초기화 (카드 우상단 액션) */}
           <Button
@@ -50,7 +50,7 @@ export const DetailFilter = memo(function DetailFilterSection({
             variant="link"
             size="sm"
             onClick={filterReset}
-            className="absolute top-6 right-6 hidden cursor-pointer items-center gap-1 p-0 text-xs font-medium text-gray-500 hover:text-[#825500] hover:no-underline md:flex md:top-8 md:right-10"
+            className="absolute top-6 right-6 hidden cursor-pointer items-center gap-1 p-0 text-xs font-medium text-gray-500 hover:text-[#825500] hover:no-underline md:top-4 md:right-6 md:flex"
           >
             <RotateCcw size={12} aria-hidden="true" />
             필터 초기화
@@ -63,11 +63,7 @@ export const DetailFilter = memo(function DetailFilterSection({
               selectedProductStatus={selectedProductStatus}
               headingClassName={SECTION_HEADING_CLASS}
             />
-            <PriceFilter
-              variant="card-chip"
-              selectedPriceRange={selectedPriceRange}
-              headingClassName={SECTION_HEADING_CLASS}
-            />
+            <PriceFilter variant="card-chip" selectedPriceRange={selectedPriceRange} headingClassName={SECTION_HEADING_CLASS} />
             <LocationFilter variant="card-chip" headingClassName={SECTION_HEADING_CLASS} />
           </div>
         </div>

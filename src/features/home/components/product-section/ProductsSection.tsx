@@ -18,7 +18,7 @@ interface ProductListHeaderProps {
 function ProductListHeader({ totalElements }: ProductListHeaderProps) {
   return (
     <p className="text-sm text-gray-500" aria-live="polite">
-      {`총 ${totalElements}개의 상품`}
+      {`전체 ${totalElements}개`}
     </p>
   )
 }
@@ -70,9 +70,9 @@ export function ProductsSection({
   }, [products, onlyOnSale])
 
   return (
-    <section role="tabpanel" id={`panel-${activeTabCode}`} aria-labelledby={activeTab} className="flex flex-col gap-6">
+    <section role="tabpanel" id={`panel-${activeTabCode}`} aria-labelledby={activeTab} className="flex flex-col gap-2">
       {/* 탭 + 토글 + 정렬 */}
-      <div className="flex flex-col justify-between gap-4 border-b border-[#d4c4b2] pb-5 md:flex-row md:items-center">
+      <div className="flex flex-col justify-between gap-4 border-b border-[#d4c4b2] pb-2 md:flex-row md:items-center md:pt-15">
         <Tabs
           tabs={PRODUCT_TYPE_TABS}
           activeTab={activeTab}
@@ -81,7 +81,7 @@ export function ProductsSection({
           variant="card-pill"
         />
 
-        <div className="flex flex-wrap items-center gap-4 md:gap-6">
+        <div className="flex flex-wrap items-center gap-4 md:gap-3">
           <label className="group flex cursor-pointer items-center gap-2.5">
             <span className="relative inline-block">
               <input
@@ -90,8 +90,8 @@ export function ProductsSection({
                 onChange={(e) => setOnlyOnSale(e.target.checked)}
                 className="peer sr-only"
               />
-              <span className="block h-6 w-11 rounded-full bg-gray-200 transition-colors peer-checked:bg-[#825500]"></span>
-              <span className="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform peer-checked:translate-x-5"></span>
+              <span className="block h-4 w-7 rounded-full bg-gray-200 transition-colors peer-checked:bg-[#825500]"></span>
+              <span className="absolute top-0.5 left-0.5 h-3 w-3 rounded-full bg-white transition-transform peer-checked:translate-x-5"></span>
             </span>
             <span className="text-sm font-bold text-gray-600 group-hover:text-[#825500]">판매중만 보기</span>
           </label>
@@ -110,18 +110,18 @@ export function ProductsSection({
           </div>
 
           {/* 데스크탑: 인라인 옵션 리스트 */}
-          <div className="hidden items-center gap-3 md:flex">
+          <div className="hidden items-center gap-2 md:flex">
             {SORT_TYPE.map((sort, idx) => {
               const isActive = selectedSort === sort.label
               return (
-                <span key={sort.id} className="flex items-center gap-3">
+                <span key={sort.id} className="flex items-center gap-2">
                   <Button
                     type="button"
                     variant="link"
                     size="sm"
                     onClick={() => handleSortChange(sort.label)}
                     className={cn(
-                      'cursor-pointer whitespace-nowrap p-0 hover:no-underline',
+                      'cursor-pointer p-0 text-sm whitespace-nowrap hover:no-underline',
                       isActive ? 'font-bold text-[#825500]' : 'font-medium text-gray-500 hover:text-[#825500]'
                     )}
                   >

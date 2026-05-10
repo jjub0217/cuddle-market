@@ -46,8 +46,7 @@ export function ProductThumbnail({
     return tradeStatus || ''
   }
   const displayTradeStatus = getDisplayTradeStatus()
-  const isOverlayShown =
-    tradeStatus === '예약중' || tradeStatus === '판매완료' || displayTradeStatus === '요청완료'
+  const isOverlayShown = tradeStatus === '예약중' || tradeStatus === '판매완료' || displayTradeStatus === '요청완료'
   const overlayBg = tradeStatus === '예약중' ? 'bg-black/40' : 'bg-black/60'
 
   const getSrc = () => {
@@ -104,14 +103,14 @@ export function ProductThumbnail({
         size="sm"
         icon={Heart}
         iconProps={{
-          size: 18,
+          size: 16,
           strokeWidth: 2,
           className: cn(isFavorite ? 'fill-[#fc8181] stroke-[#fc8181]' : 'fill-none stroke-gray-600'),
           'aria-hidden': true,
         }}
         onClick={handleHeartClick}
         aria-label={isFavorite ? '찜 해제' : '찜하기'}
-        className="pointer-events-auto absolute top-2 right-2 z-20 h-8 w-8 cursor-pointer rounded-full bg-white/90 p-0 shadow-sm backdrop-blur-md transition-all hover:bg-white md:top-3 md:right-3 md:h-9 md:w-9"
+        className="pointer-events-auto absolute top-2 right-2 z-20 h-8 w-8 cursor-pointer rounded-full bg-white/90 p-0 shadow-sm backdrop-blur-md transition-all hover:bg-white md:top-3 md:right-3 md:h-7 md:w-7"
       />
     </div>
   )

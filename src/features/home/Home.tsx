@@ -215,15 +215,15 @@ function Home() {
     <>
       <HomeHero />
       <div className="bg-white">
-        <div className="mx-auto max-w-[1280px] px-6 pt-12 pb-24 md:px-8 md:pt-16">
+        <div className="mx-auto max-w-[1280px] px-6 pt-12 pb-24 md:px-8 md:pt-18">
           <h1 className="sr-only">커들마켓</h1>
-          <div className="flex flex-col gap-10">
+          <div className="flex flex-col gap-6">
             {/* Pet category & filters section */}
-            <section aria-label="상품 필터" className="flex flex-col gap-6" data-nosnippet>
+            <section aria-label="상품 필터" className="flex flex-col gap-3" data-nosnippet>
               <div className="flex flex-col gap-1">
-                <h2 className="text-md flex flex-wrap items-center gap-2 font-medium text-gray-900">
+                <h2 className="flex flex-wrap items-center gap-2 text-sm font-medium text-gray-900">
                   우리 아이 맞춤 검색
-                  <span className="text-sm font-normal text-[#825500]/70">어떤 아이와 함께하시나요?</span>
+                  <span className="text-xs font-normal text-[#825500]/70">어떤 아이와 함께하시나요?</span>
                 </h2>
               </div>
               <PetTypeFilter
@@ -247,7 +247,7 @@ function Home() {
 
             {/* Product list section */}
             <section aria-label="상품 목록" className="flex flex-col gap-6">
-              <h2 className="heading-h3 text-gray-900">상품 목록</h2>
+              {/* <h2 className="heading-h4 text-gray-900">상품 목록</h2> */}
               {isLoading && allProducts.length === 0 ? (
                 <HomeSkeleton />
               ) : (
