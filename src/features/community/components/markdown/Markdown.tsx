@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, type DragEvent, type ClipboardEvent, type ChangeEvent } from 'react'
+import { useRef, type DragEvent, type ClipboardEvent, type ChangeEvent } from 'react'
 import { useMdCommands } from './useMdCommands'
 import { useMdImageUpload } from './useMdImageUpload'
 import MdToolbar from './MdToolbar'
@@ -10,27 +10,19 @@ const MdPreview = dynamic(() => import('./MdPreview'), {
   ssr: false,
   loading: () => <div className="p-3 text-sm text-gray-400">로딩 중...</div>,
 })
-import MdFooter from './MdFooter'
-
 interface MarkDownProps {
   value: string // 현재 마크다운 텍스트
   onChange: (value: string) => void // 텍스트 변경 콜백
   placeholder?: string // 빈 상태일 때 표시할 텍스트
   height?: number // textarea 높이 (픽셀)
+  tab: 'edit' | 'preview' // 외부 제어 탭 상태
 }
 
 const DEFAULT_PLACEHOLDER = '내용을 입력하세요'
 
-export default function Markdown({ value, onChange, placeholder = DEFAULT_PLACEHOLDER, height = 282 }: MarkDownProps) {
+export default function Markdown({ value, onChange, placeholder = DEFAULT_PLACEHOLDER, height = 282, tab }: MarkDownProps) {
   // ==========================================
-  // 1. 상태 관리
-  // ==========================================
-
-  // 현재 탭: 'edit'(편집) 또는 'preview'(미리보기)
-  const [currentTab, setCurrentTab] = useState<'edit' | 'preview'>('edit')
-
-  // ==========================================
-  // 2. 마크다운 편집 명령어 훅
+  // 1. 마크다운 편집 명령어 훅
   // ==========================================
 
   const {
@@ -104,11 +96,9 @@ export default function Markdown({ value, onChange, placeholder = DEFAULT_PLACEH
 
   return (
     <div className="w-full">
-      <div className="overflow-hidden rounded-lg border border-gray-400">
+      <div className="overflow-hidden">
         {/* 툴바: 편집/미리보기 탭 + 서식 버튼들 */}
         <MdToolbar
-          tab={currentTab}
-          setTab={setCurrentTab}
           onBold={() => wrapSelectedText('**')} // **텍스트** (굵게)
           onItalic={() => wrapSelectedText('*')} // *텍스트*  (기울임)
           onCode={() => wrapSelectedText('`')} // `텍스트`  (코드)
@@ -122,43 +112,32 @@ export default function Markdown({ value, onChange, placeholder = DEFAULT_PLACEH
         {/* 숨겨진 파일 선택 input */}
         <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
 
-        {/* 편집 모드: textarea */}
-        {currentTab === 'edit' ? (
-          <div className="relative">
-            <textarea
-              ref={textareaRef}
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
-              onPaste={handlePaste}
-              placeholder={placeholder}
-              style={{ height }}
-              className="w-full resize-none bg-white p-3 outline-none"
-              disabled={isUploading}
-            />
-            {isUploading ? (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/70">
-                <span className="text-sm text-gray-500">이미지 업로드 중...</span>
-              </div>
-            ) : null}
-          </div>
-        ) : null}
+        {/* 편집/미리보기 컨테이너 — 고정 높이로 탭 전환 시 흔들림 방지 */}
+        <div style={{ height }} className="relative bg-white">
+          {tab === 'edit' ? (
+            <>
+              <textarea
+                ref={textareaRef}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onPaste={handlePaste}
+                placeholder={placeholder}
+                className="absolute inset-0 box-border h-full w-full resize-none bg-white p-3 outline-none"
+                disabled={isUploading}
+              />
+              {isUploading ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-white/70">
+                  <span className="text-sm text-gray-500">이미지 업로드 중...</span>
+                </div>
+              ) : null}
+            </>
+          ) : (
+            <MdPreview value={value} className="absolute inset-0" />
+          )}
+        </div>
 
-        {/* 미리보기 모드: 렌더링된 마크다운 */}
-        {currentTab === 'preview' ? <MdPreview value={value} height={height} /> : null}
-
-        {/* 푸터: 마크다운 문법 안내 */}
-        <MdFooter>
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span>마크다운 문법을 사용할 수 있습니다.</span>
-            <strong>**굵게**</strong>
-            <em>*기울임*</em>
-            <span>`코드`</span>
-            <span>[링크](URL)</span>
-            <span>## 제목</span>
-          </div>
-        </MdFooter>
       </div>
     </div>
   )

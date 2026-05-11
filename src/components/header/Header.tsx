@@ -158,7 +158,7 @@ export default function Header() {
                     href={ROUTES.HOME}
                     className={cn(
                       'pb-1 text-sm font-bold transition-colors',
-                      isMarketActive ? 'border-b-2 border-[#633f00] text-[#633f00]' : 'text-[#633f00]/70 hover:text-[#633f00]'
+                      isMarketActive ? 'border-b-2 border-primary text-primary' : 'text-primary/70 hover:text-primary'
                     )}
                   >
                     중고거래
@@ -167,7 +167,7 @@ export default function Header() {
                     href={ROUTES.COMMUNITY}
                     className={cn(
                       'pb-1 text-sm font-bold transition-colors',
-                      isCommunityActive ? 'border-b-2 border-[#633f00] text-[#633f00]' : 'text-[#633f00]/70 hover:text-[#633f00]'
+                      isCommunityActive ? 'border-b-2 border-primary text-primary' : 'text-primary/70 hover:text-primary'
                     )}
                   >
                     질문·정보
@@ -176,7 +176,7 @@ export default function Header() {
                     href={ROUTES.MAP}
                     className={cn(
                       'pb-1 text-sm font-bold transition-colors',
-                      isMapActive ? 'border-b-2 border-[#633f00] text-[#633f00]' : 'text-[#633f00]/70 hover:text-[#633f00]'
+                      isMapActive ? 'border-b-2 border-primary text-primary' : 'text-primary/70 hover:text-primary'
                     )}
                   >
                     펫지도
@@ -205,7 +205,7 @@ export default function Header() {
             <div className="flex shrink-0 items-center gap-1 xl:gap-4">
               {!hideSearchBar && !isXl ? (
                 <IconButton aria-label="검색" onClick={() => setIsSearchOpen((prev) => !prev)}>
-                  <Search className="text-[#633f00]" />
+                  <Search className="text-primary" />
                 </IconButton>
               ) : null}
               <UserControls isSideOpen={isSideOpen} setIsSideOpen={setIsSideOpen} hideMenuButton={hideMenuButton} />

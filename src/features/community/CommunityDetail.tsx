@@ -19,7 +19,7 @@ import ProfileAvatar from '@/components/commons/ProfileAvatar'
 import { useForm, useWatch } from 'react-hook-form'
 import type { CommentPostRequestData, CommunityDetailItem, Comment } from '@/types'
 import { useEffect, useRef, useState } from 'react'
-import { MessageSquareText } from 'lucide-react'
+import { ArrowLeft, MessageSquareText } from 'lucide-react'
 const PostReportModal = dynamic(() => import('@/components/modal/PostReportModal'))
 const DeletePostConfirmModal = dynamic(() => import('@/components/modal/DeletePostConfirmModal'))
 import { useUserStore } from '@/store/userStore'
@@ -161,7 +161,15 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
       <div className="min-h-screen bg-white pt-8 pb-16 md:pb-0">
         <div className="px-lg pb-4xl mx-auto max-w-7xl">
           <div className="flex flex-col justify-center gap-3.5">
-            <div className="flex flex-col gap-3.5 rounded-lg py-5">
+            <button
+              type="button"
+              onClick={() => router.push('/community')}
+              className="text-on-surface-muted hover:text-on-surface mb-6 flex w-fit cursor-pointer items-center gap-1.5 text-sm font-semibold transition-colors"
+            >
+              <ArrowLeft size={16} />
+              <span>목록으로 돌아가기</span>
+            </button>
+            <div className="flex flex-col gap-3.5 rounded-lg">
               <Badge className="bg-primary-400 w-fit rounded-full text-xs text-white md:font-semibold">
                 {getBoardType(data.boardType as 'QUESTION' | 'INFO')}
               </Badge>

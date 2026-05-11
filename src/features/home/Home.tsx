@@ -203,7 +203,7 @@ function Home() {
         <div className="flex min-h-100 items-center justify-center bg-white">
           <div className="flex flex-col items-center gap-4">
             <p>상품을 불러올 수 없습니다</p>
-            <Button variant="link" onClick={() => refetch()} className="font-bold text-[#825500] hover:text-[#633f00]">
+            <Button variant="link" onClick={() => refetch()} className="font-bold text-[#825500] hover:text-primary">
               다시 시도
             </Button>
           </div>

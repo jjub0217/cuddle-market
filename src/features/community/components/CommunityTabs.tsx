@@ -37,7 +37,7 @@ export function CommunityTabs({ tabs, activeTab, onTabChange, ariaLabel, exclude
             tabIndex={isActive ? 0 : -1}
             className={cn(
               'cursor-pointer pb-3 text-base font-semibold transition-all md:pb-1',
-              isActive ? 'border-b-2 border-[#633f00] text-[#633f00]' : 'text-[#504537] hover:text-[#633f00]'
+              isActive ? 'border-b-2 border-primary text-primary' : 'text-on-surface-muted hover:text-primary'
             )}
           >
             {tab.label}

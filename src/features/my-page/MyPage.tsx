@@ -6,8 +6,18 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { useMutation, useInfiniteQuery, useQueryClient, useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api/api'
 import Tabs from '@/components/Tabs'
-import { MY_PAGE_TABS, type MyPageTabId } from '@/constants/constants'
+import {
+  MY_PAGE_NAV,
+  MY_PAGE_TABS,
+  STATUS_EN_TO_KO,
+  myPageIconMap,
+  type MyPageNavId,
+  type MyPageTabId,
+  type TransactionStatus,
+} from '@/constants/constants'
 import MyPagePanel from './components/MyPagePanel'
+import MyDashboard from './components/MyDashboard'
+import MyActivityPanel from './components/MyActivityPanel'
 import dynamic from 'next/dynamic'
 import type { WithDrawFormValues } from '@/components/modal/WithdrawModal'
 const DeleteConfirmModal = dynamic(() => import('@/components/modal/DeleteConfirmModal'))
@@ -16,6 +26,28 @@ import ProfileData from '@/components/profile/ProfileData'
 import { AnimatePresence } from 'framer-motion'
 import InlineNotification from '@/components/commons/InlineNotification'
 import Spinner from '@/components/commons/spinner/Spinner'
+import Link from 'next/link'
+import Button from '@/components/commons/button/Button'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
+import { Activity } from 'lucide-react'
+import { cn } from '@/lib/utils/cn'
+
+type TabsVariant = 'default' | 'card-pill'
+
+const VARIANT_STYLES: Record<TabsVariant, { container: string; tab: string; tabActive: string; tabInactive: string }> = {
+  default: {
+    container: 'flex w-fit gap-1 md:gap-2.5',
+    tab: 'bg-primary-100 flex-1 cursor-pointer rounded-full px-4 py-2 text-sm whitespace-nowrap md:text-base xl:rounded-2xl xl:bg-white',
+    tabActive: 'bg-primary-500 xl:bg-primary-300 font-bold text-white',
+    tabInactive: 'hover:bg-primary-500 hover:text-white text-gray-900',
+  },
+  'card-pill': {
+    container: 'flex flex-wrap items-center gap-2',
+    tab: 'cursor-pointer rounded-full px-5 py-1.5 text-sm  whitespace-nowrap transition-all',
+    tabActive: 'bg-[#825500] text-white shadow-sm',
+    tabInactive: 'border border-[#d4c4b2] bg-white text-gray-600 hover:border-[#825500] hover:text-[#825500]',
+  },
+}
 
 function MyPage() {
   const [deleteError, setDeleteError] = useState<React.ReactNode | null>(null)
@@ -29,6 +61,7 @@ function MyPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false)
   const [withdrawError, setWithdrawError] = useState<React.ReactNode | null>(null)
+  const [activeTradeStatus, setActiveTradeStatus] = useState<TransactionStatus | 'ALL'>('ALL')
   const [selectedProduct, setSelectedProduct] = useState<{
     id: number
     title: string
@@ -36,8 +69,11 @@ function MyPage() {
     mainImageUrl: string
   } | null>(null)
   const tabParam = searchParams.get('tab') as MyPageTabId | null
+  const navParam = searchParams.get('nav') as MyPageNavId | null
   const activeMyPageTab = tabParam && MY_PAGE_TABS.some((tab) => tab.id === tabParam) ? tabParam : 'tab-sales'
+  const activeMyPageNav = navParam && MY_PAGE_NAV.some((tab) => tab.id === navParam) ? navParam : 'nav-dash'
   const activeTabCode = MY_PAGE_TABS.find((tab) => tab.id === activeMyPageTab)?.code ?? 'SELL'
+  const isMd = useMediaQuery('(min-width: 768px)')
 
   const {
     data: myData,
@@ -84,7 +120,7 @@ function MyPage() {
     },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
     initialPageParam: 0,
-    enabled: activeMyPageTab === 'tab-purchases',
+    enabled: activeMyPageTab === 'tab-purchases' || activeMyPageNav === 'nav-dash',
   })
 
   const {
@@ -101,7 +137,7 @@ function MyPage() {
     },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
     initialPageParam: 0,
-    enabled: activeMyPageTab === 'tab-wishlist',
+    enabled: activeMyPageTab === 'tab-wishlist' || activeMyPageNav === 'nav-dash',
   })
 
   const {
@@ -118,12 +154,20 @@ function MyPage() {
       const paged = data.blockedUsers ?? data
       const blockedList = paged.content ?? []
       return {
-        content: blockedList.map((u: { blockedUserId: number; blockedUserNickname?: string; nickname?: string; profileImageUrl?: string; blockedAt: string }) => ({
-          blockedUserId: u.blockedUserId,
-          nickname: u.nickname || u.blockedUserNickname || '',
-          profileImageUrl: u.profileImageUrl,
-          blockedAt: u.blockedAt,
-        })),
+        content: blockedList.map(
+          (u: {
+            blockedUserId: number
+            blockedUserNickname?: string
+            nickname?: string
+            profileImageUrl?: string
+            blockedAt: string
+          }) => ({
+            blockedUserId: u.blockedUserId,
+            nickname: u.nickname || u.blockedUserNickname || '',
+            profileImageUrl: u.profileImageUrl,
+            blockedAt: u.blockedAt,
+          })
+        ),
         page: paged.page ?? 0,
         hasNext: paged.hasNext ?? false,
         total: paged.total ?? paged.totalElements ?? 0,
@@ -149,6 +193,35 @@ function MyPage() {
     'tab-blocked': { fetchNextPage: fetchNextBlocked, hasNextPage: hasNextBlocked, isFetchingNextPage: isFetchingNextBlocked },
   }[activeMyPageTab]
 
+  const isPurchasesTabActive = activeMyPageTab === 'tab-purchases'
+  // 백엔드 TradeStatus: 판매 상품은 SELLING/RESERVED/COMPLETED, 판매 요청은 SELLING/COMPLETED만 사용 (RESERVED 미사용)
+  const tradeStatusTabs = isPurchasesTabActive
+    ? [
+        { id: 'ALL', label: '전체', code: 'ALL' },
+        { id: 'SELLING', label: '요청중', code: 'SELLING' },
+        { id: 'COMPLETED', label: '구매완료', code: 'COMPLETED' },
+      ]
+    : [
+        { id: 'ALL', label: '전체', code: 'ALL' },
+        ...STATUS_EN_TO_KO.filter(
+          (status): status is { value: TransactionStatus; name: string; bgColor: string } => status.value !== null
+        ).map((status) => ({
+          id: status.value,
+          label: status.name,
+          code: status.value,
+        })),
+      ]
+
+  const filteredMyProductsData =
+    activeMyPageTab === 'tab-sales' && activeTradeStatus !== 'ALL'
+      ? myProductsData?.pages.flatMap((page) => page.content).filter((product) => product.tradeStatus === activeTradeStatus)
+      : myProductsData?.pages.flatMap((page) => page.content)
+
+  const filteredMyRequestData =
+    activeTradeStatus === 'ALL'
+      ? myRequestData?.pages.flatMap((page) => page.content)
+      : myRequestData?.pages.flatMap((page) => page.content)?.filter((p) => p.tradeStatus === activeTradeStatus)
+
   const { mutate: deleteProductMutate } = useMutation({
     mutationFn: (id: number) => api.delete(`/products/${id}`),
     onSuccess: () => {
@@ -172,6 +245,25 @@ function MyPage() {
 
   const handleTabChange = (tabId: string) => {
     router.replace(`?tab=${tabId}`)
+  }
+
+  // NAV → TAB 매핑 (sales/purchases/wishlist는 기존 탭 패널을 그대로 보여줌)
+  const NAV_TO_TAB: Record<string, MyPageTabId | null> = {
+    DASH_BOARD: null,
+    SELL: 'tab-sales',
+    PURCHASES: 'tab-purchases',
+    FAVORITE: 'tab-wishlist',
+    ACTIVITY: null,
+  }
+
+  const handleNavChange = (navId: MyPageNavId) => {
+    const navItem = MY_PAGE_NAV.find((n) => n.id === navId)
+    if (!navItem) return
+    const tabId = NAV_TO_TAB[navItem.code]
+    const params = new URLSearchParams()
+    params.set('nav', navId)
+    if (tabId) params.set('tab', tabId)
+    router.replace(`?${params.toString()}`)
   }
 
   const handleConfirmModal = (e: React.MouseEvent, id: number, title: string, price: number, mainImageUrl: string) => {
@@ -251,9 +343,9 @@ function MyPage() {
       <div className="flex min-h-screen items-center justify-center">
         <div className="flex flex-col gap-4">
           <p>내 정보를 불러올 수 없습니다</p>
-          <button onClick={() => router.push('/')} className="text-blue-600 hover:text-blue-800">
+          <Button variant="link" onClick={() => router.push('/')} className="text-primary hover:underline">
             홈으로 돌아가기
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -262,13 +354,44 @@ function MyPage() {
   if (!_hasHydrated || !user?.id) {
     return null
   }
+  // const styles = VARIANT_STYLES[variant]
+  // const Icon = iconMap[notification.notificationType as NotificationType] || BellIcon
 
   return (
     <>
       <div className="pb-4xl pt-0 md:pt-8">
         <h1 className="sr-only">마이페이지</h1>
         <div className="mx-auto flex max-w-7xl flex-col gap-3.5 md:flex-row md:gap-8">
-          <ProfileData setIsWithdrawModalOpen={setIsWithdrawModalOpen} data={myData!} isMyProfile />
+          <div className="flex flex-col gap-3">
+            <ProfileData setIsWithdrawModalOpen={setIsWithdrawModalOpen} data={myData!} isMyProfile />
+            <div role="tablist" aria-label="마이페이지 메뉴" className="flex flex-col gap-2">
+              {MY_PAGE_NAV.map((tab) => {
+                const isActive = activeMyPageNav === tab.id
+                const Icon = myPageIconMap[tab.code]
+                return (
+                  <button
+                    key={tab.id}
+                    id={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    aria-controls={`panel-${tab.code}`}
+                    tabIndex={isActive ? 0 : -1}
+                    onClick={() => handleNavChange(tab.id)}
+                    className={cn(
+                      'flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-left transition-all',
+                      isActive
+                        ? 'bg-primary-container text-on-primary-container'
+                        : 'text-on-surface-muted hover:bg-surface-container-low hover:text-on-surface'
+                    )}
+                  >
+                    <Icon size={16} />
+                    <span className="text-sm md:text-base md:font-semibold">{tab.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
           <section className="relative flex flex-1 flex-col gap-3.5 md:gap-7">
             <AnimatePresence>
               {unblockError ? (
@@ -279,29 +402,48 @@ function MyPage() {
                 </div>
               ) : null}
             </AnimatePresence>
-            <div className="px-5 md:px-0">
-              <Tabs
-                tabs={MY_PAGE_TABS}
-                activeTab={activeMyPageTab}
-                onTabChange={(tabId) => handleTabChange(tabId as MyPageTabId)}
-                ariaLabel="마이페이지 메뉴"
+            {(activeMyPageNav === 'nav-sales' || activeMyPageNav === 'nav-purchases') &&
+            (activeMyPageTab === 'tab-sales' || activeMyPageTab === 'tab-purchases') ? (
+              <div className="px-5 md:px-0">
+                <Tabs
+                  tabs={tradeStatusTabs}
+                  activeTab={activeTradeStatus}
+                  onTabChange={(tabId) => setActiveTradeStatus(tabId as TransactionStatus | 'ALL')}
+                  ariaLabel={activeMyPageTab === 'tab-sales' ? '판매 상태 메뉴' : '구매 상태 메뉴'}
+                  variant="card-pill"
+                />
+              </div>
+            ) : null}
+
+            {activeMyPageNav === 'nav-dash' ? (
+              <MyDashboard
+                profile={myData}
+                myProducts={myProductsData?.pages.flatMap((page) => page.content)}
+                myRequests={myRequestData?.pages.flatMap((page) => page.content)}
+                myFavorites={myFavoriteData?.pages.flatMap((page) => page.content)}
               />
-            </div>
-            <MyPagePanel
-              activeTabCode={activeTabCode}
-              activeMyPageTab={activeMyPageTab}
-              myProductsData={myProductsData?.pages.flatMap((page) => page.content)}
-              myProductsTotal={myProductsData?.pages[0]?.total}
-              myRequestData={myRequestData?.pages.flatMap((page) => page.content)}
-              myRequestTotal={myRequestData?.pages[0]?.total}
-              myFavoriteData={myFavoriteData?.pages.flatMap((page) => page.content)}
-              myFavoriteTotal={myFavoriteData?.pages[0]?.total}
-              myBlockedData={myBlockedData?.pages.flatMap((page) => page.content)}
-              myBlockedTotal={myBlockedData?.pages[0]?.total}
-              {...paginationProps}
-              handleConfirmModal={handleConfirmModal}
-              unblockUser={unblockUser}
-            />
+            ) : activeMyPageNav === 'nav-activity' ? (
+              <MyActivityPanel />
+            ) : (
+              <MyPagePanel
+                activeTabCode={activeTabCode}
+                activeMyPageTab={activeMyPageTab}
+                activeTradeStatus={activeTradeStatus}
+                myProductsData={filteredMyProductsData}
+                myProductsTotal={
+                  activeMyPageTab === 'tab-sales' ? filteredMyProductsData?.length : myProductsData?.pages[0]?.total
+                }
+                myRequestData={filteredMyRequestData}
+                myRequestTotal={activeTradeStatus === 'ALL' ? myRequestData?.pages[0]?.total : filteredMyRequestData?.length}
+                myFavoriteData={myFavoriteData?.pages.flatMap((page) => page.content)}
+                myFavoriteTotal={myFavoriteData?.pages[0]?.total}
+                myBlockedData={myBlockedData?.pages.flatMap((page) => page.content)}
+                myBlockedTotal={myBlockedData?.pages[0]?.total}
+                {...paginationProps}
+                handleConfirmModal={handleConfirmModal}
+                unblockUser={unblockUser}
+              />
+            )}
           </section>
         </div>
       </div>

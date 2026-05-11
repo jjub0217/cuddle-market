@@ -178,8 +178,8 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <p className="text-[#504537]">게시글을 불러올 수 없습니다</p>
-          <button onClick={() => window.location.reload()} className="text-[#633f00] hover:underline">
+          <p className="text-on-surface-muted">게시글을 불러올 수 없습니다</p>
+          <button onClick={() => window.location.reload()} className="text-primary hover:underline">
             새로고침
           </button>
         </div>
@@ -193,7 +193,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
       <main className="mx-auto w-full max-w-7xl px-4 py-8">
         {/* Header */}
         <section className="mb-4">
-          {/* <h2 className="mb-6 text-lg font-bold tracking-tight text-[#633f00]">질문/정보</h2> */}
+          {/* <h2 className="mb-6 text-lg font-bold tracking-tight text-primary">질문/정보</h2> */}
           <CommunityTabs
             tabs={COMMUNITY_TABS}
             activeTab={activeCommunityTypeTab}
@@ -213,7 +213,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
               onKeyDown={handleSearchSubmit}
               placeholder="궁금한 내용을 검색해보세요"
               enterKeyHint="search"
-              className="border-outline-variant/40 bg-surface-container-low w-full rounded-full border py-2 pr-4 pl-11 text-sm text-[#1c1b1b] placeholder:text-sm placeholder:text-[#827565] focus:border-[#633f00] focus:ring-2 focus:ring-[#633f00]/20 focus:outline-none"
+              className="border-outline-variant/40 bg-surface-container-low w-full rounded-full border py-2 pr-4 pl-11 text-sm text-[#1c1b1b] placeholder:text-sm placeholder:text-[#827565] focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
             />
           </div>
         </section>
@@ -231,7 +231,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
                     onClick={() => handleSortChange(sort.id)}
                     className={cn(
                       'cursor-pointer transition-colors',
-                      isActive ? 'font-bold text-[#633f00]' : 'font-medium text-[#504537] hover:text-[#633f00]'
+                      isActive ? 'font-bold text-primary' : 'font-medium text-on-surface-muted hover:text-primary'
                     )}
                   >
                     {sort.label}
@@ -243,7 +243,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
           {hasHydrated && isLogin() ? (
             <Link
               href={`${ROUTES.COMMUNITY_POST}?tab=${activeCommunityTypeTab}`}
-              className="hidden items-center gap-1.5 rounded-full bg-[#633f00] px-4 py-2 text-sm font-bold whitespace-nowrap text-white shadow-sm transition-opacity hover:opacity-90 active:scale-95 md:flex"
+              className="hidden items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-bold whitespace-nowrap text-white shadow-sm transition-opacity hover:opacity-90 active:scale-95 md:flex"
             >
               <PenLine size={16} />
               <span>글쓰기</span>
@@ -281,12 +281,12 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
                         </div>
 
                         {/* Title */}
-                        <h3 className="mb-2 line-clamp-2 text-lg leading-snug font-semibold text-[#1c1b1b] transition-colors group-hover:text-[#633f00]">
+                        <h3 className="mb-2 line-clamp-2 text-lg leading-snug font-semibold text-[#1c1b1b] transition-colors group-hover:text-primary">
                           {post.title}
                         </h3>
 
                         {/* Preview */}
-                        <p className="line-clamp-2 text-sm leading-relaxed whitespace-pre-line text-[#504537]">
+                        <p className="line-clamp-2 text-sm leading-relaxed whitespace-pre-line text-on-surface-muted">
                           {post.contentPreview}
                         </p>
 
@@ -324,7 +324,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
         <Link
           href={`${ROUTES.COMMUNITY_POST}?tab=${activeCommunityTypeTab}`}
           className={cn(
-            'fixed right-4 bottom-20 flex items-center justify-center rounded-full bg-[#633f00] p-4 text-white shadow-lg md:hidden',
+            'fixed right-4 bottom-20 flex items-center justify-center rounded-full bg-primary p-4 text-white shadow-lg md:hidden',
             Z_INDEX.FLOATING_BUTTON
           )}
           aria-label="글쓰기"

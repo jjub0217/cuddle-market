@@ -26,13 +26,15 @@ export function ProductInfo({
   location,
 }: ProductInfoProps) {
   const badgeItems: ProductBadgeItem[] = [
-    ...(hideProductType
+    ...(hideProductType || !productTypeName
       ? []
       : [{ label: productTypeName, tone: (productTypeName === '판매요청' ? 'warning' : 'info') as ProductBadgeItem['tone'] }]),
-    { label: productStatusName, tone: 'outline' },
+    ...(productStatusName ? [{ label: productStatusName, tone: 'outline' as const }] : []),
   ]
 
   const metaTextClass = 'text-xs font-medium'
+  const hasFavoriteCount = typeof favoriteCount === 'number'
+  const hasCreatedAt = Boolean(createdAt)
 
   return (
     <div className="flex flex-3 flex-col gap-2 bg-white p-3 md:flex-none md:p-4">
@@ -43,11 +45,13 @@ export function ProductInfo({
         {location ? (
           <>
             <ProductMetaItem label={location} textClassName={metaTextClass} />
-            <span className={metaTextClass} aria-hidden="true">·</span>
+            {hasFavoriteCount ? <span className={metaTextClass} aria-hidden="true">·</span> : null}
           </>
         ) : null}
-        <ProductMetaItem label={`좋아요 ${favoriteCount}`} textClassName={metaTextClass} />
-        <ProductMetaItem label={getTimeAgo(createdAt)} className="ml-auto text-gray-500" textClassName={metaTextClass} />
+        {hasFavoriteCount ? <ProductMetaItem label={`좋아요 ${favoriteCount}`} textClassName={metaTextClass} /> : null}
+        {hasCreatedAt ? (
+          <ProductMetaItem label={getTimeAgo(createdAt)} className="ml-auto text-gray-500" textClassName={metaTextClass} />
+        ) : null}
       </div>
     </div>
   )
