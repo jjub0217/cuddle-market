@@ -49,3 +49,6 @@ sync/
 
 # Misc
 *.log
+
+*storybook.log
+storybook-static
