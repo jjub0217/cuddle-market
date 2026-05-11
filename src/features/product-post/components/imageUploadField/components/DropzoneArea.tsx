@@ -7,7 +7,6 @@ import { arrayMove } from '@dnd-kit/sortable'
 import type { FieldValues, Path, UseFormSetValue, UseFormSetError, UseFormClearErrors } from 'react-hook-form'
 import { uploadImage } from '@/lib/api/products'
 import { MAX_FILES } from '@/constants/constants'
-import DropzoneGuide from './DropzoneGuide'
 import SortableImageList from './SortableImageList'
 import imageCompression from 'browser-image-compression'
 
@@ -140,11 +139,7 @@ export default function DropzoneArea<T extends FieldValues>({
   return (
     <div {...getRootProps()} className="cursor-pointer rounded-lg">
       <input {...getInputProps()} />
-      {previewUrls.length === 0 ? (
-        <DropzoneGuide maxFiles={maxFiles} />
-      ) : (
-        <SortableImageList previewUrls={previewUrls} onDragEnd={handleDragEnd} onRemoveImage={handleRemoveImage} />
-      )}
+      <SortableImageList previewUrls={previewUrls} onDragEnd={handleDragEnd} onRemoveImage={handleRemoveImage} />
     </div>
   )
 }

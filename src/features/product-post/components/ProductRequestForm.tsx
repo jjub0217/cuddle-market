@@ -157,6 +157,7 @@ export function ProductRequestForm({ isEditMode, productId: id, initialData }: P
               clearErrors={clearErrors}
               mainImageField="mainImageUrl"
               subImagesField="subImageUrls"
+              description="참고 이미지를 드래그 또는 클릭으로 최대 5장 업로드 (각 5MB 이하)"
             />
             <BasicInfoSection
               control={control}
