@@ -23,7 +23,8 @@ export function PriceField({ register, errors, suffix, label = '판매 가격' }
           type="number"
           size="text-sm"
           border
-          borderColor="border-gray-400"
+          borderColor="border-outline-variant"
+          backgroundColor="bg-surface-container-low"
           className="flex flex-col gap-2.5"
           inputClass="pr-10"
           error={errors.price}

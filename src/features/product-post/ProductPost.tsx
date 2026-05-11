@@ -31,11 +31,19 @@ function ProductPost() {
 
   const isSalesTab = activeProductTypeTab === 'tab-sales'
   const headerTitle = isSalesTab
-    ? isEditMode ? '판매 상품 수정' : '판매 상품 등록'
-    : isEditMode ? '판매 요청 수정' : '판매 요청 등록'
+    ? isEditMode
+      ? '판매 상품 수정'
+      : '판매 상품 등록'
+    : isEditMode
+      ? '판매 요청 수정'
+      : '판매 요청 등록'
   const headerDescription = isSalesTab
-    ? isEditMode ? '등록된 상품 정보를 수정할 수 있습니다.' : '상품을 등록하여 다른 사용자들에게 판매할 수 있습니다.'
-    : isEditMode ? '등록된 판매 요청 정보를 수정할 수 있습니다.' : '원하는 상품이 없을 때 판매를 요청할 수 있습니다.'
+    ? isEditMode
+      ? '등록된 상품 정보를 수정할 수 있습니다.'
+      : '상품을 등록하여 다른 사용자들에게 판매할 수 있습니다.'
+    : isEditMode
+      ? '등록된 판매 요청 정보를 수정할 수 있습니다.'
+      : '원하는 상품이 없을 때 판매를 요청할 수 있습니다.'
 
   const handleTabChange = (tabId: string) => {
     setActiveProductTypeTab(tabId as ProductTypeTabId)
@@ -54,7 +62,8 @@ function ProductPost() {
     const loadProduct = async () => {
       if (isEditMode && id) {
         try {
-          const { product: data } = await fetchGraphQL<{ product: ProductDetailItem }>(`
+          const { product: data } = await fetchGraphQL<{ product: ProductDetailItem }>(
+            `
             query Product($id: Int!) {
               product(id: $id) {
                 id title description price mainImageUrl subImageUrls productType tradeStatus
@@ -64,7 +73,9 @@ function ProductPost() {
                 sellerOtherProducts { id title price mainImageUrl }
               }
             }
-          `, { id: Number(id) })
+          `,
+            { id: Number(id) }
+          )
           window.scrollTo({ top: 0, behavior: 'smooth' })
           setProductData(data)
           const tabId = data.productType === 'SELL' ? 'tab-sales' : 'tab-purchases'
@@ -90,13 +101,16 @@ function ProductPost() {
       <h1 className="sr-only">{headerTitle}</h1>
       {/* 모바일 서브헤더 */}
       <div
-        className={cn('bg-primary-200 sticky top-0 mx-auto flex w-full max-w-7xl justify-between px-3.5 py-4 md:hidden', Z_INDEX.HEADER)}
+        className={cn(
+          'bg-primary-200 sticky top-0 mx-auto flex w-full max-w-7xl justify-between px-3.5 py-4 md:hidden',
+          Z_INDEX.HEADER
+        )}
       >
         <button type="button" onClick={() => router.back()} className="flex cursor-pointer items-center gap-1 text-gray-600">
           <ArrowLeft size={23} className="text-white" />
         </button>
-        <span className="heading-h4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg !font-extrabold text-white">
-          {isSalesTab ? (isEditMode ? '상품 수정' : '상품 등록') : (isEditMode ? '판매요청 수정' : '판매요청 등록')}
+        <span className="heading-h4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg font-extrabold! text-white">
+          {isSalesTab ? (isEditMode ? '상품 수정' : '상품 등록') : isEditMode ? '판매요청 수정' : '판매요청 등록'}
         </span>
       </div>
       {/* 데스크톱 서브헤더 */}
@@ -104,12 +118,12 @@ function ProductPost() {
         <SimpleHeader
           title={headerTitle}
           description={headerDescription}
-          layoutClassname="py-3.5 gap-0 flex-col justify-between border-b border-gray-200"
+          layoutClassname="py-3.5 gap-0 flex-col justify-between pt-8"
           titleClassName="text-[22px] leading-[1.5] font-bold"
           descriptionClassName="text-sm"
         />
       </div>
-      <div className="bg-[#F3F4F6] pt-5">
+      <div className="pt-5">
         <div className="px-lg pb-4xl mx-auto max-w-7xl">
           <div className="gap-2xl flex w-full flex-col">
             {!isEditMode ? (

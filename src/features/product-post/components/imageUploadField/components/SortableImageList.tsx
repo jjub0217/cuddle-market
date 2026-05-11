@@ -1,9 +1,7 @@
 import { DndContext, closestCenter, type DragEndEvent } from '@dnd-kit/core'
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable'
-import Button from '@/components/commons/button/Button'
-import { Plus } from 'lucide-react'
+import { Camera } from 'lucide-react'
 import SortableImageItem from './SortableImageItem'
-import { useMediaQuery } from '@/hooks/useMediaQuery'
 
 interface SortableImageListProps {
   previewUrls: string[]
@@ -12,7 +10,6 @@ interface SortableImageListProps {
 }
 
 export default function SortableImageList({ previewUrls, onDragEnd, onRemoveImage }: SortableImageListProps) {
-  const isMd = useMediaQuery('(min-width: 768px)')
   return (
     <DndContext collisionDetection={closestCenter} onDragEnd={onDragEnd}>
       <SortableContext items={previewUrls} strategy={horizontalListSortingStrategy}>
@@ -21,7 +18,14 @@ export default function SortableImageList({ previewUrls, onDragEnd, onRemoveImag
             <SortableImageItem key={imgUrl} url={imgUrl} index={i} onRemove={() => onRemoveImage(i)} />
           ))}
           {previewUrls.length < 5 ? (
-            <Button size={isMd ? 'lg' : 'sm'} className="bg-primary-300 flex cursor-pointer flex-col rounded-full text-white" icon={Plus} />
+            <div
+              role="button"
+              tabIndex={0}
+              className="border-outline-variant hover:border-primary-container hover:bg-surface-container-low bg-surface-container-lowest flex size-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed text-gray-400 transition-colors md:size-36"
+            >
+              <Camera className="size-6 md:size-8" strokeWidth={1.5} />
+              <span className="text-xs font-semibold md:text-sm">이미지 등록</span>
+            </div>
           ) : null}
         </div>
       </SortableContext>

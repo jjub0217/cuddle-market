@@ -20,12 +20,12 @@ export default function SortableImageItem({ url, index, onRemove }: SortableImag
   }
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} className="relative size-20 overflow-hidden rounded-lg md:size-28">
+    <div ref={setNodeRef} style={style} {...attributes} className="relative size-24 overflow-hidden rounded-lg md:size-36">
       <Button
         icon={X}
         size="xs"
-        className="bg-danger-500 absolute top-1 right-1 z-10 size-5 cursor-pointer rounded-full p-0.5"
-        iconProps={{ color: 'white', strokeWidth: 3, size: 12 }}
+        className="absolute top-1 right-1 z-10 size-6 cursor-pointer rounded-full bg-gray-500 p-0.5"
+        iconProps={{ color: 'white', strokeWidth: 2, size: 14 }}
         onClick={(e) => {
           e.stopPropagation()
           e.preventDefault()
@@ -35,7 +35,11 @@ export default function SortableImageItem({ url, index, onRemove }: SortableImag
       <div className="h-full w-full cursor-grab active:cursor-grabbing" {...listeners}>
         <Image src={url} alt={`preview-${index}`} fill className="object-cover" unoptimized />
       </div>
-      {index === 0 ? <Badge className="absolute top-1 left-1 bg-gray-900 text-xs text-white px-1.5 py-0.5">대표</Badge> : null}
+      {index === 0 ? (
+        <Badge className="bg-primary-container text-on-primary-container absolute bottom-1 left-1 rounded-md px-1.5 py-0.5 text-xs font-semibold">
+          대표
+        </Badge>
+      ) : null}
     </div>
   )
 }

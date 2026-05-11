@@ -1,6 +1,5 @@
 'use client'
 
-import Button from '@/components/commons/button/Button'
 import { useForm, useWatch } from 'react-hook-form'
 import { type Province } from '@/constants/cities'
 import { useRouter } from 'next/navigation'
@@ -150,25 +149,6 @@ export function ProductRequestForm({ isEditMode, productId: id, initialData }: P
         <fieldset className="flex flex-col gap-5">
           <legend className="sr-only">판매요청 등록폼</legend>
           <div className="flex flex-col gap-5">
-            <BasicInfoSection
-              control={control}
-              setValue={setValue}
-              register={register}
-              errors={errors}
-              titleLength={titleLength}
-              productNameLabel="찾고 있는 상품명"
-              productDescriptionLabel="상세 요청사항"
-              productDescriptionPlaceHolder="어떤 상품을 찾고 있는지, 원하는 조건(가격대, 상태 등)을 자세히 적어주세요"
-            />
-            <PriceAndStatusSection
-              register={register}
-              control={control}
-              errors={errors}
-              showProductStateFilter={false}
-              priceLabel="희망 가격"
-              heading="가격"
-            />
-            <TradeInfoSection control={control} setValue={setValue} />
             <ProductImageUpload
               initialImages={initialImages}
               setValue={setValue}
@@ -178,15 +158,46 @@ export function ProductRequestForm({ isEditMode, productId: id, initialData }: P
               mainImageField="mainImageUrl"
               subImagesField="subImageUrls"
             />
+            <BasicInfoSection
+              control={control}
+              setValue={setValue}
+              register={register}
+              errors={errors}
+              titleLength={titleLength}
+              productNameLabel="찾고 있는 상품명"
+              showProductStatus={false}
+            />
+            <PriceAndStatusSection
+              register={register}
+              errors={errors}
+              priceLabel="희망 가격"
+              heading="가격 및 상세 요청사항"
+              productDescriptionLabel="상세 요청사항"
+              productDescriptionPlaceHolder="어떤 상품을 찾고 있는지, 원하는 조건(가격대, 상태 등)을 자세히 적어주세요"
+            />
+            <TradeInfoSection control={control} setValue={setValue} />
           </div>
 
-          <div className="flex items-center gap-4">
-            <Button size="md" className={cn('w-[80%] flex-1 cursor-pointer text-white', !isValid ? 'bg-gray-300' : 'bg-primary-300')} type="submit">
-              {isEditMode ? '수정' : '등록'}
-            </Button>
-            <Button size="md" className="w-[20%] cursor-pointer bg-gray-100 text-gray-900" type="button" onClick={() => router.back()}>
+          <div className="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="text-primary hover:bg-surface-container-high cursor-pointer rounded-full px-6 py-3 text-xs font-bold transition-colors"
+            >
               취소
-            </Button>
+            </button>
+            <button
+              type="submit"
+              disabled={!isValid}
+              className={cn(
+                'cursor-pointer rounded-full px-6 py-3 text-xs font-bold shadow-sm transition-opacity',
+                isValid
+                  ? 'bg-primary-container text-on-primary-container hover:opacity-90'
+                  : 'cursor-not-allowed bg-gray-200 text-gray-400'
+              )}
+            >
+              {isEditMode ? '수정 완료' : '등록'}
+            </button>
           </div>
         </fieldset>
       </form>

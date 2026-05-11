@@ -45,7 +45,8 @@ export default function TitleField<T extends FieldValues>({
         placeholder={placeholder}
         size={size}
         border
-        borderColor="border-gray-400"
+        borderColor="border-outline-variant"
+        backgroundColor="bg-surface-container-low"
         className="flex flex-col gap-2.5"
         error={errors[fieldName] as FieldError | undefined}
         maxLength={maxLength}

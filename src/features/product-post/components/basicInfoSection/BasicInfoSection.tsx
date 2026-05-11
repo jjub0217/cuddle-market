@@ -2,11 +2,10 @@ import { PetTypeField } from '@/features/product-post/components/basicInfoSectio
 import RequiredLabel from '@/components/commons/RequiredLabel'
 import SelectDropdown from '@/components/commons/select/SelectDropdown'
 import { PRODUCT_CATEGORIES } from '@/constants/constants'
-import { ProductDescriptionFiled } from './components/ProductDescriptionFiled'
+import { ProductStateFilter } from '@/components/product/ProductStateFilter'
 import { Controller, type Control, type UseFormSetValue, type UseFormRegister, type FieldErrors } from 'react-hook-form'
 import type { ProductPostFormValues } from '../ProductPostForm'
 import { ProductNameField } from './components/ProductNameFiled'
-import FormSectionHeader from '../FormSectionHeader'
 
 interface BasicInfoSectionProps {
   control: Control<ProductPostFormValues>
@@ -14,9 +13,8 @@ interface BasicInfoSectionProps {
   register: UseFormRegister<ProductPostFormValues>
   errors: FieldErrors<ProductPostFormValues>
   productNameLabel?: string
-  productDescriptionLabel?: string
-  productDescriptionPlaceHolder?: string
   titleLength?: number
+  showProductStatus?: boolean
 }
 
 export default function BasicInfoSection({
@@ -25,41 +23,62 @@ export default function BasicInfoSection({
   register,
   errors,
   productNameLabel,
-  productDescriptionLabel,
-  productDescriptionPlaceHolder,
   titleLength,
+  showProductStatus = true,
 }: BasicInfoSectionProps) {
   return (
-    <section className="flex flex-col gap-2 rounded-xl border border-gray-400 bg-white px-5 pt-3.5 pb-5 shadow-xl">
-      <FormSectionHeader heading="기본 정보" />
+    <section className="border-outline-variant/30 flex flex-col gap-3 rounded-xl border p-6 shadow-sm">
+      {/* <FormSectionHeader heading="기본 정보" /> */}
       <div className="flex flex-col gap-3.5">
-      <PetTypeField<ProductPostFormValues> control={control} setValue={setValue} primaryName="petType" secondaryName="petDetailType" />
-      <Controller
-        name="category"
-        control={control}
-        rules={{ required: '카테고리를 선택해주세요' }}
-        render={({ field, fieldState }) => (
-          <div className="flex flex-col gap-1">
-            <RequiredLabel htmlFor="category" labelClass="text-sm md:text-base font-semibold">
-              상품 카테고리
-            </RequiredLabel>
-            <SelectDropdown
-              id="category"
-              value={field.value || ''}
-              onChange={field.onChange}
-              options={PRODUCT_CATEGORIES.map((category) => ({
-                value: category.code,
-                label: category.name,
-              }))}
-              placeholder="카테고리를 선택해주세요"
-              buttonClassName="border-gray-400 bg-white border text-gray-900 px-3 py-3 border"
-            />
-            {fieldState.error ? <p className="text-xs font-semibold text-red-500">{fieldState.error.message}</p> : null}
-          </div>
-        )}
-      />
-      <ProductNameField register={register} errors={errors} label={productNameLabel} titleLength={titleLength} />
-      <ProductDescriptionFiled register={register} errors={errors} label={productDescriptionLabel} placeholder={productDescriptionPlaceHolder} />
+        <ProductNameField register={register} errors={errors} label={productNameLabel} titleLength={titleLength} />
+        <PetTypeField<ProductPostFormValues>
+          control={control}
+          setValue={setValue}
+          primaryName="petType"
+          secondaryName="petDetailType"
+        />
+        <Controller
+          name="category"
+          control={control}
+          rules={{ required: '카테고리를 선택해주세요' }}
+          render={({ field, fieldState }) => (
+            <div className="flex flex-col gap-1">
+              <RequiredLabel htmlFor="category" labelClass="text-sm md:text-base font-semibold">
+                상품 카테고리
+              </RequiredLabel>
+              <SelectDropdown
+                id="category"
+                value={field.value || ''}
+                onChange={field.onChange}
+                options={PRODUCT_CATEGORIES.map((category) => ({
+                  value: category.code,
+                  label: category.name,
+                }))}
+                placeholder="카테고리를 선택해주세요"
+                buttonClassName="border-outline-variant bg-surface-container-low text-on-surface px-4 py-3"
+              />
+              {fieldState.error ? <p className="text-xs font-semibold text-red-500">{fieldState.error.message}</p> : null}
+            </div>
+          )}
+        />
+        {showProductStatus ? (
+          <Controller
+            name="productStatus"
+            control={control}
+            rules={{ required: '상품 상태를 선택해주세요' }}
+            render={({ field, fieldState }) => (
+              <>
+                <ProductStateFilter
+                  variant="pill"
+                  labelClassname="text-sm md:text-base font-semibold"
+                  selectedProductStatus={field.value || null}
+                  onProductStatusChange={(status) => field.onChange(status ?? '')}
+                />
+                {fieldState.error ? <p className="text-xs font-semibold text-red-500">{fieldState.error.message}</p> : null}
+              </>
+            )}
+          />
+        ) : null}
       </div>
     </section>
   )
