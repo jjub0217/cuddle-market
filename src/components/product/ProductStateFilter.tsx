@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils/cn'
 import { useFilterNavigation } from '@/hooks/useFilterNavigation'
 import { CARD_CHIP_STYLES } from './filterChipStyles'
 
-type ProductStateFilterVariant = 'default' | 'card-chip'
+type ProductStateFilterVariant = 'default' | 'card-chip' | 'pill'
 
 interface ProductStateFilterProps {
   headingClassName?: string
@@ -35,6 +35,14 @@ const VARIANT_STYLES: Record<
     label: CARD_CHIP_STYLES.chip,
     activeLabel: CARD_CHIP_STYLES.chipActive,
     inactiveLabel: CARD_CHIP_STYLES.chipInactive,
+  },
+  pill: {
+    container: 'flex flex-wrap gap-2',
+    label:
+      'inline-block cursor-pointer rounded-full px-4 py-2 text-xs font-bold transition-colors',
+    activeLabel: 'bg-primary-container text-on-primary-container border border-transparent',
+    inactiveLabel:
+      'border border-outline-variant text-on-surface-muted hover:bg-surface-container-low',
   },
 }
 

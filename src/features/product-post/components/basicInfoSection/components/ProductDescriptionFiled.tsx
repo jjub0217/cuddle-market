@@ -26,7 +26,7 @@ export function ProductDescriptionFiled({
         id="product-description"
         placeholder={placeholder}
         className={cn(
-          'focus:border-primary-500 min-h-[14vh] w-full resize-none rounded-lg border border-gray-400 bg-white px-3 py-3 text-sm placeholder:text-gray-400 focus:outline-none'
+          'border-outline-variant bg-surface-container-low focus:ring-primary min-h-[14vh] w-full resize-none rounded-lg border px-4 py-3 text-sm placeholder:text-gray-400 focus:ring-2 focus:outline-none'
         )}
         {...register('description', productPostValidationRules.description)}
       />

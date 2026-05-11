@@ -1,6 +1,5 @@
 'use client'
 
-import Button from '@/components/commons/button/Button'
 import { useForm, useWatch } from 'react-hook-form'
 import { type Province } from '@/constants/cities'
 import { useRouter } from 'next/navigation'
@@ -150,9 +149,6 @@ export function ProductPostForm({ isEditMode, productId: id, initialData }: Prod
         <fieldset className="flex flex-col gap-5">
           <legend className="sr-only">상품 등록폼</legend>
           <div className="flex flex-col gap-5">
-            <BasicInfoSection control={control} setValue={setValue} register={register} errors={errors} titleLength={titleLength} />
-            <PriceAndStatusSection control={control} register={register} errors={errors} />
-            <TradeInfoSection control={control} setValue={setValue} />
             <ProductImageUpload
               initialImages={initialImages}
               setValue={setValue}
@@ -163,14 +159,30 @@ export function ProductPostForm({ isEditMode, productId: id, initialData }: Prod
               subImagesField="subImageUrls"
               description="상품 이미지를 업로드 해주세요. 첫번째 이미지가 대표 이미지가 됩니다. (최대 5장)"
             />
+            <BasicInfoSection control={control} setValue={setValue} register={register} errors={errors} titleLength={titleLength} />
+            <PriceAndStatusSection register={register} errors={errors} />
+            <TradeInfoSection control={control} setValue={setValue} />
           </div>
-          <div className="flex items-center gap-4">
-            <Button size="md" className={cn('w-[80%] flex-1 cursor-pointer text-white', !isValid ? 'bg-gray-300' : 'bg-primary-300')} type="submit">
-              {isEditMode ? '수정' : '등록'}
-            </Button>
-            <Button size="md" className="w-[20%] cursor-pointer bg-gray-100 text-gray-900" type="button" onClick={() => router.back()}>
+          <div className="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="text-primary hover:bg-surface-container-high cursor-pointer rounded-full px-6 py-3 text-xs font-bold transition-colors"
+            >
               취소
-            </Button>
+            </button>
+            <button
+              type="submit"
+              disabled={!isValid}
+              className={cn(
+                'cursor-pointer rounded-full px-6 py-3 text-xs font-bold shadow-sm transition-opacity',
+                isValid
+                  ? 'bg-primary-container text-on-primary-container hover:opacity-90'
+                  : 'cursor-not-allowed bg-gray-200 text-gray-400'
+              )}
+            >
+              {isEditMode ? '수정 완료' : '등록'}
+            </button>
           </div>
         </fieldset>
       </form>

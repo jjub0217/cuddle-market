@@ -1,4 +1,11 @@
-import { type FieldErrors, type UseFormClearErrors, type UseFormSetValue, type UseFormSetError, type FieldValues, type Path } from 'react-hook-form'
+import {
+  type FieldErrors,
+  type UseFormClearErrors,
+  type UseFormSetValue,
+  type UseFormSetError,
+  type FieldValues,
+  type Path,
+} from 'react-hook-form'
 import DropzoneArea from './components/DropzoneArea'
 import FormSectionHeader from '../FormSectionHeader'
 import { cn } from '@/lib/utils/cn'
@@ -28,7 +35,7 @@ export default function ImageUploadField<T extends FieldValues>({
   subImagesField,
   initialImages,
   maxFiles,
-  heading = '상품 이미지 (선택항목)',
+  heading = '상품 사진',
   description,
   showSection = true,
   headingClassName,
@@ -56,5 +63,5 @@ export default function ImageUploadField<T extends FieldValues>({
     return content
   }
 
-  return <section className="flex flex-col gap-6 rounded-xl border border-gray-400 bg-white px-5 pt-3.5 pb-5 shadow-xl">{content}</section>
+  return <section className="border-outline-variant/30 flex flex-col gap-3 rounded-xl border p-6 shadow-sm">{content}</section>
 }

@@ -50,7 +50,7 @@ export function PetTypeField<T extends FieldValues>({
       label={label}
       labelClass="text-sm md:text-base font-semibold"
       layoutClass="gap-1"
-      buttonClassName="px-3 py-3"
+      buttonClassName="border-outline-variant bg-surface-container-low text-on-surface px-4 py-3"
       optionClassName=""
       labelHtmlFor="pet-type"
       onPrimaryChange={handlePrimaryChange}
