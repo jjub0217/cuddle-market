@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { COMMUNITY_SORT_TYPE, COMMUNITY_TABS, type CommunityTabId } from '@/constants/constants'
-import { CommunityTabs } from './components/CommunityTabs'
+import { UnderlineTabs } from '@/components/UnderlineTabs'
 import { ROUTES } from '@/constants/routes'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api/api'
@@ -194,7 +194,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
         {/* Header */}
         <section className="mb-4">
           {/* <h2 className="mb-6 text-lg font-bold tracking-tight text-primary">질문/정보</h2> */}
-          <CommunityTabs
+          <UnderlineTabs
             tabs={COMMUNITY_TABS}
             activeTab={activeCommunityTypeTab}
             onTabChange={handleTabChange}

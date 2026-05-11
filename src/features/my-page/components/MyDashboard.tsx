@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import Link from 'next/link'
 import { Camera, ChevronRight } from 'lucide-react'
 import ProductCard from '@/components/product/ProductCard'
+import { UnderlineTabs } from '@/components/UnderlineTabs'
 import { cn } from '@/lib/utils/cn'
 import type { Product } from '@/types'
 import type { MyPageData } from '@/components/profile/ProfileData'
@@ -39,6 +40,12 @@ const TAB_CONFIG: Record<DashboardTab, TabConfig> = {
 }
 
 const TAB_ORDER: DashboardTab[] = ['sales', 'purchases', 'wishlist']
+
+const DASHBOARD_TABS_LIST: { id: DashboardTab; label: string; code: DashboardTab }[] = TAB_ORDER.map((id) => ({
+  id,
+  label: TAB_CONFIG[id].label,
+  code: id,
+}))
 
 const SUMMARY_ITEMS = [
   { key: 'sales', label: '판매 내역' },
@@ -216,35 +223,22 @@ export default function MyDashboard({ profile, myProducts, myRequests, myFavorit
 
       {/* 거래 내역 요약 */}
       <section className="bg-surface-container-lowest border-outline-variant/20 rounded-2xl border p-6 shadow-sm md:p-8">
-        <div className="border-outline-variant/30 mb-6 flex items-end justify-between border-b">
-          <div role="tablist" aria-label="대시보드 거래 탭" className="flex gap-6 md:gap-10">
-            {TAB_ORDER.map((tabId) => {
-              const isActive = activeTab === tabId
-              return (
-                <button
-                  key={tabId}
-                  type="button"
-                  role="tab"
-                  aria-selected={isActive}
-                  onClick={() => setActiveTab(tabId)}
-                  className={cn(
-                    'cursor-pointer pb-3 text-base font-semibold transition-all md:pb-1',
-                    isActive ? 'border-primary text-primary border-b-2' : 'hover:text-primary text-on-surface-muted'
-                  )}
-                >
-                  {TAB_CONFIG[tabId].label}
-                </button>
-              )
-            })}
-          </div>
-          <Link
-            href={`?nav=${currentConfig.nav}&tab=${currentConfig.tab}`}
-            className="text-primary flex items-center gap-1 pb-3 text-sm font-bold hover:underline md:pb-1"
-          >
-            전체보기
-            <ChevronRight size={16} />
-          </Link>
-        </div>
+        <UnderlineTabs
+          tabs={DASHBOARD_TABS_LIST}
+          activeTab={activeTab}
+          onTabChange={(tabId) => setActiveTab(tabId as DashboardTab)}
+          ariaLabel="대시보드 거래 탭"
+          className="mb-6"
+          rightSlot={
+            <Link
+              href={`?nav=${currentConfig.nav}&tab=${currentConfig.tab}`}
+              className="text-primary flex items-center gap-1 text-sm font-bold hover:underline"
+            >
+              전체보기
+              <ChevronRight size={16} />
+            </Link>
+          }
+        />
         {currentData.length === 0 ? (
           <p className="text-on-surface-muted py-12 text-center text-sm">표시할 항목이 없습니다.</p>
         ) : (
