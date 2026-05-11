@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { cn } from '@/lib/utils/cn'
 import { ChevronDown as DownArrow, Check } from 'lucide-react'
 import { Z_INDEX } from '@/constants/ui'
@@ -73,9 +74,10 @@ interface SelectOptionsProps {
   onSelect: (value: string) => void
   placeholder?: string
   optionClassName?: string
+  style?: React.CSSProperties
 }
 
-function SelectOptions({ options, selectedValue, onSelect, placeholder, optionClassName }: SelectOptionsProps) {
+function SelectOptions({ options, selectedValue, onSelect, placeholder, optionClassName, style }: SelectOptionsProps) {
   const listboxRef = useRef<HTMLDivElement>(null)
   const selectedOptionRef = useRef<HTMLButtonElement>(null)
 
@@ -98,10 +100,11 @@ function SelectOptions({ options, selectedValue, onSelect, placeholder, optionCl
       ref={listboxRef}
       role="listbox"
       aria-label={placeholder}
+      style={style}
       className={cn(
-        'absolute top-full left-0 mt-0.5 flex max-h-56 min-w-fit w-full flex-col gap-1 overflow-auto rounded-md border border-gray-400 bg-white p-1 shadow-md',
+        'fixed flex max-h-56 min-w-fit flex-col gap-1 overflow-auto rounded-md border border-gray-400 bg-white p-1 shadow-md',
         Z_INDEX.DROPDOWN,
-      )}
+      )} 
     >
       {options.map((option) => {
         const isSelected = selectedValue === option.value
@@ -145,6 +148,8 @@ export default function SelectDropdown({
 }: SelectDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const selectRef = useRef<HTMLDivElement>(null)
+  const optionsRef = useRef<HTMLDivElement | null>(null)
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>()
 
   const selectedOption = options.find((option) => option.value === value)
 
@@ -160,9 +165,34 @@ export default function SelectDropdown({
   }
 
   useEffect(() => {
+    if (!isOpen || !selectRef.current) return
+
+    const updatePosition = () => {
+      if (!selectRef.current) return
+      const rect = selectRef.current.getBoundingClientRect()
+      setDropdownStyle({
+        top: rect.bottom + 2,
+        left: rect.left,
+        width: rect.width,
+      })
+    }
+
+    updatePosition()
+    window.addEventListener('resize', updatePosition)
+    window.addEventListener('scroll', updatePosition, true)
+
+    return () => {
+      window.removeEventListener('resize', updatePosition)
+      window.removeEventListener('scroll', updatePosition, true)
+    }
+  }, [isOpen])
+
+  useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as Node
-      if (isOpen && selectRef.current && !selectRef.current.contains(target)) {
+      const isInsideTrigger = selectRef.current?.contains(target)
+      const isInsideOptions = optionsRef.current?.contains(target)
+      if (isOpen && !isInsideTrigger && !isInsideOptions) {
         setIsOpen(false)
       }
     }
@@ -194,9 +224,21 @@ export default function SelectDropdown({
         placeholder={placeholder}
       />
 
-      {isOpen && !disabled ? (
-        <SelectOptions options={options} selectedValue={value} onSelect={handleSelect} placeholder={placeholder} optionClassName={optionClassName} />
-      ) : null}
+      {isOpen && !disabled && dropdownStyle
+        ? createPortal(
+            <div ref={optionsRef}>
+              <SelectOptions
+                options={options}
+                selectedValue={value}
+                onSelect={handleSelect}
+                placeholder={placeholder}
+                optionClassName={optionClassName}
+                style={dropdownStyle}
+              />
+            </div>,
+            document.body
+          )
+        : null}
     </div>
   )
 }

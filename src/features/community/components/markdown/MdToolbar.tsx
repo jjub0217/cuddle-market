@@ -1,9 +1,7 @@
 import IconButton from '@/components/commons/button/IconButton'
-import { Bold, Italic, Code2, Link as LinkIcon, List, Image } from 'lucide-react'
+import { Bold, Italic, Code2, Link as LinkIcon, List, Image as ImageTool } from 'lucide-react'
 
 interface MdToolbarProps {
-  tab: 'edit' | 'preview'
-  setTab: (t: 'edit' | 'preview') => void
   onBold: () => void
   onItalic: () => void
   onCode: () => void
@@ -14,54 +12,33 @@ interface MdToolbarProps {
   onImage: () => void
 }
 
-export default function MdToolbar({ tab, setTab, onBold, onItalic, onCode, onLink, onH1, onBullet, onNumber, onImage }: MdToolbarProps) {
+export default function MdToolbar({ onBold, onItalic, onCode, onLink, onH1, onBullet, onNumber, onImage }: MdToolbarProps) {
   return (
-    <div className="flex flex-wrap items-center gap-2.5 border-b border-gray-400 bg-gray-100 px-2 py-2 md:gap-0">
-      {/* 좌측 탭 */}
-      <div className="flex items-center gap-1 rounded-lg bg-white p-1">
-        <button
-          type="button"
-          onClick={() => setTab('edit')}
-          className={`rounded-lg px-2.5 py-1 text-xs hover:cursor-pointer ${tab === 'edit' ? 'bg-gray-100 text-gray-900 shadow-sm' : 'text-gray-600 hover:bg-gray-50'}`}
-        >
-          작성
-        </button>
-        <button
-          type="button"
-          onClick={() => setTab('preview')}
-          className={`rounded-lg px-2.5 py-1 text-xs ${tab === 'preview' ? 'bg-gray-100 text-gray-900 shadow-sm' : 'text-gray-600 hover:cursor-pointer hover:bg-gray-50'}`}
-        >
-          미리보기
-        </button>
-      </div>
-
-      {/* 우측 툴바 */}
-      <div className="ml-0 flex items-center gap-1 md:ml-auto">
-        <IconButton aria-label="굵게" onClick={onBold}>
-          <Bold size={16} />
-        </IconButton>
-        <IconButton aria-label="기울임" onClick={onItalic}>
-          <Italic size={16} />
-        </IconButton>
-        <IconButton aria-label="코드" onClick={onCode}>
-          <Code2 size={16} />
-        </IconButton>
-        <IconButton aria-label="링크" onClick={onLink}>
-          <LinkIcon size={16} />
-        </IconButton>
-        <IconButton aria-label="제목" onClick={onH1}>
-          <span>
-            <span>H</span>
-            <span className="text-xs">1</span>
-          </span>
-        </IconButton>
-        <IconButton aria-label="목록" onClick={(e) => (e.shiftKey ? onNumber() : onBullet())}>
-          <List size={16} />
-        </IconButton>
-        <IconButton aria-label="이미지" onClick={onImage}>
-          <Image size={16} />
-        </IconButton>
-      </div>
+    <div className="bg-surface-container-low flex flex-wrap items-center justify-end gap-1 rounded-2xl px-2 py-2">
+      <IconButton aria-label="굵게" onClick={onBold} className="hover:bg-surface-container-lowest hover:text-primary-container transition-colors">
+        <Bold size={16} />
+      </IconButton>
+      <IconButton aria-label="기울임" onClick={onItalic} className="hover:bg-surface-container-lowest hover:text-primary-container transition-colors">
+        <Italic size={16} />
+      </IconButton>
+      <IconButton aria-label="코드" onClick={onCode} className="hover:bg-surface-container-lowest hover:text-primary-container transition-colors">
+        <Code2 size={16} />
+      </IconButton>
+      <IconButton aria-label="링크" onClick={onLink} className="hover:bg-surface-container-lowest hover:text-primary-container transition-colors">
+        <LinkIcon size={16} />
+      </IconButton>
+      <IconButton aria-label="제목" onClick={onH1} className="hover:bg-surface-container-lowest hover:text-primary-container transition-colors">
+        <span>
+          <span>H</span>
+          <span className="text-xs">1</span>
+        </span>
+      </IconButton>
+      <IconButton aria-label="목록" onClick={(e) => (e.shiftKey ? onNumber() : onBullet())} className="hover:bg-surface-container-lowest hover:text-primary-container transition-colors">
+        <List size={16} />
+      </IconButton>
+      <IconButton aria-label="이미지" onClick={onImage} className="hover:bg-surface-container-lowest hover:text-primary-container transition-colors">
+        <ImageTool size={16} />
+      </IconButton>
     </div>
   )
 }

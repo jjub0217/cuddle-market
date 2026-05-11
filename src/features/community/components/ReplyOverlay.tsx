@@ -28,7 +28,10 @@ export function ReplyOverlay({
   const totalCount = 1 + (replies?.length ?? 0)
 
   const onCloseRef = useRef(onClose)
-  onCloseRef.current = onClose
+
+  useEffect(() => {
+    onCloseRef.current = onClose
+  })
 
   useEffect(() => {
     document.body.classList.add('overflow-hidden')

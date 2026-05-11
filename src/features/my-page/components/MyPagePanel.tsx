@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { IMAGE_SIZES, imageLoader, toResizedWebpUrl } from '@/lib/utils/imageUrl'
-import type { MyPageTabId } from '@/constants/constants'
+import type { MyPageTabId, TransactionStatus } from '@/constants/constants'
 import type { BlockedUser, Product } from '@/types'
 import MyPageTitle from './MyPageTitle'
 import MyList from './MyList'
@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils/cn'
 interface MyPagePanelProps {
   activeTabCode: string
   activeMyPageTab: MyPageTabId
+  activeTradeStatus?: TransactionStatus | 'ALL'
   myProductsData?: Product[]
   myProductsTotal?: number
   myRequestData?: Product[]
@@ -32,11 +33,31 @@ interface MyPagePanelProps {
   unblockUser?: (blockedUserId: number) => void
 }
 
+type TradeStatusKey = TransactionStatus | 'ALL'
+
+const TRADE_STATUS_LABEL: Record<'tab-sales' | 'tab-purchases', Partial<Record<TradeStatusKey, string>>> = {
+  'tab-sales': {
+    ALL: '전체',
+    SELLING: '판매중',
+    RESERVED: '예약중',
+    COMPLETED: '판매완료',
+  },
+  'tab-purchases': {
+    ALL: '전체',
+    SELLING: '요청중',
+    COMPLETED: '구매완료',
+  },
+}
+
 function BlockedUserAvatar({ profileImageUrl, nickname }: { profileImageUrl?: string; nickname: string }) {
   const [imgError, setImgError] = useState(false)
 
   if (!profileImageUrl) {
-    return <div className="bg-primary-50 flex h-full w-full items-center justify-center heading-h4">{nickname.charAt(0).toUpperCase()}</div>
+    return (
+      <div className="bg-primary-50 heading-h4 flex h-full w-full items-center justify-center">
+        {nickname.charAt(0).toUpperCase()}
+      </div>
+    )
   }
 
   return (
@@ -74,7 +95,7 @@ const TAB_CONFIG: {
     navigateTo: '/product-post?tab=tab-sales',
   },
   'tab-purchases': {
-    heading: '내가 등록한 상품',
+    heading: '내가 등록한 구매 요청',
     description: '상품',
     emptyIcon: Package,
     emptyTitle: '등록한 구매 요청이 없습니다',
@@ -94,6 +115,7 @@ const TAB_CONFIG: {
 export default function MyPagePanel({
   activeTabCode,
   activeMyPageTab,
+  activeTradeStatus,
   myProductsData,
   myProductsTotal,
   myRequestData,
@@ -123,8 +145,16 @@ export default function MyPagePanel({
 
   const productData = getProductData()
   const config = activeMyPageTab !== 'tab-blocked' ? TAB_CONFIG[activeMyPageTab] : null
+  const productCount = productData?.content?.length ?? 0
   const hasContent =
-    (activeMyPageTab !== 'tab-blocked' && (productData?.content?.length || config)) || (activeMyPageTab === 'tab-blocked' && myBlockedData?.length)
+    (activeMyPageTab !== 'tab-blocked' && (productData?.content?.length || config)) ||
+    (activeMyPageTab === 'tab-blocked' && myBlockedData?.length)
+
+  const tradeStatusLabel =
+    (activeMyPageTab === 'tab-sales' || activeMyPageTab === 'tab-purchases') && activeTradeStatus
+      ? TRADE_STATUS_LABEL[activeMyPageTab][activeTradeStatus]
+      : undefined
+  const titleDescription = tradeStatusLabel ?? config?.description ?? ''
 
   return (
     <div
@@ -137,41 +167,56 @@ export default function MyPagePanel({
         <MyPageTitle
           heading={config.heading}
           count={productData?.total}
-          description={config.description}
+          description={titleDescription}
           buttonLabel={config.buttonLabel}
           navigateTo={config.navigateTo}
           buttonClassname="text-base"
         />
       ) : (
-        <MyPageTitle heading="차단 유저" description={`차단한 유저 ${myBlockedTotal ?? 0}명`} />
+        <MyPageTitle heading="차단한 사용자" description={`차단한 사용자 ${myBlockedTotal ?? 0}명`} />
       )}
 
-      <div className="gap-lg scrollbar-hide flex max-h-[60vh] flex-col overflow-y-auto">
+      <div className="gap-lg flex flex-col">
         {activeMyPageTab !== 'tab-blocked' ? (
           productData?.content?.length ? (
             <>
-              <ul className="flex flex-col items-center justify-start divide-y divide-gray-200 md:gap-2.5 md:divide-y-0">
-                {productData.content.map((product) => (
-                  <MyList key={product.id} {...product} activeTab={activeMyPageTab} handleConfirmModal={handleConfirmModal} />
-                ))}
-              </ul>
+              <div
+                className={cn(
+                  '-m-2 p-2',
+                  productCount > 1 && 'scrollbar-hide max-h-[60vh] overflow-y-auto',
+                  productCount <= 1 && 'overflow-visible'
+                )}
+              >
+                <ul className="flex flex-col items-stretch justify-start divide-y divide-gray-200 md:gap-2.5 md:divide-y-0">
+                  {productData.content.map((product) => (
+                    <MyList key={product.id} {...product} activeTab={activeMyPageTab} handleConfirmModal={handleConfirmModal} />
+                  ))}
+                </ul>
+              </div>
               {hasNextPage ? <LoadMoreButton onClick={() => fetchNextPage()} isLoading={isFetchingNextPage} /> : null}
             </>
-          ) : (
-            config ? <EmptyState icon={config.emptyIcon} title={config.emptyTitle} description={config.emptyDescription} /> : null
-          )
+          ) : config ? (
+            <EmptyState icon={config.emptyIcon} title={config.emptyTitle} description={config.emptyDescription} />
+          ) : null
         ) : myBlockedData?.length ? (
           <>
-            <ul className="flex max-h-[60vh] flex-col items-center justify-start gap-2.5">
+            <ul className="scrollbar-hide flex max-h-[60vh] flex-col items-center justify-start gap-2.5 overflow-y-auto">
               {myBlockedData.map((user) => (
-                <li key={user.blockedUserId} className="flex w-full items-center justify-between gap-6 rounded-lg border border-gray-300 p-3.5">
+                <li
+                  key={user.blockedUserId}
+                  className="border-outline-variant/60 flex w-full items-center justify-between gap-6 rounded-lg border p-3.5"
+                >
                   <Link href={`/user-profile/${user.blockedUserId}`} className="flex items-center gap-4">
                     <div className="relative aspect-square w-12 shrink-0 overflow-hidden rounded-full">
                       <BlockedUserAvatar profileImageUrl={user.profileImageUrl} nickname={user.nickname} />
                     </div>
                     <span className="font-medium">{user.nickname}</span>
                   </Link>
-                  <Button size="sm" className="border border-gray-300" onClick={() => unblockUser?.(user.blockedUserId)}>
+                  <Button
+                    size="sm"
+                    className="border-outline-variant/60 text-on-surface hover:bg-surface-container-high cursor-pointer border transition-all"
+                    onClick={() => unblockUser?.(user.blockedUserId)}
+                  >
                     차단 해제
                   </Button>
                 </li>

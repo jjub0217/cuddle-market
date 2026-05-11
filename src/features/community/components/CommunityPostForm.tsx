@@ -1,17 +1,14 @@
 'use client'
 
-import Button from '@/components/commons/button/Button'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation'
 import type { CommunityPostRequestData } from '@/types'
 import { cn } from '@/lib/utils/cn'
-import RequiredLabel from '@/components/commons/RequiredLabel'
-import SelectDropdown from '@/components/commons/select/SelectDropdown'
+// import RequiredLabel from '@/components/commons/RequiredLabel'
 import { COMMUNITY_TABS } from '@/constants/constants'
-import TitleField from '@/components/commons/TitleField'
 import { commonTitleValidationRules, communityContentValidationRules } from '../../signup/validationRules'
 import Markdown from './markdown/Markdown'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Info } from 'lucide-react'
 import { fetchGraphQL } from '@/lib/api/graphql'
 import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -80,6 +77,7 @@ export default function CommunityPostForm() {
   const titleLength = useWatch({ control, name: 'title' })?.length ?? 0
 
   const [postError, setPostError] = useState<React.ReactNode | null>(null)
+  const [editorTab, setEditorTab] = useState<'edit' | 'preview'>('edit')
 
   const handleCancel = () => {
     clearDraft(getValues('boardType'))
@@ -96,18 +94,24 @@ export default function CommunityPostForm() {
 
     try {
       if (isEditMode) {
-        await fetchGraphQL(`
+        await fetchGraphQL(
+          `
           mutation UpdatePost($id: Int!, $input: CommunityPostInput!) {
             updatePost(id: $id, input: $input) { success }
           }
-        `, { id: Number(id), input: requestData })
+        `,
+          { id: Number(id), input: requestData }
+        )
         router.push(`/community/${id}`)
       } else {
-        const { createPost: response } = await fetchGraphQL<{ createPost: { id: number } }>(`
+        const { createPost: response } = await fetchGraphQL<{ createPost: { id: number } }>(
+          `
           mutation CreatePost($input: CommunityPostInput!) {
             createPost(input: $input) { id }
           }
-        `, { input: requestData })
+        `,
+          { input: requestData }
+        )
         clearDraft(getValues('boardType'))
         router.push(`/community/${response.id}`)
       }
@@ -123,11 +127,15 @@ export default function CommunityPostForm() {
 
   const { data: editPostData, isError: postLoadError } = useQuery({
     queryKey: ['community-edit-post', id],
-    queryFn: () => fetchGraphQL<{ communityPost: any }>(`
+    queryFn: () =>
+      fetchGraphQL<{ communityPost: any }>(
+        `
       query CommunityPost($id: Int!) {
         communityPost(id: $id) { id title content boardType imageUrls }
       }
-    `, { id: Number(id!) }),
+    `,
+        { id: Number(id!) }
+      ),
     enabled: isEditMode && !!id,
   })
 
@@ -193,12 +201,15 @@ export default function CommunityPostForm() {
       <h1 className="sr-only">{isEditMode ? '게시글 수정' : '커뮤니티 글쓰기'}</h1>
       {/* 모바일 서브헤더 */}
       <div
-        className={cn('bg-primary-200 sticky top-0 mx-auto flex w-full max-w-7xl justify-between px-3.5 py-4 md:hidden', Z_INDEX.HEADER)}
+        className={cn(
+          'bg-primary-200 sticky top-0 mx-auto flex w-full max-w-7xl justify-between px-3.5 py-4 md:hidden',
+          Z_INDEX.HEADER
+        )}
       >
         <button type="button" onClick={() => router.back()} className="flex cursor-pointer items-center gap-1 text-gray-600">
           <ArrowLeft size={23} className="text-white" />
         </button>
-        <span className="heading-h4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg !font-extrabold text-white">
+        <span className="heading-h4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg font-extrabold! text-white">
           커뮤니티
         </span>
       </div>
@@ -207,12 +218,12 @@ export default function CommunityPostForm() {
         <SimpleHeader
           title="커뮤니티 글쓰기"
           description="일상 이야기를 마음껏 나눠보세요!"
-          layoutClassname="py-3.5 gap-0 flex-col justify-between border-b border-gray-200"
+          layoutClassname="py-3.5 gap-0 flex-col justify-between pt-8"
           titleClassName="text-[22px] leading-[1.5] font-bold"
           descriptionClassName="text-sm"
         />
       </div>
-      <div className="min-h-screen bg-[#F3F4F6] pt-5">
+      <div className="min-h-screen pt-5">
         <div className="px-lg pb-4xl mx-auto max-w-7xl">
           <AnimatePresence>
             {postError ? (
@@ -224,79 +235,155 @@ export default function CommunityPostForm() {
           <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
             <fieldset className="flex flex-col gap-5">
               <legend className="sr-only">커뮤니티 등록폼</legend>
-              <div className="flex flex-col gap-3.5 rounded-lg border border-gray-400 bg-white px-3.5 py-3.5 md:px-5 shadow-xl">
+              <div className="flex flex-col gap-3.5 rounded-3xl border border-gray-400 px-3.5 py-3.5 shadow-xl md:gap-5 md:px-8 md:py-8">
                 <Controller
                   name="boardType"
                   control={control}
                   rules={{ required: '카테고리를 선택해주세요' }}
                   render={({ field, fieldState }) => (
-                    <div className="flex flex-col gap-1">
-                      <RequiredLabel labelClass="text-sm md:text-base font-semibold">카테고리</RequiredLabel>
-                      <SelectDropdown
-                        value={field.value || ''}
-                        onChange={field.onChange}
-                        options={COMMUNITY_TABS.map((category) => ({
-                          value: category.code,
-                          label: category.label,
-                        }))}
-                        placeholder="질문 있어요"
-                        optionClassName="text-base"
-                        buttonClassName="border border-gray-400 bg-white text-gray-900 px-3 py-3 text-base"
-                      />
+                    <div className="flex flex-col gap-2">
+                      {/* <RequiredLabel labelClass="text-sm md:text-base font-semibold">카테고리</RequiredLabel> */}
+                      <div className="flex gap-2" role="radiogroup" aria-label="카테고리 선택">
+                        {COMMUNITY_TABS.map((category) => {
+                          const isActive = field.value === category.code
+                          return (
+                            <button
+                              key={category.code}
+                              type="button"
+                              role="radio"
+                              aria-checked={isActive}
+                              onClick={() => field.onChange(category.code)}
+                              className={cn(
+                                'cursor-pointer rounded-full border px-4 py-2 text-sm font-bold transition-colors',
+                                isActive
+                                  ? 'bg-primary/10 text-primary border-primary/20'
+                                  : 'border-outline-variant text-on-surface-muted hover:bg-surface-container-low'
+                              )}
+                            >
+                              {category.label}
+                            </button>
+                          )
+                        })}
+                      </div>
                       {fieldState.error ? <p className="text-xs font-semibold text-red-500">{fieldState.error.message}</p> : null}
                     </div>
                   )}
                 />
-                <TitleField<CommunityPostFormValues>
-                  register={register}
-                  errors={errors}
-                  fieldName="title"
-                  rules={commonTitleValidationRules}
-                  label="제목"
-                  titleLength={titleLength}
-                  maxLength={50}
-                  id="community-title"
-                  placeholder="제목을 입력해주세요"
-                  size="text-base"
-                  counterClassName="text-xs text-gray-500"
-                  labelClassName="text-sm md:text-base font-semibold"
-                />
-              </div>
-              <div className="rounded-lg border border-gray-400 bg-white px-3.5 py-3.5 md:px-5 shadow-xl">
+                <div className="flex flex-col gap-2">
+                  <textarea
+                    id="community-title"
+                    {...register('title', commonTitleValidationRules)}
+                    placeholder="제목을 입력해 주세요"
+                    rows={1}
+                    maxLength={50}
+                    className="text-primary placeholder:text-primary/20 w-full resize-none overflow-hidden border-none bg-transparent text-2xl leading-tight font-bold focus:ring-0 focus:outline-none"
+                  />
+                  <div className="flex items-center justify-between text-xs">
+                    {errors.title ? <p className="font-semibold text-red-500">{errors.title.message}</p> : <span />}
+                    <span className="text-gray-500">{titleLength}/50</span>
+                  </div>
+                </div>
                 <Controller
                   name="content"
                   control={control}
                   rules={communityContentValidationRules}
                   render={({ field, fieldState }) => (
                     <div className="flex flex-col gap-1">
-                      <RequiredLabel labelClass="text-sm md:text-base font-semibold">내용</RequiredLabel>
-                      <Markdown value={field.value} onChange={field.onChange} placeholder="내용을 입력하세요" height={320} />
-                      <div className="flex flex-col gap-1">
-                        {fieldState.error ? (
-                          <p className="pt-1.5 text-xs font-semibold text-red-500">{fieldState.error.message}</p>
-                        ) : null}
-                        <p className="text-xs text-gray-500">{field.value?.length ?? 0}/1000자</p>
+                      {/* <RequiredLabel labelClass="text-sm md:text-base font-semibold">내용</RequiredLabel> */}
+                      <Markdown
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="내용을 입력하세요"
+                        height={320}
+                        tab={editorTab}
+                      />
+                      <div className="flex items-center justify-between text-xs">
+                        {fieldState.error ? <p className="font-semibold text-red-500">{fieldState.error.message}</p> : <span />}
+                        <div className="flex items-center gap-3 text-gray-500">
+                          <p>{field.value?.length ?? 0}/1000자</p>
+                          <div className="relative">
+                            <button
+                              type="button"
+                              aria-label="마크다운 문법 안내"
+                              className="peer hover:text-on-surface flex cursor-pointer items-center gap-1"
+                            >
+                              <Info size={14} />
+                              <span>마크다운 문법을 사용할 수 있습니다.</span>
+                            </button>
+                            <div
+                              role="tooltip"
+                              className="border-outline-variant invisible absolute right-0 bottom-full z-10 mb-2 w-72 rounded-lg border bg-white p-3 text-xs opacity-0 shadow-lg transition-opacity peer-hover:visible peer-hover:opacity-100"
+                            >
+                              <p className="text-on-surface mb-1.5 font-semibold">마크다운 문법</p>
+                              <div className="text-on-surface-muted flex gap-2">
+                                <span>
+                                  <strong>**굵게**</strong>
+                                </span>
+                                <span>
+                                  <em>*기울임*</em>
+                                </span>
+                                <span>
+                                  <code className="rounded bg-gray-100 px-1">`코드`</code>
+                                </span>
+                                <span>[링크](URL)</span>
+                                <span>## 제목</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}
                 />
-              </div>
-              <div className="flex items-center gap-4">
-                <Button
-                  size="md"
-                  className={cn('w-[80%] flex-1 cursor-pointer text-white', !isValid ? 'bg-gray-300' : 'bg-primary-200')}
-                  type="submit"
-                >
-                  {isEditMode ? '수정' : '등록'}
-                </Button>
-                <Button
-                  size="md"
-                  className="w-[20%] cursor-pointer bg-gray-100 text-gray-900"
-                  type="button"
-                  onClick={handleCancel}
-                >
-                  취소
-                </Button>
+                <div className="border-outline-variant flex items-center justify-between gap-3 border-t pt-4">
+                  <div className="bg-surface-container-low flex items-center gap-0.5 rounded-lg p-1">
+                    <button
+                      type="button"
+                      onClick={() => setEditorTab('edit')}
+                      className={cn(
+                        'cursor-pointer rounded-md px-3 py-1 text-xs font-medium transition-all',
+                        editorTab === 'edit'
+                          ? 'text-on-surface bg-white shadow-sm'
+                          : 'text-on-surface-muted hover:text-on-surface'
+                      )}
+                    >
+                      작성
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditorTab('preview')}
+                      className={cn(
+                        'cursor-pointer rounded-md px-3 py-1 text-xs font-medium transition-all',
+                        editorTab === 'preview'
+                          ? 'text-on-surface bg-white shadow-sm'
+                          : 'text-on-surface-muted hover:text-on-surface'
+                      )}
+                    >
+                      미리보기
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={handleCancel}
+                      className="text-on-surface border-outline-variant hover:bg-surface-container-high hover:bg-surface-container-low cursor-pointer rounded-full border px-6 py-3 text-xs font-bold transition-all"
+                    >
+                      취소
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={!isValid}
+                      className={cn(
+                        'cursor-pointer rounded-full px-6 py-3 text-xs font-bold transition-all',
+                        isValid
+                          ? 'bg-primary shadow-primary/20 text-white shadow-lg hover:-translate-y-0.5 hover:shadow-xl'
+                          : 'cursor-not-allowed bg-gray-200 text-gray-400'
+                      )}
+                    >
+                      {isEditMode ? '수정' : '등록'}
+                    </button>
+                  </div>
+                </div>
               </div>
             </fieldset>
           </form>

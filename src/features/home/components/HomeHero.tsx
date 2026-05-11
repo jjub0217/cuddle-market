@@ -27,7 +27,7 @@ export default function HomeHero() {
           src="/images/hero.webp"
           className="pointer-events-none absolute bottom-0 left-4 z-10 h-97.5 w-auto translate-y-[29.5%] md:h-90 xl:left-3.5"
         />
-        <div className="absolute top-[15%] z-20 flex h-full flex-col px-4 pt-8 text-[#633f00] md:justify-center md:pt-0 md:pl-[52%] xl:pl-[40%]">
+        <div className="absolute top-[15%] z-20 flex h-full flex-col px-4 pt-8 text-primary md:justify-center md:pt-0 md:pl-[52%] xl:pl-[40%]">
           <h1 className="text-xl leading-tight font-bold md:text-3xl xl:text-4xl">
             우리 동네 반려인들과 함께하는
             <br />
@@ -41,7 +41,7 @@ export default function HomeHero() {
           <button
             type="button"
             onClick={focusHeaderSearch}
-            className="mt-5 inline-flex w-fit cursor-pointer items-center gap-2 rounded-full bg-[#825500] px-5 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#633f00] md:text-base"
+            className="mt-5 inline-flex w-fit cursor-pointer items-center gap-2 rounded-full bg-[#825500] px-5 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-primary md:text-base"
           >
             <Search className="h-4 w-4" />
             검색하러 가기

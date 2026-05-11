@@ -17,13 +17,13 @@ export default function AuthMenu({ setIsSideOpen, hideMenuButton = false }: Auth
   const isXl = useMediaQuery('(min-width: 1280px)')
   return isXl ? (
     <div className="flex items-center">
-      <Link href={ROUTES.LOGIN} className="text-sm font-bold text-[#633f00]/70 transition-colors hover:text-[#633f00]">
+      <Link href={ROUTES.LOGIN} className="text-sm font-bold text-primary/70 transition-colors hover:text-primary">
         로그인 / 회원가입
       </Link>
     </div>
   ) : hideMenuButton ? null : (
     <IconButton aria-label="메뉴" onClick={() => setIsSideOpen((prev) => !prev)}>
-      <Menu className="text-[#633f00]" />
+      <Menu className="text-primary" />
     </IconButton>
   )
 }

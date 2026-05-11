@@ -11,7 +11,7 @@ export function CommunityPostThumbnail({ imageUrl, title, className }: Community
   if (!imageUrl) return null
 
   return (
-    <div className={cn('relative aspect-square h-full shrink-0 overflow-hidden rounded-2xl bg-[#f4efe7]', className)}>
+    <div className={cn('relative size-24 shrink-0 overflow-hidden rounded-2xl bg-[#f4efe7] md:size-36', className)}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={toResizedWebpUrl(imageUrl, 150)}

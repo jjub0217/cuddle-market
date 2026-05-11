@@ -10,6 +10,10 @@ import {
   TriangleAlert,
   Check,
   Slash,
+  LayoutDashboard,
+  Handbag,
+  Heart,
+  Activity,
   type LucideIcon,
 } from 'lucide-react'
 import type { ToastType } from '@/types/toast'
@@ -179,9 +183,19 @@ export const MY_PAGE_TABS = [
   { id: 'tab-sales', label: '판매상품', code: 'SELL' },
   { id: 'tab-purchases', label: '판매요청', code: 'REQUEST' },
   { id: 'tab-wishlist', label: '찜한 상품', code: 'favorites' },
-  { id: 'tab-blocked', label: '차단 유저', code: 'blocked-users' },
+  { id: 'tab-blocked', label: '차단한 사용자', code: 'blocked-users' },
 ] as const
 export type MyPageTabId = (typeof MY_PAGE_TABS)[number]['id']
+
+export const MY_PAGE_NAV = [
+  { id: 'nav-dash', label: '대시보드', code: 'DASH_BOARD' },
+  { id: 'nav-sales', label: '판매 내역', code: 'SELL' },
+  { id: 'nav-purchases', label: '구매 내역', code: 'PURCHASES' },
+  { id: 'nav-wishlist', label: '찜한 상품', code: 'FAVORITE' },
+  { id: 'nav-activity', label: '내 활동', code: 'ACTIVITY' },
+] as const
+export type MyPageNavId = (typeof MY_PAGE_NAV)[number]['id']
+export type MyPageNavCode = (typeof MY_PAGE_NAV)[number]['code']
 
 // 커뮤니티 용 탭
 export const COMMUNITY_TABS = [
@@ -322,6 +336,14 @@ export const iconMap = {
   POST_COMMENT: MessageCircle,
 } as const satisfies Record<string, LucideIcon>
 export type NotificationType = keyof typeof iconMap
+
+export const myPageIconMap: Record<MyPageNavCode, LucideIcon> = {
+  DASH_BOARD: LayoutDashboard,
+  SELL: Tag,
+  PURCHASES: Handbag,
+  FAVORITE: Heart,
+  ACTIVITY: Activity,
+}
 
 /** 토스트 기본 설정 */
 export const TOAST_DEFAULTS = {

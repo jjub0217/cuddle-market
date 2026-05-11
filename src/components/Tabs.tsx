@@ -9,6 +9,9 @@ interface Tab {
   id: string
   label: string
   code: string
+  bgColor?: string
+  value?: string
+  name?: string
 }
 
 type TabsVariant = 'default' | 'card-pill'
@@ -31,9 +34,9 @@ const VARIANT_STYLES: Record<TabsVariant, { container: string; tab: string; tabA
   },
   'card-pill': {
     container: 'flex flex-wrap items-center gap-2',
-    tab: 'cursor-pointer rounded-full px-5 py-1.5 text-sm  whitespace-nowrap transition-all',
-    tabActive: 'bg-[#825500] text-white shadow-sm',
-    tabInactive: 'border border-[#d4c4b2] bg-white text-gray-600 hover:border-[#825500] hover:text-[#825500]',
+    tab: 'cursor-pointer rounded-full border px-5 py-1.5 text-sm whitespace-nowrap transition-all',
+    tabActive: 'border-[#825500] bg-[#825500] text-white shadow-sm',
+    tabInactive: 'border-[#d4c4b2] bg-white text-gray-600 hover:border-[#825500] hover:text-[#825500]',
   },
 }
 

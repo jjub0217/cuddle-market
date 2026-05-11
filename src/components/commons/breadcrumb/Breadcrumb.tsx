@@ -21,14 +21,14 @@ export default function Breadcrumb({ items, className }: BreadcrumbProps) {
         {items.map((item, idx) => {
           const isLast = idx === items.length - 1
           const linkBase = 'transition-colors hover:underline'
-          const lastStyle = 'font-bold text-[#633f00]'
+          const lastStyle = 'font-bold text-primary'
           return (
             <Fragment key={`${item.label}-${idx}`}>
               <li>
                 {item.href ? (
                   <Link
                     href={item.href}
-                    className={cn(linkBase, isLast ? lastStyle : 'hover:text-[#633f00]')}
+                    className={cn(linkBase, isLast ? lastStyle : 'hover:text-primary')}
                   >
                     {item.label}
                   </Link>

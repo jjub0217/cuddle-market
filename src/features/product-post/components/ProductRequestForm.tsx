@@ -191,9 +191,9 @@ export function ProductRequestForm({ isEditMode, productId: id, initialData }: P
               type="submit"
               disabled={!isValid}
               className={cn(
-                'cursor-pointer rounded-full px-6 py-3 text-xs font-bold shadow-sm transition-opacity',
+                'cursor-pointer rounded-full px-6 py-3 text-xs font-bold transition-all',
                 isValid
-                  ? 'bg-primary-container text-on-primary-container hover:opacity-90'
+                  ? 'bg-primary shadow-primary/20 hover:shadow-xl hover:-translate-y-0.5 text-white shadow-lg'
                   : 'cursor-not-allowed bg-gray-200 text-gray-400'
               )}
             >
