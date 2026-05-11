@@ -157,7 +157,7 @@ export function ProductPostForm({ isEditMode, productId: id, initialData }: Prod
               clearErrors={clearErrors}
               mainImageField="mainImageUrl"
               subImagesField="subImageUrls"
-              description="상품 이미지를 업로드 해주세요. 첫번째 이미지가 대표 이미지가 됩니다. (최대 5장)"
+              description="첫번째 이미지가 대표 이미지가 됩니다. 드래그 또는 클릭으로 최대 5장 업로드 (각 5MB 이하)"
             />
             <BasicInfoSection control={control} setValue={setValue} register={register} errors={errors} titleLength={titleLength} />
             <PriceAndStatusSection register={register} errors={errors} />
