@@ -53,7 +53,12 @@ export const Warning: Story = {
     type: 'warning',
     onClose: () => {},
     durationMs: 60000,
-    children: <p className="font-semibold">진행 중인 거래가 있습니다. 먼저 완료해주세요.</p>,
+    children: (
+      <div className="flex flex-col gap-0.5">
+        <p className="font-semibold">진행 중인 거래가 있습니다.</p>
+        <p>먼저 완료해주세요.</p>
+      </div>
+    ),
   },
   render: (args) => (
     <div className="w-80">
