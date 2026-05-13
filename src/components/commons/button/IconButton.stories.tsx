@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import { Heart, Bell, Search, X } from 'lucide-react'
+import { Heart, Bell, Search } from 'lucide-react'
 import IconButton from './IconButton'
 
 const meta = {
@@ -37,14 +37,5 @@ export const Large: Story = {
     size: 'lg',
     'aria-label': '좋아요',
     children: <Heart size={24} />,
-  },
-}
-
-export const WithHover: Story = {
-  args: {
-    size: 'md',
-    'aria-label': '닫기',
-    children: <X size={20} />,
-    className: 'hover:bg-surface-container-high transition-all',
   },
 }

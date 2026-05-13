@@ -152,7 +152,7 @@ function UserPage() {
                     <ul className="grid grid-cols-2 gap-4">
                       {allProducts.map((product) => (
                         <li key={product.id}>
-                          <ProductCard data={product} vertical />
+                          <ProductCard data={product} vertical hideProductType />
                         </li>
                       ))}
                     </ul>
