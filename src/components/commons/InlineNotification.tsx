@@ -54,7 +54,7 @@ export default function InlineNotification({ type, children, onClose, durationMs
         <div className={styles.iconWrapper}>
           <Icon className={cn('h-2 w-2 shrink-0', styles.icon)} />
         </div>
-        <div className="text-sm">{children}</div>
+        <div className="break-keep text-sm">{children}</div>
         <button
           type="button"
           aria-label="close notification"
