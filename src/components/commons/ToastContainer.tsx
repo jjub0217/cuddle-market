@@ -2,7 +2,7 @@
 
 import { AnimatePresence } from 'framer-motion'
 import { useToastStore } from '@/store/toastStore'
-import ToastCard from './ToastCard'
+import ToastNotification from './ToastNotification'
 import { Z_INDEX } from '@/constants/ui'
 
 export default function ToastContainer() {
@@ -18,7 +18,7 @@ export default function ToastContainer() {
     >
       <AnimatePresence mode="popLayout">
         {visible.map((toast) => (
-          <ToastCard
+          <ToastNotification
             key={toast.id}
             type={toast.type}
             title={toast.title}
@@ -27,7 +27,7 @@ export default function ToastContainer() {
             onClose={() => remove(toast.id)}
           >
             {toast.content}
-          </ToastCard>
+          </ToastNotification>
         ))}
       </AnimatePresence>
     </div>

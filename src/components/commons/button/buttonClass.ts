@@ -6,6 +6,10 @@ export const buttonVariants = cva('flex items-center justify-center rounded-lg f
       default: '',
       ghost: 'bg-transparent hover:bg-gray-100',
       link: 'bg-transparent p-0 hover:underline',
+      primary:
+        'bg-primary shadow-primary/20 text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl',
+      secondary:
+        'border border-outline-variant/60 text-on-surface hover:bg-surface-container-high transition-all',
     },
     size: {
       xs: 'px-3 py-2 text-sm',

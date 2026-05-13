@@ -264,11 +264,7 @@ export default function MyList({
           {isMd ? (
             <div className="flex w-40 flex-col items-stretch gap-2">
               {isPurchasesTab && !isCompleted ? (
-                <Button
-                  size="sm"
-                  className="bg-primary shadow-primary/20 cursor-pointer text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
-                  onClick={productTradeStatusCompleted}
-                >
+                <Button size="sm" variant="primary" className="cursor-pointer" onClick={productTradeStatusCompleted}>
                   구매완료
                 </Button>
               ) : null}
@@ -279,7 +275,8 @@ export default function MyList({
                 {isMyProductTab && !isCompleted ? (
                   <Button
                     size="sm"
-                    className="border-outline-variant/60 text-on-surface hover:bg-surface-container-high flex-1 cursor-pointer border transition-all"
+                    variant="secondary"
+                    className="flex-1 cursor-pointer"
                     onClick={handleProductUpdate}
                   >
                     수정

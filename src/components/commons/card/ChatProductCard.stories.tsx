@@ -16,6 +16,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 const baseArgs = {
+  productImageUrl: '/images/category/house.webp',
   productTitle: '폭신폭신 프리미엄 원목 강아지 침대',
   productPrice: 45000,
 }
@@ -43,7 +44,7 @@ export const Medium: Story = {
 }
 
 export const NoImage: Story = {
-  args: { ...baseArgs, size: 'sm' },
+  args: { ...baseArgs, size: 'sm', productImageUrl: undefined },
   decorators: [
     (StoryFn) => (
       <div className="border-outline-variant/40 flex w-72 items-center gap-2 rounded-lg border bg-white p-2">

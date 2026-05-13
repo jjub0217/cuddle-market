@@ -212,11 +212,7 @@ export default function MyPagePanel({
                     </div>
                     <span className="font-medium">{user.nickname}</span>
                   </Link>
-                  <Button
-                    size="sm"
-                    className="border-outline-variant/60 text-on-surface hover:bg-surface-container-high cursor-pointer border transition-all"
-                    onClick={() => unblockUser?.(user.blockedUserId)}
-                  >
+                  <Button size="sm" variant="secondary" className="cursor-pointer" onClick={() => unblockUser?.(user.blockedUserId)}>
                     차단 해제
                   </Button>
                 </li>

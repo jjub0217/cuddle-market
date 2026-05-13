@@ -1,15 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import ToastCard from './ToastCard'
+import ToastNotification from './ToastNotification'
 
 const meta = {
-  title: 'Commons/ToastCard',
-  component: ToastCard,
+  title: 'Commons/ToastNotification',
+  component: ToastNotification,
   parameters: { layout: 'padded' },
   tags: ['autodocs'],
   argTypes: {
     type: { control: 'inline-radio', options: ['success', 'error', 'warning'] },
   },
-} satisfies Meta<typeof ToastCard>
+} satisfies Meta<typeof ToastNotification>
 
 export default meta
 
