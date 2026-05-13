@@ -10,6 +10,7 @@ import {
   TriangleAlert,
   Check,
   Slash,
+  UserRoundX,
   LayoutDashboard,
   Handbag,
   Heart,
@@ -193,6 +194,7 @@ export const MY_PAGE_NAV = [
   { id: 'nav-purchases', label: '구매 내역', code: 'PURCHASES' },
   { id: 'nav-wishlist', label: '찜한 상품', code: 'FAVORITE' },
   { id: 'nav-activity', label: '내 활동', code: 'ACTIVITY' },
+  { id: 'nav-blocked', label: '차단한 사용자', code: 'BLOCKED' },
 ] as const
 export type MyPageNavId = (typeof MY_PAGE_NAV)[number]['id']
 export type MyPageNavCode = (typeof MY_PAGE_NAV)[number]['code']
@@ -343,6 +345,7 @@ export const myPageIconMap: Record<MyPageNavCode, LucideIcon> = {
   PURCHASES: Handbag,
   FAVORITE: Heart,
   ACTIVITY: Activity,
+  BLOCKED: UserRoundX,
 }
 
 /** 토스트 기본 설정 */
