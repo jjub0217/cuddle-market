@@ -76,17 +76,14 @@ export const PurchaseRequest: Story = {
 
 export const Vertical: Story = {
   args: { data: baseProduct, vertical: true },
-  decorators: [
-    (StoryFn) => (
-      <div className="w-72">
-        <StoryFn />
-      </div>
-    ),
-  ],
-}
-
-export const HideProductType: Story = {
-  args: { data: baseProduct, hideProductType: true },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`vertical=true` 는 카드를 모든 viewport에서 세로 레이아웃으로 강제합니다. 데스크탑(≥768px)에서는 기본 카드도 세로라 시각 차이가 없고, 차이는 **모바일(<768px)** 에서만 발생합니다 (기본: 가로 → vertical=true: 세로). 모바일 2-column grid 같은 좁은 영역에 카드를 넣을 때 사용합니다 (예: `UserPage`). `hideProductType` 은 별도 prop으로 독립 동작 — 뱃지 표시/숨김은 Controls로 토글하세요.',
+      },
+    },
+  },
   decorators: [
     (StoryFn) => (
       <div className="w-72">

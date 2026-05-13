@@ -16,7 +16,18 @@ import { cn } from '@/lib/utils/cn'
 export interface ProductCardProps {
   data: Product
   'data-index'?: number
+  /**
+   * 카드를 모든 viewport에서 세로 레이아웃으로 강제합니다.
+   *
+   * - `false` (기본): 모바일(<768px)에서 가로 카드, 데스크탑(≥768px)에서 세로 카드 (responsive)
+   * - `true`: 모바일에서도 세로 강제 — 모바일 2-column grid처럼 좁은 영역에 카드를 넣을 때 사용 (예: `UserPage`)
+   *
+   * 데스크탑에서는 두 값 모두 세로라 시각 차이가 없습니다. 차이는 모바일에서만 발생합니다.
+   */
   vertical?: boolean
+  /**
+   * 카드의 "판매 / 판매요청" 뱃지를 숨깁니다. `vertical` 과 독립적으로 동작합니다.
+   */
   hideProductType?: boolean
 }
 
@@ -80,7 +91,7 @@ function ProductCard({ data, 'data-index': dataIndex, vertical = false, hideProd
           productTypeName={productTypeName}
           productStatusName={productStatusName}
           isFavorite={isFavorite}
-          hideProductType={hideProductType ?? vertical}
+          hideProductType={hideProductType}
           location={location}
         />
         <ProductThumbnail

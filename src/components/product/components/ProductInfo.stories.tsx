@@ -44,36 +44,3 @@ export const PurchaseRequest: Story = {
     ),
   ],
 }
-
-export const HideProductType: Story = {
-  args: { ...baseArgs, hideProductType: true },
-  decorators: [
-    (StoryFn) => (
-      <div className="w-72 rounded-2xl border border-black/5 bg-white">
-        <StoryFn />
-      </div>
-    ),
-  ],
-}
-
-export const NoLocation: Story = {
-  args: { ...baseArgs, location: '' },
-  decorators: [
-    (StoryFn) => (
-      <div className="w-72 rounded-2xl border border-black/5 bg-white">
-        <StoryFn />
-      </div>
-    ),
-  ],
-}
-
-export const HighFavorite: Story = {
-  args: { ...baseArgs, favoriteCount: 999 },
-  decorators: [
-    (StoryFn) => (
-      <div className="w-72 rounded-2xl border border-black/5 bg-white">
-        <StoryFn />
-      </div>
-    ),
-  ],
-}
