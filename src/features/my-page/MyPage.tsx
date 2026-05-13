@@ -254,6 +254,7 @@ function MyPage() {
     PURCHASES: 'tab-purchases',
     FAVORITE: 'tab-wishlist',
     ACTIVITY: null,
+    BLOCKED: 'tab-blocked',
   }
 
   const handleNavChange = (navId: MyPageNavId) => {
