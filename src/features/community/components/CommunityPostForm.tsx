@@ -1,6 +1,7 @@
 'use client'
 
 import { Controller, useForm, useWatch } from 'react-hook-form'
+import Button from '@/components/commons/button/Button'
 import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation'
 import type { CommunityPostRequestData } from '@/types'
 import { cn } from '@/lib/utils/cn'
@@ -370,18 +371,17 @@ export default function CommunityPostForm() {
                     >
                       취소
                     </button>
-                    <button
+                    <Button
                       type="submit"
                       disabled={!isValid}
+                      variant={isValid ? 'primary' : 'default'}
                       className={cn(
                         'cursor-pointer rounded-full px-6 py-3 text-xs font-bold transition-all',
-                        isValid
-                          ? 'bg-primary shadow-primary/20 text-white shadow-lg hover:-translate-y-0.5 hover:shadow-xl'
-                          : 'cursor-not-allowed bg-gray-200 text-gray-400'
+                        !isValid && 'cursor-not-allowed bg-gray-200 text-gray-400'
                       )}
                     >
                       {isEditMode ? '수정' : '등록'}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>

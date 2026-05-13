@@ -14,7 +14,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 const baseArgs = {
-  imageUrl: '',
+  imageUrl: '/images/category/house.webp',
   title: '폭신폭신 프리미엄 원목 강아지 침대',
   productTypeName: '판매',
   tradeStatus: '판매중' as string | null,
@@ -55,17 +55,6 @@ export const Completed: Story = {
   ],
 }
 
-export const RequestPending: Story = {
-  args: { ...baseArgs, productTypeName: '판매요청', tradeStatus: null },
-  decorators: [
-    (StoryFn) => (
-      <div className="w-72">
-        <StoryFn />
-      </div>
-    ),
-  ],
-}
-
 export const RequestCompleted: Story = {
   args: { ...baseArgs, productTypeName: '판매요청', tradeStatus: '판매완료' },
   decorators: [
@@ -89,8 +78,8 @@ export const Favorited: Story = {
   },
 }
 
-export const Vertical: Story = {
-  args: { ...baseArgs, vertical: true },
+export const NoImage: Story = {
+  args: { ...baseArgs, imageUrl: '' },
   decorators: [
     (StoryFn) => (
       <div className="w-72">

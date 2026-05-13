@@ -31,10 +31,8 @@ export default function MyPageTitle({ heading, count, description, buttonLabel, 
         <Button
           size="sm"
           icon={Plus}
-          className={cn(
-            'bg-primary shadow-primary/20 h-fit cursor-pointer font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl',
-            buttonClassname
-          )}
+          variant="primary"
+          className={cn('h-fit cursor-pointer font-bold', buttonClassname)}
           onClick={goToProductPost}
           type="button"
         >

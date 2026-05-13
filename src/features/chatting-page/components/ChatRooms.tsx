@@ -1,5 +1,5 @@
 import type { fetchChatRoom } from '@/types'
-import { SellerAvatar } from '@/components/commons/avatar/SellerAvatar'
+import ProfileAvatar from '@/components/commons/ProfileAvatar'
 import ChatProductCard from '@/components/commons/card/ChatProductCard'
 import { getTimeAgo } from '@/lib/utils/getTimeAgo'
 import { cn } from '@/lib/utils/cn'
@@ -66,7 +66,7 @@ export function ChatRooms({
                 >
                   <div className="flex w-full items-center gap-2.5">
                     <div className="shrink-0">
-                      <SellerAvatar profileImageUrl={roomData?.opponentProfileImageUrl} nickname={roomData?.opponentNickname} />
+                      <ProfileAvatar imageUrl={roomData?.opponentProfileImageUrl} nickname={roomData?.opponentNickname ?? ''} />
                     </div>
                     <div className="flex min-w-0 flex-1 flex-col gap-1">
                       <p className="leading-none font-semibold">{roomData?.opponentNickname}</p>

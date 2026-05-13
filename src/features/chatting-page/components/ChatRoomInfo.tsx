@@ -4,7 +4,7 @@ import { useRef, useState } from 'react'
 import { ROUTES } from '@/constants/routes'
 import type { fetchChatRoom } from '@/types'
 import Link from 'next/link'
-import { SellerAvatar } from '@/components/commons/avatar/SellerAvatar'
+import ProfileAvatar from '@/components/commons/ProfileAvatar'
 import ChatProductCard from '@/components/commons/card/ChatProductCard'
 import { fetchGraphQL } from '@/lib/api/graphql'
 import { chatSocketStore } from '@/store/chatSocketStore'
@@ -107,7 +107,7 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
             </button>
           ) : null}
           <Link href={ROUTES.USER_ID(data.opponentId)} className="flex items-center gap-2 hover:opacity-80">
-            <SellerAvatar profileImageUrl={data?.opponentProfileImageUrl} nickname={data?.opponentNickname} />
+            <ProfileAvatar imageUrl={data?.opponentProfileImageUrl} nickname={data?.opponentNickname ?? ''} />
             <p className="font-semibold">{data?.opponentNickname}</p>
           </Link>
         </div>

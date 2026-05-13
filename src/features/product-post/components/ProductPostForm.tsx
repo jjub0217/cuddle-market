@@ -1,6 +1,7 @@
 'use client'
 
 import { useForm, useWatch } from 'react-hook-form'
+import Button from '@/components/commons/button/Button'
 import { type Province } from '@/constants/cities'
 import { useRouter } from 'next/navigation'
 import ProductImageUpload from './imageUploadField/ImageUploadField'
@@ -171,18 +172,17 @@ export function ProductPostForm({ isEditMode, productId: id, initialData }: Prod
             >
               취소
             </button>
-            <button
+            <Button
               type="submit"
               disabled={!isValid}
+              variant={isValid ? 'primary' : 'default'}
               className={cn(
                 'cursor-pointer rounded-full px-6 py-3 text-xs font-bold transition-all',
-                isValid
-                  ? 'bg-primary shadow-primary/20 hover:shadow-xl hover:-translate-y-0.5 text-white shadow-lg'
-                  : 'cursor-not-allowed bg-gray-200 text-gray-400'
+                !isValid && 'cursor-not-allowed bg-gray-200 text-gray-400'
               )}
             >
               {isEditMode ? '수정 완료' : '등록'}
-            </button>
+            </Button>
           </div>
         </fieldset>
       </form>

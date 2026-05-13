@@ -8,7 +8,7 @@ import type { ToastType } from '@/types/toast'
 import ToastProgress from './ToastProgress'
 import { cn } from '@/lib/utils/cn'
 
-interface ToastCardProps {
+interface ToastNotificationProps {
   type: ToastType
   title?: string
   children?: ReactNode
@@ -17,7 +17,7 @@ interface ToastCardProps {
   onClose: () => void
 }
 
-export default function ToastCard({ type, title, children, durationMs, showBar, onClose }: ToastCardProps) {
+export default function ToastNotification({ type, title, children, durationMs, showBar, onClose }: ToastNotificationProps) {
   const LeadingIcon = TOAST_ICONS[type]
 
   return (

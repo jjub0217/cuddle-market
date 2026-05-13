@@ -8,7 +8,7 @@ const meta = {
   parameters: { layout: 'centered' },
   tags: ['autodocs'],
   argTypes: {
-    variant: { control: 'inline-radio', options: ['default', 'ghost', 'link'] },
+    variant: { control: 'inline-radio', options: ['default', 'ghost', 'link', 'primary', 'secondary'] },
     size: { control: 'inline-radio', options: ['xs', 'sm', 'md', 'lg'] },
     disabled: { control: 'boolean' },
   },
@@ -38,20 +38,12 @@ export const IconOnly: Story = {
   args: { icon: Heart, 'aria-label': '좋아요' },
 }
 
-export const PrimaryCTA: Story = {
-  args: {
-    children: '메인 CTA',
-    className:
-      'bg-primary text-white shadow-lg shadow-primary/20 hover:shadow-xl hover:-translate-y-0.5 transition-all',
-  },
+export const Primary: Story = {
+  args: { variant: 'primary', children: '메인 CTA' },
 }
 
-export const SecondaryAction: Story = {
-  args: {
-    children: '보조 액션',
-    className:
-      'border border-outline-variant/60 text-on-surface hover:bg-surface-container-high transition-all',
-  },
+export const Secondary: Story = {
+  args: { variant: 'secondary', children: '보조 액션' },
 }
 
 export const Disabled: Story = {
