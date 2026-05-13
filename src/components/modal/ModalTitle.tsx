@@ -13,7 +13,7 @@ export default function ModalTitle({ heading, description }: ModalTitleProps) {
         <TriangleAlert className="text-danger-600" />
         <p className="heading-h5">{heading}</p>
       </div>
-      <div>{description}</div>
+      <div className="break-keep wrap-break-word">{description}</div>
     </div>
   )
 }

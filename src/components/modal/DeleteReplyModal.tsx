@@ -41,7 +41,7 @@ export default function DeleteReplyModal({ isOpen, onCancel, replyId, onConfirm 
   return (
     <dialog
       ref={dialogRef}
-      className="m-auto w-11/12 open:flex flex-col gap-4 rounded-lg bg-white p-5 backdrop:bg-gray-900/70 md:w-[16vw] md:min-w-max"
+      className="m-auto w-11/12 open:flex flex-col gap-4 rounded-lg bg-white p-5 backdrop:bg-gray-900/70 md:w-[16vw] md:min-w-96 md:max-w-md"
       onClick={(e) => {
         if (e.target === dialogRef.current) dialogRef.current.close()
       }}
