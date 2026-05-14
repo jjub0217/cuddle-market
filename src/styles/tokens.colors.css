@@ -12,7 +12,7 @@
 
   /* Foreground */
   --color-on-surface: #633f00; /* 본문/제목 텍스트 (브라운) */
-  --color-on-surface-muted: rgba(99, 63, 0, 0.7); /* 비활성 메뉴, 보조 텍스트 */
+  --color-on-surface-muted: rgba(99, 63, 0, 0.85); /* 비활성 메뉴, 보조 텍스트 — WCAG AA 4.5:1 보장 */
 
   /* Outline */
   --color-outline-variant: #d4c4b2; /* 일반 보더 (베이지) */
@@ -70,7 +70,7 @@
   --color-gray-200: #e2e8f0;
   --color-gray-300: #cbd5e0;
   --color-gray-400: #a0aec0;
-  --color-gray-500: #718096;
+  --color-gray-500: #6b7280; /* Tailwind 표준 — WCAG AA 4.65:1 보장 (이전 #718096은 4.01:1 fail) */
   --color-gray-600: #4a5568;
   --color-gray-700: #2d3748;
   --color-gray-800: #1a202c;
@@ -87,13 +87,13 @@
   --color-notification: #facc15;
 
   --color-success-100: #dcfce7;
-  --color-success-500: #22c55e;
-  --color-success-600: #16a34a;
+  --color-success-500: #15803d; /* WCAG AA 5.04:1 on white (이전 #22c55e는 2.27:1 fail) */
+  --color-success-600: #117a36; /* WCAG AA ~5.5:1 on white (이전 #16a34a는 3.4:1 fail) */
   --color-success-800: #166534;
 
   --color-danger-100: #fca5a5;
-  --color-danger-500: #ef4444;
-  --color-danger-600: #dc2626;
+  --color-danger-500: #c91d1d; /* WCAG AA 5.7:1 on white (이전 #ef4444는 3.76:1 fail) */
+  --color-danger-600: #b91d1d; /* WCAG AA 6.4:1 on white (이전 #dc2626는 4.5:1 borderline) */
   --color-danger-800: #991b1b;
 }
 

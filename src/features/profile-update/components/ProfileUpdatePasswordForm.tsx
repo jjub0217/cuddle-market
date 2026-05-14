@@ -186,7 +186,7 @@ export default function ProfileUpdatePasswordForm() {
               </InlineNotification>
             ) : null}
           </AnimatePresence>
-          <Button size="md" className="bg-primary-300 w-full cursor-pointer text-white" type="submit">
+          <Button size="md" className="bg-primary-600 w-full cursor-pointer text-white" type="submit">
             비밀번호 변경
           </Button>
         </div>

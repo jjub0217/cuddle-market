@@ -59,7 +59,7 @@ export default function LoginModal() {
         {isLogin ? (
           <Link
             href={ROUTES.LOGIN}
-            className="bg-primary-300 flex flex-1 items-center justify-center rounded-lg px-4 py-2.5 text-white"
+            className="bg-primary-600 flex flex-1 items-center justify-center rounded-lg px-4 py-2.5 text-white"
             onClick={() => {
               const search = searchParams.toString()
               setRedirectUrl(search ? `${pathname}?${search}` : pathname)
@@ -69,7 +69,7 @@ export default function LoginModal() {
             {confirmText}
           </Link>
         ) : (
-          <Button size="md" className="bg-primary-300 flex-1 cursor-pointer text-white" onClick={handleConfirm}>
+          <Button size="md" className="bg-primary-600 flex-1 cursor-pointer text-white" onClick={handleConfirm}>
             {confirmText}
           </Button>
         )}

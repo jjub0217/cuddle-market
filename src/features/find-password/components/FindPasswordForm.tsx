@@ -220,7 +220,7 @@ export function FindPasswordForm() {
                   />
                 </div>
                 <div className="flex flex-col gap-2.5">
-                  <Button size="md" className="bg-primary-300 w-full cursor-pointer text-white" type="button" onClick={onVerifyCode}>
+                  <Button size="md" className="bg-primary-600 w-full cursor-pointer text-white" type="button" onClick={onVerifyCode}>
                     인증하기
                   </Button>
                   <Button
@@ -250,7 +250,7 @@ export function FindPasswordForm() {
                     registration={register('email', authValidationRules.email)}
                   />
                 </div>
-                <Button size="md" className="bg-primary-300 w-full cursor-pointer text-white" type="submit">
+                <Button size="md" className="bg-primary-600 w-full cursor-pointer text-white" type="submit">
                   인증코드 전송
                 </Button>
                 <Link href={ROUTES.LOGIN} className="text-primary-300 w-full text-center font-medium">

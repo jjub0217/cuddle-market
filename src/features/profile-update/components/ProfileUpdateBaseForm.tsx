@@ -354,7 +354,7 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
               ) : null}
             </AnimatePresence>
           </div>
-          <Button size="md" className="bg-primary-300 w-full cursor-pointer text-white" type="submit">
+          <Button size="md" className="bg-primary-600 w-full cursor-pointer text-white" type="submit">
             프로필 수정
           </Button>
         </div>

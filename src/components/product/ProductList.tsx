@@ -40,7 +40,7 @@ export default function ProductList({ products, showMoreButton = false, sellerId
         <button
           type="button"
           onClick={() => goToUserPage(sellerId)}
-          className="bg-primary-300 h-fit w-full cursor-pointer rounded-lg px-4 py-2.5 font-bold text-white md:w-fit md:rounded-full md:py-5"
+          className="bg-primary-600 h-fit w-full cursor-pointer rounded-lg px-4 py-2.5 font-bold text-white md:w-fit md:rounded-full md:py-5"
         >
           더보기
         </button>

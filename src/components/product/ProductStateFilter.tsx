@@ -27,8 +27,8 @@ const VARIANT_STYLES: Record<
     container: 'grid grid-cols-2 flex-wrap gap-2.5 md:flex',
     label:
       'flex cursor-pointer flex-col gap-1 rounded-lg bg-primary-50 px-4 py-2 text-center text-xs font-medium md:text-sm',
-    activeLabel: 'bg-primary-300 text-white',
-    inactiveLabel: 'text-gray-900 hover:bg-primary-300 hover:text-white',
+    activeLabel: 'bg-primary-300 text-on-surface',
+    inactiveLabel: 'text-gray-900 hover:bg-primary-300 hover:text-on-surface',
   },
   'card-chip': {
     container: CARD_CHIP_STYLES.container,
