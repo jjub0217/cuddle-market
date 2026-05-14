@@ -50,7 +50,7 @@ export default function MyDashboard({ myProducts, myRequests, myFavorites }: MyD
   return (
     <div className="flex flex-col gap-8">
       {/* 거래 내역 요약 */}
-      <section className="bg-surface-container-lowest border-outline-variant/40 rounded-2xl border p-6 md:p-8">
+      <section className="bg-surface-container-lowest border-outline-variant/40 rounded-2xl border p-6">
         <UnderlineTabs
           tabs={DASHBOARD_TABS_LIST}
           activeTab={activeTab}
@@ -60,7 +60,7 @@ export default function MyDashboard({ myProducts, myRequests, myFavorites }: MyD
           rightSlot={
             <Link
               href={`?nav=${currentConfig.nav}&tab=${currentConfig.tab}`}
-              className="text-primary flex items-center gap-1 text-sm font-bold hover:underline"
+              className="text-primary flex items-center gap-1 text-sm font-semibold hover:underline"
             >
               전체보기
               <ChevronRight size={16} />
@@ -86,11 +86,8 @@ export default function MyDashboard({ myProducts, myRequests, myFavorites }: MyD
       <section className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         <div className="bg-surface-container-lowest border-outline-variant/40 rounded-2xl border p-6 md:p-8">
           <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-on-surface text-lg font-bold">나의 커뮤니티 글</h2>
-            <Link
-              href="?nav=nav-activity"
-              className="text-primary flex items-center gap-1 text-sm font-bold hover:underline"
-            >
+            <h2 className="text-on-surface text-base font-bold">나의 커뮤니티 글</h2>
+            <Link href="?nav=nav-activity" className="text-primary flex items-center gap-1 text-sm font-bold hover:underline">
               전체보기
               <ChevronRight size={16} />
             </Link>
@@ -100,11 +97,8 @@ export default function MyDashboard({ myProducts, myRequests, myFavorites }: MyD
 
         <div className="bg-surface-container-lowest border-outline-variant/40 rounded-2xl border p-6 md:p-8">
           <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-on-surface text-lg font-bold">최근 작성한 댓글</h2>
-            <Link
-              href="?nav=nav-activity"
-              className="text-primary flex items-center gap-1 text-sm font-bold hover:underline"
-            >
+            <h2 className="text-on-surface text-base font-bold">최근 작성한 댓글</h2>
+            <Link href="?nav=nav-activity" className="text-primary flex items-center gap-1 text-sm font-bold hover:underline">
               전체보기
               <ChevronRight size={16} />
             </Link>

@@ -157,7 +157,7 @@ export default function Header() {
                   <Link
                     href={ROUTES.HOME}
                     className={cn(
-                      'pb-1 text-base font-medium transition-colors',
+                      'pb-1 text-sm font-semibold transition-colors',
                       isMarketActive ? 'border-primary text-primary border-b-2' : 'text-primary/70 hover:text-primary'
                     )}
                   >
@@ -166,7 +166,7 @@ export default function Header() {
                   <Link
                     href={ROUTES.COMMUNITY}
                     className={cn(
-                      'pb-1 text-base font-medium transition-colors',
+                      'pb-1 text-sm font-semibold transition-colors',
                       isCommunityActive ? 'border-primary text-primary border-b-2' : 'text-primary/70 hover:text-primary'
                     )}
                   >
@@ -175,7 +175,7 @@ export default function Header() {
                   <Link
                     href={ROUTES.MAP}
                     className={cn(
-                      'pb-1 text-base font-medium transition-colors',
+                      'pb-1 text-sm font-semibold transition-colors',
                       isMapActive ? 'border-primary text-primary border-b-2' : 'text-primary/70 hover:text-primary'
                     )}
                   >

@@ -46,7 +46,7 @@ export function UnderlineTabs({
               aria-controls={`panel-${tab.code}`}
               tabIndex={isActive ? 0 : -1}
               className={cn(
-                'cursor-pointer pb-3 text-base font-semibold transition-all md:pb-1',
+                'cursor-pointer pb-3 text-sm font-semibold transition-all md:pb-1',
                 isActive ? 'border-primary text-primary border-b-2' : 'text-on-surface-muted hover:text-primary'
               )}
             >

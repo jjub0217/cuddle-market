@@ -24,7 +24,7 @@ export default function MyPageTitle({ heading, count, description, buttonLabel, 
   return (
     <div className="flex justify-between">
       <div>
-        <h2 className="flex items-center gap-2 text-sm font-semibold md:text-base">{heading}</h2>
+        <h2 className="flex items-center gap-2 text-[15px] font-semibold">{heading}</h2>
         {description ? (
           <p className="text-sm text-gray-500">{count !== undefined ? `${description} ${count}` : description}</p>
         ) : null}

@@ -363,14 +363,14 @@ function MyPage() {
                     tabIndex={isActive ? 0 : -1}
                     onClick={() => handleNavChange(tab.id)}
                     className={cn(
-                      'flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-left transition-all',
+                      'flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-left font-medium transition-all',
                       isActive
-                        ? 'bg-primary-container text-on-primary-container font-medium'
+                        ? 'bg-primary-container text-on-primary-container font-semibold'
                         : 'text-on-surface-muted hover:bg-surface-container-low hover:text-on-surface'
                     )}
                   >
                     <Icon size={16} />
-                    <span className="text-sm md:text-base">{tab.label}</span>
+                    <span className="text-sm">{tab.label}</span>
                   </button>
                 )
               })}
