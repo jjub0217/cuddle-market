@@ -176,7 +176,7 @@ export function SignUpForm() {
             </InlineNotification>
           ) : null}
         </AnimatePresence>
-        <Button size="md" className="bg-primary-300 w-full cursor-pointer text-white" type="submit" disabled={isSubmitting}>
+        <Button size="md" className="bg-primary-600 w-full cursor-pointer text-white" type="submit" disabled={isSubmitting}>
           {isSubmitting ? '가입 중...' : '회원가입'}
         </Button>
       </fieldset>

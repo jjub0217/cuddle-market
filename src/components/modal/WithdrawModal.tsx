@@ -111,7 +111,7 @@ export default function WithdrawModal({ isOpen, onConfirm, onCancel, error, onCl
             <div className="flex flex-col gap-0.5">
               <textarea
                 placeholder="탈퇴 사유를 입력해주세요."
-                className="bg-primary-50 focus:border-primary-500 w-full resize-none rounded-lg px-3 py-3 text-sm placeholder:text-gray-400 focus:outline-none"
+                className="bg-primary-50 focus:border-primary-500 w-full resize-none rounded-lg px-3 py-3 text-sm placeholder:text-gray-500 focus:outline-none"
                 id="withdrawReasonDetail"
                 {...register('detailReason', {
                   required: WithDrawApiErrors.detailReason.required,
@@ -119,7 +119,7 @@ export default function WithdrawModal({ isOpen, onConfirm, onCancel, error, onCl
                   maxLength: WithDrawApiErrors.detailReason.maxLength,
                 })}
               />
-              <p className="text-sm font-semibold text-gray-400">{titleLength}/500자</p>
+              <p className="text-sm font-semibold text-gray-500">{titleLength}/500자</p>
               {errors.detailReason ? <p className="text-danger-500 text-xs font-semibold"> {errors.detailReason.message}</p> : null}
             </div>
           </div>

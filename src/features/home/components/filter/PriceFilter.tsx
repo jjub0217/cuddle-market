@@ -21,8 +21,8 @@ const VARIANT_STYLES: Record<
   default: {
     container: 'gap-sm grid grid-cols-2 flex-wrap md:flex',
     chipBase: 'bg-primary-50 cursor-pointer text-xs md:text-sm font-medium',
-    activeChip: 'bg-primary-300 font-bold text-white',
-    inactiveChip: 'text-gray-900 hover:bg-primary-300 hover:text-white',
+    activeChip: 'bg-primary-300 font-bold text-on-surface',
+    inactiveChip: 'text-gray-900 hover:bg-primary-300 hover:text-on-surface',
   },
   'card-chip': {
     container: CARD_CHIP_STYLES.container,

@@ -26,7 +26,7 @@ export default function HomeLoadingState() {
 
               {/* PetTypeFilter: 탭바 + 칩 */}
               <div className="flex flex-col gap-5">
-                <div className="flex gap-6 overflow-hidden border-b border-[#d4c4b2] pb-2">
+                <div className="border-outline-variant flex gap-6 overflow-hidden border-b pb-2">
                   {[...Array(6)].map((_, i) => (
                     <div key={i} className="h-7 w-16 shrink-0 animate-pulse rounded bg-gray-200" />
                   ))}
@@ -52,7 +52,7 @@ export default function HomeLoadingState() {
             {/* DetailFilter: 흰 카드 + 3섹션 (상품 상태 / 가격대 / 지역) */}
             <section
               aria-hidden="true"
-              className="rounded-3xl border border-[#d4c4b2] bg-white px-6 py-6 shadow-sm md:px-10 md:py-8"
+              className="border-outline-variant rounded-3xl border bg-white px-6 py-6 shadow-sm md:px-10 md:py-8"
             >
               <div className="flex flex-col gap-8 md:flex-row md:gap-10">
                 {[...Array(3)].map((_, sectionIdx) => (
@@ -71,7 +71,7 @@ export default function HomeLoadingState() {
             {/* ProductsSection: 헤딩 + 탭/정렬 + 상품 그리드 */}
             <section className="flex flex-col gap-6">
               <h2 className="heading-h3 text-gray-900">상품 목록</h2>
-              <div className="flex flex-col justify-between gap-4 border-b border-[#d4c4b2] pb-5 md:flex-row md:items-center">
+              <div className="border-outline-variant flex flex-col justify-between gap-4 border-b pb-5 md:flex-row md:items-center">
                 <div className="flex items-center gap-2">
                   {[...Array(3)].map((_, i) => (
                     <div key={i} className="h-10 w-24 animate-pulse rounded-full bg-gray-200" />

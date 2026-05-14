@@ -21,7 +21,7 @@ export default function SortableImageList({ previewUrls, onDragEnd, onRemoveImag
             <div
               role="button"
               tabIndex={0}
-              className="border-outline-variant hover:border-primary-container hover:bg-surface-container-low bg-surface-container-lowest flex size-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed text-gray-400 transition-colors md:size-36"
+              className="border-outline-variant hover:border-primary-container hover:bg-surface-container-low bg-surface-container-lowest flex size-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed text-gray-500 transition-colors md:size-36"
             >
               <Camera className="size-6 md:size-8" strokeWidth={1.5} />
               <span className="text-xs font-semibold md:text-sm">이미지 등록</span>

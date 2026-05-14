@@ -29,7 +29,7 @@ export default function InputWithButton({
   checkResult,
   registration,
   buttonText,
-  buttonClassName = 'bg-primary-50 text-primary-500 cursor-pointer font-semibold',
+  buttonClassName = 'bg-primary-100 text-primary cursor-pointer font-semibold',
   buttonDisabled,
   onButtonClick,
   size = 'text-sm',

@@ -95,7 +95,7 @@ export function LoginForm() {
             비밀번호를 잊으셨나요?
           </Link>
         </div>
-        <Button size="sm" className="bg-primary-300 w-full cursor-pointer text-white" type="submit">
+        <Button size="sm" className="bg-primary-600 w-full cursor-pointer text-white" type="submit">
           로그인
         </Button>
       </fieldset>

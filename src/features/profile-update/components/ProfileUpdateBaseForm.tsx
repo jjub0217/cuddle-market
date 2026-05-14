@@ -94,11 +94,14 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
 
   const handleNicknameCheck = async () => {
     try {
-      const { checkNickname: response } = await fetchGraphQL<{ checkNickname: { available: boolean; message: string } }>(`
+      const { checkNickname: response } = await fetchGraphQL<{ checkNickname: { available: boolean; message: string } }>(
+        `
         query CheckNickname($nickname: String!) {
           checkNickname(nickname: $nickname) { available message }
         }
-      `, { nickname })
+      `,
+        { nickname }
+      )
 
       if (response.available) {
         setCheckResult({ status: 'success', message: response.message })
@@ -162,11 +165,14 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
     }
 
     try {
-      const { updateProfile: response } = await fetchGraphQL<{ updateProfile: { success: boolean; code: string } }>(`
+      const { updateProfile: response } = await fetchGraphQL<{ updateProfile: { success: boolean; code: string } }>(
+        `
         mutation UpdateProfile($input: ProfileUpdateInput!) {
           updateProfile(input: $input) { success code }
         }
-      `, { input: data })
+      `,
+        { input: data }
+      )
       if (response.code === 'SUCCESS') {
         updateUserProfile(data)
         setCheckResult({ status: 'idle', message: '' })
@@ -202,7 +208,10 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
   }, [myData, reset])
 
   return (
-    <form className="flex w-full flex-col gap-6 rounded-xl border border-gray-200 bg-white p-5 md:p-7" onSubmit={handleSubmit(onSubmit)}>
+    <form
+      className="flex w-full flex-col gap-6 rounded-xl border border-gray-200 bg-white p-5 md:p-7"
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <fieldset className="flex flex-col gap-8">
         <legend className="sr-only">프로필 정보 수정 폼</legend>
         {isMd ? (
@@ -217,7 +226,13 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
             {/* 프로필 이미지 */}
             <div className="flex flex-col items-center gap-4">
               <div className="relative h-28 w-28">
-                <input ref={fileInputRef} type="file" accept=".jpg,.jpeg,.png,.webp" onChange={handleImageChange} className="hidden" />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".jpg,.jpeg,.png,.webp"
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
                 <div className="bg-primary-50 relative flex h-full w-full cursor-pointer items-center justify-center overflow-hidden rounded-full">
                   {profileImageUrl ? (
                     <Image
@@ -243,7 +258,9 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
                   <Camera className="" size={20} />
                 </button>
               </div>
-              {errors.profileImageUrl ? <p className="text-danger-500 text-xs font-semibold">{errors.profileImageUrl.message}</p> : null}
+              {errors.profileImageUrl ? (
+                <p className="text-danger-500 text-xs font-semibold">{errors.profileImageUrl.message}</p>
+              ) : null}
               <p className="text-xs text-gray-500">프로필 사진을 변경하려면 카메라 아이콘을 클릭하세요</p>
             </div>
 
@@ -251,13 +268,15 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
             <div className="flex flex-col gap-8">
               {/* 본인 인증 정보 */}
               <div className="flex flex-col gap-1 md:gap-1">
-                <h3 className="text-base font-semibold md:heading-h5">본인 인증 정보</h3>
+                <h3 className="md:heading-h5 text-base font-semibold">본인 인증 정보</h3>
 
                 <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
                   <div className="flex w-full flex-1 flex-col gap-1">
                     <div className="flex flex-col gap-2">
                       <span className="text-sm font-medium text-gray-600">이름</span>
-                      <div className="bg-primary-50/50 rounded-lg px-3 py-[10px] text-sm font-medium text-gray-400">{myData?.name}</div>
+                      <div className="bg-primary-50/50 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-400">
+                        {myData?.name}
+                      </div>
                     </div>
                     <p className="text-xs font-bold text-gray-400">본인 인증 정보로 변경할 수 없습니다.</p>
                   </div>
@@ -265,7 +284,9 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
                   <div className="flex w-full flex-1 flex-col gap-1">
                     <div className="flex flex-col gap-2">
                       <span className="text-sm font-medium text-gray-600">생년월일</span>
-                      <div className="bg-primary-50/50 rounded-lg px-3 py-[10px] text-sm font-medium text-gray-400">{formatBirthDate(myData?.birthDate)}</div>
+                      <div className="bg-primary-50/50 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-400">
+                        {formatBirthDate(myData?.birthDate)}
+                      </div>
                     </div>
                     <p className="text-xs font-bold text-gray-400">본인 인증 정보로 변경할 수 없습니다.</p>
                   </div>
@@ -274,11 +295,13 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
 
               {/* 계정 정보 */}
               <div className="flex flex-col gap-1 md:gap-1">
-                <h3 className="text-base font-semibold md:heading-h5">계정 정보</h3>
+                <h3 className="md:heading-h5 text-base font-semibold">계정 정보</h3>
                 <div className="flex flex-col gap-1">
                   <div className="flex flex-col gap-2">
                     <span className="text-sm font-medium text-gray-600">이메일</span>
-                    <div className="bg-primary-50/50 rounded-lg px-3 py-[10px] text-sm font-medium text-gray-400">{myData?.email}</div>
+                    <div className="bg-primary-50/50 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-400">
+                      {myData?.email}
+                    </div>
                   </div>
                   <p className="text-xs font-bold text-gray-400">이메일은 변경할 수 없습니다.</p>
                 </div>
@@ -286,10 +309,12 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
 
               {/* 활동 정보 */}
               <div className="flex flex-col gap-3.5">
-                <h3 className="text-base font-semibold md:heading-h5">활동 정보</h3>
+                <h3 className="md:heading-h5 text-base font-semibold">활동 정보</h3>
                 <div className="flex flex-col gap-1 md:-mt-2.5">
                   <div className="flex flex-col justify-center gap-2">
-                    <RequiredLabel htmlFor="update-nickname" required={false} labelClass="text-sm">닉네임</RequiredLabel>
+                    <RequiredLabel htmlFor="update-nickname" required={false} labelClass="text-sm">
+                      닉네임
+                    </RequiredLabel>
                     <InputWithButton
                       id="update-nickname"
                       type="text"
@@ -317,7 +342,9 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
                 />
                 <div className="flex flex-col gap-1">
                   <div className="flex flex-col gap-2">
-                    <RequiredLabel htmlFor="profile-introduction" required={false} labelClass="text-sm">자기소개</RequiredLabel>
+                    <RequiredLabel htmlFor="profile-introduction" required={false} labelClass="text-sm">
+                      자기소개
+                    </RequiredLabel>
                     <textarea
                       id="profile-introduction"
                       placeholder="소개글을 작성해주세요"
@@ -327,7 +354,9 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
                       {...register('introduction', profileValidationRules.introduction)}
                     />
                     <p className="text-xs font-semibold text-gray-400">{titleLength}/1000자</p>
-                    {errors.introduction ? <p className="text-danger-500 text-xs font-semibold"> {errors.introduction.message}</p> : null}
+                    {errors.introduction ? (
+                      <p className="text-danger-500 text-xs font-semibold"> {errors.introduction.message}</p>
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -354,7 +383,7 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
               ) : null}
             </AnimatePresence>
           </div>
-          <Button size="md" className="bg-primary-300 w-full cursor-pointer text-white" type="submit">
+          <Button size="md" className="bg-primary-600 w-full cursor-pointer text-white" type="submit">
             프로필 수정
           </Button>
         </div>

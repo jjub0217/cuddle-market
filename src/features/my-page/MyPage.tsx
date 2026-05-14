@@ -26,28 +26,8 @@ import ProfileData from '@/components/profile/ProfileData'
 import { AnimatePresence } from 'framer-motion'
 import InlineNotification from '@/components/commons/InlineNotification'
 import Spinner from '@/components/commons/spinner/Spinner'
-import Link from 'next/link'
 import Button from '@/components/commons/button/Button'
-import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { Activity } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
-
-type TabsVariant = 'default' | 'card-pill'
-
-const VARIANT_STYLES: Record<TabsVariant, { container: string; tab: string; tabActive: string; tabInactive: string }> = {
-  default: {
-    container: 'flex w-fit gap-1 md:gap-2.5',
-    tab: 'bg-primary-100 flex-1 cursor-pointer rounded-full px-4 py-2 text-sm whitespace-nowrap md:text-base xl:rounded-2xl xl:bg-white',
-    tabActive: 'bg-primary-500 xl:bg-primary-300 font-bold text-white',
-    tabInactive: 'hover:bg-primary-500 hover:text-white text-gray-900',
-  },
-  'card-pill': {
-    container: 'flex flex-wrap items-center gap-2',
-    tab: 'cursor-pointer rounded-full px-5 py-1.5 text-sm  whitespace-nowrap transition-all',
-    tabActive: 'bg-[#825500] text-white shadow-sm',
-    tabInactive: 'border border-[#d4c4b2] bg-white text-gray-600 hover:border-[#825500] hover:text-[#825500]',
-  },
-}
 
 function MyPage() {
   const [deleteError, setDeleteError] = useState<React.ReactNode | null>(null)
@@ -73,7 +53,6 @@ function MyPage() {
   const activeMyPageTab = tabParam && MY_PAGE_TABS.some((tab) => tab.id === tabParam) ? tabParam : 'tab-sales'
   const activeMyPageNav = navParam && MY_PAGE_NAV.some((tab) => tab.id === navParam) ? navParam : 'nav-dash'
   const activeTabCode = MY_PAGE_TABS.find((tab) => tab.id === activeMyPageTab)?.code ?? 'SELL'
-  const isMd = useMediaQuery('(min-width: 768px)')
 
   const {
     data: myData,
@@ -243,10 +222,6 @@ function MyPage() {
     },
   })
 
-  const handleTabChange = (tabId: string) => {
-    router.replace(`?tab=${tabId}`)
-  }
-
   // NAV → TAB 매핑 (sales/purchases/wishlist는 기존 탭 패널을 그대로 보여줌)
   const NAV_TO_TAB: Record<string, MyPageTabId | null> = {
     DASH_BOARD: null,
@@ -355,8 +330,6 @@ function MyPage() {
   if (!_hasHydrated || !user?.id) {
     return null
   }
-  // const styles = VARIANT_STYLES[variant]
-  // const Icon = iconMap[notification.notificationType as NotificationType] || BellIcon
 
   return (
     <>
