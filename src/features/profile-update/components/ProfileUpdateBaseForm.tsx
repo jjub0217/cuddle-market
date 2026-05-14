@@ -353,7 +353,7 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
                       )}
                       {...register('introduction', profileValidationRules.introduction)}
                     />
-                    <p className="text-xs font-semibold text-gray-400">{titleLength}/1000자</p>
+                    <p className="text-xs font-semibold text-gray-400">{titleLength}/200자</p>
                     {errors.introduction ? (
                       <p className="text-danger-500 text-xs font-semibold"> {errors.introduction.message}</p>
                     ) : null}

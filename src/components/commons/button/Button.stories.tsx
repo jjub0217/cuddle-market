@@ -35,7 +35,7 @@ export const WithIcon: Story = {
 }
 
 export const IconOnly: Story = {
-  args: { icon: Heart, 'aria-label': '좋아요' },
+  args: { icon: Heart, 'aria-label': '찜하기' },
 }
 
 export const Primary: Story = {

@@ -337,8 +337,18 @@ function MyPage() {
         <h1 className="sr-only">마이페이지</h1>
         <div className="mx-auto flex max-w-7xl flex-col gap-3.5 md:flex-row md:gap-8">
           <div className="flex flex-col gap-3">
-            <ProfileData setIsWithdrawModalOpen={setIsWithdrawModalOpen} data={myData!} isMyProfile />
-            <div role="tablist" aria-label="마이페이지 메뉴" className="flex flex-col gap-2">
+            <ProfileData
+              setIsWithdrawModalOpen={setIsWithdrawModalOpen}
+              data={myData!}
+              isMyProfile
+              enableImageUpload
+              summaryCounts={{
+                sales: myProductsData?.pages[0]?.total ?? 0,
+                purchases: myRequestData?.pages[0]?.total ?? 0,
+                wishlist: myFavoriteData?.pages[0]?.total ?? 0,
+              }}
+            />
+            <div role="tablist" aria-label="마이페이지 메뉴" className="flex flex-col gap-1">
               {MY_PAGE_NAV.map((tab) => {
                 const isActive = activeMyPageNav === tab.id
                 const Icon = myPageIconMap[tab.code]
@@ -355,12 +365,12 @@ function MyPage() {
                     className={cn(
                       'flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-left transition-all',
                       isActive
-                        ? 'bg-primary-container text-on-primary-container'
+                        ? 'bg-primary-container text-on-primary-container font-medium'
                         : 'text-on-surface-muted hover:bg-surface-container-low hover:text-on-surface'
                     )}
                   >
                     <Icon size={16} />
-                    <span className="text-sm md:text-base md:font-semibold">{tab.label}</span>
+                    <span className="text-sm md:text-base">{tab.label}</span>
                   </button>
                 )
               })}
@@ -391,7 +401,6 @@ function MyPage() {
 
             {activeMyPageNav === 'nav-dash' ? (
               <MyDashboard
-                profile={myData}
                 myProducts={myProductsData?.pages.flatMap((page) => page.content)}
                 myRequests={myRequestData?.pages.flatMap((page) => page.content)}
                 myFavorites={myFavoriteData?.pages.flatMap((page) => page.content)}

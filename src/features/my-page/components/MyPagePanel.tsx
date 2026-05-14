@@ -7,12 +7,14 @@ import type { MyPageTabId, TransactionStatus } from '@/constants/constants'
 import type { BlockedUser, Product } from '@/types'
 import MyPageTitle from './MyPageTitle'
 import MyList from './MyList'
+import ProductCard from '@/components/product/ProductCard'
 import Button from '@/components/commons/button/Button'
 import LoadMoreButton from '@/components/commons/button/LoadMoreButton'
 import EmptyState from '@/components/EmptyState'
 import { Package, Heart, type LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils/cn'
+import { getTimeAgo } from '@/lib/utils/getTimeAgo'
 
 interface MyPagePanelProps {
   activeTabCode: string
@@ -161,7 +163,7 @@ export default function MyPagePanel({
       role="tabpanel"
       id={`panel-${activeTabCode}`}
       aria-labelledby={activeMyPageTab}
-      className={cn('flex flex-col rounded-xl border-gray-200 px-5 py-7 md:border md:p-5', hasContent && 'gap-6')}
+      className={cn('border-outline-variant/40 flex flex-col rounded-xl px-5 py-5 md:border md:p-5', hasContent && 'gap-4')}
     >
       {config ? (
         <MyPageTitle
@@ -180,19 +182,29 @@ export default function MyPagePanel({
         {activeMyPageTab !== 'tab-blocked' ? (
           productData?.content?.length ? (
             <>
-              <div
-                className={cn(
-                  '-m-2 p-2',
-                  productCount > 1 && 'scrollbar-hide max-h-[60vh] overflow-y-auto',
-                  productCount <= 1 && 'overflow-visible'
-                )}
-              >
-                <ul className="flex flex-col items-stretch justify-start divide-y divide-gray-200 md:gap-2.5 md:divide-y-0">
+              {activeMyPageTab === 'tab-wishlist' ? (
+                <ul className="grid grid-cols-2 gap-4 lg:grid-cols-4">
                   {productData.content.map((product) => (
-                    <MyList key={product.id} {...product} activeTab={activeMyPageTab} handleConfirmModal={handleConfirmModal} />
+                    <li key={product.id}>
+                      <ProductCard data={product} vertical />
+                    </li>
                   ))}
                 </ul>
-              </div>
+              ) : (
+                <div
+                  className={cn(
+                    '-m-2 p-2',
+                    productCount > 1 && 'scrollbar-hide max-h-[60vh] overflow-y-auto',
+                    productCount <= 1 && 'overflow-visible'
+                  )}
+                >
+                  <ul className="flex flex-col items-stretch justify-start divide-y divide-gray-200 md:gap-2.5 md:divide-y-0">
+                    {productData.content.map((product) => (
+                      <MyList key={product.id} {...product} activeTab={activeMyPageTab} handleConfirmModal={handleConfirmModal} />
+                    ))}
+                  </ul>
+                </div>
+              )}
               {hasNextPage ? <LoadMoreButton onClick={() => fetchNextPage()} isLoading={isFetchingNextPage} /> : null}
             </>
           ) : config ? (
@@ -200,19 +212,27 @@ export default function MyPagePanel({
           ) : null
         ) : myBlockedData?.length ? (
           <>
-            <ul className="scrollbar-hide flex max-h-[60vh] flex-col items-center justify-start gap-2.5 overflow-y-auto">
+            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
               {myBlockedData.map((user) => (
                 <li
                   key={user.blockedUserId}
-                  className="border-outline-variant/60 flex w-full items-center justify-between gap-6 rounded-lg border p-3.5"
+                  className="border-outline-variant/40 flex flex-col items-center gap-3 rounded-2xl border bg-white p-4"
                 >
-                  <Link href={`/user-profile/${user.blockedUserId}`} className="flex items-center gap-4">
-                    <div className="relative aspect-square w-12 shrink-0 overflow-hidden rounded-full">
+                  <Link href={`/user-profile/${user.blockedUserId}`} className="flex w-full flex-col items-center gap-2">
+                    <div className="relative aspect-square w-14 shrink-0 overflow-hidden rounded-full">
                       <BlockedUserAvatar profileImageUrl={user.profileImageUrl} nickname={user.nickname} />
                     </div>
-                    <span className="font-medium">{user.nickname}</span>
+                    <div className="flex flex-col items-center text-center">
+                      <span className="line-clamp-1 font-semibold">{user.nickname}</span>
+                      <span className="text-xs text-gray-500">{getTimeAgo(user.blockedAt)} 차단</span>
+                    </div>
                   </Link>
-                  <Button size="sm" variant="secondary" className="cursor-pointer" onClick={() => unblockUser?.(user.blockedUserId)}>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="hover:bg-surface-container-low hover:text-on-surface w-full cursor-pointer"
+                    onClick={() => unblockUser?.(user.blockedUserId)}
+                  >
                     차단 해제
                   </Button>
                 </li>

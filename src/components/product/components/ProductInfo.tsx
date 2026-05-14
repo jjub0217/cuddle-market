@@ -40,7 +40,7 @@ export function ProductInfo({
     <div className="flex flex-3 flex-col gap-2 bg-white p-3 md:flex-none md:p-4">
       <ProductBadge items={badgeItems} />
       <ProductHeading title={title} price={price} />
-      {/* 메타 (레퍼런스 패턴): 은평구 · 좋아요 15  ........  3분 전 */}
+      {/* 메타 (레퍼런스 패턴): 은평구 · 찜 15  ........  3분 전 */}
       <div className="mt-auto flex w-full items-center gap-1 text-gray-500">
         {location ? (
           <>
@@ -48,7 +48,7 @@ export function ProductInfo({
             {hasFavoriteCount ? <span className={metaTextClass} aria-hidden="true">·</span> : null}
           </>
         ) : null}
-        {hasFavoriteCount ? <ProductMetaItem label={`좋아요 ${favoriteCount}`} textClassName={metaTextClass} /> : null}
+        {hasFavoriteCount ? <ProductMetaItem label={`찜 ${favoriteCount}`} textClassName={metaTextClass} /> : null}
         {hasCreatedAt ? (
           <ProductMetaItem label={getTimeAgo(createdAt)} className="ml-auto text-gray-500" textClassName={metaTextClass} />
         ) : null}

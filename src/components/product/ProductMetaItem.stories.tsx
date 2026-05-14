@@ -18,7 +18,7 @@ export const WithEyeIcon: Story = {
 }
 
 export const Favorites: Story = {
-  args: { icon: Heart, label: '좋아요 12' },
+  args: { icon: Heart, label: '찜 12' },
 }
 
 export const Location: Story = {

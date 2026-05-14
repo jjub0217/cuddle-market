@@ -92,13 +92,6 @@ export default function MyList({
     },
   })
 
-  const { mutate: cancelFavorite } = useMutation({
-    mutationFn: () => api.post(`/products/${id}/favorite`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['myFavorite'] })
-    },
-  })
-
   const handleProductType = (value: string) => {
     const koToEn = STATUS_EN_TO_KO.find((status) => status.name === value)?.value
     setCurrentTradeStatus(koToEn as TransactionStatus)
@@ -129,18 +122,12 @@ export default function MyList({
   const isReserved = currentTradeStatus === 'RESERVED'
   const isSalesTab = activeTab === 'tab-sales'
   const isPurchasesTab = activeTab === 'tab-purchases'
-  const isWishlistTab = activeTab === 'tab-wishlist'
   const isMyProductTab = isSalesTab || isPurchasesTab
 
   // 메인 페이지 ProductThumbnail 패턴: 이미지 위 오버레이 + 라운드 흰 배지
   const overlayLabel = isCompleted ? (isPurchasesTab ? '구매완료' : '판매완료') : isReserved ? '예약중' : null
   const overlayBg = isCompleted ? 'bg-black/60' : 'bg-black/40'
 
-  const handleCancelFavorite = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    cancelFavorite()
-  }
   const handleMoreToggle = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -154,7 +141,7 @@ export default function MyList({
     <li id={id.toString()} className="relative w-full hover:z-10">
       <Link
         href={ROUTES.DETAIL_ID(id, title)}
-        className="bg-surface-container-lowest border-outline-variant/40 group flex w-full items-stretch gap-3 rounded-xl border p-3 transition-shadow hover:shadow-lg md:gap-4 md:p-4"
+        className="group flex w-full items-stretch gap-3 rounded-xl border border-black/5 bg-white p-3 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-xl md:gap-4 md:p-4"
       >
         <div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-lg md:w-32">
           <Image
@@ -234,18 +221,14 @@ export default function MyList({
                           </Button>
                         ) : null}
 
-                        {/* 삭제 또는 찜 취소 */}
+                        {/* 삭제 */}
                         <Button
                           size="sm"
                           className="text-danger-500 hover:bg-surface-container-high w-fit cursor-pointer gap-3 rounded-none transition-all"
-                          onClick={
-                            isWishlistTab
-                              ? handleCancelFavorite
-                              : (e: React.MouseEvent) => handleConfirmModal(e, id, title, price, mainImageUrl)
-                          }
+                          onClick={(e: React.MouseEvent) => handleConfirmModal(e, id, title, price, mainImageUrl)}
                         >
                           <Trash2 size={16} />
-                          <span>{isWishlistTab ? '찜 취소' : '삭제'}</span>
+                          <span>삭제</span>
                         </Button>
                       </div>
                     ) : null}
@@ -285,13 +268,9 @@ export default function MyList({
                 <Button
                   size="sm"
                   className="border-outline-variant/60 text-on-surface hover:bg-surface-container-high flex-1 cursor-pointer border transition-all"
-                  onClick={
-                    isWishlistTab
-                      ? handleCancelFavorite
-                      : (e: React.MouseEvent) => handleConfirmModal(e, id, title, price, mainImageUrl)
-                  }
+                  onClick={(e: React.MouseEvent) => handleConfirmModal(e, id, title, price, mainImageUrl)}
                 >
-                  {isWishlistTab ? '찜 취소' : '삭제'}
+                  삭제
                 </Button>
               </div>
             </div>
