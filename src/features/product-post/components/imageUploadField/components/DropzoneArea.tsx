@@ -138,7 +138,7 @@ export default function DropzoneArea<T extends FieldValues>({
 
   return (
     <div {...getRootProps()} className="cursor-pointer rounded-lg">
-      <input {...getInputProps()} />
+      <input {...getInputProps({ 'aria-label': '이미지 파일 업로드' })} />
       <SortableImageList previewUrls={previewUrls} onDragEnd={handleDragEnd} onRemoveImage={handleRemoveImage} />
     </div>
   )

@@ -239,17 +239,19 @@ export default function MyDashboard({ profile, myProducts, myRequests, myFavorit
             </Link>
           }
         />
-        {currentData.length === 0 ? (
-          <p className="text-on-surface-muted py-12 text-center text-sm">표시할 항목이 없습니다.</p>
-        ) : (
-          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {currentData.map((product, index) => (
-              <li key={product.id}>
-                <ProductCard data-index={index} data={product} />
-              </li>
-            ))}
-          </ul>
-        )}
+        <div role="tabpanel" id={`panel-${activeTab}`} aria-labelledby={activeTab}>
+          {currentData.length === 0 ? (
+            <p className="text-on-surface-muted py-12 text-center text-sm">표시할 항목이 없습니다.</p>
+          ) : (
+            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {currentData.map((product, index) => (
+                <li key={product.id}>
+                  <ProductCard data-index={index} data={product} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </section>
 
       {/* 활동 요약 */}

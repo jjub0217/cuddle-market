@@ -41,13 +41,14 @@ export default function DeleteReplyModal({ isOpen, onCancel, replyId, onConfirm 
   return (
     <dialog
       ref={dialogRef}
+      aria-labelledby="delete-reply-modal-title"
       className="m-auto w-11/12 open:flex flex-col gap-4 rounded-lg bg-white p-5 backdrop:bg-gray-900/70 md:w-[16vw] md:min-w-96 md:max-w-md"
       onClick={(e) => {
         if (e.target === dialogRef.current) dialogRef.current.close()
       }}
       onClose={onCancel}
     >
-      <ModalTitle heading="댓글 삭제하기" description="정말로 이 댓글을 삭제하시겠습니까?" />
+      <ModalTitle headingId="delete-reply-modal-title" heading="댓글 삭제하기" description="정말로 이 댓글을 삭제하시겠습니까?" />
       <AnimatePresence>
         {replyDeleteError ? (
           <InlineNotification type="error" onClose={() => setReplyDeleteError(null)}>
