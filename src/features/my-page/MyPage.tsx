@@ -26,10 +26,7 @@ import ProfileData from '@/components/profile/ProfileData'
 import { AnimatePresence } from 'framer-motion'
 import InlineNotification from '@/components/commons/InlineNotification'
 import Spinner from '@/components/commons/spinner/Spinner'
-import Link from 'next/link'
 import Button from '@/components/commons/button/Button'
-import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { Activity } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
 function MyPage() {
@@ -56,7 +53,6 @@ function MyPage() {
   const activeMyPageTab = tabParam && MY_PAGE_TABS.some((tab) => tab.id === tabParam) ? tabParam : 'tab-sales'
   const activeMyPageNav = navParam && MY_PAGE_NAV.some((tab) => tab.id === navParam) ? navParam : 'nav-dash'
   const activeTabCode = MY_PAGE_TABS.find((tab) => tab.id === activeMyPageTab)?.code ?? 'SELL'
-  const isMd = useMediaQuery('(min-width: 768px)')
 
   const {
     data: myData,
