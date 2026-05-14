@@ -41,6 +41,7 @@ export default function LoginModal() {
   return (
     <dialog
       ref={dialogRef}
+      aria-labelledby="login-modal-title"
       className="m-auto w-11/12 open:flex flex-col items-center gap-6 rounded-lg bg-white p-5 backdrop:bg-gray-900/70 md:w-[16vw] md:min-w-80"
       onClick={(e) => {
         if (e.target === dialogRef.current) dialogRef.current.close()
@@ -48,7 +49,7 @@ export default function LoginModal() {
       onClose={closeModal}
     >
       <div className="flex w-full flex-col items-center gap-2">
-        <h2 className="heading-h4">{heading}</h2>
+        <h2 id="login-modal-title" className="heading-h4">{heading}</h2>
         <p>{description}</p>
       </div>
       <div className="flex w-full gap-3">

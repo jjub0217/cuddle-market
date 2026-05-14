@@ -32,7 +32,15 @@ export const Default: Story = {
   },
   render: (args) => {
     const [active, setActive] = useState(args.activeTab)
-    return <Tabs {...args} activeTab={active} onTabChange={setActive} />
+    const activeCode = args.tabs.find((t) => t.id === active)?.code ?? ''
+    return (
+      <div className="flex flex-col gap-4">
+        <Tabs {...args} activeTab={active} onTabChange={setActive} />
+        <div role="tabpanel" id={`panel-${activeCode}`} aria-labelledby={active} className="rounded-lg border p-4 text-sm text-gray-700">
+          {active} 탭 콘텐츠
+        </div>
+      </div>
+    )
   },
 }
 
@@ -51,6 +59,14 @@ export const CardPill: Story = {
   },
   render: (args) => {
     const [active, setActive] = useState(args.activeTab)
-    return <Tabs {...args} activeTab={active} onTabChange={setActive} />
+    const activeCode = args.tabs.find((t) => t.id === active)?.code ?? ''
+    return (
+      <div className="flex flex-col gap-4">
+        <Tabs {...args} activeTab={active} onTabChange={setActive} />
+        <div role="tabpanel" id={`panel-${activeCode}`} aria-labelledby={active} className="rounded-lg border p-4 text-sm text-gray-700">
+          {active} 탭 콘텐츠
+        </div>
+      </div>
+    )
   },
 }

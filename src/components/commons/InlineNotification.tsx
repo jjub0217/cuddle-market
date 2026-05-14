@@ -44,6 +44,7 @@ export default function InlineNotification({ type, children, onClose, durationMs
 
   return (
     <motion.div
+      role="alert"
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 20 }}
@@ -57,7 +58,7 @@ export default function InlineNotification({ type, children, onClose, durationMs
         <div className="break-keep text-sm">{children}</div>
         <button
           type="button"
-          aria-label="close notification"
+          aria-label="알림 닫기"
           onClick={onClose}
           className={cn('ml-auto shrink-0 cursor-pointer rounded p-1 transition-colors focus:outline-none focus-visible:ring-2', styles.text)}
         >

@@ -44,7 +44,7 @@ export default function ToastNotification({ type, title, children, durationMs, s
 
           <button
             type="button"
-            aria-label="close toast"
+            aria-label="토스트 닫기"
             onClick={onClose}
             className={cn(
               'ml-1 shrink-0 cursor-pointer rounded p-1 transition-colors',

@@ -60,6 +60,7 @@ export default function WithdrawModal({ isOpen, onConfirm, onCancel, error, onCl
   return (
     <dialog
       ref={dialogRef}
+      aria-labelledby="withdraw-modal-title"
       className="m-auto w-11/12 open:flex flex-col gap-4 rounded-lg bg-white p-5 backdrop:bg-gray-900/70 md:w-[16vw] md:min-w-96"
       onClick={(e) => {
         if (e.target === dialogRef.current) dialogRef.current.close()
@@ -69,7 +70,7 @@ export default function WithdrawModal({ isOpen, onConfirm, onCancel, error, onCl
         onCancel()
       }}
     >
-      <ModalTitle heading="회원탈퇴" description="정말로 탈퇴하시겠습니까?" />
+      <ModalTitle headingId="withdraw-modal-title" heading="회원탈퇴" description="정말로 탈퇴하시겠습니까?" />
       <AnimatePresence>
         {error ? (
           <InlineNotification type="error" onClose={() => onClearError?.()}>

@@ -54,13 +54,14 @@ export default function BlockModal({ isOpen, onCancel, userNickname, userId }: B
   return (
     <dialog
       ref={dialogRef}
+      aria-labelledby="block-modal-title"
       className="m-auto w-11/12 open:flex flex-col gap-4 rounded-lg bg-white p-5 backdrop:bg-gray-900/70 md:w-[16vw] md:min-w-96 md:max-w-md"
       onClick={(e) => {
         if (e.target === dialogRef.current) dialogRef.current.close()
       }}
       onClose={onCancel}
     >
-      <ModalTitle heading="사용자 차단하기" description={`정말로 ${userNickname}를 차단하시겠습니까?`} />
+      <ModalTitle headingId="block-modal-title" heading="사용자 차단하기" description={`정말로 ${userNickname}를 차단하시겠습니까?`} />
       <AnimatePresence>
         {userBlockError ? (
           <InlineNotification type="error" onClose={() => setUserBlockError(null)}>

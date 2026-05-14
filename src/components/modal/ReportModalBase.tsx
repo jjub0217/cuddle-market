@@ -69,6 +69,7 @@ export default function ReportModalBase({ isOpen, heading, description, reasons,
   return (
     <dialog
       ref={dialogRef}
+      aria-labelledby="report-modal-title"
       className="m-auto w-11/12 max-h-[90vh] open:flex flex-col gap-4 overflow-y-auto rounded-lg bg-white p-5 backdrop:bg-gray-900/70 md:w-1/5 md:min-w-96"
       onClick={(e) => {
         if (e.target === dialogRef.current) dialogRef.current.close()
@@ -78,7 +79,7 @@ export default function ReportModalBase({ isOpen, heading, description, reasons,
         onCancel()
       }}
     >
-      <ModalTitle heading={heading} description={description} />
+      <ModalTitle headingId="report-modal-title" heading={heading} description={description} />
       <AnimatePresence>
         {error ? (
           <InlineNotification type="error" onClose={() => onClearError?.()}>
