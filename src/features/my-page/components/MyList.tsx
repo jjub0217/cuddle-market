@@ -167,10 +167,10 @@ export default function MyList({
         </div>
 
         <div className="flex flex-1 items-stretch gap-3 md:gap-4">
-          <div className="flex flex-1 self-stretch flex-col justify-between gap-3">
+          <div className="flex flex-1 flex-col justify-between gap-3 self-stretch">
             <div className="flex w-full items-start justify-between">
-              <div className="flex w-full flex-col gap-1">
-                {isMd ? <h3 className="line-clamp-2 w-96 text-base leading-6.5">{title}</h3> : null}
+              <div className="flex w-full flex-col">
+                {isMd ? <h3 className="line-clamp-2 w-96 text-[15px] leading-6.5">{title}</h3> : null}
                 {!isMd ? (
                   <div className="relative flex w-full items-start justify-between gap-2">
                     <h3 className="line-clamp-2 w-full text-sm font-normal">{title}</h3>
@@ -234,7 +234,7 @@ export default function MyList({
                     ) : null}
                   </div>
                 ) : null}
-                <span className="text-md font-bold text-gray-900">{formatPrice(price)} 원</span>
+                <span className="text-base font-bold text-gray-900">{formatPrice(price)} 원</span>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -256,12 +256,7 @@ export default function MyList({
               ) : null}
               <div className="flex gap-1">
                 {isMyProductTab && !isCompleted ? (
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    className="flex-1 cursor-pointer"
-                    onClick={handleProductUpdate}
-                  >
+                  <Button size="sm" variant="secondary" className="flex-1 cursor-pointer" onClick={handleProductUpdate}>
                     수정
                   </Button>
                 ) : null}

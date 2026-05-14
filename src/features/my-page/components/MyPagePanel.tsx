@@ -172,7 +172,7 @@ export default function MyPagePanel({
           description={titleDescription}
           buttonLabel={config.buttonLabel}
           navigateTo={config.navigateTo}
-          buttonClassname="text-base"
+          buttonClassname="text-sm"
         />
       ) : (
         <MyPageTitle heading="차단한 사용자" description={`차단한 사용자 ${myBlockedTotal ?? 0}명`} />

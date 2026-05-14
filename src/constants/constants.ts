@@ -1,12 +1,12 @@
 import {
   MessageSquarePlus,
   MessageSquareMore,
+  MessageSquareText,
   HeartCrack,
   Tag,
   ShieldAlert,
   Trash2,
   Reply,
-  MessageCircle,
   TriangleAlert,
   Check,
   Slash,
@@ -335,7 +335,7 @@ export const iconMap = {
   ADMIN_SANCTION: ShieldAlert,
   POST_DELETED: Trash2,
   COMMENT_REPLY: Reply,
-  POST_COMMENT: MessageCircle,
+  POST_COMMENT: MessageSquareText,
 } as const satisfies Record<string, LucideIcon>
 export type NotificationType = keyof typeof iconMap
 

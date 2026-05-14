@@ -7,7 +7,7 @@ import { useUserStore } from '@/store/userStore'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ROUTES } from '@/constants/routes'
-import { MessageCircleMore, Bell } from 'lucide-react'
+import { MessageCircle, Bell } from 'lucide-react'
 import IconButton from '@/components/commons/button/IconButton'
 import NotificationsDropdown from './notification-section/NotificationsDropdown'
 import { useQuery } from '@tanstack/react-query'
@@ -55,18 +55,21 @@ export default function UserControls({ isSideOpen, setIsSideOpen, hideMenuButton
       {hasHydrated && isLogin() ? (
         <div className="flex items-center gap-1">
           <Link href={ROUTES.CHAT} className="ml-1 hidden xl:block" aria-label="채팅">
-            <MessageCircleMore className="text-primary" strokeWidth={1.5} />
+            <MessageCircle className="text-primary" strokeWidth={1.5} size={20} />
           </Link>
-          <div className="relative mr-2.5" onClick={handleBellToggle}>
+          <div className="relative" onClick={handleBellToggle}>
             <IconButton aria-label="알림" size="lg" className="hover:bg-transparent">
-              <Bell size={24} className="stroke-primary" />
+              <Bell size={20} strokeWidth={1.5} className="text-primary" />
             </IconButton>
             {(unreadCountData?.unreadCount ?? 0) > 0 ? (
-              <span className="bg-danger-500 absolute top-0 -right-2 flex size-5 items-center justify-center rounded-full p-2 text-sm text-white">
-                {unreadCountData?.unreadCount}
-              </span>
+              <span
+                className="bg-danger-500 absolute top-1 right-1 size-2 rounded-full"
+                aria-label={`읽지 않은 알림 ${unreadCountData?.unreadCount}개`}
+              />
             ) : null}
-            {isNotificationOpen ? <NotificationsDropdown isNotificationOpen={isNotificationOpen} setIsNotificationOpen={setIsNotificationOpen} /> : null}
+            {isNotificationOpen ? (
+              <NotificationsDropdown isNotificationOpen={isNotificationOpen} setIsNotificationOpen={setIsNotificationOpen} />
+            ) : null}
           </div>
           <UserMenu
             isNotificationOpen={false}
