@@ -157,8 +157,8 @@ export default function Header() {
                   <Link
                     href={ROUTES.HOME}
                     className={cn(
-                      'pb-1 text-sm font-bold transition-colors',
-                      isMarketActive ? 'border-b-2 border-primary text-primary' : 'text-primary/70 hover:text-primary'
+                      'pb-1 text-base font-medium transition-colors',
+                      isMarketActive ? 'border-primary text-primary border-b-2' : 'text-primary/70 hover:text-primary'
                     )}
                   >
                     중고거래
@@ -166,8 +166,8 @@ export default function Header() {
                   <Link
                     href={ROUTES.COMMUNITY}
                     className={cn(
-                      'pb-1 text-sm font-bold transition-colors',
-                      isCommunityActive ? 'border-b-2 border-primary text-primary' : 'text-primary/70 hover:text-primary'
+                      'pb-1 text-base font-medium transition-colors',
+                      isCommunityActive ? 'border-primary text-primary border-b-2' : 'text-primary/70 hover:text-primary'
                     )}
                   >
                     질문·정보
@@ -175,8 +175,8 @@ export default function Header() {
                   <Link
                     href={ROUTES.MAP}
                     className={cn(
-                      'pb-1 text-sm font-bold transition-colors',
-                      isMapActive ? 'border-b-2 border-primary text-primary' : 'text-primary/70 hover:text-primary'
+                      'pb-1 text-base font-medium transition-colors',
+                      isMapActive ? 'border-primary text-primary border-b-2' : 'text-primary/70 hover:text-primary'
                     )}
                   >
                     펫지도
