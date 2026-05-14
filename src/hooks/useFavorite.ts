@@ -19,18 +19,23 @@ export function useFavorite({ productId, initialIsFavorite }: UseFavoriteOptions
     setIsFavorite(initialIsFavorite)
   }, [initialIsFavorite])
 
-  const { mutate: toggleFavorite, isPending } = useMutation({
-    mutationFn: () => fetchGraphQL(`
+  const { mutate: runFavoriteRequest, isPending } = useMutation({
+    mutationFn: () =>
+      fetchGraphQL(
+        `
       mutation ToggleFavorite($productId: Int!) {
         toggleFavorite(productId: $productId) { success }
       }
-    `, { productId }),
+    `,
+        { productId }
+      ),
     onMutate: () => {
       setIsFavorite((prev) => !prev)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['product', productId] })
       queryClient.invalidateQueries({ queryKey: ['products'] })
+      queryClient.invalidateQueries({ queryKey: ['myFavorite'] })
     },
     onError: () => {
       setIsFavorite(initialIsFavorite)
@@ -50,7 +55,7 @@ export function useFavorite({ productId, initialIsFavorite }: UseFavoriteOptions
       return
     }
 
-    toggleFavorite()
+    runFavoriteRequest()
   }
 
   return { isFavorite, isPending, handleToggleFavorite }

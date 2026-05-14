@@ -35,7 +35,7 @@ export const Medium: Story = {
 export const Large: Story = {
   args: {
     size: 'lg',
-    'aria-label': '좋아요',
+    'aria-label': '찜하기',
     children: <Heart size={24} />,
   },
 }

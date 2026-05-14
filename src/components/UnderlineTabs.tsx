@@ -31,7 +31,7 @@ export function UnderlineTabs({
   const filteredTabs = excludeTabId ? tabs.filter((tab) => tab.id !== excludeTabId) : tabs
 
   return (
-    <div className={cn('border-outline-variant/30 flex items-end justify-between border-b', className)}>
+    <div className={cn('border-outline-variant/30 flex items-center justify-between border-b', className)}>
       <div role="tablist" aria-label={ariaLabel} className="flex gap-6 md:gap-10">
         {filteredTabs.map((tab) => {
           const isActive = activeTab === tab.id

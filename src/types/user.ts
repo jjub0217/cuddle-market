@@ -39,6 +39,7 @@ export interface BlockedUser {
   blockedUserId: number
   nickname: string
   profileImageUrl: string
+  blockedAt: string
 }
 
 export interface MyBlockedUsersResponse {
