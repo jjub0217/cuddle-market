@@ -4,14 +4,13 @@ import ProfileData from '@/components/profile/ProfileData'
 import Footer from '@/components/footer/Footer'
 import { useState } from 'react'
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import { api } from '@/lib/api/api'
-import { ProductListItem } from '@/components/product/ProductListItem'
 import ProductCard from '@/components/product/ProductCard'
-import { useMediaQuery } from '@/hooks/useMediaQuery'
 import LoadMoreButton from '@/components/commons/button/LoadMoreButton'
 import EmptyState from '@/components/EmptyState'
 import { Package } from 'lucide-react'
+import Tabs from '@/components/Tabs'
 import dynamic from 'next/dynamic'
 const UserReportModal = dynamic(() => import('@/components/modal/UserReportModal'))
 const BlockModal = dynamic(() => import('@/components/modal/BlockModal'))
@@ -21,18 +20,36 @@ import InlineNotification from '@/components/commons/InlineNotification'
 import Spinner from '@/components/commons/spinner/Spinner'
 import { ROUTES } from '@/constants/routes'
 
+const USER_PAGE_TABS = [
+  { id: 'tab-sales', label: '판매상품', code: 'SELL' },
+  { id: 'tab-purchases', label: '판매요청', code: 'REQUEST' },
+] as const
+
+type UserPageTabId = (typeof USER_PAGE_TABS)[number]['id']
+
 function UserPage() {
-  const isMd = useMediaQuery('(min-width: 768px)')
   const { user } = useUserStore()
   const params = useParams()
   const id = params.id as string
   const queryClient = useQueryClient()
 
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const tabParam = searchParams.get('tab') as UserPageTabId | null
+  const activeTab: UserPageTabId =
+    tabParam && USER_PAGE_TABS.some((t) => t.id === tabParam) ? tabParam : 'tab-sales'
+  const isSalesTab = activeTab === 'tab-sales'
+
   const [, setIsWithdrawModalOpen] = useState(false)
   const [isReportModalOpen, setIsReportModalOpen] = useState(false)
   const [isBlockModalOpen, setIsBlockModalOpen] = useState(false)
   const [unblockError, setUnblockError] = useState<React.ReactNode | null>(null)
+
+  const handleTabChange = (tabId: string) => {
+    const next = new URLSearchParams(searchParams.toString())
+    next.set('tab', tabId)
+    router.replace(`?${next.toString()}`)
+  }
 
   const {
     data: userData,
@@ -49,14 +66,14 @@ function UserPage() {
   })
 
   const {
-    data: userProductData,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading: isLoadingUserProductData,
-    error: errorUserProductData,
+    data: userSellProductData,
+    fetchNextPage: fetchNextSellPage,
+    hasNextPage: hasNextSellPage,
+    isFetchingNextPage: isFetchingNextSellPage,
+    isLoading: isLoadingUserSellProductData,
+    error: errorUserSellProductData,
   } = useInfiniteQuery({
-    queryKey: ['userProducts', id],
+    queryKey: ['userProducts', id, 'SELL'],
     queryFn: async ({ pageParam }) => {
       const response = await api.get(`/profile/${id}/products`, {
         params: { page: pageParam, size: 10 },
@@ -65,8 +82,36 @@ function UserPage() {
     },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
     initialPageParam: 0,
-    enabled: !!id,
+    enabled: !!id && isSalesTab,
   })
+
+  const {
+    data: userRequestProductData,
+    fetchNextPage: fetchNextRequestPage,
+    hasNextPage: hasNextRequestPage,
+    isFetchingNextPage: isFetchingNextRequestPage,
+    isLoading: isLoadingUserRequestProductData,
+    error: errorUserRequestProductData,
+  } = useInfiniteQuery({
+    queryKey: ['userProducts', id, 'REQUEST'],
+    queryFn: async ({ pageParam }) => {
+      const response = await api.get(`/profile/${id}/purchase-requests`, {
+        params: { page: pageParam, size: 10 },
+      })
+      return response.data.data
+    },
+    getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
+    initialPageParam: 0,
+    enabled: !!id && !isSalesTab,
+  })
+
+  const userProductData = isSalesTab ? userSellProductData : userRequestProductData
+  const fetchNextPage = isSalesTab ? fetchNextSellPage : fetchNextRequestPage
+  const hasNextPage = isSalesTab ? hasNextSellPage : hasNextRequestPage
+  const isFetchingNextPage = isSalesTab ? isFetchingNextSellPage : isFetchingNextRequestPage
+  const isLoadingUserProductData = isSalesTab ? isLoadingUserSellProductData : isLoadingUserRequestProductData
+  const errorUserProductData = isSalesTab ? errorUserSellProductData : errorUserRequestProductData
+  const activeTabLabel = isSalesTab ? '판매상품' : '판매요청'
 
   const isMyProfile = user?.id === userData?.id
 
@@ -132,36 +177,37 @@ function UserPage() {
             isMyProfile={isMyProfile}
             unblockUser={unblockUser}
           />
-          <section className="flex w-full flex-col gap-6 rounded-xl border-gray-200 p-5 md:border">
-            <div className="flex justify-between">
-              <div className="flex flex-col items-start">
-                <h4 className="text-sm font-bold md:text-base">{userData?.nickname}님의 판매상품</h4>
-                <p className="text-sm text-gray-500">상품 {totalProducts}</p>
-              </div>
+          <section className="flex w-full flex-col gap-6" aria-labelledby="user-product-heading">
+            <h4 id="user-product-heading" className="sr-only">
+              {userData?.nickname}님의 {activeTabLabel}
+            </h4>
+            <div className="flex flex-wrap items-center justify-between gap-3 px-5 md:px-0">
+              <Tabs
+                tabs={USER_PAGE_TABS}
+                activeTab={activeTab}
+                onTabChange={handleTabChange}
+                ariaLabel="유저 상품 종류 메뉴"
+                variant="card-pill"
+              />
+              <p className="text-sm text-gray-500">총 {totalProducts}개</p>
             </div>
-            <div className="gap-lg flex max-h-[60vh] flex-col overflow-y-auto">
-              {allProducts.length ? (
-                <>
-                  {isMd ? (
-                    <ul className="flex flex-col items-center justify-start gap-2.5">
-                      {allProducts.map((product) => (
-                        <ProductListItem key={product.id} product={product} />
-                      ))}
-                    </ul>
-                  ) : (
-                    <ul className="grid grid-cols-2 gap-4">
+            <div className="rounded-xl border-outline-variant/40 p-5 md:border">
+              <div className="gap-lg flex flex-col">
+                {allProducts.length ? (
+                  <>
+                    <ul className="grid grid-cols-2 gap-4 lg:grid-cols-4">
                       {allProducts.map((product) => (
                         <li key={product.id}>
                           <ProductCard data={product} vertical hideProductType />
                         </li>
                       ))}
                     </ul>
-                  )}
-                  {hasNextPage ? <LoadMoreButton onClick={() => fetchNextPage()} isLoading={isFetchingNextPage} /> : null}
-                </>
-              ) : (
-                <EmptyState icon={Package} title={'등록한 상품이 없습니다'} />
-              )}
+                    {hasNextPage ? <LoadMoreButton onClick={() => fetchNextPage()} isLoading={isFetchingNextPage} /> : null}
+                  </>
+                ) : (
+                  <EmptyState icon={Package} title={`등록한 ${activeTabLabel}이 없습니다`} />
+                )}
+              </div>
             </div>
           </section>
         </div>
