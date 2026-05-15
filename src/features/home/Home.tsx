@@ -1,7 +1,7 @@
 'use client'
 
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import { DetailFilter } from '@/features/home/components/filter/DetailFilter'
 import { ProductsSection } from '@/features/home/components/product-section/ProductsSection'
 import { fetchGraphQL } from '@/lib/api/graphql'
@@ -26,6 +26,17 @@ function Home() {
   const hasHydrated = useUserStore((state) => state._hasHydrated)
   const isLoggedIn = hasHydrated && isLogin()
   const { searchParams, pathname, push } = useFilterNavigation()
+
+  // 메인페이지 새로고침 시 스크롤 복원 비활성화 — hero가 헤더와 같은 톤이라 항상 처음부터 보여야 자연스러움
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const prev = window.history.scrollRestoration
+    window.history.scrollRestoration = 'manual'
+    window.scrollTo(0, 0)
+    return () => {
+      window.history.scrollRestoration = prev
+    }
+  }, [])
 
   // URL에서 탭 초기값 결정 (시각적 표시용)
   const urlPetType = searchParams.get('petType')
@@ -276,11 +287,11 @@ function Home() {
       {isLoggedIn ? (
         <Link
           href="/product-post"
-          className={`fixed right-8 bottom-8 flex items-center gap-2 rounded-full bg-[#825500] px-5 py-3.5 text-white shadow-lg transition-all hover:brightness-110 active:scale-95 max-md:right-4 max-md:bottom-20 md:px-6 md:py-4 ${Z_INDEX.FLOATING_BUTTON}`}
+          className={`fixed right-8 bottom-8 flex items-center gap-2 rounded-full bg-[#825500] px-4 py-3 text-white shadow-lg transition-all hover:brightness-110 active:scale-95 max-md:right-4 max-md:bottom-20 md:px-6 md:py-4 ${Z_INDEX.FLOATING_BUTTON}`}
           aria-label="상품 등록"
         >
           <Plus size={20} strokeWidth={2.5} />
-          <span className="text-sm font-bold md:text-base">상품 등록</span>
+          <span className="text-base font-bold">상품 등록</span>
         </Link>
       ) : null}
     </>

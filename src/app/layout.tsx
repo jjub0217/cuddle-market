@@ -37,6 +37,12 @@ export default function RootLayout({
     <html lang="ko">
       <head>
         <link rel="preconnect" href="https://df1xl13ui5mlo.cloudfront.net" />
+        {/* 메인페이지 새로고침 시 브라우저 scroll restoration 비활성화 — hydration 전에 적용해 헤더 색 깜빡임 방지 */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if(location.pathname==='/'&&'scrollRestoration' in history){history.scrollRestoration='manual';}`,
+          }}
+        />
       </head>
       <body>
         <Providers>

@@ -15,6 +15,7 @@ interface SearchBarProps {
   paramName?: string // URL 파라미터 이름 (기본값: 'keyword')
   inputClass?: string
   wrapperClassName?: string // Input wrapper className 오버라이드 (rounded, bg, border 등)
+  onSearch?: () => void // 검색 실행(Enter) 후 호출. 모바일 오버레이 닫기 등에 사용
 }
 
 export default function SearchBar({
@@ -25,6 +26,7 @@ export default function SearchBar({
   paramName = 'keyword',
   inputClass,
   wrapperClassName,
+  onSearch,
 }: SearchBarProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -58,6 +60,7 @@ export default function SearchBar({
           router.push(ROUTES.HOME)
         }
       }
+      onSearch?.()
     }
   }
 
