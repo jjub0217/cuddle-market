@@ -127,12 +127,21 @@ export function ChatLog({
     }
   }
 
-  // 맨 아래 근처에 있을 때만 자동 스크롤 (페인트 전에 실행하여 플리커 방지)
+  // 자동 스크롤 조건 — 실제 새 메시지가 추가된 경우에만 실행:
+  // 1) 사용자가 맨 아래 근처에 있거나
+  // 2) 마지막 메시지가 내가 보낸 메시지일 때 (스크롤이 위에 있어도 강제로 내림)
+  const prevLengthRef = useRef(0)
   useLayoutEffect(() => {
-    if (scrollRef.current && isNearBottom) {
+    if (!scrollRef.current) return
+    const isNewMessage = roomMessages.length > prevLengthRef.current
+    prevLengthRef.current = roomMessages.length
+    if (!isNewMessage) return
+    const lastMessage = roomMessages[roomMessages.length - 1]
+    const isLastFromMe = lastMessage ? getIsMine(lastMessage, user?.id) : false
+    if (isLastFromMe || isNearBottom) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
-  }, [roomMessages, isNearBottom])
+  }, [roomMessages, isNearBottom, user?.id])
 
   // 이전 메시지 로드 후 스크롤 위치 복원 (페인트 전에 실행하여 플리커 방지)
   useLayoutEffect(() => {
@@ -187,36 +196,45 @@ export function ChatLog({
         ) : null}
       </AnimatePresence>
       {Object.entries(groupedMessages).map(([dateKey, messages]) => (
-        <div key={dateKey} className="flex flex-col gap-2">
+        <div key={dateKey} className="flex flex-col gap-3">
           <div className="mt-3.5 flex justify-center">
-            <span className="rounded-full bg-[#8d99a3] px-3 py-1 text-xs font-semibold text-[#f0f9ff]">
+            <span className="rounded-full bg-[#eae7e7] px-3 py-1 text-xs font-semibold text-[#756652]">
               {chatFormatDate(messages[0].createdAt)}
             </span>
           </div>
-          <ul>
-            {messages.map((message) => {
+          <ul className="flex flex-col">
+            {messages.map((message, idx) => {
               const isMine = getIsMine(message, user?.id)
+              const prevMessage = idx > 0 ? messages[idx - 1] : null
+              const isSenderChanged = prevMessage ? getIsMine(prevMessage, user?.id) !== isMine : false
               return message.messageType === 'SYSTEM' ? (
-                <li key={message.messageId} className="bg-primary-100 m-6 mx-auto w-fit rounded-full px-3 py-1 text-center">
+                <li
+                  key={message.messageId}
+                  className="bg-primary-100 m-6 mx-auto w-fit rounded-full px-3 py-1 text-center text-sm"
+                >
                   {message.content}
                 </li>
               ) : message.isBlocked ? (
                 <li key={message.messageId} className="ml-auto flex w-fit max-w-64 min-w-60 flex-col rounded-full px-3 py-1">
-                  <span className="rounded-t-lg rounded-bl-lg bg-gray-900 px-3 py-2 text-white">{message.content}</span>
+                  <span className="rounded-t-lg rounded-bl-lg bg-gray-900 px-3 py-2 text-sm text-white">{message.content}</span>
                   <span className="text-sm">개인정보 포함으로 상대방에게 전송되지 않았습니다.</span>
                 </li>
               ) : (
                 <li
                   key={message.messageId}
-                  className={cn('flex w-fit items-end gap-1 px-3 py-1', isMine ? 'ml-auto flex-row-reverse' : 'mr-auto')}
+                  className={cn(
+                    'flex w-fit items-end gap-1 px-3 py-1',
+                    isMine ? 'ml-auto flex-row-reverse' : 'mr-auto',
+                    isSenderChanged && 'mt-5'
+                  )}
                 >
                   {message.messageType === 'IMAGE' ? (
                     <ChatImageMessage imageUrl={message.imageUrl ?? undefined} alt={message.senderNickname} />
                   ) : (
                     <span
                       className={cn(
-                        'rounded-t-lg px-3 py-2 whitespace-pre-wrap',
-                        isMine ? 'rounded-bl-lg bg-gray-900 text-white' : 'rounded-br-lg border border-gray-300 bg-white'
+                        'rounded-b-2xl px-3 py-2 text-sm whitespace-pre-wrap',
+                        isMine ? 'rounded-tl-2xl bg-[#633f00] text-white' : 'bg-surface-container-low rounded-tr-2xl'
                       )}
                     >
                       {message.content}

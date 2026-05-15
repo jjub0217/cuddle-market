@@ -28,11 +28,14 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
 
   const handleOutChatRoom = async () => {
     try {
-      await fetchGraphQL(`
+      await fetchGraphQL(
+        `
         mutation LeaveChatRoom($chatRoomId: Int!) {
           leaveChatRoom(chatRoomId: $chatRoomId) { success }
         }
-      `, { chatRoomId: data.chatRoomId })
+      `,
+        { chatRoomId: data.chatRoomId }
+      )
       unsubscribeFromRoom(data.chatRoomId)
       queryClient.invalidateQueries({ queryKey: ['chatRooms'] })
       onLeaveRoom(data.chatRoomId)
@@ -44,11 +47,14 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
   const handleTradeStatusChange = async () => {
     setIsMenuOpen(false)
     try {
-      await fetchGraphQL(`
+      await fetchGraphQL(
+        `
         mutation UpdateTradeStatus($id: Int!, $tradeStatus: String!) {
           updateTradeStatus(id: $id, tradeStatus: $tradeStatus) { success }
         }
-      `, { id: data.productId, tradeStatus: 'SOLD_OUT' })
+      `,
+        { id: data.productId, tradeStatus: 'SOLD_OUT' }
+      )
       queryClient.invalidateQueries({ queryKey: ['chatRooms'] })
     } catch (error) {
       console.error('거래 상태 변경 실패:', error)
@@ -58,11 +64,14 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
   const handleReportUser = async () => {
     setIsMenuOpen(false)
     try {
-      await fetchGraphQL(`
+      await fetchGraphQL(
+        `
         mutation ReportUser($userId: Int!, $reasonCode: String!) {
           reportUser(userId: $userId, reasonCode: $reasonCode) { success }
         }
-      `, { userId: data.opponentId, reasonCode: 'CHAT_ABUSE' })
+      `,
+        { userId: data.opponentId, reasonCode: 'CHAT_ABUSE' }
+      )
       alert('신고가 접수되었습니다.')
     } catch (error) {
       if (error instanceof Error && error.message.includes('이미 신고한')) {
@@ -77,11 +86,14 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
   const handleBlockUser = async () => {
     setIsMenuOpen(false)
     try {
-      await fetchGraphQL(`
+      await fetchGraphQL(
+        `
         mutation BlockUser($userId: Int!) {
           blockUser(userId: $userId) { success }
         }
-      `, { userId: data.opponentId })
+      `,
+        { userId: data.opponentId }
+      )
       alert('차단되었습니다.')
       queryClient.invalidateQueries({ queryKey: ['chatRooms'] })
     } catch (error) {
@@ -98,7 +110,7 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
   ]
 
   return (
-    <div className="flex flex-col gap-2.5 bg-white p-3.5">
+    <div className="flex flex-col gap-2.5 p-3.5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {onBack ? (
@@ -133,9 +145,14 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
       </div>
       <Link
         href={ROUTES.DETAIL_ID(Number(data?.productId), data?.productTitle)}
-        className="flex items-center gap-2 rounded-lg border border-gray-200 px-2.5 py-3 hover:bg-gray-50"
+        className="bg-outline-variant/20 hover:bg-outline-variant/40 flex items-center gap-2 rounded-2xl px-2.5 py-3 transition-colors"
       >
-        <ChatProductCard productImageUrl={data?.productImageUrl} productTitle={data?.productTitle} productPrice={data?.productPrice} size="md" />
+        <ChatProductCard
+          productImageUrl={data?.productImageUrl}
+          productTitle={data?.productTitle}
+          productPrice={data?.productPrice}
+          size="md"
+        />
       </Link>
     </div>
   )

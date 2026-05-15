@@ -21,8 +21,8 @@ export default function ChatInput({ value, onChange, onSubmit }: ChatInputProps)
       onChange={(e) => onChange(e.target.value)}
       onKeyDown={handleKeyDown}
       value={value}
-      placeholder="채팅을 입력하세요."
-      className="h-fit w-full resize-none rounded bg-[#E5E7EB]/50 p-2.5 focus:outline-none"
+      placeholder="메시지를 입력하세요"
+      className="h-fit w-full resize-none bg-transparent text-sm placeholder:text-gray-400 focus:outline-none"
     />
   )
 }
