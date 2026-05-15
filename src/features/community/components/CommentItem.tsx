@@ -15,7 +15,7 @@ function renderContentWithMention(content: string) {
   const [, mention, rest] = match
   return (
     <>
-      <span className="text-primary-container">{mention}</span>
+      <span className="text-primary-container text-sm md:text-base">{mention}</span>
       {rest}
     </>
   )
@@ -64,7 +64,7 @@ export function CommentItem({
         className={cn(
           'flex items-start gap-3.5',
           isReply
-            ? 'bg-surface-container-low rounded-lg px-4.5 py-4.5'
+            ? 'bg-surface-container-low rounded-lg px-2 py-3 md:px-4.5 md:py-4.5'
             : cn(showBorder && 'border-t border-gray-300 pt-3.5', !isRepliesOpen && 'pb-3.5')
         )}
       >
@@ -77,9 +77,9 @@ export function CommentItem({
 
         {/* 유저 정보 및 내용 */}
         <div className="flex flex-col justify-center gap-2">
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1 md:gap-2">
             <div className="flex items-center gap-1.5">
-              <p className="text-sm font-semibold md:text-base">{comment.authorNickname}</p>
+              <p className="text-[13px] font-semibold md:text-base">{comment.authorNickname}</p>
               {Number(comment.authorId) === user?.id ? (
                 <p className="bg-primary-200 rounded-full px-2 py-0.5 text-xs font-semibold text-white">내 댓글</p>
               ) : null}
@@ -87,19 +87,21 @@ export function CommentItem({
             <p className="whitespace-pre-wrap">{renderContentWithMention(comment.content)}</p>
           </div>
           <div className="flex items-center gap-1">
-            <p className="text-xs font-medium text-gray-500">{getTimeAgo(comment.createdAt)}</p>
-            <span aria-hidden="true" className="text-xs">
-              ·
-            </span>
+            <p className="text-xs text-gray-500 md:font-medium">{getTimeAgo(comment.createdAt)}</p>
             <div className="flex items-center gap-1">
               {onHandleReply ? (
-                <button
-                  className="text-primary-container cursor-pointer text-xs font-medium hover:underline"
-                  type="button"
-                  onClick={onHandleReply}
-                >
-                  답글 달기
-                </button>
+                <>
+                  <span aria-hidden="true" className="text-xs">
+                    ·
+                  </span>
+                  <button
+                    className="text-primary-container cursor-pointer text-xs hover:underline md:font-medium"
+                    type="button"
+                    onClick={onHandleReply}
+                  >
+                    답글 달기
+                  </button>
+                </>
               ) : null}
 
               {/* 답글 버튼 (대댓글이 아니고, hasChildren이 있을 때만) */}
@@ -109,7 +111,7 @@ export function CommentItem({
                     ·
                   </span>
                   <button
-                    className="text-primary-container cursor-pointer self-start text-xs font-medium hover:underline"
+                    className="text-primary-container cursor-pointer self-start text-xs hover:underline md:font-medium"
                     type="button"
                     onClick={onToggleReplies}
                   >

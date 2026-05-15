@@ -213,14 +213,14 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
               onKeyDown={handleSearchSubmit}
               placeholder="궁금한 내용을 검색해보세요"
               enterKeyHint="search"
-              className="border-outline-variant/40 bg-surface-container-low w-full rounded-full border py-2 pr-4 pl-11 text-sm text-[#1c1b1b] placeholder:text-sm placeholder:text-[#827565] focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
+              className="border-outline-variant/40 bg-surface-container-low focus:border-primary focus:ring-primary/20 w-full rounded-full border py-2 pr-4 pl-11 text-sm text-[#1c1b1b] placeholder:text-sm placeholder:text-[#827565] focus:ring-2 focus:outline-none"
             />
           </div>
         </section>
 
         {/* Sort filter + 글쓰기 (콘텐츠 컨트롤 행) */}
-        <section className="mb-4 flex items-end justify-between gap-3 text-sm">
-          <div className="flex items-center gap-3">
+        <section className="mb-2 flex items-end justify-between gap-3 text-sm md:mb-4">
+          <div className="flex items-center gap-3 max-md:ml-auto">
             {COMMUNITY_SORT_TYPE.map((sort, idx) => {
               const isActive = sort.id === sortBy
               return (
@@ -230,8 +230,10 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
                     type="button"
                     onClick={() => handleSortChange(sort.id)}
                     className={cn(
-                      'cursor-pointer transition-colors',
-                      isActive ? 'font-bold text-primary' : 'font-medium text-on-surface-muted hover:text-primary'
+                      'cursor-pointer font-normal transition-colors',
+                      isActive
+                        ? 'text-primary font-semibold md:font-bold'
+                        : 'text-on-surface-muted hover:text-primary md:font-medium'
                     )}
                   >
                     {sort.label}
@@ -243,7 +245,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
           {hasHydrated && isLogin() ? (
             <Link
               href={`${ROUTES.COMMUNITY_POST}?tab=${activeCommunityTypeTab}`}
-              className="hidden items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-bold whitespace-nowrap text-white shadow-sm transition-opacity hover:opacity-90 active:scale-95 md:flex"
+              className="bg-primary hidden items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold whitespace-nowrap text-white shadow-sm transition-opacity hover:opacity-90 active:scale-95 md:flex"
             >
               <PenLine size={16} />
               <span>글쓰기</span>
@@ -265,28 +267,28 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
                 <li key={post.id}>
                   <Link
                     href={ROUTES.COMMUNITY_DETAIL_ID(post.id, post.title)}
-                    className="group border-outline-variant/40 block rounded-2xl border bg-white p-5 shadow-sm transition-all hover:shadow-md md:p-4"
+                    className="group border-outline-variant/40 block rounded-2xl border bg-white p-3 shadow-sm transition-all hover:shadow-md md:p-4"
                   >
-                    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-stretch gap-4">
+                    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 md:items-stretch">
                       <div className="min-w-0 flex-1">
                         {/* Author + time */}
                         <div className="mb-3 flex items-end gap-2.5">
                           <div className="bg-chip-surface flex size-9 items-center justify-center rounded-full text-sm font-bold text-[#825500]">
                             {post.authorNickname.charAt(0).toUpperCase()}
                           </div>
-                          <div className="flex flex-col leading-tight">
-                            <span className="text-sm font-bold text-[#1c1b1b]">{post.authorNickname}</span>
+                          <div className="flex flex-col gap-0.5 leading-tight md:gap-0">
+                            <span className="text-xs font-bold text-[#1c1b1b] md:text-sm">{post.authorNickname}</span>
                             <span className="text-xs text-[#827565]">{getTimeAgo(post.createdAt)}</span>
                           </div>
                         </div>
 
                         {/* Title */}
-                        <h3 className="mb-2 line-clamp-2 text-lg leading-snug font-semibold text-[#1c1b1b] transition-colors group-hover:text-primary">
+                        <h3 className="group-hover:text-primary mb-1 line-clamp-2 text-base leading-snug font-bold text-[#1c1b1b] transition-colors md:mb-2 md:text-lg md:font-semibold">
                           {post.title}
                         </h3>
 
                         {/* Preview */}
-                        <p className="line-clamp-2 text-sm leading-relaxed whitespace-pre-line text-on-surface-muted">
+                        <p className="text-on-surface-muted line-clamp-2 text-sm leading-relaxed whitespace-pre-line">
                           {post.contentPreview}
                         </p>
 
@@ -324,12 +326,13 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
         <Link
           href={`${ROUTES.COMMUNITY_POST}?tab=${activeCommunityTypeTab}`}
           className={cn(
-            'fixed right-4 bottom-20 flex items-center justify-center rounded-full bg-primary p-4 text-white shadow-lg md:hidden',
+            'bg-primary fixed right-4 bottom-20 flex items-center gap-2 rounded-full px-4 py-3 text-white shadow-lg transition-all hover:brightness-110 active:scale-95 md:hidden',
             Z_INDEX.FLOATING_BUTTON
           )}
           aria-label="글쓰기"
         >
-          <Plus size={24} />
+          <Plus size={20} strokeWidth={2.5} />
+          <span className="text-base font-bold">글쓰기</span>
         </Link>
       ) : null}
     </div>

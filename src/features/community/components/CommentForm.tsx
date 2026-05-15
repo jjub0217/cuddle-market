@@ -93,17 +93,17 @@ export function CommentForm({
     )
   }
 
-  // 기본 (댓글 입력) — 기존 디자인 유지
+  // 기본 (댓글 입력) — 모바일은 가로 컴팩트 카드, 데스크탑은 세로 카드. 색상은 디자인 시스템 토큰 통일
   return (
-    <form className="md:bg-primary-50 bg-transparent p-0 md:rounded-lg md:pt-5 md:pr-6 md:pb-4 md:pl-4" onSubmit={onSubmit}>
+    <form className="bg-primary-50 rounded-lg px-3 py-2 md:pt-5 md:pr-6 md:pb-4 md:pl-4" onSubmit={onSubmit}>
       <fieldset className="flex items-end gap-3.5 md:block">
         <legend className="sr-only">{legendText}</legend>
         <textarea
           id={id}
           placeholder={placeholder}
           className={cn(
-            'scrollbar-hide w-full flex-1 resize-none rounded-lg bg-[#f0f4ff] px-3 py-2 leading-tight focus:outline-none',
-            'md:bg-primary-50 md:h-auto md:rounded-none md:px-0 md:py-0 md:leading-normal'
+            'scrollbar-hide bg-primary-50 w-full flex-1 resize-none leading-tight focus:outline-none',
+            'md:h-auto md:leading-normal'
           )}
           style={{ height: `${baseHeight}px`, maxHeight: `${maxHeight}px`, overflowY: 'auto' }}
           ref={setRefs}

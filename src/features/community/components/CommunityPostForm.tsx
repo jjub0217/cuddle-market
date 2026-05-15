@@ -200,32 +200,30 @@ export default function CommunityPostForm() {
   return (
     <>
       <h1 className="sr-only">{isEditMode ? '게시글 수정' : '커뮤니티 글쓰기'}</h1>
-      {/* 모바일 서브헤더 */}
+      {/* 모바일 서브헤더 — 댓글 페이지(ReplyOverlay)와 동일한 미니멀 톤 */}
       <div
         className={cn(
-          'bg-primary-200 sticky top-0 mx-auto flex w-full max-w-7xl justify-between px-3.5 py-4 md:hidden',
+          'sticky top-0 flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 md:hidden',
           Z_INDEX.HEADER
         )}
       >
-        <button type="button" onClick={() => router.back()} className="flex cursor-pointer items-center gap-1 text-gray-600">
-          <ArrowLeft size={23} className="text-white" />
+        <button type="button" onClick={() => router.back()} aria-label="뒤로가기" className="cursor-pointer">
+          <ArrowLeft size={20} />
         </button>
-        <span className="heading-h4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg font-extrabold! text-white">
-          커뮤니티
-        </span>
+        <span className="text-base font-bold">{isEditMode ? '게시글 수정' : '게시글 작성'}</span>
       </div>
       {/* 데스크톱 서브헤더 */}
       <div className="hidden md:block">
         <SimpleHeader
-          title="커뮤니티 글쓰기"
-          description="일상 이야기를 마음껏 나눠보세요!"
+          title={isEditMode ? '게시글 수정' : '게시글 작성'}
+          description={isEditMode ? '게시글 내용을 수정해주세요' : '일상 이야기를 마음껏 나눠보세요!'}
           layoutClassname="py-3.5 gap-0 flex-col justify-between pt-8"
           titleClassName="text-[22px] leading-[1.5] font-bold"
           descriptionClassName="text-sm"
         />
       </div>
       <div className="min-h-screen pt-5">
-        <div className="px-lg pb-4xl mx-auto max-w-7xl">
+        <div className="px-lg md:pb-4xl mx-auto max-w-7xl">
           <AnimatePresence>
             {postError ? (
               <InlineNotification type="error" onClose={() => setPostError(null)}>
@@ -236,7 +234,7 @@ export default function CommunityPostForm() {
           <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
             <fieldset className="flex flex-col gap-5">
               <legend className="sr-only">커뮤니티 등록폼</legend>
-              <div className="flex flex-col gap-3.5 rounded-3xl border border-gray-400 px-3.5 py-3.5 shadow-xl md:gap-5 md:px-8 md:py-8">
+              <div className="flex flex-col gap-3.5 rounded-xl border border-gray-400 px-3.5 py-3.5 shadow-xl md:gap-5 md:rounded-3xl md:px-8 md:py-8">
                 <Controller
                   name="boardType"
                   control={control}
@@ -244,7 +242,11 @@ export default function CommunityPostForm() {
                   render={({ field, fieldState }) => (
                     <div className="flex flex-col gap-2">
                       {/* <RequiredLabel labelClass="text-sm md:text-base font-semibold">카테고리</RequiredLabel> */}
-                      <div className="flex gap-2" role="radiogroup" aria-label="카테고리 선택">
+                      <div
+                        className="border-outline-variant/40 flex gap-2 border-b md:gap-6"
+                        role="radiogroup"
+                        aria-label="카테고리 선택"
+                      >
                         {COMMUNITY_TABS.map((category) => {
                           const isActive = field.value === category.code
                           return (
@@ -255,10 +257,10 @@ export default function CommunityPostForm() {
                               aria-checked={isActive}
                               onClick={() => field.onChange(category.code)}
                               className={cn(
-                                'cursor-pointer rounded-full border px-4 py-2 text-sm font-bold transition-colors',
+                                '-mb-px cursor-pointer border-b-2 px-1 pb-2 text-sm font-medium whitespace-nowrap transition-colors md:text-base',
                                 isActive
-                                  ? 'bg-primary/10 text-primary border-primary/20'
-                                  : 'border-outline-variant text-on-surface-muted hover:bg-surface-container-low'
+                                  ? 'border-primary text-primary font-bold'
+                                  : 'text-on-surface-muted hover:text-primary border-transparent'
                               )}
                             >
                               {category.label}
