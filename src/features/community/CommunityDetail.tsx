@@ -159,12 +159,12 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
   return (
     <>
       <div className="min-h-screen bg-white pt-8 pb-16 md:pb-0">
-        <div className="px-lg pb-4xl mx-auto max-w-7xl">
-          <div className="flex flex-col justify-center gap-3.5">
+        <div className="px-lg md:pb-4xl mx-auto max-w-7xl pb-0">
+          <div className="flex flex-col justify-center gap-1 md:gap-3.5">
             <button
               type="button"
               onClick={() => router.push('/community')}
-              className="text-on-surface-muted hover:text-on-surface mb-6 flex w-fit cursor-pointer items-center gap-1.5 text-sm font-semibold transition-colors"
+              className="text-on-surface-muted hover:text-on-surface mb-6 hidden w-fit cursor-pointer items-center gap-1.5 text-sm font-semibold transition-colors md:flex"
             >
               <ArrowLeft size={16} />
               <span>목록으로 돌아가기</span>
@@ -173,7 +173,7 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
               <Badge className="bg-primary-400 w-fit rounded-full text-xs text-white md:font-semibold">
                 {getBoardType(data.boardType as 'QUESTION' | 'INFO')}
               </Badge>
-              <h1 className="text-2xl leading-snug font-bold">{data.title}</h1>
+              <h1 className="text-xl leading-snug font-bold md:text-2xl">{data.title}</h1>
               <div className="border-outline-variant/40 flex items-end justify-between border-b pb-4">
                 <div className="flex items-center gap-3.5">
                   <ProfileAvatar
@@ -184,13 +184,15 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
                   />
                   {/* 유저 정보 */}
                   <div className="flex flex-col gap-2">
-                    <p className="text-sm leading-none font-medium md:text-base">{data.authorNickname}</p>
-                    <div className="flex items-center gap-1">
-                      <p className="text-xs leading-none text-gray-500">{getTimeAgo(data.createdAt)}</p>
+                    <p className="text-xs leading-none font-bold text-[#1c1b1b] md:text-base md:font-medium">
+                      {data.authorNickname}
+                    </p>
+                    <div className="flex items-center gap-0.5 md:gap-1">
+                      <p className="text-xs leading-none text-[#827565]">{getTimeAgo(data.createdAt)}</p>
                       <span aria-hidden="true" className="text-xs">
                         ·
                       </span>
-                      <p className="text-xs leading-none text-gray-500">조회 {data.viewCount}</p>
+                      <p className="text-xs leading-none text-[#827565]">조회 {data.viewCount}</p>
                     </div>
                   </div>
                 </div>
@@ -236,8 +238,8 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
               <MdPreview value={data.content} className="p-0" />
             </div>
 
-            <section aria-label="댓글" className="flex flex-col gap-3.5 py-5">
-              <div className="text-md flex items-center gap-1 font-semibold">
+            <section aria-label="댓글" className="border-outline-variant/40 flex flex-col gap-3.5 border-t py-5 md:border-t-0">
+              <div className="md:text-md flex items-center gap-1 text-sm font-semibold">
                 <span>댓글</span>
                 <span className="text-primary-container font-semibold">{data.commentCount}</span>
               </div>
