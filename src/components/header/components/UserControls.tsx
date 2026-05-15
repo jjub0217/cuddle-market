@@ -10,6 +10,7 @@ import { ROUTES } from '@/constants/routes'
 import { MessageCircle, Bell } from 'lucide-react'
 import IconButton from '@/components/commons/button/IconButton'
 import NotificationsDropdown from './notification-section/NotificationsDropdown'
+import MobileNotificationsOverlay from './MobileNotificationsOverlay'
 import { useQuery } from '@tanstack/react-query'
 import { fetchGraphQL } from '@/lib/api/graphql'
 import { useNotificationSSE } from '@/hooks/useNotifications'
@@ -25,6 +26,7 @@ export default function UserControls({ isSideOpen, setIsSideOpen, hideMenuButton
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const user = useUserStore((state) => state.user)
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
+  const [isMobileNotificationOpen, setIsMobileNotificationOpen] = useState(false)
   const { isLogin } = useUserStore()
   const hasHydrated = useUserStore((state) => state._hasHydrated)
   const router = useRouter()
@@ -32,7 +34,7 @@ export default function UserControls({ isSideOpen, setIsSideOpen, hideMenuButton
   useNotificationSSE()
   const handleBellToggle = () => {
     if (isMobile) {
-      router.push(ROUTES.NOTIFICATIONS)
+      setIsMobileNotificationOpen(true)
     } else {
       setIsNotificationOpen((prev) => !prev)
     }
@@ -51,38 +53,46 @@ export default function UserControls({ isSideOpen, setIsSideOpen, hideMenuButton
   })
 
   return (
-    <div className="flex items-center gap-2 xl:gap-4">
-      {hasHydrated && isLogin() ? (
-        <div className="flex items-center gap-1">
-          <Link href={ROUTES.CHAT} className="ml-1 hidden xl:block" aria-label="채팅">
-            <MessageCircle className="text-primary" strokeWidth={1.5} size={20} />
-          </Link>
-          <div className="relative" onClick={handleBellToggle}>
-            <IconButton aria-label="알림" size="lg" className="hover:bg-transparent">
-              <Bell size={20} strokeWidth={1.5} className="text-primary" />
-            </IconButton>
-            {(unreadCountData?.unreadCount ?? 0) > 0 ? (
-              <span
-                className="bg-danger-500 absolute top-1 right-1 size-2 rounded-full"
-                aria-label={`읽지 않은 알림 ${unreadCountData?.unreadCount}개`}
-              />
-            ) : null}
-            {isNotificationOpen ? (
-              <NotificationsDropdown isNotificationOpen={isNotificationOpen} setIsNotificationOpen={setIsNotificationOpen} />
-            ) : null}
+    <>
+      <div className="flex items-center gap-2 xl:gap-4">
+        {hasHydrated && isLogin() ? (
+          <div className="flex items-center gap-1">
+            <Link href={ROUTES.CHAT} className="ml-1 hidden xl:block" aria-label="채팅">
+              <MessageCircle className="text-primary" strokeWidth={1.5} size={20} />
+            </Link>
+            <div className="relative" onClick={handleBellToggle}>
+              <IconButton aria-label="알림" size="lg" className="hover:bg-transparent">
+                <Bell size={isMobile ? 24 : 20} strokeWidth={isMobile ? 2 : 1.5} className="text-primary" />
+              </IconButton>
+              {(unreadCountData?.unreadCount ?? 0) > 0 ? (
+                <span
+                  className="bg-danger-500 absolute top-1 right-1 size-2 rounded-full"
+                  aria-label={`읽지 않은 알림 ${unreadCountData?.unreadCount}개`}
+                />
+              ) : null}
+              {isNotificationOpen ? (
+                <NotificationsDropdown isNotificationOpen={isNotificationOpen} setIsNotificationOpen={setIsNotificationOpen} />
+              ) : null}
+            </div>
+            <UserMenu
+              isNotificationOpen={false}
+              setIsNotificationOpen={setIsNotificationOpen}
+              isUserMenuOpen={isUserMenuOpen}
+              setIsUserMenuOpen={setIsUserMenuOpen}
+              isSideOpen={isSideOpen}
+              setIsSideOpen={setIsSideOpen}
+            />
           </div>
-          <UserMenu
-            isNotificationOpen={false}
-            setIsNotificationOpen={setIsNotificationOpen}
-            isUserMenuOpen={isUserMenuOpen}
-            setIsUserMenuOpen={setIsUserMenuOpen}
-            isSideOpen={isSideOpen}
-            setIsSideOpen={setIsSideOpen}
-          />
-        </div>
-      ) : (
-        <AuthMenu setIsSideOpen={setIsSideOpen} isSideOpen={isSideOpen} hideMenuButton={hideMenuButton} />
-      )}
-    </div>
+        ) : (
+          <AuthMenu setIsSideOpen={setIsSideOpen} isSideOpen={isSideOpen} hideMenuButton={hideMenuButton} />
+        )}
+      </div>
+      {hasHydrated && isLogin() ? (
+        <MobileNotificationsOverlay
+          isOpen={isMobileNotificationOpen}
+          onClose={() => setIsMobileNotificationOpen(false)}
+        />
+      ) : null}
+    </>
   )
 }

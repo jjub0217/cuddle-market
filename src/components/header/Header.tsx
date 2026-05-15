@@ -10,6 +10,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { Suspense, useEffect, useState, useSyncExternalStore } from 'react'
 import IconButton from '@/components/commons/button/IconButton'
 import SearchBar from '@/components/header/components/SearchBar'
+import MobileSearchOverlay from '@/components/header/components/MobileSearchOverlay'
 import { Search } from 'lucide-react'
 import UserControls from '@/components/header/components/UserControls'
 import MobileNavigation from '@/components/header/components/MobileNavigation'
@@ -60,7 +61,7 @@ const HIDE_SEARCHBAR_ALWAYS_PATTERNS = [COMMUNITY_DETAIL, COMMUNITY_EDIT, /^\/pr
 
 // 홈 페이지에서 hero를 헤더 뒤로 깔기 위한 스크롤 임계값 (px)
 // 80px 정도 스크롤하면 솔리드 배경으로 전환 — 헤더 자신의 높이만큼
-const SOLID_BG_SCROLL_THRESHOLD = 80
+const SOLID_BG_SCROLL_THRESHOLD = 60
 
 // useSyncExternalStore용 subscribe 함수 (모듈 스코프 — 안정적 참조)
 const subscribeToScroll = (callback: () => void) => {
@@ -75,7 +76,6 @@ export default function Header() {
   const isXl = useMediaQuery('(min-width: 1280px)')
   const [isSideOpen, setIsSideOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
-  const searchBarHeight = 40
   const pathname = usePathname()
 
   // 가시성 계산
@@ -119,14 +119,11 @@ export default function Header() {
     }
 
     const baseHeight = 72
-    const expandedHeight = baseHeight + 12 + searchBarHeight + 12
 
     let nextHeight: number
     if (isHome) {
       // 홈: hero가 헤더 영역까지 차지하도록 padding-top 0
       nextHeight = 0
-    } else if (!isXl && isSearchOpen) {
-      nextHeight = expandedHeight
     } else {
       nextHeight = baseHeight
     }
@@ -136,7 +133,7 @@ export default function Header() {
     return () => {
       document.documentElement.style.removeProperty('--header-height')
     }
-  }, [showHeader, isSearchOpen, isXl, isHome])
+  }, [showHeader, isHome])
 
   if (!showHeader) return null
 
@@ -144,10 +141,13 @@ export default function Header() {
     <>
       <header
         className={cn(
-          'fixed top-0 flex w-full items-center justify-center pt-3 transition-colors duration-300 xl:pb-3',
-          !isXl && (isSearchOpen ? 'pb-0' : 'pb-3'),
+          'fixed top-0 flex w-full items-center justify-center py-3 transition-colors duration-300',
           // 홈 페이지 상단: 투명 (hero 위에 떠있음). 그 외: 솔리드 (cream bg + 보더)
-          showSolid ? 'border-outline-variant/40 bg-surface/95 border-b backdrop-blur-sm' : 'bg-transparent',
+          showSolid
+            ? 'border-outline-variant/40 bg-surface/95 border-b backdrop-blur-sm'
+            : isHome
+              ? 'bg-hero-surface'
+              : 'bg-transparent',
           Z_INDEX.HEADER
         )}
       >
@@ -218,28 +218,11 @@ export default function Header() {
             ) : null}
           </div>
 
-          {/* 모바일 검색바 - 아코디언 */}
-          {!hideSearchBar ? (
-            <div
-              className="overflow-hidden transition-all duration-300 xl:hidden"
-              style={{
-                height: isSearchOpen ? `${searchBarHeight}px` : '0',
-                marginTop: isSearchOpen ? '12px' : '0',
-                marginBottom: isSearchOpen ? '12px' : '0',
-              }}
-            >
-              <Suspense>
-                <SearchBar
-                  id="search-mobile"
-                  className="h-10 xl:hidden"
-                  inputClass="py-1 text-[15px] bg-white"
-                  wrapperClassName={cn('rounded-full bg-white', showSolid ? 'border border-[#d4c4b2]' : 'border-0')}
-                />
-              </Suspense>
-            </div>
-          ) : null}
         </div>
       </header>
+      {!hideSearchBar ? (
+        <MobileSearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+      ) : null}
       <MobileNavigation isOpen={isSideOpen} onClose={() => setIsSideOpen(false)} />
     </>
   )

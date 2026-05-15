@@ -1,6 +1,6 @@
 import {
   MessageSquarePlus,
-  MessageSquareMore,
+  MessageCircleMore,
   MessageSquareText,
   HeartCrack,
   Tag,
@@ -329,7 +329,7 @@ export const NOTIFICATION_MESSAGES: Record<string, string> = {
 
 export const iconMap = {
   CHAT_NEW_ROOM: MessageSquarePlus,
-  CHAT_NEW_MESSAGE: MessageSquareMore,
+  CHAT_NEW_MESSAGE: MessageCircleMore,
   PRODUCT_FAVORITE_STATUS_CHANGED: HeartCrack,
   PRODUCT_FAVORITE_PRICE_CHANGED: Tag,
   ADMIN_SANCTION: ShieldAlert,

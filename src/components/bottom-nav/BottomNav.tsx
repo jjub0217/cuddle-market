@@ -41,16 +41,14 @@ export default function BottomNav() {
 
   if (isXl) return null
 
-  const shouldHide =
-    HIDE_BOTTOMNAV_PATHS.includes(pathname) ||
-    HIDE_BOTTOMNAV_PATTERNS.some((pattern) => pattern.test(pathname))
+  const shouldHide = HIDE_BOTTOMNAV_PATHS.includes(pathname) || HIDE_BOTTOMNAV_PATTERNS.some((pattern) => pattern.test(pathname))
 
   if (shouldHide) return null
 
   return (
     <nav
       className={cn(
-        'fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white pb-[env(safe-area-inset-bottom)]',
+        'fixed right-0 bottom-0 left-0 border-t border-gray-200 bg-white pb-[env(safe-area-inset-bottom)]',
         Z_INDEX.HEADER
       )}
       aria-label="하단 메뉴"
@@ -63,12 +61,12 @@ export default function BottomNav() {
               key={href}
               href={href}
               className={cn(
-                'flex flex-1 flex-col items-center justify-center gap-0.5',
+                'flex flex-1 flex-col items-center justify-center gap-1',
                 isActive ? 'text-primary-200' : 'text-gray-400'
               )}
             >
               <Icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 2} />
-              <span className="text-xs font-medium">{label}</span>
+              <span className="text-xs text-gray-500">{label}</span>
             </Link>
           )
         })}
