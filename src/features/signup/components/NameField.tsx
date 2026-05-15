@@ -11,8 +11,10 @@ interface NameFieldProps {
 
 export function NameField({ register, errors }: NameFieldProps) {
   return (
-    <div className="flex flex-col gap-2.5">
-      <RequiredLabel htmlFor="signup-name">이름</RequiredLabel>
+    <div className="flex flex-col">
+      <RequiredLabel htmlFor="signup-name" labelClass="text-sm">
+        이름
+      </RequiredLabel>
       <InputField
         id="signup-name"
         type="text"
@@ -23,7 +25,6 @@ export function NameField({ register, errors }: NameFieldProps) {
         className="flex flex-col gap-2.5"
         error={errors.name}
         registration={register('name', signupValidationRules.name)}
-        autoFocus
       />
     </div>
   )

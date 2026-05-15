@@ -18,6 +18,9 @@ import { AnimatePresence } from 'framer-motion'
 import InlineNotification from '@/components/commons/InlineNotification'
 import { isAxiosError } from 'axios'
 import type { ToastType } from '@/types/toast'
+import { TitleSection } from '@/features/login/components/TitleSection'
+import Link from 'next/link'
+import { ROUTES } from '@/constants/routes'
 
 export interface SignUpFormValues {
   email: string
@@ -80,15 +83,7 @@ export function SignUpForm() {
       hasError = true
     }
 
-    if (!isEmailVerified) {
-      setError('email', {
-        type: 'manual',
-        message: '이메일 중복 확인을 완료해주세요.',
-      })
-      hasError = true
-    }
-
-    if (!isEmailCodeVerified) {
+    if (!isEmailVerified || !isEmailCodeVerified) {
       setError('emailCode', {
         type: 'manual',
         message: '이메일 인증을 완료해주세요.',
@@ -143,10 +138,23 @@ export function SignUpForm() {
   }
 
   return (
-    <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
+    <form
+      className="bg-surface border-outline-variant/10 flex w-full flex-col gap-14 rounded-3xl border px-10 shadow-2xl md:py-7"
+      onSubmit={handleSubmit(onSubmit)}
+    >
+      <TitleSection title="회원가입" desc="몇 가지 정보만 입력하면 바로 시작할 수 있어요" size="sm" />
       <fieldset className="flex flex-col gap-9">
         <legend className="sr-only">회원가입폼</legend>
         <div className="flex flex-col gap-6">
+          <EmailValidCode
+            register={register}
+            errors={errors}
+            control={control}
+            setIsEmailVerified={setIsEmailVerified}
+            setIsEmailCodeVerified={setIsEmailCodeVerified}
+            clearErrors={clearErrors}
+          />
+          <PasswordField register={register} errors={errors} control={control} setError={setError} clearErrors={clearErrors} />
           <NameField register={register} errors={errors} />
           <NicknameField
             register={register}
@@ -157,17 +165,15 @@ export function SignUpForm() {
             checkResult={checkResult}
             setCheckResult={setCheckResult}
           />
-          <AddressField<SignUpFormValues> control={control} setValue={setValue} primaryName="addressSido" secondaryName="addressGugun" />
           <BirthDateField control={control} />
-          <EmailValidCode
-            register={register}
-            errors={errors}
+          <AddressField<SignUpFormValues>
             control={control}
-            setIsEmailVerified={setIsEmailVerified}
-            setIsEmailCodeVerified={setIsEmailCodeVerified}
-            clearErrors={clearErrors}
+            setValue={setValue}
+            primaryName="addressSido"
+            secondaryName="addressGugun"
+            labelClass="text-sm"
+            layoutClass="gap-0"
           />
-          <PasswordField register={register} errors={errors} control={control} setError={setError} clearErrors={clearErrors} />
         </div>
         <AnimatePresence>
           {signupNotification ? (
@@ -176,9 +182,20 @@ export function SignUpForm() {
             </InlineNotification>
           ) : null}
         </AnimatePresence>
-        <Button size="md" className="bg-primary-600 w-full cursor-pointer text-white" type="submit" disabled={isSubmitting}>
+        <Button
+          size="md"
+          className="bg-primary-600 hover:bg-primary-700 w-full cursor-pointer text-white transition-colors"
+          type="submit"
+          disabled={isSubmitting}
+        >
           {isSubmitting ? '가입 중...' : '회원가입'}
         </Button>
+        <p className="text-center text-sm text-gray-500">
+          이미 계정이 있으신가요?{' '}
+          <Link href={ROUTES.LOGIN} className="text-primary font-semibold hover:underline">
+            로그인하기
+          </Link>
+        </p>
       </fieldset>
     </form>
   )

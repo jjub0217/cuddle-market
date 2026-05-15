@@ -84,8 +84,10 @@ export function NicknameField<T extends FieldValues>({
   }, [nickname, setIsNicknameVerified, setCheckResult])
 
   return (
-    <div className="flex flex-col gap-2.5">
-      <RequiredLabel htmlFor="signup-nickname">닉네임</RequiredLabel>
+    <div className="flex flex-col">
+      <RequiredLabel htmlFor="signup-nickname" labelClass="text-sm">
+        닉네임
+      </RequiredLabel>
       <InputWithButton
         id="signup-nickname"
         type="text"
@@ -96,6 +98,7 @@ export function NicknameField<T extends FieldValues>({
         buttonText={isChecking ? '체크 중...' : '중복체크'}
         onButtonClick={handleNicknameCheck}
         buttonDisabled={isChecking}
+        buttonClassName="text-sm"
       />
     </div>
   )

@@ -3,7 +3,14 @@
 import InputField from '@/components/commons/InputField'
 import RequiredLabel from '@/components/commons/RequiredLabel'
 import type { SignUpFormValues } from './SignUpForm'
-import { type UseFormRegister, type FieldErrors, type Control, type UseFormSetError, type UseFormClearErrors, useWatch } from 'react-hook-form'
+import {
+  type UseFormRegister,
+  type FieldErrors,
+  type Control,
+  type UseFormSetError,
+  type UseFormClearErrors,
+  useWatch,
+} from 'react-hook-form'
 import { authValidationRules } from '@/lib/utils/validation/authValidationRules'
 import { signupValidationRules } from '../validationRules'
 import { useMemo, useEffect } from 'react'
@@ -41,9 +48,11 @@ export function PasswordField({ register, errors, control, setError, clearErrors
   }, [password, passwordConfirm, setError, clearErrors])
 
   return (
-    <div className="flex flex-col gap-2.5">
-      <RequiredLabel htmlFor="signup-password">비밀번호</RequiredLabel>
-      <div className="flex flex-col gap-4">
+    <div className="flex flex-col">
+      <RequiredLabel htmlFor="signup-password" labelClass="text-sm">
+        비밀번호
+      </RequiredLabel>
+      <div className="flex flex-col gap-1">
         <InputField
           id="signup-password"
           type="password"

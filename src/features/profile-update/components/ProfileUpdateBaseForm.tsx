@@ -323,7 +323,7 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
                       buttonText="중복체크"
                       size="text-sm"
                       buttonSize="md"
-                      buttonClassName="bg-primary-200 text-sm text-white cursor-pointer font-semibold py-[10px]"
+                      buttonClassName="bg-primary-200 text-sm text-white cursor-pointer font-semibold py-[10px] !h-auto"
                       inputClass="md:py-[10px]"
                       checkResult={checkResult}
                       onButtonClick={handleNicknameCheck}

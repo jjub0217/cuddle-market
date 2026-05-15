@@ -11,6 +11,7 @@ import { authValidationRules } from '@/lib/utils/validation/authValidationRules'
 import { useUserStore } from '@/store/userStore'
 import axios from 'axios'
 import { useEffect } from 'react'
+import { TitleSection } from './TitleSection'
 
 interface LoginFormValues {
   email: string
@@ -68,7 +69,8 @@ export function LoginForm() {
   }, [email, password, clearErrors])
 
   return (
-    <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
+    <form className="flex w-full flex-col gap-10" onSubmit={handleSubmit(onSubmit)}>
+      <TitleSection title="로그인" desc="계정에 로그인하여 더 많은 기능을 이용해보세요" size="sm" />
       <fieldset className="flex flex-col gap-2">
         <legend className="sr-only">로그인폼</legend>
         <div className="flex flex-col gap-4">
