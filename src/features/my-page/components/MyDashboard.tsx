@@ -48,7 +48,7 @@ export default function MyDashboard({ myProducts, myRequests, myFavorites }: MyD
   const currentConfig = TAB_CONFIG[activeTab]
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-3 md:gap-8">
       {/* 거래 내역 요약 */}
       <section className="bg-surface-container-lowest border-outline-variant/40 rounded-2xl border p-6">
         <UnderlineTabs
@@ -83,7 +83,7 @@ export default function MyDashboard({ myProducts, myRequests, myFavorites }: MyD
       </section>
 
       {/* 활동 요약 */}
-      <section className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+      <section className="grid grid-cols-1 gap-3 md:gap-8 lg:grid-cols-2">
         <div className="bg-surface-container-lowest border-outline-variant/40 rounded-2xl border p-6 md:p-8">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-on-surface text-base font-bold">나의 커뮤니티 글</h2>
