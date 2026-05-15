@@ -51,6 +51,17 @@ interface ProfileDataProps {
   unblockUser?: () => void
   summaryCounts?: ProfileSummaryCounts
   enableImageUpload?: boolean
+  showJoinDate?: boolean
+}
+
+function formatJoinDate(iso?: string) {
+  if (!iso) return ''
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return ''
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}.${month}.${day}`
 }
 
 const SUMMARY_ITEMS: Array<{ key: keyof ProfileSummaryCounts; label: string }> = [
@@ -67,6 +78,7 @@ export default function ProfileData({
   unblockUser,
   summaryCounts,
   enableImageUpload,
+  showJoinDate,
 }: ProfileDataProps) {
   const user = useUserStore((state) => state.user)
   const updateUserProfile = useUserStore((state) => state.updateUserProfile)
@@ -336,6 +348,12 @@ export default function ProfileData({
               </button>
             ) : null}
           </div>
+          {showJoinDate ? (
+            <div className="border-outline-variant/40 flex items-center justify-between border-t pt-4 text-sm">
+              <span className="text-on-surface-muted text-[13px]">가입일</span>
+              <span className="text-on-surface-muted text-[13px]">{formatJoinDate(data?.createdAt)}</span>
+            </div>
+          ) : null}
           {isMyProfile && summaryCounts ? (
             <div className="border-outline-variant/40 grid grid-cols-3 gap-2 border-t pt-4">
               {SUMMARY_ITEMS.map((item) => (
