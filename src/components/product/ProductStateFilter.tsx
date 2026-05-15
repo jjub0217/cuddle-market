@@ -88,7 +88,7 @@ export function ProductStateFilter({
   const styles = VARIANT_STYLES[variant]
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 max-md:gap-0">
       {useUrlSync ? (
         <h4 id="condition-filter-heading" className={headingClassName ?? 'heading-h5'}>
           상품 상태

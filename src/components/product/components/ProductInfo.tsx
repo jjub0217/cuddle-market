@@ -32,20 +32,24 @@ export function ProductInfo({
     ...(productStatusName ? [{ label: productStatusName, tone: 'outline' as const }] : []),
   ]
 
-  const metaTextClass = 'text-xs font-medium'
+  const metaTextClass = 'text-xs font-normal md:font-medium'
   const hasFavoriteCount = typeof favoriteCount === 'number'
   const hasCreatedAt = Boolean(createdAt)
 
   return (
-    <div className="flex flex-3 flex-col gap-2 bg-white p-3 md:flex-none md:p-4">
+    <div className="flex flex-3 flex-col gap-2 bg-white px-2 py-1.5 md:flex-none md:p-4">
       <ProductBadge items={badgeItems} />
       <ProductHeading title={title} price={price} />
       {/* 메타 (레퍼런스 패턴): 은평구 · 찜 15  ........  3분 전 */}
-      <div className="mt-auto flex w-full items-center gap-1 text-gray-500">
+      <div className="mt-auto flex w-full items-center gap-0.5 text-gray-500 md:gap-1">
         {location ? (
           <>
             <ProductMetaItem label={location} textClassName={metaTextClass} />
-            {hasFavoriteCount ? <span className={metaTextClass} aria-hidden="true">·</span> : null}
+            {hasFavoriteCount ? (
+              <span className={metaTextClass} aria-hidden="true">
+                ·
+              </span>
+            ) : null}
           </>
         ) : null}
         {hasFavoriteCount ? <ProductMetaItem label={`찜 ${favoriteCount}`} textClassName={metaTextClass} /> : null}

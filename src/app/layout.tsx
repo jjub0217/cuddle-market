@@ -4,6 +4,8 @@ import ClientComponents from '@/components/ClientComponents'
 import './globals.css'
 
 export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
   interactiveWidget: 'resizes-content',
 }
 

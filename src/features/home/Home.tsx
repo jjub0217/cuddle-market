@@ -203,7 +203,7 @@ function Home() {
         <div className="flex min-h-100 items-center justify-center bg-white">
           <div className="flex flex-col items-center gap-4">
             <p>상품을 불러올 수 없습니다</p>
-            <Button variant="link" onClick={() => refetch()} className="font-bold text-[#825500] hover:text-primary">
+            <Button variant="link" onClick={() => refetch()} className="hover:text-primary font-bold text-[#825500]">
               다시 시도
             </Button>
           </div>
@@ -216,7 +216,7 @@ function Home() {
     <>
       <HomeHero />
       <div className="bg-white">
-        <div className="mx-auto max-w-[1280px] px-6 pt-12 pb-24 md:px-8 md:pt-18">
+        <div className="mx-auto max-w-[1280px] px-4 pt-12 pb-24 md:px-8 md:pt-18">
           <h1 className="sr-only">커들마켓</h1>
           <div className="flex flex-col gap-6">
             {/* Pet category & filters section */}
@@ -247,7 +247,7 @@ function Home() {
             </section>
 
             {/* Product list section */}
-            <section aria-label="상품 목록" className="flex flex-col gap-6">
+            <section aria-label="상품 목록" className="flex flex-col gap-6 pt-2 md:pt-0">
               {/* <h2 className="heading-h4 text-gray-900">상품 목록</h2> */}
               {isLoading && allProducts.length === 0 ? (
                 <HomeSkeleton />

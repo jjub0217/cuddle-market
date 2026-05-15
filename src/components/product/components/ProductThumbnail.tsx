@@ -85,7 +85,7 @@ export function ProductThumbnail({
         onError={() => {
           if (imgErrorStep < 2) setImgErrorStep((prev) => prev + 1)
         }}
-        className="absolute top-0 left-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+        className="absolute top-0 left-0 h-full w-full object-cover transition-transform duration-700 md:group-hover:scale-110"
       />
 
       {/* 거래상태 중앙 큰 오버레이 (모바일/데스크탑 동일) */}
@@ -103,14 +103,17 @@ export function ProductThumbnail({
         size="sm"
         icon={Heart}
         iconProps={{
-          size: 16,
+          size: 20,
           strokeWidth: 2,
-          className: cn(isFavorite ? 'fill-[#fc8181] stroke-[#fc8181]' : 'fill-none stroke-gray-600'),
+          className: cn(
+            'drop-shadow-md',
+            isFavorite ? 'fill-[#fc8181] stroke-[#fc8181]' : 'fill-none stroke-white'
+          ),
           'aria-hidden': true,
         }}
         onClick={handleHeartClick}
         aria-label={isFavorite ? '찜 해제' : '찜하기'}
-        className="pointer-events-auto absolute top-2 right-2 z-20 h-8 w-8 cursor-pointer rounded-full bg-white/90 p-0 shadow-sm backdrop-blur-md transition-all hover:bg-white md:top-3 md:right-3 md:h-7 md:w-7"
+        className="pointer-events-auto absolute top-0.5 right-0.5 z-20 h-8 w-8 cursor-pointer bg-transparent p-0 md:h-7 md:w-7"
       />
     </div>
   )

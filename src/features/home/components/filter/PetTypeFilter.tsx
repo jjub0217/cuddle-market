@@ -92,7 +92,7 @@ export function PetTypeFilter({ activeTab, selectedDetailPet, onTabChange }: Pet
             type="button"
             size="sm"
             onClick={() => setShowAll(true)}
-            className="cursor-pointer rounded-full bg-gray-100 px-5 py-2.5 text-gray-600 hover:bg-gray-200 md:hidden"
+            className="cursor-pointer rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600 hover:bg-gray-200 md:hidden"
           >
             더보기 ({filteredPetDetails.length - INITIAL_DISPLAY_COUNT}개)
           </Button>
