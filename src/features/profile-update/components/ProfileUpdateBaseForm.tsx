@@ -17,7 +17,6 @@ import { useState, useEffect, useRef } from 'react'
 import { useUserStore } from '@/store/userStore'
 import { uploadImage } from '@/lib/api/products'
 import { useQueryClient } from '@tanstack/react-query'
-import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { Camera } from 'lucide-react'
 import { AnimatePresence } from 'framer-motion'
 import InlineNotification from '@/components/commons/InlineNotification'
@@ -39,8 +38,9 @@ const IMAGE_UPLOAD_ERRORS = {
 
 interface ProfileUpdateBaseFormProps {
   myData?: MyPageData
+  onWithdrawClick: () => void
 }
-export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormProps) {
+export default function ProfileUpdateBaseForm({ myData, onWithdrawClick }: ProfileUpdateBaseFormProps) {
   const {
     control,
     handleSubmit,
@@ -65,7 +65,6 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
 
   const queryClient = useQueryClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const isMd = useMediaQuery('(min-width: 768px)')
 
   const [updateError, setUpdateError] = useState<React.ReactNode | null>(null)
   const [updateSuccess, setUpdateSuccess] = useState<React.ReactNode | null>(null)
@@ -209,17 +208,15 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
 
   return (
     <form
-      className="flex w-full flex-col gap-6 rounded-xl border border-gray-200 bg-white p-5 md:p-7"
+      className="flex w-full flex-col gap-6 rounded-xl border border-gray-200 bg-white p-5 md:p-6"
       onSubmit={handleSubmit(onSubmit)}
     >
       <fieldset className="flex flex-col gap-8">
         <legend className="sr-only">프로필 정보 수정 폼</legend>
-        {isMd ? (
-          <div className="flex flex-col gap-2">
-            <h2 className="text-[20px] font-bold">기본 정보</h2>
-            <p className="text-sm text-gray-500">프로필 이미지, 닉네임, 거주지를 수정할 수 있습니다</p>
-          </div>
-        ) : null}
+        <div className="flex flex-col">
+          <h2 className="text-[17.5px] font-semibold">기본 정보</h2>
+          <p className="text-sm text-gray-500">프로필 이미지, 닉네임, 거주지를 수정할 수 있습니다</p>
+        </div>
 
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-10">
@@ -251,11 +248,11 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
                 </div>
                 <button
                   type="button"
-                  className="bg-primary-100 absolute right-0 bottom-2 flex size-8 cursor-pointer items-center justify-center rounded-full"
+                  className="bg-primary-100 hover:bg-primary-200 absolute right-0 bottom-2 flex size-8 cursor-pointer items-center justify-center rounded-full transition-colors"
                   onClick={() => fileInputRef.current?.click()}
                   aria-label="프로필 사진 변경"
                 >
-                  <Camera className="" size={20} />
+                  <Camera size={20} />
                 </button>
               </div>
               {errors.profileImageUrl ? (
@@ -268,11 +265,11 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
             <div className="flex flex-col gap-8">
               {/* 본인 인증 정보 */}
               <div className="flex flex-col gap-1 md:gap-1">
-                <h3 className="md:heading-h5 text-base font-semibold">본인 인증 정보</h3>
+                {/* <h3 className="md:heading-h5 text-base font-semibold">본인 인증 정보</h3> */}
 
                 <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
                   <div className="flex w-full flex-1 flex-col gap-1">
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-1">
                       <span className="text-sm font-medium text-gray-600">이름</span>
                       <div className="bg-primary-50/50 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-400">
                         {myData?.name}
@@ -282,7 +279,7 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
                   </div>
 
                   <div className="flex w-full flex-1 flex-col gap-1">
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-1">
                       <span className="text-sm font-medium text-gray-600">생년월일</span>
                       <div className="bg-primary-50/50 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-400">
                         {formatBirthDate(myData?.birthDate)}
@@ -293,9 +290,9 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
                 </div>
               </div>
 
-              {/* 계정 정보 */}
-              <div className="flex flex-col gap-1 md:gap-1">
-                <h3 className="md:heading-h5 text-base font-semibold">계정 정보</h3>
+              {/* 계정 정보 (데스크탑에서는 사이드바에 표시) */}
+              <div className="flex flex-col gap-1 md:hidden">
+                <h3 className="text-base font-semibold">계정 정보</h3>
                 <div className="flex flex-col gap-1">
                   <div className="flex flex-col gap-2">
                     <span className="text-sm font-medium text-gray-600">이메일</span>
@@ -309,9 +306,9 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
 
               {/* 활동 정보 */}
               <div className="flex flex-col gap-3.5">
-                <h3 className="md:heading-h5 text-base font-semibold">활동 정보</h3>
+                {/* <h3 className="md:heading-h5 text-base font-semibold">활동 정보</h3> */}
                 <div className="flex flex-col gap-1 md:-mt-2.5">
-                  <div className="flex flex-col justify-center gap-2">
+                  <div className="flex flex-col justify-center gap-1">
                     <RequiredLabel htmlFor="update-nickname" required={false} labelClass="text-sm">
                       닉네임
                     </RequiredLabel>
@@ -336,12 +333,12 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
                   primaryName="addressSido"
                   secondaryName="addressGugun"
                   required={false}
-                  layoutClass="gap-2"
+                  layoutClass="gap-1"
                   labelClass="text-sm"
                   buttonClassName="py-[10px]"
                 />
                 <div className="flex flex-col gap-1">
-                  <div className="flex flex-col gap-2">
+                  <div className="gap- flex flex-col">
                     <RequiredLabel htmlFor="profile-introduction" required={false} labelClass="text-sm">
                       자기소개
                     </RequiredLabel>
@@ -349,7 +346,7 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
                       id="profile-introduction"
                       placeholder="소개글을 작성해주세요"
                       className={cn(
-                        'focus:border-primary-500 min-h-[7vh] w-full resize-none rounded-lg border border-gray-400 bg-white px-3 py-3 text-sm placeholder:text-gray-400 focus:outline-none'
+                        'focus:border-primary-500 min-h-[7vh] w-full resize-none rounded-lg border border-gray-400 bg-white px-3 py-3 text-sm placeholder:text-sm placeholder:text-gray-400 focus:outline-none'
                       )}
                       {...register('introduction', profileValidationRules.introduction)}
                     />
@@ -383,10 +380,22 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
               ) : null}
             </AnimatePresence>
           </div>
-          <Button size="md" className="bg-primary-600 w-full cursor-pointer text-white" type="submit">
+          <Button
+            size="md"
+            className="bg-primary-600 hover:bg-primary-700 w-full cursor-pointer text-white transition-colors"
+            type="submit"
+          >
             프로필 수정
           </Button>
         </div>
+        <Button
+          size="md"
+          type="button"
+          onClick={onWithdrawClick}
+          className="w-auto cursor-pointer bg-transparent text-xs text-gray-400 md:ml-auto"
+        >
+          회원탈퇴
+        </Button>
       </fieldset>
     </form>
   )

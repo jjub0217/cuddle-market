@@ -12,6 +12,7 @@ export interface User {
   introduction?: string
   createdAt?: string
   userRole?: 'USER' | 'ADMIN'
+  provider?: 'LOCAL' | 'GOOGLE' | 'KAKAO'
 }
 
 // ========== 마이페이지 관련 타입 ==========

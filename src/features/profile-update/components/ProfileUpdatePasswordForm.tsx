@@ -64,11 +64,14 @@ export default function ProfileUpdatePasswordForm() {
     }
 
     try {
-      await fetchGraphQL(`
+      await fetchGraphQL(
+        `
         mutation ChangePassword($currentPassword: String!, $newPassword: String!, $confirmPassword: String!) {
           changePassword(currentPassword: $currentPassword, newPassword: $newPassword, confirmPassword: $confirmPassword) { success }
         }
-      `, { ...requestData })
+      `,
+        { ...requestData }
+      )
       reset()
       setPwUpdateSuccess(
         <div className="flex flex-col gap-0.5">
@@ -100,19 +103,21 @@ export default function ProfileUpdatePasswordForm() {
   }, [password, passwordConfirm, setError, clearErrors])
 
   return (
-    <form className="flex w-full flex-col gap-6 rounded-xl border border-gray-200 bg-white p-7" onSubmit={handleSubmit(onSubmit)}>
-      <fieldset className="flex flex-col gap-8">
+    <form className="flex w-full flex-col gap-6 rounded-xl border border-gray-200 bg-white p-6" onSubmit={handleSubmit(onSubmit)}>
+      <fieldset className="flex flex-col gap-6">
         <legend className="sr-only">비밀번호 변경 폼</legend>
-        <div className="flex flex-col gap-2">
-          <h2 className="heading-h3">비밀번호 변경</h2>
-          <p className="text-gray-500">보안을 위해 주기적으로 비밀번호를 변경해주세요</p>
+        <div className="flex flex-col">
+          <h2 className="text-[17.5px] font-semibold">비밀번호 변경</h2>
+          <p className="text-sm text-gray-500">보안을 위해 주기적으로 비밀번호를 변경해주세요</p>
         </div>
 
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-5">
             <div className="flex flex-1 flex-col gap-1">
-              <div className="flex flex-col gap-2">
-                <label htmlFor="current-password" className="font-medium text-gray-600">현재 비밀번호</label>
+              <div className="flex flex-col gap-1">
+                <label htmlFor="current-password" className="text-sm font-medium text-gray-600">
+                  현재 비밀번호
+                </label>
                 <InputField
                   id="current-password"
                   type="password"
@@ -127,8 +132,10 @@ export default function ProfileUpdatePasswordForm() {
             </div>
 
             <div className="flex flex-1 flex-col gap-1">
-              <div className="flex flex-col gap-2">
-                <label htmlFor="new-password" className="font-medium text-gray-600">새 비밀번호</label>
+              <div className="flex flex-col gap-1">
+                <label htmlFor="new-password" className="text-sm font-medium text-gray-600">
+                  새 비밀번호
+                </label>
                 <InputField
                   id="new-password"
                   type="password"
@@ -143,8 +150,10 @@ export default function ProfileUpdatePasswordForm() {
             </div>
 
             <div className="flex flex-1 flex-col gap-1">
-              <div className="flex flex-col gap-2">
-                <label htmlFor="confirm-password" className="font-medium text-gray-600">새 비밀번호 확인</label>
+              <div className="flex flex-col gap-1">
+                <label htmlFor="confirm-password" className="text-sm font-medium text-gray-600">
+                  새 비밀번호 확인
+                </label>
                 <InputField
                   id="confirm-password"
                   type="password"
@@ -186,7 +195,11 @@ export default function ProfileUpdatePasswordForm() {
               </InlineNotification>
             ) : null}
           </AnimatePresence>
-          <Button size="md" className="bg-primary-600 w-full cursor-pointer text-white" type="submit">
+          <Button
+            size="md"
+            className="bg-primary-600 hover:bg-primary-700 w-full cursor-pointer text-white transition-colors"
+            type="submit"
+          >
             비밀번호 변경
           </Button>
         </div>
