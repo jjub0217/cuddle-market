@@ -20,9 +20,6 @@ function ProfileUpdate() {
   const [withdrawError, setWithdrawError] = useState<React.ReactNode | null>(null)
   const { user, _hasHydrated, clearAll, updateUserProfile, setRedirectUrl } = useUserStore()
 
-  const socialDomains = ['gmail', 'kakao']
-  const isSocialLogin = socialDomains.some((domain) => user?.email?.includes(domain))
-
   const isMd = useMediaQuery('(min-width: 768px)')
   const {
     data: myData,
@@ -33,7 +30,7 @@ function ProfileUpdate() {
     queryFn: async () => {
       const data = await fetchGraphQL<{ myProfile: any }>(`
         query MyProfile {
-          myProfile { id email name nickname birthDate profileImageUrl introduction addressSido addressGugun createdAt rating }
+          myProfile { id email name nickname birthDate profileImageUrl introduction addressSido addressGugun createdAt rating provider }
         }
       `)
       return data.myProfile
@@ -41,13 +38,18 @@ function ProfileUpdate() {
     enabled: !!user,
   })
 
+  const isSocialLogin = !!myData?.provider && myData.provider !== 'LOCAL'
+
   const handleWithdraw = async (data: WithDrawFormValues) => {
     try {
-      await fetchGraphQL(`
+      await fetchGraphQL(
+        `
         mutation Withdraw($reason: String!, $detailReason: String!) {
           withdraw(reason: $reason, detailReason: $detailReason) { success }
         }
-      `, { reason: data.reason, detailReason: data.detailReason })
+      `,
+        { reason: data.reason, detailReason: data.detailReason }
+      )
       clearAll()
       router.push(ROUTES.HOME)
     } catch {
@@ -72,6 +74,7 @@ function ProfileUpdate() {
         addressSido: myData.addressSido,
         addressGugun: myData.addressGugun,
         createdAt: myData.createdAt,
+        provider: myData.provider,
       })
     }
   }, [myData, updateUserProfile])
@@ -110,9 +113,9 @@ function ProfileUpdate() {
       <div className="pb-4xl bg-[#F3F4F6] pt-0 md:pt-8">
         <h1 className="sr-only">프로필 수정</h1>
         <div className="mx-auto flex max-w-7xl flex-col gap-0 md:flex-row md:gap-8 md:p-0">
-          {isMd ? <ProfileData setIsWithdrawModalOpen={setIsWithdrawModalOpen} data={myData!} isMyProfile /> : null}
+          {isMd ? <ProfileData variant="profile-edit" data={myData!} isMyProfile /> : null}
           <div className="flex w-full flex-col gap-8 p-5 md:p-0">
-            <ProfileUpdateBaseForm myData={myData!} />
+            <ProfileUpdateBaseForm myData={myData!} onWithdrawClick={() => setIsWithdrawModalOpen(true)} />
             {!isSocialLogin ? <ProfileUpdatePasswordForm /> : null}
           </div>
         </div>

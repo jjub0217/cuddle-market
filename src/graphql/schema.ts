@@ -91,6 +91,7 @@ export const typeDefs = gql`
     addressGugun: String
     createdAt: String!
     rating: Float
+    provider: String
   }
 
   type BlockedUser {

@@ -38,9 +38,13 @@ export interface MyPageData {
   createdAt: string
   isBlocked?: boolean
   isReported?: boolean
+  provider?: 'LOCAL' | 'GOOGLE' | 'KAKAO'
 }
 
+type ProfileDataVariant = 'mypage' | 'profile-edit' | 'user-profile'
+
 interface ProfileDataProps {
+  variant?: ProfileDataVariant
   data?: MyPageData
   setIsWithdrawModalOpen?: Dispatch<SetStateAction<boolean>>
   setIsReportModalOpen?: Dispatch<SetStateAction<boolean>>
@@ -52,6 +56,16 @@ interface ProfileDataProps {
   enableImageUpload?: boolean
 }
 
+function formatJoinDate(iso?: string) {
+  if (!iso) return ''
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return ''
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}.${month}.${day}`
+}
+
 const SUMMARY_ITEMS: Array<{ key: keyof ProfileSummaryCounts; label: string }> = [
   { key: 'sales', label: '판매내역' },
   { key: 'purchases', label: '구매내역' },
@@ -59,6 +73,7 @@ const SUMMARY_ITEMS: Array<{ key: keyof ProfileSummaryCounts; label: string }> =
 ]
 
 export default function ProfileData({
+  variant = 'mypage',
   data,
   isMyProfile,
   setIsReportModalOpen,
@@ -67,6 +82,7 @@ export default function ProfileData({
   summaryCounts,
   enableImageUpload,
 }: ProfileDataProps) {
+  const isProfileEditVariant = variant === 'profile-edit'
   const user = useUserStore((state) => state.user)
   const updateUserProfile = useUserStore((state) => state.updateUserProfile)
   const queryClient = useQueryClient()
@@ -294,7 +310,11 @@ export default function ProfileData({
                   </span>
                 ) : null}
                 <p className="text-text-primary text-base leading-none font-semibold">{data?.nickname}</p>
-                <p className="text-text-primary text-sm leading-none">{`${data?.addressSido} ${data?.addressGugun}`}</p>
+                {isProfileEditVariant ? (
+                  <p className="text-on-surface-muted text-sm leading-none break-all">{data?.email}</p>
+                ) : (
+                  <p className="text-text-primary text-sm leading-none">{`${data?.addressSido} ${data?.addressGugun}`}</p>
+                )}
               </div>
             ) : (
               // 모바일 내 정보
@@ -314,27 +334,36 @@ export default function ProfileData({
               </div>
             )}
           </div>
-          <div className="flex w-full flex-col gap-1">
-            <p
-              ref={introRef}
-              className={cn(
-                'w-full text-sm font-normal break-words whitespace-pre-wrap text-gray-500',
-                !isIntroExpanded && 'line-clamp-3'
-              )}
-            >
-              {data?.introduction || '소개글을 작성해주세요'}
-            </p>
-            {data?.introduction && (isIntroExpanded || isIntroClamped) ? (
-              <button
-                type="button"
-                onClick={() => setIsIntroExpanded((prev) => !prev)}
-                className="cursor-pointer self-start text-xs text-gray-400 hover:underline"
-                aria-expanded={isIntroExpanded}
+          {isProfileEditVariant ? (
+            <div className="border-outline-variant/40 flex flex-col gap-2 border-t pt-4">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-on-surface-muted">가입일</span>
+                <span className="text-text-primary font-medium">{formatJoinDate(data?.createdAt)}</span>
+              </div>
+            </div>
+          ) : (
+            <div className="flex w-full flex-col gap-1">
+              <p
+                ref={introRef}
+                className={cn(
+                  'w-full text-sm font-normal break-words whitespace-pre-wrap text-gray-500',
+                  !isIntroExpanded && 'line-clamp-3'
+                )}
               >
-                {isIntroExpanded ? '접기' : '더보기'}
-              </button>
-            ) : null}
-          </div>
+                {data?.introduction || '소개글을 작성해주세요'}
+              </p>
+              {data?.introduction && (isIntroExpanded || isIntroClamped) ? (
+                <button
+                  type="button"
+                  onClick={() => setIsIntroExpanded((prev) => !prev)}
+                  className="cursor-pointer self-start text-xs text-gray-400 hover:underline"
+                  aria-expanded={isIntroExpanded}
+                >
+                  {isIntroExpanded ? '접기' : '더보기'}
+                </button>
+              ) : null}
+            </div>
+          )}
           {isMyProfile && summaryCounts ? (
             <div className="border-outline-variant/40 grid grid-cols-3 gap-2 border-t pt-4">
               {SUMMARY_ITEMS.map((item) => (

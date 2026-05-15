@@ -17,7 +17,6 @@ import { useState, useEffect, useRef } from 'react'
 import { useUserStore } from '@/store/userStore'
 import { uploadImage } from '@/lib/api/products'
 import { useQueryClient } from '@tanstack/react-query'
-import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { Camera } from 'lucide-react'
 import { AnimatePresence } from 'framer-motion'
 import InlineNotification from '@/components/commons/InlineNotification'
@@ -39,8 +38,9 @@ const IMAGE_UPLOAD_ERRORS = {
 
 interface ProfileUpdateBaseFormProps {
   myData?: MyPageData
+  onWithdrawClick: () => void
 }
-export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormProps) {
+export default function ProfileUpdateBaseForm({ myData, onWithdrawClick }: ProfileUpdateBaseFormProps) {
   const {
     control,
     handleSubmit,
@@ -65,7 +65,6 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
 
   const queryClient = useQueryClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const isMd = useMediaQuery('(min-width: 768px)')
 
   const [updateError, setUpdateError] = useState<React.ReactNode | null>(null)
   const [updateSuccess, setUpdateSuccess] = useState<React.ReactNode | null>(null)
@@ -214,12 +213,10 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
     >
       <fieldset className="flex flex-col gap-8">
         <legend className="sr-only">프로필 정보 수정 폼</legend>
-        {isMd ? (
-          <div className="flex flex-col gap-2">
-            <h2 className="text-[20px] font-bold">기본 정보</h2>
-            <p className="text-sm text-gray-500">프로필 이미지, 닉네임, 거주지를 수정할 수 있습니다</p>
-          </div>
-        ) : null}
+        <div className="flex flex-col gap-2">
+          <h2 className="text-[20px] font-bold">기본 정보</h2>
+          <p className="text-sm text-gray-500">프로필 이미지, 닉네임, 거주지를 수정할 수 있습니다</p>
+        </div>
 
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-10">
@@ -251,11 +248,11 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
                 </div>
                 <button
                   type="button"
-                  className="bg-primary-100 absolute right-0 bottom-2 flex size-8 cursor-pointer items-center justify-center rounded-full"
+                  className="bg-primary-100 hover:bg-primary-200 absolute right-0 bottom-2 flex size-8 cursor-pointer items-center justify-center rounded-full transition-colors"
                   onClick={() => fileInputRef.current?.click()}
                   aria-label="프로필 사진 변경"
                 >
-                  <Camera className="" size={20} />
+                  <Camera size={20} />
                 </button>
               </div>
               {errors.profileImageUrl ? (
@@ -293,9 +290,9 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
                 </div>
               </div>
 
-              {/* 계정 정보 */}
-              <div className="flex flex-col gap-1 md:gap-1">
-                <h3 className="md:heading-h5 text-base font-semibold">계정 정보</h3>
+              {/* 계정 정보 (데스크탑에서는 사이드바에 표시) */}
+              <div className="flex flex-col gap-1 md:hidden">
+                <h3 className="text-base font-semibold">계정 정보</h3>
                 <div className="flex flex-col gap-1">
                   <div className="flex flex-col gap-2">
                     <span className="text-sm font-medium text-gray-600">이메일</span>
@@ -387,6 +384,14 @@ export default function ProfileUpdateBaseForm({ myData }: ProfileUpdateBaseFormP
             프로필 수정
           </Button>
         </div>
+        <Button
+          size="md"
+          type="button"
+          onClick={onWithdrawClick}
+          className="w-auto cursor-pointer bg-transparent text-xs text-gray-400 md:ml-auto"
+        >
+          회원탈퇴
+        </Button>
       </fieldset>
     </form>
   )
