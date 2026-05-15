@@ -9,7 +9,7 @@
  */
 export const CARD_CHIP_STYLES = {
   container: 'flex flex-wrap gap-2',
-  chip: 'inline-flex items-center cursor-pointer rounded-lg border px-3 py-2 text-xs font-medium whitespace-nowrap transition-all',
+  chip: 'inline-flex items-center cursor-pointer rounded-lg border px-3 py-2 text-xs font-medium whitespace-nowrap transition-all max-md:px-2.5 max-md:py-1.5',
   chipActive: 'border-[#825500] bg-[#825500] text-white',
   chipInactive:
     'border-[#d4c4b2] bg-[#f6f3f2] text-gray-700 hover:border-[#825500] hover:text-[#825500]',

@@ -59,7 +59,7 @@ export function PriceFilter({ headingClassName, selectedPriceRange, variant = 'd
   const styles = VARIANT_STYLES[variant]
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 max-md:gap-0">
       <h4 id="price-filter-heading" className={headingClassName ?? 'heading-h4'}>
         가격대
       </h4>

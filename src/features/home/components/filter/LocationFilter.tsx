@@ -72,12 +72,12 @@ export function LocationFilter({ headingClassName, variant = 'default' }: Locati
   const styles = VARIANT_STYLES[variant]
 
   return (
-    <div className="flex flex-1 flex-col gap-2">
+    <div className="flex flex-1 flex-col gap-2 max-md:gap-0">
       <h4 id="location-filter-heading" className={headingClassName ?? 'heading-h4'}>
         지역
       </h4>
       <div
-        className="flex flex-col gap-2.5 md:flex-row"
+        className="flex flex-row gap-2.5"
         role="group"
         aria-labelledby="location-filter-heading"
       >
@@ -107,7 +107,7 @@ export function LocationFilter({ headingClassName, variant = 'default' }: Locati
               value: gugun,
               label: gugun,
             }))}
-            placeholder={selectedSido ? '시/군/구 선택' : '시/도를 먼저 선택해주세요'}
+            placeholder={selectedSido ? '시/군/구 선택' : '시/도 먼저 선택'}
             disabled={!selectedSido}
             buttonClassName={styles.gugunButton}
           />

@@ -68,7 +68,7 @@ function ProductCard({ data, 'data-index': dataIndex, vertical = false, hideProd
 
   return (
     <article
-      className="group relative overflow-hidden rounded-3xl border border-black/5 bg-white shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-xl"
+      className="group relative overflow-hidden rounded-xl border border-black/5 bg-white shadow-sm transition-all duration-500 md:rounded-3xl md:hover:-translate-y-1 md:hover:shadow-xl"
       data-index={dataIndex}
     >
       <Link
@@ -77,10 +77,7 @@ function ProductCard({ data, 'data-index': dataIndex, vertical = false, hideProd
         aria-label={`${title}, ${price}원, ${productStatusName}, ${petTypeName}, ${productTradeName}`}
       />
       <div
-        className={cn(
-          'relative z-1 flex cursor-pointer',
-          vertical ? 'flex-col-reverse' : 'flex-row-reverse md:flex-col-reverse'
-        )}
+        className={cn('relative z-1 flex cursor-pointer', vertical ? 'flex-col-reverse' : 'flex-row-reverse md:flex-col-reverse')}
         onClick={handleContentClick}
       >
         <ProductInfo

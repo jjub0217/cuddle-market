@@ -34,7 +34,7 @@ const VARIANT_STYLES: Record<TabsVariant, { container: string; tab: string; tabA
   },
   'card-pill': {
     container: 'flex flex-wrap items-center gap-2',
-    tab: 'cursor-pointer rounded-full border px-5 py-1.5 text-sm whitespace-nowrap transition-all',
+    tab: 'cursor-pointer rounded-full border px-5 py-1.5 text-sm whitespace-nowrap transition-all max-md:px-4 max-md:py-1 max-md:font-normal',
     tabActive: 'border-[#825500] bg-[#825500] text-white shadow-sm',
     tabInactive: 'border-[#d4c4b2] bg-white text-gray-600 hover:border-[#825500] hover:text-[#825500]',
   },

@@ -147,7 +147,7 @@ export default function MainImage({ mainImageUrl, subImageUrls, title, tradeStat
 
       {/* 거래상태 중앙 큰 오버레이 (메인 카드 ProductThumbnail과 동일 패턴) */}
       {isOverlayShown ? (
-        <div className={cn('pointer-events-none absolute inset-0 z-30 flex items-center justify-center', overlayBg)}>
+        <div className={cn('pointer-events-none absolute inset-0 z-10 flex items-center justify-center', overlayBg)}>
           <span className={cn('rounded-full bg-white/95 font-bold text-gray-900 shadow-md', badgeSizeClass)}>
             {displayTradeStatus}
           </span>
