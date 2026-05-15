@@ -167,7 +167,7 @@ export function FindPasswordForm() {
               <div className="flex flex-col gap-6">
                 <div className="flex flex-col gap-2.5">
                   <div className="flex flex-col gap-1">
-                    <RequiredLabel required={false} labelClass="font-medium">
+                    <RequiredLabel required={false} labelClass="font-medium text-sm">
                       새 비밀번호
                     </RequiredLabel>
                     <InputField
@@ -198,14 +198,19 @@ export function FindPasswordForm() {
                     />
                   </div>
                 </div>
-                <Button size="md" className="w-full cursor-pointer bg-[#22C55E] text-white" type="button" onClick={onReSettingPassword}>
+                <Button
+                  size="md"
+                  className="w-full cursor-pointer bg-[#22C55E] text-white"
+                  type="button"
+                  onClick={onReSettingPassword}
+                >
                   비밀번호 변경 완료
                 </Button>
               </div>
             ) : sendValidCodeResult.status !== 'idle' ? (
               <div className="flex flex-col gap-6">
                 <div className="flex flex-col gap-1">
-                  <RequiredLabel required={false} labelClass="font-medium">
+                  <RequiredLabel required={false} labelClass="font-medium text-sm">
                     인증코드
                   </RequiredLabel>
                   <InputWithButton
@@ -220,7 +225,12 @@ export function FindPasswordForm() {
                   />
                 </div>
                 <div className="flex flex-col gap-2.5">
-                  <Button size="md" className="bg-primary-600 w-full cursor-pointer text-white" type="button" onClick={onVerifyCode}>
+                  <Button
+                    size="md"
+                    className="bg-primary-600 w-full cursor-pointer text-white"
+                    type="button"
+                    onClick={onVerifyCode}
+                  >
                     인증하기
                   </Button>
                   <Button
@@ -236,7 +246,7 @@ export function FindPasswordForm() {
             ) : (
               <div className="flex flex-col gap-6">
                 <div className="flex flex-col gap-1">
-                  <RequiredLabel required={false} labelClass="font-medium">
+                  <RequiredLabel required={false} labelClass="font-medium text-sm">
                     이메일
                   </RequiredLabel>
                   <InputField
@@ -250,10 +260,10 @@ export function FindPasswordForm() {
                     registration={register('email', authValidationRules.email)}
                   />
                 </div>
-                <Button size="md" className="bg-primary-600 w-full cursor-pointer text-white" type="submit">
+                <Button size="md" className="bg-primary-600 w-full cursor-pointer text-sm text-white" type="submit">
                   인증코드 전송
                 </Button>
-                <Link href={ROUTES.LOGIN} className="text-primary-300 w-full text-center font-medium">
+                <Link href={ROUTES.LOGIN} className="text-primary-300 w-full text-center text-sm font-medium">
                   로그인으로 돌아가기
                 </Link>
               </div>
