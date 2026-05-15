@@ -23,18 +23,18 @@ export function StepHeader({ currentStep, email }: StepHeaderProps) {
       <div className="flex flex-col items-center gap-1">
         {currentStep === 3 ? (
           <>
-            <h2 className="heading-h5">비밀번호 재설정</h2>
-            <p>가입하신 이메일을 입력하면 인증코드를 보내드립니다</p>
+            <h2 className="text-base font-semibold">비밀번호 재설정</h2>
+            <p className="text-sm text-gray-500">가입하신 이메일을 입력하면 인증코드를 보내드립니다</p>
           </>
         ) : currentStep === 2 ? (
           <>
-            <h2 className="heading-h5">이메일 인증</h2>
+            <h2 className="text-base font-semibold">이메일 인증</h2>
             <p>{`${email}로 인증코드를 발송했습니다.`}</p>
           </>
         ) : (
           <>
-            <h2 className="heading-h5">이메일 입력</h2>
-            <p>가입하신 이메일을 입력하면 인증코드를 보내드립니다</p>
+            <h2 className="text-base font-semibold">이메일 입력</h2>
+            <p className="text-sm text-gray-500">가입하신 이메일을 입력하면 인증코드를 보내드립니다</p>
           </>
         )}
       </div>
