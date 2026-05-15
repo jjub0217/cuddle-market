@@ -2,6 +2,7 @@
 
 import InputField from './InputField'
 import Button from './button/Button'
+import { cn } from '@/lib/utils/cn'
 import type { FieldError, UseFormRegisterReturn } from 'react-hook-form'
 
 interface InputWithButtonProps {
@@ -19,6 +20,7 @@ interface InputWithButtonProps {
   buttonSize?: 'xs' | 'sm' | 'md' | 'lg'
   borderColor?: string
   inputClass?: string
+  autoFocus?: boolean
 }
 
 export default function InputWithButton({
@@ -29,13 +31,14 @@ export default function InputWithButton({
   checkResult,
   registration,
   buttonText,
-  buttonClassName = 'bg-primary-100 text-primary cursor-pointer font-semibold',
+  buttonClassName,
   buttonDisabled,
   onButtonClick,
   size = 'text-sm',
   buttonSize = 'md',
   borderColor = 'border-gray-400',
   inputClass,
+  autoFocus,
 }: InputWithButtonProps) {
   return (
     <div className="flex items-start gap-4">
@@ -49,10 +52,20 @@ export default function InputWithButton({
         error={error}
         checkResult={checkResult}
         className="flex-1"
-        inputClass={inputClass}
+        inputClass={cn('py-2 md:py-2.5', inputClass)}
         registration={registration}
+        autoFocus={autoFocus}
       />
-      <Button size={buttonSize} className={buttonClassName} type="button" onClick={onButtonClick} disabled={buttonDisabled}>
+      <Button
+        size={buttonSize}
+        className={cn(
+          'bg-primary-100 text-primary hover:bg-primary-200 cursor-pointer font-semibold shrink-0 h-10 md:h-11 transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:hover:bg-gray-100 disabled:pointer-events-none',
+          buttonClassName,
+        )}
+        type="button"
+        onClick={onButtonClick}
+        disabled={buttonDisabled}
+      >
         {buttonText}
       </Button>
     </div>

@@ -49,6 +49,9 @@ const HIDE_SEARCHBAR_ALWAYS_PATHS: string[] = [
 // 메뉴 버튼 숨김 경로
 const HIDE_MENU_BUTTON_PATHS: string[] = [ROUTES.LOGIN, ROUTES.SIGNUP]
 
+// 미니멀 헤더 경로 (로고만 표시)
+const MINIMAL_HEADER_PATHS: string[] = [ROUTES.LOGIN, ROUTES.SIGNUP, ROUTES.FIND_PASSWORD]
+
 // SearchBar 숨김 패턴 - 모바일만 (동적 경로)
 const HIDE_SEARCHBAR_MOBILE_PATTERNS = [/^\/user-profile\/\d+$/]
 
@@ -85,6 +88,7 @@ export default function Header() {
     HIDE_SEARCHBAR_ALWAYS_PATHS.includes(pathname) || HIDE_SEARCHBAR_ALWAYS_PATTERNS.some((pattern) => pattern.test(pathname))
   const hideSearchBar = hideSearchBarMobile || hideSearchBarAlways
   const hideMenuButton = HIDE_MENU_BUTTON_PATHS.includes(pathname)
+  const isMinimalHeader = MINIMAL_HEADER_PATHS.includes(pathname)
 
   const isHome = pathname === ROUTES.HOME
   const isMarketActive = pathname === '/' || pathname.startsWith('/market')
@@ -152,7 +156,7 @@ export default function Header() {
             {/* 왼쪽: 로고 + 데스크탑 메뉴 */}
             <div className="flex shrink-0 items-center gap-8 xl:gap-12">
               <Logo />
-              {isXl ? (
+              {isXl && !isMinimalHeader ? (
                 <nav className="flex items-center gap-8" aria-label="주 메뉴">
                   <Link
                     href={ROUTES.HOME}
@@ -201,15 +205,17 @@ export default function Header() {
               <div className="flex-1" aria-hidden="true" />
             )}
 
-            {/* 오른쪽: 검색 토글(모바일) + 사용자 컨트롤 */}
-            <div className="flex shrink-0 items-center gap-1 xl:gap-4">
-              {!hideSearchBar && !isXl ? (
-                <IconButton aria-label="검색" onClick={() => setIsSearchOpen((prev) => !prev)}>
-                  <Search className="text-primary" />
-                </IconButton>
-              ) : null}
-              <UserControls isSideOpen={isSideOpen} setIsSideOpen={setIsSideOpen} hideMenuButton={hideMenuButton} />
-            </div>
+            {/* 오른쪽: 검색 토글(모바일) + 사용자 컨트롤 — 미니멀 헤더에서는 숨김 */}
+            {!isMinimalHeader ? (
+              <div className="flex shrink-0 items-center gap-1 xl:gap-4">
+                {!hideSearchBar && !isXl ? (
+                  <IconButton aria-label="검색" onClick={() => setIsSearchOpen((prev) => !prev)}>
+                    <Search className="text-primary" />
+                  </IconButton>
+                ) : null}
+                <UserControls isSideOpen={isSideOpen} setIsSideOpen={setIsSideOpen} hideMenuButton={hideMenuButton} />
+              </div>
+            ) : null}
           </div>
 
           {/* 모바일 검색바 - 아코디언 */}

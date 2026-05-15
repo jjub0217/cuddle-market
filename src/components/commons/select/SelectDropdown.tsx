@@ -27,7 +27,7 @@ function Select({ isOpen, disabled, onClick, id, buttonClassName, selectedLabel,
       onClick={onClick}
       id={id}
       className={cn(
-        'relative flex w-full items-center cursor-pointer rounded-lg border border-gray-400 px-3 py-3 pr-10 text-sm disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100/30 disabled:text-gray-300',
+        'relative flex w-full items-center cursor-pointer rounded-lg border border-gray-400 bg-white px-3 py-3 pr-10 text-sm disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100/30 disabled:text-gray-300',
         buttonClassName,
       )}
     >

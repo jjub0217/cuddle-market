@@ -20,7 +20,8 @@ const validateBirthDate = (value: string): string | true => {
 
   const age = today.getFullYear() - birthDate.getFullYear()
   const isBeforeBirthday =
-    today.getMonth() < birthDate.getMonth() || (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())
+    today.getMonth() < birthDate.getMonth() ||
+    (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())
   const actualAge = isBeforeBirthday ? age - 1 : age
 
   if (!value || value === '--') return '생년월일을 입력해주세요'
@@ -41,8 +42,10 @@ export function BirthDateField<T extends FieldValues>({ control }: BirthDateFiel
   }
 
   return (
-    <div className="flex flex-col gap-2.5">
-      <RequiredLabel htmlFor="signup-birthdate">생년월일</RequiredLabel>
+    <div className="flex flex-col">
+      <RequiredLabel htmlFor="signup-birthdate" labelClass="text-sm">
+        생년월일
+      </RequiredLabel>
       <Controller
         name={'birthDate' as Path<T>}
         control={control}
@@ -76,7 +79,7 @@ export function BirthDateField<T extends FieldValues>({ control }: BirthDateFiel
                     updateDate(newValue, month, day)
                   }}
                   onBlur={handleBlur}
-                  className="focus:border-primary-500 w-full rounded-lg border border-gray-400 px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none md:py-3"
+                  className="focus:border-primary-500 w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none md:py-3"
                 />
                 <input
                   type="text"
@@ -89,7 +92,7 @@ export function BirthDateField<T extends FieldValues>({ control }: BirthDateFiel
                     updateDate(year, newValue, day)
                   }}
                   onBlur={handleBlur}
-                  className="focus:border-primary-500 w-full rounded-lg border border-gray-400 px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none md:py-3"
+                  className="focus:border-primary-500 w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none md:py-3"
                 />
                 <input
                   type="text"
@@ -102,7 +105,7 @@ export function BirthDateField<T extends FieldValues>({ control }: BirthDateFiel
                     updateDate(year, month, newValue)
                   }}
                   onBlur={handleBlur}
-                  className="focus:border-primary-500 w-full rounded-lg border border-gray-400 px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none md:py-3"
+                  className="focus:border-primary-500 w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none md:py-3"
                 />
               </div>
               {fieldState.error ? <p className="text-danger-500 text-xs font-semibold">{fieldState.error.message}</p> : null}
