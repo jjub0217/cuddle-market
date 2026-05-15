@@ -113,7 +113,7 @@ function ProfileUpdate() {
       <div className="pb-4xl bg-[#F3F4F6] pt-0 md:pt-8">
         <h1 className="sr-only">프로필 수정</h1>
         <div className="mx-auto flex max-w-7xl flex-col gap-0 md:flex-row md:gap-8 md:p-0">
-          {isMd ? <ProfileData variant="profile-edit" data={myData!} isMyProfile /> : null}
+          {isMd ? <ProfileData data={myData!} isMyProfile /> : null}
           <div className="flex w-full flex-col gap-8 p-5 md:p-0">
             <ProfileUpdateBaseForm myData={myData!} onWithdrawClick={() => setIsWithdrawModalOpen(true)} />
             {!isSocialLogin ? <ProfileUpdatePasswordForm /> : null}
