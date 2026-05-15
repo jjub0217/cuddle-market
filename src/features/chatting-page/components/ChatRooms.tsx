@@ -48,9 +48,9 @@ export function ChatRooms({
   }
 
   return (
-    <section className="relative flex flex-col rounded-none border-gray-300 md:max-w-112 md:min-w-112 md:border-t md:border-b md:border-l">
-      <h2 className={cn('hidden border-b border-gray-300 bg-white p-5 md:static md:block', Z_INDEX.HEADER)}>채팅목록</h2>
-      <div className="scrollbar-hide flex-1 overflow-y-scroll">
+    <section className="relative flex flex-col rounded-none p-6 md:max-w-96 md:min-w-96">
+      <h2 className={cn('hidden md:static md:block', Z_INDEX.HEADER)}>채팅목록</h2>
+      <div className="scrollbar-hide flex-1 overflow-y-scroll py-5">
         <ul className="flex flex-col gap-2">
           {rooms &&
             rooms.map((room) => {
@@ -59,30 +59,58 @@ export function ChatRooms({
                 <li
                   key={roomData.chatRoomId}
                   className={cn(
-                    'flex cursor-pointer flex-col gap-2 p-4 md:p-3',
-                    roomData.chatRoomId === selectedRoomId && 'md:bg-[#E5E7EB]/50'
+                    'border-outline-variant/40 flex cursor-pointer flex-col gap-2 rounded-3xl border px-4 py-3.5',
+                    roomData.chatRoomId === selectedRoomId && 'md:bg-[#7c571a]'
                   )}
                   onClick={() => handleSelectRoom(room)}
                 >
-                  <div className="flex w-full items-center gap-2.5">
+                  <div className="flex w-full items-start gap-2.5">
                     <div className="shrink-0">
                       <ProfileAvatar imageUrl={roomData?.opponentProfileImageUrl} nickname={roomData?.opponentNickname ?? ''} />
                     </div>
-                    <div className="flex min-w-0 flex-1 flex-col gap-1">
-                      <p className="leading-none font-semibold">{roomData?.opponentNickname}</p>
-                      <div className="flex items-center gap-1">
-                        <p className={cn('min-w-0 flex-1 truncate text-xs', roomData.lastMessage == null ? 'text-blue-600' : '')}>
+                    <div className="flex min-w-0 flex-1 flex-col gap-3">
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center justify-between gap-1">
+                          <p
+                            className={cn(
+                              'text-base leading-none font-semibold',
+                              roomData.chatRoomId === selectedRoomId ? 'text-hero-surface' : 'text-gray-800'
+                            )}
+                          >
+                            {roomData?.opponentNickname}
+                          </p>
+                          {roomData.lastMessageTime ? (
+                            <span
+                              className={cn(
+                                'text-hero-surface shrink-0 text-sm leading-none',
+                                roomData.chatRoomId === selectedRoomId ? 'text-hero-surface' : 'text-[#9b9387]'
+                              )}
+                            >
+                              {getTimeAgo(roomData.lastMessageTime)}
+                            </span>
+                          ) : null}
+                        </div>
+                        <p
+                          className={cn(
+                            'min-w-0 flex-1 truncate text-sm font-medium',
+                            roomData.lastMessage == null ? 'text-blue-600' : '',
+                            roomData.chatRoomId === selectedRoomId ? 'text-hero-surface' : 'text-[#9b9387]'
+                          )}
+                        >
                           {roomData.lastMessage == null
                             ? '채팅방에 입장해주세요'
                             : roomData.lastMessage === ''
                               ? '사진'
                               : roomData.lastMessage}
                         </p>
-                        {roomData.lastMessageTime ? (
-                          <span className="shrink-0 text-xs leading-none font-medium text-gray-500">
-                            {getTimeAgo(roomData.lastMessageTime)}
-                          </span>
-                        ) : null}
+                      </div>
+                      <div className="flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-[#9f854f] bg-[#96793f] p-2.5">
+                        <ChatProductCard
+                          productImageUrl={roomData?.productImageUrl}
+                          productTitle={roomData?.productTitle}
+                          productPrice={roomData?.productPrice}
+                          size="sm"
+                        />
                       </div>
                     </div>
                     {roomData.unreadCount >= 1 ? (
@@ -91,14 +119,14 @@ export function ChatRooms({
                       </p>
                     ) : null}
                   </div>
-                  <div className="border-primary-100 bg-primary-50 flex w-full items-center gap-2 overflow-hidden rounded-lg border p-1.5">
+                  {/* <div className="flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-[#9f854f] bg-[#96793f] p-2.5">
                     <ChatProductCard
                       productImageUrl={roomData?.productImageUrl}
                       productTitle={roomData?.productTitle}
                       productPrice={roomData?.productPrice}
                       size="sm"
                     />
-                  </div>
+                  </div> */}
                 </li>
               )
             })}
