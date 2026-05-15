@@ -59,8 +59,8 @@ export function ChatRooms({
                 <li
                   key={roomData.chatRoomId}
                   className={cn(
-                    'border-outline-variant/40 flex cursor-pointer flex-col gap-2 rounded-3xl border px-4 py-3.5',
-                    roomData.chatRoomId === selectedRoomId && 'md:bg-[#7c571a]'
+                    'bg-surface-container-low flex cursor-pointer flex-col gap-2 rounded-3xl border border-[#eae2dc] px-4 py-3.5',
+                    roomData.chatRoomId === selectedRoomId && 'md:bg-[#7c571a] border-outline-variant/40'
                   )}
                   onClick={() => handleSelectRoom(room)}
                 >

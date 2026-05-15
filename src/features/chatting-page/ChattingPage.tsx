@@ -244,7 +244,7 @@ export default function ChattingPage() {
       ) : null}
       <div
         className={cn(
-          'border-outline-variant/60 bg-surface relative flex h-full flex-col border shadow-2xl md:mx-auto md:h-[calc(100vh-8rem)] md:w-full md:max-w-7xl md:flex-row md:rounded-3xl',
+          'border-outline-variant/10 bg-surface relative flex h-full flex-col border shadow-2xl md:mx-auto md:h-[calc(100vh-8rem)] md:w-full md:max-w-7xl md:flex-row md:rounded-3xl',
           isChatOpen ? 'flex-1 overflow-hidden md:flex-none' : ''
         )}
       >
