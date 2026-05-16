@@ -48,9 +48,9 @@ export default function MyDashboard({ myProducts, myRequests, myFavorites }: MyD
   const currentConfig = TAB_CONFIG[activeTab]
 
   return (
-    <div className="flex flex-col gap-3 md:gap-8">
+    <div className="flex flex-col md:gap-8">
       {/* 거래 내역 요약 */}
-      <section className="bg-surface-container-lowest border-outline-variant/40 rounded-2xl border p-6">
+      <section className="bg-surface-container-lowest border-outline-variant/40 border-b p-5 md:rounded-2xl md:border">
         <UnderlineTabs
           tabs={DASHBOARD_TABS_LIST}
           activeTab={activeTab}
@@ -83,8 +83,8 @@ export default function MyDashboard({ myProducts, myRequests, myFavorites }: MyD
       </section>
 
       {/* 활동 요약 */}
-      <section className="grid grid-cols-1 gap-3 md:gap-8 lg:grid-cols-2">
-        <div className="bg-surface-container-lowest border-outline-variant/40 rounded-2xl border p-6 md:p-8">
+      <section className="grid grid-cols-1 md:gap-8 lg:grid-cols-2">
+        <div className="bg-surface-container-lowest border-outline-variant/40 border-b p-6 md:rounded-2xl md:border md:p-8">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-on-surface text-base font-bold">나의 커뮤니티 글</h2>
             <Link href="?nav=nav-activity" className="text-primary flex items-center gap-1 text-sm font-bold hover:underline">
@@ -95,7 +95,7 @@ export default function MyDashboard({ myProducts, myRequests, myFavorites }: MyD
           <p className="text-on-surface-muted py-8 text-center text-sm">작성한 커뮤니티 글이 없습니다.</p>
         </div>
 
-        <div className="bg-surface-container-lowest border-outline-variant/40 rounded-2xl border p-6 md:p-8">
+        <div className="bg-surface-container-lowest border-outline-variant/40 p-6 md:rounded-2xl md:border md:p-8">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-on-surface text-base font-bold">최근 작성한 댓글</h2>
             <Link href="?nav=nav-activity" className="text-primary flex items-center gap-1 text-sm font-bold hover:underline">

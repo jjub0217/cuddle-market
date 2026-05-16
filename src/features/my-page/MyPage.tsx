@@ -63,6 +63,41 @@ function MyPage() {
   const [isProfileFullViewOpen, setIsProfileFullViewOpen] = useState(false)
   // 모바일 메뉴 클릭 시 풀스크린에 표시할 탭 (null이면 닫힘; 'activity'는 MyActivityPanel 표시)
   const [mobilePanelTab, setMobilePanelTab] = useState<MyPageTabId | 'activity' | null>(null)
+
+  // 모바일 오버레이(프로필/메뉴 패널)는 URL을 바꾸지 않는 단순 state이므로,
+  // 기기 뒤로가기를 누르면 패널이 닫히는 대신 직전 페이지(예: 유저 프로필)로 빠져버린다.
+  // 패널을 열 때 history 엔트리를 push해서 뒤로가기가 "패널 닫기"로 동작하도록 한다.
+  const openMobilePanel = (tab: MyPageTabId | 'activity') => {
+    if (typeof window !== 'undefined') {
+      window.history.pushState({ cmMobilePanel: tab }, '')
+    }
+    setMobilePanelTab(tab)
+  }
+
+  const openProfileFullView = () => {
+    if (typeof window !== 'undefined') {
+      window.history.pushState({ cmMobileProfile: true }, '')
+    }
+    setIsProfileFullViewOpen(true)
+  }
+
+  const closeMobileOverlay = () => {
+    if (typeof window !== 'undefined') {
+      window.history.back()
+    } else {
+      setMobilePanelTab(null)
+      setIsProfileFullViewOpen(false)
+    }
+  }
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setMobilePanelTab(null)
+      setIsProfileFullViewOpen(false)
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
   const mobilePanelTitle =
     mobilePanelTab === 'tab-sales'
       ? '판매 내역'
@@ -380,7 +415,7 @@ function MyPage() {
             {/* 모바일: 압축 프로필 카드 (클릭 시 풀스크린 진입) */}
             <button
               type="button"
-              onClick={() => setIsProfileFullViewOpen(true)}
+              onClick={openProfileFullView}
               aria-label="프로필 자세히 보기"
               className="border-outline-variant/40 flex w-full cursor-pointer flex-col gap-3 rounded-2xl border bg-white p-5 text-left transition-colors hover:bg-gray-50 md:hidden"
             >
@@ -409,7 +444,7 @@ function MyPage() {
                 <div className="flex flex-col">
                   <button
                     type="button"
-                    onClick={() => setMobilePanelTab('tab-sales')}
+                    onClick={() => openMobilePanel('tab-sales')}
                     className="text-on-surface flex cursor-pointer items-center gap-3 py-2"
                   >
                     <Tag size={20} strokeWidth={1.5} />
@@ -418,7 +453,7 @@ function MyPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setMobilePanelTab('tab-purchases')}
+                    onClick={() => openMobilePanel('tab-purchases')}
                     className="text-on-surface flex cursor-pointer items-center gap-3 py-2"
                   >
                     <Handbag size={20} strokeWidth={1.5} />
@@ -427,7 +462,7 @@ function MyPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setMobilePanelTab('tab-wishlist')}
+                    onClick={() => openMobilePanel('tab-wishlist')}
                     className="text-on-surface flex cursor-pointer items-center gap-3 py-2"
                   >
                     <Heart size={20} strokeWidth={1.5} />
@@ -442,7 +477,7 @@ function MyPage() {
                 <div className="flex flex-col">
                   <button
                     type="button"
-                    onClick={() => setMobilePanelTab('activity')}
+                    onClick={() => openMobilePanel('activity')}
                     className="text-on-surface flex cursor-pointer items-center gap-3 py-2"
                   >
                     <MessageSquareText size={20} strokeWidth={1.5} />
@@ -451,7 +486,7 @@ function MyPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setMobilePanelTab('tab-blocked')}
+                    onClick={() => openMobilePanel('tab-blocked')}
                     className="text-on-surface flex cursor-pointer items-center gap-3 py-2"
                   >
                     <UserX size={20} strokeWidth={1.5} />
@@ -592,12 +627,12 @@ function MyPage() {
         aria-hidden={!isProfileFullViewOpen}
       >
         <div className="sticky top-0 z-10 flex h-16 items-center gap-3 border-b border-gray-200 bg-white px-2">
-          <button type="button" onClick={() => setIsProfileFullViewOpen(false)} aria-label="닫기" className="cursor-pointer">
+          <button type="button" onClick={closeMobileOverlay} aria-label="닫기" className="cursor-pointer">
             <ArrowLeft size={20} />
           </button>
           <span className="text-base font-bold">프로필</span>
         </div>
-        <div className="flex flex-col gap-2 px-2 py-2">
+        <div className="flex flex-col">
           <ProfileData
             setIsWithdrawModalOpen={setIsWithdrawModalOpen}
             data={myData!}
@@ -629,7 +664,7 @@ function MyPage() {
         aria-hidden={!mobilePanelTab}
       >
         <div className="sticky top-0 flex h-16 items-center gap-3 border-b border-gray-200 bg-white px-4">
-          <button type="button" onClick={() => setMobilePanelTab(null)} aria-label="닫기" className="cursor-pointer">
+          <button type="button" onClick={closeMobileOverlay} aria-label="닫기" className="cursor-pointer">
             <ArrowLeft size={20} />
           </button>
           <span className="text-base font-bold">{mobilePanelTitle}</span>
