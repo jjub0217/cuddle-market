@@ -376,7 +376,7 @@ function MyPage() {
       <div className="pb-4xl bg-gray-100/30 pt-0 md:bg-transparent md:pt-8">
         <h1 className="sr-only">마이페이지</h1>
         <div className="mx-auto flex max-w-7xl flex-col gap-3.5 md:flex-row md:gap-8">
-          <div className="flex flex-col gap-2 p-3 md:p-0">
+          <div className="flex flex-col gap-2 p-2 md:p-0">
             {/* 모바일: 압축 프로필 카드 (클릭 시 풀스크린 진입) */}
             <button
               type="button"
