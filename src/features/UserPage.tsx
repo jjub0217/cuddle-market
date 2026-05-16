@@ -11,6 +11,7 @@ import LoadMoreButton from '@/components/commons/button/LoadMoreButton'
 import EmptyState from '@/components/EmptyState'
 import { Package } from 'lucide-react'
 import Tabs from '@/components/Tabs'
+import { UnderlineTabs } from '@/components/UnderlineTabs'
 import dynamic from 'next/dynamic'
 const UserReportModal = dynamic(() => import('@/components/modal/UserReportModal'))
 const BlockModal = dynamic(() => import('@/components/modal/BlockModal'))
@@ -180,7 +181,15 @@ function UserPage() {
             <h4 id="user-product-heading" className="sr-only">
               {userData?.nickname}님의 {activeTabLabel}
             </h4>
-            <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="md:hidden">
+              <UnderlineTabs
+                tabs={USER_PAGE_TABS}
+                activeTab={activeTab}
+                onTabChange={handleTabChange}
+                ariaLabel="유저 상품 종류 메뉴"
+              />
+            </div>
+            <div className="hidden flex-wrap items-center justify-between gap-3 md:flex">
               <Tabs
                 tabs={USER_PAGE_TABS}
                 activeTab={activeTab}
@@ -194,10 +203,10 @@ function UserPage() {
               <div className="gap-lg flex flex-col">
                 {allProducts.length ? (
                   <>
-                    <ul className="grid grid-cols-3 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                       {allProducts.map((product) => (
                         <li key={product.id}>
-                          <ProductCard data={product} vertical hideProductType />
+                          <ProductCard data={product} hideProductType />
                         </li>
                       ))}
                     </ul>
