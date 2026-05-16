@@ -166,7 +166,7 @@ export default function ProfileData({
   return (
     <aside
       aria-label="프로필"
-      className="md:bg-surface/95 border-outline-variant/40 flex h-fit flex-col rounded-2xl border bg-white px-5 py-5 md:max-w-72 md:min-w-72 md:rounded-none md:rounded-xl md:border-b"
+      className="md:bg-surface/95 border-outline-variant/40 flex h-fit flex-col border-b bg-white px-5 py-5 md:max-w-72 md:min-w-72 md:rounded-xl md:border md:border-b"
     >
       <AnimatePresence>
         {imageUpdateError ? (

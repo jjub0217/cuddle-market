@@ -59,8 +59,8 @@ export function ChatRooms({
                 <li
                   key={roomData.chatRoomId}
                   className={cn(
-                    'bg-surface-container-low flex cursor-pointer flex-col gap-2 rounded-3xl border border-[#eae2dc] px-4 py-3.5',
-                    roomData.chatRoomId === selectedRoomId && 'md:bg-[#7c571a] border-outline-variant/40'
+                    'flex cursor-pointer flex-col gap-2 rounded-3xl border border-[#eae2dc] px-4 py-3.5',
+                    roomData.chatRoomId === selectedRoomId && 'border-outline-variant/40 md:bg-[#7c571a]'
                   )}
                   onClick={() => handleSelectRoom(room)}
                 >
@@ -104,7 +104,12 @@ export function ChatRooms({
                               : roomData.lastMessage}
                         </p>
                       </div>
-                      <div className="flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-[#9f854f] bg-[#96793f] p-2.5">
+                      <div
+                        className={cn(
+                          'flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-[#9f854f] p-2.5',
+                          roomData.chatRoomId === selectedRoomId ? 'border border-[#9f854f] bg-[#96793f]' : 'bg-[#f6f3f2]'
+                        )}
+                      >
                         <ChatProductCard
                           productImageUrl={roomData?.productImageUrl}
                           productTitle={roomData?.productTitle}

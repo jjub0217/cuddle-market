@@ -168,7 +168,7 @@ function UserPage() {
             ) : null}
           </AnimatePresence>
         </div>
-        <div className="mx-auto flex min-h-screen max-w-7xl flex-col gap-7 bg-gray-100/30 p-3 md:min-h-0 md:flex-row md:gap-8 md:bg-transparent md:p-0">
+        <div className="mx-auto flex min-h-screen max-w-7xl flex-col md:min-h-0 md:flex-row md:gap-8 md:p-0">
           <ProfileData
             setIsWithdrawModalOpen={setIsWithdrawModalOpen}
             setIsReportModalOpen={setIsReportModalOpen}
@@ -177,7 +177,7 @@ function UserPage() {
             isMyProfile={isMyProfile}
             unblockUser={unblockUser}
           />
-          <section className="flex w-full flex-col gap-1 md:gap-6" aria-labelledby="user-product-heading">
+          <section className="flex w-full flex-col gap-1 p-5 md:gap-6 md:p-0" aria-labelledby="user-product-heading">
             <h4 id="user-product-heading" className="sr-only">
               {userData?.nickname}님의 {activeTabLabel}
             </h4>
