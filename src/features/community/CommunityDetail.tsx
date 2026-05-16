@@ -158,7 +158,7 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
 
   return (
     <>
-      <div className="min-h-screen bg-white pt-8 pb-16 md:pb-0">
+      <div className="min-h-screen bg-white pt-5 pb-16 md:pt-8 md:pb-0">
         <div className="px-lg md:pb-4xl mx-auto max-w-7xl pb-0">
           <div className="flex flex-col justify-center gap-1 md:gap-3.5">
             <button
@@ -173,65 +173,69 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
               <Badge className="bg-primary-400 w-fit rounded-full text-xs text-white md:font-semibold">
                 {getBoardType(data.boardType as 'QUESTION' | 'INFO')}
               </Badge>
-              <h1 className="text-xl leading-snug font-bold md:text-2xl">{data.title}</h1>
-              <div className="border-outline-variant/40 flex items-end justify-between border-b pb-4">
-                <div className="flex items-center gap-3.5">
-                  <ProfileAvatar
-                    imageUrl={data.authorProfileImageUrl}
-                    nickname={data.authorNickname}
-                    size="lg"
-                    className="h-10 w-10 md:h-10 md:w-10"
-                  />
-                  {/* 유저 정보 */}
-                  <div className="flex flex-col gap-2">
-                    <p className="text-xs leading-none font-bold text-[#1c1b1b] md:text-base md:font-medium">
-                      {data.authorNickname}
-                    </p>
-                    <div className="flex items-center gap-0.5 md:gap-1">
-                      <p className="text-xs leading-none text-[#827565]">{getTimeAgo(data.createdAt)}</p>
-                      <span aria-hidden="true" className="text-xs">
-                        ·
-                      </span>
-                      <p className="text-xs leading-none text-[#827565]">조회 {data.viewCount}</p>
+              <div className="flex flex-col-reverse gap-3.5 md:flex-col">
+                <h1 className="border-outline-variant/40 border-b pb-4 text-xl leading-snug font-bold md:border-0 md:p-0 md:text-2xl">
+                  {data.title}
+                </h1>
+                <div className="md:border-outline-variant/40 flex items-end justify-between md:border-b md:pb-4">
+                  <div className="flex items-center gap-3.5">
+                    <ProfileAvatar
+                      imageUrl={data.authorProfileImageUrl}
+                      nickname={data.authorNickname}
+                      size="lg"
+                      className="h-10 w-10 md:h-10 md:w-10"
+                    />
+                    {/* 유저 정보 */}
+                    <div className="flex flex-col gap-2">
+                      <p className="text-sm leading-none font-bold text-[#1c1b1b] md:text-base md:font-medium">
+                        {data.authorNickname}
+                      </p>
+                      <div className="flex items-center gap-0.5 md:gap-1">
+                        <p className="text-xs leading-none text-[#827565]">{getTimeAgo(data.createdAt)}</p>
+                        <span aria-hidden="true" className="text-xs">
+                          ·
+                        </span>
+                        <p className="text-xs leading-none text-[#827565]">조회 {data.viewCount}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-1">
-                  {user?.id === data?.authorId ? (
-                    <>
+                  <div className="flex items-center gap-1">
+                    {user?.id === data?.authorId ? (
+                      <>
+                        <button
+                          className="text-primary-container cursor-pointer text-xs font-medium hover:underline"
+                          type="button"
+                          onClick={() => handlePostEdit(Number(id))}
+                        >
+                          수정
+                        </button>
+                        <span aria-hidden="true" className="text-xs">
+                          ·
+                        </span>
+                        <button
+                          className="text-primary-container cursor-pointer text-xs font-medium hover:underline"
+                          type="button"
+                          onClick={() => setIsPostDeleteModalOpen(true)}
+                        >
+                          삭제
+                        </button>
+                      </>
+                    ) : (
                       <button
-                        className="text-primary-container cursor-pointer text-xs font-medium hover:underline"
+                        className="cursor-pointer text-xs font-medium text-gray-500 hover:underline"
                         type="button"
-                        onClick={() => handlePostEdit(Number(id))}
+                        onClick={() => {
+                          if (!user) {
+                            openLoginModal()
+                          } else {
+                            setIsReportModalOpen(true)
+                          }
+                        }}
                       >
-                        수정
+                        신고하기
                       </button>
-                      <span aria-hidden="true" className="text-xs">
-                        ·
-                      </span>
-                      <button
-                        className="text-primary-container cursor-pointer text-xs font-medium hover:underline"
-                        type="button"
-                        onClick={() => setIsPostDeleteModalOpen(true)}
-                      >
-                        삭제
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      className="cursor-pointer text-xs font-medium text-gray-500 hover:underline"
-                      type="button"
-                      onClick={() => {
-                        if (!user) {
-                          openLoginModal()
-                        } else {
-                          setIsReportModalOpen(true)
-                        }
-                      }}
-                    >
-                      신고하기
-                    </button>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
               {/* <h1 className="text-lg leading-snug font-bold">{data.title}</h1> */}

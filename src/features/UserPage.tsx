@@ -36,8 +36,7 @@ function UserPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const tabParam = searchParams.get('tab') as UserPageTabId | null
-  const activeTab: UserPageTabId =
-    tabParam && USER_PAGE_TABS.some((t) => t.id === tabParam) ? tabParam : 'tab-sales'
+  const activeTab: UserPageTabId = tabParam && USER_PAGE_TABS.some((t) => t.id === tabParam) ? tabParam : 'tab-sales'
   const isSalesTab = activeTab === 'tab-sales'
 
   const [, setIsWithdrawModalOpen] = useState(false)
@@ -156,7 +155,7 @@ function UserPage() {
 
   return (
     <>
-      <div className="pb-4xl relative pt-0 md:pt-8">
+      <div className="md:pb-4xl relative pt-0 md:pt-8">
         <div className="mx-auto max-w-7xl">
           <AnimatePresence>
             {unblockError ? (
@@ -168,7 +167,7 @@ function UserPage() {
             ) : null}
           </AnimatePresence>
         </div>
-        <div className="mx-auto flex max-w-7xl flex-col gap-0 md:flex-row md:gap-8">
+        <div className="mx-auto flex min-h-screen max-w-7xl flex-col gap-7 bg-gray-100/30 p-3 md:min-h-0 md:flex-row md:gap-8 md:bg-transparent md:p-0">
           <ProfileData
             setIsWithdrawModalOpen={setIsWithdrawModalOpen}
             setIsReportModalOpen={setIsReportModalOpen}
@@ -177,11 +176,11 @@ function UserPage() {
             isMyProfile={isMyProfile}
             unblockUser={unblockUser}
           />
-          <section className="flex w-full flex-col gap-6" aria-labelledby="user-product-heading">
+          <section className="flex w-full flex-col gap-1 md:gap-6" aria-labelledby="user-product-heading">
             <h4 id="user-product-heading" className="sr-only">
               {userData?.nickname}님의 {activeTabLabel}
             </h4>
-            <div className="flex flex-wrap items-center justify-between gap-3 px-5 md:px-0">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <Tabs
                 tabs={USER_PAGE_TABS}
                 activeTab={activeTab}
@@ -191,11 +190,11 @@ function UserPage() {
               />
               <p className="text-sm text-gray-500">총 {totalProducts}개</p>
             </div>
-            <div className="rounded-xl border-outline-variant/40 p-5 md:border">
+            <div className="border-outline-variant/40 rounded-xl py-5 md:border md:p-5">
               <div className="gap-lg flex flex-col">
                 {allProducts.length ? (
                   <>
-                    <ul className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                    <ul className="grid grid-cols-3 gap-4 md:grid-cols-2 lg:grid-cols-4">
                       {allProducts.map((product) => (
                         <li key={product.id}>
                           <ProductCard data={product} vertical hideProductType />
@@ -212,8 +211,18 @@ function UserPage() {
           </section>
         </div>
       </div>
-      <UserReportModal isOpen={isReportModalOpen} onCancel={() => setIsReportModalOpen(false)} userNickname={userData.nickname} userId={Number(id)} />
-      <BlockModal isOpen={isBlockModalOpen} onCancel={() => setIsBlockModalOpen(false)} userNickname={userData.nickname} userId={Number(id)} />
+      <UserReportModal
+        isOpen={isReportModalOpen}
+        onCancel={() => setIsReportModalOpen(false)}
+        userNickname={userData.nickname}
+        userId={Number(id)}
+      />
+      <BlockModal
+        isOpen={isBlockModalOpen}
+        onCancel={() => setIsBlockModalOpen(false)}
+        userNickname={userData.nickname}
+        userId={Number(id)}
+      />
       <Footer />
     </>
   )
