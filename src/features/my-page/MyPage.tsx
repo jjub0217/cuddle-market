@@ -28,6 +28,10 @@ import InlineNotification from '@/components/commons/InlineNotification'
 import Spinner from '@/components/commons/spinner/Spinner'
 import Button from '@/components/commons/button/Button'
 import { cn } from '@/lib/utils/cn'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
+import { Z_INDEX } from '@/constants/ui'
+import { ArrowLeft, Tag, Handbag, ChevronRight, Heart, MessageSquareText, UserX, Headphones } from 'lucide-react'
+import Link from 'next/link'
 
 function MyPage() {
   const [deleteError, setDeleteError] = useState<React.ReactNode | null>(null)
@@ -52,6 +56,42 @@ function MyPage() {
   const navParam = searchParams.get('nav') as MyPageNavId | null
   const activeMyPageTab = tabParam && MY_PAGE_TABS.some((tab) => tab.id === tabParam) ? tabParam : 'tab-sales'
   const activeMyPageNav = navParam && MY_PAGE_NAV.some((tab) => tab.id === navParam) ? navParam : 'nav-dash'
+
+  // 모바일에서는 사이드 nav 숨김 + 대시보드 강제 노출
+  const isMobile = useMediaQuery('(max-width: 767px)')
+  const effectiveNav: MyPageNavId = isMobile ? 'nav-dash' : activeMyPageNav
+  const [isProfileFullViewOpen, setIsProfileFullViewOpen] = useState(false)
+  // 모바일 메뉴 클릭 시 풀스크린에 표시할 탭 (null이면 닫힘; 'activity'는 MyActivityPanel 표시)
+  const [mobilePanelTab, setMobilePanelTab] = useState<MyPageTabId | 'activity' | null>(null)
+  const mobilePanelTitle =
+    mobilePanelTab === 'tab-sales'
+      ? '판매 내역'
+      : mobilePanelTab === 'tab-purchases'
+        ? '구매 내역'
+        : mobilePanelTab === 'tab-wishlist'
+          ? '찜한 상품'
+          : mobilePanelTab === 'tab-blocked'
+            ? '차단 유저'
+            : mobilePanelTab === 'activity'
+              ? '내 글'
+              : ''
+  const mobilePanelTabCode =
+    mobilePanelTab && mobilePanelTab !== 'activity'
+      ? (MY_PAGE_TABS.find((tab) => tab.id === mobilePanelTab)?.code ?? 'SELL')
+      : 'SELL'
+  const mobileTradeStatusTabs =
+    mobilePanelTab === 'tab-purchases'
+      ? [
+          { id: 'ALL', label: '전체', code: 'ALL' },
+          { id: 'SELLING', label: '요청중', code: 'SELLING' },
+          { id: 'COMPLETED', label: '구매완료', code: 'COMPLETED' },
+        ]
+      : [
+          { id: 'ALL', label: '전체', code: 'ALL' },
+          { id: 'SELLING', label: '판매중', code: 'SELLING' },
+          { id: 'RESERVED', label: '예약중', code: 'RESERVED' },
+          { id: 'COMPLETED', label: '판매완료', code: 'COMPLETED' },
+        ]
   const activeTabCode = MY_PAGE_TABS.find((tab) => tab.id === activeMyPageTab)?.code ?? 'SELL'
 
   const {
@@ -99,7 +139,7 @@ function MyPage() {
     },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
     initialPageParam: 0,
-    enabled: activeMyPageTab === 'tab-purchases' || activeMyPageNav === 'nav-dash',
+    enabled: activeMyPageTab === 'tab-purchases' || effectiveNav === 'nav-dash',
   })
 
   const {
@@ -116,7 +156,7 @@ function MyPage() {
     },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
     initialPageParam: 0,
-    enabled: activeMyPageTab === 'tab-wishlist' || activeMyPageNav === 'nav-dash',
+    enabled: activeMyPageTab === 'tab-wishlist' || effectiveNav === 'nav-dash',
   })
 
   const {
@@ -333,22 +373,124 @@ function MyPage() {
 
   return (
     <>
-      <div className="pb-4xl pt-0 md:pt-8">
+      <div className="pb-4xl bg-gray-100/30 pt-0 md:bg-transparent md:pt-8">
         <h1 className="sr-only">마이페이지</h1>
         <div className="mx-auto flex max-w-7xl flex-col gap-3.5 md:flex-row md:gap-8">
-          <div className="flex flex-col gap-3">
-            <ProfileData
-              setIsWithdrawModalOpen={setIsWithdrawModalOpen}
-              data={myData!}
-              isMyProfile
-              enableImageUpload
-              summaryCounts={{
-                sales: myProductsData?.pages[0]?.total ?? 0,
-                purchases: myRequestData?.pages[0]?.total ?? 0,
-                wishlist: myFavoriteData?.pages[0]?.total ?? 0,
-              }}
-            />
-            <div role="tablist" aria-label="마이페이지 메뉴" className="flex flex-col gap-1">
+          <div className="flex flex-col gap-2 p-2 md:p-0">
+            {/* 모바일: 압축 프로필 카드 (클릭 시 풀스크린 진입) */}
+            <button
+              type="button"
+              onClick={() => setIsProfileFullViewOpen(true)}
+              aria-label="프로필 자세히 보기"
+              className="border-outline-variant/40 flex w-full cursor-pointer flex-col gap-3 rounded-2xl border bg-white p-5 text-left transition-colors hover:bg-gray-50 md:hidden"
+            >
+              <div className="flex items-start gap-3.5">
+                <div className="bg-primary-50 flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full">
+                  {myData?.profileImageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={myData.profileImageUrl} alt={myData.nickname} className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="text-xl font-semibold text-[#825500]">{myData?.nickname?.charAt(0).toUpperCase()}</span>
+                  )}
+                </div>
+                <div className="flex flex-1 flex-col gap-0.5">
+                  <p className="text-base font-bold text-[#1c1b1b]">{myData?.nickname}</p>
+                  <p className="text-sm text-gray-500">{`${myData?.addressSido ?? ''} ${myData?.addressGugun ?? ''}`.trim()}</p>
+                </div>
+                <ChevronRight size={25} strokeWidth={1.5} className="text-on-surface-muted" />
+              </div>
+              {myData?.introduction ? <p className="line-clamp-1 text-sm text-gray-500">{myData.introduction}</p> : null}
+            </button>
+
+            {/* 모바일 전용 섹션 */}
+            <section className="flex flex-col gap-2 md:hidden" aria-label="마이페이지 모바일 콘텐츠">
+              <div className="border-outline-variant/40 flex flex-col gap-2 rounded-2xl border bg-white p-5">
+                <h2 className="text-sm font-bold text-[#1c1b1b]">내 상품 관리</h2>
+                <div className="flex flex-col">
+                  <button
+                    type="button"
+                    onClick={() => setMobilePanelTab('tab-sales')}
+                    className="text-on-surface flex cursor-pointer items-center gap-3 py-2"
+                  >
+                    <Tag size={20} strokeWidth={1.5} />
+                    <span className="flex-1 text-left text-base">판매 내역</span>
+                    <ChevronRight size={25} strokeWidth={1.5} className="text-on-surface-muted" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMobilePanelTab('tab-purchases')}
+                    className="text-on-surface flex cursor-pointer items-center gap-3 py-2"
+                  >
+                    <Handbag size={20} strokeWidth={1.5} />
+                    <span className="flex-1 text-left text-base">구매내역</span>
+                    <ChevronRight size={25} strokeWidth={1.5} className="text-on-surface-muted" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMobilePanelTab('tab-wishlist')}
+                    className="text-on-surface flex cursor-pointer items-center gap-3 py-2"
+                  >
+                    <Heart size={20} strokeWidth={1.5} />
+                    <span className="flex-1 text-left text-base">찜한 상품</span>
+                    <ChevronRight size={25} strokeWidth={1.5} className="text-on-surface-muted" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="border-outline-variant/40 flex flex-col gap-2 rounded-2xl border bg-white p-5">
+                <h2 className="text-sm font-bold text-[#1c1b1b]">나의 활동</h2>
+                <div className="flex flex-col">
+                  <button
+                    type="button"
+                    onClick={() => setMobilePanelTab('activity')}
+                    className="text-on-surface flex cursor-pointer items-center gap-3 py-2"
+                  >
+                    <MessageSquareText size={20} strokeWidth={1.5} />
+                    <span className="flex-1 text-left text-base">내 글</span>
+                    <ChevronRight size={25} strokeWidth={1.5} className="text-on-surface-muted" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMobilePanelTab('tab-blocked')}
+                    className="text-on-surface flex cursor-pointer items-center gap-3 py-2"
+                  >
+                    <UserX size={20} strokeWidth={1.5} />
+                    <span className="flex-1 text-left text-base">차단 유저</span>
+                    <ChevronRight size={25} strokeWidth={1.5} className="text-on-surface-muted" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="border-outline-variant/40 flex flex-col gap-2 rounded-2xl border bg-white p-5">
+                <h2 className="text-base font-bold text-[#1c1b1b]">고객지원</h2>
+                <div className="flex flex-col">
+                  <a
+                    href="mailto:support@cuddlemarket.com?subject=커들마켓 1:1 문의"
+                    className="text-on-surface flex items-center gap-3 py-3"
+                  >
+                    <Headphones size={20} strokeWidth={1.5} />
+                    <span className="flex-1 text-left text-base">고객센터</span>
+                    <ChevronRight size={25} strokeWidth={1.5} className="text-on-surface-muted" />
+                  </a>
+                </div>
+              </div>
+            </section>
+
+            {/* 데스크탑: 기존 ProfileData */}
+            <div className="hidden md:block">
+              <ProfileData
+                setIsWithdrawModalOpen={setIsWithdrawModalOpen}
+                data={myData!}
+                isMyProfile
+                enableImageUpload
+                summaryCounts={{
+                  sales: myProductsData?.pages[0]?.total ?? 0,
+                  purchases: myRequestData?.pages[0]?.total ?? 0,
+                  wishlist: myFavoriteData?.pages[0]?.total ?? 0,
+                }}
+              />
+            </div>
+            <div role="tablist" aria-label="마이페이지 메뉴" className="hidden flex-col gap-1 md:flex">
               {MY_PAGE_NAV.map((tab) => {
                 const isActive = activeMyPageNav === tab.id
                 const Icon = myPageIconMap[tab.code]
@@ -376,7 +518,7 @@ function MyPage() {
               })}
             </div>
           </div>
-          <section className="relative flex flex-1 flex-col gap-3.5 md:gap-7">
+          <section className="relative hidden flex-1 flex-col gap-3.5 md:flex md:gap-7">
             <AnimatePresence>
               {unblockError ? (
                 <div className="absolute top-11 left-1/2 z-50 w-11/12 -translate-x-1/2 md:w-auto md:pt-8">
@@ -386,7 +528,7 @@ function MyPage() {
                 </div>
               ) : null}
             </AnimatePresence>
-            {(activeMyPageNav === 'nav-sales' || activeMyPageNav === 'nav-purchases') &&
+            {(effectiveNav === 'nav-sales' || effectiveNav === 'nav-purchases') &&
             (activeMyPageTab === 'tab-sales' || activeMyPageTab === 'tab-purchases') ? (
               <div className="px-5 md:px-0">
                 <Tabs
@@ -399,13 +541,13 @@ function MyPage() {
               </div>
             ) : null}
 
-            {activeMyPageNav === 'nav-dash' ? (
+            {effectiveNav === 'nav-dash' ? (
               <MyDashboard
                 myProducts={myProductsData?.pages.flatMap((page) => page.content)}
                 myRequests={myRequestData?.pages.flatMap((page) => page.content)}
                 myFavorites={myFavoriteData?.pages.flatMap((page) => page.content)}
               />
-            ) : activeMyPageNav === 'nav-activity' ? (
+            ) : effectiveNav === 'nav-activity' ? (
               <MyActivityPanel />
             ) : (
               <MyPagePanel
@@ -438,6 +580,94 @@ function MyPage() {
         error={deleteError}
         onClearError={() => setDeleteError(null)}
       />
+      {/* 모바일 ProfileData 풀스크린 — 좌→우 슬라이드 */}
+      <div
+        className={cn(
+          'fixed inset-0 overflow-y-auto bg-gray-100/30 transition-transform duration-300 ease-out md:hidden',
+          Z_INDEX.MODAL,
+          isProfileFullViewOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+        role="dialog"
+        aria-label="프로필 자세히"
+        aria-hidden={!isProfileFullViewOpen}
+      >
+        <div className="sticky top-0 z-10 flex h-16 items-center gap-3 border-b border-gray-200 bg-white px-2">
+          <button type="button" onClick={() => setIsProfileFullViewOpen(false)} aria-label="닫기" className="cursor-pointer">
+            <ArrowLeft size={20} />
+          </button>
+          <span className="text-base font-bold">프로필</span>
+        </div>
+        <div className="flex flex-col gap-2 px-2 py-2">
+          <ProfileData
+            setIsWithdrawModalOpen={setIsWithdrawModalOpen}
+            data={myData!}
+            isMyProfile
+            enableImageUpload
+            summaryCounts={{
+              sales: myProductsData?.pages[0]?.total ?? 0,
+              purchases: myRequestData?.pages[0]?.total ?? 0,
+              wishlist: myFavoriteData?.pages[0]?.total ?? 0,
+            }}
+          />
+          <MyDashboard
+            myProducts={myProductsData?.pages.flatMap((page) => page.content)}
+            myRequests={myRequestData?.pages.flatMap((page) => page.content)}
+            myFavorites={myFavoriteData?.pages.flatMap((page) => page.content)}
+          />
+        </div>
+      </div>
+      {/* 모바일 마이페이지 메뉴 → 풀스크린 패널 (우→좌 슬라이드) */}
+      <div
+        className={cn(
+          'fixed inset-0 overflow-y-auto bg-white transition-transform duration-300 ease-out md:hidden',
+          Z_INDEX.MODAL,
+          mobilePanelTab ? 'translate-x-0' : 'translate-x-full'
+        )}
+        role="dialog"
+        aria-modal="true"
+        aria-label={mobilePanelTitle || '마이페이지 상세'}
+        aria-hidden={!mobilePanelTab}
+      >
+        <div className="sticky top-0 flex h-16 items-center gap-3 border-b border-gray-200 bg-white px-4">
+          <button type="button" onClick={() => setMobilePanelTab(null)} aria-label="닫기" className="cursor-pointer">
+            <ArrowLeft size={20} />
+          </button>
+          <span className="text-base font-bold">{mobilePanelTitle}</span>
+        </div>
+        <div className="flex flex-col">
+          {mobilePanelTab === 'tab-sales' || mobilePanelTab === 'tab-purchases' ? (
+            <div className="p-4">
+              <Tabs
+                tabs={mobileTradeStatusTabs}
+                activeTab={activeTradeStatus}
+                onTabChange={(tabId) => setActiveTradeStatus(tabId as TransactionStatus | 'ALL')}
+                ariaLabel={mobilePanelTab === 'tab-sales' ? '판매 상태 메뉴' : '구매 상태 메뉴'}
+                variant="card-pill"
+              />
+            </div>
+          ) : null}
+          {mobilePanelTab === 'activity' ? (
+            <MyActivityPanel />
+          ) : mobilePanelTab ? (
+            <MyPagePanel
+              activeTabCode={mobilePanelTabCode}
+              activeMyPageTab={mobilePanelTab}
+              activeTradeStatus={activeTradeStatus}
+              myProductsData={filteredMyProductsData}
+              myProductsTotal={mobilePanelTab === 'tab-sales' ? filteredMyProductsData?.length : myProductsData?.pages[0]?.total}
+              myRequestData={filteredMyRequestData}
+              myRequestTotal={activeTradeStatus === 'ALL' ? myRequestData?.pages[0]?.total : filteredMyRequestData?.length}
+              myFavoriteData={myFavoriteData?.pages.flatMap((page) => page.content)}
+              myFavoriteTotal={myFavoriteData?.pages[0]?.total}
+              myBlockedData={myBlockedData?.pages.flatMap((page) => page.content)}
+              myBlockedTotal={myBlockedData?.pages[0]?.total}
+              {...paginationProps}
+              handleConfirmModal={handleConfirmModal}
+              unblockUser={unblockUser}
+            />
+          ) : null}
+        </div>
+      </div>
       <WithdrawModal
         isOpen={isWithdrawModalOpen}
         onConfirm={handleWithdraw}

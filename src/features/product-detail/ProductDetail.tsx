@@ -44,7 +44,7 @@ function ProductDetail({ initialData }: ProductDetailProps) {
 
   return (
     <>
-      <div className="px-lg pb-4xl mx-auto max-w-7xl pt-8">
+      <div className="px-lg pb-4xl mx-auto max-w-7xl pt-5 md:pt-8">
         <div className="flex flex-col gap-20">
           <div className="flex flex-col gap-4">
             <Breadcrumb

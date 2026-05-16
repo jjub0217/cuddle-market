@@ -163,7 +163,10 @@ export default function MyPagePanel({
       role="tabpanel"
       id={`panel-${activeTabCode}`}
       aria-labelledby={activeMyPageTab}
-      className={cn('border-outline-variant/40 flex flex-col rounded-xl px-5 py-5 md:border md:p-5', hasContent && 'gap-4')}
+      className={cn(
+        'border-outline-variant/40 flex flex-col rounded-xl px-4 py-5 md:border md:p-5 md:px-5',
+        hasContent && 'gap-4'
+      )}
     >
       {config ? (
         <MyPageTitle
@@ -198,7 +201,7 @@ export default function MyPagePanel({
                     productCount <= 1 && 'overflow-visible'
                   )}
                 >
-                  <ul className="flex flex-col items-stretch justify-start divide-y divide-gray-200 md:gap-2.5 md:divide-y-0">
+                  <ul className="flex flex-col items-stretch justify-start gap-2 divide-y divide-gray-200 md:gap-2.5 md:divide-y-0">
                     {productData.content.map((product) => (
                       <MyList key={product.id} {...product} activeTab={activeMyPageTab} handleConfirmModal={handleConfirmModal} />
                     ))}

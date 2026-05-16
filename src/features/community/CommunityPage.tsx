@@ -190,7 +190,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
   return (
     <div className="min-h-screen bg-white">
       <h1 className="sr-only">커뮤니티 페이지</h1>
-      <main className="mx-auto w-full max-w-7xl px-4 py-8">
+      <main className="mx-auto w-full max-w-7xl px-4 py-5 md:py-8">
         {/* Header */}
         <section className="mb-4">
           {/* <h2 className="mb-6 text-lg font-bold tracking-tight text-primary">질문/정보</h2> */}
@@ -262,7 +262,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
           {communityPosts.length === 0 ? (
             <EmptyState icon={MessageSquareText} title="아직 게시글이 없어요" description="첫 번째 이야기를 나눠보세요!" />
           ) : (
-            <ul className="grid grid-cols-1 gap-4">
+            <ul className="grid grid-cols-1 gap-2 md:gap-4">
               {communityPosts.map((post) => (
                 <li key={post.id}>
                   <Link
@@ -283,7 +283,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
                         </div>
 
                         {/* Title */}
-                        <h3 className="group-hover:text-primary mb-1 line-clamp-2 text-base leading-snug font-bold text-[#1c1b1b] transition-colors md:mb-2 md:text-lg md:font-semibold">
+                        <h3 className="group-hover:text-primary mb-1 line-clamp-2 text-base leading-snug font-semibold text-[#1c1b1b] transition-colors md:mb-2 md:text-lg">
                           {post.title}
                         </h3>
 
