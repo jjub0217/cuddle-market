@@ -70,7 +70,10 @@ export function LoginForm() {
 
   return (
     <form className="flex w-full flex-col gap-10" onSubmit={handleSubmit(onSubmit)}>
-      <TitleSection title="로그인" desc="계정에 로그인하여 더 많은 기능을 이용해보세요" size="sm" />
+      {/* 모바일에서는 숨김 (모바일 로그인 페이지는 상단에 별도 헤드라인 사용) */}
+      <div className="hidden md:block">
+        <TitleSection title="로그인" desc="계정에 로그인하여 더 많은 기능을 이용해보세요" size="sm" />
+      </div>
       <fieldset className="flex flex-col gap-2">
         <legend className="sr-only">로그인폼</legend>
         <div className="flex flex-col gap-4">
