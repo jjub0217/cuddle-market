@@ -184,7 +184,10 @@ export default function ChattingPage() {
   }
 
   const handleBack = () => {
-    router.push('/chat')
+    // 채팅방 진입은 handleSelectRoom의 router.push('/chat/[id]')로 이뤄지므로
+    // 목록으로 돌아갈 때 push('/chat')를 쓰면 history에 중복 엔트리가 쌓여
+    // 이후 router.back()이 떠난 채팅방으로 되돌아간다. 정상 뒤로가기로 처리.
+    router.back()
   }
 
   useEffect(() => {
@@ -260,7 +263,7 @@ export default function ChattingPage() {
         </div>
         <section
           className={cn(
-            'relative flex w-full flex-col overflow-hidden border-l border-gray-300 md:flex md:w-224',
+            'relative flex w-full flex-col overflow-hidden border-l border-gray-300 max-md:flex-1 md:flex md:w-224',
             isChatOpen ? 'flex' : 'hidden'
           )}
         >
@@ -312,7 +315,13 @@ export default function ChattingPage() {
                     type="button"
                     aria-label="전송"
                     className="bg-primary hover:bg-primary/90 flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors"
-                    onClick={handleSend}
+                    // onClick 대신 onPointerDown + preventDefault:
+                    // 모바일에서 textarea 포커스 중 버튼 탭 시 blur로 키보드가 닫히며
+                    // fixed 입력창이 점프해 click이 취소되는 문제를 차단한다.
+                    onPointerDown={(e) => {
+                      e.preventDefault()
+                      handleSend()
+                    }}
                   >
                     <Send size={16} className="text-white" />
                   </button>

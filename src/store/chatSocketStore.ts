@@ -39,7 +39,10 @@ export const chatSocketStore = create<ChatSocketState>((set, get) => ({
     if (get().socket?.active) return
 
     const socket = new Client({
-      webSocketFactory: () => new SockJS(url, null, { transports: ['websocket'] }),
+      // transports를 ['websocket']로 강제하면 SockJS의 fallback(xhr-streaming/polling)이
+      // 비활성화된다. 모바일 네트워크(공유기/통신사 프록시)가 WebSocket Upgrade를 차단하면
+      // 연결이 즉시 실패하므로, 기본 transport 체인을 사용해 polling fallback을 허용한다.
+      webSocketFactory: () => new SockJS(url),
       connectHeaders: {
         Authorization: `Bearer ${accessToken}`,
       },

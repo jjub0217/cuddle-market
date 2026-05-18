@@ -9,6 +9,7 @@ import { IMAGE_SIZES, imageLoader, toResizedWebpUrl, PLACEHOLDER_IMAGES } from '
 import { AnimatePresence } from 'framer-motion'
 import InlineNotification from '@/components/commons/InlineNotification'
 import Spinner from '@/components/commons/spinner/Spinner'
+import { MessageCircleMore } from 'lucide-react'
 
 interface ChatLogProps {
   isLoadingMessages: boolean
@@ -174,21 +175,34 @@ export function ChatLog({
     )
   }
 
+  // 메시지가 한 번도 오간 적 없는 빈 채팅방 — 빈 상태 안내로 영역을 채워
+  // 휑함과 배경색 경계 노출을 함께 해소한다.
+  if (!isLoadingMessages && roomMessages.length === 0) {
+    return (
+      <div className="flex h-full flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
+        <div className="flex flex-col gap-1">
+          <p className="text-sm font-semibold text-[#1c1b1b] md:text-base">아직 주고받은 메시지가 없어요</p>
+          <p className="text-xs text-gray-500 md:text-sm">첫 메시지를 보내 대화를 시작해보세요</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div ref={scrollRef} onScroll={handleScroll} className="flex h-full flex-col gap-4 overflow-y-auto">
       <AnimatePresence>
         {connectionError ? (
-          <div className="sticky top-0 left-1/2 z-10 w-fit -translate-x-1/2">
+          <div className="sticky top-5 z-10 mx-auto w-80 max-w-[calc(100%-1.5rem)] md:top-0">
             <InlineNotification type="error" onClose={() => onClearConnectionError?.()}>
               <div className="flex flex-col gap-0.5">
-                <p className="text-base font-semibold">채팅 서버 연결에 문제가 발생했습니다.</p>
+                <p className="text-sm font-semibold md:text-base">채팅 서버 연결에 문제가 발생했습니다.</p>
                 <p>{connectionError}</p>
               </div>
             </InlineNotification>
           </div>
         ) : null}
         {imageUploadError ? (
-          <div className="sticky top-0 left-1/2 z-10 w-fit -translate-x-1/2">
+          <div className="sticky top-0 z-10 mx-auto w-80 max-w-[calc(100%-1.5rem)]">
             <InlineNotification type="error" onClose={() => onClearImageUploadError?.()}>
               {imageUploadError}
             </InlineNotification>
