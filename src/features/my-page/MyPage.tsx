@@ -615,12 +615,12 @@ function MyPage() {
         error={deleteError}
         onClearError={() => setDeleteError(null)}
       />
-      {/* 모바일 ProfileData 풀스크린 — 좌→우 슬라이드 */}
+      {/* 모바일 ProfileData 풀스크린 — 우→좌 슬라이드 */}
       <div
         className={cn(
           'fixed inset-0 overflow-y-auto bg-gray-100/30 transition-transform duration-300 ease-out md:hidden',
           Z_INDEX.MODAL,
-          isProfileFullViewOpen ? 'translate-x-0' : '-translate-x-full'
+          isProfileFullViewOpen ? 'translate-x-0' : 'translate-x-full'
         )}
         role="dialog"
         aria-label="프로필 자세히"
