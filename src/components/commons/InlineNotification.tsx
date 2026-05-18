@@ -55,12 +55,15 @@ export default function InlineNotification({ type, children, onClose, durationMs
         <div className={styles.iconWrapper}>
           <Icon className={cn('h-2 w-2 shrink-0', styles.icon)} />
         </div>
-        <div className="break-keep text-sm">{children}</div>
+        <div className="text-xs md:text-sm md:break-keep">{children}</div>
         <button
           type="button"
           aria-label="알림 닫기"
           onClick={onClose}
-          className={cn('ml-auto shrink-0 cursor-pointer rounded p-1 transition-colors focus:outline-none focus-visible:ring-2', styles.text)}
+          className={cn(
+            'ml-auto shrink-0 cursor-pointer rounded p-1 transition-colors focus:outline-none focus-visible:ring-2',
+            styles.text
+          )}
         >
           <X className="h-4 w-4" />
         </button>

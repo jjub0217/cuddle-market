@@ -48,10 +48,10 @@ export function ChatRooms({
   }
 
   return (
-    <section className="relative flex flex-col rounded-none p-6 md:max-w-96 md:min-w-96">
+    <section className="relative flex flex-col rounded-none py-3 md:max-w-96 md:min-w-96 md:p-6">
       <h2 className={cn('hidden md:static md:block', Z_INDEX.HEADER)}>채팅목록</h2>
-      <div className="scrollbar-hide flex-1 overflow-y-scroll py-5">
-        <ul className="flex flex-col gap-2">
+      <div className="scrollbar-hide flex-1 overflow-y-scroll md:py-5">
+        <ul className="flex flex-col md:gap-2">
           {rooms &&
             rooms.map((room) => {
               const roomData = getRoomData(room)
@@ -59,7 +59,7 @@ export function ChatRooms({
                 <li
                   key={roomData.chatRoomId}
                   className={cn(
-                    'flex cursor-pointer flex-col gap-2 rounded-3xl border border-[#eae2dc] px-4 py-3.5',
+                    'flex cursor-pointer flex-col gap-2 border-[#eae2dc] px-4 py-3.5 md:rounded-3xl md:border',
                     roomData.chatRoomId === selectedRoomId && 'border-outline-variant/40 md:bg-[#7c571a]'
                   )}
                   onClick={() => handleSelectRoom(room)}
@@ -69,11 +69,11 @@ export function ChatRooms({
                       <ProfileAvatar imageUrl={roomData?.opponentProfileImageUrl} nickname={roomData?.opponentNickname ?? ''} />
                     </div>
                     <div className="flex min-w-0 flex-1 flex-col gap-3">
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-0.5 md:gap-2">
                         <div className="flex items-center justify-between gap-1">
                           <p
                             className={cn(
-                              'text-base leading-none font-semibold',
+                              'text-[15px] leading-none font-semibold md:text-base',
                               roomData.chatRoomId === selectedRoomId ? 'text-hero-surface' : 'text-gray-800'
                             )}
                           >
@@ -106,8 +106,8 @@ export function ChatRooms({
                       </div>
                       <div
                         className={cn(
-                          'flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-[#9f854f] p-2.5',
-                          roomData.chatRoomId === selectedRoomId ? 'border border-[#9f854f] bg-[#96793f]' : 'bg-[#f6f3f2]'
+                          'bg-surface-container-low flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-[#ebe5e0] p-2.5',
+                          roomData.chatRoomId === selectedRoomId && 'border-[#9f854f] bg-[#96793f]'
                         )}
                       >
                         <ChatProductCard

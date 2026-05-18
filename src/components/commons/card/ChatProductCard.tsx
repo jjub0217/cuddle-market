@@ -45,10 +45,8 @@ export default function ChatProductCard({ productImageUrl, productTitle, product
         />
       </div>
       <div className="min-w-0 flex-1">
-        <p className={`text-hero-surface truncate text-sm font-bold`}>{productTitle}</p>
-        <p className={`${priceClasses[size]} text-hero-surface`}>
-          {productPrice != null ? `${formatPrice(productPrice)}원` : ''}
-        </p>
+        <p className={`truncate text-sm font-medium md:font-bold`}>{productTitle}</p>
+        <p className={`${priceClasses[size]} text-[#684d21]`}>{productPrice != null ? `${formatPrice(productPrice)}원` : ''}</p>
       </div>
     </>
   )
