@@ -29,6 +29,8 @@ const HIDE_HEADER_MOBILE_PATTERNS = [
   new RegExp(`^${ROUTES.COMMUNITY_POST}$`),
   new RegExp(`^${ROUTES.PRODUCT_POST}$`),
   new RegExp(`^${ROUTES.NOTIFICATIONS}$`),
+  new RegExp(`^${ROUTES.LOGIN}$`),
+  new RegExp(`^${ROUTES.SIGNUP}$`),
 ]
 
 // SearchBar 숨김 경로 - 모바일만 (정적 경로)

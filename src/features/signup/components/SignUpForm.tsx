@@ -139,10 +139,12 @@ export function SignUpForm() {
 
   return (
     <form
-      className="bg-surface border-outline-variant/10 flex w-full flex-col gap-14 rounded-3xl border px-10 shadow-2xl md:py-7"
+      className="md:bg-surface md:border-outline-variant/10 flex w-full flex-col gap-14 px-10 md:rounded-3xl md:border md:py-7 md:shadow-2xl"
       onSubmit={handleSubmit(onSubmit)}
     >
-      <TitleSection title="회원가입" desc="몇 가지 정보만 입력하면 바로 시작할 수 있어요" size="sm" />
+      <div className="hidden md:block">
+        <TitleSection title="회원가입" desc="몇 가지 정보만 입력하면 바로 시작할 수 있어요" size="sm" />
+      </div>
       <fieldset className="flex flex-col gap-9">
         <legend className="sr-only">회원가입폼</legend>
         <div className="flex flex-col gap-6">
