@@ -6,15 +6,7 @@ import type { AdminReport } from '../../types/adminApi'
 import { formatDate } from '../common/formatDate'
 import Field from '../common/Field'
 import DeleteConfirmDialog from '../common/DeleteConfirmDialog'
-
-const USER_REPORT_REASON_EN_TO_KO: Record<string, string> = {
-  ABUSE_OR_HATE: '욕설/비방/혐오',
-  SPAM_OR_AD: '스팸/광고',
-  INAPPROPRIATE_CONTENT: '음란물/불건전',
-  REPETITIVE_POST: '도배 게시물',
-  SELF_HARM_OR_SUICIDE: '자해/자살 의도',
-  ETC: '기타',
-}
+import { USER_REPORT_REASON_EN_TO_KO } from '../../configs/userReportTableConfig'
 
 interface UserReportDetailModalProps {
   isOpen: boolean

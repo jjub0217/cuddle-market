@@ -7,6 +7,12 @@ const REASON_CODES = [
   'PROFESSIONAL_SELLER', 'ETC',
 ]
 
+const PRODUCT_NAMES = [
+  '강아지 자동 급식기', '고양이 원목 캣타워', '노즈워크 코지 매트', '반려견 노이즈 캐리어',
+  '대형견 하네스 세트', '고양이 자동 화장실', '반려동물 빗 슬리커 브러시', '강아지 방수 레인코트',
+  '고양이 낚싯대 장난감', '대형 강아지 방석 쿠션', '반려견 유모차', '고양이 사료 정수기',
+]
+
 const STATUSES: AdminReport['status'][] = ['PENDING', 'REVIEWED', 'REJECTED', 'ACTION_TAKEN']
 
 function randomDate(start: Date, end: Date): string {
@@ -22,7 +28,7 @@ function generateProductSellReports(count: number): AdminReport[] {
     targetType: 'PRODUCT' as const,
     targetId: 300 + i,
     targetNickname: `판매자${300 + i}`,
-    title: null,
+    title: PRODUCT_NAMES[i % PRODUCT_NAMES.length],
     boardType: null,
     reasonCodes: [REASON_CODES[i % REASON_CODES.length]],
     detailReason: i % 3 === 0 ? '상품 신고 상세 사유입니다.' : null,

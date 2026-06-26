@@ -113,7 +113,7 @@ function generateComments(postSeed: number, postCreatedAt: string): MockCommunit
       id: parentId,
       nickname: `${COMMENT_NICKNAMES[(postSeed + i) % COMMENT_NICKNAMES.length]}${postSeed + i}`,
       content: COMMENT_CONTENTS[(postSeed + i) % COMMENT_CONTENTS.length],
-      depth: 0,
+      depth: 1,
       parentId: null,
       createdAt: parentCreatedAt,
     })
@@ -126,7 +126,7 @@ function generateComments(postSeed: number, postCreatedAt: string): MockCommunit
           id: ++idCounter,
           nickname: `${COMMENT_NICKNAMES[(postSeed + i + j + 3) % COMMENT_NICKNAMES.length]}${postSeed + i + j + 3}`,
           content: REPLY_CONTENTS[(postSeed + i + j) % REPLY_CONTENTS.length],
-          depth: 1,
+          depth: 2,
           parentId,
           createdAt: randomDate(new Date(parentCreatedAt), new Date('2026-03-01')),
         })

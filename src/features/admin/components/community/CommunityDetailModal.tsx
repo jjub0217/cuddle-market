@@ -4,10 +4,13 @@ import { useEffect, useRef, useState } from 'react'
 import { X, Trash2 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { fetchAdminCommunityDetail } from '@/lib/api/admin'
+import { getMockCommunityPosts } from '@/features/admin/mocks/mockCommunityPosts'
 import { api } from '@/lib/api/api'
 import type { Comment, CommentResponse } from '@/types/community'
 import { BOARD_TYPE_EN_TO_KO } from '../../configs/communityTableConfig'
 import DeleteConfirmDialog from '../common/DeleteConfirmDialog'
+
+const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
 
 interface CommunityDetailModalProps {
   isOpen: boolean
@@ -49,6 +52,16 @@ async function fetchReplies(commentId: number): Promise<Comment[]> {
 }
 
 async function fetchCommentsWithReplies(postId: number): Promise<Comment[]> {
+  if (DEMO_MODE) {
+    const post = getMockCommunityPosts({ page: 1, pageSize: 1000 }).data.find((p) => p.id === postId)
+    return (post?.comments ?? []).map((c) => ({
+      id: c.id,
+      authorNickname: c.nickname,
+      content: c.content,
+      depth: c.depth,
+      createdAt: c.createdAt,
+    })) as unknown as Comment[]
+  }
   try {
     const { data } = await api.get<CommentResponse>(`/community/posts/${postId}/comments`)
     const parentComments = data.data.comments
