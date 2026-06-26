@@ -2,8 +2,8 @@ import type { AdminTableResponse, SortState, FilterState } from '../types/adminT
 import type { AdminReport } from '../types/adminApi'
 
 const REASON_CODES = [
-  'ABUSE_OR_HATE', 'SPAM_OR_AD', 'INAPPROPRIATE_CONTENT',
-  'REPETITIVE_POST', 'SELF_HARM_OR_SUICIDE', 'ETC',
+  'HARASSMENT', 'FRAUD', 'INAPPROPRIATE_CONTENT',
+  'SPAM', 'OFFENSIVE_PROFILE', 'UNDERAGE', 'OTHER',
 ]
 
 const STATUSES: AdminReport['status'][] = ['PENDING', 'REVIEWED', 'REJECTED', 'ACTION_TAKEN']

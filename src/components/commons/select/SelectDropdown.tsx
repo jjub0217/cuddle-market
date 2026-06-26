@@ -226,7 +226,9 @@ export default function SelectDropdown({
 
       {isOpen && !disabled && dropdownStyle
         ? createPortal(
-            <div ref={optionsRef}>
+            // fixed로 흐름에서 빼야 함: dialog에 portal될 때 이 wrapper가
+            // flex 자식으로 잡혀 gap(예: gap-4=16px)을 추가하는 부작용 방지.
+            <div ref={optionsRef} className="fixed">
               <SelectOptions
                 options={options}
                 selectedValue={value}
@@ -236,7 +238,10 @@ export default function SelectDropdown({
                 style={dropdownStyle}
               />
             </div>,
-            document.body
+            // <dialog showModal()>은 top-layer에 렌더돼 z-index로 못 이김.
+            // dialog 안에서 열린 경우엔 그 dialog에 portal해야 옵션이 위로 뜨고 클릭됨.
+            // dialog 밖(일반 페이지)에선 기존처럼 body에 portal.
+            selectRef.current?.closest('dialog') ?? document.body
           )
         : null}
     </div>
