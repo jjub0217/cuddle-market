@@ -14,6 +14,17 @@ import type {
   ApiResponse,
   PageResponse,
 } from '@/features/admin/types/adminApi'
+import { getMockProducts } from '@/features/admin/mocks/mockProducts'
+import { getMockCommunityPosts } from '@/features/admin/mocks/mockCommunityPosts'
+import { getMockUsers } from '@/features/admin/mocks/mockUsers'
+import { getMockWithdrawals } from '@/features/admin/mocks/mockWithdrawals'
+import { getMockUserReports } from '@/features/admin/mocks/mockUserReports'
+import { getMockProductSellReports } from '@/features/admin/mocks/mockProductSellReports'
+import { getMockCommunityReports } from '@/features/admin/mocks/mockCommunityReports'
+import { mockMemberStats, mockWithdrawalReasons } from '@/features/admin/mocks/mockMemberStats'
+
+// 데모 모드: NEXT_PUBLIC_DEMO_MODE=true 인 배포에서만 목업 데이터로 어드민을 보여줌
+const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
 
 interface FetchParams {
   page: number
@@ -94,9 +105,41 @@ const REPORT_STATUS_KO_TO_EN: Record<string, string> = {
   '조치완료': 'ACTION_TAKEN',
 }
 
+const CONDITION_KO_TO_EN: Record<string, string> = {
+  '새 상품': 'NEW',
+  '거의 새것': 'LIKE_NEW',
+  '사용감 있음': 'USED',
+  '수리 필요': 'NEED_REPAIR',
+}
+
+// 신고 처리상태: config badge value는 한글이라 목업 영문 status를 한글로 변환
+const REPORT_STATUS_EN_TO_KO: Record<string, string> = {
+  PENDING: '대기중',
+  REVIEWED: '검토완료',
+  REJECTED: '거절',
+  ACTION_TAKEN: '조치완료',
+}
+
 // ========== 상품 API ==========
 
 export async function fetchAdminProducts(params: FetchParams): Promise<AdminTableResponse<AdminProduct>> {
+  if (DEMO_MODE) {
+    const mock = getMockProducts(params)
+    return {
+      ...mock,
+      data: mock.data.map((p) => ({
+        ...p,
+        // 테이블 config는 title/sellerNickname 키를 기대
+        title: p.name,
+        sellerNickname: p.nickname,
+        // badge 색상은 영문 value에 매칭되므로 한글 → 영문 변환
+        productType: PRODUCT_TYPE_KO_TO_EN[p.productType] ?? p.productType,
+        tradeStatus: TRADE_STATUS_KO_TO_EN[p.tradeStatus] ?? p.tradeStatus,
+        productStatus: CONDITION_KO_TO_EN[p.condition] ?? p.condition,
+      })),
+    } as unknown as AdminTableResponse<AdminProduct>
+  }
+
   const searchParams = new URLSearchParams({
     page: String(params.page - 1),
     size: String(params.pageSize),
@@ -135,6 +178,19 @@ export async function fetchAdminProductDetail(id: number): Promise<ProductDetail
 // ========== 커뮤니티 API ==========
 
 export async function fetchAdminCommunityPosts(params: FetchParams): Promise<AdminTableResponse<CommunityItem>> {
+  if (DEMO_MODE) {
+    const mock = getMockCommunityPosts(params)
+    return {
+      ...mock,
+      data: mock.data.map((p) => ({
+        ...p,
+        authorNickname: p.nickname,
+        commentCount: p.comments?.length ?? 0,
+        boardType: BOARD_TYPE_KO_TO_EN[p.boardType] ?? p.boardType,
+      })),
+    } as unknown as AdminTableResponse<CommunityItem>
+  }
+
   const searchParams = new URLSearchParams({
     page: String(params.page - 1),
     size: String(params.pageSize),
@@ -156,6 +212,16 @@ export async function fetchAdminCommunityPosts(params: FetchParams): Promise<Adm
 }
 
 export async function fetchAdminCommunityDetail(id: number): Promise<CommunityDetailItem | null> {
+  if (DEMO_MODE) {
+    const mock = getMockCommunityPosts({ page: 1, pageSize: 1000 }).data.find((p) => p.id === id)
+    if (!mock) return null
+    return {
+      ...mock,
+      authorNickname: mock.nickname,
+      boardType: BOARD_TYPE_KO_TO_EN[mock.boardType] ?? mock.boardType,
+      imageUrls: [mock.image, ...(mock.subImages ?? [])].filter(Boolean),
+    } as unknown as CommunityDetailItem
+  }
   try {
     const { data } = await api.get<CommunityDetailItemResponse>(`/community/posts/${id}`)
     return data.data
@@ -164,9 +230,24 @@ export async function fetchAdminCommunityDetail(id: number): Promise<CommunityDe
   }
 }
 
+// 데모 모드 전용: 필터 드롭다운의 한글 value를 mock 데이터의 영문 코드로 변환.
+// (실제 분기가 백엔드 호출 전 KO_TO_EN 하는 것과 동일한 변환을 mock 호출 전에 적용해야
+//  한글 필터값과 영문 mock 값이 맞아 필터가 동작함)
+function mapDemoFilters(params: FetchParams, maps: Record<string, Record<string, string>>): FetchParams {
+  if (!params.filters) return params
+  const mapped: FilterState = { ...params.filters }
+  for (const [key, map] of Object.entries(maps)) {
+    const v = params.filters[key]
+    if (v) mapped[key] = map[v] ?? v
+  }
+  return { ...params, filters: mapped }
+}
+
 // ========== 회원 관리 API ==========
 
 export async function fetchAdminUsers(params: FetchParams): Promise<AdminTableResponse<AdminUser>> {
+  if (DEMO_MODE) return getMockUsers(mapDemoFilters(params, { status: USER_STATUS_KO_TO_EN, role: USER_ROLE_KO_TO_EN }))
+
   const searchParams = new URLSearchParams({
     page: String(params.page - 1),
     size: String(params.pageSize),
@@ -187,12 +268,15 @@ export async function fetchAdminUsers(params: FetchParams): Promise<AdminTableRe
 }
 
 export async function grantAdminRole(userId: number): Promise<void> {
+  if (DEMO_MODE) return
   await api.patch(`/admin/users/${userId}/role`)
 }
 
 // ========== 탈퇴 회원 API ==========
 
 export async function fetchAdminWithdrawals(params: FetchParams): Promise<AdminTableResponse<AdminWithdrawal>> {
+  if (DEMO_MODE) return getMockWithdrawals(mapDemoFilters(params, { withdrawalReason: WITHDRAWAL_REASON_KO_TO_EN }))
+
   const searchParams = new URLSearchParams({
     page: String(params.page - 1),
     size: String(params.pageSize),
@@ -216,6 +300,7 @@ export async function fetchAdminWithdrawalDetail(userId: number): Promise<AdminW
 }
 
 export async function restoreWithdrawnUser(userId: number): Promise<void> {
+  if (DEMO_MODE) return
   await api.post(`/admin/withdrawals/${userId}/restore`)
 }
 
@@ -225,6 +310,23 @@ export async function fetchAdminReports(
   params: FetchParams,
   targetType?: 'USER' | 'PRODUCT' | 'COMMUNITY_POST',
 ): Promise<AdminTableResponse<AdminReport>> {
+  if (DEMO_MODE) {
+    const demoParams = mapDemoFilters(params, { status: REPORT_STATUS_KO_TO_EN })
+    const result =
+      targetType === 'USER'
+        ? getMockUserReports(demoParams)
+        : targetType === 'PRODUCT'
+          ? getMockProductSellReports(demoParams)
+          : getMockCommunityReports(demoParams)
+    return {
+      ...result,
+      data: result.data.map((r) => ({
+        ...r,
+        status: (REPORT_STATUS_EN_TO_KO[r.status] ?? r.status) as typeof r.status,
+      })),
+    } as unknown as AdminTableResponse<AdminReport>
+  }
+
   const searchParams = new URLSearchParams({
     page: String(params.page - 1),
     size: String(params.pageSize),
@@ -263,17 +365,22 @@ export async function reviewReport(
   reportId: number,
   body: { status: string; rejectedReason?: string; actionNote?: string },
 ): Promise<void> {
+  if (DEMO_MODE) return
   await api.patch(`/admin/reports/${reportId}/review`, body)
 }
 
 // ========== 통계 API ==========
 
 export async function fetchMemberStats(): Promise<MemberTrendStat[]> {
+  if (DEMO_MODE) return mockMemberStats
+
   const { data } = await api.get<ApiResponse<MemberTrendStat[]>>('/admin/statistics/trends')
   return data.data
 }
 
 export async function fetchWithdrawalReasons(): Promise<WithdrawalReasonStat[]> {
+  if (DEMO_MODE) return mockWithdrawalReasons
+
   const { data } = await api.get<ApiResponse<WithdrawalReasonStat[]>>('/admin/statistics/withdrawal-reasons')
   return data.data
 }
@@ -281,6 +388,15 @@ export async function fetchWithdrawalReasons(): Promise<WithdrawalReasonStat[]> 
 // ========== 대시보드 API ==========
 
 export async function fetchDashboardStats(): Promise<DashboardSummary> {
+  if (DEMO_MODE)
+    return {
+      totalUserCount: 1284,
+      activeUserCount: 1102,
+      withdrawnUserCount: 182,
+      totalProductCount: 3471,
+      activeProductCount: 2980,
+    }
+
   const { data } = await api.get<ApiResponse<DashboardSummary>>('/admin/statistics/summary')
   return data.data
 }
