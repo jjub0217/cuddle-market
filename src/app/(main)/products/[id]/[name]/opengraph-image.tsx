@@ -23,7 +23,7 @@ export default async function OGImage({ params }: { params: Promise<{ id: string
   if (!product) {
     return new ImageResponse(
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', backgroundColor: OG_COLORS.backgroundLight }}>
-        <img alt="" src={logoBase64} width={120} height={139} />
+        <img alt="" src={logoBase64} width={120} height={120} />
       </div>,
       { ...size, fonts: [{ name: 'NotoSansKR', data: fontData, style: 'normal' as const }] },
     )
@@ -54,7 +54,7 @@ export default async function OGImage({ params }: { params: Promise<{ id: string
           {productImageSrc ? (
             <img alt="" src={productImageSrc} width={340} height={340} style={{ objectFit: 'cover' }} />
           ) : (
-            <img alt="" src={logoBase64} width={100} height={116} />
+            <img alt="" src={logoBase64} width={100} height={100} />
           )}
         </div>
         {/* Text */}
@@ -74,7 +74,7 @@ export default async function OGImage({ params }: { params: Promise<{ id: string
       </div>
       {/* Footer */}
       <div style={{ display: 'flex', height: 60, backgroundColor: OG_COLORS.primary, alignItems: 'center', padding: '0 48px', gap: '12px' }}>
-        <img alt="" src={logoBase64} width={32} height={37} />
+        <img alt="" src={logoBase64} width={32} height={32} />
         <span style={{ color: OG_COLORS.white, fontSize: 22, fontWeight: 700 }}>커들마켓</span>
         <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 22 }}>|</span>
         <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 18 }}>반려동물 용품 중고마켓</span>

@@ -15,14 +15,14 @@ export const metadata: Metadata = {
     description: '반려동물 관련 질문과 유용한 정보를 나눠보세요',
     url: 'https://cuddle-market.vercel.app/community',
     siteName: '커들마켓',
-    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+    images: [{ url: '/og-image-v2.png', width: 1200, height: 630 }],
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
     title: '커뮤니티 | 커들마켓',
     description: '반려동물 관련 질문과 유용한 정보를 나눠보세요',
-    images: ['/og-image.png'],
+    images: ['/og-image-v2.png'],
   },
 }
 
