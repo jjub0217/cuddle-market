@@ -19,14 +19,14 @@ export const metadata: Metadata = {
     description: '반려동물 용품을 사고팔 수 있는 따뜻한 중고거래 플랫폼, 커들마켓',
     url: 'https://cuddle-market.vercel.app',
     siteName: '커들마켓',
-    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+    images: [{ url: '/og-image-v2.png', width: 1200, height: 630 }],
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
     title: '커들마켓 | 반려동물 용품 중고거래',
     description: '반려동물 용품을 사고팔 수 있는 따뜻한 중고거래 플랫폼, 커들마켓',
-    images: ['/og-image.png'],
+    images: ['/og-image-v2.png'],
   },
 }
 
@@ -72,7 +72,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       url: 'https://cuddle-market.vercel.app',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://cuddle-market.vercel.app/og-image.png',
+        url: 'https://cuddle-market.vercel.app/og-image-v2.png',
       },
     },
   }
