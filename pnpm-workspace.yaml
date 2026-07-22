@@ -1,0 +1,15 @@
+packages:
+  - "mobile"
+  - "packages/*"
+
+onlyBuiltDependencies:
+  - "@apollo/protobufjs"
+  - esbuild
+  - sharp
+  - unrs-resolver
+
+allowBuilds:
+  '@apollo/protobufjs': true
+  esbuild: true
+  sharp: true
+  unrs-resolver: true
