@@ -94,6 +94,6 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: 16,
     paddingTop: 12,
-    gap: 12,
+    gap: 8,
   },
 });

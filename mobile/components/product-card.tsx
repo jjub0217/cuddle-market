@@ -53,6 +53,9 @@ function getTimeAgo(createdAt: string): string {
   return `${year}.${month}.${day}`;
 }
 
+// 제목 한 줄의 높이(fontSize 15 기준). 카드 높이를 균일하게 맞추는 기준값이라 상수로 둔다.
+const TITLE_LINE_HEIGHT = 20;
+
 interface Props {
   product: Product;
 }
@@ -86,7 +89,9 @@ export function ProductCard({ product }: Props) {
           ) : null}
         </View>
 
-        {/* 제목 (최대 2줄) */}
+        {/* 제목 (최대 2줄, 넘치면 말줄임)
+            제목이 1줄이어도 2줄 자리를 늘 차지한다(styles.title의 minHeight).
+            그래야 카드 높이가 전부 같아지고, 카드 높이를 따라가는 썸네일 크기도 균일해진다. */}
         <Text style={styles.title} numberOfLines={2}>
           {product.title}
         </Text>
@@ -110,9 +115,10 @@ export function ProductCard({ product }: Props) {
 const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
-    gap: 12,
-    padding: 12,
     borderRadius: 12,
+    // 카드에 안쪽 패딩을 두지 않아 썸네일이 위·아래·좌측에 꽉 찬다(웹 모바일 카드와 같은 구조).
+    // 라운드 밖으로 삐져나온 썸네일 모서리는 overflow로 잘라낸다.
+    overflow: 'hidden',
     backgroundColor: '#FFFFFF',
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: '#E5E7EB',
@@ -121,6 +127,8 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 4,
     justifyContent: 'center',
+    // 여백은 카드가 아니라 글자 영역만 갖는다(썸네일과의 간격도 여기 paddingLeft가 만든다).
+    padding: 12,
   },
   badgeRow: {
     flexDirection: 'row',
@@ -159,6 +167,10 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '500',
     color: '#111827',
+    // 줄 높이를 명시해야(기기·플랫폼 기본값이 제각각) 2줄 자리를 정확히 계산할 수 있다.
+    lineHeight: TITLE_LINE_HEIGHT,
+    // 1줄짜리 제목도 2줄 자리를 차지해 카드 높이를 일정하게 만든다.
+    minHeight: TITLE_LINE_HEIGHT * 2,
   },
   price: {
     fontSize: 16,
