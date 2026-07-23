@@ -21,6 +21,8 @@ function getProductStatusLabel(code: string): string {
       return '거의 새것';
     case 'USED':
       return '사용감 있음';
+    case 'NEED_REPAIR':
+      return '수리 필요';
     default:
       return code;
   }
