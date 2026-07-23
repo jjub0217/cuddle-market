@@ -11,6 +11,7 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@cuddle/shared": "workspace:*",
     "@apollo/server": "^5.4.0",
     "@as-integrations/next": "^4.1.0",
     "@dnd-kit/core": "^6.3.1",

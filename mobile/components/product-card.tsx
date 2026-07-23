@@ -91,8 +91,8 @@ export function ProductCard({ product }: Props) {
           {product.title}
         </Text>
 
-        {/* 가격 (강조) */}
-        <Text style={styles.price}>{formatPrice(product.price)}</Text>
+        {/* 가격 (강조) — 단위는 화면에서 붙인다 */}
+        <Text style={styles.price}>{`${formatPrice(product.price)}원`}</Text>
 
         {/* 메타 행: 위치 · 찜 N …… 상대시간(오른쪽 끝) */}
         <View style={styles.metaRow}>

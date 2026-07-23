@@ -1,6 +1,10 @@
-/** 가격을 "1,000원" 형태로 포맷한다. */
+/**
+ * 가격에 천 단위 콤마를 붙인다. 단위('원')는 붙이지 않는다.
+ * 화면마다 '원'을 붙이는 위치가 달라서(웹은 별도 span) 단위는 호출부가 정한다.
+ * 소수점은 버린다. 로케일을 'ko-KR'로 고정해 환경에 따라 결과가 달라지지 않게 한다.
+ */
 export function formatPrice(price: number): string {
-  return `${price.toLocaleString('ko-KR')}원`
+  return Math.floor(price).toLocaleString('ko-KR')
 }
 
 /**
