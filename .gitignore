@@ -56,3 +56,12 @@ sync/
 
 *storybook.log
 storybook-static
+
+# 개인 작업 노트 (레포 미포함)
+docs/blog-drafts/
+docs/brainstorm/
+docs/session-logs/
+
+# 로컬 툴링
+.claude/worktrees/
+claude-code-skills/
