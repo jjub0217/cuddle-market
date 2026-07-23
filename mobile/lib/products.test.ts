@@ -7,6 +7,8 @@ const mockFetch = jest.fn()
 
 beforeEach(() => {
   mockFetch.mockReset()
+  // 테스트 환경엔 .env가 안 실리므로 base URL을 명시적으로 주입(가드 통과).
+  process.env.EXPO_PUBLIC_API_BASE_URL = 'https://test.local/api'
   // globalThis.fetch를 테스트용 mock으로 교체.
   ;(globalThis as { fetch: typeof fetch }).fetch = mockFetch as unknown as typeof fetch
 })
@@ -74,5 +76,10 @@ describe('fetchProducts', () => {
     })
 
     await expect(fetchProducts(0)).rejects.toThrow()
+  })
+
+  it('EXPO_PUBLIC_API_BASE_URL 미설정이면 명확히 throw한다', async () => {
+    delete process.env.EXPO_PUBLIC_API_BASE_URL
+    await expect(fetchProducts(0)).rejects.toThrow('EXPO_PUBLIC_API_BASE_URL')
   })
 })

@@ -9,7 +9,8 @@ const workspaceRoot = path.resolve(projectRoot, '..')
 const config = getDefaultConfig(projectRoot)
 
 // 1) 워크스페이스 전체를 감시(옆 폴더 packages/shared 변경 감지)
-config.watchFolders = [workspaceRoot]
+//    Expo 기본 watchFolders를 덮어쓰지 않고 workspaceRoot만 추가(expo-doctor 권고).
+config.watchFolders = [...(config.watchFolders ?? []), workspaceRoot]
 
 // 2) 모듈 해석 경로: 앱의 node_modules → 루트 node_modules 순
 config.resolver.nodeModulesPaths = [
