@@ -14,7 +14,7 @@ export interface Product {
   mainImageUrl: string
   createdAt: string
   favoriteCount: number
-  isFavorite: boolean
+  isFavorite: boolean | null
   viewCount?: number
   addressSido?: string
   addressGugun?: string
@@ -37,4 +37,36 @@ export interface ProductResponse {
     totalElements: number
     numberOfElements: number
   }
+}
+
+/** 판매자 정보. 프로필 이미지와 지역은 비어 있을 수 있다(실측). */
+export interface SellerInfo {
+  sellerId: number
+  sellerNickname: string
+  sellerProfileImageUrl: string | null
+  addressSido: string | null
+  addressGugun: string | null
+}
+
+/**
+ * 상품 상세 응답(`GET /products/{id}`의 data).
+ * 라이브 검증(2026-07-23): 비로그인 200, code는 문자열 "SUCCESS".
+ */
+export interface ProductDetailItem extends Product {
+  category: string
+  description: string
+  subImageUrls: string[]
+  addressSido: string
+  addressGugun: string
+  viewCount: number
+  // 비로그인으로 조회하면 false가 아니라 null이 온다(실측).
+  isFavorite: boolean | null
+  sellerInfo: SellerInfo
+  sellerOtherProducts: Product[]
+}
+
+export interface ProductDetailResponse {
+  code: string
+  message: string
+  data: ProductDetailItem
 }

@@ -1,6 +1,6 @@
 import type { Product } from '@cuddle/shared'
 
-import { fetchProducts } from './products'
+import { fetchProductDetail, fetchProducts, ProductNotFoundError } from './products'
 
 // fetch를 mock으로 갈아끼워 네트워크 없이 순수 로직만 검증한다.
 const mockFetch = jest.fn()
@@ -81,5 +81,70 @@ describe('fetchProducts', () => {
   it('EXPO_PUBLIC_API_BASE_URL 미설정이면 명확히 throw한다', async () => {
     delete process.env.EXPO_PUBLIC_API_BASE_URL
     await expect(fetchProducts(0)).rejects.toThrow('EXPO_PUBLIC_API_BASE_URL')
+  })
+})
+
+function makeDetail() {
+  return {
+    ...makeProduct(61),
+    category: 'FOOD',
+    description: '두부간식 잘먹어요',
+    subImageUrls: [],
+    addressSido: '서울특별시',
+    addressGugun: '은평구',
+    viewCount: 12,
+    sellerInfo: {
+      sellerId: 28,
+      sellerNickname: '유리',
+      sellerProfileImageUrl: null,
+      addressSido: '서울특별시',
+      addressGugun: '은평구',
+    },
+    sellerOtherProducts: [],
+  }
+}
+
+describe('fetchProductDetail', () => {
+  it('200이면 data를 그대로 반환한다', async () => {
+    const detail = makeDetail()
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ code: 'SUCCESS', message: '성공', data: detail }),
+    })
+
+    const result = await fetchProductDetail(61)
+
+    expect(result.title).toBe('상품 61')
+    expect(result.sellerInfo.sellerNickname).toBe('유리')
+  })
+
+  it('/products/{id} 를 호출한다', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ code: 'SUCCESS', message: '성공', data: makeDetail() }),
+    })
+
+    await fetchProductDetail(61)
+
+    expect(mockFetch.mock.calls[0][0]).toContain('/products/61')
+  })
+
+  it('404면 ProductNotFoundError를 던진다', async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 404, json: async () => ({}) })
+
+    await expect(fetchProductDetail(55)).rejects.toBeInstanceOf(ProductNotFoundError)
+  })
+
+  it('404가 아닌 실패는 일반 오류를 던진다', async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 500, json: async () => ({}) })
+
+    const promise = fetchProductDetail(61)
+    await expect(promise).rejects.toThrow()
+    await expect(promise).rejects.not.toBeInstanceOf(ProductNotFoundError)
+  })
+
+  it('EXPO_PUBLIC_API_BASE_URL 미설정이면 명확히 throw한다', async () => {
+    delete process.env.EXPO_PUBLIC_API_BASE_URL
+    await expect(fetchProductDetail(61)).rejects.toThrow('EXPO_PUBLIC_API_BASE_URL')
   })
 })
