@@ -1,57 +1,17 @@
-import { formatPrice, type Product } from '@cuddle/shared';
+import {
+  formatPrice,
+  getProductStatusLabel,
+  getProductTypeLabel,
+  getTimeAgo,
+  type Product,
+} from '@cuddle/shared';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { ProductThumbnail } from '@/components/product-thumbnail';
 
 // 가로형 상품 카드(UI 스펙 §4). 좌 썸네일 + 우 정보영역.
-// 펫종류 없음, 찜="찜 N" 텍스트(표시전용, 토글 X). 카드 탭 액션 없음(범위 밖).
-
-// 코드→이름 변환(웹 constants.ts와 동일 매핑). 없으면 코드 그대로 반환.
-function getProductTypeLabel(code: string): string {
-  if (code === 'SELL') return '판매';
-  if (code === 'REQUEST') return '판매요청';
-  return code;
-}
-
-function getProductStatusLabel(code: string): string {
-  switch (code) {
-    case 'NEW':
-      return '새 상품';
-    case 'LIKE_NEW':
-      return '거의 새것';
-    case 'USED':
-      return '사용감 있음';
-    case 'NEED_REPAIR':
-      return '수리 필요';
-    default:
-      return code;
-  }
-}
-
-// createdAt → "3시간 전" 상대시간(웹 getTimeAgo와 동일 로직).
-function getTimeAgo(createdAt: string): string {
-  const now = new Date();
-  const created = new Date(createdAt);
-  const diffMs = now.getTime() - created.getTime();
-
-  const diffMinutes = Math.floor(diffMs / (1000 * 60));
-  const diffHours = Math.floor(diffMinutes / 60);
-  const diffDays = Math.floor(diffHours / 24);
-  const diffWeeks = Math.floor(diffDays / 7);
-  const diffMonths = Math.floor(diffDays / 30);
-
-  if (diffMinutes < 1) return '방금 전';
-  if (diffMinutes < 60) return `${diffMinutes}분 전`;
-  if (diffHours < 24) return `${diffHours}시간 전`;
-  if (diffDays < 7) return `${diffDays}일 전`;
-  if (diffDays < 30) return `${diffWeeks}주 전`;
-  if (diffDays < 365) return `${diffMonths}개월 전`;
-
-  const year = created.getFullYear();
-  const month = String(created.getMonth() + 1).padStart(2, '0');
-  const day = String(created.getDate()).padStart(2, '0');
-  return `${year}.${month}.${day}`;
-}
+// 펫종류 없음, 찜="찜 N" 텍스트(표시전용, 토글 X).
+// 코드→한글 변환과 상대시간은 @cuddle/shared에서 가져온다(웹과 같은 원본).
 
 // 제목 한 줄의 높이(fontSize 15 기준). 카드 높이를 균일하게 맞추는 기준값이라 상수로 둔다.
 const TITLE_LINE_HEIGHT = 20;
