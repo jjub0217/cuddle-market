@@ -94,16 +94,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 4,
   },
+  // 뱃지: 판매=연파랑 알약, 판매요청=연주황 알약.
+  // 웹 ProductBadge의 판매/판매요청 토큰과 짝을 이루는 같은 값이다(웹·앱 공통).
+  // 근거: src/styles/tokens.colors.css 의 --color-badge-sell-* / --color-badge-request-*
+  // 크기는 카드용(작게): 좌우 8 / 상하 2 / 글자 11.
   badge: {
     borderRadius: 999,
     paddingHorizontal: 8,
     paddingVertical: 2,
   },
   badgeSell: {
-    backgroundColor: '#EFF6FF', // 판매: 차분한 파랑 톤
+    backgroundColor: '#EFF6FF',
   },
   badgeRequest: {
-    backgroundColor: '#FFF7ED', // 판매요청: 눈에 띄는 주황 톤
+    backgroundColor: '#FFF7ED',
   },
   badgeOutline: {
     borderWidth: StyleSheet.hairlineWidth,
@@ -120,12 +124,13 @@ const styles = StyleSheet.create({
     color: '#EA580C',
   },
   badgeTextOutline: {
+    // 같은 줄의 타입 뱃지(badgeText)와 글자 크기를 맞춘다.
     fontSize: 11,
     color: '#6B7280',
   },
   title: {
-    fontSize: 15,
-    fontWeight: '500',
+    fontSize: 16,
+    fontWeight: '400',
     color: '#111827',
     // 줄 높이를 명시해야(기기·플랫폼 기본값이 제각각) 2줄 자리를 정확히 계산할 수 있다.
     lineHeight: TITLE_LINE_HEIGHT,
