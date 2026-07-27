@@ -47,6 +47,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
+  // 프로필 이미지가 없을 때만 보이는 자리표시자.
+  // 웹 상세 아바타(bg-primary-50)와 같은 디자인 시스템 색(크림/베이지)으로 맞춘다.
+  // (회색은 에러처럼 보인다는 피드백으로 브랜드 크림으로 되돌림.)
   avatar: {
     width: 40,
     height: 40,
@@ -54,7 +57,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFF7ED',
+    backgroundColor: '#FAF3E6',
   },
   avatarImage: {
     width: '100%',
@@ -62,7 +65,8 @@ const styles = StyleSheet.create({
   },
   avatarInitial: {
     fontSize: 16,
-    color: '#EA580C',
+    // 웹이 기본 텍스트색(검정)을 상속하는 것과 같은 결. 크림 배경 위 대비 넉넉.
+    color: '#111827',
   },
   info: {
     gap: 3,

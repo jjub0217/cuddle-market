@@ -14,7 +14,7 @@ export function Breadcrumb({ petDetailType, category }: Props) {
     <View style={styles.row} accessibilityRole="header">
       <Text style={styles.item}>{getPetDetailLabel(petDetailType)}</Text>
       <Text style={styles.separator}>›</Text>
-      {/* 마지막 항목은 웹과 같이 굵게 + 포인트색 */}
+      {/* 마지막 항목은 굵게 + 브랜드 브라운(웹 text-primary=#633F00과 같은 값) */}
       <Text style={styles.last}>{getCategoryLabel(category)}</Text>
     </View>
   );
@@ -37,6 +37,8 @@ const styles = StyleSheet.create({
   last: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#EA580C',
+    // 텍스트 강조색은 브랜드 브라운. #EA580C(3.56:1, 작은글자 실패) 대신
+    // #633F00(9.37:1)으로 대비를 확보한다.
+    color: '#633F00',
   },
 });

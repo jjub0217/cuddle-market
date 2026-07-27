@@ -51,6 +51,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 4,
   },
+  // 뱃지: 판매=연파랑 알약, 판매요청=연주황 알약.
+  // 웹 ProductBadge의 판매/판매요청 토큰과 짝을 이루는 같은 값이다(웹·앱 공통).
+  // 근거: src/styles/tokens.colors.css 의 --color-badge-sell-* / --color-badge-request-*
+  // 크기는 상세용(카드보다 큼): 좌우 8 / 상하 3 / 글자 12.
   badge: {
     borderRadius: 999,
     paddingHorizontal: 8,
@@ -81,15 +85,18 @@ const styles = StyleSheet.create({
     color: '#6B7280',
   },
   title: {
-    fontSize: 22,
+    // 제목 20/700 = 가격과 크기·굵기 동일(사용자가 실물 보고 이 크기를 택함).
+    fontSize: 20,
     fontWeight: '700',
-    lineHeight: 28,
+    lineHeight: 26,
     color: '#111827',
   },
   price: {
     fontSize: 20,
+    // 가격은 굵게(700) 강조. 제목과 크기·굵기가 같다(위 title 참고).
     fontWeight: '700',
-    color: '#EA580C',
+    // 가격은 제목과 같은 검정(styles.title과 동일).
+    color: '#111827',
   },
   meta: {
     fontSize: 13,
