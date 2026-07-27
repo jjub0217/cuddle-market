@@ -113,7 +113,7 @@ export function ProductThumbnail({
         }}
         onClick={handleHeartClick}
         aria-label={isFavorite ? '찜 해제' : '찜하기'}
-        className="pointer-events-auto absolute top-0.5 right-0.5 z-20 h-8 w-8 cursor-pointer bg-transparent p-0 md:h-7 md:w-7"
+        className="pointer-events-auto absolute top-1.5 right-2.5 z-20 h-8 w-8 cursor-pointer bg-transparent p-0 md:h-7 md:w-7"
       />
     </div>
   )

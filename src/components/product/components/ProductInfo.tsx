@@ -37,7 +37,7 @@ export function ProductInfo({
   const hasCreatedAt = Boolean(createdAt)
 
   return (
-    <div className="flex flex-3 flex-col gap-2 bg-white px-2 py-1.5 md:flex-none md:p-4">
+    <div className="flex flex-3 flex-col gap-2 bg-white px-2 py-1.5 md:flex-none md:p-4 md:pl-3">
       <ProductBadge items={badgeItems} />
       <ProductHeading title={title} price={price} />
       {/* 메타 (레퍼런스 패턴): 은평구 · 찜 15  ........  3분 전 */}

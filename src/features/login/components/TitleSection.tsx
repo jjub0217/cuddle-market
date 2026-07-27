@@ -19,7 +19,7 @@ export function TitleSection({ title, desc, link, linkPath, size = 'md' }: Title
         <h1 className={titleClass}>{title}</h1>
         {desc ? <span className={descClass}>{desc}</span> : null}
         {link && linkPath ? (
-          <Link href={linkPath} className="text-primary-300 text-sm font-bold">
+          <Link href={linkPath} className="text-primary text-sm font-bold">
             {link}
           </Link>
         ) : null}

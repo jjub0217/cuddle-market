@@ -96,7 +96,7 @@ export function LoginForm() {
             />
             {errors.root ? <p className="text-danger-500 text-sm">{errors.root.message}</p> : null}
           </div>
-          <Link href={ROUTES.FIND_PASSWORD} className="text-primary-300 text-xs font-medium">
+          <Link href={ROUTES.FIND_PASSWORD} className="text-primary text-xs font-medium">
             비밀번호를 잊으셨나요?
           </Link>
         </div>
