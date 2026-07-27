@@ -1,7 +1,7 @@
 import type { fetchChatRoom } from '@/types'
 import ProfileAvatar from '@/components/commons/ProfileAvatar'
 import ChatProductCard from '@/components/commons/card/ChatProductCard'
-import { getTimeAgo } from '@/lib/utils/getTimeAgo'
+import { getTimeAgo } from '@cuddle/shared'
 import { cn } from '@/lib/utils/cn'
 import { chatSocketStore } from '@/store/chatSocketStore'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'

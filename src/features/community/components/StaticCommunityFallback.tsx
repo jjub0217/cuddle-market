@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { CommunityItem } from '@/types'
-import { getTimeAgo } from '@/lib/utils/getTimeAgo'
+import { getTimeAgo } from '@cuddle/shared'
 import { ROUTES } from '@/constants/routes'
 import { CommunityPostThumbnail } from './CommunityPostThumbnail'
 

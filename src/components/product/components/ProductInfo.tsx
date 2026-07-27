@@ -1,4 +1,4 @@
-import { getTimeAgo } from '@/lib/utils/getTimeAgo'
+import { getTimeAgo } from '@cuddle/shared'
 import { ProductHeading } from './ProductHeading'
 import { ProductBadge, type ProductBadgeItem } from './ProductBadge'
 import { ProductMetaItem } from '../ProductMetaItem'

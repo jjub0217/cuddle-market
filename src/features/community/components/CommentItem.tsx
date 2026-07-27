@@ -1,6 +1,6 @@
 'use client'
 
-import { getTimeAgo } from '@/lib/utils/getTimeAgo'
+import { getTimeAgo } from '@cuddle/shared'
 import { cn } from '@/lib/utils/cn'
 import type { Comment } from '@/types'
 import ProfileAvatar from '@/components/commons/ProfileAvatar'

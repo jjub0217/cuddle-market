@@ -14,7 +14,7 @@ import EmptyState from '@/components/EmptyState'
 import { Package, Heart, type LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils/cn'
-import { getTimeAgo } from '@/lib/utils/getTimeAgo'
+import { getTimeAgo } from '@cuddle/shared'
 
 interface MyPagePanelProps {
   activeTabCode: string
