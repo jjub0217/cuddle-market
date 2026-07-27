@@ -138,7 +138,7 @@ function StaticProductCard({ product, index }: { product: Product; index: number
           <span className="heading-h5 line-clamp line-1 text-gray-900">{title}</span>
           <p className="flex w-full flex-col">
             <span className="font-semibold text-gray-500">{productTypeName}</span>
-            <span className="text-primary-300 max-w-[90%] overflow-hidden font-bold">
+            <span className="text-gray-900 max-w-[90%] overflow-hidden font-bold">
               <span>{formatPrice(price)}</span>원
             </span>
           </p>

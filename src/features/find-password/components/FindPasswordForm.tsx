@@ -263,7 +263,7 @@ export function FindPasswordForm() {
                 <Button size="md" className="bg-primary-600 w-full cursor-pointer text-sm text-white" type="submit">
                   인증코드 전송
                 </Button>
-                <Link href={ROUTES.LOGIN} className="text-primary-300 w-full text-center text-sm font-medium">
+                <Link href={ROUTES.LOGIN} className="text-primary w-full text-center text-sm font-medium">
                   로그인으로 돌아가기
                 </Link>
               </div>

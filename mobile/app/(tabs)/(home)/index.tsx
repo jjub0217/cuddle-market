@@ -1,6 +1,7 @@
 import type { Product } from '@cuddle/shared';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProductCard } from '@/components/product-card';
@@ -17,6 +18,7 @@ import { fetchProducts } from '@/lib/products';
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   const {
     data,
@@ -48,7 +50,15 @@ export default function HomeScreen() {
       <FlatList
         data={products}
         keyExtractor={(item) => String(item.id)}
-        renderItem={({ item }) => <ProductCard product={item} />}
+        renderItem={({ item }) => (
+          <Pressable
+            onPress={() => router.push(`/products/${item.id}`)}
+            // 누르는 동안 살짝 흐려져서 눌린 걸 알 수 있게 한다
+            style={({ pressed }) => (pressed ? styles.cardPressed : undefined)}
+          >
+            <ProductCard product={item} />
+          </Pressable>
+        )}
         contentContainerStyle={[
           styles.listContent,
           { paddingBottom: insets.bottom + 12 },
@@ -94,6 +104,9 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: 16,
     paddingTop: 12,
-    gap: 12,
+    gap: 8,
+  },
+  cardPressed: {
+    opacity: 0.7,
   },
 });

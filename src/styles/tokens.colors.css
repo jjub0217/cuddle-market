@@ -42,6 +42,14 @@
   --color-badge-yellow-container: #fff5e0;
   --color-badge-blue: #33495c;
   --color-badge-blue-container: #cbe2fa;
+
+  /* Badge 판매/판매요청 (앱 알약 뱃지와 같은 값 — 웹·앱 공통) */
+  --color-badge-sell-bg: #eff6ff;
+  --color-badge-sell-fg: #2563eb;
+  --color-badge-request-bg: #fff7ed;
+  --color-badge-request-fg: #ea580c;
+  /* 상품상태 뱃지 테두리 (배경 없는 외곽선형) — 글자는 gray-500을 그대로 쓴다 */
+  --color-badge-status-border: #d1d5db;
 }
 
 /* ===== Brown brand palette (구 파랑 → 브라운 교체) ===== */

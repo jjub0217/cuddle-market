@@ -39,7 +39,7 @@ function Login() {
                 <SocialLoginButtons />
                 <div className="mt-3 flex w-full justify-center gap-1">
                   <span className="text-sm">아직 계정이 없으신가요?</span>
-                  <Link href={ROUTES.SIGNUP} className="text-primary-300 text-sm font-bold">
+                  <Link href={ROUTES.SIGNUP} className="text-primary text-sm font-bold">
                     회원가입하기
                   </Link>
                 </div>

@@ -13,7 +13,8 @@ export default function ProductBadges({ productType, productStatus }: ProductBad
 
   const items: ProductBadgeItem[] = [
     { label: productTypeName, tone: productTypeName === '판매요청' ? 'warning' : 'info' },
-    { label: productStatusName, tone: 'light' },
+    // 상품상태는 카드·상세 모두 같은 회색 외곽선(앱과 동일). 예전엔 상세만 light였다.
+    { label: productStatusName, tone: 'outline' },
   ]
 
   return <ProductBadge items={items} size="md" />

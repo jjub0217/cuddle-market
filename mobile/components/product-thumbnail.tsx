@@ -7,7 +7,7 @@ import { getOverlay } from '@/lib/tradeStatus';
 // 1:1 정사각 썸네일 + 거래상태 오버레이(UI 스펙 §4.2, §5).
 // 오버레이는 판매중/요청중=없음, 예약중=스크림0.40, 완료계열=0.60 + 중앙 흰 pill.
 
-const THUMB_SIZE = 100; // 한 변 약 96~104dp (UI 스펙 §4.2)
+const THUMB_SIZE = 100; // 정사각 한 변의 최소값. 약 96~104dp (UI 스펙 §4.2)
 
 interface Props {
   imageUrl: string;
@@ -44,15 +44,18 @@ export function ProductThumbnail({ imageUrl, tradeStatus, productType }: Props) 
 
 const styles = StyleSheet.create({
   container: {
-    width: THUMB_SIZE,
-    height: THUMB_SIZE,
-    borderRadius: 8,
+    // 높이는 카드 높이만큼 늘어나고(위·아래 꽉 참), 가로는 그 높이를 따라가 항상 정사각을 유지한다.
+    alignSelf: 'stretch',
+    aspectRatio: 1,
+    // 글자 영역이 짧아도 이 크기 아래로는 줄지 않는다.
+    minHeight: THUMB_SIZE,
+    // 모서리 라운드는 카드가 overflow로 잘라준다(카드 모서리와 어긋나지 않게).
     overflow: 'hidden',
     backgroundColor: '#E5E7EB', // 로드 전/실패 시 보이는 회색 placeholder
   },
   image: {
-    width: '100%',
-    height: '100%',
+    // 컨테이너 높이가 카드에 따라 늘어나므로 퍼센트 대신 절대 채움을 쓴다(웹도 absolute 이미지).
+    ...StyleSheet.absoluteFillObject,
   },
   scrim: {
     // 썸네일 전체를 덮는 어두운 막(라운드 안쪽으로).
