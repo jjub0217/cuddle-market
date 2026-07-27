@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils/cn'
 import { Bell as BellIcon } from 'lucide-react'
 import type { NotificationItem as NotificationItemType } from '@/types/notifications'
 import { iconMap, NOTIFICATION_MESSAGES, type NotificationType } from '@/constants/constants'
-import { getTimeAgo } from '@/lib/utils/getTimeAgo'
+import { getTimeAgo } from '@cuddle/shared'
 import { notificationIconClass, notificationIconStrokeClass } from './notificationIconClass'
 
 interface NotificationItemProps extends NotificationItemType {

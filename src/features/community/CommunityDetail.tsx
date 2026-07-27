@@ -12,7 +12,7 @@ const MdPreview = dynamic(() => import('./components/markdown/MdPreview'), {
 })
 import { getBoardType } from '@/lib/utils/getBoardType'
 import Badge from '@/components/commons/badge/Badge'
-import { getTimeAgo } from '@/lib/utils/getTimeAgo'
+import { getTimeAgo } from '@cuddle/shared'
 import { CommentList, type ReplyRequestFormValues } from './components/CommentList'
 import { CommentForm } from './components/CommentForm'
 import ProfileAvatar from '@/components/commons/ProfileAvatar'

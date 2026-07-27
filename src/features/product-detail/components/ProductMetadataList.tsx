@@ -1,4 +1,4 @@
-import { getTimeAgo } from '@/lib/utils/getTimeAgo'
+import { getTimeAgo } from '@cuddle/shared'
 import { ProductMetaItem } from '@/components/product/ProductMetaItem'
 
 interface ProductMetadataListProps {
