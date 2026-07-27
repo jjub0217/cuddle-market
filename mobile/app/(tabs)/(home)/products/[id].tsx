@@ -1,5 +1,5 @@
 import type { Product, ProductDetailItem } from '@cuddle/shared';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -24,9 +24,13 @@ import { fetchProductDetail, ProductNotFoundError } from '@/lib/products';
 // 헤더(DetailHeader)는 어느 상태에서도 늘 보인다. 로딩·오류·404일 때도 `‹`로 목록에
 // 돌아갈 수 있어야 하기 때문. 그래서 상태별로 바뀌는 것은 헤더 아래 본문뿐이다.
 
-/** 홈 목록 캐시에서 같은 id의 상품을 찾아, 상세를 즉시 그릴 밑그림으로 쓴다. */
-function useListCachePlaceholder(id: number): ProductDetailItem | undefined {
-  const queryClient = useQueryClient();
+// 홈 목록 캐시에서 같은 id의 상품을 찾아, 상세를 즉시 그릴 밑그림으로 쓴다.
+// placeholderData의 함수 형태로 호출되므로 밑그림이 실제로 필요할 때만 실행된다
+// (매 렌더마다 객체를 새로 만들지 않는다).
+function readListCachePlaceholder(
+  queryClient: QueryClient,
+  id: number,
+): ProductDetailItem | undefined {
   const pages = queryClient.getQueryData<{ pages: { content: Product[] }[] }>(['products']);
   const found = pages?.pages.flatMap((page) => page.content).find((p) => p.id === id);
 
@@ -56,12 +60,13 @@ export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const productId = Number(id);
-  const placeholder = useListCachePlaceholder(productId);
+  const queryClient = useQueryClient();
 
   const { data, isLoading, isPlaceholderData, error, refetch } = useQuery({
     queryKey: ['product', productId],
     queryFn: () => fetchProductDetail(productId),
-    placeholderData: placeholder,
+    // 밑그림은 필요할 때만 목록 캐시에서 계산한다(매 렌더 객체 생성 회피).
+    placeholderData: () => readListCachePlaceholder(queryClient, productId),
     // 없는 상품(404)은 다시 시도해도 소용없다.
     retry: (count, err) => !(err instanceof ProductNotFoundError) && count < 2,
   });
