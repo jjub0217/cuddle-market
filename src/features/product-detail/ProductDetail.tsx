@@ -82,7 +82,8 @@ function ProductDetail({ initialData }: ProductDetailProps) {
                     favoriteCount={data.favoriteCount}
                   />
                 </div>
-                <ProductActions {...data} />
+                {/* 비로그인 조회 시 isFavorite이 null → 찜 토글 초기값은 false로 */}
+                <ProductActions {...data} isFavorite={data.isFavorite ?? false} />
               </div>
             </div>
           </div>

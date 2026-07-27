@@ -15,9 +15,11 @@ const SIZE_CLASSES: Record<ProductBadgeSize, string> = {
 }
 
 const TONE_CLASSES: Record<ProductBadgeTone, string> = {
-  // 진한 브라운 채움 (펫 타입 등)
+  // [현재 실화면 미사용 — 디자인 시스템 팔레트로 보존]
+  // 진한 브라운 채움 (펫 타입 등). 필요 시 다시 tone="primary"로 사용.
   primary: 'bg-primary-700 text-white',
-  // 연한 브라운 채움 (상품 상태 등)
+  // [현재 실화면 미사용 — 디자인 시스템 팔레트로 보존]
+  // 연한 브라운 채움. 상품 상태를 채움형으로 되돌릴 때 tone="light".
   light: 'bg-primary-200 text-gray-900',
   // 블루 톤 (판매) — 토큰: tokens.colors.css의 --color-badge-sell-*
   info: 'bg-badge-sell-bg text-badge-sell-fg',
