@@ -11,7 +11,7 @@ export interface Product {
   mainImageUrl: string
   createdAt: string
   favoriteCount: number
-  isFavorite: boolean
+  isFavorite: boolean | null
   viewCount?: number
   addressSido?: string
   addressGugun?: string
@@ -92,7 +92,7 @@ export interface ProductPostResponse {
   addressGugun: string
   viewCount: number
   favoriteCount: number
-  isFavorite: boolean
+  isFavorite: boolean | null
   createdAt: string
   updatedAt: string
 }
