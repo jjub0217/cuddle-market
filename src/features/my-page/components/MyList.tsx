@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Eye, EllipsisVertical, Heart, SquarePen, Trash2, Check } from 'lucide-react'
+import { EllipsisVertical, SquarePen, Trash2, Check } from 'lucide-react'
 import Image from 'next/image'
 import { IMAGE_SIZES, imageLoader, toResizedWebpUrl, PLACEHOLDER_IMAGES } from '@/lib/utils/imageUrl'
 import SelectDropdown from '@/components/commons/select/SelectDropdown'
@@ -238,8 +238,9 @@ export default function MyList({
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <ProductMetaItem icon={Eye} label={`${viewCount ?? 0}`} className="text-sm text-gray-400" />
-              <ProductMetaItem icon={Heart} label={`${favoriteCount ?? 0}`} className="text-sm text-gray-400" />
+              {/* 조회·찜은 누를 수 없는 정보라 아이콘 없이 글자로만 둔다 */}
+              <ProductMetaItem label={`조회 ${viewCount ?? 0}`} className="text-sm text-gray-400" />
+              <ProductMetaItem label={`찜 ${favoriteCount ?? 0}`} className="text-sm text-gray-400" />
             </div>
           </div>
 
