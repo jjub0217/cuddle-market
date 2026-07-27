@@ -601,7 +601,7 @@ export * from './lib/tradeStatus'
 - [ ] **Step 8: 테스트가 통과하는지 확인한다**
 
 Run: `pnpm --filter @cuddle/shared test`
-Expected: PASS — 전체 통과 (기존 format 2건 + 새 11건)
+Expected: PASS — 전체 통과 (기존 format 4건 + 새 14건 = 18건. 위 "새 11건"은 어림값이었고 실제는 14건 — 계획 코드 그대로 넣은 결과)
 
 - [ ] **Step 9: 웹 빌드 게이트**
 
