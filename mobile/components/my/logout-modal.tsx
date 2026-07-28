@@ -8,9 +8,14 @@ import { logout } from '@/lib/auth/session';
 //
 // 왜 네이티브 Alert.alert이 아닌가:
 // 같은 화면의 탈퇴가 커스텀 모달이라, 나란히 있는 두 줄을 눌렀을 때 창 모양이 갈리면
-// 만든 사람이 다른 화면처럼 보인다. 껍데기(덮개 · 카드 · 버튼 두 개)를 탈퇴와 맞춘다.
+// 만든 사람이 다른 화면처럼 보인다.
 //
-// 확인 버튼 색만 다르다 — 탈퇴는 되돌릴 수 없어 빨강, 로그아웃은 다시 들어오면 되니 검정.
+// 글자를 가운데로 두는 건 웹의 같은 창(src/components/modal/LoginModal.tsx)에 맞춘 것이다.
+// 문구 두 줄도 웹과 글자까지 같다. 확인 버튼 색은 웹이 브랜드 갈색(#825500)이지만 여기선
+// 아직 검정이다 — 앱 색을 웹 토큰에 매핑하는 일은 이번 범위 밖이라 별도로 다룬다.
+//
+// 탈퇴 모달은 왼쪽 정렬 그대로다. 거기는 사유 목록·상세 입력·동의 체크가 줄줄이 있어서
+// 가운데로 모으면 읽는 흐름이 흐트러진다. 짧은 확인 창만 가운데로 둔다.
 
 interface Props {
   visible: boolean;
@@ -93,10 +98,12 @@ const styles = StyleSheet.create({
     fontSize: 19,
     fontWeight: '700',
     color: '#111827',
+    textAlign: 'center',
   },
   description: {
     fontSize: 14,
     color: '#6B7280',
+    textAlign: 'center',
   },
   actions: {
     flexDirection: 'row',

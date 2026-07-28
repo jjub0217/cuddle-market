@@ -108,7 +108,10 @@ export function WithdrawModal({ visible, onClose, onDone }: Props) {
                       pressed && styles.pressed,
                     ]}
                   >
-                    <View style={[styles.radio, selected && styles.radioSelected]} />
+                    <View style={[styles.radio, selected && styles.radioSelected]}>
+                      {/* 선택 표시는 안을 꽉 채우지 않고 가운데 점으로 — 흔히 보는 라디오 모양. */}
+                      {selected ? <View style={styles.radioDot} /> : null}
+                    </View>
                     <Text style={styles.reasonLabel}>{item.label}</Text>
                   </Pressable>
                 );
@@ -234,9 +237,16 @@ const styles = StyleSheet.create({
     borderRadius: 9,
     borderWidth: 2,
     borderColor: '#D1D5DB',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   radioSelected: {
     borderColor: '#111827',
+  },
+  radioDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     backgroundColor: '#111827',
   },
   reasonLabel: {
