@@ -11,6 +11,40 @@
 **설계 문서:** `docs/superpowers/specs/2026-07-28-rn-auth-login-favorite-design.md`
 **이슈:** #784 · **브랜치:** `feature/784--rn-auth-login-favorite`
 
+## 실행 방식 (합의됨)
+
+앞부분은 서로 의존해서 한 줄로만 갈 수 있고, 뒷부분 네 갈래는 파일이 겹치지 않아 동시에 갈 수 있다.
+
+```
+T1 tokens ─┐
+T2 store  ─┴→ T3 apiFetch → T4 session → T5 프로필·복원·아이콘
+                                              │
+   ━━━━━ 1단계: 여기까지 순차 (메인 세션에서 직접) ━━━━━
+                                              │
+              ┌───────────────┬───────────────┼───────────────┐
+              ↓               ↓               ↓               ↓
+         A: T6 로그인화면   B: T7→T8→T9    C: T10 찜      D: T11 웹
+                              마이 탭
+   ━━━━━ 2단계: tmux 4분할로 동시 진행 ━━━━━
+                                              │
+   ━━━━━ 3단계: 합쳐서 게이트 + 실기기 손 검증 7단계 ━━━━━
+```
+
+**팬별 파일 (겹치지 않음 — 대조 완료)**
+
+| 팬 | 작업 | 파일 |
+|---|---|---|
+| A | 로그인 화면 | `components/auth/login-form.tsx`, `app/login.tsx` |
+| B | 마이 탭 · 마이페이지 · 탈퇴 | `app/(tabs)/_layout.tsx`, `app/(tabs)/(my)/*`, `components/my/*` |
+| C | 찜 | `lib/favorites.ts`, `hooks/use-favorite.ts`, `components/product-detail/favorite-button.tsx`, `app/(tabs)/(home)/products/[id].tsx` |
+| D | 웹 | `src/features/login/Login.tsx`, `src/features/my-page/MyPage.tsx` |
+
+**2단계 진행 규칙**
+
+- **커밋은 메인 세션이 모아서 한다.** 네 팬이 같은 브랜치에 동시에 커밋하면 git 인덱스가 잠겨 서로 밀린다. 각 팬은 코드만 쓰고, 끝나면 메인이 팬별로 나눠 커밋한다.
+- **실기기 확인은 2단계가 다 끝난 뒤에.** 팬 B의 마이 탭이 팬 A가 만드는 로그인 화면으로 이동하므로, 중간에 열면 없는 화면을 찾는다. 각 팬의 "실기기 확인" 단계는 3단계로 미룬다.
+- **`icon-symbol.tsx`는 1단계(T5)에서 이미 끝냈다.** 팬 B·C 모두 손대지 않는다.
+
 ## Global Constraints
 
 - **Expo SDK는 54로 고정.** 사용자의 Expo Go가 54.0.8이라 상위 SDK는 실기기에서 안 뜬다. 패키지 설치는 반드시 `npx expo install <pkg>`(SDK에 맞는 버전을 골라줌). `@latest`나 `pnpm add`로 Expo 패키지를 넣지 말 것.
@@ -1013,6 +1047,11 @@ git commit -m "feat(mobile): 세션 흐름 login/logout/withdraw/restore (#784)"
 - Create: `mobile/lib/profile.ts`
 - Create: `mobile/hooks/use-me.ts`
 - Modify: `mobile/app/_layout.tsx`
+- Modify: `mobile/components/ui/icon-symbol.tsx`
+
+> **아이콘 매핑을 왜 여기서 하나:** 2단계에서 팬 B(마이 탭)는 사람 아이콘을, 팬 C(찜)는 하트
+> 아이콘을 쓴다. 각자 `icon-symbol.tsx`를 고치게 두면 **같은 파일을 동시에 만져 충돌**한다.
+> 갈라지기 전에 세 개를 한 번에 넣어둔다.
 
 **Interfaces:**
 - Consumes: Task 2(`useAuthStore`), Task 3(`apiFetch`), Task 4(`restore`)
@@ -1134,7 +1173,27 @@ export default function RootLayout() {
 }
 ```
 
-- [ ] **Step 4: 타입체크**
+- [ ] **Step 4: 아이콘 매핑 3개 추가**
+
+Modify `mobile/components/ui/icon-symbol.tsx` — `MAPPING` 객체에 3줄 추가:
+
+```tsx
+const MAPPING = {
+  'house.fill': 'home',
+  'paperplane.fill': 'send',
+  'chevron.left.forwardslash.chevron.right': 'code',
+  'chevron.right': 'chevron-right',
+  'chevron.left': 'chevron-left',
+  'person.crop.circle': 'person',
+  heart: 'favorite-border',
+  'heart.fill': 'favorite',
+} as IconMapping;
+```
+
+`person.crop.circle`은 마이 탭 아이콘, `heart` 2종은 찜 버튼이 쓴다. 아직 쓰는 곳이 없어도
+여기서 넣는 이유는 위 파일 목록의 설명 참고.
+
+- [ ] **Step 5: 타입체크**
 
 ```bash
 cd mobile && npx tsc --noEmit
@@ -1143,11 +1202,11 @@ cd mobile && npx tsc --noEmit
 Expected: 출력 없음.
 (`login` 라우트 파일은 Task 6에서 만든다. expo-router는 없는 이름의 `Stack.Screen`을 타입 오류로 잡지 않고 런타임에 무시하므로 여기서는 통과한다. 만약 `.expo/types` 자동 생성 타입 때문에 오류가 난다면 Task 6을 먼저 끝내고 이 단계를 다시 실행한다.)
 
-- [ ] **Step 5: 커밋**
+- [ ] **Step 6: 커밋**
 
 ```bash
-git add mobile/lib/profile.ts mobile/hooks/use-me.ts mobile/app/_layout.tsx
-git commit -m "feat(mobile): 내 프로필 조회 + 앱 시작 세션 복원 (#784)"
+git add mobile/lib/profile.ts mobile/hooks/use-me.ts mobile/app/_layout.tsx mobile/components/ui/icon-symbol.tsx
+git commit -m "feat(mobile): 내 프로필 조회 + 앱 시작 세션 복원 + 아이콘 매핑 (#784)"
 ```
 
 ---
@@ -1484,31 +1543,16 @@ git commit -m "feat(mobile): 로그인 화면 (#784)"
 - Create: `mobile/app/(tabs)/(my)/_layout.tsx`
 - Create: `mobile/app/(tabs)/(my)/index.tsx` (이 작업에서는 뼈대만, Task 8에서 채운다)
 - Modify: `mobile/app/(tabs)/_layout.tsx`
-- Modify: `mobile/components/ui/icon-symbol.tsx`
 - Delete: `mobile/app/(tabs)/explore.tsx`
+
+> `icon-symbol.tsx`는 **건드리지 않는다.** `person.crop.circle` 매핑은 Task 5에서 이미 넣었다
+> (팬 C와 같은 파일을 동시에 만지지 않으려고 앞으로 뺐다).
 
 **Interfaces:**
 - Consumes: Task 2(`useAuthStore`)
 - Produces: `(my)` 탭 라우트. Task 8이 `index.tsx`를 채운다.
 
-- [ ] **Step 1: 아이콘 매핑 추가**
-
-Modify `mobile/components/ui/icon-symbol.tsx` — `MAPPING` 객체에 3줄 추가:
-
-```tsx
-const MAPPING = {
-  'house.fill': 'home',
-  'paperplane.fill': 'send',
-  'chevron.left.forwardslash.chevron.right': 'code',
-  'chevron.right': 'chevron-right',
-  'chevron.left': 'chevron-left',
-  'person.crop.circle': 'person',
-  heart: 'favorite-border',
-  'heart.fill': 'favorite',
-} as IconMapping;
-```
-
-- [ ] **Step 2: 마이 탭 스택 레이아웃 작성**
+- [ ] **Step 1: 마이 탭 스택 레이아웃 작성**
 
 Create `mobile/app/(tabs)/(my)/_layout.tsx`:
 
@@ -1524,7 +1568,7 @@ export default function MyLayout() {
 }
 ```
 
-- [ ] **Step 3: 마이페이지 뼈대 작성**
+- [ ] **Step 2: 마이페이지 뼈대 작성**
 
 Create `mobile/app/(tabs)/(my)/index.tsx`:
 
@@ -1565,7 +1609,7 @@ const styles = StyleSheet.create({
 });
 ```
 
-- [ ] **Step 4: 탭 레이아웃 교체**
+- [ ] **Step 3: 탭 레이아웃 교체**
 
 Modify `mobile/app/(tabs)/_layout.tsx` — 전체 내용을 아래로 바꾼다:
 
@@ -1628,13 +1672,13 @@ export default function TabLayout() {
 }
 ```
 
-- [ ] **Step 5: Explore 탭 삭제**
+- [ ] **Step 4: Explore 탭 삭제**
 
 ```bash
 git rm mobile/app/\(tabs\)/explore.tsx
 ```
 
-- [ ] **Step 6: 타입체크 + 린트 + 전체 테스트**
+- [ ] **Step 5: 타입체크 + 린트 + 전체 테스트**
 
 ```bash
 cd mobile && npx tsc --noEmit && npx expo lint && npx jest
@@ -1644,7 +1688,7 @@ Expected: 타입 오류 없음 / 린트 경고 없음 / 38 tests 통과
 
 > `explore.tsx`가 쓰던 `Collapsible` · `ExternalLink` · `ParallaxScrollView` 등은 이제 아무도 안 쓰지만 **지우지 않는다.** 이 작업의 범위가 아니고, 지웠다가 되살리는 비용이 더 크다.
 
-- [ ] **Step 7: 실기기 확인**
+- [ ] **Step 6: 실기기 확인**
 
 ```bash
 cd mobile && pnpm expo start
@@ -1655,7 +1699,7 @@ cd mobile && pnpm expo start
 - 로그인 화면에서 틀린 비밀번호 → "이메일 또는 비밀번호가 일치하지 않습니다"
 - 맞는 계정 → 화면이 닫히고, 다시 「마이」를 누르면 이번엔 마이 탭이 열리는지
 
-- [ ] **Step 8: 커밋**
+- [ ] **Step 7: 커밋**
 
 ```bash
 git add mobile/app/\(tabs\)/_layout.tsx mobile/app/\(tabs\)/\(my\)/ mobile/components/ui/icon-symbol.tsx
