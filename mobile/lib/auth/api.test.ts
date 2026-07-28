@@ -84,6 +84,34 @@ describe('apiFetch', () => {
     expect(authHeaderOf(mockFetch.mock.calls[1])).toBe('Bearer old-token');
   });
 
+  it('갱신 응답에 새 리프레시 토큰이 오면 그것도 저장한다', async () => {
+    // 서버는 갱신할 때마다 리프레시 토큰을 새로 주고 옛 것을 블랙리스트에 넣는다(1회용).
+    // 새 것을 안 받아두면 두 번째 갱신이 "이미 로그아웃된 토큰"으로 반드시 실패한다.
+    mockFetch
+      .mockResolvedValueOnce(reply(401))
+      .mockResolvedValueOnce(
+        reply(200, { data: { accessToken: 'new-token', refreshToken: 'new-refresh' } })
+      )
+      .mockResolvedValueOnce(reply(200));
+
+    await apiFetch('/profile/me');
+
+    expect(useAuthStore.getState().refreshToken).toBe('new-refresh');
+    expect(SecureStore.setItemAsync).toHaveBeenCalledWith('cuddle.refreshToken', 'new-refresh');
+  });
+
+  it('갱신 응답에 리프레시 토큰이 없으면 쓰던 것을 그대로 둔다', async () => {
+    // 서버가 안 줄 수도 있다. 그때 기존 것을 지워버리면 다음 갱신 기회까지 잃는다.
+    mockFetch
+      .mockResolvedValueOnce(reply(401))
+      .mockResolvedValueOnce(reply(200, { data: { accessToken: 'new-token' } }))
+      .mockResolvedValueOnce(reply(200));
+
+    await apiFetch('/profile/me');
+
+    expect(useAuthStore.getState().refreshToken).toBe('r-token');
+  });
+
   it('재시도가 또 401이어도 무한 반복하지 않는다', async () => {
     mockFetch.mockImplementation(async (url: string) =>
       String(url).endsWith('/auth/refresh')

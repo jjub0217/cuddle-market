@@ -1,5 +1,5 @@
 import { useAuthStore } from './store';
-import { clearTokens, saveAccessToken } from './tokens';
+import { clearTokens, saveAccessToken, saveTokens } from './tokens';
 
 // 인증이 필요한 요청은 전부 여기를 지난다.
 // 하는 일 두 가지: (1) 액세스 토큰을 Bearer로 붙인다 (2) 401이면 갱신하고 한 번 재시도한다.
@@ -41,9 +41,21 @@ async function requestNewAccessToken(): Promise<string | null> {
   });
   if (!res.ok) return null;
 
-  const body = (await res.json()) as { data?: { accessToken?: string } };
+  const body = (await res.json()) as {
+    data?: { accessToken?: string; refreshToken?: string };
+  };
   const accessToken = body?.data?.accessToken;
   if (!accessToken) return null;
+
+  // 서버는 갱신할 때마다 리프레시 토큰을 새로 주고 옛 것을 블랙리스트에 넣는다(1회용).
+  // 새 것을 안 받아두면 두 번째 갱신이 "이미 로그아웃된 Refresh Token"으로 반드시 실패한다.
+  // 안 줄 때도 있으니, 없으면 쓰던 것을 그대로 둔다 — 지우면 다음 기회까지 잃는다.
+  const newRefreshToken = body?.data?.refreshToken;
+  if (newRefreshToken) {
+    useAuthStore.getState().setSession({ accessToken, refreshToken: newRefreshToken });
+    await saveTokens({ accessToken, refreshToken: newRefreshToken });
+    return accessToken;
+  }
 
   useAuthStore.getState().setAccessToken(accessToken);
   await saveAccessToken(accessToken);
