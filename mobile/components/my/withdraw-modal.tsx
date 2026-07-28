@@ -186,7 +186,8 @@ const styles = StyleSheet.create({
     width: '100%',
     maxHeight: '85%',
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    // 로그아웃 모달과 같은 값. 두 창이 한 화면에서 나란히 열리므로 어긋나면 바로 보인다.
+    borderRadius: 8,
   },
   sheetContent: {
     padding: 20,

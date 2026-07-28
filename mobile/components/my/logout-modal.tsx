@@ -90,7 +90,9 @@ const styles = StyleSheet.create({
   sheet: {
     width: '100%',
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    // 8은 앱에서 가장 많이 쓰는 값이자 웹 모달(rounded-lg)과 같은 값이다.
+    // 카드류가 쓰는 16과 구분된다 — 카드는 웹도 rounded-2xl(16)이라 그쪽이 맞다.
+    borderRadius: 8,
     padding: 20,
     gap: 10,
   },
