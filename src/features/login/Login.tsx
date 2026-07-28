@@ -13,7 +13,8 @@ function Login() {
       {/* 모바일: Header는 Header.tsx에서 렌더 스킵됨(DOM 제거) → 일반 흐름. 데스크탑: 기존 디자인 100% 보존 */}
       <div className="flex min-h-screen flex-col items-center justify-start bg-[url('/images/login-bg.png')] bg-cover bg-center py-20 md:bg-[#F3F4F6] md:bg-none">
         <div className="flex min-w-full flex-col items-center gap-2 md:min-w-132.5">
-          <Logo />
+          {/* 모바일 폭에서만 로고를 키운다(h-9 → h-11). 데스크탑(md 이상)은 기존 h-10 그대로. */}
+          <Logo logoClassname="h-11 md:h-10" />
           <div className="flex w-full flex-col items-center gap-9 md:w-auto">
             {/* 데스크탑: 기존 타이틀 + 설명 그대로 */}
             <div className="hidden md:block">
@@ -22,12 +23,6 @@ function Login() {
                 desc="로그인하고 반려동물 이웃과의 특별한 일상을 시작해보세요"
               />
             </div>
-            {/* 모바일: 두 줄 헤드라인만 (설명 문구 숨김) */}
-            <h1 className="heading-h3 text-center md:hidden">
-              우리 아이를 위한
-              <br />
-              믿음직한 선택
-            </h1>
             <div className="md:bg-surface md:border-outline-variant/10 flex h-full min-w-full flex-col items-center gap-9 px-10 py-7 md:h-auto md:min-w-100 md:rounded-3xl md:border md:shadow-2xl">
               <LoginForm />
               <div className="flex w-full flex-col gap-3">

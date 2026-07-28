@@ -11,6 +11,7 @@ import {
   DetailSkeleton,
   NotFoundState,
 } from '@/components/product-detail/detail-states';
+import { FavoriteButton } from '@/components/product-detail/favorite-button';
 import { ImageCarousel } from '@/components/product-detail/image-carousel';
 import { ProductSummary } from '@/components/product-detail/product-summary';
 import { SellerCard } from '@/components/product-detail/seller-card';
@@ -109,6 +110,14 @@ export default function ProductDetailScreen() {
         <View style={styles.section}>
           {isPlaceholderData ? <View style={styles.bar} /> : <SellerCard seller={data.sellerInfo} />}
         </View>
+
+        {/* 밑그림 상태에서는 아직 isFavorite을 모른다. 버튼을 그리면 하트가
+            빈 채로 보였다가 갑자기 채워져 깜빡인다. 실제 응답이 온 뒤에만 그린다. */}
+        {isPlaceholderData ? null : (
+          <View style={styles.section}>
+            <FavoriteButton productId={data.id} isFavorite={data.isFavorite} />
+          </View>
+        )}
 
         <View style={styles.divider} />
 

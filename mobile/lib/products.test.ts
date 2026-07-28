@@ -1,9 +1,23 @@
+// 상품 조회도 apiFetch를 타므로 SecureStore가 딸려 들어온다. 네이티브 모듈이라 jest에서 못 돈다.
+jest.mock('expo-secure-store', () => ({
+  setItemAsync: jest.fn(),
+  getItemAsync: jest.fn(),
+  deleteItemAsync: jest.fn(),
+}))
+
 import type { Product } from '@cuddle/shared'
 
+import { useAuthStore } from './auth/store'
 import { fetchProductDetail, fetchProducts, ProductNotFoundError } from './products'
 
 // fetch를 mock으로 갈아끼워 네트워크 없이 순수 로직만 검증한다.
 const mockFetch = jest.fn()
+
+/** 요청에 실린 Authorization 헤더를 꺼낸다. */
+function authHeaderOf(call: unknown[]): string | undefined {
+  const init = call[1] as { headers?: Record<string, string> } | undefined
+  return init?.headers?.Authorization
+}
 
 beforeEach(() => {
   mockFetch.mockReset()
@@ -11,6 +25,8 @@ beforeEach(() => {
   process.env.EXPO_PUBLIC_API_BASE_URL = 'https://test.local/api'
   // globalThis.fetch를 테스트용 mock으로 교체.
   ;(globalThis as { fetch: typeof fetch }).fetch = mockFetch as unknown as typeof fetch
+  // 기본은 비로그인. 로그인 상태가 필요한 테스트가 각자 덮어쓴다.
+  useAuthStore.setState({ status: 'guest', accessToken: null, refreshToken: null })
 })
 
 // data.content 한 건을 만드는 최소 헬퍼.
@@ -82,6 +98,19 @@ describe('fetchProducts', () => {
     delete process.env.EXPO_PUBLIC_API_BASE_URL
     await expect(fetchProducts(0)).rejects.toThrow('EXPO_PUBLIC_API_BASE_URL')
   })
+
+  it('로그인 상태면 목록 조회에도 토큰을 붙인다', async () => {
+    // 서버는 토큰이 있어야 isFavorite을 채워준다. 없으면 목록 하트가 항상 비어 보인다.
+    useAuthStore.setState({ status: 'authed', accessToken: 'a-token', refreshToken: 'r-token' })
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ code: 'SUCCESS', message: 'ok', data: { content: [], hasNext: false } }),
+    })
+
+    await fetchProducts(0)
+
+    expect(authHeaderOf(mockFetch.mock.calls[0])).toBe('Bearer a-token')
+  })
 })
 
 function makeDetail() {
@@ -146,5 +175,32 @@ describe('fetchProductDetail', () => {
   it('EXPO_PUBLIC_API_BASE_URL 미설정이면 명확히 throw한다', async () => {
     delete process.env.EXPO_PUBLIC_API_BASE_URL
     await expect(fetchProductDetail(61)).rejects.toThrow('EXPO_PUBLIC_API_BASE_URL')
+  })
+
+  it('로그인 상태면 토큰을 붙여 조회한다', async () => {
+    // 이 테스트가 없어서 놓쳤던 버그:
+    // 토큰 없이 상세를 다시 받으면 서버가 isFavorite을 null로 준다(실측).
+    // 그래서 찜을 눌러 하트가 켜졌다가, 재조회가 끝나는 순간 도로 꺼졌다.
+    useAuthStore.setState({ status: 'authed', accessToken: 'a-token', refreshToken: 'r-token' })
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ code: 'SUCCESS', message: '성공', data: makeDetail() }),
+    })
+
+    await fetchProductDetail(61)
+
+    expect(authHeaderOf(mockFetch.mock.calls[0])).toBe('Bearer a-token')
+  })
+
+  it('비로그인이면 토큰 없이 그대로 조회한다', async () => {
+    // 상세는 게스트도 볼 수 있어야 한다. 토큰이 없다고 요청을 막으면 안 된다.
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ code: 'SUCCESS', message: '성공', data: makeDetail() }),
+    })
+
+    await fetchProductDetail(61)
+
+    expect(authHeaderOf(mockFetch.mock.calls[0])).toBeUndefined()
   })
 })

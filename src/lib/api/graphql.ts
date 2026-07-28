@@ -14,7 +14,11 @@ async function refreshAccessToken(): Promise<string | null> {
 
         const response = await axios.post(`${API_BASE_URL}/auth/refresh`, { refreshToken })
         const newAccessToken = response.data?.data?.accessToken ?? null
+        const newRefreshToken = response.data?.data?.refreshToken ?? null
         useUserStore.getState().setAccessToken(newAccessToken)
+        // Refresh Token은 1회용이다(서버가 새로 주고 옛 것을 블랙리스트에 넣는다).
+        // 새 것을 안 받아두면 다음 갱신이 반드시 실패한다. api.ts와 같은 이유.
+        if (newRefreshToken) useUserStore.getState().setRefreshToken(newRefreshToken)
         return newAccessToken
       } catch {
         useUserStore.getState().clearAll()

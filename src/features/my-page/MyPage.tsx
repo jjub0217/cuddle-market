@@ -30,8 +30,9 @@ import Button from '@/components/commons/button/Button'
 import { cn } from '@/lib/utils/cn'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { Z_INDEX } from '@/constants/ui'
-import { ArrowLeft, Tag, Handbag, ChevronRight, Heart, MessageSquareText, UserX, Headphones } from 'lucide-react'
+import { ArrowLeft, Tag, Handbag, ChevronRight, Heart, MessageSquareText, UserX, Headphones, LogOut, UserMinus } from 'lucide-react'
 import Link from 'next/link'
+import { useLogout } from '@/hooks/useLogout'
 
 function MyPage() {
   const [deleteError, setDeleteError] = useState<React.ReactNode | null>(null)
@@ -44,6 +45,7 @@ function MyPage() {
   const [unblockError, setUnblockError] = useState<React.ReactNode | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false)
+  const { openLogoutConfirm } = useLogout()
   const [withdrawError, setWithdrawError] = useState<React.ReactNode | null>(null)
   const [activeTradeStatus, setActiveTradeStatus] = useState<TransactionStatus | 'ALL'>('ALL')
   const [selectedProduct, setSelectedProduct] = useState<{
@@ -507,6 +509,30 @@ function MyPage() {
                     <span className="flex-1 text-left text-base">고객센터</span>
                     <ChevronRight size={25} strokeWidth={1.5} className="text-on-surface-muted" />
                   </a>
+                </div>
+              </div>
+
+              <div className="border-outline-variant/40 flex flex-col gap-2 rounded-2xl border bg-white p-5">
+                <h2 className="text-base font-bold text-[#1c1b1b]">계정</h2>
+                <div className="flex flex-col">
+                  <button
+                    type="button"
+                    onClick={openLogoutConfirm}
+                    className="text-on-surface flex cursor-pointer items-center gap-3 py-3"
+                  >
+                    <LogOut size={20} strokeWidth={1.5} />
+                    <span className="flex-1 text-left text-base">로그아웃</span>
+                    <ChevronRight size={25} strokeWidth={1.5} className="text-on-surface-muted" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsWithdrawModalOpen(true)}
+                    className="text-danger-500 flex cursor-pointer items-center gap-3 py-3"
+                  >
+                    <UserMinus size={20} strokeWidth={1.5} />
+                    <span className="flex-1 text-left text-base">탈퇴하기</span>
+                    <ChevronRight size={25} strokeWidth={1.5} className="text-on-surface-muted" />
+                  </button>
                 </div>
               </div>
             </section>
