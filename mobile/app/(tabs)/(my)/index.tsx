@@ -43,7 +43,13 @@ export default function MyScreen() {
         onPress: async () => {
           await logout(queryClient);
           // 게스트가 마이 탭에 남아 있을 이유가 없다. 홈으로 보낸다.
-          router.replace('/');
+          //
+          // replace가 아니라 navigate인 이유:
+          // 탭을 바꾸는 건 NAVIGATE 액션이어야 한다. REPLACE는 지금 스택 안에서만
+          // 통하는데(StackRouter가 자기 routeNames에 없는 이름이면 처리를 포기한다),
+          // 홈은 다른 탭이라 액션이 아무 데서도 처리되지 않고 조용히 버려진다.
+          // 그러면 로그아웃해 놓고 마이 화면에 그대로 남는다(실기기에서 확인).
+          router.navigate('/');
         },
       },
     ]);
@@ -122,7 +128,8 @@ export default function MyScreen() {
         onClose={() => setIsWithdrawOpen(false)}
         onDone={() => {
           setIsWithdrawOpen(false);
-          router.replace('/');
+          // 로그아웃과 같은 이유로 navigate. (replace는 탭을 못 바꾼다)
+          router.navigate('/');
         }}
       />
     </SafeAreaView>
