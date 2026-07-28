@@ -4,66 +4,6 @@ import { useEffect, useRef, useCallback } from 'react'
 import { useMapStore } from '@/store/mapStore'
 import { getPlaceDetail } from '@/lib/api/places'
 
-declare global {
-  interface Window {
-    naver: typeof naver
-  }
-}
-
-declare namespace naver.maps {
-  class Map {
-    constructor(el: HTMLElement, options: MapOptions)
-    setCenter(center: LatLng): void
-    getCenter(): LatLng
-    getZoom(): number
-    setZoom(zoom: number): void
-    getBounds(): LatLngBounds
-  }
-  class LatLng {
-    constructor(lat: number, lng: number)
-    lat(): number
-    lng(): number
-  }
-  class LatLngBounds {
-    getMin(): LatLng
-    getMax(): LatLng
-  }
-  class Marker {
-    constructor(options: MarkerOptions)
-    setMap(map: Map | null): void
-    getPosition(): LatLng
-  }
-  class Event {
-    static addListener(
-      target: unknown,
-      eventName: string,
-      handler: (...args: unknown[]) => void
-    ): void
-  }
-  interface MapOptions {
-    center: LatLng
-    zoom: number
-    zoomControl?: boolean
-    zoomControlOptions?: {
-      position: number
-    }
-  }
-  interface MarkerOptions {
-    position: LatLng
-    map: Map
-    icon?: {
-      content: string
-      anchor: Point
-    }
-  }
-  class Point {
-    constructor(x: number, y: number)
-  }
-  const Position: {
-    TOP_RIGHT: number
-  }
-}
-
 export default function NaverMap() {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<naver.maps.Map | null>(null)
