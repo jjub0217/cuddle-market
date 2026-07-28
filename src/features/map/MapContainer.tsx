@@ -14,7 +14,15 @@ import { getPlaces } from '@/lib/api/places'
 import Spinner from '@/components/commons/spinner/Spinner'
 
 export default function MapContainer() {
-  const [mapReady, setMapReady] = useState(false)
+  // SDK가 이미 실려 있으면 처음부터 준비된 상태로 시작한다.
+  // (지도 페이지에 다시 들어오면 <Script>가 재실행되지 않아 onLoad가 안 터진다)
+  //
+  // 하이드레이션은 어긋나지 않는다: <Script strategy="afterInteractive">는 하이드레이션이
+  // 끝난 뒤에 주입되므로, 첫 로드 시점에는 서버·클라이언트 모두 window.naver가 없어 false다.
+  // 클라이언트 이동으로 들어올 때는 하이드레이션 자체가 없다.
+  const [mapReady, setMapReady] = useState(
+    () => typeof window !== 'undefined' && Boolean(window.naver?.maps)
+  )
   const clientId = process.env.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID
   const abortRef = useRef<AbortController | null>(null)
 
@@ -72,12 +80,6 @@ export default function MapContainer() {
     fetchPlaces()
     setNeedsSearch(false)
   }, [selectedCategory, activeFilters, fetchPlaces, mapReady, setNeedsSearch])
-
-  useEffect(() => {
-    if (window.naver?.maps) {
-      setMapReady(true)
-    }
-  }, [])
 
   return (
     <>
