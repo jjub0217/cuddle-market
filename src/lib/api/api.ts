@@ -31,8 +31,16 @@ async function fetchNewAccessToken(): Promise<string | null> {
     const response = await axios.post(`${API_BASE_URL}/auth/refresh`, { refreshToken })
 
     const newAccessToken = response.data?.data?.accessToken ?? null
+    const newRefreshToken = response.data?.data?.refreshToken ?? null
 
     useUserStore.getState().setAccessToken(newAccessToken)
+
+    // 서버는 갱신할 때마다 Refresh Token을 새로 발급하고 옛 것을 블랙리스트에 넣는다(1회용).
+    // 새 것을 받아두지 않으면 다음 갱신이 "이미 로그아웃된 Refresh Token"으로 반드시 실패한다.
+    // 서버가 안 줄 때는 쓰던 것을 그대로 둔다 — 지우면 다음 갱신 기회까지 잃는다.
+    if (newRefreshToken) {
+      useUserStore.getState().setRefreshToken(newRefreshToken)
+    }
 
     return newAccessToken
   } catch {
