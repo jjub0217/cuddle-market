@@ -78,11 +78,14 @@ export function LoginForm() {
         <legend className="sr-only">로그인폼</legend>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
+            {/* inputClass의 py-3은 모바일 폭에서만 효과가 있다 — Input의 기본값이 py-2/md:py-3이라
+                데스크탑은 원래 py-3이었다. 공통 Input을 고치면 회원가입·비밀번호찾기까지 같이 커진다. */}
             <InputField
               type="email"
               placeholder="이메일 (example@cuddle.com)"
               backgroundColor="bg-primary-50"
               size="text-xs"
+              inputClass="py-3"
               error={errors.email}
               registration={register('email', authValidationRules.email)}
             />
@@ -91,6 +94,7 @@ export function LoginForm() {
               placeholder="비밀번호 (10~30자의 영문 대소문자, 숫자, 특수문자 포함)"
               backgroundColor="bg-primary-50"
               size="text-xs"
+              inputClass="py-3"
               error={errors.password}
               registration={register('password', authValidationRules.password)}
             />
@@ -100,7 +104,8 @@ export function LoginForm() {
             비밀번호를 잊으셨나요?
           </Link>
         </div>
-        <Button size="sm" className="bg-primary-600 w-full cursor-pointer text-white" type="submit">
+        {/* py-3 md:py-2 — 모바일 폭에서만 높이를 키운다. size="sm" 자체를 고치면 홈 필터·채팅 등 28개 파일이 같이 커진다. */}
+        <Button size="sm" className="bg-primary-600 w-full cursor-pointer py-3 text-white md:py-2" type="submit">
           로그인
         </Button>
       </fieldset>

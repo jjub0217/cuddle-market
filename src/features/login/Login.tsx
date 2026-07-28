@@ -13,7 +13,8 @@ function Login() {
       {/* 모바일: Header는 Header.tsx에서 렌더 스킵됨(DOM 제거) → 일반 흐름. 데스크탑: 기존 디자인 100% 보존 */}
       <div className="flex min-h-screen flex-col items-center justify-start bg-[url('/images/login-bg.png')] bg-cover bg-center py-20 md:bg-[#F3F4F6] md:bg-none">
         <div className="flex min-w-full flex-col items-center gap-2 md:min-w-132.5">
-          <Logo />
+          {/* 모바일 폭에서만 로고를 키운다(h-9 → h-11). 데스크탑(md 이상)은 기존 h-10 그대로. */}
+          <Logo logoClassname="h-11 md:h-10" />
           <div className="flex w-full flex-col items-center gap-9 md:w-auto">
             {/* 데스크탑: 기존 타이틀 + 설명 그대로 */}
             <div className="hidden md:block">
