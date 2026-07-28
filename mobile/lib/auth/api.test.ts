@@ -70,6 +70,20 @@ describe('apiFetch', () => {
     expect(SecureStore.setItemAsync).toHaveBeenCalledWith('cuddle.accessToken', 'new-token');
   });
 
+  it('갱신 요청에도 액세스 토큰을 함께 실어 보낸다', async () => {
+    // 이 서버는 /auth/refresh를 인증 필터 뒤에 뒀다(실기기 진단으로 확인).
+    // 리프레시 토큰을 본문에만 담으면 401 UNAUTHORIZED로 문 앞에서 막힌다.
+    mockFetch
+      .mockResolvedValueOnce(reply(401))
+      .mockResolvedValueOnce(reply(200, { data: { accessToken: 'new-token' } }))
+      .mockResolvedValueOnce(reply(200));
+
+    await apiFetch('/profile/me');
+
+    expect(mockFetch.mock.calls[1][0]).toBe('https://test.local/api/auth/refresh');
+    expect(authHeaderOf(mockFetch.mock.calls[1])).toBe('Bearer old-token');
+  });
+
   it('재시도가 또 401이어도 무한 반복하지 않는다', async () => {
     mockFetch.mockImplementation(async (url: string) =>
       String(url).endsWith('/auth/refresh')

@@ -21,12 +21,22 @@ export function apiBaseUrl(): string {
 let refreshPromise: Promise<string | null> | null = null;
 
 async function requestNewAccessToken(): Promise<string | null> {
-  const refreshToken = useAuthStore.getState().refreshToken;
+  const { accessToken: currentAccessToken, refreshToken } = useAuthStore.getState();
   if (!refreshToken) return null;
+
+  // 왜 갱신 요청에까지 액세스 토큰을 붙이나:
+  // 이 서버는 /auth/refresh를 인증 필터 뒤에 뒀다. 리프레시 토큰을 본문에만 담아 보내면
+  // 본문을 읽어보지도 않고 401 UNAUTHORIZED로 막는다. 헤더에 액세스 토큰이 있어야 통과한다.
+  // (실기기에서 세 조합을 쏴서 확인했다 — 본문만 401, 액세스헤더 200, 리프레시헤더 401)
+  //
+  // 한계: 액세스 토큰이 완전히 만료되면 이 헤더도 거부될 수 있다. 그때는 갱신이 불가능하고
+  // 아래 흐름대로 조용히 게스트가 된다. 문 뒤에 둔 갱신 주소는 원래 이 한계를 갖는다.
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (currentAccessToken) headers.Authorization = `Bearer ${currentAccessToken}`;
 
   const res = await fetch(`${apiBaseUrl()}/auth/refresh`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ refreshToken }),
   });
   if (!res.ok) return null;
