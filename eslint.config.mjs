@@ -23,6 +23,14 @@ globalIgnores([
   '*.config.ts', // TypeScript 설정 파일들
   '*.config.mjs', // ESM 설정 파일들
   'public', // 정적 자원 폴더
+  // Claude Code가 만드는 에이전트 작업 사본. 저장소 전체가 통째로 복사되기 때문에
+  // 빼두지 않으면 같은 소스를 수십 번 중복으로 훑어 경고가 수만 건으로 불어난다.
+  // (.gitignore에는 이미 들어 있는데 eslint ignore에서 빠져 있었다)
+  '.claude/**',
+  // RN 앱. 자기 설정(mobile/eslint.config.js)과 자기 게이트(npx expo lint)를 따로 갖는다.
+  // 웹 규칙으로 다시 훑으면 가짜 경고만 나온다 — expo-image의 <Image>에 alt를 요구하거나,
+  // Node 설정 파일(metro.config.js 등)의 require를 금지하거나, 자동 생성 파일까지 검사한다.
+  'mobile/**',
 ]), // 3. 메인 설정 블록
 {
   // 적용할 파일 확장자 지정
