@@ -35,7 +35,10 @@ export function useFavorite({ productId, initialIsFavorite }: UseFavoriteOptions
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['product', productId] })
       queryClient.invalidateQueries({ queryKey: ['products'] })
-      queryClient.invalidateQueries({ queryKey: ['myFavorite'] })
+      // 찜 목록은 일부러 무효화하지 않는다.
+      // 하트를 끄자마자 항목이 사라지면 실수로 눌렀을 때 되돌릴 방법이 없다.
+      // 자리에 남겨두면 한 번 더 눌러 복구할 수 있고, 화면을 나갔다 오면 정리된다.
+      // 앱도 같은 규칙이다(설계 §5).
     },
     onError: () => {
       setIsFavorite(initialIsFavorite)

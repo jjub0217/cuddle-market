@@ -459,7 +459,7 @@ function MyPage() {
                     className="text-on-surface flex cursor-pointer items-center gap-3 py-2"
                   >
                     <Handbag size={20} strokeWidth={1.5} />
-                    <span className="flex-1 text-left text-base">구매내역</span>
+                    <span className="flex-1 text-left text-base">구매 내역</span>
                     <ChevronRight size={25} strokeWidth={1.5} className="text-on-surface-muted" />
                   </button>
                   <button
