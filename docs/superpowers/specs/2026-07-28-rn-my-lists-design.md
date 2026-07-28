@@ -48,7 +48,11 @@
 
 마이 탭 스택(`(my)/_layout.tsx`) 안에 쌓이므로 **탭바가 유지된다**. 이 스택은 #784에서 이 용도를 예고하며 만들어 뒀다("다음 바퀴의 찜한 상품 · 내 상품 목록이 여기 쌓인다").
 
-**라우트**: `(my)/products` · `(my)/purchases` · `(my)/favorites`
+**라우트**: `(my)/my-products` · `(my)/my-purchases` · `(my)/my-favorites`
+
+`my-` 접두사를 붙이는 이유: 그룹 `(my)`는 주소에 나타나지 않는다. 그래서 파일을 `(my)/products.tsx`로 두면 **URL이 그냥 `/products`** 가 되는데, `(home)/products/[id].tsx`가 이미 `/products/[id]`를 쓰고 있다. 충돌은 아니지만 `/products`가 "내 판매 내역"을 뜻하게 되어 읽는 사람을 헷갈리게 한다.
+
+#784에서 `(home)`과 `(my)`의 `index`가 둘 다 `/`가 되는 바람에 화면 이동이 조용히 무시된 적이 있다. 같은 종류의 함정을 미리 피한다.
 
 **메뉴 이름**: 카드 제목 「내 상품 관리」, 행은 `판매 내역` · `구매 내역` · `찜한 상품`.
 웹은 `구매내역`으로 붙여 썼는데 나머지 둘은 띄어썼다. 앱은 띄어쓰고, **웹의 표기도 함께 고친다**.
@@ -68,9 +72,9 @@
 세 화면은 **제목 · 조회 함수 · 쿼리 키 · 빈 상태 문구**만 다르다. 공통 껍데기를 하나 만들고 각 화면은 설정만 바꿔 부른다.
 
 ```
-components/my/my-product-list.tsx     ← 껍데기 (헤더 · FlatList · 무한스크롤 · 3상태)
-   ↑              ↑              ↑
-favorites.tsx  products.tsx  purchases.tsx   ← 각 20~30줄
+components/my/my-product-list.tsx        ← 껍데기 (헤더 · FlatList · 무한스크롤 · 3상태)
+      ↑                ↑                ↑
+my-favorites.tsx  my-products.tsx  my-purchases.tsx   ← 각 20~30줄
 ```
 
 하나를 제대로 만들면 나머지 둘은 거의 공짜다. 5바퀴에서 상태 필터를 넣을 때도 껍데기 한 곳만 고치면 된다.
@@ -79,12 +83,14 @@ favorites.tsx  products.tsx  purchases.tsx   ← 각 20~30줄
 
 ```ts
 interface Props {
-  title: string;                                  // 헤더에 그릴 제목
-  queryKey: readonly unknown[];                   // ['my','favorites'] 등
-  fetchPage: (page: number) => Promise<ProductsPage>;
-  emptyMessage: string;
-  /** 찜한 상품 화면에서만 켠다. 켜면 껍데기가 각 카드에 onToggleFavorite을 넘겨 하트를 붙인다. */
-  showFavoriteToggle?: boolean;
+  title: string;                                   // 헤더에 그릴 제목
+  queryKey: readonly unknown[];                    // ['my','favorites'] 등
+  fetchPage: (page: number) => Promise<MyListPage>;
+  emptyTitle: string;
+  emptyDescription: string;
+  errorTitle: string;
+  /** 찜한 상품 화면만 켠다. 켜면 각 카드 썸네일에 찜 버튼이 붙는다. */
+  showFavorite?: boolean;
 }
 ```
 
@@ -199,9 +205,9 @@ fetchMyPurchases(page)  →  GET /profile/me/purchase-requests?page={page}&size=
 | `mobile/lib/my-lists.ts` | 조회 함수 3개 |
 | `mobile/lib/my-lists.test.ts` | 위 테스트 |
 | `mobile/components/my/my-product-list.tsx` | 목록 화면 공통 껍데기 |
-| `mobile/app/(tabs)/(my)/favorites.tsx` | 찜한 상품 |
-| `mobile/app/(tabs)/(my)/products.tsx` | 판매 내역 |
-| `mobile/app/(tabs)/(my)/purchases.tsx` | 구매 내역 |
+| `mobile/app/(tabs)/(my)/my-favorites.tsx` | 찜한 상품 |
+| `mobile/app/(tabs)/(my)/my-products.tsx` | 판매 내역 |
+| `mobile/app/(tabs)/(my)/my-purchases.tsx` | 구매 내역 |
 
 ### 고치는 것
 
