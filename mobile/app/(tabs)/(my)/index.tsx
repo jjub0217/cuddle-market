@@ -1,10 +1,8 @@
-import { useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Linking,
   Pressable,
   ScrollView,
@@ -14,10 +12,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { LogoutModal } from '@/components/my/logout-modal';
 import { SectionCard, SectionRow } from '@/components/my/section-card';
 import { WithdrawModal } from '@/components/my/withdraw-modal';
 import { useMe } from '@/hooks/use-me';
-import { logout } from '@/lib/auth/session';
 import { useAuthStore } from '@/lib/auth/store';
 
 // 마이페이지. 웹 모바일 마이페이지와 같은 카드 결.
@@ -29,31 +27,19 @@ const SUPPORT_MAIL = 'mailto:support@cuddlemarket.com?subject=커들마켓 1:1 �
 
 export default function MyScreen() {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const status = useAuthStore((state) => state.status);
   const { data: me, isLoading } = useMe();
+  const [isLogoutOpen, setIsLogoutOpen] = useState(false);
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
 
-  const handleLogout = () => {
-    Alert.alert('로그아웃', '정말로 로그아웃 하시겠습니까?', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '로그아웃',
-        style: 'destructive',
-        onPress: async () => {
-          await logout(queryClient);
-          // 게스트가 마이 탭에 남아 있을 이유가 없다. 홈으로 보낸다.
-          //
-          // replace가 아니라 navigate인 이유:
-          // 탭을 바꾸는 건 NAVIGATE 액션이어야 한다. REPLACE는 지금 스택 안에서만
-          // 통하는데(StackRouter가 자기 routeNames에 없는 이름이면 처리를 포기한다),
-          // 홈은 다른 탭이라 액션이 아무 데서도 처리되지 않고 조용히 버려진다.
-          // 그러면 로그아웃해 놓고 마이 화면에 그대로 남는다(실기기에서 확인).
-          router.navigate('/');
-        },
-      },
-    ]);
-  };
+  // 게스트가 마이 탭에 남아 있을 이유가 없다. 홈으로 보낸다.
+  //
+  // replace가 아니라 navigate인 이유:
+  // 탭을 바꾸는 건 NAVIGATE 액션이어야 한다. REPLACE는 지금 스택 안에서만 통하는데
+  // (StackRouter가 자기 routeNames에 없는 이름이면 처리를 포기한다), 홈은 다른 탭이라
+  // 액션이 아무 데서도 처리되지 않고 조용히 버려진다.
+  // 그러면 로그아웃해 놓고 마이 화면에 그대로 남는다(실기기에서 확인).
+  const goHome = () => router.navigate('/');
 
   const renderBody = () => {
     // 게스트인데 이 화면이 열려 있는 건 정상 흐름이 아니다(탭 누름을 가로채므로).
@@ -110,7 +96,7 @@ export default function MyScreen() {
         </SectionCard>
 
         <SectionCard title="계정">
-          <SectionRow label="로그아웃" onPress={handleLogout} />
+          <SectionRow label="로그아웃" onPress={() => setIsLogoutOpen(true)} />
           <SectionRow label="탈퇴하기" tone="danger" onPress={() => setIsWithdrawOpen(true)} />
         </SectionCard>
       </ScrollView>
@@ -123,13 +109,20 @@ export default function MyScreen() {
         <Text style={styles.headerTitle}>마이</Text>
       </View>
       {renderBody()}
+      <LogoutModal
+        visible={isLogoutOpen}
+        onClose={() => setIsLogoutOpen(false)}
+        onDone={() => {
+          setIsLogoutOpen(false);
+          goHome();
+        }}
+      />
       <WithdrawModal
         visible={isWithdrawOpen}
         onClose={() => setIsWithdrawOpen(false)}
         onDone={() => {
           setIsWithdrawOpen(false);
-          // 로그아웃과 같은 이유로 navigate. (replace는 탭을 못 바꾼다)
-          router.navigate('/');
+          goHome();
         }}
       />
     </SafeAreaView>
