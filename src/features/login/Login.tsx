@@ -22,12 +22,6 @@ function Login() {
                 desc="로그인하고 반려동물 이웃과의 특별한 일상을 시작해보세요"
               />
             </div>
-            {/* 모바일: 두 줄 헤드라인만 (설명 문구 숨김) */}
-            <h1 className="heading-h3 text-center md:hidden">
-              우리 아이를 위한
-              <br />
-              믿음직한 선택
-            </h1>
             <div className="md:bg-surface md:border-outline-variant/10 flex h-full min-w-full flex-col items-center gap-9 px-10 py-7 md:h-auto md:min-w-100 md:rounded-3xl md:border md:shadow-2xl">
               <LoginForm />
               <div className="flex w-full flex-col gap-3">
