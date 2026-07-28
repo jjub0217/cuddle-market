@@ -34,12 +34,12 @@ export default function MyScreen() {
 
   // 게스트가 마이 탭에 남아 있을 이유가 없다. 홈으로 보낸다.
   //
-  // replace가 아니라 navigate인 이유:
-  // 탭을 바꾸는 건 NAVIGATE 액션이어야 한다. REPLACE는 지금 스택 안에서만 통하는데
-  // (StackRouter가 자기 routeNames에 없는 이름이면 처리를 포기한다), 홈은 다른 탭이라
-  // 액션이 아무 데서도 처리되지 않고 조용히 버려진다.
-  // 그러면 로그아웃해 놓고 마이 화면에 그대로 남는다(실기기에서 확인).
-  const goHome = () => router.navigate('/');
+  // 왜 '/'가 아니라 '/(tabs)/(home)'인가:
+  // (home)과 (my)는 둘 다 그룹이라 주소에 안 나타나고, 둘 다 index를 갖고 있어서
+  // 두 화면의 주소가 똑같이 '/'다(.expo/types/router.d.ts에서 확인). 그래서 마이에서
+  // '/'로 가라고 하면 지금 있는 자리를 가리키게 되어 아무 일도 일어나지 않는다.
+  // 홈을 콕 집으려면 그룹 이름까지 적어야 한다. 실기기에서 두 번 헛돈 자리다.
+  const goHome = () => router.navigate('/(tabs)/(home)');
 
   const renderBody = () => {
     // 게스트인데 이 화면이 열려 있는 건 정상 흐름이 아니다(탭 누름을 가로채므로).

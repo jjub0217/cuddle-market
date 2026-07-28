@@ -27,7 +27,9 @@ export default function LoginScreen() {
     if (router.canGoBack()) {
       router.back();
     } else {
-      router.replace('/');
+      // '/'는 홈과 마이 양쪽을 가리켜 어디로 갈지 정해지지 않는다(둘 다 그룹 안 index다).
+      // 홈을 콕 집는다.
+      router.replace('/(tabs)/(home)');
     }
   };
 
