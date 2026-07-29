@@ -5,9 +5,10 @@ import {
   getTimeAgo,
   type Product,
 } from '@cuddle/shared';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { ProductThumbnail, type FavoriteControl } from '@/components/product-thumbnail';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 
 // 가로형 상품 카드(UI 스펙 §4). 좌 썸네일 + 우 정보영역.
 // 펫종류 없음, 찜="찜 N" 텍스트는 개수(정보). 켜고 끄는 것은 썸네일 위 찜 버튼이 맡는다(설계 §5).
@@ -20,9 +21,11 @@ interface Props {
   product: Product;
   /** 넘기면 썸네일에 찜 버튼이 붙는다. 카드는 그대로 전달만 한다. */
   favorite?: FavoriteControl;
+  /** 넘기면 오른쪽 위에 ⋮ 가 붙는다. 관리하는 목록(판매 · 구매)만 넘긴다. */
+  onMorePress?: () => void;
 }
 
-export function ProductCard({ product, favorite }: Props) {
+export function ProductCard({ product, favorite, onMorePress }: Props) {
   const location = product.addressGugun || product.addressSido || '';
   const isRequest = product.productType === 'REQUEST';
 
@@ -36,6 +39,18 @@ export function ProductCard({ product, favorite }: Props) {
       />
 
       <View style={styles.info}>
+        {onMorePress ? (
+          <Pressable
+            onPress={onMorePress}
+            hitSlop={10}
+            accessibilityRole="button"
+            accessibilityLabel="상품 관리 메뉴 열기"
+            style={({ pressed }) => [styles.more, pressed && styles.morePressed]}
+          >
+            <IconSymbol name="ellipsis" size={20} color="#9CA3AF" />
+          </Pressable>
+        ) : null}
+
         {/* 뱃지 행: 판매유형 + 상품상태 */}
         <View style={styles.badgeRow}>
           <View style={[styles.badge, isRequest ? styles.badgeRequest : styles.badgeSell]}>
@@ -131,12 +146,28 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#6B7280',
   },
+  more: {
+    // 정보 영역 오른쪽 위. 제목이 길어져도 자리를 뺏기지 않게 절대 배치로 띄운다.
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1,
+  },
+  morePressed: {
+    opacity: 0.5,
+  },
   title: {
     fontSize: 16,
     fontWeight: '400',
     color: '#111827',
     // 줄 높이를 명시해야(기기·플랫폼 기본값이 제각각) 2줄 자리를 정확히 계산할 수 있다.
     lineHeight: TITLE_LINE_HEIGHT,
+    // ⋮ 가 붙는 화면에서 제목이 그 아래로 파고들지 않게. 없는 화면에서도 빈 여백일 뿐이다.
+    paddingRight: 28,
     // 1줄짜리 제목도 2줄 자리를 차지해 카드 높이를 일정하게 만든다.
     minHeight: TITLE_LINE_HEIGHT * 2,
   },

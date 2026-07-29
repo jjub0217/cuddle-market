@@ -14,6 +14,7 @@ export default function MyPurchasesScreen() {
       emptyIcon="shippingbox"
       emptyTitle="등록한 구매 요청이 없습니다"
       emptyDescription="구매 요청을 등록해보세요"
+      listKind="purchases"
       errorTitle="구매 내역을 불러오지 못했어요."
       registerLabel="판매요청 등록"
     />
