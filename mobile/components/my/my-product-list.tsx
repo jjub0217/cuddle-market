@@ -6,11 +6,11 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
-  EmptyState,
   ErrorState,
   ListFooter,
   LoadingState,
 } from '@/components/list-states';
+import { MyListEmpty } from '@/components/my/my-list-empty';
 import { ProductCard } from '@/components/product-card';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useFavorite } from '@/hooks/use-favorite';
@@ -24,12 +24,23 @@ import type { MyListPage } from '@/lib/my-lists';
 const HEADER_HEIGHT = 52; // 홈 · 상세 · 마이와 같은 값
 
 interface Props {
+  /** 헤더에 그릴 제목. 마이페이지 메뉴 이름과 같다(예: 판매 내역). */
   title: string;
+  /** 목록 위 제목 영역. 웹 패널과 같은 문구(예: 내가 등록한 상품). */
+  heading: string;
   queryKey: readonly unknown[];
   fetchPage: (page: number) => Promise<MyListPage>;
+  emptyIcon: 'shippingbox' | 'heart';
   emptyTitle: string;
   emptyDescription: string;
   errorTitle: string;
+  /**
+   * 등록 버튼 문구. 없으면 버튼을 그리지 않는다(찜한 상품).
+   *
+   * 지금은 눌리지 않는다 — 앱에 상품 등록 화면이 아직 없다(6바퀴).
+   * 웹과 같은 자리에 같은 문구로 두되, 갈 곳이 생기면 그때 연결한다.
+   */
+  registerLabel?: string;
   /** 찜한 상품 화면만 켠다. 판매 · 구매는 관리용이라 끈다(설계 §5). */
   showFavorite?: boolean;
 }
@@ -40,7 +51,7 @@ function RowShell({ productId, children }: { productId: number; children: ReactN
 
   return (
     <Pressable
-      onPress={() => router.push(`/products/${productId}`)}
+      onPress={() => router.push(`/(tabs)/(my)/products/${productId}`)}
       style={({ pressed }) => (pressed ? styles.cardPressed : undefined)}
     >
       {children}
@@ -84,11 +95,14 @@ function FavoriteRow({ product }: { product: Product }) {
 
 export function MyProductList({
   title,
+  heading,
   queryKey,
   fetchPage,
+  emptyIcon,
   emptyTitle,
   emptyDescription,
   errorTitle,
+  registerLabel,
   showFavorite = false,
 }: Props) {
   const insets = useSafeAreaInsets();
@@ -111,13 +125,15 @@ export function MyProductList({
   });
 
   const products: Product[] = data?.pages.flatMap((page) => page.content) ?? [];
+  // 서버가 첫 페이지에 전체 개수를 함께 준다. 아직 못 받았으면 개수 줄을 숨긴다.
+  const total = data?.pages[0]?.total;
 
   // ----- 3상태 렌더 (로딩/오류/빈은 서로 섞지 않음) -----
   const renderBody = () => {
     if (isLoading) return <LoadingState />;
     if (isError) return <ErrorState onRetry={() => refetch()} title={errorTitle} />;
     if (products.length === 0) {
-      return <EmptyState title={emptyTitle} description={emptyDescription} />;
+      return <MyListEmpty icon={emptyIcon} title={emptyTitle} description={emptyDescription} />;
     }
 
     return (
@@ -154,6 +170,24 @@ export function MyProductList({
         </Pressable>
         <Text style={styles.headerTitle}>{title}</Text>
       </View>
+
+      {/* 제목 영역. 웹 패널의 MyPageTitle과 같은 자리 — 제목 · 개수 · 등록 버튼. */}
+      <View style={styles.titleRow}>
+        <View>
+          <Text style={styles.heading}>{heading}</Text>
+          {total !== undefined ? <Text style={styles.count}>{`상품 ${total}`}</Text> : null}
+        </View>
+        {registerLabel ? (
+          // 앱에 등록 화면이 아직 없어 눌리지 않는다(6바퀴에 연결).
+          // 숨기지 않고 흐리게 두는 이유: 웹과 자리·문구를 맞춰 두면 화면이 갑자기
+          // 바뀌지 않고, "여기서 등록한다"는 것도 미리 읽힌다.
+          <View style={styles.registerButton} accessibilityRole="button" accessibilityState={{ disabled: true }}>
+            <IconSymbol name="plus" size={16} color="#FFFFFF" />
+            <Text style={styles.registerLabel}>{registerLabel}</Text>
+          </View>
+        ) : null}
+      </View>
+
       {renderBody()}
     </SafeAreaView>
   );
@@ -181,6 +215,41 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: '#111827',
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 4,
+  },
+  heading: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  count: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginTop: 2,
+  },
+  registerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    // 웹 variant="primary"와 같은 브랜드 브라운. 앱 브레드크럼이 이미 쓰는 값이다.
+    backgroundColor: '#633F00',
+    // 아직 연결할 화면이 없어 흐리게 둔다(웹 disabled와 같은 0.5).
+    opacity: 0.5,
+  },
+  registerLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
   listContent: {
     paddingHorizontal: 16,

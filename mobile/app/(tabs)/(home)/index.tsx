@@ -85,7 +85,7 @@ function HomeRow({ product }: { product: Product }) {
 
   return (
     <Pressable
-      onPress={() => router.push(`/products/${product.id}`)}
+      onPress={() => router.push(`/(tabs)/(home)/products/${product.id}`)}
       // 누르는 동안 살짝 흐려져서 눌린 걸 알 수 있게 한다
       style={({ pressed }) => (pressed ? styles.cardPressed : undefined)}
     >
