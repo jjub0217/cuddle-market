@@ -41,7 +41,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 40,
     borderRadius: 8,
-    borderWidth: 2,
+    // 웹은 2px이지만 앱에서는 1로 둔다. 화면이 좁아 2는 도드라져 보인다.
+    borderWidth: 1,
     borderStyle: 'dashed',
     borderColor: '#D1D5DB',
     backgroundColor: '#FFFFFF',
