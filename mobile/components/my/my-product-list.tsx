@@ -1,7 +1,7 @@
 import type { Product } from '@cuddle/shared';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -10,11 +10,21 @@ import {
   ListFooter,
   LoadingState,
 } from '@/components/list-states';
+import { DeleteConfirmModal } from '@/components/my/delete-confirm-modal';
 import { MyListEmpty } from '@/components/my/my-list-empty';
+import { ProductActionSheet, type SheetAction } from '@/components/my/product-action-sheet';
+import {
+  StatusFilterChips,
+  type FilterChip,
+  type StatusFilter,
+} from '@/components/my/status-filter-chips';
 import { ProductCard } from '@/components/product-card';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useFavorite } from '@/hooks/use-favorite';
+import { useProductActions } from '@/hooks/use-product-actions';
 import type { MyListPage } from '@/lib/my-lists';
+import type { TradeStatus } from '@/lib/product-actions';
+import { buildStatusActions, type MenuKind } from '@/lib/product-menu';
 
 // 마이 목록 화면 셋(찜한 상품 · 판매 내역 · 구매 내역)의 공통 껍데기.
 //
@@ -29,7 +39,7 @@ interface Props {
   /** 목록 위 제목 영역. 웹 패널과 같은 문구(예: 내가 등록한 상품). */
   heading: string;
   queryKey: readonly unknown[];
-  fetchPage: (page: number) => Promise<MyListPage>;
+  fetchPage: (page: number, tradeStatus?: TradeStatus) => Promise<MyListPage>;
   emptyIcon: 'shippingbox' | 'heart';
   emptyTitle: string;
   emptyDescription: string;
@@ -43,6 +53,10 @@ interface Props {
   registerLabel?: string;
   /** 찜한 상품 화면만 켠다. 판매 · 구매는 관리용이라 끈다(설계 §5). */
   showFavorite?: boolean;
+  /** 있으면 카드에 ⋮ 가 붙고 관리 시트를 연다. 찜한 상품은 넘기지 않는다. */
+  listKind?: MenuKind;
+  /** 있으면 목록 위에 상태 필터 칩을 그린다. 찜한 상품은 넘기지 않는다. */
+  filterChips?: FilterChip[];
 }
 
 /** 카드를 감싸 "누르면 상세로"를 붙인다. 찜 버튼 유무와 상관없는 공통 부분. */
@@ -59,11 +73,11 @@ function RowShell({ productId, children }: { productId: number; children: ReactN
   );
 }
 
-/** 찜 버튼이 없는 줄(판매 · 구매). */
-function PlainRow({ product }: { product: Product }) {
+/** 찜 버튼이 없는 줄(판매 · 구매). 관리 목록이면 ⋮ 가 붙는다. */
+function PlainRow({ product, onMorePress }: { product: Product; onMorePress?: () => void }) {
   return (
     <RowShell productId={product.id}>
-      <ProductCard product={product} />
+      <ProductCard product={product} onMorePress={onMorePress} />
     </RowShell>
   );
 }
@@ -104,9 +118,18 @@ export function MyProductList({
   errorTitle,
   registerLabel,
   showFavorite = false,
+  listKind,
+  filterChips,
 }: Props) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+
+  // 시트를 연 상품. null이면 시트가 닫혀 있다.
+  const [sheetProduct, setSheetProduct] = useState<Product | null>(null);
+  // 삭제 확인 창을 연 상품.
+  const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
+  const [filter, setFilter] = useState<StatusFilter>('ALL');
+  const { changeStatus, remove, isPending } = useProductActions(queryKey);
 
   const {
     data,
@@ -117,8 +140,10 @@ export function MyProductList({
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey,
-    queryFn: ({ pageParam }) => fetchPage(pageParam),
+    // 필터가 키에 들어가므로 바꾸면 새 무한스크롤이 시작된다.
+    // 이전 필터 결과는 캐시에 남아 되돌아오면 즉시 보인다.
+    queryKey: [...queryKey, filter],
+    queryFn: ({ pageParam }) => fetchPage(pageParam, filter === 'ALL' ? undefined : filter),
     initialPageParam: 0,
     // 다음 페이지 번호 = 지금까지 받은 페이지 수(0-base). hasNext=false면 종료. 홈과 같은 규칙.
     getNextPageParam: (last, all) => (last.hasNext ? all.length : undefined),
@@ -127,6 +152,36 @@ export function MyProductList({
   const products: Product[] = data?.pages.flatMap((page) => page.content) ?? [];
   // 서버가 첫 페이지에 전체 개수를 함께 준다. 아직 못 받았으면 개수 줄을 숨긴다.
   const total = data?.pages[0]?.total;
+
+  /** 시트에 그릴 항목. 상태 변경은 규칙 함수가 정하고, 삭제는 항상 맨 아래에 둔다. */
+  const buildSheetActions = (): SheetAction[] => {
+    if (!sheetProduct || !listKind) return [];
+
+    const statusActions: SheetAction[] = buildStatusActions(
+      listKind,
+      sheetProduct.tradeStatus
+    ).map((action) => ({
+      label: action.label,
+      onPress: () => {
+        changeStatus(sheetProduct.id, action.next);
+        setSheetProduct(null);
+      },
+    }));
+
+    return [
+      ...statusActions,
+      {
+        label: '삭제',
+        tone: 'danger',
+        onPress: () => {
+          // 시트를 먼저 닫고 확인 창을 연다. 두 개가 겹쳐 뜨지 않게.
+          const target = sheetProduct;
+          setSheetProduct(null);
+          setDeleteTarget(target);
+        },
+      },
+    ];
+  };
 
   // ----- 3상태 렌더 (로딩/오류/빈은 서로 섞지 않음) -----
   const renderBody = () => {
@@ -141,7 +196,21 @@ export function MyProductList({
         data={products}
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) =>
-          showFavorite ? <FavoriteRow product={item} /> : <PlainRow product={item} />
+          showFavorite ? (
+            <FavoriteRow product={item} />
+          ) : (
+            <PlainRow
+              product={item}
+              // 요청이 도는 동안 다시 누르면 상태 변경이 겹친다. 버튼은 그대로 두되 무시한다.
+              onMorePress={
+                listKind
+                  ? () => {
+                      if (!isPending) setSheetProduct(item);
+                    }
+                  : undefined
+              }
+            />
+          )
         }
         contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 12 }]}
         showsVerticalScrollIndicator={false}
@@ -171,11 +240,20 @@ export function MyProductList({
         <Text style={styles.headerTitle}>{title}</Text>
       </View>
 
+      {filterChips ? (
+        <StatusFilterChips chips={filterChips} activeId={filter} onChange={setFilter} />
+      ) : null}
+
       {/* 제목 영역. 웹 패널의 MyPageTitle과 같은 자리 — 제목 · 개수 · 등록 버튼. */}
       <View style={styles.titleRow}>
         <View>
           <Text style={styles.heading}>{heading}</Text>
-          {total !== undefined ? <Text style={styles.count}>{`상품 ${total}`}</Text> : null}
+          {total !== undefined ? (
+            <Text style={styles.count}>
+              {/* 웹과 같이 "전체 2"처럼 필터 이름 + 개수. 필터가 없는 찜 목록은 "상품 2". */}
+              {`${filterChips?.find((chip) => chip.id === filter)?.label ?? '상품'} ${total}`}
+            </Text>
+          ) : null}
         </View>
         {registerLabel ? (
           // 앱에 등록 화면이 아직 없어 눌리지 않는다(6바퀴에 연결).
@@ -189,6 +267,22 @@ export function MyProductList({
       </View>
 
       {renderBody()}
+
+      <ProductActionSheet
+        visible={sheetProduct !== null}
+        onClose={() => setSheetProduct(null)}
+        actions={buildSheetActions()}
+      />
+
+      <DeleteConfirmModal
+        visible={deleteTarget !== null}
+        productTitle={deleteTarget?.title ?? ''}
+        submitting={isPending}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => {
+          if (deleteTarget) remove(deleteTarget.id, () => setDeleteTarget(null));
+        }}
+      />
     </SafeAreaView>
   );
 }

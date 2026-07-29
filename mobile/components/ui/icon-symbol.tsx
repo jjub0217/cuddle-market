@@ -22,6 +22,7 @@ const MAPPING = {
   'person.crop.circle': 'person',
   heart: 'favorite-border',
   'heart.fill': 'favorite',
+  ellipsis: 'more-vert',
   // 마이 목록의 빈 상태 아이콘. 웹은 lucide Package를 쓴다.
   shippingbox: 'inventory-2',
   plus: 'add',

@@ -152,9 +152,17 @@ function MyPage() {
     isLoading: isLoadingMyProductData,
     error: errorMyProductData,
   } = useInfiniteQuery({
-    queryKey: ['myProducts', user?.id],
+    queryKey: ['myProducts', user?.id, activeTradeStatus],
     queryFn: async ({ pageParam }) => {
-      const response = await api.get('/profile/me/products', { params: { page: pageParam, size: 10 } })
+      const response = await api.get('/profile/me/products', {
+        params: {
+          page: pageParam,
+          size: 10,
+          // 화면에서 거르면 이미 받아온 페이지에만 적용되어 뒤쪽 항목을 놓친다.
+          // 서버가 거르게 맡긴다. ALL이면 파라미터를 빼서 전부 받는다.
+          ...(activeTradeStatus === 'ALL' ? {} : { tradeStatus: activeTradeStatus }),
+        },
+      })
       return response.data.data
     },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
@@ -169,9 +177,15 @@ function MyPage() {
     isFetchingNextPage: isFetchingNextRequests,
     error: errorMyRequestData,
   } = useInfiniteQuery({
-    queryKey: ['myRequest', user?.id],
+    queryKey: ['myRequest', user?.id, activeTradeStatus],
     queryFn: async ({ pageParam }) => {
-      const response = await api.get('/profile/me/purchase-requests', { params: { page: pageParam, size: 10 } })
+      const response = await api.get('/profile/me/purchase-requests', {
+        params: {
+          page: pageParam,
+          size: 10,
+          ...(activeTradeStatus === 'ALL' ? {} : { tradeStatus: activeTradeStatus }),
+        },
+      })
       return response.data.data
     },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
@@ -268,15 +282,9 @@ function MyPage() {
         })),
       ]
 
-  const filteredMyProductsData =
-    activeMyPageTab === 'tab-sales' && activeTradeStatus !== 'ALL'
-      ? myProductsData?.pages.flatMap((page) => page.content).filter((product) => product.tradeStatus === activeTradeStatus)
-      : myProductsData?.pages.flatMap((page) => page.content)
-
-  const filteredMyRequestData =
-    activeTradeStatus === 'ALL'
-      ? myRequestData?.pages.flatMap((page) => page.content)
-      : myRequestData?.pages.flatMap((page) => page.content)?.filter((p) => p.tradeStatus === activeTradeStatus)
+  // 서버가 걸러 주므로 여기서는 페이지를 이어붙이기만 한다.
+  const filteredMyProductsData = myProductsData?.pages.flatMap((page) => page.content)
+  const filteredMyRequestData = myRequestData?.pages.flatMap((page) => page.content)
 
   const { mutate: deleteProductMutate } = useMutation({
     mutationFn: (id: number) => api.delete(`/products/${id}`),
@@ -616,11 +624,9 @@ function MyPage() {
                 activeMyPageTab={activeMyPageTab}
                 activeTradeStatus={activeTradeStatus}
                 myProductsData={filteredMyProductsData}
-                myProductsTotal={
-                  activeMyPageTab === 'tab-sales' ? filteredMyProductsData?.length : myProductsData?.pages[0]?.total
-                }
+                myProductsTotal={myProductsData?.pages[0]?.total}
                 myRequestData={filteredMyRequestData}
-                myRequestTotal={activeTradeStatus === 'ALL' ? myRequestData?.pages[0]?.total : filteredMyRequestData?.length}
+                myRequestTotal={myRequestData?.pages[0]?.total}
                 myFavoriteData={myFavoriteData?.pages.flatMap((page) => page.content)}
                 myFavoriteTotal={myFavoriteData?.pages[0]?.total}
                 myBlockedData={myBlockedData?.pages.flatMap((page) => page.content)}
@@ -715,9 +721,9 @@ function MyPage() {
               activeMyPageTab={mobilePanelTab}
               activeTradeStatus={activeTradeStatus}
               myProductsData={filteredMyProductsData}
-              myProductsTotal={mobilePanelTab === 'tab-sales' ? filteredMyProductsData?.length : myProductsData?.pages[0]?.total}
+              myProductsTotal={myProductsData?.pages[0]?.total}
               myRequestData={filteredMyRequestData}
-              myRequestTotal={activeTradeStatus === 'ALL' ? myRequestData?.pages[0]?.total : filteredMyRequestData?.length}
+              myRequestTotal={myRequestData?.pages[0]?.total}
               myFavoriteData={myFavoriteData?.pages.flatMap((page) => page.content)}
               myFavoriteTotal={myFavoriteData?.pages[0]?.total}
               myBlockedData={myBlockedData?.pages.flatMap((page) => page.content)}

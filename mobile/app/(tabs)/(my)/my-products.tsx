@@ -15,6 +15,13 @@ export default function MyProductsScreen() {
       emptyIcon="shippingbox"
       emptyTitle="등록한 상품이 없습니다"
       emptyDescription="상품을 등록해보세요"
+      filterChips={[
+        { id: 'ALL', label: '전체' },
+        { id: 'SELLING', label: '판매중' },
+        { id: 'RESERVED', label: '예약중' },
+        { id: 'COMPLETED', label: '판매완료' },
+      ]}
+      listKind="sales"
       errorTitle="판매 내역을 불러오지 못했어요."
       registerLabel="상품 등록"
     />
