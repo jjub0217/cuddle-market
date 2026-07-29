@@ -7,10 +7,10 @@ import {
 } from '@cuddle/shared';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { ProductThumbnail } from '@/components/product-thumbnail';
+import { ProductThumbnail, type FavoriteControl } from '@/components/product-thumbnail';
 
 // 가로형 상품 카드(UI 스펙 §4). 좌 썸네일 + 우 정보영역.
-// 펫종류 없음, 찜="찜 N" 텍스트(표시전용, 토글 X).
+// 펫종류 없음, 찜="찜 N" 텍스트는 개수(정보). 켜고 끄는 것은 썸네일 위 찜 버튼이 맡는다(설계 §5).
 // 코드→한글 변환과 상대시간은 @cuddle/shared에서 가져온다(웹과 같은 원본).
 
 // 제목 한 줄의 높이(fontSize 15 기준). 카드 높이를 균일하게 맞추는 기준값이라 상수로 둔다.
@@ -18,9 +18,11 @@ const TITLE_LINE_HEIGHT = 20;
 
 interface Props {
   product: Product;
+  /** 넘기면 썸네일에 찜 버튼이 붙는다. 카드는 그대로 전달만 한다. */
+  favorite?: FavoriteControl;
 }
 
-export function ProductCard({ product }: Props) {
+export function ProductCard({ product, favorite }: Props) {
   const location = product.addressGugun || product.addressSido || '';
   const isRequest = product.productType === 'REQUEST';
 
@@ -30,6 +32,7 @@ export function ProductCard({ product }: Props) {
         imageUrl={product.mainImageUrl}
         tradeStatus={product.tradeStatus}
         productType={product.productType}
+        favorite={favorite}
       />
 
       <View style={styles.info}>
