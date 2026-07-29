@@ -41,23 +41,38 @@ export function LoadingState() {
   );
 }
 
+interface EmptyStateProps {
+  /** 화면마다 다른 한 줄. 넘기지 않으면 홈 문구를 쓴다. */
+  title?: string;
+  description?: string;
+}
+
 /** 빈 상태: 성공했으나 목록 0개. 오류와 명확히 구분. */
-export function EmptyState() {
+export function EmptyState({
+  title = '아직 등록된 상품이 없어요.',
+  description = '첫 상품이 올라오면 여기에서 보여드릴게요.',
+}: EmptyStateProps) {
   return (
     <View style={styles.centered}>
       <Text style={styles.emptyIcon}>🐾</Text>
-      <Text style={styles.emptyTitle}>아직 등록된 상품이 없어요.</Text>
-      <Text style={styles.emptySub}>첫 상품이 올라오면 여기에서 보여드릴게요.</Text>
+      <Text style={styles.emptyTitle}>{title}</Text>
+      <Text style={styles.emptySub}>{description}</Text>
     </View>
   );
 }
 
+interface ErrorStateProps {
+  onRetry: () => void;
+  /** 화면마다 다른 한 줄. 넘기지 않으면 홈 문구를 쓴다. */
+  title?: string;
+}
+
 /** 오류 상태: 첫 로드 실패. 전체 화면 + 다시 시도 버튼. */
-export function ErrorState({ onRetry }: { onRetry: () => void }) {
+export function ErrorState({ onRetry, title = '상품을 불러오지 못했어요.' }: ErrorStateProps) {
   return (
     <View style={styles.centered}>
       <Text style={styles.emptyIcon}>⚠️</Text>
-      <Text style={styles.emptyTitle}>상품을 불러오지 못했어요.</Text>
+      <Text style={styles.emptyTitle}>{title}</Text>
       <Text style={styles.emptySub}>네트워크를 확인하고 다시 시도해 주세요.</Text>
       <Pressable
         onPress={onRetry}

@@ -15,8 +15,8 @@ interface Props {
 }
 
 export function FavoriteButton({ productId, isFavorite }: Props) {
-  const { toggle, isPending } = useFavorite(productId);
   const active = isFavorite === true;
+  const { toggle, isPending } = useFavorite(productId, active);
 
   return (
     <Pressable

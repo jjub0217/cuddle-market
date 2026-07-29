@@ -11,6 +11,7 @@ import {
   ListFooter,
   LoadingState,
 } from '@/components/list-states';
+import { useFavorite } from '@/hooks/use-favorite';
 import { fetchProducts } from '@/lib/products';
 
 // 홈: 로그인 없이 /products/search 실데이터를 무한스크롤로 렌더.
@@ -18,7 +19,6 @@ import { fetchProducts } from '@/lib/products';
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
 
   const {
     data,
@@ -50,15 +50,7 @@ export default function HomeScreen() {
       <FlatList
         data={products}
         keyExtractor={(item) => String(item.id)}
-        renderItem={({ item }) => (
-          <Pressable
-            onPress={() => router.push(`/products/${item.id}`)}
-            // 누르는 동안 살짝 흐려져서 눌린 걸 알 수 있게 한다
-            style={({ pressed }) => (pressed ? styles.cardPressed : undefined)}
-          >
-            <ProductCard product={item} />
-          </Pressable>
-        )}
+        renderItem={({ item }) => <HomeRow product={item} />}
         contentContainerStyle={[
           styles.listContent,
           { paddingBottom: insets.bottom + 12 },
@@ -80,6 +72,32 @@ export default function HomeScreen() {
       </View>
       {renderBody()}
     </SafeAreaView>
+  );
+}
+
+/**
+ * 목록의 한 줄. 카드마다 훅이 필요해 별도 컴포넌트로 뺀다
+ * (renderItem 안에서는 훅을 부를 수 없다).
+ */
+function HomeRow({ product }: { product: Product }) {
+  const router = useRouter();
+  const { toggle, isPending } = useFavorite(product.id, product.isFavorite === true);
+
+  return (
+    <Pressable
+      onPress={() => router.push(`/(tabs)/(home)/products/${product.id}`)}
+      // 누르는 동안 살짝 흐려져서 눌린 걸 알 수 있게 한다
+      style={({ pressed }) => (pressed ? styles.cardPressed : undefined)}
+    >
+      <ProductCard
+        product={product}
+        favorite={{
+          isFavorite: product.isFavorite === true,
+          onToggle: toggle,
+          disabled: isPending,
+        }}
+      />
+    </Pressable>
   );
 }
 

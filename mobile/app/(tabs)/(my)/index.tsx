@@ -91,6 +91,14 @@ export default function MyScreen() {
           </View>
         </View>
 
+        {/* 웹 모바일 마이페이지와 같은 묶음·이름. 웹은 「구매내역」으로 붙여 썼는데
+            나머지 둘은 띄어써서, 여기서는 띄어쓰고 웹 표기도 함께 고친다. */}
+        <SectionCard title="내 상품 관리">
+          <SectionRow label="판매 내역" onPress={() => router.push('/(tabs)/(my)/my-products')} />
+          <SectionRow label="구매 내역" onPress={() => router.push('/(tabs)/(my)/my-purchases')} />
+          <SectionRow label="찜한 상품" onPress={() => router.push('/(tabs)/(my)/my-favorites')} />
+        </SectionCard>
+
         <SectionCard title="고객지원">
           <SectionRow label="고객센터" onPress={() => Linking.openURL(SUPPORT_MAIL)} />
         </SectionCard>

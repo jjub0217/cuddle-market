@@ -108,7 +108,7 @@ function MyPage() {
         : mobilePanelTab === 'tab-wishlist'
           ? '찜한 상품'
           : mobilePanelTab === 'tab-blocked'
-            ? '차단 유저'
+            ? '차단한 사용자'
             : mobilePanelTab === 'activity'
               ? '내 글'
               : ''
@@ -459,7 +459,7 @@ function MyPage() {
                     className="text-on-surface flex cursor-pointer items-center gap-3 py-2"
                   >
                     <Handbag size={20} strokeWidth={1.5} />
-                    <span className="flex-1 text-left text-base">구매내역</span>
+                    <span className="flex-1 text-left text-base">구매 내역</span>
                     <ChevronRight size={25} strokeWidth={1.5} className="text-on-surface-muted" />
                   </button>
                   <button
@@ -475,7 +475,7 @@ function MyPage() {
               </div>
 
               <div className="border-outline-variant/40 flex flex-col gap-2 rounded-2xl border bg-white p-5">
-                <h2 className="text-sm font-bold text-[#1c1b1b]">나의 활동</h2>
+                <h2 className="text-sm font-bold text-[#1c1b1b]">내 활동</h2>
                 <div className="flex flex-col">
                   <button
                     type="button"
@@ -492,7 +492,7 @@ function MyPage() {
                     className="text-on-surface flex cursor-pointer items-center gap-3 py-2"
                   >
                     <UserX size={20} strokeWidth={1.5} />
-                    <span className="flex-1 text-left text-base">차단 유저</span>
+                    <span className="flex-1 text-left text-base">차단한 사용자</span>
                     <ChevronRight size={25} strokeWidth={1.5} className="text-on-surface-muted" />
                   </button>
                 </div>
