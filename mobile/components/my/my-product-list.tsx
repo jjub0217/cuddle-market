@@ -66,7 +66,7 @@ function PlainRow({ product }: { product: Product }) {
  * renderItem 안에서 훅을 부를 수 없다는 제약도 이렇게 함께 풀린다.
  */
 function FavoriteRow({ product }: { product: Product }) {
-  const { toggle, isPending } = useFavorite(product.id);
+  const { toggle, isPending } = useFavorite(product.id, product.isFavorite === true);
 
   return (
     <RowShell productId={product.id}>

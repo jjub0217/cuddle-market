@@ -15,7 +15,16 @@ import { toggleFavorite } from '@/lib/favorites';
 
 type ProductsPage = ProductResponse['data'];
 
-export function useFavorite(productId: number) {
+/**
+ * @param isFavorite 부르는 쪽이 지금 화면에 그리고 있는 찜 여부.
+ *
+ * 왜 캐시에서 안 읽고 받나:
+ * 예전에는 상세 캐시(['product', id])에서 현재 값을 읽었는데, 목록에서 누를 때는
+ * 그 상품 상세를 연 적이 없으면 캐시가 비어 있어 false로 읽혔다. 그러면 끄려는데
+ * 켜는 방향으로 뒤집혀 하트가 안 꺼진다(실기기에서 확인). 화면이 보여주는 값을
+ * 그대로 받는 편이 어긋날 여지가 없다.
+ */
+export function useFavorite(productId: number, isFavorite: boolean) {
   const queryClient = useQueryClient();
   const router = useRouter();
 
@@ -27,21 +36,29 @@ export function useFavorite(productId: number) {
       old ? { ...old, isFavorite: next, favoriteCount: old.favoriteCount + delta } : old
     );
 
-    queryClient.setQueryData<InfiniteData<ProductsPage>>(['products'], (old) =>
-      old
-        ? {
-            ...old,
-            pages: old.pages.map((page) => ({
-              ...page,
-              content: page.content.map((item: Product) =>
-                item.id === productId
-                  ? { ...item, isFavorite: next, favoriteCount: item.favoriteCount + delta }
-                  : item
-              ),
-            })),
-          }
-        : old
-    );
+    /** 무한스크롤 목록 캐시 하나를 뒤집는다. */
+    const patchList = (key: readonly unknown[]) => {
+      queryClient.setQueryData<InfiniteData<ProductsPage>>(key, (old) =>
+        old
+          ? {
+              ...old,
+              pages: old.pages.map((page) => ({
+                ...page,
+                content: page.content.map((item: Product) =>
+                  item.id === productId
+                    ? { ...item, isFavorite: next, favoriteCount: item.favoriteCount + delta }
+                    : item
+                ),
+              })),
+            }
+          : old
+      );
+    };
+
+    patchList(['products']);
+    // 찜 목록도 함께 뒤집는다. 이 캐시는 일부러 무효화하지 않으므로(항목이 사라지지 않게),
+    // 여기서 고쳐주지 않으면 하트를 눌러도 화면이 그대로다.
+    patchList(['my', 'favorites']);
   };
 
   const mutation = useMutation({
@@ -51,9 +68,7 @@ export function useFavorite(productId: number) {
       // 진행 중인 재조회가 우리가 뒤집은 값을 덮어쓰지 않게 멈춘다.
       await queryClient.cancelQueries({ queryKey: ['product', productId] });
 
-      const before = Boolean(
-        queryClient.getQueryData<ProductDetailItem>(['product', productId])?.isFavorite
-      );
+      const before = isFavorite;
       patchCaches(!before);
 
       // 실패하면 여기로 되돌린다.

@@ -81,7 +81,7 @@ export default function HomeScreen() {
  */
 function HomeRow({ product }: { product: Product }) {
   const router = useRouter();
-  const { toggle, isPending } = useFavorite(product.id);
+  const { toggle, isPending } = useFavorite(product.id, product.isFavorite === true);
 
   return (
     <Pressable
