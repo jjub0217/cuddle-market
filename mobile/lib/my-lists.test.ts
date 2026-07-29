@@ -92,4 +92,25 @@ describe('내 목록 조회', () => {
 
     await expect(fetchMyPurchases(0)).rejects.toThrow('구매 내역');
   });
+  it('tradeStatus를 주면 쿼리에 붙는다', async () => {
+    await fetchMyProducts(0, 'COMPLETED');
+
+    expect(mockFetch.mock.calls[0][0]).toBe(
+      'https://test.local/api/profile/me/products?page=0&size=20&tradeStatus=COMPLETED'
+    );
+  });
+
+  it('tradeStatus를 안 주면 안 붙는다', async () => {
+    // 전체 보기다. 서버는 파라미터가 없으면 전부 돌려준다.
+    await fetchMyProducts(0);
+
+    expect(mockFetch.mock.calls[0][0]).not.toContain('tradeStatus');
+  });
+
+  it('찜한 상품은 필터를 받지 않는다', async () => {
+    // 찜 목록에는 상태 필터가 없다(설계 §1).
+    await fetchMyFavorites(0);
+
+    expect(mockFetch.mock.calls[0][0]).not.toContain('tradeStatus');
+  });
 });
