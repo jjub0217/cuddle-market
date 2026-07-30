@@ -510,7 +510,7 @@ function MyPage() {
                 <h2 className="text-base font-bold text-[#1c1b1b]">고객지원</h2>
                 <div className="flex flex-col">
                   <a
-                    href="mailto:support@cuddlemarket.com?subject=커들마켓 1:1 문의"
+                    href="mailto:devel.jjub@gmail.com?subject=커들마켓 1:1 문의"
                     className="text-on-surface flex items-center gap-3 py-3"
                   >
                     <Headphones size={20} strokeWidth={1.5} />
