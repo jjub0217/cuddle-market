@@ -108,10 +108,16 @@ export default function MobileNavigation({ isOpen, onClose }: MobileNavigationPr
               style={{ height: isCustomerOpen ? `${customerHeight}px` : '0' }}
             >
               <div className="flex flex-col gap-2 pl-4">
-                <a href="mailto:support@cuddlemarket.com?subject=허들마켓 1:1 문의">1:1 문의</a>
+                <a href="mailto:devel.jjub@gmail.com?subject=커들마켓 1:1 문의">1:1 문의</a>
               </div>
             </div>
           </div>
+
+          {/* 개인정보처리방침은 '내 것'이 아니라 서비스 안내라서 마이페이지가 아니라 여기 둔다.
+              구글 플레이 이용자는 전부 모바일이라, 모바일에서 숨겨지는 푸터만으로는 닿을 수 없다. */}
+          <Link href={ROUTES.PRIVACY} onClick={onClose} className="block py-2 font-normal">
+            개인정보처리방침
+          </Link>
         </div>
       </nav>
     </>

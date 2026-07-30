@@ -41,6 +41,9 @@ export const ROUTES = {
   SOCIAL_SIGNUP: '/auth/social-signup',
   FIND_PASSWORD: '/auth/find-password',
 
+  // Legal
+  PRIVACY: '/privacy',
+
   // Admin Auth
   ADMIN_LOGIN: '/admin/login',
 

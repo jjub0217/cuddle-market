@@ -29,9 +29,12 @@ export default function Footer() {
               <strong className="font-semibold text-gray-500">고객센터</strong>
               <ul className="flex flex-col gap-2 text-sm text-gray-500">
                 <li>
-                  <a href="mailto:support@cuddlemarket.com?subject=커들마켓 1:1 문의" aria-label="고객센터 이메일로 1:1 문의하기">
+                  <a href="mailto:devel.jjub@gmail.com?subject=커들마켓 1:1 문의" aria-label="고객센터 이메일로 1:1 문의하기">
                     1:1 문의
                   </a>
+                </li>
+                <li>
+                  <Link href={ROUTES.PRIVACY}>개인정보처리방침</Link>
                 </li>
               </ul>
             </div>
