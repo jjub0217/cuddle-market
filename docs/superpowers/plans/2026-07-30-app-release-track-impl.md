@@ -336,6 +336,17 @@ cd mobile && npx eas-cli build --platform android --profile preview
 - 안드로이드 서명 키를 만들지 물으면 **EAS가 관리하도록** 둔다(`Generate new keystore`).
 - 빌드는 클라우드에서 돌고 **10~20분** 걸린다. 끝나면 내려받기 링크가 나온다.
 
+> ⚠️ **빌드 전에 환경변수를 EAS에 등록해야 한다.** `mobile/.env`는 `.gitignore`에 걸려 있고, **EAS Build는 git이 추적하는 파일만 올린다.** 그래서 `.env`가 빌드에 안 들어가고, 앱 안에서 `EXPO_PUBLIC_API_BASE_URL`이 `undefined`가 된다.
+>
+> ```bash
+> npx eas-cli env:set --name EXPO_PUBLIC_API_BASE_URL --value "<주소>" \
+>     --environment preview --environment production --visibility plaintext --scope project
+> npx eas-cli env:list preview   # 확인
+> ```
+>
+> 이 주소는 비밀이 아니다(공개 API이고 `CLAUDE.md`에도 적혀 있다). 그래서 `plaintext`로 둔다.
+> 빌드 로그에 `No environment variables ... found for the preview environment`가 뜨면 등록이 안 된 것이다.
+
 > ⚠️ **여기가 이번 과제에서 가장 막히기 쉬운 곳이다.** 이 저장소는 pnpm 워크스페이스(모노레포)라 빌드가 실패할 수 있다. 실패하면 아래를 순서대로 본다.
 >
 > 1. 오류 로그에서 `Cannot find module '@cuddle/shared'` 류가 나오는가 → 워크스페이스 해석 문제. 저장소 루트에 `.npmrc`의 `node-linker=hoisted`가 있는지 확인(있어야 한다)
@@ -357,6 +368,34 @@ APK를 폰으로 내려받아 설치한다. **Expo Go를 끄고** 확인할 것:
 7. 마이 탭의 판매 내역에서 ⋮ 를 눌러 하단 시트가 올라온다
 
 > 이 목록은 **1~5바퀴에서 만든 것이 독립 앱에서도 그대로 도는지** 보는 것이다. Expo Go 안에서만 되고 진짜 앱에서 안 되는 문제가 여기서 드러난다.
+
+**앱이 켜자마자 죽으면** — 실제로 이번에 겪었다. 추측하지 말고 로그를 본다.
+
+```bash
+brew install android-platform-tools     # adb 설치 (한 번만)
+
+# 폰: 설정 → 휴대전화 정보 → 소프트웨어 정보 → "빌드번호" 7번 탭 (개발자 옵션)
+#     설정 → 개발자 옵션 → "무선 디버깅" 켜기 → "페어링 코드로 기기 페어링"
+#     → 화면의 6자리 코드와 주소:포트를 확인
+
+adb pair <주소>:<페어링포트> <6자리코드>
+adb devices -l                          # mDNS로 자동 연결된다
+
+adb logcat -c
+adb shell monkey -p com.cuddlemarket.app -c android.intent.category.LAUNCHER 1
+adb logcat -d | grep -E "ReactNativeJS|JavascriptException|FATAL"
+```
+
+**USB 케이블이 필요 없다** — 무선 디버깅으로 된다. 폰과 맥이 같은 와이파이에 있으면 된다.
+
+빠른 재현 고리도 있다. **EAS 빌드(20분)를 반복하지 말 것**:
+
+```bash
+npx expo export --platform android --output-dir /tmp/expo-export   # 번들이 만들어지는지 (1~2분)
+npx expo start --no-dev --minify --clear                            # Expo Go에 프로덕션 번들 (초 단위)
+```
+
+다만 **이 둘이 통과해도 독립 빌드가 죽을 수 있다** — 이번이 그랬다. Expo Go는 Metro가 서버에서 번들을 주지만, 독립 빌드는 EAS 서버가 `pnpm install`을 새로 돌려 만든다. **모듈 배치가 달라질 수 있는 것이 근본 차이다.**
 
 - [ ] **Step 6: 커밋**
 
@@ -391,10 +430,23 @@ EOF
 **Interfaces:**
 - Produces: 탈퇴 시 식별 정보가 지워진 `User` — 과제 6의 개인정보처리방침 3·4장이 이걸 전제로 쓰여 있다.
 
-- [ ] **Step 1: 지금 동작을 확인한다**
+- [ ] **Step 0: 저장소를 최신으로 맞춘다**
 
 ```bash
 cd ~/Desktop/cmarket_api
+git status -sb          # 어디 있고 뒤처졌는지 본다
+git pull origin main    # 뒤처졌으면 따라잡는다
+```
+
+Expected: `## main...origin/main` (뒤에 `[behind N]`이 없어야 한다).
+
+> `git checkout main`은 이미 main에 있으면 필요 없다. 하지만 **`git pull`은 항상 값이 있다** — 뒤처져 있으면 따라잡고, 아니면 "Already up to date"로 끝나 손해가 없다. 이 저장소는 원격이 `jinioh88/cmarket_api`라 다른 사람이 푸시할 수 있다.
+>
+> 이 저장소는 **`main`에 직접 커밋한다.** 전역 규칙("기본 브랜치 직접 커밋 금지")의 예외다 (사용자 확인, 2026-07-30).
+
+- [ ] **Step 1: 지금 동작을 확인한다**
+
+```bash
 sed -n '125,145p' service/cmarket-domain/src/main/java/org/cmarket/cmarket/domain/auth/model/User.java
 ```
 

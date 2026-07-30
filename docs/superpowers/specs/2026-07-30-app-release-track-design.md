@@ -243,6 +243,10 @@ Expo Go에서 안 되는 건 **푸시 알림 하나뿐**이고 그건 1.1이다.
 
 | 함정 | 대처 |
 |---|---|
+| **EAS Build는 `.env`를 안 올린다** (gitignore라서) | `eas env:set`으로 EAS에 등록. 빌드 로그의 `No environment variables ... found` 경고가 신호 |
+| **Expo Go에서 되는 게 독립 빌드에서 된다는 뜻이 아니다** | Expo Go는 Metro가 번들을 주고, 독립 빌드는 EAS 서버가 `pnpm install`을 새로 돌려 만든다. **모듈 배치가 달라질 수 있다** |
+| **`reactCompiler`(SDK 54 템플릿 기본값)가 독립 빌드를 죽였다** | 껐다. react가 워크스페이스에 두 벌(웹 19.2.3 / mobile 19.1.0)이라 React Compiler가 다른 React를 가리켰다. 버전을 하나로 맞추기 전엔 켜지 말 것 |
+| **앱이 켜자마자 죽으면 추측하지 말고 `adb logcat`** | 무선 디버깅으로 USB 없이 된다. `adb pair` → `adb logcat -d \| grep ReactNativeJS`. 추측으로 20분짜리 빌드를 반복하는 것보다 5분이 빠르다 |
 | `android.package`는 첫 업로드 후 영구 고정 | 빌드해서 폰에 깔아보고 확정. 올리기 전엔 자유롭게 바꿀 수 있다 |
 | 내부 테스트는 12명 요건에 안 셈 | **비공개 테스트** 트랙을 쓴다 |
 | 개인정보처리방침 없으면 트랙 업로드에서 막힘 | 6바퀴에 포함 |
