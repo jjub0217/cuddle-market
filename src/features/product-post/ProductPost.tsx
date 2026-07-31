@@ -10,10 +10,8 @@ import { ProductRequestForm } from './components/ProductRequestForm'
 import { fetchGraphQL } from '@/lib/api/graphql'
 import type { ProductDetailItem } from '@/types'
 import { useUserStore } from '@/store/userStore'
-import { ArrowLeft } from 'lucide-react'
-import { cn } from '@/lib/utils/cn'
+import MobileBackHeader from '@/components/header/MobileBackHeader'
 import Spinner from '@/components/commons/spinner/Spinner'
-import { Z_INDEX } from '@/constants/ui'
 
 function ProductPost() {
   const router = useRouter()
@@ -99,20 +97,8 @@ function ProductPost() {
   return (
     <>
       <h1 className="sr-only">{headerTitle}</h1>
-      {/* 모바일 서브헤더 */}
-      <div
-        className={cn(
-          'bg-primary-200 sticky top-0 mx-auto flex w-full max-w-7xl justify-between px-3.5 py-4 md:hidden',
-          Z_INDEX.HEADER
-        )}
-      >
-        <button type="button" onClick={() => router.back()} className="flex cursor-pointer items-center gap-1 text-gray-600">
-          <ArrowLeft size={23} className="text-white" />
-        </button>
-        <span className="heading-h4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg font-extrabold! text-white">
-          {isSalesTab ? (isEditMode ? '상품 수정' : '상품 등록') : isEditMode ? '판매요청 수정' : '판매요청 등록'}
-        </span>
-      </div>
+      {/* 모바일 서브헤더 — 커뮤니티 글 작성과 같은 조각을 쓴다 */}
+      <MobileBackHeader title={headerTitle} />
       {/* 데스크톱 서브헤더 */}
       <div className="hidden md:block">
         <SimpleHeader

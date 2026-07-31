@@ -9,12 +9,12 @@ import { cn } from '@/lib/utils/cn'
 import { COMMUNITY_TABS } from '@/constants/constants'
 import { commonTitleValidationRules, communityContentValidationRules } from '../../signup/validationRules'
 import Markdown from './markdown/Markdown'
-import { ArrowLeft, Info } from 'lucide-react'
+import { Info } from 'lucide-react'
 import { fetchGraphQL } from '@/lib/api/graphql'
 import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import SimpleHeader from '@/components/header/SimpleHeader'
-import { Z_INDEX } from '@/constants/ui'
+import MobileBackHeader from '@/components/header/MobileBackHeader'
 import { AnimatePresence } from 'framer-motion'
 import InlineNotification from '@/components/commons/InlineNotification'
 import { useUserStore } from '@/store/userStore'
@@ -200,18 +200,8 @@ export default function CommunityPostForm() {
   return (
     <>
       <h1 className="sr-only">{isEditMode ? '게시글 수정' : '커뮤니티 글쓰기'}</h1>
-      {/* 모바일 서브헤더 — 댓글 페이지(ReplyOverlay)와 동일한 미니멀 톤 */}
-      <div
-        className={cn(
-          'sticky top-0 flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 md:hidden',
-          Z_INDEX.HEADER
-        )}
-      >
-        <button type="button" onClick={() => router.back()} aria-label="뒤로가기" className="cursor-pointer">
-          <ArrowLeft size={20} />
-        </button>
-        <span className="text-base font-bold">{isEditMode ? '게시글 수정' : '게시글 작성'}</span>
-      </div>
+      {/* 모바일 서브헤더 — 상품 등록과 같은 조각을 쓴다 */}
+      <MobileBackHeader title={isEditMode ? '게시글 수정' : '게시글 작성'} />
       {/* 데스크톱 서브헤더 */}
       <div className="hidden md:block">
         <SimpleHeader

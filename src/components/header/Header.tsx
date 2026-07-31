@@ -14,6 +14,7 @@ import MobileSearchOverlay from '@/components/header/components/MobileSearchOver
 import { Search } from 'lucide-react'
 import UserControls from '@/components/header/components/UserControls'
 import MobileNavigation from '@/components/header/components/MobileNavigation'
+import MobileNotificationsOverlay from '@/components/header/components/MobileNotificationsOverlay'
 
 // ========== 공통 동적 경로 패턴 ==========
 const COMMUNITY_DETAIL = /^\/community\/\d+(\/[^/]+)?$/
@@ -77,6 +78,7 @@ export default function Header() {
   const isXl = useMediaQuery('(min-width: 1280px)')
   const [isSideOpen, setIsSideOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const pathname = usePathname()
 
   // 가시성 계산
@@ -211,10 +213,15 @@ export default function Header() {
               <div className="flex shrink-0 items-center gap-1 xl:gap-4">
                 {!hideSearchBar && !isXl ? (
                   <IconButton aria-label="검색" onClick={() => setIsSearchOpen((prev) => !prev)}>
-                    <Search className="text-primary" />
+                    <Search className="text-header-icon" />
                   </IconButton>
                 ) : null}
-                <UserControls isSideOpen={isSideOpen} setIsSideOpen={setIsSideOpen} hideMenuButton={hideMenuButton} />
+                <UserControls
+                  isSideOpen={isSideOpen}
+                  setIsSideOpen={setIsSideOpen}
+                  hideMenuButton={hideMenuButton}
+                  onOpenMobileNotifications={() => setIsNotificationsOpen(true)}
+                />
               </div>
             ) : null}
           </div>
@@ -225,6 +232,10 @@ export default function Header() {
         <MobileSearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
       ) : null}
       <MobileNavigation isOpen={isSideOpen} onClose={() => setIsSideOpen(false)} />
+      {/* ⚠️ 전체화면 오버레이는 반드시 </header> 밖에 둔다.
+          헤더에는 backdrop-blur-sm(기준 상자를 만든다)과 z-30(쌓임 맥락을 만든다)이
+          걸려 있어서, 안에 두면 fixed inset-0이 헤더 높이로 잘리고 z-[100]도 무시된다(#804). */}
+      <MobileNotificationsOverlay isOpen={isNotificationsOpen} onClose={() => setIsNotificationsOpen(false)} />
     </>
   )
 }

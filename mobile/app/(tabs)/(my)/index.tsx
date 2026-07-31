@@ -1,33 +1,30 @@
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import {
-  ActivityIndicator,
-  Linking,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { Handbag, Headphones, Heart, LogOut, Tag, UserMinus } from 'lucide-react-native';
 
 import { LogoutModal } from '@/components/my/logout-modal';
 import { SectionCard, SectionRow } from '@/components/my/section-card';
 import { WithdrawModal } from '@/components/my/withdraw-modal';
+import { AppHeader } from '@/components/ui/app-header';
 import { useMe } from '@/hooks/use-me';
 import { useAuthStore } from '@/lib/auth/store';
+import { ACCOUNT_DELETION_URL, PRIVACY_URL, SUPPORT_MAIL_URL } from '@/lib/support-links';
 
 // 마이페이지. 웹 모바일 마이페이지와 같은 카드 결.
 //
 // 「내 상품 관리」·「찜한 상품」 메뉴는 아직 넣지 않는다 —
 // 눌러도 갈 화면이 없어서 "준비 중" 같은 군더더기가 생긴다. 다음 바퀴에 화면과 함께 넣는다.
-
-const SUPPORT_MAIL = 'mailto:devel.jjub@gmail.com?subject=커들마켓 1:1 문의';
-
-// 개인정보처리방침은 웹 페이지를 그대로 연다. 앱에서 따로 그리지 않는다 —
-// 법 문서는 한 곳에서만 고쳐야 웹과 앱이 어긋나지 않는다.
-const PRIVACY_URL = 'https://cuddle-market.vercel.app/privacy';
+//
+// 「고객지원」 묶음은 헤더 햄버거에도 있고 여기에도 있다 — 일부러 중복이다.
+// 웹이 푸터와 모바일 내비 양쪽에 두고 있어 그것을 따랐다. 찾는 사람이 어느 쪽으로
+// 가든 닿아야 한다.
+//
+// 한때 여기서 지우고 햄버거로만 뒀는데(#806), 웹이 중복인데 앱만 한 곳으로 몰 이유가
+// 없어 되살렸다. 주소·메일 상수는 lib/support-links.ts에 있어 두 화면이 같이 쓴다.
 
 export default function MyScreen() {
   const router = useRouter();
@@ -97,28 +94,24 @@ export default function MyScreen() {
 
         {/* 웹 모바일 마이페이지와 같은 묶음·이름. 웹은 「구매내역」으로 붙여 썼는데
             나머지 둘은 띄어써서, 여기서는 띄어쓰고 웹 표기도 함께 고친다. */}
+        {/* 줄 왼쪽 아이콘은 웹 모바일 마이페이지(MyPage.tsx의 md:hidden 블록)와 같은 것이다. */}
         <SectionCard title="내 상품 관리">
-          <SectionRow label="판매 내역" onPress={() => router.push('/(tabs)/(my)/my-products')} />
-          <SectionRow label="구매 내역" onPress={() => router.push('/(tabs)/(my)/my-purchases')} />
-          <SectionRow label="찜한 상품" onPress={() => router.push('/(tabs)/(my)/my-favorites')} />
+          <SectionRow icon={Tag} label="판매 내역" onPress={() => router.push('/(tabs)/(my)/my-products')} />
+          <SectionRow icon={Handbag} label="구매 내역" onPress={() => router.push('/(tabs)/(my)/my-purchases')} />
+          <SectionRow icon={Heart} label="찜한 상품" onPress={() => router.push('/(tabs)/(my)/my-favorites')} />
         </SectionCard>
 
-        {/* 개인정보처리방침은 원래 햄버거 오버레이에 들어갈 것이다 —
-            로그인 없이도 닿아야 하는 것은 햄버거, 로그인해야 의미 있는 것은 마이,
-            가 웹과 앱의 공통 기준이다(웹 모바일은 이미 그렇게 되어 있다).
-
-            그런데 앱에는 아직 헤더가 없어서 햄버거를 열 자리가 없다. 헤더는 8바퀴에
-            알림·검색과 함께 만든다 — 지금 만들면 알림 아이콘이 갈 곳 없는 껍데기가 된다.
-            그때까지 앱에서 방침에 닿을 길이 아예 없으면 안 되므로 임시로 여기 둔다.
-            헤더가 생기면 이 줄을 햄버거로 옮긴다. */}
         <SectionCard title="고객지원">
-          <SectionRow label="고객센터" onPress={() => Linking.openURL(SUPPORT_MAIL)} />
+          <SectionRow icon={Headphones} label="고객센터" onPress={() => Linking.openURL(SUPPORT_MAIL_URL)} />
+          {/* 아래 둘은 웹 마이페이지에 없는 줄이라(웹은 푸터·햄버거에 둔다) 가져올
+              아이콘이 없다. 지어내지 않고 비워 둔다. */}
           <SectionRow label="개인정보처리방침" onPress={() => Linking.openURL(PRIVACY_URL)} />
+          <SectionRow label="계정 삭제 안내" onPress={() => Linking.openURL(ACCOUNT_DELETION_URL)} />
         </SectionCard>
 
         <SectionCard title="계정">
-          <SectionRow label="로그아웃" onPress={() => setIsLogoutOpen(true)} />
-          <SectionRow label="탈퇴하기" tone="danger" onPress={() => setIsWithdrawOpen(true)} />
+          <SectionRow icon={LogOut} label="로그아웃" onPress={() => setIsLogoutOpen(true)} />
+          <SectionRow icon={UserMinus} label="탈퇴하기" tone="danger" onPress={() => setIsWithdrawOpen(true)} />
         </SectionCard>
       </ScrollView>
     );
@@ -126,9 +119,8 @@ export default function MyScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>마이</Text>
-      </View>
+      {/* 손으로 만들었던 「마이」 헤더를 공용 조각으로 바꿨다(#806). */}
+      <AppHeader left="마이" />
       {renderBody()}
       <LogoutModal
         visible={isLogoutOpen}
@@ -154,19 +146,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
-  },
-  header: {
-    height: 52,
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
-    backgroundColor: '#FFFFFF',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#111827',
   },
   content: {
     padding: 16,

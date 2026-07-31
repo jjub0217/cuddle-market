@@ -19,7 +19,7 @@ import {
   type StatusFilter,
 } from '@/components/my/status-filter-chips';
 import { ProductCard } from '@/components/product-card';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { ChevronLeft, Plus, type LucideIcon } from 'lucide-react-native';
 import { useFavorite } from '@/hooks/use-favorite';
 import { useProductActions } from '@/hooks/use-product-actions';
 import type { MyListPage } from '@/lib/my-lists';
@@ -40,7 +40,8 @@ interface Props {
   heading: string;
   queryKey: readonly unknown[];
   fetchPage: (page: number, tradeStatus?: TradeStatus) => Promise<MyListPage>;
-  emptyIcon: 'shippingbox' | 'heart';
+  /** 빈 상태에 그릴 Lucide 아이콘. 웹 MyPagePanel과 같은 타입이다. */
+  emptyIcon: LucideIcon;
   emptyTitle: string;
   emptyDescription: string;
   errorTitle: string;
@@ -235,7 +236,7 @@ export function MyProductList({
           accessibilityLabel="뒤로"
           style={({ pressed }) => (pressed ? styles.backPressed : undefined)}
         >
-          <IconSymbol name="chevron.left" size={26} color="#111827" />
+          <ChevronLeft size={26} color="#111827" />
         </Pressable>
         <Text style={styles.headerTitle}>{title}</Text>
       </View>
@@ -260,7 +261,7 @@ export function MyProductList({
           // 숨기지 않고 흐리게 두는 이유: 웹과 자리·문구를 맞춰 두면 화면이 갑자기
           // 바뀌지 않고, "여기서 등록한다"는 것도 미리 읽힌다.
           <View style={styles.registerButton} accessibilityRole="button" accessibilityState={{ disabled: true }}>
-            <IconSymbol name="plus" size={16} color="#FFFFFF" />
+            <Plus size={16} color="#FFFFFF" />
             <Text style={styles.registerLabel}>{registerLabel}</Text>
           </View>
         ) : null}

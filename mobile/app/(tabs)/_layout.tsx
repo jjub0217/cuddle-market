@@ -2,10 +2,19 @@ import { Tabs, useRouter } from 'expo-router';
 import React from 'react';
 
 import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Home, UserRound } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAuthStore } from '@/lib/auth/store';
+
+/**
+ * 탭바 아이콘 선 굵기. Lucide 기본값은 2인데 28px로 크게 그리니 둔해 보였다.
+ * (웹 BottomNav은 활성 2.5 / 비활성 2 — 웹은 20px이라 같은 굵기여도 덜 두껍게 보인다.)
+ */
+const TAB_ICON_STROKE = 1.75;
+
+/** 탭바 아이콘 크기. 28은 살짝 컸다. (웹 BottomNav은 20이지만 화면 폭이 달라 그대로는 못 쓴다.) */
+const TAB_ICON_SIZE = 26;
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -17,12 +26,15 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
         tabBarButton: HapticTab,
+        // 기본값은 10인데(bottom-tabs의 labelBeneath) 너무 작았다.
+        // 12는 웹 BottomNav의 text-xs와 같은 값이다.
+        tabBarLabelStyle: { fontSize: 12 },
       }}>
       <Tabs.Screen
         name="(home)"
         options={{
           title: '홈',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          tabBarIcon: ({ color }) => <Home size={TAB_ICON_SIZE} color={color} strokeWidth={TAB_ICON_STROKE} />,
         }}
       />
       <Tabs.Screen
@@ -30,7 +42,7 @@ export default function TabLayout() {
         options={{
           title: '마이',
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="person.crop.circle" color={color} />
+            <UserRound size={TAB_ICON_SIZE} color={color} strokeWidth={TAB_ICON_STROKE} />
           ),
         }}
         // 게스트가 마이 탭을 누르면 탭을 열지 않고 로그인 화면만 띄운다.

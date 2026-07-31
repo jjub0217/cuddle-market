@@ -2,13 +2,16 @@ import { Image } from 'expo-image';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Heart } from 'lucide-react-native';
 import { getOverlay } from '@/lib/tradeStatus';
 
 // 1:1 정사각 썸네일 + 거래상태 오버레이(UI 스펙 §4.2, §5).
 // 오버레이는 판매중/요청중=없음, 예약중=스크림0.40, 완료계열=0.60 + 중앙 흰 pill.
 
 const THUMB_SIZE = 100; // 정사각 한 변의 최소값. 약 96~104dp (UI 스펙 §4.2)
+
+/** 찜 하트 뒤에 까는 그림자 색. */
+const SHADOW = 'rgba(0, 0, 0, 0.45)';
 
 /** 찜 버튼을 그릴지, 그린다면 무엇을 보여주고 누르면 뭘 할지. */
 export interface FavoriteControl {
@@ -66,13 +69,28 @@ export function ProductThumbnail({ imageUrl, tradeStatus, productType, favorite 
           accessibilityLabel={favorite.isFavorite ? '찜 해제' : '찜하기'}
           style={({ pressed }) => [styles.favoriteButton, pressed && styles.favoritePressed]}
         >
-          <IconSymbol
-            name={favorite.isFavorite ? 'heart.fill' : 'heart'}
-            size={20}
-            // 안 찜한 상태는 흰색이다. 사진 위라 회색은 밝은 사진에서 묻힌다(설계 §5).
-            color={favorite.isFavorite ? '#FC8181' : '#FFFFFF'}
-            style={styles.favoriteIcon}
-          />
+          <View style={styles.favoriteIcon}>
+            {/* 그림자용 검은 하트를 1px 아래에 깔아 둔다(웹의 drop-shadow-md에 해당).
+                밝은 사진 위에서 흰 하트가 묻히는 걸 막는 장치다.
+                전에는 textShadow로 했는데, 그건 글자 기반 아이콘(MaterialIcons)에서만
+                먹는다 — Lucide는 SVG라 아무 일도 일어나지 않는다. */}
+            {/* 채움 여부를 진짜 하트와 똑같이 따라가야 한다.
+                여기만 늘 채우면 찜을 껐을 때 속이 빈 하트 뒤로 검은 채움이 비쳐
+                「검은 하트」로 보인다. */}
+            <Heart
+              size={20}
+              color={SHADOW}
+              fill={favorite.isFavorite ? SHADOW : 'none'}
+              style={styles.favoriteShadow}
+            />
+            <Heart
+              size={20}
+              // 안 찜한 상태는 흰색이다. 사진 위라 회색은 밝은 사진에서 묻힌다(설계 §5).
+              color={favorite.isFavorite ? '#FC8181' : '#FFFFFF'}
+              // 찜한 상태만 속을 채운다(Lucide는 이름이 아니라 fill로 채움을 켠다).
+              fill={favorite.isFavorite ? '#FC8181' : 'none'}
+            />
+          </View>
         </Pressable>
       )}
     </View>
@@ -131,9 +149,12 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   favoriteIcon: {
-    // 밝은 사진 위에서도 흰 하트가 보이도록 옅은 그림자(웹의 drop-shadow-md에 해당).
-    textShadowColor: 'rgba(0, 0, 0, 0.45)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    width: 20,
+    height: 20,
+  },
+  favoriteShadow: {
+    position: 'absolute',
+    left: 0,
+    top: 1,
   },
 });

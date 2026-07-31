@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { LoginForm } from '@/components/auth/login-form';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { ChevronLeft } from 'lucide-react-native';
 
 // 로그인. 탭바까지 덮는 루트 스택 화면이라, 닫으면 원래 보던 자리로 돌아간다.
 //
@@ -44,7 +44,7 @@ export default function LoginScreen() {
           accessibilityLabel="닫기"
           style={({ pressed }) => (pressed ? styles.backPressed : undefined)}
         >
-          <IconSymbol name="chevron.left" size={26} color="#111827" />
+          <ChevronLeft size={26} color="#111827" />
         </Pressable>
       </View>
 

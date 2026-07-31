@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { ChevronLeft } from 'lucide-react-native';
 
 // 상세 화면 헤더(뒤로가기만, 타이틀 없음 — 설계 §4).
 //
@@ -28,7 +28,7 @@ export function DetailHeader() {
         accessibilityLabel="뒤로 가기"
         style={({ pressed }) => (pressed ? styles.backPressed : undefined)}
       >
-        <IconSymbol name="chevron.left" size={26} color="#111827" />
+        <ChevronLeft size={26} color="#111827" />
       </Pressable>
     </View>
   );
