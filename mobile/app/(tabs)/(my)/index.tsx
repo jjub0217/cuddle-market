@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Handbag, Headphones, Heart, LogOut, Tag, UserMinus } from 'lucide-react-native';
+import { Handbag, Headphones, Heart, LogOut, Tag, UserMinus, UserX } from 'lucide-react-native';
 
 import { LogoutModal } from '@/components/my/logout-modal';
 import { SectionCard, SectionRow } from '@/components/my/section-card';
@@ -110,6 +110,11 @@ export default function MyScreen() {
         </SectionCard>
 
         <SectionCard title="계정">
+          <SectionRow
+            icon={UserX}
+            label="차단 목록"
+            onPress={() => router.push('/(tabs)/(my)/blocked-users')}
+          />
           <SectionRow icon={LogOut} label="로그아웃" onPress={() => setIsLogoutOpen(true)} />
           <SectionRow icon={UserMinus} label="탈퇴하기" tone="danger" onPress={() => setIsWithdrawOpen(true)} />
         </SectionCard>
