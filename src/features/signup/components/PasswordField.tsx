@@ -11,8 +11,9 @@ import {
   type UseFormClearErrors,
   useWatch,
 } from 'react-hook-form'
-import { authValidationRules } from '@/lib/utils/validation/authValidationRules'
+import { authValidationRules, PASSWORD_MAX, passwordRules } from '@/lib/utils/validation/authValidationRules'
 import { signupValidationRules } from '../validationRules'
+import { PasswordChecklist } from './PasswordChecklist'
 import { useMemo, useEffect } from 'react'
 
 interface PasswordFieldProps {
@@ -26,6 +27,8 @@ interface PasswordFieldProps {
 export function PasswordField({ register, errors, control, setError, clearErrors }: PasswordFieldProps) {
   const password = useWatch({ control, name: 'password' })
   const passwordConfirm = useWatch({ control, name: 'passwordConfirm' })
+
+  const passwordChecks = useMemo(() => passwordRules(password ?? ''), [password])
 
   const checkResult = useMemo(() => {
     if (passwordConfirm && password && password === passwordConfirm) {
@@ -60,8 +63,14 @@ export function PasswordField({ register, errors, control, setError, clearErrors
           size="text-sm"
           border
           borderColor="border-gray-400"
-          error={errors.password}
+          maxLength={PASSWORD_MAX}
           registration={register('password', authValidationRules.password)}
+        />
+        {/* 오류 문구(errors.password)를 함께 넘기지 않는다 — 체크리스트가 같은 내용을
+            더 자세히 보여주므로 두 줄이 겹쳐 나온다. */}
+        <PasswordChecklist
+          checks={passwordChecks}
+          visible={Boolean(password) || Boolean(errors.password)}
         />
         <InputField
           id="signup-password-confirm"
@@ -72,6 +81,7 @@ export function PasswordField({ register, errors, control, setError, clearErrors
           borderColor="border-gray-400"
           error={errors.passwordConfirm}
           checkResult={checkResult}
+          maxLength={PASSWORD_MAX}
           registration={register('passwordConfirm', signupValidationRules.passwordConfirm(password))}
         />
       </div>

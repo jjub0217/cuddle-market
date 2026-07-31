@@ -15,6 +15,7 @@ import { AddressField } from '@/components/signup/address-field';
 import { BirthDateField } from '@/components/signup/birth-date-field';
 import { EmailVerification } from '@/components/signup/email-verification';
 import { Field, fieldStyles, messageStyles } from '@/components/signup/field';
+import { PasswordChecklist } from '@/components/signup/password-checklist';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useFieldScroll } from '@/lib/signup/use-field-scroll';
 import { useSignupForm } from '@/lib/signup/use-signup-form';
@@ -85,11 +86,15 @@ export default function SignupScreen() {
               value={form.values.password}
               onChangeText={(text) => form.setValue('password', text)}
               onFocus={focusField('password')}
-              error={form.errors.password}
-              placeholder="영문 대소문자·숫자·특수문자 포함 10자 이상"
+              placeholder="비밀번호를 입력해주세요"
               secureTextEntry
               autoCapitalize="none"
               textContentType="newPassword"
+              maxLength={30}
+            />
+            <PasswordChecklist
+              checks={form.passwordChecks}
+              visible={form.values.password.length > 0 || Boolean(form.errors.password)}
             />
           </View>
 
@@ -99,7 +104,14 @@ export default function SignupScreen() {
               value={form.values.passwordConfirm}
               onChangeText={(text) => form.setValue('passwordConfirm', text)}
               onFocus={focusField('passwordConfirm')}
-              error={form.errors.passwordConfirm}
+              error={
+                form.passwordConfirmState === 'mismatch'
+                  ? '비밀번호가 일치하지 않습니다'
+                  : form.errors.passwordConfirm
+              }
+              success={
+                form.passwordConfirmState === 'match' ? '✓ 비밀번호가 일치합니다' : undefined
+              }
               placeholder="비밀번호를 다시 입력해주세요"
               secureTextEntry
               autoCapitalize="none"

@@ -1,5 +1,6 @@
 import {
   formatBirthDate,
+  passwordRules,
   validateBirthDate,
   validateEmail,
   validateName,
@@ -36,6 +37,27 @@ describe('validatePassword', () => {
     expect(validatePassword('Abcdefg1xy')).toBe(
       '영문 대소문자, 숫자, 특수문자를 모두 포함해야 합니다'
     );
+  });
+});
+
+describe('passwordRules', () => {
+  it('둘 다 만족하면 둘 다 true', () => {
+    expect(passwordRules('Abcdef1!xy')).toEqual({ length: true, composition: true });
+  });
+  it('9자면 길이만 false', () => {
+    expect(passwordRules('Abcde1!xy')).toEqual({ length: false, composition: true });
+  });
+  it('31자면 길이가 false — 최대 길이도 이 줄이 함께 본다', () => {
+    expect(passwordRules('Abcdef1!' + 'x'.repeat(23))).toEqual({
+      length: false,
+      composition: true,
+    });
+  });
+  it('특수문자가 없으면 구성만 false', () => {
+    expect(passwordRules('Abcdefg1xy')).toEqual({ length: true, composition: false });
+  });
+  it('비어 있으면 둘 다 false', () => {
+    expect(passwordRules('')).toEqual({ length: false, composition: false });
   });
 });
 

@@ -10,6 +10,9 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // 대문자·소문자·숫자·특수문자를 각각 하나씩은 갖춰야 한다. 웹과 같은 정규식이다.
 const PASSWORD_PATTERN = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()]).+$/;
 
+export const PASSWORD_MIN = 10;
+export const PASSWORD_MAX = 30;
+
 const MIN_AGE = 14;
 
 export function validateEmail(value: string): string | null {
@@ -20,12 +23,24 @@ export function validateEmail(value: string): string | null {
 
 export function validatePassword(value: string): string | null {
   if (value.length === 0) return '비밀번호를 입력해주세요';
-  if (value.length < 10) return '비밀번호는 최소 10자 이상이어야 합니다';
-  if (value.length > 30) return '비밀번호는 최대 30자까지 가능합니다';
+  if (value.length < PASSWORD_MIN) return `비밀번호는 최소 ${PASSWORD_MIN}자 이상이어야 합니다`;
+  if (value.length > PASSWORD_MAX) return `비밀번호는 최대 ${PASSWORD_MAX}자까지 가능합니다`;
   if (!PASSWORD_PATTERN.test(value)) {
     return '영문 대소문자, 숫자, 특수문자를 모두 포함해야 합니다';
   }
   return null;
+}
+
+/**
+ * 비밀번호 조건을 하나씩 따로 알려준다.
+ * validatePassword가 "첫 번째로 걸린 문제 하나"만 돌려주는 것과 다르다 —
+ * 화면은 조건마다 통과/미통과를 같이 보여줘야 해서 각각이 필요하다.
+ */
+export function passwordRules(value: string): { length: boolean; composition: boolean } {
+  return {
+    length: value.length >= PASSWORD_MIN && value.length <= PASSWORD_MAX,
+    composition: PASSWORD_PATTERN.test(value),
+  };
 }
 
 export function validatePasswordConfirm(password: string, confirm: string): string | null {

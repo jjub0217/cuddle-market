@@ -11,6 +11,7 @@ import {
 } from './api';
 import {
   formatBirthDate,
+  passwordRules,
   validateBirthDate,
   validateEmail,
   validateName,
@@ -172,6 +173,17 @@ export function useSignupForm() {
     }
   }, [values.nickname]);
 
+  // 비밀번호는 조건마다 통과 여부를 따로 보여준다. 하나씩 켜지는 게 보여야
+  // "무엇이 모자란지"를 짐작하지 않아도 된다.
+  const passwordChecks = useMemo(() => passwordRules(values.password), [values.password]);
+
+  // 비밀번호 확인은 입력이 시작된 뒤부터 판단한다. 비어 있을 때 "일치하지 않음"을
+  // 띄우면 아직 치지도 않았는데 혼내는 꼴이 된다.
+  const passwordConfirmState: 'idle' | 'match' | 'mismatch' = useMemo(() => {
+    if (values.passwordConfirm.length === 0) return 'idle';
+    return values.password === values.passwordConfirm ? 'match' : 'mismatch';
+  }, [values.password, values.passwordConfirm]);
+
   const canGoNext = useMemo(
     () =>
       verification === 'verified' &&
@@ -257,6 +269,8 @@ export function useSignupForm() {
     errors,
     verification,
     secondsLeft,
+    passwordChecks,
+    passwordConfirmState,
     sendCode,
     submitCode,
     changeEmail,
