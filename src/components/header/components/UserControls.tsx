@@ -5,7 +5,6 @@ import AuthMenu from '../components/user-section/AuthMenu'
 import React, { useState } from 'react'
 import { useUserStore } from '@/store/userStore'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { ROUTES } from '@/constants/routes'
 import { MessageCircle, Bell } from 'lucide-react'
 import IconButton from '@/components/commons/button/IconButton'
@@ -44,7 +43,6 @@ export default function UserControls({
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
   const { isLogin } = useUserStore()
   const hasHydrated = useUserStore((state) => state._hasHydrated)
-  const router = useRouter()
   const isMobile = useMediaQuery('(max-width: 767px)')
   useNotificationSSE()
   const handleBellToggle = () => {
