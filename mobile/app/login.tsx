@@ -59,24 +59,17 @@ export default function LoginScreen() {
         >
           <LoginForm onSuccess={close} />
 
-          {/* ⚠️ 임시 — A안·B안을 실기기에서 비교하려고 둔다.
-              하나를 고른 뒤 이 블록과 진 쪽 화면을 지우고 진짜 통로를 만든다(#798). */}
-          <View style={styles.compare}>
-            <Pressable
-              onPress={() => router.push('/signup')}
-              accessibilityRole="button"
-              style={({ pressed }) => [styles.compareButton, pressed && styles.comparePressed]}
-            >
-              <Text style={styles.compareLabel}>회원가입 (A안 · 한 화면)</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => router.push('/signup-b')}
-              accessibilityRole="button"
-              style={({ pressed }) => [styles.compareButton, pressed && styles.comparePressed]}
-            >
-              <Text style={styles.compareLabel}>회원가입 (B안 · 2단계)</Text>
-            </Pressable>
-          </View>
+          {/* 웹도 로그인 폼 아래에 같은 자리로 둔다(SignUpForm.tsx:195-200). */}
+          <Pressable
+            onPress={() => router.push('/signup')}
+            accessibilityRole="button"
+            hitSlop={8}
+            style={({ pressed }) => [styles.signupLink, pressed && styles.signupLinkPressed]}
+          >
+            <Text style={styles.signupLinkText}>
+              아직 계정이 없으신가요? <Text style={styles.signupLinkStrong}>회원가입하기</Text>
+            </Text>
+          </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -105,24 +98,19 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 32,
   },
-  // ⚠️ 임시 (#798)
-  compare: {
-    gap: 8,
+  signupLink: {
     marginTop: 24,
-  },
-  compareButton: {
-    height: 44,
-    borderRadius: 8,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
     alignItems: 'center',
-    justifyContent: 'center',
   },
-  comparePressed: {
+  signupLinkPressed: {
     opacity: 0.6,
   },
-  compareLabel: {
+  signupLinkText: {
     fontSize: 14,
     color: '#6B7280',
+  },
+  signupLinkStrong: {
+    fontWeight: '600',
+    color: '#111827',
   },
 });

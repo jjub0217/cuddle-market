@@ -32,9 +32,8 @@ export default function RootLayout() {
           {/* 로그인은 탭바까지 통째로 덮는다. 닫으면 원래 보던 자리로 돌아가므로
               웹처럼 redirectUrl을 들고 다닐 필요가 없다. */}
           <Stack.Screen name="login" options={{ headerShown: false }} />
-          {/* 회원가입 두 안. 헤더는 화면이 직접 그린다(login과 같은 이유). 하나를 고르면 진 쪽을 지운다(#798). */}
+          {/* 헤더는 화면이 직접 그린다(login과 같은 이유). */}
           <Stack.Screen name="signup" options={{ headerShown: false }} />
-          <Stack.Screen name="signup-b" options={{ headerShown: false }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
         </Stack>
         <StatusBar style="auto" />
