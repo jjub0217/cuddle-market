@@ -3,13 +3,16 @@ import { ROUTES } from '@/constants/routes'
 import { SignUpForm } from './components/SignUpForm'
 import Logo from '@/components/Logo'
 
-// 모바일 폭에도 배경 무늬(login-bg.png)를 두지 않는다.
-// 로그인은 칸이 둘뿐이라 무늬가 빈 자리에만 보이지만, 회원가입은 칸이 아홉이라
-// 입력칸과 검증 문구 뒤에 깔린다. 특히 빨강·초록 작은 글씨 위에 겹쳐 읽기 나쁘다.
-// (로그인 화면은 그대로 둔다 — Login.tsx)
+// 배경 무늬(login-bg.png) 대신 단색을 쓴다. 무늬가 입력칸·검증 문구 뒤에 깔려
+// 읽기 나빴다(로그인은 칸이 둘뿐이라 빈 자리에만 보이므로 그대로 둔다 — Login.tsx).
+//
+// ⚠️ 배경색을 넣을 때 폼을 흰 카드에 올려야 한다. 검증 문구 색(--color-success-500
+// #15803D)이 흰 배경에서도 5.02:1로 간당간당해서, 배경을 조금만 어둡게 해도 AA
+// 기준 4.5:1이 무너진다. #F4D6AA 위에서는 3.59:1이다. 데스크탑이 이미 회색 배경 +
+// 흰 카드 구조라, 모바일도 같은 구조로 맞춘다.
 export default function Signup() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-baseline bg-white py-20 md:justify-center md:bg-[#F3F4F6]">
+    <div className="flex min-h-screen flex-col items-center justify-baseline bg-[#F4D6AA] px-4 py-20 md:justify-center md:bg-[#F3F4F6] md:px-0">
       <div className="flex min-w-full flex-col items-center gap-2 md:min-w-132.5">
         <Logo />
         <div className="flex flex-col items-center gap-9">
