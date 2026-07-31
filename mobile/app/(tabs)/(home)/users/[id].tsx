@@ -10,10 +10,11 @@ import { EmptyState, ErrorState, ListFooter, LoadingState } from '@/components/l
 import { ProductActionSheet, type SheetAction } from '@/components/my/product-action-sheet';
 import { ProductCard } from '@/components/product-card';
 import { BlockConfirm } from '@/components/report/block-confirm';
-import { KindTabs } from '@/components/user-profile/kind-tabs';
+import { StatusFilterChips, type FilterChip } from '@/components/my/status-filter-chips';
 import { ProfileHead } from '@/components/user-profile/profile-head';
 import { useMe } from '@/hooks/use-me';
 import { unblockUser } from '@/lib/reports';
+import { showToast } from '@/lib/toast';
 import { fetchUserProducts, fetchUserProfile, type ProductKind } from '@/lib/user-profile';
 
 // 판매자 프로필. 상품 상세의 판매자 카드를 눌러 들어온다.
@@ -25,6 +26,21 @@ import { fetchUserProducts, fetchUserProfile, type ProductKind } from '@/lib/use
 // 목록을 여기서 직접 그리는 게 짧고 정확하다.
 
 const HEADER_HEIGHT = 52;
+
+/**
+ * 무엇을 보여줄지 고르는 칩. 마이 목록(판매 내역 등)과 **같은 조각·같은 생김새**다.
+ *
+ * 고르는 축은 다르다 — 마이는 거래 상태(판매중·예약중…)를 한 목록 안에서 거르고,
+ * 여기는 상품 종류라 서버 주소가 아예 나뉜다. 그래도 「목록 위에서 고르는 줄」이
+ * 앱 안에서 두 모양이면 안 되므로 조각을 함께 쓴다.
+ *
+ * 「전체」가 없는 이유: 서버에 그 주소가 없다. 두 목록을 앱이 합치면 페이지 경계와
+ * 정렬을 떠안는다(설계 §5). 웹도 둘뿐이다.
+ */
+const KIND_CHIPS: FilterChip<ProductKind>[] = [
+  { id: 'sell', label: '판매상품' },
+  { id: 'request', label: '판매요청' },
+];
 
 export default function UserProfileScreen() {
   const router = useRouter();
@@ -79,7 +95,7 @@ export default function UserProfileScreen() {
     try {
       await unblockUser(userId);
       refreshProfile();
-      Alert.alert('차단을 해제했습니다');
+      showToast('차단을 해제했습니다');
     } catch {
       Alert.alert('차단 해제에 실패했습니다.', '잠시 후 다시 시도해주세요.');
     }
@@ -166,7 +182,7 @@ export default function UserProfileScreen() {
     return (
       <>
         <ProfileHead profile={profile} />
-        <KindTabs activeId={kind} onChange={setKind} />
+        <StatusFilterChips chips={KIND_CHIPS} activeId={kind} onChange={setKind} />
         {renderList()}
       </>
     );
@@ -215,7 +231,7 @@ export default function UserProfileScreen() {
           onDone={() => {
             setIsBlockOpen(false);
             refreshProfile();
-            Alert.alert('차단했습니다');
+            showToast('차단했습니다');
           }}
         />
       ) : null}
