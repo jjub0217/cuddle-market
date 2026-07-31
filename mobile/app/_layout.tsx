@@ -36,7 +36,6 @@ export default function RootLayout() {
           <Stack.Screen name="signup" options={{ headerShown: false }} />
           {/* 헤더는 화면이 직접 그린다(login과 같은 이유). */}
           <Stack.Screen name="notifications" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>
