@@ -159,14 +159,16 @@ GET /profile/{userId}/purchase-requests   판매 요청(REQUEST)만
 
 > 「전체」가 정말 필요해지면 백엔드에 엔드포인트를 하나 두는 게 옳다. 별도 이슈다.
 
-### 마이 탭의 칩과 다른 축이다
+### 마이 탭의 칩과 축은 다르지만 — 생김새는 같아야 한다
 
 ```
 마이 판매내역 칩    전체 · 판매중 · 예약중 · 판매완료    ← 거래 상태 (한 목록 안에서 거름)
 프로필 탭          판매상품 · 판매요청                 ← 상품 종류 (목록이 아예 다름)
 ```
 
-그래서 `StatusFilterChips`를 그대로 못 쓴다. 탭 조각을 새로 만든다.
+한때 여기 「그래서 `StatusFilterChips`를 그대로 못 쓴다. 탭 조각을 새로 만든다」고 적혀 있었다. **절반만 맞았다.** `StatusFilterChips`가 거래 상태 타입에 묶여 있던 건 사실이지만, **못 쓰는 건 로직이었지 생김새가 아니었다.** 밑줄형 조각을 새로 만들었다가 실기기에서 「마이 판매내역처럼 해달라고 했는데」라는 지적을 받고 되돌렸다.
+
+`StatusFilterChips`를 제네릭(`FilterChip<T>`)으로 넓혀 두 화면이 **같은 조각**을 쓴다. 고르는 축이 달라도 「목록 위에서 고르는 줄」이 앱 안에서 두 모양이면 안 된다.
 
 ### 라우트를 두 스택에 둔다
 
@@ -265,10 +267,12 @@ UserBlockRepository를 쓰는 곳
 ```
 차단한 사용자는 회원님에게 채팅을 보낼 수 없습니다
 이미 진행 중인 거래는 영향을 받지 않습니다
-차단은 언제든 '마이 > 차단 목록'에서 해제할 수 있습니다     (웹은 '마이페이지 > 차단 목록')
+차단은 언제든 차단 목록에서 해제할 수 있습니다
 ```
 
 **웹 문구도 같이 고친다.** 「웹과 같게」가 기조지만 **틀린 것을 같게 맞추는 건 통일이 아니다.**
+
+마지막 줄에서 위치(「마이페이지 >」 · 「마이 >」)를 뺐다 — 웹과 앱의 메뉴 이름이 달라 한 문구로 둘 다 맞출 수 없는데, 위치를 빼면 두 곳에서 다 맞는 말이 된다.
 
 > ✅ **실제로 확인했다**(2026-08-01, 사용자). 차단해도 그 사람 상품이 목록에서 안 사라진다.
 > 코드를 읽고 세운 추정이 실물과 맞았다. 추정이 아니라 사실이므로 문구를 고치는 게 맞다.
@@ -335,7 +339,9 @@ UserBlockRepository를 쓰는 곳
 | `mobile/app/(tabs)/(my)/users/[id].tsx` | **신설.** 위를 re-export |
 | `mobile/app/(tabs)/(my)/blocked-users.tsx` | **신설.** 차단 목록 |
 | `mobile/components/user-profile/profile-head.tsx` | **신설.** 사진·닉네임·지역·소개글 |
-| `mobile/components/user-profile/kind-tabs.tsx` | **신설.** [판매상품][판매요청] |
+| `mobile/components/my/status-filter-chips.tsx` | 제네릭으로 넓혀 프로필도 같은 칩을 쓴다 (§5) |
+| `mobile/components/ui/toast-host.tsx` · `mobile/lib/toast.ts` | **신설.** 성공·실패 알림 (§10-1) |
+| `mobile/components/ui/confirm-dialog.tsx` | **신설.** 차단하기·차단 해제 공용 확인 창 (§10-1) |
 | `mobile/components/report/block-confirm.tsx` | **신설.** 차단 확인 창 |
 | `mobile/components/product-detail/detail-header.tsx` | 오른쪽에 `⋮` 추가 |
 | `mobile/components/product-detail/seller-card.tsx` | 누르면 프로필로 |
