@@ -1,3 +1,5 @@
+import type { IconSymbolName } from '@/components/ui/icon-symbol';
+
 import { apiFetch } from './auth/api';
 
 // 알림 API와 규칙을 한 곳에 모은다.
@@ -46,16 +48,24 @@ export const NOTIFICATION_MESSAGES: Record<NotificationType, string> = {
   POST_COMMENT: '게시글에 새로운 댓글이 달렸습니다',
 };
 
-/** 알림 종류별 아이콘. IconSymbol이 아는 이름이어야 한다(Task 6에서 매핑을 더한다). */
-export const NOTIFICATION_ICONS: Record<NotificationType, string> = {
-  CHAT_NEW_ROOM: 'bell.chat.new',
-  CHAT_NEW_MESSAGE: 'bell.chat',
-  PRODUCT_FAVORITE_STATUS_CHANGED: 'bell.heart.broken',
-  PRODUCT_FAVORITE_PRICE_CHANGED: 'bell.tag',
-  ADMIN_SANCTION: 'bell.shield',
-  POST_DELETED: 'bell.trash',
-  COMMENT_REPLY: 'bell.reply',
-  POST_COMMENT: 'bell.comment',
+/**
+ * 알림 종류별 아이콘.
+ *
+ * 이름은 SF Symbol 이름이다 — iOS는 이 이름을 그대로 쓰고, 안드로이드는
+ * icon-symbol.tsx의 표를 거쳐 MaterialIcons로 바뀐다. 그래서 지어낸 이름을 쓰면
+ * iOS에서만 아이콘이 사라진다. 아래 타입이 그걸 tsc 단계에서 막는다.
+ *
+ * `import type`이라 컴파일 뒤에는 사라진다 — 이 파일은 화면 코드를 안 끌어온다.
+ */
+export const NOTIFICATION_ICONS: Record<NotificationType, IconSymbolName> = {
+  CHAT_NEW_ROOM: 'plus.bubble',
+  CHAT_NEW_MESSAGE: 'message',
+  PRODUCT_FAVORITE_STATUS_CHANGED: 'heart.slash',
+  PRODUCT_FAVORITE_PRICE_CHANGED: 'tag',
+  ADMIN_SANCTION: 'exclamationmark.shield',
+  POST_DELETED: 'trash',
+  COMMENT_REPLY: 'arrowshape.turn.up.left',
+  POST_COMMENT: 'bubble.left',
 };
 
 interface Page {
