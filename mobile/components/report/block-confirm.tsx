@@ -1,16 +1,17 @@
 import { USER_BLOCK_ALERT_LIST } from '@cuddle/shared';
-import { useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { blockUser } from '@/lib/reports';
+import { showToast } from '@/lib/toast';
 
 // 차단 확인 창.
 //
-// 로그아웃 확인 창(components/my/logout-modal.tsx)과 같은 결로 만든다 —
-// 같은 앱에서 확인 창 모양이 갈리면 만든 사람이 다른 화면처럼 보인다.
-// 다만 안내 줄이 있어 글자는 왼쪽 정렬이다(로그아웃은 한 줄뿐이라 가운데).
+// 껍데기는 components/ui/confirm-dialog.tsx다 — 차단 해제 창과 같은 모양이어야 한다.
+// (한때 여기가 창을 직접 그리고 차단 해제는 RN 기본 Alert을 써서 둘이 갈려 있었다.)
+// 여기는 「무엇을 묻고 무엇을 부르는지」만 정한다.
 //
-// 색은 앱이 지금 쓰는 무채색 그대로다. 웹 브랜드 토큰 매핑은 #786에서 다룬다.
+// 안내 문구는 @cuddle/shared의 USER_BLOCK_ALERT_LIST를 쓴다. 웹도 같은 것을 쓰므로
+// 문구를 고칠 일이 있으면 shared 한 곳만 고치면 된다.
 
 interface Props {
   visible: boolean;
@@ -22,120 +23,28 @@ interface Props {
 }
 
 export function BlockConfirm({ visible, nickname, userId, onClose, onDone }: Props) {
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleSubmit = async () => {
-    if (submitting) return;
-    setSubmitting(true);
-    setError(null);
-
+  const handleConfirm = async () => {
     try {
       await blockUser(userId);
       onDone();
     } catch {
-      setError('사용자 차단에 실패했습니다. 잠시 후 다시 시도해주세요.');
-    } finally {
-      setSubmitting(false);
+      // 창을 닫고 토스트로 알린다. 창을 열어 둔 채 오류를 그리면 안내 문구와 겹쳐
+      // 무엇이 잘못됐는지 흐려진다.
+      onClose();
+      showToast('사용자 차단에 실패했습니다');
     }
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.backdrop}>
-        <View style={styles.sheet}>
-          <Text style={styles.heading}>사용자 차단하기</Text>
-          <Text style={styles.description}>{`정말로 ${nickname}님을 차단하시겠습니까?`}</Text>
-
-          {error ? <Text style={styles.error}>{error}</Text> : null}
-
-          {/* 문구는 @cuddle/shared가 원본이다 — 웹도 같은 것을 쓴다. */}
-          <View style={styles.alertBox}>
-            {USER_BLOCK_ALERT_LIST.map((line) => (
-              <Text key={line} style={styles.alertLine}>
-                {`· ${line}`}
-              </Text>
-            ))}
-          </View>
-
-          <View style={styles.actions}>
-            <Pressable
-              onPress={onClose}
-              disabled={submitting}
-              accessibilityRole="button"
-              style={({ pressed }) => [styles.cancel, pressed && styles.pressed]}
-            >
-              <Text style={styles.cancelLabel}>취소</Text>
-            </Pressable>
-            <Pressable
-              onPress={handleSubmit}
-              disabled={submitting}
-              accessibilityRole="button"
-              style={({ pressed }) => [
-                styles.confirm,
-                submitting && styles.confirmDisabled,
-                pressed && styles.pressed,
-              ]}
-            >
-              {submitting ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={styles.confirmLabel}>차단하기</Text>
-              )}
-            </Pressable>
-          </View>
-        </View>
-      </View>
-    </Modal>
+    <ConfirmDialog
+      visible={visible}
+      heading="사용자 차단하기"
+      description={`정말로 ${nickname}님을 차단하시겠습니까?`}
+      notes={USER_BLOCK_ALERT_LIST}
+      confirmLabel="차단하기"
+      tone="danger"
+      onClose={onClose}
+      onConfirm={handleConfirm}
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(17, 24, 39, 0.7)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  sheet: {
-    width: '100%',
-    backgroundColor: '#FFFFFF',
-    // 8은 로그아웃 확인 창과 같은 값이다.
-    borderRadius: 8,
-    padding: 20,
-    gap: 10,
-  },
-  heading: { fontSize: 19, fontWeight: '700', color: '#111827' },
-  description: { fontSize: 14, color: '#6B7280' },
-  error: { fontSize: 13, color: '#DC2626' },
-  alertBox: {
-    backgroundColor: '#F9FAFB',
-    borderRadius: 8,
-    padding: 12,
-    gap: 6,
-  },
-  alertLine: { fontSize: 13, color: '#4B5563', lineHeight: 18 },
-  actions: { flexDirection: 'row', gap: 10, marginTop: 6 },
-  cancel: {
-    flex: 1,
-    height: 46,
-    borderRadius: 8,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#D1D5DB',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cancelLabel: { fontSize: 15, fontWeight: '600', color: '#111827' },
-  confirm: {
-    flex: 1,
-    height: 46,
-    borderRadius: 8,
-    backgroundColor: '#DC2626',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  confirmDisabled: { opacity: 0.5 },
-  confirmLabel: { fontSize: 15, fontWeight: '600', color: '#FFFFFF' },
-  pressed: { opacity: 0.7 },
-});

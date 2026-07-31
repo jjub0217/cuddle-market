@@ -3,7 +3,7 @@ import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-quer
 import { useLocalSearchParams, useRouter, useSegments } from 'expo-router';
 import { ChevronLeft, EllipsisVertical } from 'lucide-react-native';
 import { useState } from 'react';
-import { Alert, FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState, ErrorState, ListFooter, LoadingState } from '@/components/list-states';
@@ -97,7 +97,7 @@ export default function UserProfileScreen() {
       refreshProfile();
       showToast('차단을 해제했습니다');
     } catch {
-      Alert.alert('차단 해제에 실패했습니다.', '잠시 후 다시 시도해주세요.');
+      showToast('차단 해제에 실패했습니다');
     }
   };
 

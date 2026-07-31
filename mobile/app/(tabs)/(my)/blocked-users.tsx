@@ -2,11 +2,14 @@ import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState, ErrorState, ListFooter, LoadingState } from '@/components/list-states';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { fetchBlockedUsers, unblockUser, type BlockedUser } from '@/lib/reports';
+import { showToast } from '@/lib/toast';
 
 // 차단한 사람 목록. 여기서 해제한다.
 //
@@ -29,23 +32,23 @@ export default function BlockedUsersScreen() {
 
   const users: BlockedUser[] = data?.pages.flatMap((page) => page.content) ?? [];
 
-  const handleUnblock = (user: BlockedUser) => {
-    Alert.alert('차단 해제', `${user.nickname}님의 차단을 해제할까요?`, [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '해제',
-        onPress: async () => {
-          try {
-            await unblockUser(user.blockedUserId);
-            queryClient.invalidateQueries({ queryKey: ['blockedUsers'] });
-            // 그 사람 프로필을 열어 뒀다면 거기 배지도 사라져야 한다.
-            queryClient.invalidateQueries({ queryKey: ['userProfile', user.blockedUserId] });
-          } catch {
-            Alert.alert('차단 해제에 실패했습니다.', '잠시 후 다시 시도해주세요.');
-          }
-        },
-      },
-    ]);
+  // 누구를 해제할지 들고 있는다. null이면 창이 안 떠 있다.
+  const [target, setTarget] = useState<BlockedUser | null>(null);
+
+  const handleUnblock = async () => {
+    if (!target) return;
+
+    try {
+      await unblockUser(target.blockedUserId);
+      queryClient.invalidateQueries({ queryKey: ['blockedUsers'] });
+      // 그 사람 프로필을 열어 뒀다면 거기 「차단 유저」 배지도 사라져야 한다.
+      queryClient.invalidateQueries({ queryKey: ['userProfile', target.blockedUserId] });
+      setTarget(null);
+      showToast('차단을 해제했습니다');
+    } catch {
+      setTarget(null);
+      showToast('차단 해제에 실패했습니다');
+    }
   };
 
   const renderBody = () => {
@@ -81,7 +84,7 @@ export default function BlockedUsersScreen() {
             </View>
             <Text style={styles.nickname}>{item.nickname}</Text>
             <Pressable
-              onPress={() => handleUnblock(item)}
+              onPress={() => setTarget(item)}
               accessibilityRole="button"
               style={({ pressed }) => [styles.unblock, pressed && styles.pressed]}
             >
@@ -115,6 +118,16 @@ export default function BlockedUsersScreen() {
       </View>
 
       {renderBody()}
+
+      {/* 차단하기 창과 같은 조각이다 — 한쪽만 RN 기본 Alert이면 모양이 갈린다. */}
+      <ConfirmDialog
+        visible={target !== null}
+        heading="차단 해제"
+        description={target ? `${target.nickname}님의 차단을 해제할까요?` : undefined}
+        confirmLabel="해제"
+        onClose={() => setTarget(null)}
+        onConfirm={handleUnblock}
+      />
     </SafeAreaView>
   );
 }

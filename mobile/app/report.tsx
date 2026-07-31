@@ -4,7 +4,6 @@ import { Check, X } from 'lucide-react-native';
 import { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -65,14 +64,14 @@ export default function ReportScreen() {
       router.back();
       showToast('신고가 접수되었습니다');
     } catch (error) {
+      // 실패해도 화면을 안 닫는다 — 고른 사유와 쓴 글이 남아 있어야 다시 낼 수 있다.
       const already = isAlreadyReported(error);
-      Alert.alert(
+      showToast(
         already
           ? isProduct
-            ? '이미 신고한 상품입니다.'
-            : '이미 신고한 사용자입니다.'
-          : '신고에 실패했습니다.',
-        already ? undefined : '잠시 후 다시 시도해주세요.'
+            ? '이미 신고한 상품입니다'
+            : '이미 신고한 사용자입니다'
+          : '신고에 실패했습니다'
       );
     } finally {
       setSubmitting(false);
