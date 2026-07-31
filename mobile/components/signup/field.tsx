@@ -12,9 +12,11 @@ interface Props extends TextInputProps {
   trailing?: ReactNode;
   /** 칸 아래 회색 안내문. 오류가 있으면 오류가 우선한다 */
   hint?: string;
+  /** 초록 성공 문구(중복체크 통과 등). 오류가 있으면 오류가 우선한다 */
+  success?: string;
 }
 
-export function Field({ label, error, trailing, hint, style, ...inputProps }: Props) {
+export function Field({ label, error, trailing, hint, success, style, ...inputProps }: Props) {
   return (
     <View style={styles.field}>
       <Text style={styles.label}>{label}</Text>
@@ -26,11 +28,21 @@ export function Field({ label, error, trailing, hint, style, ...inputProps }: Pr
         />
         {trailing}
       </View>
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-      {!error && hint ? <Text style={styles.hint}>{hint}</Text> : null}
+      {error ? <Text style={messageStyles.error}>{error}</Text> : null}
+      {!error && success ? <Text style={messageStyles.success}>{success}</Text> : null}
+      {!error && !success && hint ? <Text style={messageStyles.hint}>{hint}</Text> : null}
     </View>
   );
 }
+
+// 칸 아래 문구. 웹 회원가입과 같은 값을 쓴다(InputField.tsx: text-xs font-semibold).
+// 색은 웹 토큰 그대로다 — tokens.colors.css에 WCAG AA 대비를 맞춘 값이라고 적혀 있다.
+// 표시 기호도 웹과 같이 이모지가 아닌 ✓(U+2713)를 쓴다. 이모지는 기기마다 모양이 다르다.
+export const messageStyles = StyleSheet.create({
+  error: { fontSize: 12, fontWeight: '600', color: '#C91D1D' },
+  success: { fontSize: 12, fontWeight: '600', color: '#15803D' },
+  hint: { fontSize: 12, color: '#6B7280' },
+});
 
 /** 칸 오른쪽에 붙는 버튼 모양. 여러 조각이 같이 쓴다. */
 export const fieldStyles = StyleSheet.create({
@@ -67,7 +79,5 @@ const styles = StyleSheet.create({
     color: '#111827',
     backgroundColor: '#FFFFFF',
   },
-  inputError: { borderColor: '#DC2626' },
-  error: { fontSize: 13, color: '#DC2626' },
-  hint: { fontSize: 12, color: '#9CA3AF' },
+  inputError: { borderColor: '#C91D1D' },
 });

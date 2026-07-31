@@ -1,12 +1,12 @@
 import { Pressable, StyleSheet, Text, View, type TextInputProps } from 'react-native';
 
 import type { useSignupForm } from '@/lib/signup/use-signup-form';
-import { Field, fieldStyles } from './field';
+import { Field, fieldStyles, messageStyles } from './field';
 
 // 이메일 인증 영역. 상태가 셋이다.
 //   ① idle      이메일 칸 + [인증받기]
 //   ② sent      이메일 칸(잠김) + 인증코드 칸 + [확인] + 남은 시간
-//   ③ verified  이메일 칸(잠김) + "✅ 인증 완료" + [이메일 변경]
+//   ③ verified  이메일 칸(잠김) + "✓ 인증 완료" + [이메일 변경]
 //
 // 인증이 끝나면 이메일 칸을 잠그고 재발송 버튼을 없앤다. 둘 다 이유가 있다:
 // 인증한 주소와 가입하는 주소가 달라지면 서버가 막고(설계 §6·§7), 재발송하면
@@ -60,7 +60,7 @@ export function EmailVerification({ form, onFocus }: Props) {
 
       {verified ? (
         <View style={styles.verifiedRow}>
-          <Text style={styles.verifiedText}>✅ 이메일 인증이 완료되었어요.</Text>
+          <Text style={messageStyles.success}>✓ 이메일 인증이 완료되었어요.</Text>
           <Pressable onPress={form.changeEmail} accessibilityRole="button" hitSlop={8}>
             <Text style={styles.changeLink}>이메일 변경</Text>
           </Pressable>
@@ -98,6 +98,5 @@ const styles = StyleSheet.create({
   wrap: { gap: 16 },
   locked: { backgroundColor: '#F9FAFB', color: '#6B7280' },
   verifiedRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  verifiedText: { fontSize: 13, color: '#059669' },
-  changeLink: { fontSize: 13, color: '#6B7280', textDecorationLine: 'underline' },
+  changeLink: { fontSize: 12, color: '#6B7280', textDecorationLine: 'underline' },
 });

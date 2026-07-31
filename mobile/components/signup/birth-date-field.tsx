@@ -2,6 +2,8 @@ import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-na
 
 import type { useSignupForm } from '@/lib/signup/use-signup-form';
 
+import { messageStyles } from './field';
+
 // 생년월일. 웹과 같이 YYYY / MM / DD 세 칸으로 받는다(BirthDateField.tsx:74,87,100).
 // 날짜 선택기를 쓰면 폰에서는 더 편하지만 새 의존성이 늘고 웹과 모양이 갈린다.
 
@@ -55,7 +57,7 @@ export function BirthDateField({ form, onFocus }: Props) {
           maxLength={2}
         />
       </View>
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? <Text style={messageStyles.error}>{error}</Text> : null}
     </View>
   );
 }
@@ -75,8 +77,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     textAlign: 'center',
   },
-  inputError: { borderColor: '#DC2626' },
+  inputError: { borderColor: '#C91D1D' },
   year: { flex: 2 },
   part: { flex: 1 },
-  error: { fontSize: 13, color: '#DC2626' },
+
 });

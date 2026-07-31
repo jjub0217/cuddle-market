@@ -162,9 +162,11 @@ const styles = StyleSheet.create({
     color: '#111827',
     backgroundColor: '#FFFFFF',
   },
+  // 회원가입 화면과 같은 값 — 웹 토큰(--color-danger-500)에서 가져왔다.
   error: {
-    fontSize: 13,
-    color: '#DC2626',
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#C91D1D',
   },
   submit: {
     height: 48,

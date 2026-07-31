@@ -6,6 +6,8 @@ import { BottomSheet, sheetItemStyles } from '@/components/ui/bottom-sheet';
 import { CITIES, PROVINCES } from '@/constants/cities';
 import type { useSignupForm } from '@/lib/signup/use-signup-form';
 
+import { messageStyles } from './field';
+
 // 거주지. 앱에는 웹의 <select> 같은 요소가 없어서, 누르면 아래에서 목록이
 // 올라오는 방식으로 만든다. withdraw-modal.tsx가 이미 같은 방식(Modal + ScrollView)을 쓴다.
 //
@@ -81,7 +83,7 @@ export function AddressField({ form, onOpen }: Props) {
         </Text>
       </Pressable>
 
-      {errors.addressSido ? <Text style={styles.error}>{errors.addressSido}</Text> : null}
+      {errors.addressSido ? <Text style={messageStyles.error}>{errors.addressSido}</Text> : null}
 
       {/* 마이페이지의 상품 메뉴 시트와 같은 껍데기를 쓴다 — 두 시트가 따로 놀면 안 된다. */}
       <BottomSheet visible={open !== null} onClose={() => setOpen(null)}>
@@ -120,10 +122,10 @@ const styles = StyleSheet.create({
   },
   selectPressed: { opacity: 0.7 },
   selectDisabled: { backgroundColor: '#F9FAFB' },
-  selectError: { borderColor: '#DC2626' },
+  selectError: { borderColor: '#C91D1D' },
   value: { fontSize: 15, color: '#111827' },
   placeholder: { fontSize: 15, color: '#9CA3AF' },
-  error: { fontSize: 13, color: '#DC2626' },
+
   // 시/도 17개 · 구/군은 최대 30개가 넘는다. 화면을 다 덮지 않게 여기서 끊는다.
   list: { maxHeight: 56 * 6 },
 });

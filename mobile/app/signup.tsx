@@ -14,7 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AddressField } from '@/components/signup/address-field';
 import { BirthDateField } from '@/components/signup/birth-date-field';
 import { EmailVerification } from '@/components/signup/email-verification';
-import { Field, fieldStyles } from '@/components/signup/field';
+import { Field, fieldStyles, messageStyles } from '@/components/signup/field';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useFieldScroll } from '@/lib/signup/use-field-scroll';
 import { useSignupForm } from '@/lib/signup/use-signup-form';
@@ -127,7 +127,7 @@ export default function SignupScreen() {
               error={form.errors.nickname}
               placeholder="닉네임을 입력해주세요"
               maxLength={10}
-              hint={form.nicknameChecked ? '✅ 사용할 수 있는 닉네임이에요.' : undefined}
+              success={form.nicknameChecked ? '✓ 사용할 수 있는 닉네임이에요.' : undefined}
               trailing={
                 <Pressable
                   onPress={form.checkNickname}
@@ -151,7 +151,7 @@ export default function SignupScreen() {
             <AddressField form={form} onOpen={blurFields} />
           </View>
 
-          {form.formError ? <Text style={styles.formError}>{form.formError}</Text> : null}
+          {form.formError ? <Text style={messageStyles.error}>{form.formError}</Text> : null}
 
           <Pressable
             onPress={handleSubmit}
@@ -187,7 +187,6 @@ const styles = StyleSheet.create({
   backPressed: { opacity: 0.5 },
   content: { paddingHorizontal: 20, paddingTop: 12, gap: 16 },
   heading: { fontSize: 22, fontWeight: '700', color: '#111827', marginBottom: 8 },
-  formError: { fontSize: 13, color: '#DC2626' },
   submit: {
     height: 48,
     borderRadius: 8,
