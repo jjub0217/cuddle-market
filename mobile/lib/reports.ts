@@ -79,7 +79,11 @@ export async function unblockUser(userId: number): Promise<void> {
 }
 
 export interface BlockedUser {
-  userId: number;
+  /**
+   * ⚠️ `userId`가 아니라 `blockedUserId`다(서버 BlockedUserResponse).
+   * 다른 API들이 userId를 쓰다 보니 헷갈리기 쉬운데, 여기만 이름이 다르다.
+   */
+  blockedUserId: number;
   nickname: string;
   profileImageUrl: string | null;
 }
@@ -91,14 +95,25 @@ interface BlockedPage {
 
 const PAGE_SIZE = 20; // 서버 기본값(@PageableDefault)과 같은 값
 
+/**
+ * 차단한 사람 목록.
+ *
+ * ⚠️ 응답이 한 겹 더 감싸져 있다. 다른 목록 API와 모양이 다르다.
+ *
+ *   { data: { blockedUsers: { content, hasNext, ... } } }
+ *              ↑ 이 껍데기(BlockedUserListResponse.blockedUsers)를 빠뜨리면
+ *                항상 빈 목록이 된다 — 실기기에서 실제로 그랬다.
+ */
 export async function fetchBlockedUsers(page: number): Promise<BlockedPage> {
   const res = await apiFetch(`/reports/blocks/users?page=${page}&size=${PAGE_SIZE}`);
   if (!res.ok) throw new Error(`차단 목록을 불러오지 못했어요 (HTTP ${res.status})`);
 
-  const body = (await res.json()) as { data?: Partial<BlockedPage> };
+  const body = (await res.json()) as { data?: { blockedUsers?: Partial<BlockedPage> } };
+  const page_ = body.data?.blockedUsers;
+
   return {
-    content: body.data?.content ?? [],
-    hasNext: body.data?.hasNext ?? false,
+    content: page_?.content ?? [],
+    hasNext: page_?.hasNext ?? false,
   };
 }
 

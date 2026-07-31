@@ -100,7 +100,9 @@ describe('blockUser / unblockUser', () => {
 
 describe('fetchBlockedUsers', () => {
   it('page와 size=20으로 부른다', async () => {
-    mockFetch.mockResolvedValue(reply(200, { data: { content: [], hasNext: false } }));
+    mockFetch.mockResolvedValue(
+      reply(200, { data: { blockedUsers: { content: [], hasNext: false } } })
+    );
 
     await fetchBlockedUsers(1);
 
@@ -109,12 +111,16 @@ describe('fetchBlockedUsers', () => {
     );
   });
 
-  it('content와 hasNext를 돌려준다', async () => {
+  // ⚠️ 이 API만 응답이 한 겹 더 감싸져 있다(BlockedUserListResponse.blockedUsers).
+  // 처음에는 그 껍데기를 빠뜨려 실기기에서 목록이 늘 비어 있었다.
+  it('data.blockedUsers 안의 content와 hasNext를 돌려준다', async () => {
     mockFetch.mockResolvedValue(
       reply(200, {
         data: {
-          content: [{ userId: 7, nickname: '지니', profileImageUrl: null }],
-          hasNext: true,
+          blockedUsers: {
+            content: [{ blockedUserId: 7, nickname: '지니', profileImageUrl: null }],
+            hasNext: true,
+          },
         },
       })
     );
@@ -122,8 +128,20 @@ describe('fetchBlockedUsers', () => {
     const page = await fetchBlockedUsers(0);
 
     expect(page.content).toHaveLength(1);
+    expect(page.content[0].blockedUserId).toBe(7);
     expect(page.content[0].nickname).toBe('지니');
     expect(page.hasNext).toBe(true);
+  });
+
+  it('껍데기가 없는 모양이면 빈 목록으로 본다 — 옛 모양을 통과시키지 않는다', async () => {
+    mockFetch.mockResolvedValue(
+      reply(200, { data: { content: [{ blockedUserId: 7 }], hasNext: true } })
+    );
+
+    const page = await fetchBlockedUsers(0);
+
+    expect(page.content).toHaveLength(0);
+    expect(page.hasNext).toBe(false);
   });
 });
 

@@ -36,10 +36,10 @@ export default function BlockedUsersScreen() {
         text: '해제',
         onPress: async () => {
           try {
-            await unblockUser(user.userId);
+            await unblockUser(user.blockedUserId);
             queryClient.invalidateQueries({ queryKey: ['blockedUsers'] });
             // 그 사람 프로필을 열어 뒀다면 거기 배지도 사라져야 한다.
-            queryClient.invalidateQueries({ queryKey: ['userProfile', user.userId] });
+            queryClient.invalidateQueries({ queryKey: ['userProfile', user.blockedUserId] });
           } catch {
             Alert.alert('차단 해제에 실패했습니다.', '잠시 후 다시 시도해주세요.');
           }
@@ -63,7 +63,7 @@ export default function BlockedUsersScreen() {
     return (
       <FlatList
         data={users}
-        keyExtractor={(item) => String(item.userId)}
+        keyExtractor={(item) => String(item.blockedUserId)}
         renderItem={({ item }) => (
           <View style={styles.row}>
             <View style={styles.avatar}>
