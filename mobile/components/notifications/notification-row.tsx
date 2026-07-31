@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import {
+  NOTIFICATION_COLORS,
   NOTIFICATION_ICONS,
   NOTIFICATION_MESSAGES,
   type NotificationItem,
@@ -31,14 +32,23 @@ function timeAgo(iso: string): string {
 }
 
 export function NotificationRow({ item, onPress }: Props) {
+  // 색은 꾸밈이 아니라 정보다 — 글자를 읽기 전에 알림 종류를 알아채는 장치라서,
+  // 여덟 종류를 한 색으로 뭉개면 목록이 구별 안 되는 같은 줄들이 된다.
+  // 값과 그 이유는 lib/notifications.ts의 NOTIFICATION_COLORS 주석에 적어 뒀다.
+  const color = NOTIFICATION_COLORS[item.notificationType];
+
   return (
     <Pressable
       onPress={() => onPress(item)}
       accessibilityRole="button"
       style={({ pressed }) => [styles.row, !item.isRead && styles.unread, pressed && styles.pressed]}
     >
-      <View style={styles.icon}>
-        <IconSymbol name={NOTIFICATION_ICONS[item.notificationType]} size={20} color="#825500" />
+      <View style={[styles.icon, { backgroundColor: color.bg }]}>
+        <IconSymbol
+          name={NOTIFICATION_ICONS[item.notificationType]}
+          size={20}
+          color={color.icon}
+        />
       </View>
 
       <View style={styles.body}>
@@ -66,13 +76,13 @@ const styles = StyleSheet.create({
   // 안 읽음: 배경 + 점. 웹과 같은 방식이다.
   unread: { backgroundColor: '#FDF6EC' },
   pressed: { opacity: 0.7 },
+  // 배경색은 종류마다 달라서 여기 두지 않는다 — 쓰는 쪽에서 덧씌운다.
   icon: {
     width: 36,
     height: 36,
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FBEFDD',
   },
   body: { flex: 1, gap: 2 },
   title: { fontSize: 15, fontWeight: '600', color: '#111827' },

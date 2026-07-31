@@ -7,6 +7,7 @@ jest.mock('expo-secure-store', () => ({
 
 import { useAuthStore } from './auth/store';
 import {
+  NOTIFICATION_COLORS,
   NOTIFICATION_MESSAGES,
   fetchNotifications,
   fetchUnreadCount,
@@ -160,5 +161,33 @@ describe('NOTIFICATION_MESSAGES', () => {
     expect(NOTIFICATION_MESSAGES.PRODUCT_FAVORITE_STATUS_CHANGED).toBe(
       '찜한 상품의 거래 상태가 변경되었습니다'
     );
+  });
+});
+
+describe('NOTIFICATION_COLORS', () => {
+  it('여덟 종류가 모두 색을 갖는다 — 색이 종류를 구별해 준다', () => {
+    const types = Object.keys(NOTIFICATION_MESSAGES) as (keyof typeof NOTIFICATION_COLORS)[];
+
+    expect(Object.keys(NOTIFICATION_COLORS)).toHaveLength(8);
+    // 빠뜨린 종류가 있으면 그 줄만 배경 없는 아이콘으로 나온다 — 화면에서는 늦게 발견된다.
+    for (const type of types) {
+      expect(NOTIFICATION_COLORS[type]).toEqual({
+        bg: expect.stringMatching(/^#[0-9A-F]{6}$/),
+        icon: expect.stringMatching(/^#[0-9A-F]{6}$/),
+      });
+    }
+  });
+
+  it('한 색으로 뭉개지지 않았다 — 아이콘 색이 최소 일곱 갈래', () => {
+    const icons = new Set(Object.values(NOTIFICATION_COLORS).map((c) => c.icon));
+    // 채팅 둘(새 방·새 메시지)만 일부러 같은 파랑을 쓴다. 그래서 8이 아니라 7이다.
+    expect(icons.size).toBe(7);
+  });
+
+  it('웹 notificationIconClass.ts에서 옮긴 값과 같다', () => {
+    expect(NOTIFICATION_COLORS.CHAT_NEW_ROOM).toEqual({ bg: '#DBEAFE', icon: '#2563EB' });
+    expect(NOTIFICATION_COLORS.CHAT_NEW_MESSAGE).toEqual(NOTIFICATION_COLORS.CHAT_NEW_ROOM);
+    // 회색 둘은 웹이 Tailwind 기본값을 tokens.colors.css에서 덮어쓴 값이다.
+    expect(NOTIFICATION_COLORS.POST_DELETED).toEqual({ bg: '#E5E7EB', icon: '#A0AEC0' });
   });
 });

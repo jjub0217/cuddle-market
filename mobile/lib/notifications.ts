@@ -68,6 +68,37 @@ export const NOTIFICATION_ICONS: Record<NotificationType, IconSymbolName> = {
   POST_COMMENT: 'bubble.left',
 };
 
+/**
+ * 알림 종류별 색(원 배경 + 아이콘).
+ *
+ * ⚠️ 색이 정보를 나른다. 글자를 읽기 전에 「채팅이구나 / 제재구나」를 알아채게 하는
+ * 장치라, 여덟 종류를 한 색으로 뭉개면 목록이 그냥 같은 줄 열 개로 보인다.
+ * 아이콘 모양만으로는 36px 원 안에서 구별이 잘 안 된다 — 색이 먼저 눈에 띈다.
+ * 그래서 「보기 좋으라고」가 아니라 「구별하라고」 있는 값이다. 하나로 줄이지 말 것.
+ *
+ * 값의 출처: 웹 src/components/header/components/notification-section/
+ * notificationIconClass.ts. 웹은 Tailwind 클래스로 적혀 있어서, 실제 색은 두 군데를
+ * 봐야 나온다.
+ *  - `stroke-[#2563EB]` 처럼 대괄호에 박힌 것은 그 16진값 그대로다.
+ *  - `bg-blue-100` · `stroke-gray-400` 처럼 이름으로 적힌 것은 토큰을 따라가야 한다.
+ *    회색 둘은 이 프로젝트가 src/styles/tokens.colors.css에서 Tailwind 기본값을
+ *    덮어썼다(gray-100 #F3F4F6→#E5E7EB, gray-400 #99A1AF→#A0AEC0). 나머지는
+ *    Tailwind v4 기본 팔레트(oklch)를 sRGB로 옮긴 값이다.
+ * 웹의 토큰이 바뀌면 여기도 같이 고쳐야 한다 — 앱은 CSS를 못 읽어서 자동으로 따라오지 않는다.
+ */
+export const NOTIFICATION_COLORS: Record<NotificationType, { bg: string; icon: string }> = {
+  // 채팅 둘은 같은 파랑을 쓴다(웹도 같다) — 「채팅」이라는 한 갈래로 읽히게 하려고.
+  CHAT_NEW_ROOM: { bg: '#DBEAFE', icon: '#2563EB' },
+  CHAT_NEW_MESSAGE: { bg: '#DBEAFE', icon: '#2563EB' },
+  PRODUCT_FAVORITE_STATUS_CHANGED: { bg: '#FCE7F3', icon: '#EC4899' },
+  PRODUCT_FAVORITE_PRICE_CHANGED: { bg: '#FEF9C2', icon: '#EAB308' },
+  ADMIN_SANCTION: { bg: '#FFE2E2', icon: '#DC2626' },
+  // 지워진 글은 이미 끝난 일이라 유일하게 무채색이다 — 눈에 덜 띄는 게 맞다.
+  POST_DELETED: { bg: '#E5E7EB', icon: '#A0AEC0' },
+  COMMENT_REPLY: { bg: '#F3E8FF', icon: '#9333EA' },
+  POST_COMMENT: { bg: '#E0E7FF', icon: '#6366F1' },
+};
+
 interface Page {
   content: NotificationItem[];
   hasNext: boolean;
