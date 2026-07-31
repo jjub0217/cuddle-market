@@ -442,7 +442,7 @@ function MyPage() {
                   <p className="text-base font-bold text-[#1c1b1b]">{myData?.nickname}</p>
                   <p className="text-sm text-gray-500">{`${myData?.addressSido ?? ''} ${myData?.addressGugun ?? ''}`.trim()}</p>
                 </div>
-                <ChevronRight size={25} strokeWidth={1.5} className="text-on-surface-muted" />
+                <ChevronRight size={22} strokeWidth={1.5} className="text-on-surface-muted" />
               </div>
               {myData?.introduction ? <p className="line-clamp-1 text-sm text-gray-500">{myData.introduction}</p> : null}
             </button>
@@ -459,7 +459,7 @@ function MyPage() {
                   >
                     <Tag size={20} strokeWidth={1.5} />
                     <span className="flex-1 text-left text-base">판매 내역</span>
-                    <ChevronRight size={25} strokeWidth={1.5} className="text-on-surface-muted" />
+                    <ChevronRight size={22} strokeWidth={1.5} className="text-on-surface-muted" />
                   </button>
                   <button
                     type="button"
@@ -468,7 +468,7 @@ function MyPage() {
                   >
                     <Handbag size={20} strokeWidth={1.5} />
                     <span className="flex-1 text-left text-base">구매 내역</span>
-                    <ChevronRight size={25} strokeWidth={1.5} className="text-on-surface-muted" />
+                    <ChevronRight size={22} strokeWidth={1.5} className="text-on-surface-muted" />
                   </button>
                   <button
                     type="button"
@@ -477,7 +477,7 @@ function MyPage() {
                   >
                     <Heart size={20} strokeWidth={1.5} />
                     <span className="flex-1 text-left text-base">찜한 상품</span>
-                    <ChevronRight size={25} strokeWidth={1.5} className="text-on-surface-muted" />
+                    <ChevronRight size={22} strokeWidth={1.5} className="text-on-surface-muted" />
                   </button>
                 </div>
               </div>
@@ -492,7 +492,7 @@ function MyPage() {
                   >
                     <MessageSquareText size={20} strokeWidth={1.5} />
                     <span className="flex-1 text-left text-base">내 글</span>
-                    <ChevronRight size={25} strokeWidth={1.5} className="text-on-surface-muted" />
+                    <ChevronRight size={22} strokeWidth={1.5} className="text-on-surface-muted" />
                   </button>
                   <button
                     type="button"
@@ -501,7 +501,7 @@ function MyPage() {
                   >
                     <UserX size={20} strokeWidth={1.5} />
                     <span className="flex-1 text-left text-base">차단한 사용자</span>
-                    <ChevronRight size={25} strokeWidth={1.5} className="text-on-surface-muted" />
+                    <ChevronRight size={22} strokeWidth={1.5} className="text-on-surface-muted" />
                   </button>
                 </div>
               </div>
@@ -515,7 +515,7 @@ function MyPage() {
                   >
                     <Headphones size={20} strokeWidth={1.5} />
                     <span className="flex-1 text-left text-base">고객센터</span>
-                    <ChevronRight size={25} strokeWidth={1.5} className="text-on-surface-muted" />
+                    <ChevronRight size={22} strokeWidth={1.5} className="text-on-surface-muted" />
                   </a>
                 </div>
               </div>
@@ -530,7 +530,7 @@ function MyPage() {
                   >
                     <LogOut size={20} strokeWidth={1.5} />
                     <span className="flex-1 text-left text-base">로그아웃</span>
-                    <ChevronRight size={25} strokeWidth={1.5} className="text-on-surface-muted" />
+                    <ChevronRight size={22} strokeWidth={1.5} className="text-on-surface-muted" />
                   </button>
                   <button
                     type="button"
@@ -539,7 +539,7 @@ function MyPage() {
                   >
                     <UserMinus size={20} strokeWidth={1.5} />
                     <span className="flex-1 text-left text-base">탈퇴하기</span>
-                    <ChevronRight size={25} strokeWidth={1.5} className="text-on-surface-muted" />
+                    <ChevronRight size={22} strokeWidth={1.5} className="text-on-surface-muted" />
                   </button>
                 </div>
               </div>

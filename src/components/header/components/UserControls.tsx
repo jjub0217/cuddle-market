@@ -70,18 +70,24 @@ export default function UserControls({
       {hasHydrated && isLogin() ? (
         <div className="flex items-center gap-1">
           <Link href={ROUTES.CHAT} className="ml-1 hidden xl:block" aria-label="채팅">
-            <MessageCircle className="text-primary" strokeWidth={1.5} size={20} />
+            <MessageCircle className="text-header-icon" strokeWidth={1.5} size={20} />
           </Link>
           <div className="relative" onClick={handleBellToggle}>
             <IconButton aria-label="알림" size="lg" className="hover:bg-transparent">
-              <Bell size={isMobile ? 24 : 20} strokeWidth={isMobile ? 2 : 1.5} className="text-primary" />
+              {/* 점의 기준을 버튼(40x40)이 아니라 종 자체로 삼는다.
+                  버튼 기준이면 종 크기가 모바일 24 / 데스크탑 20으로 갈릴 때 점만
+                  엉뚱한 자리에 남는다. 종을 감싸면 두 폭에서 같은 자리가 된다.
+                  값(top 1 · right 3 · 8px)은 앱 app-header.tsx와 같다. */}
+              <span className="relative inline-flex">
+                <Bell size={isMobile ? 24 : 20} strokeWidth={isMobile ? 2 : 1.5} className="text-header-icon" />
+                {(unreadCountData?.unreadCount ?? 0) > 0 ? (
+                  <span
+                    className="bg-danger-500 absolute top-px right-[3px] size-2 rounded-full"
+                    aria-label={`읽지 않은 알림 ${unreadCountData?.unreadCount}개`}
+                  />
+                ) : null}
+              </span>
             </IconButton>
-            {(unreadCountData?.unreadCount ?? 0) > 0 ? (
-              <span
-                className="bg-danger-500 absolute top-1 right-1 size-2 rounded-full"
-                aria-label={`읽지 않은 알림 ${unreadCountData?.unreadCount}개`}
-              />
-            ) : null}
             {isNotificationOpen ? (
               <NotificationsDropdown isNotificationOpen={isNotificationOpen} setIsNotificationOpen={setIsNotificationOpen} />
             ) : null}

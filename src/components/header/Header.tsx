@@ -213,7 +213,7 @@ export default function Header() {
               <div className="flex shrink-0 items-center gap-1 xl:gap-4">
                 {!hideSearchBar && !isXl ? (
                   <IconButton aria-label="검색" onClick={() => setIsSearchOpen((prev) => !prev)}>
-                    <Search className="text-primary" />
+                    <Search className="text-header-icon" />
                   </IconButton>
                 ) : null}
                 <UserControls

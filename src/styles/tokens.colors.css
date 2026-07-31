@@ -13,6 +13,10 @@
   /* Foreground */
   --color-on-surface: #633f00; /* 본문/제목 텍스트 (브라운) */
   --color-on-surface-muted: rgba(99, 63, 0, 0.85); /* 비활성 메뉴, 보조 텍스트 — WCAG AA 4.5:1 보장 */
+  /* 헤더의 아이콘 버튼(검색·알림·메뉴). 브라운(--color-primary)이 아니라 먹색이다 —
+     앱 헤더와 같은 값이라 두 화면을 나란히 놓아도 같은 서비스로 보인다.
+     글자가 아니라 아이콘에만 쓴다. */
+  --color-header-icon: #111827;
 
   /* Outline */
   --color-outline-variant: #d4c4b2; /* 일반 보더 (베이지) */

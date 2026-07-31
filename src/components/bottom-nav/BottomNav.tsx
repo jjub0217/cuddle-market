@@ -65,7 +65,10 @@ export default function BottomNav() {
                 isActive ? 'text-primary-200' : 'text-gray-400'
               )}
             >
-              <Icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 2} />
+              {/* 크기·굵기는 앱 탭바(mobile/app/(tabs)/_layout.tsx)와 같은 값이다.
+                  전에는 20px에 활성 2.5 / 비활성 2였는데, 굵기로도 활성을 알리던 것을
+                  앱처럼 색 하나로만 알린다 — 같은 탭바가 두 화면에서 다르게 보이면 안 된다. */}
+              <Icon className="h-[26px] w-[26px]" strokeWidth={1.75} />
               <span className="text-xs text-gray-500">{label}</span>
             </Link>
           )

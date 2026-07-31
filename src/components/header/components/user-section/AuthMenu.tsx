@@ -23,7 +23,7 @@ export default function AuthMenu({ setIsSideOpen, hideMenuButton = false }: Auth
     </div>
   ) : hideMenuButton ? null : (
     <IconButton aria-label="메뉴" onClick={() => setIsSideOpen((prev) => !prev)}>
-      <Menu className="text-primary" />
+      <Menu className="text-header-icon" />
     </IconButton>
   )
 }
