@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Keyboard, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Keyboard, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+
+import { BottomSheet, sheetItemStyles } from '@/components/ui/bottom-sheet';
 
 import { CITIES, PROVINCES } from '@/constants/cities';
 import type { useSignupForm } from '@/lib/signup/use-signup-form';
@@ -81,29 +83,25 @@ export function AddressField({ form, onOpen }: Props) {
 
       {errors.addressSido ? <Text style={styles.error}>{errors.addressSido}</Text> : null}
 
-      <Modal
-        visible={open !== null}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setOpen(null)}
-      >
-        <Pressable style={styles.backdrop} onPress={() => setOpen(null)} />
-        <View style={styles.sheet}>
-          <Text style={styles.sheetTitle}>{open === 'sido' ? '시/도' : '시/군/구'}</Text>
-          <ScrollView>
-            {options.map((option) => (
-              <Pressable
-                key={option}
-                onPress={() => pick(option)}
-                accessibilityRole="button"
-                style={({ pressed }) => [styles.option, pressed && styles.optionPressed]}
-              >
-                <Text style={styles.optionLabel}>{option}</Text>
-              </Pressable>
-            ))}
-          </ScrollView>
-        </View>
-      </Modal>
+      {/* 마이페이지의 상품 메뉴 시트와 같은 껍데기를 쓴다 — 두 시트가 따로 놀면 안 된다. */}
+      <BottomSheet visible={open !== null} onClose={() => setOpen(null)}>
+        <ScrollView style={styles.list}>
+          {options.map((option, index) => (
+            <Pressable
+              key={option}
+              onPress={() => pick(option)}
+              accessibilityRole="button"
+              style={({ pressed }) => [
+                sheetItemStyles.item,
+                index > 0 && sheetItemStyles.itemDivider,
+                pressed && sheetItemStyles.itemPressed,
+              ]}
+            >
+              <Text style={sheetItemStyles.label}>{option}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+      </BottomSheet>
     </View>
   );
 }
@@ -126,18 +124,6 @@ const styles = StyleSheet.create({
   value: { fontSize: 15, color: '#111827' },
   placeholder: { fontSize: 15, color: '#9CA3AF' },
   error: { fontSize: 13, color: '#DC2626' },
-  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)' },
-  sheet: {
-    maxHeight: '60%',
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 32,
-  },
-  sheetTitle: { fontSize: 16, fontWeight: '700', color: '#111827', marginBottom: 8 },
-  option: { paddingVertical: 14 },
-  optionPressed: { opacity: 0.6 },
-  optionLabel: { fontSize: 15, color: '#111827' },
+  // 시/도 17개 · 구/군은 최대 30개가 넘는다. 화면을 다 덮지 않게 여기서 끊는다.
+  list: { maxHeight: 56 * 6 },
 });
