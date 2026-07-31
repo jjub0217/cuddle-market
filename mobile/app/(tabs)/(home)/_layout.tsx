@@ -8,14 +8,14 @@ export const unstable_settings = {
 };
 
 export default function HomeStackLayout() {
+  // 화면마다 끄지 않고 스택 전체에서 끈다.
+  //
+  // 전에는 index · products/[id]를 하나씩 적었는데, users/[id]를 더하면서 등록을
+  // 빠뜨려 네이티브 헤더가 「users/[id]」라는 라우트 이름을 그대로 띄웠다(#805).
+  // 이 탭의 화면은 전부 자기 헤더를 직접 그리므로 — 네이티브 스택 헤더에는 상단
+  // 인셋 옵션이 없어 시계·배터리와 붙어 보인다 — 기본값으로 꺼 두는 게 맞다.
+  // 마이 탭((my)/_layout.tsx)이 이미 이 방식이다.
   return (
-    <Stack>
-      {/* 홈은 자체 헤더(커들마켓)를 갖고 있어 스택 헤더를 숨긴다 */}
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      {/* 상세도 자체 헤더(DetailHeader)를 쓴다.
-          네이티브 스택 헤더는 상단 인셋(상태바 높이)을 지정할 옵션이 없어
-          시계·배터리와 뒤로가기가 붙어 보였다. 홈과 같은 방식으로 통일한다. */}
-      <Stack.Screen name="products/[id]" options={{ headerShown: false }} />
-    </Stack>
+    <Stack screenOptions={{ headerShown: false }} />
   );
 }
