@@ -30,8 +30,15 @@ const HEADER_HEIGHT = 52;
 export default function SignupScreen() {
   const router = useRouter();
   const form = useSignupForm();
-  const { scrollRef, onScrollViewLayout, onScroll, registerField, focusField, keyboardHeight } =
-    useFieldScroll();
+  const {
+    scrollRef,
+    onScrollViewLayout,
+    onScroll,
+    registerField,
+    focusField,
+    blurFields,
+    keyboardHeight,
+  } = useFieldScroll();
 
   const handleSubmit = async () => {
     const ok = await form.submit();
@@ -141,7 +148,7 @@ export default function SignupScreen() {
           </View>
 
           <View onLayout={registerField('address')}>
-            <AddressField form={form} />
+            <AddressField form={form} onOpen={blurFields} />
           </View>
 
           {form.formError ? <Text style={styles.formError}>{form.formError}</Text> : null}

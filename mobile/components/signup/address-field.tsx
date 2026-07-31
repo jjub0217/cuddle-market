@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Keyboard, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { CITIES, PROVINCES } from '@/constants/cities';
 import type { useSignupForm } from '@/lib/signup/use-signup-form';
@@ -11,13 +11,23 @@ import type { useSignupForm } from '@/lib/signup/use-signup-form';
 
 interface Props {
   form: ReturnType<typeof useSignupForm>;
+  /** 목록을 열기 전에 키보드를 내린다. 안 내리면 앞 칸에서 올라온 키보드가 거주지를 덮는다. */
+  onOpen?: () => void;
 }
 
 type Sheet = 'sido' | 'gugun';
 
-export function AddressField({ form }: Props) {
+export function AddressField({ form, onOpen }: Props) {
   const { values, errors } = form;
   const [open, setOpen] = useState<Sheet | null>(null);
+
+  // keyboardShouldPersistTaps="handled" 때문에 버튼을 눌러도 키보드가 저절로 안 내려간다.
+  // 거주지는 입력칸이 아니라 누르는 버튼이라, 직접 내려주지 않으면 계속 덮인 채로 남는다.
+  const openSheet = (sheet: Sheet) => {
+    Keyboard.dismiss();
+    onOpen?.();
+    setOpen(sheet);
+  };
 
   const guguns: readonly string[] = values.addressSido
     ? ((CITIES as Record<string, readonly string[]>)[values.addressSido] ?? [])
@@ -40,7 +50,7 @@ export function AddressField({ form }: Props) {
       <Text style={styles.label}>거주지</Text>
 
       <Pressable
-        onPress={() => setOpen('sido')}
+        onPress={() => openSheet('sido')}
         accessibilityRole="button"
         style={({ pressed }) => [
           styles.select,
@@ -54,7 +64,7 @@ export function AddressField({ form }: Props) {
       </Pressable>
 
       <Pressable
-        onPress={() => setOpen('gugun')}
+        onPress={() => openSheet('gugun')}
         accessibilityRole="button"
         disabled={!values.addressSido}
         style={({ pressed }) => [

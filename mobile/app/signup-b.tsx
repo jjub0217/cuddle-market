@@ -33,8 +33,15 @@ const HEADER_HEIGHT = 52;
 export default function SignupStepScreen() {
   const router = useRouter();
   const form = useSignupForm();
-  const { scrollRef, onScrollViewLayout, onScroll, registerField, focusField, keyboardHeight } =
-    useFieldScroll();
+  const {
+    scrollRef,
+    onScrollViewLayout,
+    onScroll,
+    registerField,
+    focusField,
+    blurFields,
+    keyboardHeight,
+  } = useFieldScroll();
   const [step, setStep] = useState<1 | 2>(1);
 
   const goBack = useCallback(() => {
@@ -186,7 +193,7 @@ export default function SignupStepScreen() {
               </View>
 
               <View onLayout={registerField('address')}>
-                <AddressField form={form} />
+                <AddressField form={form} onOpen={blurFields} />
               </View>
 
               {form.formError ? <Text style={styles.formError}>{form.formError}</Text> : null}
