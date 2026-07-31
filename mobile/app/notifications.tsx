@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { EmptyState, ErrorState, ListFooter } from '@/components/list-states';
 import { NotificationSkeleton } from '@/components/notifications/notification-skeleton';
 import { NotificationRow } from '@/components/notifications/notification-row';
-import Feather from '@expo/vector-icons/Feather';
+import { ChevronLeft } from 'lucide-react-native';
 import { apiBaseUrl } from '@/lib/auth/api';
 import {
   fetchNotifications,
@@ -114,7 +114,7 @@ export default function NotificationsScreen() {
           accessibilityLabel="닫기"
           style={({ pressed }) => (pressed ? styles.pressed : undefined)}
         >
-          <Feather name="chevron-left" size={24} color="#111827" />
+          <ChevronLeft size={24} color="#111827" />
         </Pressable>
         <Text style={styles.heading}>알림</Text>
         <Pressable onPress={handleReadAll} hitSlop={8} accessibilityRole="button">

@@ -1,3 +1,4 @@
+import { Package } from 'lucide-react-native';
 import { MyProductList } from '@/components/my/my-product-list';
 import { fetchMyProducts } from '@/lib/my-lists';
 
@@ -12,7 +13,7 @@ export default function MyProductsScreen() {
       heading="내가 등록한 상품"
       queryKey={['my', 'products']}
       fetchPage={fetchMyProducts}
-      emptyIcon="shippingbox"
+      emptyIcon={Package}
       emptyTitle="등록한 상품이 없습니다"
       emptyDescription="상품을 등록해보세요"
       filterChips={[

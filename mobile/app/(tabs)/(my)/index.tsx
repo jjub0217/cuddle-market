@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Handbag, Headphones, Heart, LogOut, Tag, UserMinus } from 'lucide-react-native';
+
 import { LogoutModal } from '@/components/my/logout-modal';
 import { SectionCard, SectionRow } from '@/components/my/section-card';
 import { WithdrawModal } from '@/components/my/withdraw-modal';
@@ -92,21 +94,24 @@ export default function MyScreen() {
 
         {/* 웹 모바일 마이페이지와 같은 묶음·이름. 웹은 「구매내역」으로 붙여 썼는데
             나머지 둘은 띄어써서, 여기서는 띄어쓰고 웹 표기도 함께 고친다. */}
+        {/* 줄 왼쪽 아이콘은 웹 모바일 마이페이지(MyPage.tsx의 md:hidden 블록)와 같은 것이다. */}
         <SectionCard title="내 상품 관리">
-          <SectionRow label="판매 내역" onPress={() => router.push('/(tabs)/(my)/my-products')} />
-          <SectionRow label="구매 내역" onPress={() => router.push('/(tabs)/(my)/my-purchases')} />
-          <SectionRow label="찜한 상품" onPress={() => router.push('/(tabs)/(my)/my-favorites')} />
+          <SectionRow icon={Tag} label="판매 내역" onPress={() => router.push('/(tabs)/(my)/my-products')} />
+          <SectionRow icon={Handbag} label="구매 내역" onPress={() => router.push('/(tabs)/(my)/my-purchases')} />
+          <SectionRow icon={Heart} label="찜한 상품" onPress={() => router.push('/(tabs)/(my)/my-favorites')} />
         </SectionCard>
 
         <SectionCard title="고객지원">
-          <SectionRow label="고객센터" onPress={() => Linking.openURL(SUPPORT_MAIL_URL)} />
+          <SectionRow icon={Headphones} label="고객센터" onPress={() => Linking.openURL(SUPPORT_MAIL_URL)} />
+          {/* 아래 둘은 웹 마이페이지에 없는 줄이라(웹은 푸터·햄버거에 둔다) 가져올
+              아이콘이 없다. 지어내지 않고 비워 둔다. */}
           <SectionRow label="개인정보처리방침" onPress={() => Linking.openURL(PRIVACY_URL)} />
           <SectionRow label="계정 삭제 안내" onPress={() => Linking.openURL(ACCOUNT_DELETION_URL)} />
         </SectionCard>
 
         <SectionCard title="계정">
-          <SectionRow label="로그아웃" onPress={() => setIsLogoutOpen(true)} />
-          <SectionRow label="탈퇴하기" tone="danger" onPress={() => setIsWithdrawOpen(true)} />
+          <SectionRow icon={LogOut} label="로그아웃" onPress={() => setIsLogoutOpen(true)} />
+          <SectionRow icon={UserMinus} label="탈퇴하기" tone="danger" onPress={() => setIsWithdrawOpen(true)} />
         </SectionCard>
       </ScrollView>
     );

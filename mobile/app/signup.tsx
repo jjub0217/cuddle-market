@@ -18,7 +18,7 @@ import { BirthDateField } from '@/components/signup/birth-date-field';
 import { EmailVerification } from '@/components/signup/email-verification';
 import { Field, fieldStyles, messageStyles } from '@/components/signup/field';
 import { PasswordChecklist } from '@/components/signup/password-checklist';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { ChevronLeft } from 'lucide-react-native';
 import { useFieldScroll } from '@/lib/signup/use-field-scroll';
 import { useSignupForm } from '@/lib/signup/use-signup-form';
 
@@ -81,7 +81,7 @@ export default function SignupScreen() {
           accessibilityLabel="뒤로"
           style={({ pressed }) => (pressed ? styles.backPressed : undefined)}
         >
-          <IconSymbol name="chevron.left" size={26} color="#111827" />
+          <ChevronLeft size={26} color="#111827" />
         </Pressable>
         <Text style={styles.stepLabel}>{step} / 2</Text>
       </View>

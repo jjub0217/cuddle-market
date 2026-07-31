@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import type { LucideIcon } from 'lucide-react-native';
 
 // 마이 목록(찜한 상품 · 판매 내역 · 구매 내역)의 빈 상태.
 // 웹 src/components/EmptyState.tsx 와 같은 결 — 점선 테두리 박스 + 원형 배경 아이콘.
@@ -11,17 +11,21 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 // 홈의 빈 목록은 "찾는 게 없다"이고, 여기는 "아직 시작하지 않았다"에 가깝다.
 
 interface Props {
-  /** 'shippingbox'(판매·구매) 또는 'heart'(찜) */
-  icon: 'shippingbox' | 'heart';
+  /**
+   * Lucide 아이콘 그 자체. 웹 MyPagePanel도 `emptyIcon: LucideIcon`으로 같은 모양이다
+   * — Package(판매·구매) · Heart(찜).
+   */
+  icon: LucideIcon;
   title: string;
   description: string;
 }
 
-export function MyListEmpty({ icon, title, description }: Props) {
+export function MyListEmpty({ icon: Icon, title, description }: Props) {
   return (
     <View style={styles.box}>
       <View style={styles.iconCircle}>
-        <IconSymbol name={icon} size={32} color="#E2A958" />
+        {/* 32px으로 크게 그려서 Lucide 기본 굵기(2)면 둔해 보인다. */}
+        <Icon size={32} color="#E2A958" strokeWidth={1.5} />
       </View>
       <View style={styles.text}>
         <Text style={styles.title}>{title}</Text>

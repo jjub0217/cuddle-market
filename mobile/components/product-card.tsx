@@ -8,7 +8,7 @@ import {
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { ProductThumbnail, type FavoriteControl } from '@/components/product-thumbnail';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { EllipsisVertical } from 'lucide-react-native';
 
 // 가로형 상품 카드(UI 스펙 §4). 좌 썸네일 + 우 정보영역.
 // 펫종류 없음, 찜="찜 N" 텍스트는 개수(정보). 켜고 끄는 것은 썸네일 위 찜 버튼이 맡는다(설계 §5).
@@ -47,7 +47,7 @@ export function ProductCard({ product, favorite, onMorePress }: Props) {
             accessibilityLabel="상품 관리 메뉴 열기"
             style={({ pressed }) => [styles.more, pressed && styles.morePressed]}
           >
-            <IconSymbol name="ellipsis" size={20} color="#9CA3AF" />
+            <EllipsisVertical size={20} color="#9CA3AF" />
           </Pressable>
         ) : null}
 

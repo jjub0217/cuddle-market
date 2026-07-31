@@ -1,12 +1,45 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import Feather from '@expo/vector-icons/Feather';
+import {
+  HeartCrack,
+  MessageCircleMore,
+  MessageSquarePlus,
+  MessageSquareText,
+  Reply,
+  ShieldAlert,
+  Tag,
+  Trash2,
+  type LucideIcon,
+} from 'lucide-react-native';
+
 import {
   NOTIFICATION_COLORS,
-  NOTIFICATION_ICONS,
   NOTIFICATION_MESSAGES,
   type NotificationItem,
+  type NotificationType,
 } from '@/lib/notifications';
+
+/**
+ * 알림 종류별 아이콘.
+ *
+ * 웹 src/constants/constants.ts의 `iconMap`과 **같은 Lucide 아이콘**이다.
+ * 이름만 비슷한 게 아니라 같은 그림이어야 한다 — 같은 알림이 웹과 앱에서 다르게
+ * 보이면 안 된다. 웹의 lucide-react와 앱의 lucide-react-native를 같은 판(0.563.0)으로
+ * 묶어 둔 이유이기도 하다. 웹이 아이콘을 바꾸면 여기도 같이 고쳐야 한다.
+ *
+ * (전에는 Feather를 썼는데 HeartCrack·ShieldAlert·Reply 같은 게 없어서 뜻만 비슷한
+ *  다른 그림으로 대신했었다.)
+ */
+const NOTIFICATION_ICONS: Record<NotificationType, LucideIcon> = {
+  CHAT_NEW_ROOM: MessageSquarePlus,
+  CHAT_NEW_MESSAGE: MessageCircleMore,
+  PRODUCT_FAVORITE_STATUS_CHANGED: HeartCrack,
+  PRODUCT_FAVORITE_PRICE_CHANGED: Tag,
+  ADMIN_SANCTION: ShieldAlert,
+  POST_DELETED: Trash2,
+  COMMENT_REPLY: Reply,
+  POST_COMMENT: MessageSquareText,
+};
 
 interface Props {
   item: NotificationItem;
@@ -36,6 +69,7 @@ export function NotificationRow({ item, onPress }: Props) {
   // 여덟 종류를 한 색으로 뭉개면 목록이 구별 안 되는 같은 줄들이 된다.
   // 값과 그 이유는 lib/notifications.ts의 NOTIFICATION_COLORS 주석에 적어 뒀다.
   const color = NOTIFICATION_COLORS[item.notificationType];
+  const Icon = NOTIFICATION_ICONS[item.notificationType];
 
   return (
     <Pressable
@@ -44,11 +78,7 @@ export function NotificationRow({ item, onPress }: Props) {
       style={({ pressed }) => [styles.row, !item.isRead && styles.unread, pressed && styles.pressed]}
     >
       <View style={[styles.icon, { backgroundColor: color.bg }]}>
-        <Feather
-          name={NOTIFICATION_ICONS[item.notificationType]}
-          size={20}
-          color={color.icon}
-        />
+        <Icon size={20} color={color.icon} />
       </View>
 
       <View style={styles.body}>

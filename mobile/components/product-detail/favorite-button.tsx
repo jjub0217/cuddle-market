@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Heart } from 'lucide-react-native';
 import { useFavorite } from '@/hooks/use-favorite';
 
 // 상세의 찜 버튼. 판매자 카드 아래 본문 인라인 자리(설계 §8.5).
@@ -31,10 +31,12 @@ export function FavoriteButton({ productId, isFavorite }: Props) {
         pressed && styles.pressed,
       ]}
     >
-      <IconSymbol
-        name={active ? 'heart.fill' : 'heart'}
+      {/* 찜한 상태는 속을 채운다. Lucide는 아이콘이 하나뿐이고 fill로 채움을 켠다
+          (Feather·MaterialIcons처럼 heart / heart.fill 두 이름이 따로 있지 않다). */}
+      <Heart
         size={22}
         color={active ? '#FC8181' : '#6B7280'}
+        fill={active ? '#FC8181' : 'none'}
       />
       <Text style={[styles.label, active && styles.labelActive]}>
         {active ? '찜한 상품' : '찜하기'}

@@ -1,9 +1,4 @@
-import type Feather from '@expo/vector-icons/Feather';
-
 import { apiFetch } from './auth/api';
-
-/** Feather가 아는 아이콘 이름. 오타를 tsc가 잡아준다. */
-type FeatherIconName = React.ComponentProps<typeof Feather>['name'];
 
 // 알림 API와 규칙을 한 곳에 모은다.
 // 헤더(안 읽은 수)와 목록 화면(전부)이 같은 재료를 쓰므로, 두 군데에 흩어지면 어긋난다.
@@ -51,25 +46,10 @@ export const NOTIFICATION_MESSAGES: Record<NotificationType, string> = {
   POST_COMMENT: '게시글에 새로운 댓글이 달렸습니다',
 };
 
-/**
- * 알림 종류별 아이콘.
- *
- * 이름은 SF Symbol 이름이다 — iOS는 이 이름을 그대로 쓰고, 안드로이드는
- * icon-symbol.tsx의 표를 거쳐 MaterialIcons로 바뀐다. 그래서 지어낸 이름을 쓰면
- * iOS에서만 아이콘이 사라진다. 아래 타입이 그걸 tsc 단계에서 막는다.
- *
- * `import type`이라 컴파일 뒤에는 사라진다 — 이 파일은 화면 코드를 안 끌어온다.
- */
-export const NOTIFICATION_ICONS: Record<NotificationType, FeatherIconName> = {
-  CHAT_NEW_ROOM: 'message-square',
-  CHAT_NEW_MESSAGE: 'message-circle',
-  PRODUCT_FAVORITE_STATUS_CHANGED: 'heart',
-  PRODUCT_FAVORITE_PRICE_CHANGED: 'tag',
-  ADMIN_SANCTION: 'alert-triangle',
-  POST_DELETED: 'trash-2',
-  COMMENT_REPLY: 'corner-up-left',
-  POST_COMMENT: 'message-square',
-};
+// 알림 종류별 아이콘은 여기 없다 — components/notifications/notification-row.tsx에 있다.
+// 한때 여기에 이름(문자열)으로 뒀는데, Lucide로 옮기면서 값이 「이름」이 아니라
+// 「컴포넌트」가 됐다. 이 파일은 화면 코드를 안 끌어오는 순수 모듈이라(그래서 테스트가
+// 쉽다) 컴포넌트를 들이면 그 성질이 깨진다. 색(아래)은 문자열이라 그대로 여기 남는다.
 
 /**
  * 알림 종류별 색(원 배경 + 아이콘).
