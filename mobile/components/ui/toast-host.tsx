@@ -14,6 +14,21 @@ import { TOAST_DURATION_MS, useToastStore } from '@/lib/toast';
 
 const FADE_MS = 180;
 
+/**
+ * 하단 탭바를 비켜 가려고 띄우는 높이(안전영역 위로).
+ *
+ * 탭바 높이를 실행 중에 물어볼 방법이 없다 — `useBottomTabBarHeight()`는 탭 화면
+ * **안에서만** 돌고, 이 조각은 탭 밖(루트 _layout)에 있다. 화면이 바뀌어도 살아남아야
+ * 해서 거기 둔 것이라 옮길 수도 없다.
+ *
+ * 그래서 실측값으로 못 박는다. 실기기(411dp 폭) 스크린샷에서 잰 값이다.
+ *   시스템 내비(insets.bottom) 약 44 · 탭바 본문 약 53 · 화면 바닥에서 탭바 위까지 98
+ * 56(탭바) + 16(여백)이면 안전영역이 0인 기기에서도 탭바를 비킨다.
+ *
+ * 탭바 모양을 바꾸면(아이콘·글자 크기 등) 이 값도 같이 봐야 한다.
+ */
+const TAB_BAR_CLEARANCE = 72;
+
 export function ToastHost() {
   const message = useToastStore((state) => state.message);
   const seq = useToastStore((state) => state.seq);
@@ -59,7 +74,7 @@ export function ToastHost() {
     <Animated.View
       pointerEvents="none"
       accessibilityLiveRegion="polite"
-      style={[styles.toast, { opacity, bottom: insets.bottom + 24 }]}
+      style={[styles.toast, { opacity, bottom: insets.bottom + TAB_BAR_CLEARANCE }]}
     >
       <Text style={styles.label}>{shown}</Text>
     </Animated.View>
@@ -71,7 +86,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 24,
     right: 24,
-    // 하단 탭바(56) 위로 올린다. bottom은 안전영역까지 더해 쓰는 쪽에서 정한다.
+    // bottom은 안전영역 + TAB_BAR_CLEARANCE로 위에서 정한다.
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
