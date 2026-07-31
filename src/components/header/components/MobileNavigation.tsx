@@ -113,10 +113,15 @@ export default function MobileNavigation({ isOpen, onClose }: MobileNavigationPr
             </div>
           </div>
 
-          {/* 개인정보처리방침은 '내 것'이 아니라 서비스 안내라서 마이페이지가 아니라 여기 둔다.
-              구글 플레이 이용자는 전부 모바일이라, 모바일에서 숨겨지는 푸터만으로는 닿을 수 없다. */}
+          {/* 안내 문서는 '내 것'이 아니라 서비스 안내라서 마이페이지가 아니라 여기 둔다.
+              구글 플레이 이용자는 전부 모바일이라, 모바일에서 숨겨지는 푸터만으로는 닿을 수 없다.
+              계정 삭제 안내는 앱을 지운 뒤 웹으로 찾아오는 사람을 위한 것이기도 하다.
+              (항목이 늘어날 때의 구조는 Footer.tsx 주석 참고) */}
           <Link href={ROUTES.PRIVACY} onClick={onClose} className="block py-2 font-normal">
             개인정보처리방침
+          </Link>
+          <Link href={ROUTES.ACCOUNT_DELETION} onClick={onClose} className="block py-2 font-normal">
+            계정 삭제 안내
           </Link>
         </div>
       </nav>

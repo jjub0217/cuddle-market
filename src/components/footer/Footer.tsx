@@ -25,6 +25,14 @@ export default function Footer() {
               </ul>
             </div>
 
+            {/* 안내 문서는 여기 나란히 둔다. 아직 넷 이하라 목차 페이지를 두면
+                한 번 더 눌러야 닿는다.
+
+                ⚠️ 항목이 다섯을 넘어가면 그때 「도움말 센터」(/help) 목차 페이지를
+                만들고 이 문서들을 그 하위로 옮긴다. 앞으로 생길 만한 것들:
+                이용약관 · 운영정책(금지 행위·제재 기준) · 안전거래 안내 ·
+                자주 묻는 질문 · 공지사항 · 청소년보호정책.
+                미리 목차부터 만들지는 않는다 — 아직 오지 않은 문제다. */}
             <div className="flex flex-col gap-4">
               <strong className="font-semibold text-gray-500">고객센터</strong>
               <ul className="flex flex-col gap-2 text-sm text-gray-500">
@@ -35,6 +43,9 @@ export default function Footer() {
                 </li>
                 <li>
                   <Link href={ROUTES.PRIVACY}>개인정보처리방침</Link>
+                </li>
+                <li>
+                  <Link href={ROUTES.ACCOUNT_DELETION}>계정 삭제 안내</Link>
                 </li>
               </ul>
             </div>
