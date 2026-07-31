@@ -20,7 +20,7 @@ import { useEffect, useRef, useState } from 'react'
 // 이메일 인증 영역. 상태가 셋이다. 앱과 같은 규칙을 쓴다
 // (mobile/components/signup/email-verification.tsx).
 //
-//   ① idle      이메일 칸 + [이메일 인증]
+//   ① idle      이메일 칸 + [인증받기]
 //   ② sent      이메일 칸(잠김) + [재발송] + 인증코드 칸 + [확인] + 남은 시간
 //   ③ verified  이메일 칸(잠김) + ✓ 인증 완료 + [이메일 변경]
 //
@@ -249,7 +249,7 @@ export function EmailValidCode({
               error={errors.email}
               checkResult={emailCheckResult}
               registration={register('email', authValidationRules.email)}
-              buttonText={isEmailChecking ? '확인 중...' : '이메일 인증'}
+              buttonText={isEmailChecking ? '확인 중...' : '인증받기'}
               buttonClassName="bg-primary-100 text-primary cursor-pointer font-semibold text-sm"
               onButtonClick={handleEmailVerify}
               buttonDisabled={isEmailChecking}
@@ -281,7 +281,7 @@ export function EmailValidCode({
               error={errors.emailCode}
               checkResult={codeCheckResult}
               registration={register('emailCode', authValidationRules.emailCode)}
-              buttonText={isCodeChecking ? '확인 중...' : '인증코드 확인'}
+              buttonText={isCodeChecking ? '확인 중...' : '확인'}
               buttonClassName="cursor-pointer bg-gray-100 font-semibold text-gray-900 text-sm"
               onButtonClick={handleCheckValidCode}
               buttonDisabled={isCodeChecking}
