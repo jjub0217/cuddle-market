@@ -164,7 +164,17 @@ export default function MobileNotificationsOverlay({ isOpen, onClose }: MobileNo
         </button>
       </div>
 
-      <div className="flex h-[calc(100%-4rem)] flex-col overflow-y-auto" role="tabpanel">
+      {/*
+        아래 pb-[...]는 지우지 말 것.
+        이 오버레이는 하단 탭바(BottomNav)를 일부러 덮지 않는다 — 알림을 열어둔 채로도 다른 탭으로 갈 수 있게 한 의도.
+        그래서 탭바에 가려지는 만큼(BottomNav의 h-14 = 3.5rem + 아이폰 홈 인디케이터 영역 env(safe-area-inset-bottom))
+        목록 아래에 여백을 줘야 마지막 알림이 안 잘린다.
+        BottomNav 높이를 바꾸면 여기 3.5rem도 같이 바꿔야 한다. (src/components/bottom-nav/BottomNav.tsx)
+      */}
+      <div
+        className="flex h-[calc(100%-4rem)] flex-col overflow-y-auto pb-[calc(3.5rem+env(safe-area-inset-bottom))]"
+        role="tabpanel"
+      >
         {isLoading ? (
           <NotificationsSkeleton />
         ) : notificationsData?.pages.some((page) => page.content.length > 0) ? (
