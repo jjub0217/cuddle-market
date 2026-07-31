@@ -15,6 +15,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { isAlreadyReported, reportProduct, reportUser } from '@/lib/reports';
+import { showToast } from '@/lib/toast';
 
 // 신고 화면. 상품용과 사용자용을 한 화면이 다 그린다 —
 // 사유 목록과 보낼 주소만 다르고 나머지가 같아서, 화면을 나누면 같은 코드가 두 벌이 된다.
@@ -58,9 +59,11 @@ export default function ReportScreen() {
       }
       // 화면이 통째로 바뀌므로 "됐다"는 신호가 없으면 눌렀는지 모른다.
       // 웹은 모달만 닫고 아무 말이 없지만, 여기는 매체가 달라 일부러 다르게 간다.
-      Alert.alert('신고가 접수되었습니다', undefined, [
-        { text: '확인', onPress: () => router.back() },
-      ]);
+      //
+      // 확인 창이 아니라 토스트인 이유: 사용자가 할 일이 없는 알림이다.
+      // [확인]을 한 번 더 누르게 하면 성공했는데 손이 더 간다.
+      router.back();
+      showToast('신고가 접수되었습니다');
     } catch (error) {
       const already = isAlreadyReported(error);
       Alert.alert(

@@ -2,9 +2,10 @@ import type { Product, ProductDetailItem } from '@cuddle/shared';
 import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { showToast } from '@/lib/toast';
 import { ProductActionSheet } from '@/components/my/product-action-sheet';
 import { Breadcrumb } from '@/components/product-detail/breadcrumb';
 import { DetailHeader } from '@/components/product-detail/detail-header';
@@ -193,7 +194,7 @@ export default function ProductDetailScreen() {
             onClose={() => setIsBlockOpen(false)}
             onDone={() => {
               setIsBlockOpen(false);
-              Alert.alert('차단했습니다');
+              showToast('차단했습니다');
             }}
           />
         </>
