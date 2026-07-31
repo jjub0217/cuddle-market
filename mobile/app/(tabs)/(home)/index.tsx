@@ -1,7 +1,7 @@
 import type { Product } from '@cuddle/shared';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProductCard } from '@/components/product-card';
@@ -11,6 +11,7 @@ import {
   ListFooter,
   LoadingState,
 } from '@/components/list-states';
+import { AppHeader, HeaderLogo } from '@/components/ui/app-header';
 import { useFavorite } from '@/hooks/use-favorite';
 import { fetchProducts } from '@/lib/products';
 
@@ -67,9 +68,9 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>커들마켓</Text>
-      </View>
+      {/* 손으로 만들었던 「커들마켓」 헤더를 공용 조각으로 바꿨다(#806).
+          같은 자리에 로고와 알림 벨이 함께 들어간다. */}
+      <AppHeader left={<HeaderLogo />} />
       {renderBody()}
     </SafeAreaView>
   );
@@ -105,19 +106,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
-  },
-  header: {
-    height: 52,
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
-    backgroundColor: '#FFFFFF',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#111827',
   },
   listContent: {
     paddingHorizontal: 16,

@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LogoutModal } from '@/components/my/logout-modal';
 import { SectionCard, SectionRow } from '@/components/my/section-card';
 import { WithdrawModal } from '@/components/my/withdraw-modal';
+import { AppHeader } from '@/components/ui/app-header';
 import { useMe } from '@/hooks/use-me';
 import { useAuthStore } from '@/lib/auth/store';
 
@@ -126,9 +127,8 @@ export default function MyScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>마이</Text>
-      </View>
+      {/* 손으로 만들었던 「마이」 헤더를 공용 조각으로 바꿨다(#806). */}
+      <AppHeader left="마이" />
       {renderBody()}
       <LogoutModal
         visible={isLogoutOpen}
@@ -154,19 +154,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
-  },
-  header: {
-    height: 52,
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
-    backgroundColor: '#FFFFFF',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#111827',
   },
   content: {
     padding: 16,
