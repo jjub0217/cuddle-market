@@ -22,6 +22,7 @@ interface InputFieldProps {
   suffix?: string
   autoFocus?: boolean
   maxLength?: number
+  readOnly?: boolean
 }
 
 export default function InputField({ error, checkResult, registration, className, inputClass, id, suffix, ...inputProps }: InputFieldProps) {

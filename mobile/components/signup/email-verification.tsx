@@ -5,12 +5,16 @@ import { Field, fieldStyles, messageStyles } from './field';
 
 // 이메일 인증 영역. 상태가 셋이다.
 //   ① idle      이메일 칸 + [인증받기]
-//   ② sent      이메일 칸(잠김) + 인증코드 칸 + [확인] + 남은 시간
+//   ② sent      이메일 칸(잠김) + [재발송] + 인증코드 칸 + [확인] + 남은 시간
 //   ③ verified  이메일 칸(잠김) + "✓ 인증 완료" + [이메일 변경]
 //
-// 인증이 끝나면 이메일 칸을 잠그고 재발송 버튼을 없앤다. 둘 다 이유가 있다:
-// 인증한 주소와 가입하는 주소가 달라지면 서버가 막고(설계 §6·§7), 재발송하면
-// 서버가 기존 인증 기록을 지워 역시 가입이 막힌다.
+// 코드를 보낸 뒤부터 칸을 잠근다. 받은 코드는 그때 그 주소의 것이라, 주소를 고칠 수
+// 있으면 「인증한 주소」와 「가입하는 주소」가 어긋난다. 서버는 가입 시점에 주소로
+// 인증 기록을 찾으므로 그대로 두면 가입이 막힌다(설계 §6·§7).
+//
+// 인증이 끝나면 재발송 버튼도 없앤다 — 재발송하면 서버가 기존 인증 기록을 지운다.
+//
+// 웹도 같은 규칙이다(src/features/signup/components/EmailValidCode.tsx).
 
 interface Props {
   form: ReturnType<typeof useSignupForm>;
@@ -26,6 +30,7 @@ function mmss(totalSeconds: number): string {
 export function EmailVerification({ form, onFocus }: Props) {
   const { values, errors, verification, secondsLeft } = form;
   const verified = verification === 'verified';
+  const locked = verification !== 'idle';
 
   return (
     <View style={styles.wrap}>
@@ -40,8 +45,8 @@ export function EmailVerification({ form, onFocus }: Props) {
         autoCapitalize="none"
         autoCorrect={false}
         textContentType="emailAddress"
-        editable={!verified}
-        style={verified ? styles.locked : undefined}
+        editable={!locked}
+        style={locked ? styles.locked : undefined}
         hint={verified ? undefined : '사용 가능 여부를 확인한 뒤 인증코드를 보내드려요.'}
         trailing={
           verified ? null : (
@@ -58,9 +63,13 @@ export function EmailVerification({ form, onFocus }: Props) {
         }
       />
 
-      {verified ? (
+      {locked ? (
         <View style={styles.verifiedRow}>
-          <Text style={messageStyles.success}>✓ 이메일 인증이 완료되었어요.</Text>
+          {verified ? (
+            <Text style={messageStyles.success}>✓ 이메일 인증이 완료되었어요.</Text>
+          ) : (
+            <Text style={messageStyles.hint}>이 주소로 코드를 보냈어요.</Text>
+          )}
           <Pressable onPress={form.changeEmail} accessibilityRole="button" hitSlop={8}>
             <Text style={styles.changeLink}>이메일 변경</Text>
           </Pressable>

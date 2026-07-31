@@ -152,6 +152,7 @@ export function SignUpForm() {
             register={register}
             errors={errors}
             control={control}
+            setValue={setValue}
             setIsEmailVerified={setIsEmailVerified}
             setIsEmailCodeVerified={setIsEmailCodeVerified}
             clearErrors={clearErrors}
