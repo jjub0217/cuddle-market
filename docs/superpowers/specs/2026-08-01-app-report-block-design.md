@@ -216,7 +216,25 @@ app/(tabs)/(my)/users/[id].tsx        위를 re-export
 | 신고 사유 | **필수** · 하나만 고른다 | `register('reasonCode', { required: true })` |
 | 상세 사유 | **선택** · 최대 300자 · 글자수 표시 | `ReportApiErrors.detailReason.maxLength` |
 | 제출 버튼 | 사유를 고르기 전엔 안 눌린다 | `disabled={!isValid}` |
-| 보내는 값 | `reasonCodes` · `detailReason`(있을 때만) — **FormData** | `ProductReportModal` |
+| 보내는 값 | **JSON** — 아래 표 참고 (필드 이름이 둘이 다르다) | 서버 DTO (§10-①) |
+
+### ⚠️ 상품과 사용자의 필드 이름이 다르다
+
+```json
+상품 신고   POST /reports/products/{id}
+            { "reasonCodes": ["ILLEGAL_ITEM"], "detailReason": "…" }
+                          ↑ 복수형 · 배열
+
+사용자 신고  POST /reports/users/{id}
+            { "reasonCode": "HARASSMENT", "detailReason": "…" }
+                          ↑ 단수형 · 문자열
+```
+
+`ProductReportRequest.reasonCodes`는 `List<String>`이고 `UserReportRequest.reasonCode`는 `String`이다. **한 화면이 둘을 다 그리므로 여기서 갈린다** — 보낼 때만 모양을 바꾼다.
+
+화면은 어느 쪽이든 **사유 하나만** 고르게 한다(웹도 라디오다). 상품 쪽은 고른 하나를 배열로 감싸 보낸다.
+
+`detailReason`은 비어 있으면 아예 안 보낸다. `imageUrls`도 이번엔 안 보낸다 — 셋 다 선택 필드다.
 
 ---
 
@@ -294,7 +312,6 @@ UserBlockRepository를 쓰는 곳
 | `mobile/components/product-detail/seller-card.tsx` | 누르면 프로필로 |
 | `mobile/app/(tabs)/(my)/index.tsx` | 「차단 목록」 줄 추가 |
 | `mobile/app/_layout.tsx` | `report` 화면 등록 |
-| `mobile/lib/auth/api.ts` | FormData면 Content-Type을 안 넣게 (§10-①) |
 
 ### 갈래 B · 웹
 
@@ -326,20 +343,35 @@ UserBlockRepository를 쓰는 곳
 
 ## 10. 함정 — 계획에 못 박을 것
 
-### ① `apiFetch`가 Content-Type을 항상 붙인다
+### ① `apiFetch`는 손대지 않는다 — 서버가 JSON을 받는다
 
-`mobile/lib/auth/api.ts:83`
+한때 이 자리에 「신고는 FormData라 `apiFetch`의 `Content-Type`을 고쳐야 한다」고 적혀 있었다. **틀렸다.** 웹 `ProductReportModal`이 `FormData`를 만들길래 서버도 multipart를 받는 줄 알고 컨트롤러를 안 열어봤다.
 
-```ts
-const headers: Record<string, string> = {
-  'Content-Type': 'application/json',
-  ...
-};
+```java
+@PostMapping("/products/{productId}")
+public ResponseEntity<...> reportProduct(
+        @PathVariable Long productId,
+        @Valid @RequestBody ProductReportRequest request   // @RequestBody = JSON
+)
 ```
 
-신고는 **FormData**로 보내야 한다. React Native의 `fetch`는 FormData를 주면 `multipart/form-data; boundary=...`를 **스스로** 붙이는데, 우리가 먼저 넣으면 boundary가 없어 서버가 파싱을 못 한다.
+`@ModelAttribute`도 `@RequestPart`도 아니다. 그리고 컨트롤러 주석이 이미지 처리까지 못 박아 뒀다.
 
-**body가 FormData면 Content-Type을 빼도록 고친다.** 이미지 첨부를 뺐어도 웹이 FormData로 보내니 서버가 그걸 기대한다 — 피할 수 없다.
+> *"이미지는 별도 이미지 업로드 API(`POST /api/images`)를 통해 업로드한 후 반환된 URL 리스트를 `imageUrls` 필드에 전달합니다."*
+
+즉 **이미지도 JSON 안의 URL 목록**이다. FormData는 애초에 필요가 없다.
+
+그래서 이렇게 된다.
+
+```
+지금 (이미지 없음)   JSON { reasonCodes, detailReason }              → apiFetch 그대로
+나중 (이미지 추가)   POST /api/images 로 올려 URL을 받고
+                    JSON { reasonCodes, detailReason, imageUrls }   → 그래도 apiFetch 그대로
+```
+
+**앱의 모든 API가 지나는 길목을 안 건드린다.** 이미지를 나중에 얹어도 마찬가지다.
+
+> ⚠️ 곁가지 — **웹이 지금 잘못 보내고 있을 수 있다.** `@RequestBody`에 FormData를 보내면 보통 415가 난다. 웹에서 신고가 실제로 되고 있는지 확인할 거리다. 이번 범위 밖이므로 별도로 본다.
 
 ### ② 상품 상세 응답에 `isBlocked`가 없다
 
