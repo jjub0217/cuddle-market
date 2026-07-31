@@ -139,7 +139,7 @@ export function SignUpForm() {
 
   return (
     <form
-      className="md:bg-surface md:border-outline-variant/10 flex w-full flex-col gap-14 px-10 md:rounded-3xl md:border md:py-7 md:shadow-2xl"
+      className="bg-surface border-outline-variant/10 flex w-full flex-col gap-14 rounded-3xl border px-6 py-8 shadow-lg md:px-10 md:py-7 md:shadow-2xl"
       onSubmit={handleSubmit(onSubmit)}
     >
       <div className="hidden md:block">
@@ -152,6 +152,7 @@ export function SignUpForm() {
             register={register}
             errors={errors}
             control={control}
+            setValue={setValue}
             setIsEmailVerified={setIsEmailVerified}
             setIsEmailCodeVerified={setIsEmailCodeVerified}
             clearErrors={clearErrors}

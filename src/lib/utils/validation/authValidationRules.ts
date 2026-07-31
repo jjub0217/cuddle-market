@@ -1,6 +1,28 @@
 import type { ProfileUpdateBaseFormValues, ProfileUpdatePasswordFormValues } from '@/types/forms'
 import type { RegisterOptions } from 'react-hook-form'
 
+export const PASSWORD_MIN = 10
+export const PASSWORD_MAX = 30
+
+/** 대문자·소문자·숫자·특수문자를 각각 하나씩은 갖춰야 한다. */
+export const PASSWORD_PATTERN = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()]).+$/
+
+/**
+ * 비밀번호 조건을 하나씩 따로 알려준다.
+ *
+ * react-hook-form의 error는 "첫 번째로 걸린 문제" 하나만 준다. 길이를 채우면
+ * 그제서야 구성이 모자라다는 걸 알게 되어 사용자가 한 번에 하나씩 더듬어야 한다.
+ * 조건을 모두 펼쳐 두면 무엇이 남았는지 바로 보인다.
+ *
+ * 앱도 같은 함수를 쓴다(mobile/lib/signup/validation.ts의 passwordRules).
+ */
+export function passwordRules(value: string): { length: boolean; composition: boolean } {
+  return {
+    length: value.length >= PASSWORD_MIN && value.length <= PASSWORD_MAX,
+    composition: PASSWORD_PATTERN.test(value),
+  }
+}
+
 /**
  * 인증 관련 폼(로그인, 회원가입)에서 공통으로 사용되는 validation 규칙
  */

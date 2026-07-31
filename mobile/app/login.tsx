@@ -5,6 +5,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Text,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -57,6 +58,18 @@ export default function LoginScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <LoginForm onSuccess={close} />
+
+          {/* 웹도 로그인 폼 아래에 같은 자리로 둔다(SignUpForm.tsx:195-200). */}
+          <Pressable
+            onPress={() => router.push('/signup')}
+            accessibilityRole="button"
+            hitSlop={8}
+            style={({ pressed }) => [styles.signupLink, pressed && styles.signupLinkPressed]}
+          >
+            <Text style={styles.signupLinkText}>
+              아직 계정이 없으신가요? <Text style={styles.signupLinkStrong}>회원가입하기</Text>
+            </Text>
+          </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -84,5 +97,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 32,
+  },
+  signupLink: {
+    marginTop: 24,
+    alignItems: 'center',
+  },
+  signupLinkPressed: {
+    opacity: 0.6,
+  },
+  signupLinkText: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  signupLinkStrong: {
+    fontWeight: '600',
+    color: '#111827',
   },
 });
