@@ -645,8 +645,29 @@ interface SignupForm {
 
 `mobile/lib/signup/use-signup-form.test.ts`
 
+> ⚠️ **함정 둘 (실제로 걸렸다).**
+> 1. **RTL v14의 `renderHook`은 Promise를 돌려준다.** React 19에 맞추며 비동기가 됐다.
+>    `const { result } = await renderHook(...)`로 써야 한다. `await`를 빠뜨리면
+>    `result`가 `undefined`가 되고, 모든 테스트가 `Cannot read properties of undefined
+>    (reading 'current')`로 죽는다. 원인이 훅에 있는 것처럼 보여 헤매기 쉽다.
+> 2. **`jest.mock('./api')` 통짜 automock은 `SignUpRejectedError`까지 빈 껍데기로 만든다.**
+>    생성자가 아무 일도 안 해서 `message`가 `''`가 된다. 서버 문구를 확인하는 테스트가
+>    깨진다. 서버 호출 다섯 개만 가짜로 바꾸고 오류 클래스는 진짜를 써야 한다.
+>
+> 그리고 동기 `act(() => ...)`와 비동기 `await act(async () => ...)`를 섞으면
+> "overlapping act() calls" 경고가 쏟아진다. **전부 `await act(async () => ...)`로 통일한다.**
+
 ```ts
-jest.mock('./api');
+// 서버 호출 다섯 개만 가짜로 바꾸고 SignUpRejectedError는 진짜를 쓴다.
+// 통째로 automock하면 오류 클래스의 생성자까지 빈 껍데기가 되어 message가 사라진다.
+jest.mock('./api', () => ({
+  ...jest.requireActual('./api'),
+  checkEmailAvailable: jest.fn(),
+  sendVerificationCode: jest.fn(),
+  verifyCode: jest.fn(),
+  checkNicknameAvailable: jest.fn(),
+  signUp: jest.fn(),
+}));
 jest.mock('../auth/session');
 
 import { act, renderHook, waitFor } from '@testing-library/react-native';
@@ -688,7 +709,7 @@ afterEach(() => {
 
 describe('인증 흐름', () => {
   it('코드를 보내면 sent가 되고 타이머가 299초부터 내려간다', async () => {
-    const { result } = renderHook(() => useSignupForm());
+    const { result } = await renderHook(() => useSignupForm());
 
     act(() => result.current.setValue('email', 'me@cuddle.com'));
     await act(async () => {
@@ -706,7 +727,7 @@ describe('인증 흐름', () => {
 
   it('이미 가입된 이메일이면 코드를 안 보내고 오류를 남긴다', async () => {
     mockedApi.checkEmailAvailable.mockResolvedValue(false);
-    const { result } = renderHook(() => useSignupForm());
+    const { result } = await renderHook(() => useSignupForm());
 
     act(() => result.current.setValue('email', 'taken@cuddle.com'));
     await act(async () => {
@@ -719,7 +740,7 @@ describe('인증 흐름', () => {
   });
 
   it('코드가 맞으면 verified가 된다', async () => {
-    const { result } = renderHook(() => useSignupForm());
+    const { result } = await renderHook(() => useSignupForm());
 
     act(() => result.current.setValue('email', 'me@cuddle.com'));
     await act(async () => {
@@ -734,7 +755,7 @@ describe('인증 흐름', () => {
   });
 
   it('인증이 끝난 뒤 sendCode를 불러도 서버를 안 부른다', async () => {
-    const { result } = renderHook(() => useSignupForm());
+    const { result } = await renderHook(() => useSignupForm());
 
     act(() => result.current.setValue('email', 'me@cuddle.com'));
     await act(async () => {
@@ -754,7 +775,7 @@ describe('인증 흐름', () => {
   });
 
   it('changeEmail을 부르면 idle로 돌아가고 코드가 비워진다', async () => {
-    const { result } = renderHook(() => useSignupForm());
+    const { result } = await renderHook(() => useSignupForm());
 
     act(() => result.current.setValue('email', 'me@cuddle.com'));
     await act(async () => {
@@ -772,7 +793,7 @@ describe('인증 흐름', () => {
   });
 
   it('5분이 지나면 idle로 돌아간다', async () => {
-    const { result } = renderHook(() => useSignupForm());
+    const { result } = await renderHook(() => useSignupForm());
 
     act(() => result.current.setValue('email', 'me@cuddle.com'));
     await act(async () => {
@@ -788,7 +809,7 @@ describe('인증 흐름', () => {
 
 describe('닉네임 중복체크', () => {
   it('중복체크를 다시 하기 전에는 nicknameChecked가 꺼진다', async () => {
-    const { result } = renderHook(() => useSignupForm());
+    const { result } = await renderHook(() => useSignupForm());
 
     act(() => result.current.setValue('nickname', '주현'));
     await act(async () => {
@@ -803,7 +824,7 @@ describe('닉네임 중복체크', () => {
 
 describe('canGoNext (B안 1단계)', () => {
   it('인증이 끝나고 비밀번호가 맞아야 켜진다', async () => {
-    const { result } = renderHook(() => useSignupForm());
+    const { result } = await renderHook(() => useSignupForm());
 
     act(() => result.current.setValue('email', 'me@cuddle.com'));
     await act(async () => {
@@ -825,7 +846,7 @@ describe('canGoNext (B안 1단계)', () => {
 
 describe('submit', () => {
   it('가입에 성공하면 곧바로 로그인하고 true를 돌려준다', async () => {
-    const { result } = renderHook(() => useSignupForm());
+    const { result } = await renderHook(() => useSignupForm());
 
     act(() => result.current.setValue('email', 'me@cuddle.com'));
     await act(async () => {
@@ -862,7 +883,7 @@ describe('submit', () => {
     mockedApi.signUp.mockRejectedValue(
       new api.SignUpRejectedError('이미 사용 중인 닉네임입니다.')
     );
-    const { result } = renderHook(() => useSignupForm());
+    const { result } = await renderHook(() => useSignupForm());
 
     act(() => result.current.setValue('email', 'me@cuddle.com'));
     await act(async () => {
