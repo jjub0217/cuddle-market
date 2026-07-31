@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { ChevronLeft } from 'lucide-react-native';
+import { ChevronLeft, EllipsisVertical } from 'lucide-react-native';
 
 // 상세 화면 헤더(뒤로가기만, 타이틀 없음 — 설계 §4).
 //
@@ -15,7 +15,15 @@ import { ChevronLeft } from 'lucide-react-native';
 /** 헤더 막대 높이. 홈 헤더(52)와 같은 값이라 화면 전환 시 위치가 흔들리지 않는다. */
 const HEADER_HEIGHT = 52;
 
-export function DetailHeader() {
+interface Props {
+  /**
+   * 넘기면 오른쪽에 ⋮ 가 붙는다. 안 넘기면 안 그린다 —
+   * 내 상품일 때는 신고·차단이 의미가 없어서 부르는 쪽이 뺀다(#805).
+   */
+  onMorePress?: () => void;
+}
+
+export function DetailHeader({ onMorePress }: Props) {
   const router = useRouter();
 
   return (
@@ -30,6 +38,18 @@ export function DetailHeader() {
       >
         <ChevronLeft size={26} color="#111827" />
       </Pressable>
+
+      {onMorePress ? (
+        <Pressable
+          onPress={onMorePress}
+          hitSlop={12}
+          accessibilityRole="button"
+          accessibilityLabel="더보기"
+          style={({ pressed }) => (pressed ? styles.backPressed : undefined)}
+        >
+          <EllipsisVertical size={24} color="#111827" />
+        </Pressable>
+      ) : null}
     </View>
   );
 }
@@ -38,6 +58,7 @@ const styles = StyleSheet.create({
   header: {
     height: HEADER_HEIGHT,
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
