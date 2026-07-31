@@ -1,15 +1,7 @@
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import {
-  ActivityIndicator,
-  Linking,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { LogoutModal } from '@/components/my/logout-modal';
@@ -23,12 +15,11 @@ import { useAuthStore } from '@/lib/auth/store';
 //
 // 「내 상품 관리」·「찜한 상품」 메뉴는 아직 넣지 않는다 —
 // 눌러도 갈 화면이 없어서 "준비 중" 같은 군더더기가 생긴다. 다음 바퀴에 화면과 함께 넣는다.
-
-const SUPPORT_MAIL = 'mailto:devel.jjub@gmail.com?subject=커들마켓 1:1 문의';
-
-// 개인정보처리방침은 웹 페이지를 그대로 연다. 앱에서 따로 그리지 않는다 —
-// 법 문서는 한 곳에서만 고쳐야 웹과 앱이 어긋나지 않는다.
-const PRIVACY_URL = 'https://cuddle-market.vercel.app/privacy';
+//
+// 「고객지원」 묶음(고객센터·개인정보처리방침)은 헤더 햄버거로 옮겼다(#806).
+// 로그인 없이도 닿아야 하는 것은 햄버거, 로그인해야 의미 있는 것은 마이 — 가 기준인데
+// 이 화면은 로그인해야 열려서, 여기 두면 로그아웃한 사람은 방침에 닿을 길이 없었다.
+// 주소·메일 상수도 lib/support-links.ts로 옮겼다.
 
 export default function MyScreen() {
   const router = useRouter();
@@ -102,19 +93,6 @@ export default function MyScreen() {
           <SectionRow label="판매 내역" onPress={() => router.push('/(tabs)/(my)/my-products')} />
           <SectionRow label="구매 내역" onPress={() => router.push('/(tabs)/(my)/my-purchases')} />
           <SectionRow label="찜한 상품" onPress={() => router.push('/(tabs)/(my)/my-favorites')} />
-        </SectionCard>
-
-        {/* 개인정보처리방침은 원래 햄버거 오버레이에 들어갈 것이다 —
-            로그인 없이도 닿아야 하는 것은 햄버거, 로그인해야 의미 있는 것은 마이,
-            가 웹과 앱의 공통 기준이다(웹 모바일은 이미 그렇게 되어 있다).
-
-            그런데 앱에는 아직 헤더가 없어서 햄버거를 열 자리가 없다. 헤더는 8바퀴에
-            알림·검색과 함께 만든다 — 지금 만들면 알림 아이콘이 갈 곳 없는 껍데기가 된다.
-            그때까지 앱에서 방침에 닿을 길이 아예 없으면 안 되므로 임시로 여기 둔다.
-            헤더가 생기면 이 줄을 햄버거로 옮긴다. */}
-        <SectionCard title="고객지원">
-          <SectionRow label="고객센터" onPress={() => Linking.openURL(SUPPORT_MAIL)} />
-          <SectionRow label="개인정보처리방침" onPress={() => Linking.openURL(PRIVACY_URL)} />
         </SectionCard>
 
         <SectionCard title="계정">
