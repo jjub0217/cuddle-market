@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import Feather from '@expo/vector-icons/Feather';
 import {
   NOTIFICATION_COLORS,
   NOTIFICATION_ICONS,
@@ -44,7 +44,7 @@ export function NotificationRow({ item, onPress }: Props) {
       style={({ pressed }) => [styles.row, !item.isRead && styles.unread, pressed && styles.pressed]}
     >
       <View style={[styles.icon, { backgroundColor: color.bg }]}>
-        <IconSymbol
+        <Feather
           name={NOTIFICATION_ICONS[item.notificationType]}
           size={20}
           color={color.icon}

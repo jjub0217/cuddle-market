@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { LogoutModal } from '@/components/my/logout-modal';
@@ -10,16 +10,19 @@ import { WithdrawModal } from '@/components/my/withdraw-modal';
 import { AppHeader } from '@/components/ui/app-header';
 import { useMe } from '@/hooks/use-me';
 import { useAuthStore } from '@/lib/auth/store';
+import { ACCOUNT_DELETION_URL, PRIVACY_URL, SUPPORT_MAIL_URL } from '@/lib/support-links';
 
 // 마이페이지. 웹 모바일 마이페이지와 같은 카드 결.
 //
 // 「내 상품 관리」·「찜한 상품」 메뉴는 아직 넣지 않는다 —
 // 눌러도 갈 화면이 없어서 "준비 중" 같은 군더더기가 생긴다. 다음 바퀴에 화면과 함께 넣는다.
 //
-// 「고객지원」 묶음(고객센터·개인정보처리방침)은 헤더 햄버거로 옮겼다(#806).
-// 로그인 없이도 닿아야 하는 것은 햄버거, 로그인해야 의미 있는 것은 마이 — 가 기준인데
-// 이 화면은 로그인해야 열려서, 여기 두면 로그아웃한 사람은 방침에 닿을 길이 없었다.
-// 주소·메일 상수도 lib/support-links.ts로 옮겼다.
+// 「고객지원」 묶음은 헤더 햄버거에도 있고 여기에도 있다 — 일부러 중복이다.
+// 웹이 푸터와 모바일 내비 양쪽에 두고 있어 그것을 따랐다. 찾는 사람이 어느 쪽으로
+// 가든 닿아야 한다.
+//
+// 한때 여기서 지우고 햄버거로만 뒀는데(#806), 웹이 중복인데 앱만 한 곳으로 몰 이유가
+// 없어 되살렸다. 주소·메일 상수는 lib/support-links.ts에 있어 두 화면이 같이 쓴다.
 
 export default function MyScreen() {
   const router = useRouter();
@@ -93,6 +96,12 @@ export default function MyScreen() {
           <SectionRow label="판매 내역" onPress={() => router.push('/(tabs)/(my)/my-products')} />
           <SectionRow label="구매 내역" onPress={() => router.push('/(tabs)/(my)/my-purchases')} />
           <SectionRow label="찜한 상품" onPress={() => router.push('/(tabs)/(my)/my-favorites')} />
+        </SectionCard>
+
+        <SectionCard title="고객지원">
+          <SectionRow label="고객센터" onPress={() => Linking.openURL(SUPPORT_MAIL_URL)} />
+          <SectionRow label="개인정보처리방침" onPress={() => Linking.openURL(PRIVACY_URL)} />
+          <SectionRow label="계정 삭제 안내" onPress={() => Linking.openURL(ACCOUNT_DELETION_URL)} />
         </SectionCard>
 
         <SectionCard title="계정">

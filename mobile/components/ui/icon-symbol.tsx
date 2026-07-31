@@ -34,21 +34,9 @@ const MAPPING = {
   // ⚠️ 왼쪽 키는 반드시 **실제로 있는 SF Symbol 이름**이어야 한다.
   // iOS판(icon-symbol.ios.tsx)은 이 이름을 SymbolView에 그대로 넘기기 때문에,
   // 지어낸 이름을 쓰면 안드로이드에서는 멀쩡한데 iOS에서만 아이콘이 안 뜬다.
-  // 계획서에 적혀 있던 'bell.chat.new'·'bell.heart.broken' 같은 이름은 SF Symbol에
-  // 없어서 tsc가 막았다 — 아래처럼 뜻이 같은 실제 이름으로 바꿨다.
-  // 헤더 햄버거(#806). MaterialIcons 쪽은 'menu'인데, 왼쪽 키를 'menu'로 두면
-  // 안 된다 — SF Symbol에 그런 이름이 없어서 위 ⚠️대로 tsc가 막는다(실제로 막혔다).
-  // 세 줄 짜리 햄버거의 SF Symbol 이름은 'line.3.horizontal'이다.
-  'line.3.horizontal': 'menu',
-  bell: 'notifications-none',
-  'plus.bubble': 'add-comment', // 계획서의 'bell.chat.new' 대체
-  message: 'chat', // 계획서의 'bell.chat' 대체
-  'heart.slash': 'heart-broken', // 계획서의 'bell.heart.broken' 대체
-  tag: 'local-offer', // 계획서의 'bell.tag' 대체
-  'exclamationmark.shield': 'gpp-maybe', // 계획서의 'bell.shield' 대체
-  trash: 'delete', // 계획서의 'bell.trash' 대체
-  'arrowshape.turn.up.left': 'reply', // 계획서의 'bell.reply' 대체
-  'bubble.left': 'comment', // 계획서의 'bell.comment' 대체
+  // (한때 알림·햄버거 아이콘도 여기 있었는데 Feather로 옮겨 지웠다 — MaterialIcons는
+  //  선이 굵고 각져서, 웹이 쓰는 Lucide와 나란히 두면 다른 앱처럼 보였다.
+  //  Feather는 Lucide의 뿌리라 모양이 거의 같다. 아이콘을 새로 더할 때 참고할 것.)
 } as IconMapping;
 
 /**

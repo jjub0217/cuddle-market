@@ -4,8 +4,9 @@ import { useRouter } from 'expo-router';
 import { useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { AppMenuSheet } from '@/components/ui/app-menu-sheet';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import Feather from '@expo/vector-icons/Feather';
+
+import { AppMenuOverlay } from '@/components/ui/app-menu-overlay';
 import { useAuthStore } from '@/lib/auth/store';
 import { fetchUnreadCount } from '@/lib/notifications';
 
@@ -54,7 +55,7 @@ export function AppHeader({ left }: Props) {
             accessibilityLabel={unreadCount > 0 ? '알림 (읽지 않은 알림 있음)' : '알림'}
             style={({ pressed }) => (pressed ? styles.iconPressed : undefined)}
           >
-            <IconSymbol name="bell" size={26} color="#111827" />
+            <Feather name="bell" size={24} color="#111827" />
             {unreadCount > 0 ? <View style={styles.dot} /> : null}
           </Pressable>
         ) : null}
@@ -70,11 +71,11 @@ export function AppHeader({ left }: Props) {
           accessibilityLabel="메뉴"
           style={({ pressed }) => (pressed ? styles.iconPressed : undefined)}
         >
-          <IconSymbol name="line.3.horizontal" size={26} color="#111827" />
+          <Feather name="menu" size={24} color="#111827" />
         </Pressable>
       </View>
 
-      <AppMenuSheet visible={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+      <AppMenuOverlay visible={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
     </View>
   );
 }
@@ -97,7 +98,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
+    // 로고 이미지에 자체 좌우 여백이 들어 있어, 양쪽을 16으로 두면 왼쪽이 더 떠 보인다.
+    // 눈에 보이는 여백을 맞추려고 왼쪽만 줄인다.
+    paddingLeft: 8,
+    paddingRight: 16,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E5E7EB',

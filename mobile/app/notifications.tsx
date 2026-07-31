@@ -4,9 +4,10 @@ import * as WebBrowser from 'expo-web-browser';
 import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { EmptyState, ErrorState, ListFooter, LoadingState } from '@/components/list-states';
+import { EmptyState, ErrorState, ListFooter } from '@/components/list-states';
+import { NotificationSkeleton } from '@/components/notifications/notification-skeleton';
 import { NotificationRow } from '@/components/notifications/notification-row';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import Feather from '@expo/vector-icons/Feather';
 import { apiBaseUrl } from '@/lib/auth/api';
 import {
   fetchNotifications,
@@ -78,7 +79,7 @@ export default function NotificationsScreen() {
   };
 
   const renderBody = () => {
-    if (isLoading) return <LoadingState />;
+    if (isLoading) return <NotificationSkeleton />;
     if (isError) return <ErrorState onRetry={() => refetch()} title="알림을 불러오지 못했어요." />;
     if (items.length === 0)
       return (
@@ -113,7 +114,7 @@ export default function NotificationsScreen() {
           accessibilityLabel="닫기"
           style={({ pressed }) => (pressed ? styles.pressed : undefined)}
         >
-          <IconSymbol name="chevron.left" size={26} color="#111827" />
+          <Feather name="chevron-left" size={24} color="#111827" />
         </Pressable>
         <Text style={styles.heading}>알림</Text>
         <Pressable onPress={handleReadAll} hitSlop={8} accessibilityRole="button">

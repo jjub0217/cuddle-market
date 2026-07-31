@@ -1,6 +1,9 @@
-import type { IconSymbolName } from '@/components/ui/icon-symbol';
+import type Feather from '@expo/vector-icons/Feather';
 
 import { apiFetch } from './auth/api';
+
+/** Feather가 아는 아이콘 이름. 오타를 tsc가 잡아준다. */
+type FeatherIconName = React.ComponentProps<typeof Feather>['name'];
 
 // 알림 API와 규칙을 한 곳에 모은다.
 // 헤더(안 읽은 수)와 목록 화면(전부)이 같은 재료를 쓰므로, 두 군데에 흩어지면 어긋난다.
@@ -57,15 +60,15 @@ export const NOTIFICATION_MESSAGES: Record<NotificationType, string> = {
  *
  * `import type`이라 컴파일 뒤에는 사라진다 — 이 파일은 화면 코드를 안 끌어온다.
  */
-export const NOTIFICATION_ICONS: Record<NotificationType, IconSymbolName> = {
-  CHAT_NEW_ROOM: 'plus.bubble',
-  CHAT_NEW_MESSAGE: 'message',
-  PRODUCT_FAVORITE_STATUS_CHANGED: 'heart.slash',
+export const NOTIFICATION_ICONS: Record<NotificationType, FeatherIconName> = {
+  CHAT_NEW_ROOM: 'message-square',
+  CHAT_NEW_MESSAGE: 'message-circle',
+  PRODUCT_FAVORITE_STATUS_CHANGED: 'heart',
   PRODUCT_FAVORITE_PRICE_CHANGED: 'tag',
-  ADMIN_SANCTION: 'exclamationmark.shield',
-  POST_DELETED: 'trash',
-  COMMENT_REPLY: 'arrowshape.turn.up.left',
-  POST_COMMENT: 'bubble.left',
+  ADMIN_SANCTION: 'alert-triangle',
+  POST_DELETED: 'trash-2',
+  COMMENT_REPLY: 'corner-up-left',
+  POST_COMMENT: 'message-square',
 };
 
 /**
