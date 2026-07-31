@@ -36,6 +36,9 @@ export default function RootLayout() {
           <Stack.Screen name="signup" options={{ headerShown: false }} />
           {/* 헤더는 화면이 직접 그린다(login과 같은 이유). */}
           <Stack.Screen name="notifications" options={{ headerShown: false }} />
+          {/* 헤더는 화면이 직접 그린다(login과 같은 이유).
+              탭 안이 아니라 루트에 두는 이유: 집중해서 끝내는 화면이라 탭바가 보이면 안 된다. */}
+          <Stack.Screen name="report" options={{ headerShown: false }} />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>
