@@ -13,6 +13,7 @@ import NotificationItem from './notification-section/NotificationItem'
 import { useRouter, usePathname } from 'next/navigation'
 import { getNavigationPath } from '@/lib/utils/getNavigationPath'
 import NotificationsSkeleton from './notification-section/NotificationsSkeleton'
+import NotificationsEmpty from './notification-section/NotificationsEmpty'
 import { chatSocketStore } from '@/store/chatSocketStore'
 
 interface MobileNotificationsOverlayProps {
@@ -191,7 +192,7 @@ export default function MobileNotificationsOverlay({ isOpen, onClose }: MobileNo
             <div ref={observerTargetRef} className="h-1" />
           </>
         ) : (
-          <div className="flex h-32 items-center justify-center text-sm text-gray-500">표시할 알림이 없습니다.</div>
+          <NotificationsEmpty className="h-32" />
         )}
       </div>
     </div>

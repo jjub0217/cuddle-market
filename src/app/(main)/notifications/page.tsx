@@ -10,6 +10,7 @@ import { getNavigationPath } from '@/lib/utils/getNavigationPath'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import { chatSocketStore } from '@/store/chatSocketStore'
 import NotificationsSkeleton from '@/components/header/components/notification-section/NotificationsSkeleton'
+import NotificationsEmpty from '@/components/header/components/notification-section/NotificationsEmpty'
 import { ArrowLeft } from 'lucide-react'
 
 export default function NotificationsPage() {
@@ -121,7 +122,7 @@ export default function NotificationsPage() {
             <div ref={observerTargetRef} className="h-1" />
           </>
         ) : (
-          <div className="flex h-64 items-center justify-center text-sm text-gray-500">표시할 알림이 없습니다.</div>
+          <NotificationsEmpty className="h-64" />
         )}
       </div>
     </div>
