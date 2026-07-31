@@ -10,7 +10,6 @@ import { ROUTES } from '@/constants/routes'
 import { MessageCircle, Bell } from 'lucide-react'
 import IconButton from '@/components/commons/button/IconButton'
 import NotificationsDropdown from './notification-section/NotificationsDropdown'
-import MobileNotificationsOverlay from './MobileNotificationsOverlay'
 import { useQuery } from '@tanstack/react-query'
 import { fetchGraphQL } from '@/lib/api/graphql'
 import { useNotificationSSE } from '@/hooks/useNotifications'
@@ -20,13 +19,29 @@ interface UserControlsProps {
   isSideOpen: boolean
   setIsSideOpen: React.Dispatch<React.SetStateAction<boolean>>
   hideMenuButton?: boolean
+  /**
+   * 모바일 알림 오버레이를 연다.
+   *
+   * 오버레이를 여기서 그리지 않고 Header가 그리는 이유:
+   * 헤더는 솔리드 상태일 때 backdrop-blur-sm을 쓴다. backdrop-filter가 걸린 요소는
+   * 그 안의 position:fixed 자식에게 「기준 상자」가 되어(transform·filter와 같은 규칙),
+   * fixed inset-0이 화면 전체가 아니라 헤더 높이로 잡힌다.
+   * 게다가 헤더의 z-30이 쌓임 맥락을 만들어 오버레이의 z-[100]이 바깥에서
+   * z-30으로 취급된다 — 같은 z-30인 FAB이 DOM에서 뒤라 위에 그려진다.
+   * 두 증상 모두 헤더 밖으로 빼면 사라진다(#804).
+   */
+  onOpenMobileNotifications: () => void
 }
 
-export default function UserControls({ isSideOpen, setIsSideOpen, hideMenuButton = false }: UserControlsProps) {
+export default function UserControls({
+  isSideOpen,
+  setIsSideOpen,
+  hideMenuButton = false,
+  onOpenMobileNotifications,
+}: UserControlsProps) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const user = useUserStore((state) => state.user)
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
-  const [isMobileNotificationOpen, setIsMobileNotificationOpen] = useState(false)
   const { isLogin } = useUserStore()
   const hasHydrated = useUserStore((state) => state._hasHydrated)
   const router = useRouter()
@@ -34,7 +49,7 @@ export default function UserControls({ isSideOpen, setIsSideOpen, hideMenuButton
   useNotificationSSE()
   const handleBellToggle = () => {
     if (isMobile) {
-      setIsMobileNotificationOpen(true)
+      onOpenMobileNotifications()
     } else {
       setIsNotificationOpen((prev) => !prev)
     }
@@ -53,46 +68,38 @@ export default function UserControls({ isSideOpen, setIsSideOpen, hideMenuButton
   })
 
   return (
-    <>
-      <div className="flex items-center gap-2 xl:gap-4">
-        {hasHydrated && isLogin() ? (
-          <div className="flex items-center gap-1">
-            <Link href={ROUTES.CHAT} className="ml-1 hidden xl:block" aria-label="채팅">
-              <MessageCircle className="text-primary" strokeWidth={1.5} size={20} />
-            </Link>
-            <div className="relative" onClick={handleBellToggle}>
-              <IconButton aria-label="알림" size="lg" className="hover:bg-transparent">
-                <Bell size={isMobile ? 24 : 20} strokeWidth={isMobile ? 2 : 1.5} className="text-primary" />
-              </IconButton>
-              {(unreadCountData?.unreadCount ?? 0) > 0 ? (
-                <span
-                  className="bg-danger-500 absolute top-1 right-1 size-2 rounded-full"
-                  aria-label={`읽지 않은 알림 ${unreadCountData?.unreadCount}개`}
-                />
-              ) : null}
-              {isNotificationOpen ? (
-                <NotificationsDropdown isNotificationOpen={isNotificationOpen} setIsNotificationOpen={setIsNotificationOpen} />
-              ) : null}
-            </div>
-            <UserMenu
-              isNotificationOpen={false}
-              setIsNotificationOpen={setIsNotificationOpen}
-              isUserMenuOpen={isUserMenuOpen}
-              setIsUserMenuOpen={setIsUserMenuOpen}
-              isSideOpen={isSideOpen}
-              setIsSideOpen={setIsSideOpen}
-            />
-          </div>
-        ) : (
-          <AuthMenu setIsSideOpen={setIsSideOpen} isSideOpen={isSideOpen} hideMenuButton={hideMenuButton} />
-        )}
-      </div>
+    <div className="flex items-center gap-2 xl:gap-4">
       {hasHydrated && isLogin() ? (
-        <MobileNotificationsOverlay
-          isOpen={isMobileNotificationOpen}
-          onClose={() => setIsMobileNotificationOpen(false)}
-        />
-      ) : null}
-    </>
+        <div className="flex items-center gap-1">
+          <Link href={ROUTES.CHAT} className="ml-1 hidden xl:block" aria-label="채팅">
+            <MessageCircle className="text-primary" strokeWidth={1.5} size={20} />
+          </Link>
+          <div className="relative" onClick={handleBellToggle}>
+            <IconButton aria-label="알림" size="lg" className="hover:bg-transparent">
+              <Bell size={isMobile ? 24 : 20} strokeWidth={isMobile ? 2 : 1.5} className="text-primary" />
+            </IconButton>
+            {(unreadCountData?.unreadCount ?? 0) > 0 ? (
+              <span
+                className="bg-danger-500 absolute top-1 right-1 size-2 rounded-full"
+                aria-label={`읽지 않은 알림 ${unreadCountData?.unreadCount}개`}
+              />
+            ) : null}
+            {isNotificationOpen ? (
+              <NotificationsDropdown isNotificationOpen={isNotificationOpen} setIsNotificationOpen={setIsNotificationOpen} />
+            ) : null}
+          </div>
+          <UserMenu
+            isNotificationOpen={false}
+            setIsNotificationOpen={setIsNotificationOpen}
+            isUserMenuOpen={isUserMenuOpen}
+            setIsUserMenuOpen={setIsUserMenuOpen}
+            isSideOpen={isSideOpen}
+            setIsSideOpen={setIsSideOpen}
+          />
+        </div>
+      ) : (
+        <AuthMenu setIsSideOpen={setIsSideOpen} isSideOpen={isSideOpen} hideMenuButton={hideMenuButton} />
+      )}
+    </div>
   )
 }
