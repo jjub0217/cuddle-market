@@ -5,6 +5,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Text,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -57,6 +58,25 @@ export default function LoginScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <LoginForm onSuccess={close} />
+
+          {/* ⚠️ 임시 — A안·B안을 실기기에서 비교하려고 둔다.
+              하나를 고른 뒤 이 블록과 진 쪽 화면을 지우고 진짜 통로를 만든다(#798). */}
+          <View style={styles.compare}>
+            <Pressable
+              onPress={() => router.push('/signup')}
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.compareButton, pressed && styles.comparePressed]}
+            >
+              <Text style={styles.compareLabel}>회원가입 (A안 · 한 화면)</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => router.push('/signup-b')}
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.compareButton, pressed && styles.comparePressed]}
+            >
+              <Text style={styles.compareLabel}>회원가입 (B안 · 2단계)</Text>
+            </Pressable>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -84,5 +104,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 32,
+  },
+  // ⚠️ 임시 (#798)
+  compare: {
+    gap: 8,
+    marginTop: 24,
+  },
+  compareButton: {
+    height: 44,
+    borderRadius: 8,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#E5E7EB',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  comparePressed: {
+    opacity: 0.6,
+  },
+  compareLabel: {
+    fontSize: 14,
+    color: '#6B7280',
   },
 });
