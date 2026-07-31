@@ -1,11 +1,19 @@
 import type { SellerInfo } from '@cuddle/shared';
 import { Image } from 'expo-image';
+import { useRouter, useSegments } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+
+import { useAuthStore } from '@/lib/auth/store';
 
 // 판매자 프로필. 웹과 같은 위치(설명보다 위).
 // 프로필 이미지가 없으면(실측 null 가능) 닉네임 첫 글자를 동그라미에 넣는다.
-// 프로필로 이동하는 동작은 로그인이 있어야 해서 이번 바퀴에는 없다.
+//
+// 누르면 판매자 프로필로 간다(#805).
+//
+// 게스트면 프로필 대신 로그인 화면을 띄운다. 서버에 @PreAuthorize가 걸려 있어
+// 게스트가 열면 401만 받고 빈 화면을 보게 된다. 마이 탭이 쓰는 방식과 같다 —
+// 「들어간 뒤 밀어내기」가 아니라 「들어가기 전에 막기」라야 취소했을 때 제자리로 돌아온다.
 
 interface Props {
   seller: SellerInfo;
@@ -13,11 +21,34 @@ interface Props {
 
 export function SellerCard({ seller }: Props) {
   const [failed, setFailed] = useState(false);
+  const router = useRouter();
+  // string[]으로 넓히는 이유: useSegments()는 「있을 수 있는 경로들」의 튜플 유니온을
+  // 돌려주는데, 그러면 공통 원소 타입이 never라 includes()에 무엇도 넣을 수 없다.
+  const segments = useSegments() as string[];
+  const isAuthed = useAuthStore((state) => state.status) === 'authed';
   const location = [seller.addressSido, seller.addressGugun].filter(Boolean).join(' ');
   const showImage = Boolean(seller.sellerProfileImageUrl) && !failed;
 
+  const open = () => {
+    if (!isAuthed) {
+      router.push('/login');
+      return;
+    }
+
+    // 지금 어느 탭 스택에 있는지 보고 그 스택에 쌓는다.
+    // 그룹을 안 적으면 expo-router가 홈 탭으로 옮겨간 뒤 거기에 쌓아서, 찜 목록에서
+    // 들어왔을 때 뒤로 가면 원래 자리가 아니라 홈이 나온다(products/[id]와 같은 함정).
+    const group = segments.includes('(my)') ? '(my)' : '(home)';
+    router.push(`/(tabs)/${group}/users/${seller.sellerId}`);
+  };
+
   return (
-    <View style={styles.row}>
+    <Pressable
+      onPress={open}
+      accessibilityRole="button"
+      accessibilityLabel={`${seller.sellerNickname} 프로필 보기`}
+      style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+    >
       <View style={styles.avatar}>
         {showImage ? (
           <Image
@@ -37,7 +68,7 @@ export function SellerCard({ seller }: Props) {
         <Text style={styles.nickname}>{seller.sellerNickname}</Text>
         {location ? <Text style={styles.location}>{location}</Text> : null}
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -46,6 +77,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+  },
+  rowPressed: {
+    opacity: 0.6,
   },
   // 프로필 이미지가 없을 때만 보이는 자리표시자.
   // 웹 상세 아바타(bg-primary-50)와 같은 디자인 시스템 색(크림/베이지)으로 맞춘다.
