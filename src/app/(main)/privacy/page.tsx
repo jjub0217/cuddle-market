@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
+import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: '개인정보처리방침 | 커들마켓',
@@ -172,6 +173,13 @@ export default function PrivacyPage() {
               '법에 따라 보존해야 하는 정보는 다른 개인정보와 분리해 보관한 뒤, 기간이 지나면 파기합니다.',
             ]}
           />
+          <p>
+            계정을 지우는 구체적인 방법(앱에서 지우기 · 앱을 쓸 수 없을 때 요청하기)은{' '}
+            <Link href="/account-deletion" className="text-gray-900 underline">
+              계정 삭제 안내
+            </Link>
+            에서 보실 수 있습니다.
+          </p>
         </Section>
 
         <Section id="third-party" title="5. 개인정보의 제3자 제공">

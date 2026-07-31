@@ -43,6 +43,7 @@ export const ROUTES = {
 
   // Legal
   PRIVACY: '/privacy',
+  ACCOUNT_DELETION: '/account-deletion',
 
   // Admin Auth
   ADMIN_LOGIN: '/admin/login',
