@@ -29,6 +29,42 @@ NEXT_PUBLIC_WS_URL=https://cmarket-api.duckdns.org/ws-stomp
 - **Trouble Shooting DB**: `30ff2b30-7961-81ef-9e09-c0b983057b31`
 - **사용자 ID (강주현)**: `7c32774b-0096-4545-a9fe-7cfec90faa15`
 
+## 게이트 (검증 명령)
+
+**전부 저장소 루트에서 친다.**
+
+```bash
+pnpm gate:shared    # packages/shared — vitest
+pnpm gate:mobile    # 앱 — tsc + expo lint + jest
+pnpm gate           # 웹 — tsc + next build
+pnpm gate:all       # 셋 다 (shared → mobile → 웹 순)
+
+# 바뀐 파일만 lint (웹)
+git diff --name-only develop...HEAD -- 'src/**/*.ts*' 'packages/**/*.ts' | tr '\n' '\0' | xargs -0 npx eslint
+```
+
+- ⚠️ **`cd mobile` 뒤에 루트 명령을 치면 실패한다.** `pnpm build`·`git add docs/...`가 그렇다. `gate:mobile`은 이 함정을 없애려고 만들었다 — 루트에서 앱 게이트를 돌린다.
+- ⚠️ 전체 `pnpm lint`는 exit 1이 정상이다 (#788의 잔여 10건). 바뀐 파일만 본다.
+
+## 백엔드 저장소
+
+이 저장소가 **아니다**.
+
+```
+~/Desktop/cmarket_api    main에 직접 커밋·푸시 (전역 규칙의 예외)
+                         이 맥에서는 컴파일 불가 (JDK 11, 프로젝트는 21)
+                         모듈 둘을 다 뒤져야 한다:
+                           service/cmarket/          웹 계층 (컨트롤러·요청/응답 DTO)
+                           service/cmarket-domain/   도메인 (enum·모델)
+```
+
+**응답 DTO 찾는 법** — API를 붙일 때 「다른 API가 이러니 이것도 그렇겠지」로 추측하지 말고 직접 열어본다. 9바퀴에 이걸 안 해서 차단 목록이 늘 비어 있었다.
+
+```bash
+find ~/Desktop/cmarket_api -name "*Response.java" | grep -i <이름>
+grep -nE "private |public class" <그 파일>
+```
+
 ## 마이그레이션 가이드
 
 자세한 가이드는 `docs/migration-guide.md` 참고
