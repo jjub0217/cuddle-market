@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { TradeStatus } from '@/lib/product-actions';
 
-// 목록 위 상태 필터. 웹의 Tabs variant="card-pill"과 같은 모양이다.
+// 목록 위 칩 줄. 웹의 Tabs variant="card-pill"과 같은 모양이다.
 //
 // 왜 드롭다운이 아닌가:
 // 선택지가 넷뿐이라 한 줄에 다 보이고, 목록을 훑다가 바꾸는 동작이 한 번에 끝난다.
@@ -12,21 +12,29 @@ import type { TradeStatus } from '@/lib/product-actions';
 // 웹도 flex-wrap이다. 가로 ScrollView를 쓰면 세로 크기가 정해지지 않아 남는 공간을
 // 다 먹거나(빈 자리), 내용에 딱 맞추면 칩 테두리가 경계에 걸려 잘린다 — 둘 다 실기기에서 봤다.
 // 칩이 넷뿐이라 좁은 화면에서는 다음 줄로 넘기면 충분하다.
+//
+// 무엇을 고르는 칩인지는 이 조각이 모른다(제네릭 T). 마이 목록은 거래 상태를,
+// 판매자 프로필은 상품 종류(판매상품 · 판매요청)를 고른다 — 고르는 축은 다르지만
+// 생김새는 같아야 한다. 같은 앱에서 「목록 위에서 고르는 줄」이 두 모양이면 안 된다.
 
 export type StatusFilter = 'ALL' | TradeStatus;
 
-export interface FilterChip {
-  id: StatusFilter;
+export interface FilterChip<T extends string = StatusFilter> {
+  id: T;
   label: string;
 }
 
-interface Props {
-  chips: FilterChip[];
-  activeId: StatusFilter;
-  onChange: (id: StatusFilter) => void;
+interface Props<T extends string> {
+  chips: FilterChip<T>[];
+  activeId: T;
+  onChange: (id: T) => void;
 }
 
-export function StatusFilterChips({ chips, activeId, onChange }: Props) {
+export function StatusFilterChips<T extends string = StatusFilter>({
+  chips,
+  activeId,
+  onChange,
+}: Props<T>) {
   return (
     <View style={styles.row}>
       {chips.map((chip) => {

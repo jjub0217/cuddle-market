@@ -1,9 +1,12 @@
 import type { Product, ProductDetailItem } from '@cuddle/shared';
 import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { showToast } from '@/lib/toast';
+import { ProductActionSheet } from '@/components/my/product-action-sheet';
 import { Breadcrumb } from '@/components/product-detail/breadcrumb';
 import { DetailHeader } from '@/components/product-detail/detail-header';
 import {
@@ -15,6 +18,8 @@ import { FavoriteButton } from '@/components/product-detail/favorite-button';
 import { ImageCarousel } from '@/components/product-detail/image-carousel';
 import { ProductSummary } from '@/components/product-detail/product-summary';
 import { SellerCard } from '@/components/product-detail/seller-card';
+import { BlockConfirm } from '@/components/report/block-confirm';
+import { useMe } from '@/hooks/use-me';
 import { fetchProductDetail, ProductNotFoundError } from '@/lib/products';
 
 // 상품 상세. 읽기 전용.
@@ -71,6 +76,19 @@ export default function ProductDetailScreen() {
     // 없는 상품(404)은 다시 시도해도 소용없다.
     retry: (count, err) => !(err instanceof ProductNotFoundError) && count < 2,
   });
+
+  const { data: me } = useMe();
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isBlockOpen, setIsBlockOpen] = useState(false);
+
+  const seller = data?.sellerInfo;
+  // 내 상품에는 ⋮ 를 아예 안 그린다. 내 것을 신고·차단할 이유가 없다.
+  // (수정·삭제는 11바퀴 몫이라 이번엔 메뉴 자체가 없다.)
+  const isMine = Boolean(me && seller && me.id === seller.sellerId);
+  // sellerId > 0을 함께 보는 이유: 상세 응답이 오기 전에는 목록 캐시로 만든
+  // 밑그림이 쓰이는데, 그 sellerInfo.sellerId는 0인 자리표시자다(위 readListCachePlaceholder).
+  // 그때 ⋮ 를 그리면 0번 사용자를 신고·차단하게 된다.
+  const canReport = Boolean(seller && seller.sellerId > 0 && !isMine);
 
   // 로딩·오류·본문은 서로 섞지 않는다(홈 index.tsx의 renderBody와 같은 결).
   const renderBody = () => {
@@ -140,8 +158,47 @@ export default function ProductDetailScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <DetailHeader />
+      <DetailHeader onMorePress={canReport ? () => setIsSheetOpen(true) : undefined} />
       {renderBody()}
+
+      {data && seller ? (
+        <>
+          <ProductActionSheet
+            visible={isSheetOpen}
+            onClose={() => setIsSheetOpen(false)}
+            actions={[
+              {
+                label: '상품 신고하기',
+                onPress: () => {
+                  setIsSheetOpen(false);
+                  router.push({
+                    pathname: '/report',
+                    params: { kind: 'product', id: String(productId), name: data.title },
+                  });
+                },
+              },
+              {
+                label: '판매자 차단하기',
+                tone: 'danger',
+                onPress: () => {
+                  setIsSheetOpen(false);
+                  setIsBlockOpen(true);
+                },
+              },
+            ]}
+          />
+          <BlockConfirm
+            visible={isBlockOpen}
+            nickname={seller.sellerNickname}
+            userId={seller.sellerId}
+            onClose={() => setIsBlockOpen(false)}
+            onDone={() => {
+              setIsBlockOpen(false);
+              showToast('차단했습니다');
+            }}
+          />
+        </>
+      ) : null}
     </SafeAreaView>
   );
 }
