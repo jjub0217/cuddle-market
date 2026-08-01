@@ -8,7 +8,11 @@
     "start": "next start",
     "lint": "eslint",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "gate": "tsc --noEmit && next build",
+    "gate:mobile": "pnpm --filter ./mobile gate",
+    "gate:shared": "pnpm --filter @cuddle/shared test",
+    "gate:all": "pnpm gate:shared && pnpm gate:mobile && pnpm gate"
   },
   "dependencies": {
     "@cuddle/shared": "workspace:*",
