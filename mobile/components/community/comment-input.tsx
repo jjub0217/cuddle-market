@@ -41,6 +41,20 @@ interface CommentInputProps {
   onSubmit: (content: string) => Promise<boolean>;
   onCancelReply: () => void;
   submitting: boolean;
+  /**
+   * 게스트가 칸을 눌렀을 때. 로그인 화면으로 보낸다.
+   *
+   * 게스트에게는 칸 대신 **글이 안 써지는 단추**를 그린다 — 칸에 「로그인해 주세요」라고
+   * 적어 놓고 글이 써지면 말과 행동이 다르다.
+   */
+  onRequestLogin?: () => void;
+  /**
+   * 칸에 초점이 갔을 때.
+   *
+   * 상세 화면이 쓴다: 키보드가 올라오면 창이 좁아지는데 댓글은 **아래**에 있어
+   * 밀려난다. 칸을 누른 까닭은 댓글을 쓰려는 것이니 그 자리로 따라가야 한다.
+   */
+  onFocus?: () => void;
 }
 
 export function CommentInput({
@@ -49,6 +63,8 @@ export function CommentInput({
   onSubmit,
   onCancelReply,
   submitting,
+  onRequestLogin,
+  onFocus,
 }: CommentInputProps) {
   const [value, setValue] = useState('');
   const inputRef = useRef<TextInput>(null);
@@ -106,13 +122,36 @@ export function CommentInput({
 
   const isReplyInput = Boolean(replyTo) || isThread;
 
-  // 게스트에게는 왜 못 쓰는지 미리 알린다.
-  // 「등록」을 눌러야 로그인 화면이 뜨는데, 그때야 알면 헛걸음이다.
-  // 칸 자체는 막지 않는다 — 미리 쳐 둔 글은 로그인하고 돌아와도 남는다.
   const isGuest = useAuthStore((state) => state.status) !== 'authed';
   const placeholder = isGuest
     ? `${isReplyInput ? '답글' : '댓글'}을 입력하려면 로그인해 주세요`
     : `${isReplyInput ? '답글' : '댓글'}을 입력하세요`;
+
+  // 게스트에게는 **글이 안 써지는 단추**를 준다. 눌러 보면 바로 로그인 화면이다.
+  //
+  // 왜 다 쓴 뒤가 아니라 지금 막나: 칸에 「로그인해 주세요」라고 적어 놓고 글이 써지면
+  // 말과 행동이 다르다. 다 쓴 다음에 끊기는 것이 가장 나쁜 순간이기도 하다.
+  //
+  // ⚠️ 웹은 「등록」을 눌러야 로그인을 띄운다(CommentList onSubmit). 일부러 다르게 간다 —
+  //    웹은 그 자리에 작은 창이 뜨고 뒤 화면이 그대로 보이지만, 앱은 화면이 통째로 넘어간다.
+  if (isGuest) {
+    return (
+      <Pressable
+        onPress={onRequestLogin}
+        accessibilityRole="button"
+        accessibilityLabel={placeholder}
+        style={({ pressed }) => [styles.bar, pressed && styles.pressed]}
+      >
+        {/* 칸처럼 보이지만 TextInput이 아니다 — 키보드가 떴다가 화면이 넘어가면 어수선하다 */}
+        <View style={styles.input}>
+          <Text style={styles.guestPlaceholder}>{placeholder}</Text>
+        </View>
+        <View style={[styles.submit, styles.submitDisabled]}>
+          <Text style={styles.submitLabel}>등록</Text>
+        </View>
+      </Pressable>
+    );
+  }
 
   return (
     // ⚠️ 키보드 피하기는 **화면**이 맡는다(로그인 화면과 같은 방식).
@@ -137,6 +176,7 @@ export function CommentInput({
           onChangeText={handleChangeText}
           selection={selection}
           onSelectionChange={handleSelectionChange}
+          onFocus={onFocus}
           placeholder={placeholder}
           placeholderTextColor="#9CA3AF"
           style={styles.input}
@@ -165,6 +205,8 @@ export function CommentInput({
 }
 
 const styles = StyleSheet.create({
+  // 진짜 칸의 placeholder와 같은 색·크기로 둔다 — 눌러야 아는 차이여야 한다
+  guestPlaceholder: { fontSize: 15, color: '#9CA3AF' },
   replyBar: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -84,29 +84,51 @@ describe('커서를 언제 놓나', () => {
 });
 
 describe('게스트일 때', () => {
-  // 「등록」을 눌러야 로그인 화면이 뜬다. 그때야 알면 헛걸음이라 미리 알린다.
+  // 칸에 「로그인해 주세요」라고 적어 놓고 글이 써지면 말과 행동이 다르다.
+  // 그래서 글이 안 써지는 단추를 주고, 누르면 바로 로그인으로 보낸다.
+  //
+  // ⚠️ 웹은 「등록」을 눌러야 로그인을 띄운다. 일부러 다르게 간다 — 웹은 그 자리에
+  //    작은 창이 뜨지만 앱은 화면이 통째로 넘어가서, 다 쓴 뒤에 끊기면 더 나쁘다.
 
   it('댓글 칸에 로그인하라고 알린다', async () => {
     signOut();
     await renderInput(null);
 
-    expect(screen.getByPlaceholderText('댓글을 입력하려면 로그인해 주세요')).toBeTruthy();
+    expect(screen.getByText('댓글을 입력하려면 로그인해 주세요')).toBeTruthy();
   });
 
   it('답글 칸에도 알린다', async () => {
     signOut();
     await renderInput({ commentId: 34, nickname: '협주' });
 
-    expect(screen.getByPlaceholderText('답글을 입력하려면 로그인해 주세요')).toBeTruthy();
+    expect(screen.getByText('답글을 입력하려면 로그인해 주세요')).toBeTruthy();
   });
 
-  it('칸 자체를 막지는 않는다', async () => {
-    // 미리 쳐 둔 글은 로그인하고 돌아와도 남는다
+  it('글이 안 써진다', async () => {
+    // 진짜 칸이면 키보드가 떴다가 화면이 넘어가 어수선하다
     signOut();
     await renderInput(null);
 
-    const field = screen.getByPlaceholderText('댓글을 입력하려면 로그인해 주세요');
-    expect(field.props.editable).not.toBe(false);
+    expect(screen.queryByPlaceholderText('댓글을 입력하세요')).toBeNull();
+    expect(screen.queryByPlaceholderText('댓글을 입력하려면 로그인해 주세요')).toBeNull();
+  });
+
+  it('누르면 로그인으로 보낸다', async () => {
+    signOut();
+    const onRequestLogin = jest.fn();
+    await render(
+      <CommentInput
+        replyTo={null}
+        onSubmit={SUBMIT}
+        onCancelReply={NOOP}
+        submitting={false}
+        onRequestLogin={onRequestLogin}
+      />
+    );
+
+    await fireEvent.press(screen.getByText('댓글을 입력하려면 로그인해 주세요'));
+
+    expect(onRequestLogin).toHaveBeenCalled();
   });
 });
 

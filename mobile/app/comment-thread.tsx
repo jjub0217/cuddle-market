@@ -140,6 +140,9 @@ export default function CommentThreadScreen() {
           onSubmit={handleSubmit}
           onCancelReply={() => setReplyTo(null)}
           submitting={submitting}
+          onRequestLogin={() => router.push('/login')}
+          // 답글이 많으면 칸이 화면 밖이다. 누른 자리를 보여 준다.
+          onFocus={() => scrollRef.current?.scrollToEnd({ animated: true })}
         />
       </KeyboardAvoidingView>
 

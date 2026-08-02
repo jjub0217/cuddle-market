@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft, EllipsisVertical } from 'lucide-react-native';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -44,6 +44,7 @@ export default function PostDetailScreen() {
   /** ⋮ 를 연 댓글. 시트와 삭제 확인 창이 같이 쓴다 */
   const [menuTarget, setMenuTarget] = useState<CommentItem | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const scrollRef = useRef<ScrollView>(null);
 
   const {
     data: post,
@@ -102,7 +103,12 @@ export default function PostDetailScreen() {
     }
 
     return (
-      <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        ref={scrollRef}
+        contentContainerStyle={styles.body}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         <Text style={styles.title}>{post.title}</Text>
 
         <Pressable
@@ -201,6 +207,10 @@ export default function PostDetailScreen() {
             onSubmit={handleCreateComment}
             onCancelReply={() => {}}
             submitting={submitting}
+            onRequestLogin={() => router.push('/login')}
+            // 키보드가 올라오면 창이 좁아지는데 댓글은 아래에 있어 밀려난다.
+            // 칸을 누른 까닭은 댓글을 쓰려는 것이니 그 자리로 따라간다.
+            onFocus={() => scrollRef.current?.scrollToEnd({ animated: true })}
           />
         ) : null}
       </KeyboardAvoidingView>
