@@ -8,6 +8,22 @@ import { apiFetch } from './auth/api';
 // 서버가 @RequestBody를 받으므로 그게 맞다.
 
 /**
+ * 서버가 준 상태 코드를 잃지 않으려고 따로 둔다.
+ *
+ * 보통 `Error`로 바꿔 던지면 문구만 남고 상태 코드가 사라진다. 그런데 「이미 신고했다」는
+ * 문구로 가려낼 수 없어서(아래 isAlreadyReported 참고) 상태 코드를 여기 실어 보낸다.
+ */
+export class ReportError extends Error {
+  constructor(
+    message: string,
+    readonly status: number
+  ) {
+    super(message);
+    this.name = 'ReportError';
+  }
+}
+
+/**
  * ⚠️ 두 신고 API의 필드 이름이 다르다. 여기서 틀리면 조용히 실패한다.
  *
  *   상품    { reasonCodes: ["ILLEGAL_ITEM"] }   ProductReportRequest.reasonCodes: List<String>
@@ -20,14 +36,15 @@ async function postReport(path: string, payload: Record<string, unknown>, label:
   const res = await apiFetch(path, { method: 'POST', body: JSON.stringify(payload) });
 
   if (!res.ok) {
-    // 서버 문구를 그대로 살린다 — "이미 신고한 상품입니다" 같은 것을 화면이 구별해야 한다.
+    // 서버 문구를 그대로 살리되, 상태 코드도 함께 실어 보낸다.
+    // 중복 신고(409) 판별은 문구가 아니라 상태 코드로 한다 — isAlreadyReported 참고.
     const message = await readMessage(res);
-    throw new Error(message ?? `${label}에 실패했어요 (HTTP ${res.status})`);
+    throw new ReportError(message ?? `${label}에 실패했어요 (HTTP ${res.status})`, res.status);
   }
 }
 
-/** 오류 응답의 message를 꺼낸다. 못 읽으면 null. */
-async function readMessage(res: Response): Promise<string | null> {
+/** 오류 응답의 message를 꺼낸다. 못 읽으면 null. (lib/community.ts와 같은 방식) */
+export async function readMessage(res: Response): Promise<string | null> {
   try {
     const body = (await res.json()) as { message?: string };
     return body?.message ?? null;
@@ -70,12 +87,12 @@ export function reportUser(
 
 export async function blockUser(userId: number): Promise<void> {
   const res = await apiFetch(`/reports/blocks/users/${userId}`, { method: 'POST' });
-  if (!res.ok) throw new Error(`사용자 차단에 실패했어요 (HTTP ${res.status})`);
+  if (!res.ok) throw new ReportError(`사용자 차단에 실패했어요 (HTTP ${res.status})`, res.status);
 }
 
 export async function unblockUser(userId: number): Promise<void> {
   const res = await apiFetch(`/reports/blocks/users/${userId}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error(`차단 해제에 실패했어요 (HTTP ${res.status})`);
+  if (!res.ok) throw new ReportError(`차단 해제에 실패했어요 (HTTP ${res.status})`, res.status);
 }
 
 export interface BlockedUser {
@@ -117,13 +134,22 @@ export async function fetchBlockedUsers(page: number): Promise<BlockedPage> {
   };
 }
 
+/** ErrorCode.ALREADY_REPORTED(409) */
+const ALREADY_REPORTED_STATUS = 409;
+
 /**
  * 「이미 신고했다」인지 가려낸다.
  *
- * 웹도 문구로 가려낸다(ProductReportModal · UserReportModal). 서버가 따로 코드를
- * 주지 않아서다. 상품은 "이미 신고한 상품입니다", 사용자는 "이미 신고한 사용자입니다".
+ * 문구로 가려내면 안 된다 — 서버는 대상 이름을 담아 던지지만
+ * GlobalExceptionHandler가 그 문구를 버리고 ErrorCode의 한 줄만 준다.
+ *
+ *   ReportServiceImpl        "이미 신고된 " + targetName + "입니다."
+ *   GlobalExceptionHandler   new ErrorResponse(e.getErrorCode(), traceId)   ← 위 문구를 버린다
+ *   실제 응답                 409 { "message": "이미 신고된 대상입니다." }
+ *
+ * 9바퀴에는 '이미 신고한'을 찾고 있어서 한 번도 안 맞았다 (#817).
+ * 웹도 같은 문제를 #808에서 409 기준으로 고쳤다(src/lib/api/reportErrors.ts).
  */
 export function isAlreadyReported(error: unknown): boolean {
-  const message = error instanceof Error ? error.message : '';
-  return message.includes('이미 신고한');
+  return error instanceof ReportError && error.status === ALREADY_REPORTED_STATUS;
 }

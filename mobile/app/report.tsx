@@ -1,4 +1,4 @@
-import { PRODUCT_REPORT_REASON, USER_REPORT_REASON } from '@cuddle/shared';
+import { COMMUNITY_REPORT_REASON, PRODUCT_REPORT_REASON, USER_REPORT_REASON } from '@cuddle/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Check, X } from 'lucide-react-native';
 import { useState } from 'react';
@@ -13,10 +13,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { reportPost } from '@/lib/community';
 import { isAlreadyReported, reportProduct, reportUser } from '@/lib/reports';
 import { showToast } from '@/lib/toast';
 
-// 신고 화면. 상품용과 사용자용을 한 화면이 다 그린다 —
+// 신고 화면. 상품용과 사용자용과 게시글용을 한 화면이 다 그린다 —
 // 사유 목록과 보낼 주소만 다르고 나머지가 같아서, 화면을 나누면 같은 코드가 두 벌이 된다.
 //
 // 왜 모달이 아니라 전체 화면인가:
@@ -33,14 +34,18 @@ const DETAIL_MAX = 300; // 웹 ReportApiErrors.detailReason.maxLength와 같은 
 export default function ReportScreen() {
   const router = useRouter();
   const { kind, id, name } = useLocalSearchParams<{
-    kind: 'product' | 'user';
+    kind: 'product' | 'user' | 'post';
     id: string;
     name?: string;
   }>();
 
-  const isProduct = kind === 'product';
   const targetId = Number(id);
-  const reasons = isProduct ? PRODUCT_REPORT_REASON : USER_REPORT_REASON;
+  const reasons =
+    kind === 'product'
+      ? PRODUCT_REPORT_REASON
+      : kind === 'post'
+        ? COMMUNITY_REPORT_REASON
+        : USER_REPORT_REASON;
 
   const [reasonCode, setReasonCode] = useState<string | null>(null);
   const [detail, setDetail] = useState('');
@@ -51,8 +56,10 @@ export default function ReportScreen() {
     setSubmitting(true);
 
     try {
-      if (isProduct) {
+      if (kind === 'product') {
         await reportProduct(targetId, reasonCode, detail);
+      } else if (kind === 'post') {
+        await reportPost(targetId, reasonCode, detail);
       } else {
         await reportUser(targetId, reasonCode, detail);
       }
@@ -68,9 +75,11 @@ export default function ReportScreen() {
       const already = isAlreadyReported(error);
       showToast(
         already
-          ? isProduct
+          ? kind === 'product'
             ? '이미 신고한 상품입니다'
-            : '이미 신고한 사용자입니다'
+            : kind === 'post'
+              ? '이미 신고한 게시글입니다'
+              : '이미 신고한 사용자입니다'
           : '신고에 실패했습니다'
       );
     } finally {
@@ -90,13 +99,23 @@ export default function ReportScreen() {
         >
           <X size={24} color="#111827" />
         </Pressable>
-        <Text style={styles.heading}>{isProduct ? '상품 신고하기' : '사용자 신고하기'}</Text>
+        <Text style={styles.heading}>
+          {kind === 'product'
+            ? '상품 신고하기'
+            : kind === 'post'
+              ? '게시글 신고하기'
+              : '사용자 신고하기'}
+        </Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
         {name ? (
           <Text style={styles.description}>
-            {isProduct ? `"${name}" 상품을 신고합니다.` : `${name}님을 신고합니다.`}
+            {kind === 'product'
+              ? `"${name}" 상품을 신고합니다.`
+              : kind === 'post'
+                ? `"${name}" 게시글을 신고합니다.`
+                : `${name}님을 신고합니다.`}
           </Text>
         ) : null}
 

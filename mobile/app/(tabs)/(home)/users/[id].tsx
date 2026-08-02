@@ -48,11 +48,15 @@ export default function UserProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const userId = Number(id);
 
-  // 이 화면은 홈 스택과 마이 스택 양쪽에 있다((my)/users/[id].tsx가 이걸 다시 내보낸다).
+  // 이 화면은 홈·마이·커뮤니티 세 스택에 있다(나머지 둘이 이걸 다시 내보낸다).
   // 상품으로 갈 때 그룹을 고정하면 마이에서 들어온 사람이 홈 탭으로 튄다.
   // string[]으로 넓히는 이유는 seller-card.tsx의 같은 자리에 적어 뒀다.
   const segments = useSegments() as string[];
-  const group = segments.includes('(my)') ? '(my)' : '(home)';
+  const group = segments.includes('(my)')
+    ? '(my)'
+    : segments.includes('(community)')
+      ? '(community)'
+      : '(home)';
 
   const { data: me } = useMe();
   const [kind, setKind] = useState<ProductKind>('sell');
@@ -157,7 +161,11 @@ export default function UserProfileScreen() {
         renderItem={({ item }) => (
           <Pressable
             // 지금 스택에 상세를 쌓는다. 그룹까지 적어야 다른 탭으로 안 튄다.
-            onPress={() => router.push(`/(tabs)/${group}/products/${item.id}`)}
+            onPress={() => {
+              // 커뮤니티 스택에는 상품 상세가 없다. 홈 스택으로 보낸다.
+              const target = group === '(community)' ? '(home)' : group;
+              router.push(`/(tabs)/${target}/products/${item.id}`);
+            }}
             style={({ pressed }) => (pressed ? styles.cardPressed : undefined)}
           >
             <ProductCard product={item} />

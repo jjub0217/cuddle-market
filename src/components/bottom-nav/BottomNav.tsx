@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Users, MapPin, MessageCircleMore, UserRound } from 'lucide-react'
+import { Home, UsersRound, MapPin, MessageCircleMore, UserRound } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { ROUTES } from '@/constants/routes'
 import { Z_INDEX } from '@/constants/ui'
@@ -10,7 +10,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery'
 
 const NAV_ITEMS = [
   { href: ROUTES.HOME, label: '홈', icon: Home, match: (p: string) => p === '/' || p.startsWith('/market') },
-  { href: ROUTES.COMMUNITY, label: '커뮤니티', icon: Users, match: (p: string) => p.startsWith('/community') },
+  { href: ROUTES.COMMUNITY, label: '커뮤니티', icon: UsersRound, match: (p: string) => p.startsWith('/community') },
   { href: ROUTES.MAP, label: '플레이스', icon: MapPin, match: (p: string) => p.startsWith('/map') },
   { href: ROUTES.CHAT, label: '채팅', icon: MessageCircleMore, match: (p: string) => p.startsWith('/chat') },
   { href: ROUTES.MYPAGE, label: '마이', icon: UserRound, match: (p: string) => p.startsWith('/mypage') },
@@ -68,7 +68,11 @@ export default function BottomNav() {
               href={href}
               className={cn(
                 'flex flex-1 flex-col items-center justify-center gap-1',
-                isActive ? 'text-primary-200' : 'text-gray-400'
+                // 활성은 primary-container(#825500)다. 예전 primary-200(#ecc88e)은
+                // 흰 배경 대비가 1.59:1이라 비활성 회색(2.54:1)보다 **더 흐렸다** —
+                // 고른 탭이 가장 안 보이는 상태였다. 그 값은 「내 댓글」 알약처럼
+                // 배경으로 쓰라고 만든 색이다(위에 흰 글자가 올라간다).
+                isActive ? 'text-primary-container' : 'text-gray-400'
               )}
             >
               {/* 크기·굵기는 앱 탭바(mobile/app/(tabs)/_layout.tsx)와 같은 값이다.

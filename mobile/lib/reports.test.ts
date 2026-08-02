@@ -7,6 +7,7 @@ jest.mock('expo-secure-store', () => ({
 
 import { useAuthStore } from './auth/store';
 import {
+  ReportError,
   blockUser,
   fetchBlockedUsers,
   isAlreadyReported,
@@ -146,13 +147,31 @@ describe('fetchBlockedUsers', () => {
 });
 
 describe('isAlreadyReported', () => {
-  it('중복 신고 메시지를 알아본다', () => {
-    expect(isAlreadyReported(new Error('이미 신고한 상품입니다'))).toBe(true);
-    expect(isAlreadyReported(new Error('이미 신고한 사용자입니다'))).toBe(true);
+  it('409면 참이다', () => {
+    expect(isAlreadyReported(new ReportError('이미 신고된 대상입니다.', 409))).toBe(true);
   });
 
-  it('그 밖의 오류는 아니다', () => {
-    expect(isAlreadyReported(new Error('서버 내부 오류가 발생했습니다'))).toBe(false);
+  it('다른 상태면 거짓이다', () => {
+    expect(isAlreadyReported(new ReportError('서버 오류', 500))).toBe(false);
+  });
+
+  it('문구만 비슷한 보통 오류는 거짓이다', () => {
+    // 예전에는 문구로 가려내서 이런 것도 참이 될 수 있었다
+    expect(isAlreadyReported(new Error('이미 신고한 상품입니다'))).toBe(false);
     expect(isAlreadyReported(null)).toBe(false);
+  });
+
+  it('서버가 실제로 주는 문구로도 참이다', () => {
+    // 「이미 신고한」이 아니라 「이미 신고된」이다. 문구 판별이 안 맞던 이유
+    expect(isAlreadyReported(new ReportError('이미 신고된 대상입니다.', 409))).toBe(true);
+  });
+
+  // 실제 흐름으로도 한 번 확인한다 — postReport가 상태 코드를 안 실으면 여기서 깨진다.
+  it('신고가 409로 실패하면 그 오류로 참이 된다', async () => {
+    mockFetch.mockResolvedValue(reply(409, { message: '이미 신고된 대상입니다.' }));
+
+    const error = await reportProduct(42, 'ETC').catch((caught: unknown) => caught);
+
+    expect(isAlreadyReported(error)).toBe(true);
   });
 });
