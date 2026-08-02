@@ -1,3 +1,4 @@
+import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
 import { render, screen } from '@/test/render'
@@ -97,5 +98,43 @@ describe('스레드 화면에서', () => {
     render(<CommentSection postId="36" comments={[COMMENT]} inputId="t" />)
 
     expect(screen.getByRole('textbox')).toBeInTheDocument()
+  })
+})
+
+describe('답글 칸이 눈에 보이게', () => {
+  const REPLY_TARGET = { ...COMMENT, id: 34, hasChildren: false, childrenCount: 0 }
+
+  it('「답글 달기」를 누르면 칸을 화면 안으로 옮기고 초점을 준다', async () => {
+    // 칸이 화면 밖에 생기면 눌러도 아무 일도 안 일어난 것처럼 보인다.
+    // 특히 맨 아래 답글에서 누르면 칸이 접힌 화면 밖이다.
+    const scrollSpy = vi.spyOn(Element.prototype, 'scrollIntoView')
+    const user = userEvent.setup()
+    render(<CommentSection postId="36" comments={[REPLY_TARGET]} inputId="t" />)
+
+    await user.click(screen.getByRole('button', { name: '답글 달기' }))
+
+    const input = await screen.findByPlaceholderText('답글을 입력하세요')
+    expect(scrollSpy).toHaveBeenCalled()
+    expect(input).toHaveFocus()
+
+    scrollSpy.mockRestore()
+  })
+
+  it('스레드 화면에 들어오자마자는 화면을 안 옮긴다', () => {
+    // 칸이 처음부터 열려 있는데 들어오자마자 화면이 튀면 어리둥절하다
+    const scrollSpy = vi.spyOn(Element.prototype, 'scrollIntoView')
+
+    render(
+      <CommentSection
+        postId="36"
+        comments={[REPLY_TARGET]}
+        inputId="t"
+        showComposer={false}
+        alwaysOpenReplyFor={REPLY_TARGET.id}
+      />
+    )
+
+    expect(scrollSpy).not.toHaveBeenCalled()
+    scrollSpy.mockRestore()
   })
 })

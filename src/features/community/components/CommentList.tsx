@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useMutation, useQueries, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api/api'
@@ -68,6 +68,26 @@ export function CommentList({
   const [replyingToId, setReplyingToId] = useState<number | null>(alwaysOpenReplyFor ?? null)
   /** 지금 답글을 다는 대상의 닉네임. 칸 하나가 대상만 바꾸므로 화면에 알려 준다 */
   const [replyMention, setReplyMention] = useState<string | null>(null)
+
+  const replyInputRef = useRef<HTMLTextAreaElement | null>(null)
+  /**
+   * 「답글 달기」를 **누른 횟수**. 화면을 옮길지 정하는 데만 쓴다.
+   *
+   * 0이면 처음 그린 것이라 안 움직인다 — 스레드 화면은 칸이 처음부터 열려 있는데,
+   * 들어오자마자 화면이 튀면 어리둥절하다.
+   */
+  const [replyOpenSeq, setReplyOpenSeq] = useState(0)
+
+  // 칸이 화면 밖에 생기면 눌러도 아무 일도 안 일어난 것처럼 보인다.
+  // 특히 맨 아래 답글에서 누르면 칸이 접힌 화면 밖이다.
+  useEffect(() => {
+    if (replyOpenSeq === 0) return
+    const input = replyInputRef.current
+    if (!input) return
+    input.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    // 옮기는 것과 초점을 따로 둔다 — focus가 또 움직이면 위 스크롤과 부딪힌다
+    input.focus({ preventScroll: true })
+  }, [replyOpenSeq])
   const [replyPostError, setReplyPostError] = useState<React.ReactNode | null>(null)
 
   // 답글은 부모 댓글마다 따로 부른다 — 서버가 목록에 답글을 안 담아 준다.
@@ -163,6 +183,7 @@ export function CommentList({
     setActiveThreadId(target.threadId)
     setReplyMention(target.mention ?? null)
     setValue('content', target.mention ? `@${target.mention} ` : '')
+    setReplyOpenSeq((seq) => seq + 1)
   }
 
   const onSubmit = (data: ReplyRequestFormValues) => {
@@ -253,6 +274,7 @@ export function CommentList({
                 onChangeValue={(v) => setValue('content', v)}
                 onSubmit={handleSubmit(onSubmit)}
                 variant="compact"
+                textareaRef={replyInputRef}
               />
             </div>
           ) : null}
