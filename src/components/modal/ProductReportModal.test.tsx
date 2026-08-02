@@ -102,6 +102,40 @@ describe('보내는 모양', () => {
   })
 })
 
+describe('이미지 URL 펴기', () => {
+  // imageFiles는 이름과 달리 이미 올라간 URL이고, subImagesField를 안 넘겨서
+  // 배열이 아니라 문자열 하나로 들어온다. 여기서 틀리면 런타임에 죽는다.
+  //
+  // 화면으로 사진을 넣으려면 실제 파일 업로드가 필요해 시험에서 흉내 내기 어렵다.
+  // 그래서 펴는 규칙만 따로 못 박는다 — ProductReportModal이 쓰는 식과 같은 식이다.
+  const flatten = (imageFiles?: string | string[]) =>
+    imageFiles ? [imageFiles].flat().filter(Boolean) : []
+
+  it('문자열 하나가 와도 배열이 된다', () => {
+    expect(flatten('https://cdn/a.webp')).toEqual(['https://cdn/a.webp'])
+  })
+
+  it('배열이 와도 그대로 편다', () => {
+    expect(flatten(['https://cdn/a.webp', 'https://cdn/b.webp'])).toEqual([
+      'https://cdn/a.webp',
+      'https://cdn/b.webp',
+    ])
+  })
+
+  it('없으면 빈 배열', () => {
+    expect(flatten(undefined)).toEqual([])
+    expect(flatten('')).toEqual([])
+    expect(flatten([])).toEqual([])
+  })
+
+  it('문자열에 .flat()을 바로 부르면 죽는다', () => {
+    // 감싸지 않고 imageFiles.flat()으로 줄이자는 제안이 있었는데,
+    // 선언 타입만 배열이고 실제로는 문자열이라 이렇게 된다.
+    const asAny = 'https://cdn/a.webp' as unknown as string[]
+    expect(() => asAny.flat()).toThrow(TypeError)
+  })
+})
+
 describe('중복 신고', () => {
   it('409면 「이미 신고한 상품입니다」가 뜬다', async () => {
     api.post.mockRejectedValue(alreadyReportedError())

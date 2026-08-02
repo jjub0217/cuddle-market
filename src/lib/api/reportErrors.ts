@@ -28,10 +28,3 @@ const ALREADY_REPORTED_STATUS = 409
 export function isAlreadyReported(error: unknown): boolean {
   return isAxiosError(error) && error.response?.status === ALREADY_REPORTED_STATUS
 }
-
-/** 서버가 준 문구. 못 읽으면 null */
-export function readErrorMessage(error: unknown): string | null {
-  if (!isAxiosError(error)) return null
-  const message = (error.response?.data as { message?: string } | undefined)?.message
-  return message ?? null
-}
