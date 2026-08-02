@@ -1,3 +1,4 @@
+import { splitMention } from '@cuddle/shared';
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -89,12 +90,18 @@ export function CommentInput({
   // ⚠️ 커서를 글 **끝**에 둔다. 그냥 초점만 주면 「@협주 」 앞에서 깜빡여서
   //    이어 치면 「안녕@협주 」가 된다 — 멘션이 앞에 있어야 대상을 안다.
   //
-  // 대상을 되돌리면(null) 채워 뒀던 @닉네임도 지운다 — 웹 openReplyForm과 같다.
+  // 대상을 되돌리면(취소·같은 사람 다시 누르기) **@닉네임만** 떼고 쓰던 글은 남긴다.
+  // 「협주에게 말고 그냥 이 글타래에 달자」고 누른 것이라, 써 둔 글까지 날리면
+  // 되돌릴 수 없는 손해다. 띠의 「취소」도 「이 사람에게 다는 걸 취소」라는 뜻이다.
+  //
+  // 등록에 성공했을 때도 이 자리를 지나는데, 그때는 handleSubmit이 따로 비운다.
+  // 어느 쪽이 먼저 돌든 결과는 빈 칸이다 — 빈 글에서 @를 떼도 빈 글이다.
+  //
   // 처음 그릴 때는 replyTo가 null이라 아무 일도 안 한다: 화면에 들어오자마자
   // 초점이 가서 키보드가 튀어 오르면 어리둥절하다.
   useEffect(() => {
     if (!replyTo) {
-      setValue('');
+      setValue((current) => splitMention(current).rest.trimStart());
       return;
     }
     const next = `@${replyTo.nickname} `;
@@ -117,6 +124,9 @@ export function CommentInput({
     // 사람이 치기 시작하면 커서는 사람 것이다
     if (selection) setSelection(undefined);
   };
+
+  // 맨 앞 @닉네임과 나머지를 가른다. 목록에서 쓰는 것과 같은 함수다
+  const { mention, rest } = splitMention(value);
 
   const handleSubmit = async () => {
     const content = value.trim();
@@ -175,9 +185,12 @@ export function CommentInput({
       ) : null}
 
       <View style={styles.bar}>
+        {/* 맨 앞 @닉네임만 색을 준다 — 답글 목록의 @닉네임과 같은 색이라야
+            같은 것으로 읽힌다(comment-row.tsx의 mention).
+            ⚠️ RN에서는 값을 value가 아니라 **children**으로 준다. 그래야 일부만 색을
+               입힐 수 있다. 둘을 같이 주면 children이 이긴다. */}
         <TextInput
           ref={inputRef}
-          value={value}
           onChangeText={handleChangeText}
           selection={selection}
           onSelectionChange={handleSelectionChange}
@@ -187,7 +200,11 @@ export function CommentInput({
           style={styles.input}
           multiline
           maxLength={1000}
-        />
+        >
+          {mention ? <Text style={styles.mention}>{mention}</Text> : null}
+          {/* 맨 글자를 그냥 두면 «Text strings must be rendered within a <Text>»가 난다 */}
+          {rest ? <Text>{rest}</Text> : null}
+        </TextInput>
         <Pressable
           onPress={handleSubmit}
           disabled={!value.trim() || submitting}
@@ -212,6 +229,8 @@ export function CommentInput({
 const styles = StyleSheet.create({
   // 진짜 칸의 placeholder와 같은 색·크기로 둔다 — 눌러야 아는 차이여야 한다
   guestPlaceholder: { fontSize: 15, color: '#9CA3AF' },
+  // 답글 목록의 @닉네임과 같은 색이다 (comment-row.tsx의 mention · 웹 --color-primary-container)
+  mention: { color: '#825500' },
   replyBar: {
     flexDirection: 'row',
     alignItems: 'center',

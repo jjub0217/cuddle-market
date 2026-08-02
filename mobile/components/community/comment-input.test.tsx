@@ -44,7 +44,17 @@ describe('답글 대상이 생기면', () => {
   it('@닉네임을 채운다', async () => {
     await renderInput({ commentId: 34, nickname: '협주', depth: 2 });
 
-    expect(input().props.value).toBe('@협주 ');
+    // 값을 value가 아니라 children으로 준다(일부만 색을 입히려고). 그래서 보이는 글자로 본다
+    expect(screen.getByText('@협주')).toBeTruthy();
+  });
+
+  it('@닉네임에 답글 목록과 같은 색을 준다', async () => {
+    // 목록의 @닉네임과 색이 다르면 같은 것으로 안 읽힌다 (comment-row.tsx의 mention)
+    await renderInput({ commentId: 34, nickname: '협주', depth: 2 });
+
+    expect(screen.getByText('@협주').props.style).toEqual(
+      expect.objectContaining({ color: '#825500' })
+    );
   });
 
   it('커서를 @닉네임 **뒤**에 둔다', async () => {
@@ -58,6 +68,23 @@ describe('답글 대상이 생기면', () => {
     await renderInput({ commentId: 34, nickname: '협주', depth: 2 });
 
     expect(screen.getByText('협주님에게 답글 남기는 중')).toBeTruthy();
+  });
+});
+
+describe('대상을 되돌릴 때', () => {
+  // 띠의 「취소」와 같은 사람을 다시 누르는 것이 여기로 온다.
+  // 「이 사람에게 다는 걸 취소」라는 뜻이지 「쓰던 글을 버린다」가 아니다.
+
+  it('@닉네임만 떼고 쓰던 글은 남긴다', async () => {
+    const view = await renderInput({ commentId: 34, nickname: '협주', depth: 2 });
+    await fireEvent.changeText(input(), '@협주 그건 좀 아닌 것 같아요');
+
+    await view.rerender(
+      <CommentInput replyTo={null} onSubmit={SUBMIT} onCancelReply={NOOP} submitting={false} />
+    );
+
+    expect(screen.getByText('그건 좀 아닌 것 같아요')).toBeTruthy();
+    expect(screen.queryByText('@협주')).toBeNull();
   });
 });
 
@@ -138,8 +165,8 @@ describe('대상이 없을 때', () => {
     await renderInput(null);
 
     const field = screen.getByPlaceholderText('댓글을 입력하세요');
-    expect(field.props.value).toBe('');
     expect(field.props.selection).toBeUndefined();
+    expect(screen.queryByText(/^@/)).toBeNull();
   });
 
   it('「~님에게 답글 남기는 중」을 안 그린다', async () => {
