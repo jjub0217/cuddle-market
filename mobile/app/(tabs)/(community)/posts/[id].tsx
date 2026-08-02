@@ -1,5 +1,5 @@
 import { getTimeAgo } from '@cuddle/shared';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft, EllipsisVertical } from 'lucide-react-native';
@@ -7,16 +7,20 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { CommentInput } from '@/components/community/comment-input';
 import { CommentList } from '@/components/community/comment-list';
 import { PostBody } from '@/components/community/post-body';
 import { ErrorState, LoadingState } from '@/components/list-states';
 import { ProductActionSheet, type SheetAction } from '@/components/my/product-action-sheet';
 import { useMe } from '@/hooks/use-me';
-import { fetchPostDetail } from '@/lib/community';
+import { useAuthStore } from '@/lib/auth/store';
+import { createComment, fetchPostDetail } from '@/lib/community';
+import { showToast } from '@/lib/toast';
 
-// 게시글 상세. 읽기만 한다 — 고치기·지우기는 12바퀴다.
+// 게시글 상세. 글 읽기 + 댓글 읽기·쓰기 — 고치기·지우기는 12바퀴다.
 //
-// 댓글은 Task 10에서 이 화면 안에 전부 그린다. 여기서는 글만 그린다.
+// 맨 아래 칸은 **글에 새 댓글**을 단다. 답글은 여기서 안 단다 —
+// 부모 댓글의 「답글 달기」를 누르면 스레드 화면(app/comment-thread.tsx)으로 옮겨 간다.
 
 const HEADER_HEIGHT = 52; // 앱의 다른 헤더와 같은 값
 
@@ -25,8 +29,10 @@ export default function PostDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const postId = Number(id);
 
+  const queryClient = useQueryClient();
   const { data: me } = useMe();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const {
     data: post,
@@ -55,6 +61,28 @@ export default function PostDetailScreen() {
         },
       ]
     : [];
+
+  /** 글에 새 댓글. 등록됐으면 true — false면 칸이 쓴 글을 안 지운다 */
+  const handleCreateComment = async (content: string): Promise<boolean> => {
+    if (useAuthStore.getState().status !== 'authed') {
+      router.push('/login');
+      return false;
+    }
+
+    setSubmitting(true);
+    try {
+      await createComment(postId, content);
+      // 댓글 수는 서버가 준 commentCount를 쓴다. 상세를 다시 받아 맞춘다.
+      queryClient.invalidateQueries({ queryKey: ['comments', postId] });
+      queryClient.invalidateQueries({ queryKey: ['communityPost', postId] });
+      return true;
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : '댓글 등록에 실패했습니다.');
+      return false;
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const renderBody = () => {
     if (isLoading) return <LoadingState />;
@@ -97,8 +125,22 @@ export default function PostDetailScreen() {
             <Text style={styles.commentsCount}>{post.commentCount}</Text>
           </View>
 
-          {/* 「답글 달기」·⋮ 는 아직 갈 데가 없다 — 스레드 화면은 11바퀴, ⋮ 는 12바퀴다 */}
-          <CommentList postId={postId} />
+          {/* ⋮ 는 아직 갈 데가 없다 — 12바퀴다 */}
+          <CommentList
+            postId={postId}
+            onReply={(comment) =>
+              // 상세에서는 답글을 안 단다. 부모든 답글이든 그 **부모의 스레드**로 옮긴다 —
+              // 거기서 대상을 고르면 된다. 서버가 답글을 평평하게 주므로 답글의
+              // parentId가 또 답글일 수 있지만, 스레드는 언제나 부모 기준이다.
+              router.push({
+                pathname: '/comment-thread',
+                params: {
+                  postId: String(postId),
+                  commentId: String(comment.parentId ?? comment.id),
+                },
+              })
+            }
+          />
         </View>
       </ScrollView>
     );
@@ -132,6 +174,17 @@ export default function PostDetailScreen() {
       </View>
 
       {renderBody()}
+
+      {/* 글이 안 떴으면 댓글 칸도 안 그린다. 탭 안이라 이 칸 아래에 탭바가 온다 —
+          웹도 같은 모양이다(레이아웃이 탭바 높이를 비켜 준다). */}
+      {post ? (
+        <CommentInput
+          replyTo={null}
+          onSubmit={handleCreateComment}
+          onCancelReply={() => {}}
+          submitting={submitting}
+        />
+      ) : null}
 
       <ProductActionSheet
         visible={isSheetOpen}

@@ -26,6 +26,9 @@ pnpm gate:mobile     # tsc --noEmit + expo lint + jest
 | `(home)` 스택의 `headerShown` | 화면마다 적으면 새 화면을 더할 때 빠뜨린다 | `screenOptions`로 통째로 끈다 |
 | 팬(병렬 에이전트) 동시 커밋 | `.git/index.lock`에서 부딪힌다 | 팬은 구현·게이트만. 커밋은 리드가 한다 |
 | Expo Go에서 됨 ≠ 독립 빌드에서 됨 | EAS가 `pnpm install`을 새로 돌린다 | 의존성을 바꿨으면 EAS 빌드로 한 번 확인한다 |
+| `setNativeProps` | 새 아키텍처(`newArchEnabled: true`)에서는 못 믿는다 | `TextInput`의 커서는 `selection` **prop**으로 옮기고, 그 자리에 닿으면 `undefined`로 놓는다. 계속 붙잡으면 사용자가 커서를 못 옮긴다 |
+| `@testing-library/react-native` 14의 `render`·`fireEvent` | 둘 다 **기다려야** 한다 | `await` 없이 쓰면 render는 «render function has not been called», **fireEvent는 오류 없이 옛 값을 준다** — 시험이 조용히 틀린 것을 통과시킨다 |
+| `react-native-marked`의 `<Markdown>` | 속이 `FlatList`라 `ScrollView` 안에 넣으면 경고가 난다. `MDImage`는 `useEffect` 의존성 배열이 없어 끝없이 다시 그린다(8.1.1) | `useMarkdown` 훅으로 조각만 받고, `Renderer`를 상속해 `image()`만 우리 것으로 바꾼다 |
 
 ## API를 붙일 때
 

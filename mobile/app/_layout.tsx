@@ -40,6 +40,10 @@ export default function RootLayout() {
           {/* 헤더는 화면이 직접 그린다(login과 같은 이유).
               탭 안이 아니라 루트에 두는 이유: 집중해서 끝내는 화면이라 탭바가 보이면 안 된다. */}
           <Stack.Screen name="report" options={{ headerShown: false }} />
+          {/* 헤더는 화면이 직접 그린다(login과 같은 이유).
+              탭 안이 아니라 루트에 두는 이유: 하단에 답글 칸이 늘 열려 있어
+              탭바까지 있으면 아래가 두 겹이 된다. */}
+          <Stack.Screen name="comment-thread" options={{ headerShown: false }} />
         </Stack>
         {/* Stack 밖에 둔다 — 화면이 바뀌어도 살아남아야 한다.
             신고 화면은 성공하면 스스로 닫히는데, 화면 안에서 그리면 토스트도 같이 사라진다. */}
