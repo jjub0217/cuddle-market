@@ -22,9 +22,14 @@ import { useAuthStore } from '@/lib/auth/store';
 // 저장되므로 사용자가 손댈 수 있어야 한다.
 
 export interface ReplyTarget {
-  /** 답글이 붙을 댓글 id (parentId로 보낸다) */
+  /** 답글이 붙을 댓글 id */
   commentId: number;
   nickname: string;
+  /**
+   * 그 댓글의 깊이. 서버가 3까지만 받아서 이걸 봐야 한다 —
+   * 어디에 달지는 lib/community.ts의 replyParentId가 정한다.
+   */
+  depth: number;
 }
 
 interface CommentInputProps {

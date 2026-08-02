@@ -148,6 +148,37 @@ export function flattenComments(
   ]);
 }
 
+/**
+ * 서버가 받는 가장 깊은 댓글. 이보다 깊어지면 CommentDepthExceededException이 난다.
+ *
+ *   부모 댓글        depth 1
+ *   └ 답글          depth 2
+ *      └ 답글의 답글  depth 3   ← 여기까지다
+ *
+ * 서버 CommunityServiceImpl: `if (parentDepth >= 3) throw new CommentDepthExceededException()`
+ */
+const MAX_COMMENT_DEPTH = 3;
+
+/**
+ * 답글을 **어느 댓글 아래에** 달지 정한다.
+ *
+ * 깊이 3짜리 답글에 그대로 달면 4가 되어 서버가 거절한다. 그때는 **그 스레드의 부모**에
+ * 단다 — 어차피 서버가 답글을 깊이 구분 없이 평평하게 주므로 화면에 보이는 자리는 같고,
+ * 누구에게 한 말인지는 본문 앞의 @닉네임이 알려 준다.
+ *
+ * 웹도 같은 구멍이 있다(CommentList가 target.commentId를 그대로 보낸다). 앱을 먼저 고친다.
+ *
+ * @param threadParentId 이 스레드의 원 댓글 (depth 1)
+ * @param target 지금 고른 대상. 없으면 스레드에 단다
+ */
+export function replyParentId(
+  threadParentId: number,
+  target: { commentId: number; depth: number } | null
+): number {
+  if (!target) return threadParentId;
+  return target.depth >= MAX_COMMENT_DEPTH ? threadParentId : target.commentId;
+}
+
 // 댓글 수를 화면에서 직접 세는 함수를 여기 뒀었다. 안 쓰기로 했다 —
 // 댓글을 달거나 지운 뒤 상세를 다시 받으므로(queryKey 'communityPost') 서버가 준
 // commentCount가 곧바로 맞는 값이 된다. 두 군데서 세면 어긋날 자리만 생긴다.

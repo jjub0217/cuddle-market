@@ -32,7 +32,7 @@ beforeEach(signIn);
 
 // ⚠️ @testing-library/react-native 14의 render는 기다려야 한다(async).
 //    안 기다리면 «render function has not been called»가 뜬다.
-function renderInput(replyTo: { commentId: number; nickname: string } | null) {
+function renderInput(replyTo: { commentId: number; nickname: string; depth: number } | null) {
   return render(
     <CommentInput replyTo={replyTo} onSubmit={SUBMIT} onCancelReply={NOOP} submitting={false} />
   );
@@ -42,20 +42,20 @@ const input = () => screen.getByPlaceholderText('답글을 입력하세요');
 
 describe('답글 대상이 생기면', () => {
   it('@닉네임을 채운다', async () => {
-    await renderInput({ commentId: 34, nickname: '협주' });
+    await renderInput({ commentId: 34, nickname: '협주', depth: 2 });
 
     expect(input().props.value).toBe('@협주 ');
   });
 
   it('커서를 @닉네임 **뒤**에 둔다', async () => {
-    await renderInput({ commentId: 34, nickname: '협주' });
+    await renderInput({ commentId: 34, nickname: '협주', depth: 2 });
 
     // '@협주 ' = 4글자. 시작이 0이면 @ 앞에서 깜박이는 것이다
     expect(input().props.selection).toEqual({ start: 4, end: 4 });
   });
 
   it('누구에게 다는 중인지 알려 준다', async () => {
-    await renderInput({ commentId: 34, nickname: '협주' });
+    await renderInput({ commentId: 34, nickname: '협주', depth: 2 });
 
     expect(screen.getByText('협주님에게 답글 남기는 중')).toBeTruthy();
   });
@@ -65,7 +65,7 @@ describe('커서를 언제 놓나', () => {
   // 계속 붙잡고 있으면 사용자가 커서를 옮길 수 없다.
 
   it('부탁한 자리에 닿으면 놓는다', async () => {
-    await renderInput({ commentId: 34, nickname: '협주' });
+    await renderInput({ commentId: 34, nickname: '협주', depth: 2 });
 
     await fireEvent(input(), 'selectionChange', {
       nativeEvent: { selection: { start: 4, end: 4 } },
@@ -75,7 +75,7 @@ describe('커서를 언제 놓나', () => {
   });
 
   it('사람이 치기 시작하면 놓는다', async () => {
-    await renderInput({ commentId: 34, nickname: '협주' });
+    await renderInput({ commentId: 34, nickname: '협주', depth: 2 });
 
     await fireEvent.changeText(input(), '@협주 안녕');
 
@@ -99,7 +99,7 @@ describe('게스트일 때', () => {
 
   it('답글 칸에도 알린다', async () => {
     signOut();
-    await renderInput({ commentId: 34, nickname: '협주' });
+    await renderInput({ commentId: 34, nickname: '협주', depth: 2 });
 
     expect(screen.getByText('답글을 입력하려면 로그인해 주세요')).toBeTruthy();
   });

@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { useRef, useState } from 'react';
 import {
+  Keyboard,
   KeyboardAvoidingView,
   Pressable,
   ScrollView,
@@ -16,7 +17,12 @@ import { CommentInput, type ReplyTarget } from '@/components/community/comment-i
 import { CommentList } from '@/components/community/comment-list';
 import { CommentMenuSheet } from '@/components/community/comment-menu-sheet';
 import { useAuthStore } from '@/lib/auth/store';
-import { createComment, fetchComments, type CommentItem } from '@/lib/community';
+import {
+  createComment,
+  fetchComments,
+  replyParentId,
+  type CommentItem,
+} from '@/lib/community';
 import { showToast } from '@/lib/toast';
 
 // 댓글 하나와 그 답글만 보는 화면.
@@ -53,14 +59,16 @@ export default function CommentThreadScreen() {
   });
   const comment = comments?.find((item) => item.id === commentId);
 
-  /** 대상을 안 골랐으면 이 스레드에 단다 */
-  const targetId = replyTo?.commentId ?? commentId;
+  /** 지금 고른 대상. 안 골랐으면 이 스레드다 */
+  const activeTargetId = replyTo?.commentId ?? commentId;
 
   const handleReply = (target: CommentItem) => {
     // 이미 그 대상이면 이 스레드로 되돌린다(웹 openReplyForm과 같다).
     // 칸은 안 닫는다 — 닫히면 답글을 달 길이 없어진다.
     setReplyTo(
-      targetId === target.id ? null : { commentId: target.id, nickname: target.authorNickname }
+      activeTargetId === target.id
+        ? null
+        : { commentId: target.id, nickname: target.authorNickname, depth: target.depth }
     );
     // 답글이 많으면 지금 답하는 자리가 화면 밖이다. 눌러도 아무 일도 안 일어난 것처럼
     // 보이므로 목록 끝으로 내린다 (웹의 scrollIntoView 자리). 초점은 칸이 스스로 잡는다.
@@ -74,15 +82,21 @@ export default function CommentThreadScreen() {
       return false;
     }
 
+    // 키보드를 내린다. 그대로 두면 방금 단 답글도, 실패했을 때 뜨는 안내도 가린다
+    // (토스트는 화면 바닥에서 72px 위에 뜬다 — 키보드 안쪽이다).
+    Keyboard.dismiss();
+
     setSubmitting(true);
     try {
-      await createComment(postId, content, targetId);
+      await createComment(postId, content, replyParentId(commentId, replyTo));
       // 칸을 닫지 않는다. 대상만 이 스레드로 되돌린다 —
       // 닫히면 답글을 달 길이 없어진다.
       setReplyTo(null);
       queryClient.invalidateQueries({ queryKey: ['comments', postId] });
       queryClient.invalidateQueries({ queryKey: ['replies'] });
       queryClient.invalidateQueries({ queryKey: ['communityPost', postId] });
+      // 방금 단 답글이 목록 끝에 붙는다. 거기로 내려 보여 준다
+      requestAnimationFrame(() => scrollRef.current?.scrollToEnd({ animated: true }));
       return true;
     } catch (error) {
       showToast(error instanceof Error ? error.message : '답글 등록에 실패했습니다.');
