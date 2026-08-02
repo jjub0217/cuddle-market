@@ -5,8 +5,8 @@ import {
   fetchPostDetail,
   fetchPosts,
   fetchReplies,
+  flattenComments,
   reportPost,
-  totalCommentCount,
 } from './community';
 import { isAlreadyReported } from './reports';
 
@@ -207,14 +207,50 @@ describe('fetchReplies', () => {
   });
 });
 
-describe('totalCommentCount', () => {
-  // commentCount = 부모 + 답글 합계. 글 36은 부모 2개인데 7이다.
-  it('부모와 답글을 합친다', () => {
-    expect(totalCommentCount(2, [4, 1])).toBe(7);
+describe('flattenComments', () => {
+  const parent = (id: number, children: number) => ({
+    id,
+    authorId: 1,
+    authorNickname: 'a',
+    authorProfileImageUrl: null,
+    content: 'p',
+    createdAt: '',
+    depth: 1,
+    parentId: null,
+    hasChildren: children > 0,
+    childrenCount: children,
+  });
+  const reply = (id: number, parentId: number) => ({
+    id,
+    authorId: 1,
+    authorNickname: 'b',
+    authorProfileImageUrl: null,
+    content: 'r',
+    createdAt: '',
+    depth: 2,
+    parentId,
+    hasChildren: false,
+    childrenCount: 0,
   });
 
-  it('답글이 없으면 부모 수 그대로', () => {
-    expect(totalCommentCount(3, [])).toBe(3);
+  it('부모 → 그 답글들 → 다음 부모 순으로 편다', () => {
+    const rows = flattenComments(
+      [parent(1, 2), parent(2, 0)],
+      new Map([[1, [reply(11, 1), reply(12, 1)]]])
+    );
+
+    expect(rows.map((row) => row.comment.id)).toEqual([1, 11, 12, 2]);
+    expect(rows.map((row) => row.isReply)).toEqual([false, true, true, false]);
+  });
+
+  it('답글이 아직 안 온 부모는 그냥 부모만', () => {
+    const rows = flattenComments([parent(1, 2)], new Map());
+
+    expect(rows.map((row) => row.comment.id)).toEqual([1]);
+  });
+
+  it('댓글이 없으면 빈 목록', () => {
+    expect(flattenComments([], new Map())).toEqual([]);
   });
 });
 

@@ -126,14 +126,31 @@ export async function fetchReplies(commentId: number): Promise<CommentItem[]> {
   return body.data?.comments ?? [];
 }
 
-/**
- * 헤더에 쓸 댓글 수.
- * 서버 commentCount와 같은 뜻이지만, 등록·삭제 직후에는 서버 값이 아직 옛것이라
- * 지금 화면에 있는 것으로 센다.
- */
-export function totalCommentCount(parentCount: number, replyCounts: number[]): number {
-  return parentCount + replyCounts.reduce((sum, count) => sum + count, 0);
+/** 화면에 그릴 한 줄 */
+export interface CommentRowItem {
+  comment: CommentItem;
+  isReply: boolean;
 }
+
+/**
+ * 부모 → 그 답글들 → 다음 부모 순으로 편다.
+ *
+ * 목록 조각이 한 줄기만 받으므로 여기서 미리 편다.
+ * 답글이 아직 안 온 부모는 부모만 그린다 — 자리를 비워 두면 화면이 튄다.
+ */
+export function flattenComments(
+  parents: CommentItem[],
+  repliesByParent: Map<number, CommentItem[]>
+): CommentRowItem[] {
+  return parents.flatMap((parent) => [
+    { comment: parent, isReply: false },
+    ...(repliesByParent.get(parent.id) ?? []).map((reply) => ({ comment: reply, isReply: true })),
+  ]);
+}
+
+// 댓글 수를 화면에서 직접 세는 함수를 여기 뒀었다. 안 쓰기로 했다 —
+// 댓글을 달거나 지운 뒤 상세를 다시 받으므로(queryKey 'communityPost') 서버가 준
+// commentCount가 곧바로 맞는 값이 된다. 두 군데서 세면 어긋날 자리만 생긴다.
 
 export async function createComment(
   postId: number,

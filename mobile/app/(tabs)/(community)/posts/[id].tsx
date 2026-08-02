@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { CommentList } from '@/components/community/comment-list';
 import { PostBody } from '@/components/community/post-body';
 import { ErrorState, LoadingState } from '@/components/list-states';
 import { ProductActionSheet, type SheetAction } from '@/components/my/product-action-sheet';
@@ -88,7 +89,17 @@ export default function PostDetailScreen() {
         {/* 이미지는 본문 안에 있다. imageUrls를 또 그리면 두 번 나온다 */}
         <PostBody content={post.content} />
 
-        {/* 댓글은 Task 10에서 여기 아래에 그린다 */}
+        {/* 댓글은 상세 안에 전부 펼친다. 「댓글 N ›」 줄만 두면 대화가 있는지조차
+            안 보인다 — 웹을 그렇게 만들어 보고 바꿨다. */}
+        <View style={styles.comments}>
+          <View style={styles.commentsHead}>
+            <Text style={styles.commentsTitle}>댓글</Text>
+            <Text style={styles.commentsCount}>{post.commentCount}</Text>
+          </View>
+
+          {/* 「답글 달기」·⋮ 는 아직 갈 데가 없다 — 스레드 화면은 11바퀴, ⋮ 는 12바퀴다 */}
+          <CommentList postId={postId} />
+        </View>
       </ScrollView>
     );
   };
@@ -156,5 +167,15 @@ const styles = StyleSheet.create({
   avatarLetter: { fontSize: 14, color: '#6B7280' },
   meta: { fontSize: 13, color: '#6B7280' },
   divider: { height: StyleSheet.hairlineWidth, backgroundColor: '#E5E7EB', marginBottom: 16 },
+  comments: {
+    marginTop: 20,
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#E5E7EB',
+  },
+  commentsHead: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  commentsTitle: { fontSize: 15, fontWeight: '600', color: '#111827' },
+  commentsCount: { fontSize: 15, fontWeight: '600', color: '#825500' }, // 웹 --color-primary-container
   pressed: { opacity: 0.6 },
 });
