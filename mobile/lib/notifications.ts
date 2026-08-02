@@ -128,8 +128,8 @@ export async function markAllAsRead(): Promise<void> {
  * 알림을 눌렀을 때 갈 곳.
  *
  * kind가 'app'이면 앱 화면으로 옮기고, 'web'이면 앱 안 브라우저로 웹 주소를 연다.
- * 채팅(12바퀴)·커뮤니티(9바퀴) 화면이 앱에 아직 없어서 나뉜다. 그 바퀴들이 지나면
- * 여기만 고치면 된다 — 화면 쪽은 안 건드려도 된다.
+ * 이제 웹으로 나가는 것은 채팅뿐이다 — 커뮤니티는 10바퀴에 앱 화면이 생겼다.
+ * 채팅 화면이 생기는 14바퀴에 여기만 고치면 웹 갈래가 없어진다.
  *
  * 규칙은 웹 src/lib/utils/getNavigationPath.ts와 같다.
  */
@@ -143,11 +143,11 @@ export function resolveTarget(
       return { kind: 'app', path: `/products/${relatedEntityId}` };
     if (relatedEntityType === 'CHAT_ROOM') return { kind: 'web', path: `/chat/${relatedEntityId}` };
     if (relatedEntityType === 'POST')
-      return { kind: 'web', path: `/community/${relatedEntityId}` };
+      return { kind: 'app', path: `/(tabs)/(community)/posts/${relatedEntityId}` };
   }
 
   if (notificationType === 'ADMIN_SANCTION') return { kind: 'app', path: '/(tabs)/(my)' };
-  if (notificationType === 'POST_DELETED') return { kind: 'web', path: '/community' };
+  if (notificationType === 'POST_DELETED') return { kind: 'app', path: '/(tabs)/(community)' };
 
   return { kind: 'app', path: '/(tabs)/(home)' };
 }

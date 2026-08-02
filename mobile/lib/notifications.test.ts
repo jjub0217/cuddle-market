@@ -127,19 +127,19 @@ describe('resolveTarget', () => {
     });
   });
 
-  it('커뮤니티 글도 웹으로', () => {
-    expect(resolveTarget(item({ relatedEntityType: 'POST', relatedEntityId: 5 }))).toEqual({
-      kind: 'web',
-      path: '/community/5',
+  it('게시글 알림은 앱 커뮤니티 상세로 간다', () => {
+    expect(resolveTarget(item({ relatedEntityType: 'POST', relatedEntityId: 36 }))).toEqual({
+      kind: 'app',
+      path: '/(tabs)/(community)/posts/36',
     });
   });
 
-  it('게시글 삭제 알림은 커뮤니티 목록(웹)으로', () => {
+  it('글이 지워졌다는 알림은 앱 커뮤니티 목록으로 간다', () => {
     expect(
       resolveTarget(
         item({ notificationType: 'POST_DELETED', relatedEntityType: null, relatedEntityId: null })
       )
-    ).toEqual({ kind: 'web', path: '/community' });
+    ).toEqual({ kind: 'app', path: '/(tabs)/(community)' });
   });
 
   it('아무 데도 안 걸리면 앱 홈으로', () => {
