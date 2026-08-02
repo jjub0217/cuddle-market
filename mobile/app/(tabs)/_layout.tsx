@@ -2,7 +2,7 @@ import { Tabs, useRouter } from 'expo-router';
 import React from 'react';
 
 import { HapticTab } from '@/components/haptic-tab';
-import { Home, Users, UserRound } from 'lucide-react-native';
+import { Home, UsersRound, UserRound } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAuthStore } from '@/lib/auth/store';
@@ -45,7 +45,7 @@ export default function TabLayout() {
         options={{
           title: '커뮤니티',
           tabBarIcon: ({ color }) => (
-            <Users size={TAB_ICON_SIZE} color={color} strokeWidth={TAB_ICON_STROKE} />
+            <UsersRound size={TAB_ICON_SIZE} color={color} strokeWidth={TAB_ICON_STROKE} />
           ),
         }}
       />

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Users, MapPin, MessageCircleMore, UserRound } from 'lucide-react'
+import { Home, UsersRound, MapPin, MessageCircleMore, UserRound } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { ROUTES } from '@/constants/routes'
 import { Z_INDEX } from '@/constants/ui'
@@ -10,7 +10,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery'
 
 const NAV_ITEMS = [
   { href: ROUTES.HOME, label: '홈', icon: Home, match: (p: string) => p === '/' || p.startsWith('/market') },
-  { href: ROUTES.COMMUNITY, label: '커뮤니티', icon: Users, match: (p: string) => p.startsWith('/community') },
+  { href: ROUTES.COMMUNITY, label: '커뮤니티', icon: UsersRound, match: (p: string) => p.startsWith('/community') },
   { href: ROUTES.MAP, label: '플레이스', icon: MapPin, match: (p: string) => p.startsWith('/map') },
   { href: ROUTES.CHAT, label: '채팅', icon: MessageCircleMore, match: (p: string) => p.startsWith('/chat') },
   { href: ROUTES.MYPAGE, label: '마이', icon: UserRound, match: (p: string) => p.startsWith('/mypage') },
