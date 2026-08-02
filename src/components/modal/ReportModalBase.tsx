@@ -11,7 +11,18 @@ import InlineNotification from '../commons/InlineNotification'
 export interface ReportFormValues {
   reasonCode: string
   detailReason?: string
-  imageFiles?: string[]
+  /**
+   * 이름과 달리 **파일이 아니라 이미 올라간 URL**이다.
+   * `DropzoneArea`가 `/images`에 먼저 올리고 URL을 넣어 준다.
+   *
+   * 그리고 여기서는 `subImagesField`를 안 넘긴다. 그래서 `DropzoneArea`가
+   * `mainImageField`에 **URL 하나(문자열)** 만 넣고 나머지는 버린다.
+   *
+   * 예전에는 `string[]`이라고 적혀 있었는데 실제로는 문자열이 들어와서,
+   * `imageFiles.flat()` 같은 배열 메서드를 부르면 런타임에 죽는다.
+   * 쓰는 쪽은 `[imageFiles].flat()`으로 어느 쪽이 와도 되게 편다.
+   */
+  imageFiles?: string | string[]
 }
 
 export interface ReportReason {

@@ -36,6 +36,24 @@ window.ResizeObserver = class {
   disconnect() {}
 } as unknown as typeof ResizeObserver
 
+// jsdom이 <dialog>를 반쪽만 만들었다 — 요소는 있는데 showModal()·close()가 없다.
+// 우리 모달(ReportModalBase 등)이 그걸 부르므로 열자마자 죽는다.
+//
+// 진짜 브라우저처럼 「위에 덮기」까지 흉내 내지는 않는다. open 속성만 맞춰 주면
+// 시험이 보는 것(내용이 화면에 있는가)은 다 맞다.
+if (typeof HTMLDialogElement !== 'undefined') {
+  HTMLDialogElement.prototype.showModal = function showModal(this: HTMLDialogElement) {
+    this.open = true
+  }
+  HTMLDialogElement.prototype.show = function show(this: HTMLDialogElement) {
+    this.open = true
+  }
+  HTMLDialogElement.prototype.close = function close(this: HTMLDialogElement) {
+    this.open = false
+    this.dispatchEvent(new Event('close'))
+  }
+}
+
 window.IntersectionObserver = class {
   readonly root = null
   readonly rootMargin = ''
