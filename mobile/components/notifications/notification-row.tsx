@@ -1,3 +1,4 @@
+import { getTimeAgo } from '@cuddle/shared';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import {
@@ -46,23 +47,11 @@ interface Props {
   onPress: (item: NotificationItem) => void;
 }
 
-/** 「2개월 전」 같은 표기. 분·시간·일·개월만 쓴다 — 초 단위는 알림에 의미가 없다. */
-function timeAgo(iso: string): string {
-  const then = new Date(iso).getTime();
-  if (Number.isNaN(then)) return '';
-
-  const minutes = Math.floor((Date.now() - then) / 60000);
-  if (minutes < 1) return '방금 전';
-  if (minutes < 60) return `${minutes}분 전`;
-
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}시간 전`;
-
-  const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}일 전`;
-
-  return `${Math.floor(days / 30)}개월 전`;
-}
+// 시각 표기는 shared의 getTimeAgo를 쓴다(웹 NotificationItem도 같다).
+//
+// 여기 같은 일을 하는 함수를 따로 두고 있었는데, 시간대가 없는 시각을 `new Date(iso)`로
+// 그냥 읽었다. 서버는 시간대 없이 **UTC** 시각을 주므로 한국에서는 9시간이 빠졌다 —
+// 방금 온 알림이 「9시간 전」으로 보였다. getTimeAgo는 그때 `Z`를 붙여 준다.
 
 export function NotificationRow({ item, onPress }: Props) {
   // 색은 꾸밈이 아니라 정보다 — 글자를 읽기 전에 알림 종류를 알아채는 장치라서,
@@ -85,7 +74,7 @@ export function NotificationRow({ item, onPress }: Props) {
         {/* 서버 title이 아니라 정해진 문구를 쓴다 — 웹과 같아야 한다 */}
         <Text style={styles.title}>{NOTIFICATION_MESSAGES[item.notificationType]}</Text>
         <Text style={styles.content}>{item.content}</Text>
-        <Text style={styles.time}>{timeAgo(item.createdAt)}</Text>
+        <Text style={styles.time}>{getTimeAgo(item.createdAt)}</Text>
       </View>
 
       {!item.isRead ? <View style={styles.dot} /> : null}
