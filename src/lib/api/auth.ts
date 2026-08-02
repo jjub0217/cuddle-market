@@ -1,5 +1,6 @@
 import type {
   NicknameCheckResponse,
+  EmailAvailabilityResponse,
   EmailCheckResponse,
   SignUpRequestData,
   SignUpResponse,
@@ -18,7 +19,7 @@ export const checkNickname = async (nickname: string): Promise<NicknameCheckResp
   return response.data
 }
 
-export const checkEmail = async (email: string): Promise<EmailCheckResponse> => {
+export const checkEmail = async (email: string): Promise<EmailAvailabilityResponse> => {
   const response = await axios.get(`${API_BASE_URL}/auth/email/check?email=${email}`)
   return response.data
 }
