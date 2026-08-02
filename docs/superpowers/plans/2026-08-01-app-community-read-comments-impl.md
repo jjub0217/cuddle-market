@@ -121,6 +121,214 @@ EmptyState (mobile/components/list-states.tsx)
 
 ---
 
+# Task 0: 백엔드 — 차단이 커뮤니티 글과 상품 상세에도 먹게
+
+**저장소가 다르다.** `~/Desktop/cmarket_api` (main에 직접 커밋)
+
+**Files:**
+- Modify: `service/cmarket-domain/.../community/repository/PostRepositoryCustom.java`
+- Modify: `service/cmarket-domain/.../community/repository/PostRepositoryCustomImpl.java`
+- Modify: `service/cmarket-domain/.../community/app/service/CommunityService.java`
+- Modify: `service/cmarket-domain/.../community/app/service/CommunityServiceImpl.java`
+- Modify: `service/cmarket/.../web/community/controller/CommunityController.java`
+- Modify: `service/cmarket-domain/.../product/app/service/ProductServiceImpl.java`
+
+**Interfaces:**
+- Consumes: `UserBlockRepository.findBlockedUserIdsByBlockerId(Long)` (2026-08-02 #809에서 추가함)
+- Produces: 커뮤니티 목록이 차단한 작성자의 글을 안 준다 · 차단한 판매자의 상품 상세가 막힌다
+
+**왜 이 바퀴에 넣나**
+
+차단 안내가 약속한 것 중 둘이 아직 거짓이다.
+
+```
+✅ 차단한 사용자의 상품은 목록에 보이지 않습니다   #809에서 참이 됐다
+❌ 게시글이 숨김 처리됩니다                       커뮤니티 조회가 차단을 안 본다
+❌ 상품을 볼 수 없습니다                          목록에서 빠질 뿐, 주소를 직접 열면 상세가 보인다
+```
+
+10바퀴에서 앱에 커뮤니티가 생기므로, 차단한 사람의 글이 그대로 보이면 바로 눈에 띈다. 지금 같이 고친다.
+
+> **프로필은 안 막는다.** 차단한 사람 프로필에 「차단 해제」가 있다(9바퀴). 못 열게 하면 해제 경로가 마이 ▸ 차단 목록 하나만 남는다. 그래서 문구에서 프로필을 뺀다.
+
+- [ ] **Step 1: 컴파일이 되는 상태인지 먼저 확인한다**
+
+이 맥에는 Java 11만 있다. 저장소의 `Dockerfile`이 쓰는 Java 21 이미지로 컨테이너에서 빌드한다 — 맥에는 아무것도 안 깐다.
+
+```bash
+cd ~/Desktop/cmarket_api
+docker run --rm -v "$PWD":/app -w /app -v cmarket-gradle-cache:/root/.gradle \
+  eclipse-temurin:21.0.9_10-jdk-jammy ./gradlew compileJava --console=plain
+```
+
+Expected: `BUILD SUCCESSFUL`
+
+> 도커 데몬이 꺼져 있으면 `open -a Docker`로 켠다. 처음 한 번은 이미지·Gradle을 받느라 몇 분 걸린다.
+
+- [ ] **Step 2: 글 목록 쿼리가 작성자를 걸러내게 한다**
+
+`PostRepositoryCustom.java`
+
+```java
+    Page<Post> findPosts(String sortBy, String sortOrder, BoardType boardType, String searchType, String keyword,
+                         java.util.List<Long> excludedAuthorIds, Pageable pageable);
+```
+
+`PostRepositoryCustomImpl.java` — 시그니처를 같게 바꾸고, 기본 조건 아래에 더한다.
+
+```java
+    public Page<Post> findPosts(String sortBy, String sortOrder, BoardType boardType, String searchType, String keyword,
+                                java.util.List<Long> excludedAuthorIds, Pageable pageable) {
+        // 기본 조건: 소프트 삭제되지 않은 게시글만
+        BooleanExpression whereCondition = post.deletedAt.isNull();
+
+        // 차단한 사용자의 글 제외
+        //
+        // 차단 안내가 「게시글이 숨김 처리됩니다」라고 약속한다. 상품은 #809에서
+        // 걸러지게 했고, 글은 여기서 한다.
+        //
+        // 화면에 다 받아 온 뒤 걸러내면 안 된다 — 한 페이지에 10개를 달라고 했는데
+        // 8개만 남는 식이 되어 페이지 수와 무한스크롤이 어긋난다. 쿼리에서 뺀다.
+        if (excludedAuthorIds != null && !excludedAuthorIds.isEmpty()) {
+            whereCondition = whereCondition.and(post.authorId.notIn(excludedAuthorIds));
+        }
+```
+
+> `post.authorId`는 `Post` 엔티티의 필드다. `CommunityServiceImpl`이 `post.getAuthorId()`를 쓰는 것으로 확인했다.
+
+- [ ] **Step 3: 서비스가 차단 목록을 넘기게 한다**
+
+`CommunityService.java` — `getPostList`에 `email`을 더한다.
+
+```java
+    PostListDto getPostList(String sortBy, BoardType boardType, String searchType, String keyword,
+                            Integer page, Integer size, String email);
+```
+
+`CommunityServiceImpl.java`
+
+```java
+    public PostListDto getPostList(String sortBy, BoardType boardType, String searchType, String keyword,
+                                   Integer page, Integer size, String email) {
+        …
+
+        // 내가 차단한 사람의 글은 목록에서 뺀다.
+        // 비회원이면 차단이 있을 수 없으므로 빈 목록이다.
+        final Long viewerId = email != null
+                ? userRepository.findByEmailAndDeletedAtIsNull(email).map(User::getId).orElse(null)
+                : null;
+        final java.util.List<Long> blockedAuthorIds = viewerId != null
+                ? userBlockRepository.findBlockedUserIdsByBlockerId(viewerId)
+                : java.util.List.of();
+
+        Page<Post> postPage = postRepository.findPosts(
+                sortBy, sortOrder, boardType, searchType, keyword, blockedAuthorIds, pageable);
+```
+
+`UserBlockRepository`를 생성자에 더한다 (`SearchServiceImpl`이 같은 방식으로 받는다 — 그걸 그대로 따른다).
+
+- [ ] **Step 4: 컨트롤러가 로그인 사용자를 넘기게 한다**
+
+`CommunityController.java`의 `getPostList`
+
+```java
+    @GetMapping("/posts")
+    public ResponseEntity<SuccessResponse<PostListResponse>> getPostList(
+            …기존 파라미터 그대로…
+    ) {
+        // 비회원도 볼 수 있는 주소다. 로그인 안 했으면 null이 온다.
+        String email = SecurityUtils.getCurrentUserEmailOrNull();
+
+        PostListDto postListDto = communityService.getPostList(
+                sortBy, boardType, searchType, keyword, page, size, email);
+```
+
+> ⚠️ **`SecurityUtils`에 「없으면 null」을 주는 메서드가 있는지 먼저 확인한다.**
+> `grep -n "public static" service/cmarket/src/main/java/org/cmarket/cmarket/web/common/util/SecurityUtils.java`
+> `getCurrentUserEmail()`이 로그인 안 했을 때 던진다면 그대로 쓰면 안 된다.
+> 없으면 `SearchController`가 비회원을 어떻게 다루는지 보고 같은 방식을 쓴다 — 그쪽도 `/api/products/search`가 비회원 허용이다.
+
+- [ ] **Step 5: 상품 상세를 차단한 판매자면 막는다**
+
+`ProductServiceImpl.java`의 `getProductDetail(Long productId, String email)` — email을 이미 받는다.
+
+```java
+        // 판매자 정보 조회
+        User seller = userRepository.findById(product.getSellerId())
+                .orElseThrow(() -> new UserNotFoundException("판매자를 찾을 수 없습니다."));
+
+        // 차단한 판매자의 상품은 상세도 못 본다.
+        //
+        // 목록에서 빼는 것만으로는 부족하다 — 주소를 직접 열거나, 차단 전에 눌러 둔
+        // 링크로 들어오면 그대로 보였다. 차단 안내가 「상품을 볼 수 없습니다」라고
+        // 약속하므로 여기서도 막는다.
+        if (email != null) {
+            Long viewerId = userRepository.findByEmailAndDeletedAtIsNull(email)
+                    .map(User::getId).orElse(null);
+            if (viewerId != null
+                    && userBlockRepository.existsByBlockerIdAndBlockedUserId(viewerId, seller.getId())) {
+                throw new ProductNotFoundException("차단한 사용자의 상품입니다.");
+            }
+        }
+```
+
+> `existsByBlockerIdAndBlockedUserId`는 `UserBlockRepository`에 이미 있다.
+> `ProductNotFoundException`을 쓰는 이유: 새 예외를 만들면 핸들러·에러코드까지 늘어난다. 화면에는 「상품을 찾을 수 없습니다」와 같은 자리에 뜨면 된다.
+> `UserBlockRepository`를 `ProductServiceImpl` 생성자에 더한다.
+
+- [ ] **Step 6: 컴파일해서 다른 호출부가 없는지 본다**
+
+```bash
+cd ~/Desktop/cmarket_api
+docker run --rm -v "$PWD":/app -w /app -v cmarket-gradle-cache:/root/.gradle \
+  eclipse-temurin:21.0.9_10-jdk-jammy ./gradlew compileJava --console=plain
+```
+
+⚠️ **여기서 실패하면 그게 소득이다.** #809에서 `searchProducts`를 고쳤을 때 `AdminProductQueryService`가 같은 쿼리를 쓰고 있는 것을 컴파일러가 찾아 줬다. `findPosts`·`getPostList`도 다른 데서 부를 수 있다. 나온 곳을 다 고친다.
+
+- [ ] **Step 7: 테스트**
+
+```bash
+docker run --rm -v "$PWD":/app -w /app -v cmarket-gradle-cache:/root/.gradle \
+  eclipse-temurin:21.0.9_10-jdk-jammy ./gradlew test --console=plain
+```
+
+Expected: `BUILD SUCCESSFUL` — 스프링 컨텍스트가 뜬다는 뜻이고, 새로 넣은 의존성 주입까지 확인된다.
+
+- [ ] **Step 8: 커밋**
+
+```bash
+cd ~/Desktop/cmarket_api
+git add -A
+git commit -m "차단이 커뮤니티 글과 상품 상세에도 먹게
+
+차단 안내가 약속한 것 중 둘이 거짓이었다.
+  게시글이 숨김 처리됩니다   커뮤니티 조회가 차단을 안 봤다
+  상품을 볼 수 없습니다      목록에서 빠질 뿐 주소를 직접 열면 상세가 보였다
+
+글 목록은 쿼리에서 작성자를 뺀다(화면에서 걸러내면 페이지 수가 어긋난다).
+상품 상세는 차단한 판매자면 못 찾은 것으로 다룬다.
+
+프로필은 안 막는다 — 거기 「차단 해제」가 있어서 못 열면 해제 경로가 줄어든다.
+
+Java 21 컨테이너에서 compileJava·test 통과를 확인했다."
+```
+
+> 푸시는 사용자에게 확인받고 한다. 배포해야 효과가 난다.
+
+- [ ] **Step 9: 배포 후 실물 확인 (사용자)**
+
+```
+□ A를 차단한 상태로 커뮤니티 목록에 A의 글이 안 보인다
+□ 차단을 풀면 다시 보인다
+□ 로그아웃 상태에서는 아무것도 안 걸러진다
+□ 차단한 사람의 상품 상세 주소를 직접 열면 「상품을 찾을 수 없습니다」가 뜬다
+□ 차단 안 한 사람의 상품은 그대로 열린다
+□ 페이지를 넘겨도 개수가 안 어긋난다
+```
+
+---
+
 # Task 1: 멘션 떼기와 커뮤니티 신고 사유를 shared로
 
 **Files:**
@@ -295,6 +503,48 @@ describe('COMMUNITY_REPORT_REASON', () => {
   })
 })
 ```
+
+- [ ] **Step 6-1: 차단 안내에 되살릴 줄을 더한다 (Task 0 뒤에)**
+
+Task 0에서 백엔드가 커뮤니티 글과 상품 상세도 막게 했으므로, 안내에서 뺐던 줄을 되살린다.
+
+`packages/shared/src/constants/report.ts`
+
+```ts
+export const USER_BLOCK_ALERT_LIST: string[] = [
+  '차단한 사용자는 회원님에게 채팅을 보낼 수 없습니다',
+  '차단한 사용자의 상품은 볼 수 없습니다',
+  '차단한 사용자의 게시글은 목록에 보이지 않습니다',
+  '이미 진행 중인 거래는 영향을 받지 않습니다',
+  '차단은 언제든 차단 목록에서 해제할 수 있습니다',
+]
+```
+
+바뀌는 것 둘:
+
+```
+「상품은 목록에 보이지 않습니다」 → 「상품은 볼 수 없습니다」
+   Task 0에서 상세도 막았으므로 이제 「볼 수 없다」가 참이다
+새로   「게시글은 목록에 보이지 않습니다」
+```
+
+> **프로필은 안 적는다.** 차단한 사람 프로필은 「차단 유저」 배지를 붙여 그대로 보여준다 — 거기 「차단 해제」가 있어서다(9바퀴).
+
+시험(`packages/shared/src/constants/blockAlert.test.ts`)도 같이 고친다.
+
+```ts
+  it('상품과 게시글을 둘 다 막는다고 알린다', () => {
+    expect(USER_BLOCK_ALERT_LIST).toContain('차단한 사용자의 상품은 볼 수 없습니다')
+    expect(USER_BLOCK_ALERT_LIST).toContain('차단한 사용자의 게시글은 목록에 보이지 않습니다')
+  })
+
+  it('프로필 숨김은 여전히 약속하지 않는다', () => {
+    // 프로필은 「차단 유저」 배지를 붙여 그대로 보여준다 — 거기 「차단 해제」가 있다
+    expect(USER_BLOCK_ALERT_LIST.join(' ')).not.toContain('프로필')
+  })
+```
+
+⚠️ **이 단계는 Task 0이 배포된 뒤에 머지해야 한다.** 안 그러면 안내는 「못 본다」고 하는데 실제로는 보이는 상태가 생긴다.
 
 - [ ] **Step 7: 내보낸다**
 
@@ -1614,10 +1864,101 @@ export async function reportPost(
 Run: `cd mobile && npx jest lib/community.test.ts`
 Expected: PASS — 19개
 
+- [ ] **Step 4-1: 앱의 「이미 신고했다」 판별을 고친다 (#817)**
+
+9바퀴에 넣은 판별이 서버가 주는 문구와 안 맞아 **한 번도 안 맞았다.**
+
+```
+mobile/lib/reports.ts:128   message.includes('이미 신고한')
+서버 실제                    409 { "message": "이미 신고된 대상입니다." }
+                            (ReportServiceImpl은 대상 이름을 담아 던지지만
+                             GlobalExceptionHandler가 ErrorCode 문구로 갈아친다)
+```
+
+문구 대신 **상태 코드**를 본다. 지금 `postReport`가 `Response`를 `Error`로 바꾸며 상태를 잃으므로 함께 실어 보낸다.
+
+`mobile/lib/reports.ts`
+
+```ts
+/** 서버가 준 상태 코드를 잃지 않으려고 따로 둔다 */
+export class ReportError extends Error {
+  constructor(
+    message: string,
+    readonly status: number
+  ) {
+    super(message);
+    this.name = 'ReportError';
+  }
+}
+```
+
+`postReport`의 throw를 바꾼다.
+
+```ts
+  if (!res.ok) {
+    const message = await readMessage(res);
+    throw new ReportError(message ?? `${label}에 실패했어요 (HTTP ${res.status})`, res.status);
+  }
+```
+
+`blockUser`·`unblockUser`도 같은 식으로 바꾼다(상태가 필요해질 자리다).
+
+그리고 판별을 상태 코드로.
+
+```ts
+/** ErrorCode.ALREADY_REPORTED(409) */
+const ALREADY_REPORTED_STATUS = 409;
+
+/**
+ * 「이미 신고했다」인지 가려낸다.
+ *
+ * 문구로 가려내면 안 된다 — 서버는 대상 이름을 담아 던지지만
+ * GlobalExceptionHandler가 그 문구를 버리고 ErrorCode의 한 줄만 준다.
+ *
+ *   ReportServiceImpl        "이미 신고된 " + targetName + "입니다."
+ *   GlobalExceptionHandler   new ErrorResponse(e.getErrorCode(), traceId)   ← 위 문구를 버린다
+ *   실제 응답                 409 { "message": "이미 신고된 대상입니다." }
+ *
+ * 9바퀴에는 '이미 신고한'을 찾고 있어서 한 번도 안 맞았다 (#817).
+ * 웹도 같은 문제를 #808에서 409 기준으로 고쳤다(src/lib/api/reportErrors.ts).
+ */
+export function isAlreadyReported(error: unknown): boolean {
+  return error instanceof ReportError && error.status === ALREADY_REPORTED_STATUS;
+}
+```
+
+`lib/community.ts`의 `reportPost`도 같은 `ReportError`를 던지게 한다 — 게시글 신고에서도 중복 판별이 필요하다.
+
+**시험을 더한다** (`mobile/lib/reports.test.ts`)
+
+```ts
+describe('isAlreadyReported', () => {
+  it('409면 참이다', () => {
+    expect(isAlreadyReported(new ReportError('이미 신고된 대상입니다.', 409))).toBe(true);
+  });
+
+  it('다른 상태면 거짓이다', () => {
+    expect(isAlreadyReported(new ReportError('서버 오류', 500))).toBe(false);
+  });
+
+  it('문구만 비슷한 보통 오류는 거짓이다', () => {
+    // 예전에는 문구로 가려내서 이런 것도 참이 될 수 있었다
+    expect(isAlreadyReported(new Error('이미 신고한 상품입니다'))).toBe(false);
+  });
+
+  it('서버가 실제로 주는 문구로도 참이다', () => {
+    // 「이미 신고한」이 아니라 「이미 신고된」이다. 문구 판별이 안 맞던 이유
+    expect(isAlreadyReported(new ReportError('이미 신고된 대상입니다.', 409))).toBe(true);
+  });
+});
+```
+
+기존 신고 시험 중 오류를 `new Error(...)`로 만들던 것이 있으면 `ReportError`로 바꾼다. 타입체크가 잡아 준다.
+
 - [ ] **Step 5: 게이트**
 
 Run: `pnpm gate:mobile` (저장소 루트에서)
-Expected: 154 + 19 = 173개 통과 · tsc·lint 오류 0
+Expected: 154 + 19 + 4 = 177개 통과 · tsc·lint 오류 0
 
 - [ ] **Step 6: 커밋**
 
@@ -3459,15 +3800,21 @@ git diff --name-only develop...HEAD -- 'src/**/*.ts*' 'packages/**/*.ts' | tr '\
 ## 순서와 나눌 수 있는 것
 
 ```
-Task 1        shared          ← 먼저. Task 2·3이 이걸 쓴다
+Task 0        백엔드           ← 가장 먼저. 저장소가 다르고 배포까지 시간이 걸린다
+Task 1        shared          ← Task 2·3이 이걸 쓴다
+                                단 Step 6-1(차단 문구)은 Task 0이 배포된 뒤 머지
 Task 2~5      웹              ← 순서대로. 3이 4·5의 바탕이다
-Task 6        앱 API          ← Task 1과 나란히 해도 된다
+Task 6        앱 API          ← Task 1과 나란히 해도 된다 (#817도 여기서 고친다)
 Task 7        마크다운         ← 갈림길. 여기서 막히면 바로 갈아탄다
 Task 8~9      앱 목록·상세     ← 6·7 뒤
 Task 10~12    앱 댓글          ← 8·9 뒤. 10 → 11 → 12 순서를 지킨다
 Task 13       알림            ← 8·9 뒤면 언제든
 Task 14       실기기          ← 마지막
 ```
+
+**Task 0을 먼저 하는 이유**: 백엔드는 배포해야 효과가 나고, 배포는 사용자가 한다. 앱·웹 작업을 하는 동안 배포가 돌아가면 마지막에 한꺼번에 확인할 수 있다. 반대로 뒤로 미루면 차단 문구(Task 1 Step 6-1)가 배포를 기다리느라 걸린다.
+
+**닫는 이슈**: `#812`(10바퀴) · `#817`(앱 중복 신고 판별) · `#809`의 남은 절반(게시글·상품 상세)
 
 **팬(병렬 에이전트)에게 줄 때**: git 명령을 주지 않는다(`.git/index.lock` 충돌). 커밋은 리드가 한다. 명령을 이을 때 `;` 대신 `&&`를 쓴다. 계획서의 해당 Task만 준다.
 
