@@ -67,17 +67,48 @@ EmptyState (mobile/components/list-states.tsx)
 
 ---
 
-## 스펙과 달라지는 것 하나
+## 스펙과 달라지는 것 (2026-08-02, 웹을 만들며 정해짐)
 
-스펙 §4-1은 댓글 화면을 `(tabs)/(community)/posts/[id]/comments`에 두고 **탭바를 숨긴다**고 했다.
-계획에서는 **루트 스택 `app/post-comments.tsx`** 로 바꾼다.
+스펙 §4-1은 「상세에는 `댓글 7 ›` 줄만 두고, 누르면 **댓글 전용 화면**으로 간다」였다.
+웹을 그렇게 만들어 실물로 보고 **바꿨다.** 앱도 이 모양으로 간다.
 
 ```
-왜   9바퀴 신고 화면이 이미 같은 판단을 했다 (app/report.tsx 주석):
-       "루트 스택에 둔다 — 탭바까지 덮어야 한다"
-     루트에 두면 탭바를 숨겼다 되돌리는 장치가 아예 필요 없다.
-     화면이 뜨는 모양(탭바 안 보임 · 하단 전체가 입력창)은 합의한 그대로다.
+바뀜 ①   상세에 댓글·답글을 **전부 펼친다**
+         「댓글 7 ›」 줄만 두면 대화가 있는지조차 안 보인다
+
+바뀜 ②   부모 댓글의 「답글 달기」 → **그 댓글의 스레드 화면**으로 간다
+         전체 댓글 화면이 아니라 그 댓글과 그 답글만 보인다.
+         답글이 길어져도 다른 댓글을 안 밀어내고, 어디에 답하는 중인지 흐려지지 않는다.
+         당근이 같은 방식이다.
+
+바뀜 ③   답글의 「답글 달기」는 화면을 안 옮긴다
+         이미 그 스레드 안이라 옮길 데가 없다.
 ```
+
+**스레드 화면의 규칙 다섯** (웹에서 정하고 실물로 확인한 것 — 앱도 같게 한다)
+
+```
+1  칸이 하나        답글마다 따로 안 열린다. 목록 맨 아래에 늘 열려 있다
+2  기본 대상        그 스레드(부모 댓글)에 달린다
+3  「답글 달기」     @닉네임이 채워지고 대상만 바뀐다. 칸 위치는 그대로
+                    「○○님에게 답글 남기는 중」을 칸 위에 적는다 —
+                    칸 하나가 대상만 바꾸므로 이게 없으면 어디에 다는지 모른다
+4  칸을 안 닫는다    등록에 성공해도, 같은 대상을 다시 눌러도 유지.
+                    닫히면 답글을 달 길이 없어진다. 대상만 그 스레드로 되돌린다
+5  열릴 때 화면 이동  칸을 화면 가운데로 옮기고 초점을 준다. 커서는 @닉네임 **뒤**에.
+                    화면 밖에 생기면 눌러도 아무 일도 안 일어난 것처럼 보인다.
+                    단 화면에 **들어오자마자는 안 움직인다** — 칸이 처음부터 열려 있는데
+                    들어오는 순간 화면이 튀면 어리둥절하다
+```
+
+**탭바** — 상세는 두고, 스레드는 숨긴다. 웹도 같게 맞췄다(`BottomNav`의 숨김 규칙).
+
+```
+상세     탭바 있음   다른 탭으로 가는 일이 흔하다 (2바퀴 규칙 그대로)
+스레드   탭바 없음   하단에 입력칸이 늘 열려 있어 탭바까지 있으면 아래가 두 겹이 된다
+```
+
+앱에서 스레드 화면을 **루트 스택**(`app/comment-thread.tsx`)에 두면 탭바를 숨겼다 되돌리는 장치가 필요 없다. 9바퀴 신고 화면이 같은 판단을 했다(`app/report.tsx` 주석: "루트 스택에 둔다 — 탭바까지 덮어야 한다").
 
 ## 계획서를 쓴 뒤에 바뀐 것 (2026-08-02 검토)
 
@@ -133,9 +164,9 @@ portal + 이벤트       createPortal은 DOM에서만 body로 나간다. React �
 | `features/community/components/CommentList.tsx` | 답글을 처음부터 펼친다 · 오버레이 분기 제거 (수정) |
 | `features/community/components/ReplyOverlay.tsx` | **삭제** |
 | `features/community/components/CommentSection.tsx` | 댓글 목록 + 입력 폼 + 등록 처리를 한 덩어리로 (신설). 상세(데스크톱)와 댓글 페이지(모바일)가 같이 쓴다 |
-| `features/community/CommunityDetail.tsx` | 모바일은 「댓글 N ›」 줄만, 데스크톱은 `CommentSection` (수정) |
-| `app/(main)/community/[id]/[name]/comments/page.tsx` | 모바일 전용 댓글 페이지 (신설) |
-| `features/community/CommunityComments.tsx` | 그 페이지의 알맹이 — 헤더 + `CommentSection` (신설) |
+| `features/community/CommunityDetail.tsx` | 폭 상관없이 댓글을 전부 그린다. 부모 「답글 달기」는 스레드 페이지로 (수정) |
+| `app/(main)/community/[id]/[name]/comments/[commentId]/page.tsx` | 댓글 스레드 페이지 (신설) |
+| `features/community/CommentThread.tsx` | 그 페이지의 알맹이 — 헤더 + `CommentSection` (신설) |
 
 ### 앱 (`mobile/`)
 
@@ -147,10 +178,11 @@ portal + 이벤트       createPortal은 DOM에서만 body로 나간다. React �
 | `app/(tabs)/(community)/index.tsx` | 목록 (신설) |
 | `app/(tabs)/(community)/posts/[id].tsx` | 상세 (신설) |
 | `app/(tabs)/(community)/users/[id].tsx` | 작성자 프로필 재수출 (신설) |
-| `app/post-comments.tsx` | 댓글 화면 — 루트 스택 (신설) |
+| `app/comment-thread.tsx` | 댓글 스레드 화면 — 루트 스택 (신설) |
 | `components/community/post-card.tsx` | 목록 한 줄 (신설) |
 | `components/community/post-body.tsx` | 마크다운 본문 (신설) |
 | `components/community/comment-row.tsx` | 댓글·답글 한 줄 (신설) |
+| `components/community/comment-list.tsx` | 부모·답글을 한 줄기로 그린다 (신설) |
 | `components/community/comment-input.tsx` | 하단 입력창 + 답글 띠 (신설) |
 | `app/(tabs)/_layout.tsx` | 커뮤니티 탭 추가 (수정) |
 | `lib/notifications.ts` | POST 갈래를 앱 화면으로 (수정) |
@@ -1611,7 +1643,7 @@ Run: `pnpm test src/features/community/components/CommentSection.test.tsx`
 Run: `pnpm dev`
 ```
 □ 넓은 폭 /community/36/... → 상세 안에 댓글이 다 있다 (지금과 같다)
-□ 좁은 폭 → 「댓글 7 ›」 줄만 보인다
+□ 좁은 폭에서도 댓글·답글이 전부 보인다
 □ 그 줄을 누르면 /comments 로 가고 「← 댓글 7」 헤더가 뜬다
 □ 댓글 페이지에서 답글이 펼쳐져 있고, 답글 달기가 그 자리에서 열린다
 □ 뒤로가기로 상세로 돌아온다
@@ -1624,7 +1656,7 @@ git add src/features/community/ src/app/\(main\)/community/
 git commit -m "feat(web): 모바일에서 댓글을 별도 페이지로 (#812)
 
 앱과 같은 배치로 맞춘다. 데스크톱은 상세 안에 댓글이 그대로 있고,
-모바일만 「댓글 N ›」 줄에서 /comments 로 넘어간다.
+부모 댓글의 「답글 달기」에서 /comments/{commentId} 로 넘어간다.
 
 데스크톱 폭에서 그 주소로 바로 들어와도 막지 않는다.
 
@@ -2923,7 +2955,7 @@ import { getTimeAgo } from '@cuddle/shared';
 import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ChevronLeft, ChevronRight, EllipsisVertical, MessageSquare } from 'lucide-react-native';
+import { ChevronLeft, EllipsisVertical } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -2936,8 +2968,7 @@ import { fetchPostDetail } from '@/lib/community';
 
 // 게시글 상세. 읽기만 한다 — 고치기·지우기는 12바퀴다.
 //
-// 댓글은 여기 안 그린다. 「댓글 7 ›」 줄만 두고 루트 스택의 댓글 화면으로 보낸다.
-// 하단 입력창과 탭바가 겹쳐서다(설계 §4-2).
+// 댓글은 Task 10에서 이 화면 안에 전부 그린다. 여기서는 글만 그린다.
 
 const HEADER_HEIGHT = 52; // 앱의 다른 헤더와 같은 값
 
@@ -3010,19 +3041,7 @@ export default function PostDetailScreen() {
         {/* 이미지는 본문 안에 있다. imageUrls를 또 그리면 두 번 나온다 */}
         <PostBody content={post.content} />
 
-        <Pressable
-          style={({ pressed }) => [styles.commentsRow, pressed && styles.pressed]}
-          onPress={() =>
-            router.push({ pathname: '/post-comments', params: { postId: String(postId) } })
-          }
-          accessibilityRole="button"
-        >
-          <View style={styles.commentsLabel}>
-            <MessageSquare size={18} color="#111827" />
-            <Text style={styles.commentsText}>댓글 {post.commentCount}</Text>
-          </View>
-          <ChevronRight size={20} color="#9CA3AF" />
-        </Pressable>
+        {/* 댓글은 Task 10에서 여기 아래에 그린다 */}
       </ScrollView>
     );
   };
@@ -3090,18 +3109,6 @@ const styles = StyleSheet.create({
   avatarLetter: { fontSize: 14, color: '#6B7280' },
   meta: { fontSize: 13, color: '#6B7280' },
   divider: { height: StyleSheet.hairlineWidth, backgroundColor: '#E5E7EB', marginBottom: 16 },
-  commentsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 24,
-    marginHorizontal: 16,
-    paddingVertical: 16,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#E5E7EB',
-  },
-  commentsLabel: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  commentsText: { fontSize: 16, fontWeight: '600', color: '#111827' },
   pressed: { opacity: 0.6 },
 });
 ```
@@ -3119,7 +3126,7 @@ Run: `pnpm gate:mobile`
 □ 프로필에서 상품을 누르면 홈 스택 상세로 간다 (빈 화면이 아니다)
 □ ⋮ → 게시글 신고하기 → 사유 5개가 나온다 → 제출하면 접수된다
 □ 내 글에는 ⋮ 가 없다
-□ 「댓글 7 ›」은 아직 눌러도 빈 화면이다 — Task 10에서 만든다
+□ 댓글은 아직 안 보인다 — Task 10에서 그린다
 ```
 
 - [ ] **Step 6: 커밋**
@@ -3128,8 +3135,7 @@ Run: `pnpm gate:mobile`
 git add mobile/app/ mobile/components/
 git commit -m "feat(mobile): 커뮤니티 상세와 게시글 신고 (#812)
 
-상세는 읽기만 한다. 댓글은 「댓글 N ›」 줄만 두고 루트 스택 화면으로 보낸다 —
-하단 입력창과 탭바가 겹쳐서다.
+상세는 읽기만 한다. 댓글은 Task 10에서 이 화면 안에 그린다.
 
 신고 화면(9바퀴)이 게시글도 받게 넓혔다. 사유는 COMMUNITY_REPORT_REASON이고
 게시글은 reasonCode(문자열)다.
@@ -3142,15 +3148,20 @@ Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 
 ---
 
-# Task 10: 댓글 화면 (읽기)
+# Task 10: 상세에 댓글·답글을 전부 그린다
 
 **Files:**
-- Create: `mobile/app/post-comments.tsx`
 - Create: `mobile/components/community/comment-row.tsx`
+- Create: `mobile/components/community/comment-list.tsx`
+- Modify: `mobile/app/(tabs)/(community)/posts/[id].tsx`
 
 **Interfaces:**
-- Consumes: `fetchComments` · `fetchReplies` · `totalCommentCount` · `CommentItem` (Task 6) · `splitMention` (Task 1)
-- Produces: `/post-comments?postId=36` 경로 · `CommentRow({ comment, isReply, onReply, onMenu })`
+- Consumes: `fetchComments` · `fetchReplies` · `CommentItem` (Task 6) · `splitMention` (Task 1)
+- Produces:
+  - `CommentRow({ comment, isReply, isMine, onMenu, onReply, replyHref })`
+  - `CommentList({ postId, threadHref })` — 댓글을 받아 부모·답글을 한 줄기로 그린다
+
+**왜 상세에 다 그리나** — 「댓글 7 ›」 줄만 두면 대화가 있는지조차 안 보인다. 웹을 그렇게 만들어 보고 바꿨다(계획서 앞부분 「스펙과 달라지는 것」).
 
 - [ ] **Step 1: 댓글 한 줄을 만든다**
 
@@ -3165,7 +3176,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { CommentItem } from '@/lib/community';
 
 // 댓글·답글 한 줄. 웹 CommentItem과 같은 재료·같은 숫자를 쓴다.
-//   닉네임 14 · 본문 15 · 멘션 14 · 답글 상자 패딩 14
+//   닉네임 14 · 본문 15(줄 간격 좁게) · 멘션 14 · 답글 상자 패딩 14
 //
 // 답글은 들여쓰기 + 옅은 상자로만 구분한다. 서버가 깊이를 안 나누고 평평하게 주므로
 // 들여쓰기도 한 겹뿐이다 — 답글의 답글도 같은 자리에 온다.
@@ -3173,13 +3184,19 @@ import type { CommentItem } from '@/lib/community';
 interface CommentRowProps {
   comment: CommentItem;
   isReply?: boolean;
-  /** 내 댓글이면 ⋮ 에 삭제, 남의 것이면 신고가 뜬다 */
-  onMenu: () => void;
-  onReply: () => void;
   isMine: boolean;
+  /** ⋮ — 내 것이면 삭제, 남의 것이면 작성자 신고 */
+  onMenu: () => void;
+  /**
+   * 「답글 달기」를 눌렀을 때.
+   *
+   * 부모 댓글은 스레드 화면으로 **옮겨 가고**, 답글은 그 자리에서 칸을 연다.
+   * 어느 쪽인지는 부르는 쪽이 정한다 — 이 조각은 누르면 부를 뿐이다.
+   */
+  onReply: () => void;
 }
 
-export function CommentRow({ comment, isReply = false, onMenu, onReply, isMine }: CommentRowProps) {
+export function CommentRow({ comment, isReply = false, isMine, onMenu, onReply }: CommentRowProps) {
   const { mention, rest } = splitMention(comment.content);
 
   return (
@@ -3226,12 +3243,7 @@ export function CommentRow({ comment, isReply = false, onMenu, onReply, isMine }
 }
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-    paddingVertical: 14,
-  },
+  row: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingVertical: 14 },
   replyRow: {
     marginLeft: 40,
     padding: 14,
@@ -3254,7 +3266,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     overflow: 'hidden',
   },
-  content: { fontSize: 15, lineHeight: 21, color: '#111827' }, // 웹 leading-snug(1.375)와 같은 비율
+  content: { fontSize: 15, lineHeight: 21, color: '#111827' }, // 웹 leading-snug와 같은 비율
   mention: { fontSize: 14, color: '#825500' }, // 웹 --color-primary-container
   metaLine: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   time: { fontSize: 12, color: '#9CA3AF' },
@@ -3264,66 +3276,127 @@ const styles = StyleSheet.create({
 });
 ```
 
-> 색 값은 `src/styles/tokens.colors.css`에서 확인한 실제 값이다(`globals.css`가 아니다).
-> 앱 색 토큰 체계는 #786에서 따로 다룬다. 지금은 웹 값을 그대로 적는다.
+- [ ] **Step 2: 부모와 답글을 한 줄기로 펴는 것을 시험으로 쓴다**
 
-- [ ] **Step 2: 댓글 화면을 만든다 (읽기까지만)**
+화면을 그리기 전에 **줄 세우는 규칙**부터 못 박는다. 이건 순수 함수라 시험이 쉽다.
 
-`mobile/app/post-comments.tsx`
+`mobile/lib/community.test.ts`에 더한다.
 
-```tsx
-import { useQueries, useQuery } from '@tanstack/react-query';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ChevronLeft } from 'lucide-react-native';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+```ts
+describe('flattenComments', () => {
+  const parent = (id: number, children: number) => ({
+    id, authorId: 1, authorNickname: 'a', authorProfileImageUrl: null,
+    content: 'p', createdAt: '', depth: 1, parentId: null,
+    hasChildren: children > 0, childrenCount: children,
+  });
+  const reply = (id: number, parentId: number) => ({
+    id, authorId: 1, authorNickname: 'b', authorProfileImageUrl: null,
+    content: 'r', createdAt: '', depth: 2, parentId,
+    hasChildren: false, childrenCount: 0,
+  });
 
-import { CommentRow } from '@/components/community/comment-row';
-import { EmptyState, ErrorState, LoadingState } from '@/components/list-states';
-import { useMe } from '@/hooks/use-me';
-import {
-  fetchComments,
-  fetchReplies,
-  totalCommentCount,
-  type CommentItem,
-} from '@/lib/community';
+  it('부모 → 그 답글들 → 다음 부모 순으로 편다', () => {
+    const rows = flattenComments(
+      [parent(1, 2), parent(2, 0)],
+      new Map([[1, [reply(11, 1), reply(12, 1)]]])
+    );
 
-// 댓글 화면.
-//
-// 왜 루트 스택인가 (탭 안이 아니라):
-// 하단에 입력창을 고정해야 하는데 탭 안에 두면 탭바와 두 겹이 된다.
-// 9바퀴 신고 화면이 같은 이유로 루트에 있다 — "루트 스택에 둔다, 탭바까지 덮어야 한다".
-// 탭 안에 두고 탭바를 숨겼다 되돌리는 것보다 이쪽이 함정이 없다.
-//
-// 답글은 처음부터 펼친다. 실측 근거는 설계 §3-2에 있다 (요청 최대 3번 · +50ms).
+    expect(rows.map((row) => row.comment.id)).toEqual([1, 11, 12, 2]);
+    expect(rows.map((row) => row.isReply)).toEqual([false, true, true, false]);
+  });
 
-const HEADER_HEIGHT = 52;
+  it('답글이 아직 안 온 부모는 그냥 부모만', () => {
+    const rows = flattenComments([parent(1, 2)], new Map());
 
-/** 화면에 그릴 줄. 부모와 답글을 한 줄기로 편다 */
-interface Row {
+    expect(rows.map((row) => row.comment.id)).toEqual([1]);
+  });
+
+  it('댓글이 없으면 빈 목록', () => {
+    expect(flattenComments([], new Map())).toEqual([]);
+  });
+});
+```
+
+`mobile/lib/community.ts`에 더한다.
+
+```ts
+/** 화면에 그릴 한 줄 */
+export interface CommentRowItem {
   comment: CommentItem;
   isReply: boolean;
 }
 
-export default function PostCommentsScreen() {
-  const router = useRouter();
-  const { postId: postIdParam } = useLocalSearchParams<{ postId: string }>();
-  const postId = Number(postIdParam);
+/**
+ * 부모 → 그 답글들 → 다음 부모 순으로 편다.
+ *
+ * 목록 조각(FlatList)이 한 줄기만 받으므로 여기서 미리 편다.
+ * 답글이 아직 안 온 부모는 부모만 그린다 — 자리를 비워 두면 화면이 튄다.
+ */
+export function flattenComments(
+  parents: CommentItem[],
+  repliesByParent: Map<number, CommentItem[]>
+): CommentRowItem[] {
+  return parents.flatMap((parent) => [
+    { comment: parent, isReply: false },
+    ...(repliesByParent.get(parent.id) ?? []).map((reply) => ({ comment: reply, isReply: true })),
+  ]);
+}
+```
 
+Run: `pnpm gate:mobile` → 통과 확인
+
+- [ ] **Step 3: 목록 조각을 만든다**
+
+`mobile/components/community/comment-list.tsx`
+
+댓글을 받아 부모·답글을 그린다. **답글은 처음부터 다 부른다**(실측 근거는 설계 §3-2).
+
+```tsx
+import { useQueries, useQuery } from '@tanstack/react-query';
+import { StyleSheet, Text, View } from 'react-native';
+
+import { useMe } from '@/hooks/use-me';
+import {
+  fetchComments,
+  fetchReplies,
+  flattenComments,
+  type CommentItem,
+} from '@/lib/community';
+
+import { CommentRow } from './comment-row';
+
+interface CommentListProps {
+  postId: number;
+  /** ⋮ 를 눌렀을 때. 부르는 쪽이 시트를 연다 */
+  onMenu: (comment: CommentItem) => void;
+  /** 「답글 달기」를 눌렀을 때. 부모는 화면을 옮기고, 답글은 그 자리에 칸을 연다 */
+  onReply: (comment: CommentItem, isReply: boolean) => void;
+  /** 답글 칸을 이 줄 **아래**에 그린다 (스레드 화면에서만 쓴다) */
+  renderReplyInput?: (parentId: number) => React.ReactNode;
+  /** 이 부모만 그린다 (스레드 화면). 없으면 전부 */
+  onlyParentId?: number;
+}
+
+export function CommentList({
+  postId,
+  onMenu,
+  onReply,
+  renderReplyInput,
+  onlyParentId,
+}: CommentListProps) {
   const { data: me } = useMe();
 
-  const {
-    data: parents,
-    isLoading,
-    isError,
-    refetch,
-  } = useQuery({
+  const { data: allParents } = useQuery({
     queryKey: ['comments', postId],
     queryFn: () => fetchComments(postId),
   });
 
-  // 답글 있는 부모마다 따로 부른다. 서버가 목록에 답글을 안 담아 준다.
-  const parentsWithReplies = (parents ?? []).filter((comment) => comment.hasChildren);
+  const parents = (allParents ?? []).filter(
+    (comment) => onlyParentId === undefined || comment.id === onlyParentId
+  );
+
+  // 답글 있는 부모마다 따로 부른다 — 서버가 목록에 답글을 안 담아 준다.
+  const parentsWithReplies = parents.filter((comment) => comment.hasChildren);
 
   const replyQueries = useQueries({
     queries: parentsWithReplies.map((comment) => ({
@@ -3342,136 +3415,111 @@ export default function PostCommentsScreen() {
       .map((comment) => comment.id)
   );
 
-  /** 부모 → 그 답글들 → 다음 부모 … 순으로 편다 */
-  const rows: Row[] = (parents ?? []).flatMap((parent) => [
-    { comment: parent, isReply: false },
-    ...(repliesByParent.get(parent.id) ?? []).map((reply) => ({ comment: reply, isReply: true })),
-  ]);
-
-  const count = totalCommentCount(
-    parents?.length ?? 0,
-    [...repliesByParent.values()].map((replies) => replies.length)
-  );
-
-  const renderBody = () => {
-    if (isLoading) return <LoadingState />;
-    if (isError) return <ErrorState onRetry={() => refetch()} title="댓글을 불러오지 못했어요." />;
-    if (rows.length === 0) {
-      return <EmptyState title="첫 댓글을 남겨보세요." description="" />;
-    }
-
-    return (
-      <FlatList
-        data={rows}
-        keyExtractor={(row) => String(row.comment.id)}
-        contentContainerStyle={styles.list}
-        renderItem={({ item }) => (
-          <>
-            <CommentRow
-              comment={item.comment}
-              isReply={item.isReply}
-              isMine={Boolean(me && me.id === item.comment.authorId)}
-              onMenu={() => {}}
-              onReply={() => {}}
-            />
-            {/* 답글을 못 불러온 부모 아래에만 한 줄. 나머지 댓글은 그대로 보인다 */}
-            {!item.isReply && failedParents.has(item.comment.id) ? (
-              <Text style={styles.replyError}>답글을 불러오지 못했어요.</Text>
-            ) : null}
-          </>
-        )}
-        showsVerticalScrollIndicator={false}
-      />
-    );
-  };
+  const rows = flattenComments(parents, repliesByParent);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <View style={styles.header}>
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={12}
-          accessibilityRole="button"
-          accessibilityLabel="뒤로 가기"
-          style={({ pressed }) => (pressed ? styles.pressed : undefined)}
-        >
-          <ChevronLeft size={26} color="#111827" />
-        </Pressable>
-        <Text style={styles.heading}>댓글 {count}</Text>
-      </View>
+    <View>
+      {rows.map((row) => (
+        <View key={row.comment.id}>
+          <CommentRow
+            comment={row.comment}
+            isReply={row.isReply}
+            isMine={Boolean(me && me.id === row.comment.authorId)}
+            onMenu={() => onMenu(row.comment)}
+            onReply={() => onReply(row.comment, row.isReply)}
+          />
+          {/* 답글을 못 불러온 부모 아래에만 한 줄. 나머지 댓글은 그대로 보인다 */}
+          {!row.isReply && failedParents.has(row.comment.id) ? (
+            <Text style={styles.replyError}>답글을 불러오지 못했어요.</Text>
+          ) : null}
+        </View>
+      ))}
 
-      {renderBody()}
-    </SafeAreaView>
+      {/* 스레드 화면에서 답글 칸을 맨 아래에 그린다 */}
+      {renderReplyInput && onlyParentId !== undefined ? renderReplyInput(onlyParentId) : null}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
-  header: {
-    height: HEADER_HEIGHT,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
-  },
-  heading: { fontSize: 18, fontWeight: '700', color: '#111827' },
-  list: { paddingHorizontal: 16, paddingBottom: 16 },
   replyError: { marginLeft: 40, marginBottom: 8, fontSize: 12, color: '#9CA3AF' },
-  pressed: { opacity: 0.5 },
 });
 ```
 
-> `onMenu`·`onReply`는 지금 빈 함수다. Task 11·12에서 채운다. 이 과제는 **읽기까지**다.
+> ⚠️ **`FlatList`를 안 쓴다.** 상세 화면이 이미 `ScrollView` 안이라 목록을 또 넣으면 스크롤이 겹친다. 댓글이 지금 최대 7개(실측)라 다 그려도 된다. 정말 많아지면 그때 `FlatList` 하나로 상세 전체를 그리는 쪽으로 바꾼다.
 
-- [ ] **Step 3: 게이트**
+- [ ] **Step 4: 상세 화면에 붙인다**
+
+`mobile/app/(tabs)/(community)/posts/[id].tsx` — 「댓글 7 ›」 줄을 지우고 목록을 그린다.
+
+```tsx
+        <View style={styles.commentsHead}>
+          <Text style={styles.commentsTitle}>댓글 {post.commentCount}</Text>
+        </View>
+
+        <CommentList
+          postId={postId}
+          onMenu={(comment) => setMenuTarget(comment)}
+          onReply={(comment) =>
+            // 상세에서는 부모만 「답글 달기」가 보인다 — 답글도 보이지만
+            // 어느 쪽이든 스레드 화면으로 옮긴다. 거기서 대상을 고르면 된다.
+            router.push({
+              pathname: '/comment-thread',
+              params: { postId: String(postId), commentId: String(comment.parentId ?? comment.id) },
+            })
+          }
+        />
+```
+
+> 답글의 「답글 달기」를 상세에서 눌러도 그 답글이 속한 **부모의 스레드**로 간다(`comment.parentId ?? comment.id`). 서버가 답글을 평평하게 주므로 `parentId`가 답글을 가리킬 수 있는데, 그래도 스레드는 부모 기준이다 — Task 11에서 그 자리를 다시 본다.
+
+- [ ] **Step 5: 게이트**
 
 Run: `pnpm gate:mobile`
 
-- [ ] **Step 4: 실기기로 확인한다**
+- [ ] **Step 6: 실기기로 확인한다**
 
 ```
-□ 「댓글 7 ›」을 누르면 「← 댓글 7」 화면이 뜬다
-□ 탭바가 안 보인다
-□ 답글이 처음부터 펼쳐져 있다 (들여쓰기 + 옅은 상자)
+□ 상세를 내리면 댓글이 이어진다 · 답글이 처음부터 펼쳐져 있다
+□ 답글은 들여쓰기 + 옅은 상자로 구분된다
 □ 답글 본문 맨 앞 @닉네임이 색이 다르다
 □ 내 댓글에 「내 댓글」 표가 붙는다
-□ 헤더 숫자가 부모+답글 합계다 (글 36이면 7)
-□ 댓글이 없는 글은 "첫 댓글을 남겨보세요."가 뜬다
-□ 뒤로가기로 상세로 돌아온다
+□ 댓글이 없는 글은 아무것도 안 그린다 (빈 상태는 Task 11에서)
+□ 탭바가 그대로 보인다
 ```
 
-- [ ] **Step 5: 커밋**
+- [ ] **Step 7: 커밋**
 
 ```bash
-git add mobile/app/post-comments.tsx mobile/components/community/comment-row.tsx
-git commit -m "feat(mobile): 댓글 화면 읽기 (#812)
+git add mobile/
+git commit -m "feat(mobile): 상세에 댓글·답글을 전부 그린다 (#812)
 
-루트 스택에 뒀다 — 하단 입력창과 탭바가 겹치지 않게. 9바퀴 신고 화면과
-같은 판단이다.
+「댓글 N ›」 줄만 두면 대화가 있는지조차 안 보인다. 웹을 그렇게 만들어 보고 바꿨다.
 
-답글은 처음부터 펼친다. 부모 → 그 답글들 → 다음 부모 순으로 한 줄기로 펴서
-FlatList 하나로 그린다. 서버가 답글을 깊이 구분 없이 주므로 들여쓰기도 한 겹이다.
+부모 → 그 답글들 → 다음 부모 순으로 한 줄기로 펴서 그린다(flattenComments).
+답글은 처음부터 다 부른다 — 실측으로 요청 최대 3번 · +50ms다.
 
-답글만 못 불러오면 그 부모 아래에 한 줄만 안내하고 나머지 댓글은 그대로 둔다.
+FlatList를 안 쓴다. 상세가 이미 ScrollView 안이라 스크롤이 겹친다.
 
 Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 ```
 
 ---
 
-# Task 11: 댓글·답글 쓰기
+# Task 11: 댓글 스레드 화면 + 답글 쓰기
 
 **Files:**
+- Create: `mobile/app/comment-thread.tsx` (루트 스택)
 - Create: `mobile/components/community/comment-input.tsx`
-- Modify: `mobile/app/post-comments.tsx`
+- Modify: `mobile/app/(tabs)/(community)/posts/[id].tsx` (댓글 쓰기 칸)
 
 **Interfaces:**
-- Consumes: `createComment` (Task 6) · `CommentRow` (Task 10)
-- Produces: `CommentInput({ replyTo, onCancelReply, onSubmit, submitting })`
+- Consumes: `createComment` (Task 6) · `CommentList` (Task 10)
+- Produces: `/comment-thread?postId=36&commentId=34` 경로
 
-- [ ] **Step 1: 입력창 조각을 만든다**
+**규칙 다섯** — 계획서 앞부분 「스펙과 달라지는 것」에 적어 뒀다. 그대로 따른다.
+
+- [ ] **Step 1: 입력칸 조각을 만든다**
 
 `mobile/components/community/comment-input.tsx`
 
@@ -3488,14 +3536,14 @@ import {
   View,
 } from 'react-native';
 
-// 화면 맨 아래 입력창. 댓글도 답글도 여기서 쓴다.
+// 댓글·답글을 쓰는 칸.
 //
-// 답글을 달 때 화면을 바꾸지 않는다(오늘의집 방식). 당근은 답글 전용 화면으로
-// 넘어가고 우리 웹 모바일도 그랬는데, 그러면 방금 읽던 답글이 눈에서 사라진다.
-// 여기서는 위에 「협주님에게 답글 남기는 중 · 취소」 띠만 뜬다.
+// 스레드 화면에서는 **늘 열려 있고 대상만 바뀐다.** 답글마다 칸이 따로 열리지
+// 않는다 — 칸이 여럿이면 어디에 쓰는지 헷갈리고, 화면 밖에 생기면 눌러도
+// 아무 일도 안 일어난 것처럼 보인다.
 //
-// @닉네임은 입력칸에 미리 채우고 지울 수 있게 둔다 — 웹·오늘의집과 같다.
-// 서버에 멘션 필드가 없어 글자에 섞여 저장되기 때문에, 사용자가 손댈 수 있어야 한다.
+// @닉네임은 미리 채우고 지울 수 있게 둔다. 서버에 멘션 필드가 없어 글자에 섞여
+// 저장되므로 사용자가 손댈 수 있어야 한다.
 
 export interface ReplyTarget {
   /** 답글이 붙을 댓글 id (parentId로 보낸다) */
@@ -3504,38 +3552,53 @@ export interface ReplyTarget {
 }
 
 interface CommentInputProps {
+  /** 지금 답글을 다는 대상. null이면 글에 새 댓글을 단다 */
   replyTo: ReplyTarget | null;
+  /** 이 스레드가 기본 대상임을 알린다. 있으면 「취소」를 안 그린다 */
+  isThread?: boolean;
+  onSubmit: (content: string) => Promise<void>;
   onCancelReply: () => void;
-  onSubmit: (content: string, parentId?: number) => Promise<void>;
   submitting: boolean;
 }
 
-export function CommentInput({ replyTo, onCancelReply, onSubmit, submitting }: CommentInputProps) {
+export function CommentInput({
+  replyTo,
+  isThread = false,
+  onSubmit,
+  onCancelReply,
+  submitting,
+}: CommentInputProps) {
   const [value, setValue] = useState('');
   const inputRef = useRef<TextInput>(null);
 
-  // 답글 대상이 바뀌면 @닉네임을 채우고 바로 칠 수 있게 한다.
+  // 대상이 바뀌면 @닉네임을 채우고 바로 칠 수 있게 한다.
+  //
+  // ⚠️ 커서를 글 **끝**에 둔다. 그냥 초점만 주면 「@협주 」 앞에서 깜빡여서
+  //    이어 치면 「안녕@협주 」가 된다 — 멘션이 앞에 있어야 대상을 안다.
   useEffect(() => {
     if (!replyTo) return;
-    setValue(`@${replyTo.nickname} `);
+    const next = `@${replyTo.nickname} `;
+    setValue(next);
     inputRef.current?.focus();
+    inputRef.current?.setNativeProps({ selection: { start: next.length, end: next.length } });
   }, [replyTo]);
 
   const handleSubmit = async () => {
     const content = value.trim();
     if (!content || submitting) return;
-
-    await onSubmit(content, replyTo?.commentId);
+    await onSubmit(content);
     setValue('');
   };
 
   return (
     <KeyboardAvoidingView
       // iOS는 'padding', 안드로이드는 창 크기가 저절로 줄어 'height'가 맞다.
-      // Expo 54 문서: https://docs.expo.dev/versions/v54.0.0/ (KeyboardAvoidingView는 RN 것)
+      // Expo 54 문서를 확인하고 실기기로 볼 것.
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      {replyTo ? (
+      {/* 칸 하나가 대상만 바꾸므로 누구에게 다는 중인지 알려 준다.
+          그 스레드 자체에 다는 중일 때는 당연한 상태라 안 그린다. */}
+      {replyTo && !isThread ? (
         <View style={styles.replyBar}>
           <Text style={styles.replyLabel}>{replyTo.nickname}님에게 답글 남기는 중</Text>
           <Pressable onPress={onCancelReply} hitSlop={8} accessibilityRole="button">
@@ -3588,7 +3651,7 @@ const styles = StyleSheet.create({
     borderTopColor: '#E5E7EB',
   },
   replyLabel: { fontSize: 13, color: '#6B7280' },
-  cancel: { fontSize: 13, fontWeight: '600', color: '#8B6F47' },
+  cancel: { fontSize: 13, fontWeight: '600', color: '#825500' },
   bar: {
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -3607,8 +3670,7 @@ const styles = StyleSheet.create({
     borderColor: '#D1D5DB',
     borderRadius: 20,
     paddingHorizontal: 14,
-    paddingTop: 10,
-    paddingBottom: 10,
+    paddingVertical: 10,
     fontSize: 15,
     color: '#111827',
   },
@@ -3626,88 +3688,143 @@ const styles = StyleSheet.create({
 });
 ```
 
-- [ ] **Step 2: 댓글 화면에 붙인다**
+- [ ] **Step 2: 스레드 화면을 만든다**
 
-`mobile/app/post-comments.tsx`
-
-**① import를 더한다**
+`mobile/app/comment-thread.tsx` — **루트 스택이라 탭바가 안 뜬다.**
 
 ```tsx
 import { useQueryClient } from '@tanstack/react-query';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { ChevronLeft } from 'lucide-react-native';
 import { useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CommentInput, type ReplyTarget } from '@/components/community/comment-input';
+import { CommentList } from '@/components/community/comment-list';
 import { useAuthStore } from '@/lib/auth/store';
-import { createComment } from '@/lib/community';
+import { createComment, type CommentItem } from '@/lib/community';
 import { showToast } from '@/lib/toast';
-```
 
-**② 상태와 등록 처리를 더한다** (`useMe` 아래)
+// 댓글 하나와 그 답글만 보는 화면.
+//
+// 왜 루트 스택인가: 하단에 답글 칸이 늘 열려 있어 탭바까지 있으면 아래가 두 겹이
+// 된다. 9바퀴 신고 화면이 같은 판단을 했다("루트 스택에 둔다 — 탭바까지 덮어야 한다").
+// 웹도 이 화면에서는 하단 탭바를 숨긴다.
+//
+// 칸은 **늘 열려 있고 대상만 바뀐다** — 규칙 다섯은 계획서 앞부분에 적어 뒀다.
 
-```tsx
-const queryClient = useQueryClient();
-const [replyTo, setReplyTo] = useState<ReplyTarget | null>(null);
-const [submitting, setSubmitting] = useState(false);
+const HEADER_HEIGHT = 52;
 
-const handleSubmit = async (content: string, parentId?: number) => {
-  // 게스트는 못 쓴다. 마이 탭과 같은 방식으로 로그인 화면만 띄운다.
-  if (useAuthStore.getState().status === 'guest') {
-    router.push('/login');
-    return;
-  }
+export default function CommentThreadScreen() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { postId: postIdParam, commentId: commentIdParam } = useLocalSearchParams<{
+    postId: string;
+    commentId: string;
+  }>();
+  const postId = Number(postIdParam);
+  const commentId = Number(commentIdParam);
 
-  setSubmitting(true);
-  try {
-    await createComment(postId, content, parentId);
-    setReplyTo(null);
-    // 부모 목록과 그 답글을 같이 새로 받는다.
-    queryClient.invalidateQueries({ queryKey: ['comments', postId] });
-    if (parentId) queryClient.invalidateQueries({ queryKey: ['replies', parentId] });
-    // 상세 화면의 댓글 수도 옛것이 된다.
-    queryClient.invalidateQueries({ queryKey: ['communityPost', postId] });
-  } catch (error) {
-    // 서버 문구를 그대로 보여준다 — 차단 같은 것을 사용자가 알아야 한다.
-    showToast(error instanceof Error ? error.message : '댓글 등록에 실패했습니다');
-  } finally {
-    setSubmitting(false);
-  }
-};
-```
+  const [replyTo, setReplyTo] = useState<ReplyTarget | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [menuTarget, setMenuTarget] = useState<CommentItem | null>(null);
 
-**③ `onReply`를 채운다** (`CommentRow` 호출)
+  /** 대상을 안 골랐으면 이 스레드에 단다 */
+  const targetId = replyTo?.commentId ?? commentId;
 
-```tsx
-onReply={() =>
-  setReplyTo({ commentId: item.comment.id, nickname: item.comment.authorNickname })
+  const handleSubmit = async (content: string) => {
+    if (useAuthStore.getState().status === 'guest') {
+      router.push('/login');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await createComment(postId, content, targetId);
+      // 칸을 닫지 않는다. 대상만 이 스레드로 되돌린다 —
+      // 닫히면 답글을 달 길이 없어진다.
+      setReplyTo(null);
+      queryClient.invalidateQueries({ queryKey: ['comments', postId] });
+      queryClient.invalidateQueries({ queryKey: ['replies'] });
+      queryClient.invalidateQueries({ queryKey: ['communityPost', postId] });
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : '답글 등록에 실패했습니다');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <View style={styles.header}>
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={12}
+          accessibilityRole="button"
+          accessibilityLabel="뒤로 가기"
+        >
+          <ChevronLeft size={26} color="#111827" />
+        </Pressable>
+        <Text style={styles.heading}>답글</Text>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
+        <CommentList
+          postId={postId}
+          onlyParentId={commentId}
+          onMenu={(comment) => setMenuTarget(comment)}
+          onReply={(comment) =>
+            setReplyTo({ commentId: comment.id, nickname: comment.authorNickname })
+          }
+        />
+      </ScrollView>
+
+      <CommentInput
+        replyTo={replyTo}
+        isThread={replyTo === null}
+        onSubmit={handleSubmit}
+        onCancelReply={() => setReplyTo(null)}
+        submitting={submitting}
+      />
+
+      {/* ⋮ 시트는 Task 12에서 붙인다 */}
+    </SafeAreaView>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  header: {
+    height: HEADER_HEIGHT,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#E5E7EB',
+  },
+  heading: { fontSize: 18, fontWeight: '700', color: '#111827' },
+  body: { paddingHorizontal: 16, paddingBottom: 16 },
+});
 ```
 
-> 답글에 답글을 달면 `parentId`가 **그 답글**을 가리킨다(웹과 같다). 서버가 평평하게 돌려주므로 화면 자리는 같다.
+> ⚠️ **답글 칸이 화면 밖에 생기지 않게** 한다. 웹에서는 `scrollIntoView`로 옮겼는데, RN에서는 `ScrollView`의 `ref.scrollToEnd()`를 쓴다. 입력칸이 화면 아래에 고정돼 있으므로 대개 이미 보이지만, 답글이 많으면 목록을 끝까지 내려야 대상이 보인다. 실기기로 확인하고 필요하면 붙인다.
 
-**④ 입력창을 화면 맨 아래에 둔다** (`{renderBody()}` 아래)
+- [ ] **Step 3: 상세에 댓글 쓰기 칸을 붙인다**
+
+상세 화면 맨 아래에 `CommentInput`을 둔다. 거기서는 **글에 새 댓글**을 단다(`replyTo`가 늘 null).
 
 ```tsx
-{renderBody()}
-
-<CommentInput
-  replyTo={replyTo}
-  onCancelReply={() => setReplyTo(null)}
-  onSubmit={handleSubmit}
-  submitting={submitting}
-/>
+      <CommentInput
+        replyTo={null}
+        onSubmit={handleCreateComment}
+        onCancelReply={() => {}}
+        submitting={submitting}
+      />
 ```
 
-- [ ] **Step 3: 토스트가 입력창을 안 덮는지 본다**
-
-토스트는 루트 `_layout`의 `ToastHost`가 그리고, 높이가 `insets.bottom + 72`로 못 박혀 있다(탭바 기준). 이 화면에는 탭바 대신 입력창이 있다.
-
-실기기에서 등록을 일부러 실패시켜(비행기 모드) 토스트를 띄우고 확인한다.
-
-```
-□ 토스트가 입력창을 가리지 않는다
-```
-
-가린다면 `mobile/components/ui/toast-host.tsx`를 고치지 말고 **이 화면에서만** 올린다 — 다른 화면의 토스트 위치를 건드리면 9바퀴에 맞춰 놓은 것이 어긋난다. 방법은 실기기에서 본 뒤 정한다.
+> ⚠️ 상세는 탭 안이라 **탭바 위에** 칸이 온다. 하단이 두 겹이 되는데, 웹도 같은 모양이다(레이아웃이 탭바 높이를 비켜 준다). 실기기로 보고 어색하면 그때 정한다.
 
 - [ ] **Step 4: 게이트**
 
@@ -3716,32 +3833,35 @@ Run: `pnpm gate:mobile`
 - [ ] **Step 5: 실기기로 확인한다**
 
 ```
-□ 하단에 입력창이 있다
-□ 입력칸을 누르면 키보드가 올라오고 입력창이 키보드 위에 붙는다
-□ 댓글을 쓰고 등록하면 목록에 바로 보인다
-□ 「답글 달기」를 누르면 화면이 안 바뀌고 띠가 뜬다
-□ 입력칸에 @닉네임이 채워져 있고 지울 수 있다
-□ 「취소」를 누르면 띠가 사라지고 안내 문구가 "댓글을 입력해주세요"로 돌아온다
-□ 답글을 등록하면 그 부모 아래에 보인다
-□ 답글에 답글을 달면 같은 자리에 @표시와 함께 보인다
+□ 상세 맨 아래에 「댓글을 입력해주세요」 칸이 있다 · 등록하면 목록에 바로 보인다
+□ 부모 댓글 「답글 달기」 → 스레드 화면으로 간다 · 탭바가 사라진다
+□ 스레드에 그 댓글과 그 답글만 보인다
+□ 칸이 처음부터 열려 있다 · 안내 문구가 「답글을 입력해주세요」다
+□ 답글의 「답글 달기」 → 화면이 안 바뀌고 「○○님에게 답글 남기는 중」이 뜬다
+□ 칸에 @닉네임이 채워지고 **커서가 그 뒤에** 있다
+□ 등록해도 칸이 안 닫힌다 · 대상이 스레드로 돌아간다
+□ 「취소」를 누르면 대상이 스레드로 돌아간다
 □ 게스트가 등록을 누르면 로그인 화면이 뜬다
-□ 헤더 숫자가 늘어난다
+□ 뒤로가기로 상세로 돌아오면 탭바가 다시 보인다
 ```
 
 - [ ] **Step 6: 커밋**
 
 ```bash
-git add mobile/app/post-comments.tsx mobile/components/community/comment-input.tsx
-git commit -m "feat(mobile): 댓글·답글 쓰기 (#812)
+git add mobile/
+git commit -m "feat(mobile): 댓글 스레드 화면과 답글 쓰기 (#812)
 
-답글을 달 때 화면을 바꾸지 않는다(오늘의집 방식). 당근과 우리 웹 모바일은
-전용 화면으로 넘어가는데, 그러면 방금 읽던 답글이 눈에서 사라진다.
-여기서는 위에 「협주님에게 답글 남기는 중 · 취소」 띠만 뜬다.
+부모 댓글의 「답글 달기」를 누르면 그 댓글과 답글만 보이는 화면으로 간다.
+루트 스택이라 탭바가 안 뜬다 — 하단에 칸이 늘 열려 있어 두 겹이 되면 안 된다.
 
-@닉네임은 입력칸에 미리 채우고 지울 수 있게 뒀다. 서버에 멘션 필드가 없어
-글자에 섞여 저장되므로 사용자가 손댈 수 있어야 한다.
+칸은 하나다. 답글마다 따로 열리지 않고 대상만 바뀐다.
+  기본        그 스레드에 달린다
+  「답글 달기」 @닉네임이 채워지고 대상만 바뀐다
+  등록 성공     칸을 안 닫는다. 대상만 스레드로 되돌린다
 
-게스트는 등록을 누르면 로그인 화면으로 보낸다. 읽기는 그대로 된다.
+커서는 @닉네임 뒤에 둔다. 앞에 두면 이어 쳤을 때 「안녕@협주 」가 된다.
+
+웹에서 정한 규칙을 그대로 옮겼다(계획서 「스펙과 달라지는 것」).
 
 Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 ```
@@ -3751,7 +3871,7 @@ Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 # Task 12: 댓글 ⋮ — 삭제와 작성자 신고
 
 **Files:**
-- Modify: `mobile/app/post-comments.tsx`
+- Modify: `mobile/app/comment-thread.tsx` · `mobile/app/(tabs)/(community)/posts/[id].tsx`
 
 **Interfaces:**
 - Consumes: `deleteComment` (Task 6) · `ProductActionSheet` · `SheetAction` · `ConfirmDialog`
@@ -3759,7 +3879,7 @@ Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 
 - [ ] **Step 1: ⋮ 를 채운다**
 
-`mobile/app/post-comments.tsx`
+`mobile/app/comment-thread.tsx` (상세 화면도 같은 방식으로)
 
 **① import를 더한다**
 
@@ -3892,7 +4012,7 @@ Run: `pnpm gate:mobile`
 - [ ] **Step 4: 커밋**
 
 ```bash
-git add mobile/app/post-comments.tsx
+git add mobile/app/
 git commit -m "feat(mobile): 댓글 삭제와 작성자 신고 (#812)
 
 ⋮ 는 내 것이면 「삭제」, 남의 것이면 「이 사람 신고하기」다.
