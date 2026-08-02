@@ -1,7 +1,7 @@
 'use client'
 
 import { useUserStore } from '@/store/userStore'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { useMutation, useInfiniteQuery, useQueryClient, useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api/api'
@@ -16,6 +16,7 @@ import {
   type TransactionStatus,
 } from '@/constants/constants'
 import MyPagePanel from './components/MyPagePanel'
+import { resolvePanel, type MyPagePanel as MyPagePanelId } from './panelParam'
 import MyDashboard from './components/MyDashboard'
 import MyActivityPanel from './components/MyActivityPanel'
 import dynamic from 'next/dynamic'
@@ -62,44 +63,44 @@ function MyPage() {
   // 모바일에서는 사이드 nav 숨김 + 대시보드 강제 노출
   const isMobile = useMediaQuery('(max-width: 767px)')
   const effectiveNav: MyPageNavId = isMobile ? 'nav-dash' : activeMyPageNav
-  const [isProfileFullViewOpen, setIsProfileFullViewOpen] = useState(false)
-  // 모바일 메뉴 클릭 시 풀스크린에 표시할 탭 (null이면 닫힘; 'activity'는 MyActivityPanel 표시)
-  const [mobilePanelTab, setMobilePanelTab] = useState<MyPageTabId | 'activity' | null>(null)
+  // 모바일 전체 화면 패널(판매내역·구매내역·찜·차단·활동·프로필)이 무엇인지는 **주소에 담는다.**
+  //
+  // 예전에는 useState + history.pushState였다. 주소를 안 바꾸고 히스토리만 밀어 넣어서
+  // 「패널 안에서의 뒤로가기」는 됐지만, 상품 상세나 수정 화면으로 나갔다 돌아오면
+  // state가 사라져 판매내역이 아니라 마이 대시보드가 떴다 (#819).
+  //
+  // 주소에 담으면 뒤로가기·앞으로가기·새로고침·링크 공유가 다 저절로 맞는다.
+  // 데스크탑 탭이 이미 ?tab= 을 쓰고 있어 규칙도 같다.
+  const panel = resolvePanel(searchParams.get('panel'))
+  const isProfileFullViewOpen = panel === 'profile'
+  const mobilePanelTab: MyPageTabId | 'activity' | null = panel === 'profile' ? null : panel
 
-  // 모바일 오버레이(프로필/메뉴 패널)는 URL을 바꾸지 않는 단순 state이므로,
-  // 기기 뒤로가기를 누르면 패널이 닫히는 대신 직전 페이지(예: 유저 프로필)로 빠져버린다.
-  // 패널을 열 때 history 엔트리를 push해서 뒤로가기가 "패널 닫기"로 동작하도록 한다.
-  const openMobilePanel = (tab: MyPageTabId | 'activity') => {
-    if (typeof window !== 'undefined') {
-      window.history.pushState({ cmMobilePanel: tab }, '')
-    }
-    setMobilePanelTab(tab)
+  /** 패널을 우리가 열어서 들어왔는지. 닫을 때 뒤로 갈 데가 있는지 가른다 */
+  const openedHereRef = useRef(false)
+
+  const openPanel = (next: MyPagePanelId) => {
+    openedHereRef.current = true
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('panel', next)
+    router.push(`${pathname}?${params.toString()}`)
   }
 
-  const openProfileFullView = () => {
-    if (typeof window !== 'undefined') {
-      window.history.pushState({ cmMobileProfile: true }, '')
-    }
-    setIsProfileFullViewOpen(true)
-  }
+  const openMobilePanel = (tab: MyPageTabId | 'activity') => openPanel(tab)
+  const openProfileFullView = () => openPanel('profile')
 
   const closeMobileOverlay = () => {
-    if (typeof window !== 'undefined') {
-      window.history.back()
-    } else {
-      setMobilePanelTab(null)
-      setIsProfileFullViewOpen(false)
+    // 우리가 열어서 들어온 것이면 뒤로 가면 된다 — 히스토리가 늘지 않는다.
+    // 주소로 바로 들어온 경우(링크 공유·새로고침)에는 뒤로 갈 데가 없으니 주소만 바꾼다.
+    if (openedHereRef.current) {
+      openedHereRef.current = false
+      router.back()
+      return
     }
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete('panel')
+    const query = params.toString()
+    router.replace(query ? `${pathname}?${query}` : pathname)
   }
-
-  useEffect(() => {
-    const handlePopState = () => {
-      setMobilePanelTab(null)
-      setIsProfileFullViewOpen(false)
-    }
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [])
   const mobilePanelTitle =
     mobilePanelTab === 'tab-sales'
       ? '판매 내역'
