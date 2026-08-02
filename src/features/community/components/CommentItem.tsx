@@ -45,7 +45,7 @@ export function CommentItem({
   onDelete,
 }: CommentItemProps) {
   const user = useUserStore((state) => state.user)
-  const isMyComment = user?.id === Number(comment.authorId)
+  const isMyComment = user?.id === comment.authorId
   const [isReplyDeleteModalOpen, setIsReplyDeleteModalOpen] = useState(false)
 
   const handleDelete = () => {
@@ -80,7 +80,7 @@ export function CommentItem({
           <div className="flex flex-col gap-1 md:gap-2">
             <div className="flex items-center gap-1.5">
               <p className="text-[13px] font-semibold md:text-base">{comment.authorNickname}</p>
-              {Number(comment.authorId) === user?.id ? (
+              {comment.authorId === user?.id ? (
                 <p className="bg-primary-200 rounded-full px-2 py-0.5 text-xs font-semibold text-white">내 댓글</p>
               ) : null}
             </div>
