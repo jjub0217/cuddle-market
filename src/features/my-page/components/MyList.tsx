@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { EllipsisVertical, SquarePen, Trash2, Check } from 'lucide-react'
+import { EllipsisVertical } from 'lucide-react'
 import Image from 'next/image'
 import { IMAGE_SIZES, imageLoader, toResizedWebpUrl, PLACEHOLDER_IMAGES } from '@/lib/utils/imageUrl'
 import SelectDropdown from '@/components/commons/select/SelectDropdown'
@@ -181,19 +181,16 @@ export default function MyList({
                       {/* 판매내역 — 거래 상태 변경 */}
                       {isSalesTab && !isCompleted && currentTradeStatus !== 'SELLING' ? (
                         <BottomSheetItem onClick={handleChangeTradeStatus('SELLING')}>
-                          <Check size={18} />
                           <span>판매중으로 바꾸기</span>
                         </BottomSheetItem>
                       ) : null}
                       {isSalesTab && !isCompleted && currentTradeStatus !== 'RESERVED' ? (
                         <BottomSheetItem onClick={handleChangeTradeStatus('RESERVED')}>
-                          <Check size={18} />
                           <span>예약중으로 바꾸기</span>
                         </BottomSheetItem>
                       ) : null}
                       {isSalesTab && !isCompleted ? (
                         <BottomSheetItem onClick={handleChangeTradeStatus('COMPLETED')}>
-                          <Check size={18} />
                           <span>판매완료로 바꾸기</span>
                         </BottomSheetItem>
                       ) : null}
@@ -201,7 +198,6 @@ export default function MyList({
                       {/* 구매내역 — 구매완료 */}
                       {isPurchasesTab && !isCompleted ? (
                         <BottomSheetItem onClick={handleChangeTradeStatus('COMPLETED')}>
-                          <Check size={18} />
                           <span>구매완료로 바꾸기</span>
                         </BottomSheetItem>
                       ) : null}
@@ -209,7 +205,6 @@ export default function MyList({
                       {/* 수정 */}
                       {isMyProductTab && !isCompleted ? (
                         <BottomSheetItem onClick={handleProductUpdate}>
-                          <SquarePen size={18} />
                           <span>수정하기</span>
                         </BottomSheetItem>
                       ) : null}
@@ -219,7 +214,6 @@ export default function MyList({
                         tone="danger"
                         onClick={(e: React.MouseEvent) => handleConfirmModal(e, id, title, price, mainImageUrl)}
                       >
-                        <Trash2 size={18} />
                         <span>삭제</span>
                       </BottomSheetItem>
                     </BottomSheet>

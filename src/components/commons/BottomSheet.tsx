@@ -74,7 +74,21 @@ export function BottomSheet({ isOpen, onClose, children, label }: BottomSheetPro
   if (!mounted || !isOpen) return null
 
   return createPortal(
-    <div className={cn('fixed inset-0', Z_INDEX.MODAL)}>
+    <div
+      className={cn('fixed inset-0', Z_INDEX.MODAL)}
+      // ⚠️ portal은 DOM에서만 body로 나간다. React 이벤트는 **여전히 React 트리를 따라**
+      //    올라간다. 이 시트는 카드 전체를 감싼 <Link> 안에서 열리므로, 막지 않으면
+      //    덮개를 눌렀을 때 링크가 눌린 셈이 되어 상세 페이지로 넘어간다.
+      //    (실기기에서 실제로 그랬다 — #793)
+      onClick={(e) => {
+        e.stopPropagation()
+        e.preventDefault()
+      }}
+      onMouseDown={(e) => e.stopPropagation()}
+      // ⚠️ 키 이벤트는 막지 않는다. 막으면 ESC가 document까지 못 올라가 시트가 안 닫힌다.
+      //    (한 번 막았다가 시험이 잡았다.)
+      //    링크는 눌림(click)으로만 따라가므로 위 onClick만으로 충분하다.
+    >
       {/* 덮개. 눌러서 닫는다 */}
       <button
         type="button"

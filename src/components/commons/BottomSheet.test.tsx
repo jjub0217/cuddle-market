@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -62,6 +63,55 @@ describe('여닫기', () => {
     await user.keyboard('{Escape}')
 
     expect(onClose).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('링크 안에서 열렸을 때', () => {
+  // 실기기에서 걸린 것 — 시트는 목록 카드 전체를 감싼 <Link> 안에서 열린다.
+  // portal은 **DOM에서만** body로 나가고, React 이벤트는 여전히 React 트리를 따라
+  // 올라간다. 막지 않으면 덮개를 눌렀을 때 링크가 눌린 셈이 되어 상세로 넘어간다.
+
+  function LinkHarness({ onNavigate, onClose }: { onNavigate: () => void; onClose: () => void }) {
+    return (
+      <Link href="/products/1" onClick={onNavigate}>
+        카드
+        <BottomSheet isOpen onClose={onClose} label="상품 메뉴">
+          <BottomSheetItem onClick={vi.fn()}>수정하기</BottomSheetItem>
+        </BottomSheet>
+      </Link>
+    )
+  }
+
+  it('덮개를 눌러도 바깥 링크가 안 눌린다', async () => {
+    const onNavigate = vi.fn()
+    const onClose = vi.fn()
+    const user = userEvent.setup()
+    render(<LinkHarness onNavigate={onNavigate} onClose={onClose} />)
+
+    await user.click(screen.getByRole('button', { name: '닫기' }))
+
+    expect(onClose).toHaveBeenCalledTimes(1)
+    // 여기서 1이 나오면 시트를 닫는 대신 상세 페이지로 넘어간다
+    expect(onNavigate).not.toHaveBeenCalled()
+  })
+
+  it('항목을 눌러도 바깥 링크가 안 눌린다', async () => {
+    const onNavigate = vi.fn()
+    const onEdit = vi.fn()
+    const user = userEvent.setup()
+    render(
+      <Link href="/products/1" onClick={onNavigate}>
+        카드
+        <BottomSheet isOpen onClose={vi.fn()} label="상품 메뉴">
+          <BottomSheetItem onClick={onEdit}>수정하기</BottomSheetItem>
+        </BottomSheet>
+      </Link>
+    )
+
+    await user.click(screen.getByText('수정하기'))
+
+    expect(onEdit).toHaveBeenCalledTimes(1)
+    expect(onNavigate).not.toHaveBeenCalled()
   })
 })
 
