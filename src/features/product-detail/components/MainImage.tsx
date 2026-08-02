@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Pagination, Navigation } from 'swiper/modules'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
@@ -80,8 +80,20 @@ export default function MainImage({ mainImageUrl, subImageUrls, title, tradeStat
   const slides = images.length > 0 ? images : [PLACEHOLDER_IMAGES[800]]
   const hasMultiple = slides.length > 1
 
-  const prevRef = useRef<HTMLButtonElement>(null)
-  const nextRef = useRef<HTMLButtonElement>(null)
+  /**
+   * 이전/다음 버튼을 Swiper에 넘기는 방법.
+   *
+   * 예전에는 `useRef` + 그리는 도중에 `prevRef.current`를 읽어 `navigation`에 넣었다.
+   * 렌더는 순수해야 해서 ref를 읽으면 안 된다(react-hooks/refs). 게다가 첫 렌더에는
+   * 아직 버튼이 안 붙어 있어 늘 null이었고, 그래서 `onBeforeInit`으로 한 번 더 넣어
+   * 주는 우회가 붙어 있었다.
+   *
+   * ref 대신 **state에 담는다.** `ref={setPrevEl}`처럼 함수를 주면 React가 버튼을
+   * 붙일 때 그 요소로, 뗄 때 null로 불러 준다(콜백 ref). 값이 바뀌면 다시 그려지고
+   * Swiper가 새 요소를 받는다. 그리는 도중에 읽는 곳이 없어진다.
+   */
+  const [prevEl, setPrevEl] = useState<HTMLButtonElement | null>(null)
+  const [nextEl, setNextEl] = useState<HTMLButtonElement | null>(null)
 
   const getDisplayTradeStatus = () => {
     if (productTypeName === '판매요청') {
@@ -102,13 +114,7 @@ export default function MainImage({ mainImageUrl, subImageUrls, title, tradeStat
         <Swiper
           modules={[Pagination, Navigation]}
           pagination={{ clickable: true }}
-          navigation={{ prevEl: prevRef.current, nextEl: nextRef.current }}
-          onBeforeInit={(swiper) => {
-            if (swiper.params.navigation && typeof swiper.params.navigation !== 'boolean') {
-              swiper.params.navigation.prevEl = prevRef.current
-              swiper.params.navigation.nextEl = nextRef.current
-            }
-          }}
+          navigation={{ prevEl, nextEl }}
           slidesPerView={1}
           spaceBetween={0}
           loop={hasMultiple}
@@ -127,7 +133,7 @@ export default function MainImage({ mainImageUrl, subImageUrls, title, tradeStat
       {hasMultiple ? (
         <>
           <button
-            ref={prevRef}
+            ref={setPrevEl}
             type="button"
             aria-label="이전 이미지"
             className="absolute top-1/2 left-2 z-20 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center text-white transition-opacity hover:opacity-80"
@@ -135,7 +141,7 @@ export default function MainImage({ mainImageUrl, subImageUrls, title, tradeStat
             <ChevronLeft size={44} strokeWidth={1.5} />
           </button>
           <button
-            ref={nextRef}
+            ref={setNextEl}
             type="button"
             aria-label="다음 이미지"
             className="absolute top-1/2 right-2 z-20 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center text-white transition-opacity hover:opacity-80"
