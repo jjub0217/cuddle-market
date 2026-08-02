@@ -735,6 +735,86 @@ Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 
 ---
 
+# Task 2-1: 웹 게시글 신고 사유를 shared로 (스펙 W-5)
+
+**Files:**
+- Modify: `src/constants/constants.ts` (`POST_REPORT_REASON` 제거)
+- Modify: `src/components/modal/PostReportModal.tsx` (또는 그 상수를 쓰는 곳)
+
+**Interfaces:**
+- Consumes: `COMMUNITY_REPORT_REASON` (Task 1)
+- Produces: 없음
+
+**왜 필요한가 — 지금 「기타」 신고가 실패한다**
+
+```
+서버 CommunityReportReason   ABUSE_OR_HATE · SPAM_OR_AD · INAPPROPRIATE_CONTENT
+                             REPETITIVE_POST · SELF_HARM_OR_SUICIDE · ETC
+웹 POST_REPORT_REASON        … 'OTHER'   ← 서버에 없는 값
+```
+
+`OTHER`는 **사용자 신고**(`UserReportReason`)의 값이다. 게시글 신고에서 「기타」를 고르면 서버가 못 알아본다. 상수를 옮기면서 같이 고친다.
+
+- [ ] **Step 1: 쓰는 곳을 찾는다**
+
+```bash
+grep -rn "POST_REPORT_REASON" src/ --include="*.ts" --include="*.tsx"
+```
+
+- [ ] **Step 2: shared 것으로 바꾼다**
+
+`src/constants/constants.ts`에서 `POST_REPORT_REASON`을 지우고, 쓰던 곳이 이렇게 가져가게 한다.
+
+```ts
+import { COMMUNITY_REPORT_REASON } from '@cuddle/shared'
+```
+
+`ReportModalBase`가 받는 `reasons` 모양(`{ id, label }[]`)이 `ReportReason`과 같으므로 그대로 넘어간다. 다르면 그 자리에 맞춘다.
+
+> 라벨과 차례는 이미 웹 것을 그대로 옮겨 뒀다(Task 1). 화면 글자는 안 바뀌고 **「기타」가 보내는 값만** `OTHER` → `ETC`로 바뀐다.
+
+- [ ] **Step 3: 게시글 신고도 409로 중복을 가려낸다**
+
+`PostReportModal`이 오류를 문구로 가려내고 있으면 `isAlreadyReported`(`src/lib/api/reportErrors.ts`, #808에서 만들었다)로 바꾼다.
+
+```ts
+import { isAlreadyReported } from '@/lib/api/reportErrors'
+
+const isDuplicate = isAlreadyReported(error)
+```
+
+- [ ] **Step 4: 시험**
+
+`src/components/modal/PostReportModal.test.tsx` — `ProductReportModal.test.tsx`를 본떠 쓴다.
+
+```
+□ 「기타」를 고르면 ETC를 보낸다 (OTHER가 아니다)
+□ 409면 「이미 신고한 게시글입니다」가 뜬다
+```
+
+- [ ] **Step 5: 게이트**
+
+```bash
+pnpm gate
+```
+
+- [ ] **Step 6: 커밋**
+
+```bash
+git add src/constants/constants.ts src/components/modal/
+git commit -m "fix(web): 게시글 신고 사유를 shared로 · 「기타」가 서버 값과 안 맞던 것 (#812)
+
+웹 POST_REPORT_REASON의 「기타」가 OTHER였는데 서버 CommunityReportReason에는
+그 값이 없다(사용자 신고만 OTHER다). 「기타」로 낸 신고가 조용히 실패하고 있었다.
+
+@cuddle/shared의 COMMUNITY_REPORT_REASON으로 옮긴다. 라벨과 차례는 웹 것을
+그대로 가져갔으므로 화면 글자는 안 바뀌고 보내는 값만 ETC로 바뀐다.
+
+Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
+```
+
+---
+
 # Task 3: 웹 답글을 처음부터 펼치고 오버레이를 없앤다
 
 **Files:**
