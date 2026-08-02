@@ -21,6 +21,7 @@ export type {
 // ========== 인증 관련 타입 ==========
 export type {
   NicknameCheckResponse,
+  EmailAvailabilityResponse,
   EmailCheckResponse,
   SignUpRequestData,
   SignUpResponse,

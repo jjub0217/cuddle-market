@@ -36,8 +36,12 @@ NEXT_PUBLIC_WS_URL=https://cmarket-api.duckdns.org/ws-stomp
 ```bash
 pnpm gate:shared    # packages/shared — vitest
 pnpm gate:mobile    # 앱 — tsc + expo lint + jest
-pnpm gate           # 웹 — tsc + next build
+pnpm gate           # 웹 — tsc + vitest(unit) + next build
 pnpm gate:all       # 셋 다 (shared → mobile → 웹 순)
+
+pnpm test           # 웹 유닛 테스트만 (jsdom + RTL)
+pnpm test:watch     # 고칠 때마다 다시 돈다
+pnpm test:storybook # 스토리를 진짜 크로미움에서. 느리니 게이트에선 안 돈다
 
 # 바뀐 파일만 lint (웹)
 git diff --name-only develop...HEAD -- 'src/**/*.ts*' 'packages/**/*.ts' | tr '\n' '\0' | xargs -0 npx eslint
@@ -45,6 +49,14 @@ git diff --name-only develop...HEAD -- 'src/**/*.ts*' 'packages/**/*.ts' | tr '\
 
 - ⚠️ **`cd mobile` 뒤에 루트 명령을 치면 실패한다.** `pnpm build`·`git add docs/...`가 그렇다. `gate:mobile`은 이 함정을 없애려고 만들었다 — 루트에서 앱 게이트를 돌린다.
 - ⚠️ 전체 `pnpm lint`는 exit 1이 정상이다 (#788의 잔여 10건). 바뀐 파일만 본다.
+
+**러너가 셋이다.** 어디에 시험을 쓸지는 그 코드가 사는 곳으로 정한다.
+
+```
+packages/shared/   vitest    웹·앱이 같이 쓰는 로직 → 한 번 쓰면 양쪽이 덮인다
+mobile/            Jest      앱 화면·로직 (jest-expo)
+src/ (웹)          vitest    웹 화면·훅 (jsdom + React Testing Library)
+```
 
 ## 백엔드 저장소
 
