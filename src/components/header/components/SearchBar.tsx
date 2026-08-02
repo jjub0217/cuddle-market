@@ -1,7 +1,7 @@
 'use client'
 
 import { Search as SearchIcon } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { cn } from '@/lib/utils/cn'
 import Input from '@/components/commons/Input'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
@@ -34,6 +34,20 @@ export default function SearchBar({
   const currentKeyword = searchParams.get(paramName) || ''
   const [keyword, setKeyword] = useState(currentKeyword)
   const isHomePage = pathname === ROUTES.HOME
+
+  // URL의 검색어가 바뀌면(뒤로가기·앞으로가기 등) 입력칸을 거기에 맞춘다.
+  //
+  // 예전에는 useEffect로 했는데, 그러면 한 번 그린 뒤에 또 그린다 —
+  // 뒤로가기 순간 옛 글자가 잠깐 보였다 바뀐다.
+  // 렌더 도중에 맞추면 화면에 내보내기 전에 다시 그려서 깜빡임이 없다.
+  //
+  // 「이전 값을 기억해 두고 달라졌을 때만」이 핵심이다. 그냥 대입하면 매 렌더마다 돌아
+  // 사용자가 치던 글자가 지워진다.
+  const [prevUrlKeyword, setPrevUrlKeyword] = useState(currentKeyword)
+  if (prevUrlKeyword !== currentKeyword) {
+    setPrevUrlKeyword(currentKeyword)
+    setKeyword(currentKeyword)
+  }
 
   function handleKeywordChange(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.nativeEvent.isComposing) return
@@ -75,11 +89,6 @@ export default function SearchBar({
       router.push(query ? `${pathname}?${query}` : pathname)
     }
   }
-
-  // URL이 변경될 때 (뒤로가기, 앞으로가기 등) Input value 동기화
-  useEffect(() => {
-    setKeyword(currentKeyword)
-  }, [currentKeyword])
 
   return (
     <div className={cn('h-5 flex-1 md:h-10 md:min-w-120', className)} role="search" aria-label={placeholder}>

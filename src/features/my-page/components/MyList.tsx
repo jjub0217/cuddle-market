@@ -2,9 +2,9 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { EllipsisVertical, SquarePen, Trash2, Check } from 'lucide-react'
+import { EllipsisVertical } from 'lucide-react'
 import Image from 'next/image'
 import { IMAGE_SIZES, imageLoader, toResizedWebpUrl, PLACEHOLDER_IMAGES } from '@/lib/utils/imageUrl'
 import SelectDropdown from '@/components/commons/select/SelectDropdown'
@@ -18,8 +18,7 @@ import { api } from '@/lib/api/api'
 import { ROUTES } from '@/constants/routes'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import IconButton from '@/components/commons/button/IconButton'
-import { Z_INDEX } from '@/constants/ui'
-import { useOutsideClick } from '@/hooks/useOutsideClick'
+import { BottomSheet, BottomSheetItem } from '@/components/commons/BottomSheet'
 
 interface StatusDropdownProps {
   className?: string
@@ -79,9 +78,6 @@ export default function MyList({
     return toResizedWebpUrl(mainImageUrl, 400)
   }
   const router = useRouter()
-  const modalRef = useRef<HTMLDivElement>(null)
-  useOutsideClick(isMoreMenuOpen, [modalRef], () => setIsMoreMenuOpen(false))
-
   const isMd = useMediaQuery('(min-width: 768px)')
   const queryClient = useQueryClient()
   const { mutate } = useMutation({
@@ -134,9 +130,6 @@ export default function MyList({
     setIsMoreMenuOpen((prev) => !prev)
   }
 
-  const menuItemClass =
-    'text-on-surface hover:bg-surface-container-high w-fit cursor-pointer gap-3 rounded-none border-b border-outline-variant/60 transition-all'
-
   return (
     <li id={id.toString()} className="relative w-full hover:z-10">
       <Link
@@ -177,61 +170,53 @@ export default function MyList({
                     <IconButton size="sm" onClick={handleMoreToggle} aria-label="상품 옵션 메뉴 열기">
                       <EllipsisVertical size={16} className="text-gray-500" />
                     </IconButton>
-                    {isMoreMenuOpen ? (
-                      <div
-                        className={cn(
-                          'border-outline-variant/60 absolute top-7 right-0 flex w-fit flex-col items-stretch rounded-lg border bg-white',
-                          Z_INDEX.DROPDOWN
-                        )}
-                        ref={modalRef}
+                    {/* 좁은 폭에서는 아래에서 올라오는 시트로 연다.
+                        한 손으로 닿는 자리이고, 삭제를 화면 한가운데가 아니라
+                        아래로 떨어뜨려 둘 수 있다. 앱과 같은 모양이다(#793). */}
+                    <BottomSheet
+                      isOpen={isMoreMenuOpen}
+                      onClose={() => setIsMoreMenuOpen(false)}
+                      label={`${title} 상품 메뉴`}
+                    >
+                      {/* 판매내역 — 거래 상태 변경 */}
+                      {isSalesTab && !isCompleted && currentTradeStatus !== 'SELLING' ? (
+                        <BottomSheetItem onClick={handleChangeTradeStatus('SELLING')}>
+                          <span>판매중으로 바꾸기</span>
+                        </BottomSheetItem>
+                      ) : null}
+                      {isSalesTab && !isCompleted && currentTradeStatus !== 'RESERVED' ? (
+                        <BottomSheetItem onClick={handleChangeTradeStatus('RESERVED')}>
+                          <span>예약중으로 바꾸기</span>
+                        </BottomSheetItem>
+                      ) : null}
+                      {isSalesTab && !isCompleted ? (
+                        <BottomSheetItem onClick={handleChangeTradeStatus('COMPLETED')}>
+                          <span>판매완료로 바꾸기</span>
+                        </BottomSheetItem>
+                      ) : null}
+
+                      {/* 구매내역 — 구매완료 */}
+                      {isPurchasesTab && !isCompleted ? (
+                        <BottomSheetItem onClick={handleChangeTradeStatus('COMPLETED')}>
+                          <span>구매완료로 바꾸기</span>
+                        </BottomSheetItem>
+                      ) : null}
+
+                      {/* 수정 */}
+                      {isMyProductTab && !isCompleted ? (
+                        <BottomSheetItem onClick={handleProductUpdate}>
+                          <span>수정하기</span>
+                        </BottomSheetItem>
+                      ) : null}
+
+                      {/* 삭제 */}
+                      <BottomSheetItem
+                        tone="danger"
+                        onClick={(e: React.MouseEvent) => handleConfirmModal(e, id, title, price, mainImageUrl)}
                       >
-                        {/* 판매내역 — 거래 상태 변경 */}
-                        {isSalesTab && !isCompleted && currentTradeStatus !== 'SELLING' ? (
-                          <Button size="sm" className={menuItemClass} onClick={handleChangeTradeStatus('SELLING')}>
-                            <Check size={16} />
-                            <span>판매중</span>
-                          </Button>
-                        ) : null}
-                        {isSalesTab && !isCompleted && currentTradeStatus !== 'RESERVED' ? (
-                          <Button size="sm" className={menuItemClass} onClick={handleChangeTradeStatus('RESERVED')}>
-                            <Check size={16} />
-                            <span>예약중</span>
-                          </Button>
-                        ) : null}
-                        {isSalesTab && !isCompleted ? (
-                          <Button size="sm" className={menuItemClass} onClick={handleChangeTradeStatus('COMPLETED')}>
-                            <Check size={16} />
-                            <span>판매완료</span>
-                          </Button>
-                        ) : null}
-
-                        {/* 구매내역 — 구매완료 */}
-                        {isPurchasesTab && !isCompleted ? (
-                          <Button size="sm" className={menuItemClass} onClick={handleChangeTradeStatus('COMPLETED')}>
-                            <Check size={16} />
-                            <span>구매완료</span>
-                          </Button>
-                        ) : null}
-
-                        {/* 수정 */}
-                        {isMyProductTab && !isCompleted ? (
-                          <Button size="sm" className={menuItemClass} onClick={handleProductUpdate}>
-                            <SquarePen size={16} />
-                            <span>수정</span>
-                          </Button>
-                        ) : null}
-
-                        {/* 삭제 */}
-                        <Button
-                          size="sm"
-                          className="text-danger-500 hover:bg-surface-container-high w-fit cursor-pointer gap-3 rounded-none transition-all"
-                          onClick={(e: React.MouseEvent) => handleConfirmModal(e, id, title, price, mainImageUrl)}
-                        >
-                          <Trash2 size={16} />
-                          <span>삭제</span>
-                        </Button>
-                      </div>
-                    ) : null}
+                        <span>삭제</span>
+                      </BottomSheetItem>
+                    </BottomSheet>
                   </div>
                 ) : null}
                 <span className="text-base font-bold text-gray-900">{formatPrice(price)} 원</span>

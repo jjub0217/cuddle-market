@@ -151,12 +151,29 @@ export default function SelectDropdown({
   const optionsRef = useRef<HTMLDivElement | null>(null)
   const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>()
 
+  /**
+   * 옵션 목록을 담을 곳.
+   *
+   * `<dialog showModal()>`은 top-layer에 그려져서 z-index로는 못 이긴다.
+   * 그래서 dialog 안에서 열렸으면 **그 dialog 안에** 담아야 옵션이 위로 뜨고 눌린다.
+   * dialog 밖(일반 페이지)에서는 body에 담는다.
+   *
+   * 왜 state로 들고 있나: 예전에는 그리는 도중에 `selectRef.current.closest('dialog')`를
+   * 읽었는데, 렌더는 순수해야 해서 ref를 읽으면 안 된다(react-hooks/refs).
+   * 담을 곳은 **열 때 한 번** 정하면 되므로, 이벤트 처리 함수에서 정해 둔다.
+   */
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null)
+
   const selectedOption = options.find((option) => option.value === value)
 
   const handleToggle = () => {
-    if (!disabled) {
-      setIsOpen((prev) => !prev)
+    if (disabled) return
+
+    // 여는 순간에만 담을 곳을 다시 본다. 이벤트 처리 함수라 ref를 읽어도 된다.
+    if (!isOpen) {
+      setPortalTarget(selectRef.current?.closest('dialog') ?? document.body)
     }
+    setIsOpen((prev) => !prev)
   }
 
   const handleSelect = (optionValue: string) => {
@@ -224,7 +241,7 @@ export default function SelectDropdown({
         placeholder={placeholder}
       />
 
-      {isOpen && !disabled && dropdownStyle
+      {isOpen && !disabled && dropdownStyle && portalTarget
         ? createPortal(
             // fixed로 흐름에서 빼야 함: dialog에 portal될 때 이 wrapper가
             // flex 자식으로 잡혀 gap(예: gap-4=16px)을 추가하는 부작용 방지.
@@ -238,10 +255,8 @@ export default function SelectDropdown({
                 style={dropdownStyle}
               />
             </div>,
-            // <dialog showModal()>은 top-layer에 렌더돼 z-index로 못 이김.
-            // dialog 안에서 열린 경우엔 그 dialog에 portal해야 옵션이 위로 뜨고 클릭됨.
-            // dialog 밖(일반 페이지)에선 기존처럼 body에 portal.
-            selectRef.current?.closest('dialog') ?? document.body
+            // 담을 곳은 열 때 정해 뒀다(위 portalTarget 주석 참고).
+            portalTarget
           )
         : null}
     </div>

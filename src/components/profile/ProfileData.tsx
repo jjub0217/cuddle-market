@@ -94,6 +94,9 @@ export default function ProfileData({
   const menuItemClass =
     'flex w-full cursor-pointer items-center gap-2 whitespace-nowrap px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container-high transition-colors'
 
+  /** 앞뒤 공백을 뗀 소개글. 공백만 있으면 「없다」와 같게 다룬다 */
+  const introduction = data?.introduction?.trim() ?? ''
+
   const introRef = useRef<HTMLParagraphElement>(null)
   const [isIntroExpanded, setIsIntroExpanded] = useState(false)
   const [isIntroClamped, setIsIntroClamped] = useState(false)
@@ -327,17 +330,27 @@ export default function ProfileData({
               </div>
             )}
           </div>
+          {/* 소개글.
+              비어 있을 때 「소개글을 작성해주세요」는 내 프로필에서만 뜬다 —
+              남의 프로필에서 보면 누구더러 쓰라는 건지 알 수 없다.
+              그래서 남의 프로필이면 줄을 아예 안 그린다.
+
+              공백만 있는 소개글도 「없다」로 본다. 저장할 때 앞뒤 공백을 안 떼고
+              최소 2자만 보기 때문에(authValidationRules.introduction) 공백 두 칸도
+              저장된다. 그걸 그대로 그리면 남의 프로필에 빈 줄이 생긴다. */}
           <div className="flex w-full flex-col gap-1">
-            <p
-              ref={introRef}
-              className={cn(
-                'w-full text-sm font-normal break-words whitespace-pre-wrap text-gray-500',
-                !isIntroExpanded && 'line-clamp-3'
-              )}
-            >
-              {data?.introduction || '소개글을 작성해주세요'}
-            </p>
-            {data?.introduction && (isIntroExpanded || isIntroClamped) ? (
+            {introduction || isMyProfile ? (
+              <p
+                ref={introRef}
+                className={cn(
+                  'w-full text-sm font-normal break-words whitespace-pre-wrap text-gray-500',
+                  !isIntroExpanded && 'line-clamp-3'
+                )}
+              >
+                {introduction || '소개글을 작성해주세요'}
+              </p>
+            ) : null}
+            {introduction && (isIntroExpanded || isIntroClamped) ? (
               <button
                 type="button"
                 onClick={() => setIsIntroExpanded((prev) => !prev)}
