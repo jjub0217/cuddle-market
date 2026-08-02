@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  KeyboardAvoidingView,
   type NativeSyntheticEvent,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -11,6 +9,8 @@ import {
   type TextInputSelectionChangeEventData,
   View,
 } from 'react-native';
+
+import { useAuthStore } from '@/lib/auth/store';
 
 // 댓글·답글을 쓰는 칸.
 //
@@ -106,12 +106,19 @@ export function CommentInput({
 
   const isReplyInput = Boolean(replyTo) || isThread;
 
+  // 게스트에게는 왜 못 쓰는지 미리 알린다.
+  // 「등록」을 눌러야 로그인 화면이 뜨는데, 그때야 알면 헛걸음이다.
+  // 칸 자체는 막지 않는다 — 미리 쳐 둔 글은 로그인하고 돌아와도 남는다.
+  const isGuest = useAuthStore((state) => state.status) !== 'authed';
+  const placeholder = isGuest
+    ? `${isReplyInput ? '답글' : '댓글'}을 입력하려면 로그인해 주세요`
+    : `${isReplyInput ? '답글' : '댓글'}을 입력하세요`;
+
   return (
-    <KeyboardAvoidingView
-      // iOS는 'padding', 안드로이드는 창 크기가 저절로 줄어 'height'가 맞다.
-      // 실기기로 봐야 아는 자리다 — 타입체크도 린트도 안 잡아준다.
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+    // ⚠️ 키보드 피하기는 **화면**이 맡는다(로그인 화면과 같은 방식).
+    //    여기서 KeyboardAvoidingView로 이 칸만 감쌌더니 키보드가 칸을 덮었다 —
+    //    위쪽 목록까지 함께 밀어 올려야 자리가 생긴다.
+    <View>
       {/* 칸 하나가 대상만 바꾸므로 누구에게 다는 중인지 알려 준다.
           기본 대상(그 스레드)에 다는 중일 때는 당연한 상태라 안 그린다. */}
       {replyTo ? (
@@ -130,7 +137,7 @@ export function CommentInput({
           onChangeText={handleChangeText}
           selection={selection}
           onSelectionChange={handleSelectionChange}
-          placeholder={isReplyInput ? '답글을 입력하세요' : '댓글을 입력하세요'}
+          placeholder={placeholder}
           placeholderTextColor="#9CA3AF"
           style={styles.input}
           multiline
@@ -153,7 +160,7 @@ export function CommentInput({
           )}
         </Pressable>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 

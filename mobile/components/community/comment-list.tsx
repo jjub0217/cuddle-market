@@ -1,4 +1,5 @@
 import { useQueries, useQuery } from '@tanstack/react-query';
+import { MessageSquareText } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -65,6 +66,18 @@ export function CommentList({
 
   const rows = flattenComments(parents, repliesByParent);
 
+  // 아직 받는 중일 때는 아무것도 안 그린다 — 「댓글이 없다」고 했다가 곧 나타나면 어수선하다.
+  // 스레드 화면에서는 안 그린다: 거기엔 부모 댓글이 늘 있어 「없다」가 참이 아니다.
+  if (allParents && rows.length === 0 && onlyParentId === undefined) {
+    return (
+      <View style={styles.empty}>
+        <MessageSquareText size={32} color="#D1D5DB" />
+        {/* 웹 CommentSection과 같은 문구다 */}
+        <Text style={styles.emptyText}>첫 댓글을 남겨보세요</Text>
+      </View>
+    );
+  }
+
   return (
     <View>
       {rows.map((row) => (
@@ -91,4 +104,6 @@ export function CommentList({
 
 const styles = StyleSheet.create({
   replyError: { marginLeft: 40, marginBottom: 8, fontSize: 12, color: '#9CA3AF' },
+  empty: { alignItems: 'center', gap: 12, paddingVertical: 24 },
+  emptyText: { fontSize: 14, color: '#9CA3AF' },
 });

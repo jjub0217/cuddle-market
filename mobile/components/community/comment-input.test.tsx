@@ -1,6 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import React from 'react';
 
+import { useAuthStore } from '@/lib/auth/store';
+
 import { CommentInput } from './comment-input';
 
 // 커서 자리를 다루는 부분만 본다.
@@ -15,6 +17,18 @@ import { CommentInput } from './comment-input';
 
 const NOOP = () => {};
 const SUBMIT = async () => true;
+
+// 안내 문구가 로그인 여부에 따라 갈리므로 시험마다 정해 준다.
+// 저장소 기본값은 'restoring'이라 아무것도 안 하면 게스트로 보인다.
+function signIn() {
+  useAuthStore.setState({ status: 'authed' });
+}
+
+function signOut() {
+  useAuthStore.setState({ status: 'guest' });
+}
+
+beforeEach(signIn);
 
 // ⚠️ @testing-library/react-native 14의 render는 기다려야 한다(async).
 //    안 기다리면 «render function has not been called»가 뜬다.
@@ -66,6 +80,33 @@ describe('커서를 언제 놓나', () => {
     await fireEvent.changeText(input(), '@협주 안녕');
 
     expect(input().props.selection).toBeUndefined();
+  });
+});
+
+describe('게스트일 때', () => {
+  // 「등록」을 눌러야 로그인 화면이 뜬다. 그때야 알면 헛걸음이라 미리 알린다.
+
+  it('댓글 칸에 로그인하라고 알린다', async () => {
+    signOut();
+    await renderInput(null);
+
+    expect(screen.getByPlaceholderText('댓글을 입력하려면 로그인해 주세요')).toBeTruthy();
+  });
+
+  it('답글 칸에도 알린다', async () => {
+    signOut();
+    await renderInput({ commentId: 34, nickname: '협주' });
+
+    expect(screen.getByPlaceholderText('답글을 입력하려면 로그인해 주세요')).toBeTruthy();
+  });
+
+  it('칸 자체를 막지는 않는다', async () => {
+    // 미리 쳐 둔 글은 로그인하고 돌아와도 남는다
+    signOut();
+    await renderInput(null);
+
+    const field = screen.getByPlaceholderText('댓글을 입력하려면 로그인해 주세요');
+    expect(field.props.editable).not.toBe(false);
   });
 });
 

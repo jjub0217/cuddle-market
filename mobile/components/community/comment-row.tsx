@@ -8,8 +8,11 @@ import type { CommentItem } from '@/lib/community';
 // 댓글·답글 한 줄. 웹 CommentItem과 같은 재료·같은 숫자를 쓴다.
 //   닉네임 14 · 본문 15(줄 간격 좁게) · 멘션 14 · 답글 상자 패딩 14
 //
-// 답글은 들여쓰기 + 옅은 상자로만 구분한다. 서버가 깊이를 안 나누고 평평하게 주므로
+// 답글은 **들여쓰기로만** 구분한다. 서버가 깊이를 안 나누고 평평하게 주므로
 // 들여쓰기도 한 겹뿐이다 — 답글의 답글도 같은 자리에 온다.
+//
+// ⚠️ 답글에 상자(배경색·안쪽 여백)를 두면 안 된다. 그 여백만큼 ⋮ 가 안으로 밀려
+//    댓글의 ⋮ 와 세로로 어긋난다. 오른쪽 끝은 댓글이든 답글이든 한 줄이어야 한다.
 
 interface CommentRowProps {
   comment: CommentItem;
@@ -85,12 +88,8 @@ export function CommentRow({ comment, isReply = false, isMine, onMenu, onReply }
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingVertical: 14 },
-  replyRow: {
-    marginLeft: 40,
-    padding: 14,
-    borderRadius: 8,
-    backgroundColor: '#f6f3f2', // 웹 --color-surface-container-low
-  },
+  // 들여쓰기만. 안쪽 여백을 주면 ⋮ 가 밀려 댓글의 ⋮ 와 어긋난다.
+  replyRow: { marginLeft: 40 },
   avatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#F3F4F6' },
   avatarFallback: { alignItems: 'center', justifyContent: 'center' },
   avatarLetter: { fontSize: 14, color: '#6B7280' },

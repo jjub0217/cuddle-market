@@ -2,7 +2,15 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CommentInput, type ReplyTarget } from '@/components/community/comment-input';
@@ -101,32 +109,39 @@ export default function CommentThreadScreen() {
         <Text style={styles.heading}>답글 {comment?.childrenCount ?? 0}</Text>
       </View>
 
-      <ScrollView
-        ref={scrollRef}
-        contentContainerStyle={styles.body}
-        keyboardShouldPersistTaps="handled"
+      {/* 목록과 입력칸을 **함께** 밀어 올린다. 입력칸만 감싸면 키보드가 칸을 덮는다
+          (로그인 화면과 같은 방식이다). 안드로이드는 창이 저절로 줄어 안 준다. */}
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        {comments && !comment ? (
-          <Text style={styles.notFound}>댓글을 찾을 수 없어요.</Text>
-        ) : (
-          <CommentList
-            postId={postId}
-            onlyParentId={commentId}
-            // ⋮ — 내 댓글이면 삭제, 남의 댓글이면 작성자 신고.
-            onMenu={setMenuTarget}
-            // 여기서는 부모든 답글이든 화면을 안 옮긴다. 이미 그 스레드 안이다.
-            onReply={handleReply}
-          />
-        )}
-      </ScrollView>
+        <ScrollView
+          ref={scrollRef}
+          contentContainerStyle={styles.body}
+          keyboardShouldPersistTaps="handled"
+        >
+          {comments && !comment ? (
+            <Text style={styles.notFound}>댓글을 찾을 수 없어요.</Text>
+          ) : (
+            <CommentList
+              postId={postId}
+              onlyParentId={commentId}
+              // ⋮ — 내 댓글이면 삭제, 남의 댓글이면 작성자 신고.
+              onMenu={setMenuTarget}
+              // 여기서는 부모든 답글이든 화면을 안 옮긴다. 이미 그 스레드 안이다.
+              onReply={handleReply}
+            />
+          )}
+        </ScrollView>
 
-      <CommentInput
-        replyTo={replyTo}
-        isThread
-        onSubmit={handleSubmit}
-        onCancelReply={() => setReplyTo(null)}
-        submitting={submitting}
-      />
+        <CommentInput
+          replyTo={replyTo}
+          isThread
+          onSubmit={handleSubmit}
+          onCancelReply={() => setReplyTo(null)}
+          submitting={submitting}
+        />
+      </KeyboardAvoidingView>
 
       <CommentMenuSheet
         postId={postId}
@@ -144,6 +159,7 @@ export default function CommentThreadScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF' },
+  flex: { flex: 1 },
   header: {
     height: HEADER_HEIGHT,
     flexDirection: 'row',

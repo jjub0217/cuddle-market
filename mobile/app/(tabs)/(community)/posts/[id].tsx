@@ -4,7 +4,15 @@ import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft, EllipsisVertical } from 'lucide-react-native';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CommentInput } from '@/components/community/comment-input';
@@ -177,18 +185,25 @@ export default function PostDetailScreen() {
         ) : null}
       </View>
 
-      {renderBody()}
+      {/* 본문과 입력칸을 **함께** 밀어 올린다. 입력칸만 감싸면 키보드가 칸을 덮는다
+          (로그인 화면과 같은 방식이다). 안드로이드는 창이 저절로 줄어 안 준다. */}
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        {renderBody()}
 
-      {/* 글이 안 떴으면 댓글 칸도 안 그린다. 탭 안이라 이 칸 아래에 탭바가 온다 —
-          웹도 같은 모양이다(레이아웃이 탭바 높이를 비켜 준다). */}
-      {post ? (
-        <CommentInput
-          replyTo={null}
-          onSubmit={handleCreateComment}
-          onCancelReply={() => {}}
-          submitting={submitting}
-        />
-      ) : null}
+        {/* 글이 안 떴으면 댓글 칸도 안 그린다. 탭 안이라 이 칸 아래에 탭바가 온다 —
+            웹도 같은 모양이다(레이아웃이 탭바 높이를 비켜 준다). */}
+        {post ? (
+          <CommentInput
+            replyTo={null}
+            onSubmit={handleCreateComment}
+            onCancelReply={() => {}}
+            submitting={submitting}
+          />
+        ) : null}
+      </KeyboardAvoidingView>
 
       <ProductActionSheet
         visible={isSheetOpen}
@@ -207,6 +222,7 @@ export default function PostDetailScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF' },
+  flex: { flex: 1 },
   header: {
     height: HEADER_HEIGHT,
     flexDirection: 'row',
