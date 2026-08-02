@@ -98,3 +98,27 @@ input[type='date']::-webkit-calendar-picker-indicator {
   display: none;
 }
 
+
+/* 아래에서 올라오는 시트 (components/commons/BottomSheet.tsx).
+   이 저장소에는 animate-in 같은 플러그인이 없어서 직접 둔다. */
+@keyframes bottom-sheet-rise {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.bottom-sheet__panel {
+  animation-name: bottom-sheet-rise;
+  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+  animation-fill-mode: both;
+}
+
+/* 움직임을 줄여 달라고 한 사용자에게는 안 움직인다 */
+@media (prefers-reduced-motion: reduce) {
+  .bottom-sheet__panel {
+    animation: none;
+  }
+}
