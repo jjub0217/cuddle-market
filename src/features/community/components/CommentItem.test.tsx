@@ -69,3 +69,40 @@ describe('내 댓글', () => {
     expect(screen.queryByRole('button', { name: '삭제' })).not.toBeInTheDocument()
   })
 })
+
+describe('스타일 값', () => {
+  // 앱이 이 숫자를 그대로 옮겨 쓴다(10바퀴). 여기서 흔들리면 웹과 앱이 갈린다.
+  // md: 분기를 없애 모바일·데스크톱이 한 벌이다.
+
+  it('닉네임은 14px 한 벌이다', () => {
+    render(<CommentItem comment={COMMENT} />)
+
+    const name = screen.getByText('협주')
+    expect(name).toHaveClass('text-sm')
+    expect(name.className).not.toMatch(/md:text-/)
+  })
+
+  it('본문은 15px에 줄 간격이 좁다', () => {
+    render(<CommentItem comment={COMMENT} />)
+
+    const body = screen.getByText('좀만 더 줘봐요')
+    expect(body).toHaveClass('text-[15px]')
+    // leading-none(줄 간격 1)이면 두 줄 넘는 답글의 줄이 붙는다
+    expect(body).toHaveClass('leading-snug')
+    expect(body).not.toHaveClass('leading-none')
+  })
+
+  it('답글 상자 여백이 사방 14px이다', () => {
+    const { container } = render(<CommentItem comment={COMMENT} isReply />)
+
+    const box = container.querySelector('.bg-surface-container-low')
+    expect(box).toHaveClass('p-[14px]')
+  })
+
+  it('폭에 따라 글자 굵기가 달라지지 않는다', () => {
+    render(<CommentItem comment={COMMENT} />)
+
+    const time = screen.getByText(/전$/)
+    expect(time.className).not.toMatch(/md:font-/)
+  })
+})

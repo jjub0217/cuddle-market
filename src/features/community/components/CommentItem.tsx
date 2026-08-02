@@ -62,15 +62,17 @@ export function CommentItem({ comment, isReply = false, showBorder = true, onHan
         <div className="flex flex-col justify-center gap-2">
           <div className="flex flex-col gap-1 md:gap-2">
             <div className="flex items-center gap-1.5">
-              <p className="text-[13px] font-semibold md:text-base">{comment.authorNickname}</p>
+              <p className="text-sm font-semibold leading-none">{comment.authorNickname}</p>
               {comment.authorId === user?.id ? (
                 <p className="bg-primary-200 rounded-full px-2 py-0.5 text-xs font-semibold text-white">내 댓글</p>
               ) : null}
             </div>
-            <p className="whitespace-pre-wrap">{renderContentWithMention(comment.content)}</p>
+            <p className="whitespace-pre-wrap text-[15px] leading-snug">
+              {renderContentWithMention(comment.content)}
+            </p>
           </div>
           <div className="flex items-center gap-1">
-            <p className="text-xs text-gray-500 md:font-medium">{getTimeAgo(comment.createdAt)}</p>
+            <p className="text-xs font-medium text-gray-500">{getTimeAgo(comment.createdAt)}</p>
             <div className="flex items-center gap-1">
               {onHandleReply ? (
                 <>
@@ -78,7 +80,7 @@ export function CommentItem({ comment, isReply = false, showBorder = true, onHan
                     ·
                   </span>
                   <button
-                    className="text-primary-container cursor-pointer text-xs hover:underline md:font-medium"
+                    className="text-primary-container cursor-pointer text-xs font-medium hover:underline"
                     type="button"
                     onClick={onHandleReply}
                   >
