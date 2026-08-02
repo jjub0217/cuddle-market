@@ -31,11 +31,12 @@ interface CommentSectionProps {
   /**
    * 맨 아래 「댓글 쓰기」 칸을 그릴지.
    *
-   * 스레드 페이지에서는 끈다. 거기 입력칸은 **글에 새 댓글**을 다는 것이라,
-   * 답글을 달러 들어온 사람이 잘못 쓰기 쉽다. 스레드에서는 「답글 달기」로
-   * 그 자리에 열리는 칸만 쓴다.
+   * 스레드 화면에서는 끈다. 그 칸은 **글에 새 댓글**을 다는 것이라, 답글을 달러
+   * 들어온 사람이 잘못 쓰기 쉽다. 대신 답글 칸이 늘 열려 있다(alwaysOpenReplyFor).
    */
   showComposer?: boolean
+  /** 이 댓글의 답글 칸을 늘 열어 둔다 (스레드 화면용) */
+  alwaysOpenReplyFor?: number
 }
 
 export function CommentSection({
@@ -44,6 +45,7 @@ export function CommentSection({
   inputId,
   threadHref,
   showComposer = true,
+  alwaysOpenReplyFor,
 }: CommentSectionProps) {
   const queryClient = useQueryClient()
   const [postError, setPostError] = useState<React.ReactNode | null>(null)
@@ -91,7 +93,12 @@ export function CommentSection({
   return (
     <div className="flex flex-col gap-3.5">
       {comments.length > 0 ? (
-        <CommentList comments={comments} postId={postId} threadHref={threadHref} />
+        <CommentList
+          comments={comments}
+          postId={postId}
+          threadHref={threadHref}
+          alwaysOpenReplyFor={alwaysOpenReplyFor}
+        />
       ) : (
         <div className="flex flex-col items-center gap-3 py-6">
           <MessageSquareText size={32} className="text-gray-300" />

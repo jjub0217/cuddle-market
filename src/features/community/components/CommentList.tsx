@@ -29,6 +29,14 @@ interface CommentListProps {
    * 답글의 「답글 달기」는 언제나 그 자리에서 연다 — 이미 그 스레드 안이다.
    */
   threadHref?: (commentId: number) => string
+  /**
+   * 이 댓글의 답글 칸을 **늘 열어 둔다** (스레드 화면용).
+   *
+   * 상세에서는 「답글 달기」를 눌러야 칸이 열리지만, 스레드 화면은 답글을 달러
+   * 들어온 자리라 칸이 처음부터 보이는 편이 낫다. 답글마다 따로 칸이 열리지 않고,
+   * 이 칸 하나가 대상만 바꾼다 — 「답글 달기」를 누르면 @닉네임이 채워진다.
+   */
+  alwaysOpenReplyFor?: number
 }
 
 interface ReplyTarget {
@@ -37,7 +45,12 @@ interface ReplyTarget {
   mention?: string
 }
 
-export function CommentList({ comments, postId, threadHref }: CommentListProps) {
+export function CommentList({
+  comments,
+  postId,
+  threadHref,
+  alwaysOpenReplyFor,
+}: CommentListProps) {
   const queryClient = useQueryClient()
   const user = useUserStore((state) => state.user)
   const setRedirectUrl = useUserStore((state) => state.setRedirectUrl)
@@ -51,8 +64,10 @@ export function CommentList({ comments, postId, threadHref }: CommentListProps) 
     },
   })
   const replyContent = useWatch({ control, name: 'content' })
-  const [activeThreadId, setActiveThreadId] = useState<number | null>(null)
-  const [replyingToId, setReplyingToId] = useState<number | null>(null)
+  const [activeThreadId, setActiveThreadId] = useState<number | null>(alwaysOpenReplyFor ?? null)
+  const [replyingToId, setReplyingToId] = useState<number | null>(alwaysOpenReplyFor ?? null)
+  /** 지금 답글을 다는 대상의 닉네임. 칸 하나가 대상만 바꾸므로 화면에 알려 준다 */
+  const [replyMention, setReplyMention] = useState<string | null>(null)
   const [replyPostError, setReplyPostError] = useState<React.ReactNode | null>(null)
 
   // 답글은 부모 댓글마다 따로 부른다 — 서버가 목록에 답글을 안 담아 준다.
@@ -97,8 +112,10 @@ export function CommentList({ comments, postId, threadHref }: CommentListProps) 
       queryClient.invalidateQueries({ queryKey: ['community', postId, 'comments'] })
       queryClient.invalidateQueries({ queryKey: ['community', postId] })
       reset()
-      setReplyingToId(null)
-      setActiveThreadId(null)
+      // 스레드 화면에서는 칸이 늘 열려 있어야 한다. 대상만 그 스레드로 되돌린다.
+      setReplyingToId(alwaysOpenReplyFor ?? null)
+      setActiveThreadId(alwaysOpenReplyFor ?? null)
+      setReplyMention(null)
     },
     onError: () => {
       setReplyPostError(
@@ -134,13 +151,17 @@ export function CommentList({ comments, postId, threadHref }: CommentListProps) 
 
   const openReplyForm = (target: ReplyTarget) => {
     if (replyingToId === target.commentId) {
-      setReplyingToId(null)
-      setActiveThreadId(null)
-      reset()
+      // 같은 대상을 또 누르면 되돌린다. 스레드 화면에서는 칸을 닫지 않고
+      // 대상만 그 스레드로 되돌린다 — 칸이 사라지면 답글을 달 길이 없어진다.
+      setReplyingToId(alwaysOpenReplyFor ?? null)
+      setActiveThreadId(alwaysOpenReplyFor ?? null)
+      setReplyMention(null)
+      setValue('content', '')
       return
     }
     setReplyingToId(target.commentId)
     setActiveThreadId(target.threadId)
+    setReplyMention(target.mention ?? null)
     setValue('content', target.mention ? `@${target.mention} ` : '')
   }
 
@@ -217,6 +238,13 @@ export function CommentList({ comments, postId, threadHref }: CommentListProps) 
                   </InlineNotification>
                 ) : null}
               </AnimatePresence>
+              {/* 누구에게 다는 중인지 — 칸 하나가 대상만 바꾸므로 이게 없으면 헷갈린다.
+                  그 스레드 자체에 다는 중일 때는 안 그린다(당연한 상태다). */}
+              {replyingToId && replyingToId !== comment.id ? (
+                <p className="pb-1 text-xs text-gray-500">
+                  {replyMention ?? '답글'}님에게 답글 남기는 중
+                </p>
+              ) : null}
               <CommentForm
                 id={String(comment.id)}
                 placeholder="답글을 입력하세요"

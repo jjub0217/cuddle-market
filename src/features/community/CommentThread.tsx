@@ -66,9 +66,10 @@ export default function CommentThread({ postId, commentId, initialComment }: Com
             postId={postId}
             comments={[comment]}
             inputId="comment-input-thread"
-            // 맨 아래 「댓글 쓰기」 칸은 글에 **새 댓글**을 다는 것이다.
-            // 답글을 달러 들어온 사람이 잘못 쓰기 쉬워 여기서는 끈다.
+            // 맨 아래 「댓글 쓰기」 칸은 글에 **새 댓글**을 다는 것이라 여기서는 끈다.
+            // 대신 답글 칸이 처음부터 열려 있다 — 답글을 달러 들어온 자리다.
             showComposer={false}
+            alwaysOpenReplyFor={commentId}
           />
         ) : (
           <p className="py-10 text-center text-sm text-gray-400">댓글을 찾을 수 없어요.</p>

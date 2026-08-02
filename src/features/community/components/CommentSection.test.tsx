@@ -68,15 +68,29 @@ describe('입력칸 id', () => {
   })
 })
 
-describe('스레드 페이지에서', () => {
-  it('맨 아래 「댓글 쓰기」 칸을 안 그린다', () => {
-    // 그 칸은 글에 **새 댓글**을 다는 것이다. 답글을 달러 들어온 사람이
-    // 잘못 쓰기 쉬워 스레드에서는 끈다.
+describe('스레드 화면에서', () => {
+  it('「댓글 쓰기」 칸 대신 답글 칸이 처음부터 열려 있다', () => {
+    // 「댓글 쓰기」 칸은 글에 **새 댓글**을 다는 것이라 여기서는 끈다.
+    // 대신 답글 칸이 처음부터 보인다 — 답글을 달러 들어온 자리다.
     render(
-      <CommentSection postId="36" comments={[COMMENT]} inputId="t" showComposer={false} />
+      <CommentSection
+        postId="36"
+        comments={[COMMENT]}
+        inputId="t"
+        showComposer={false}
+        alwaysOpenReplyFor={COMMENT.id}
+      />
     )
 
-    expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
+    expect(screen.getByPlaceholderText('답글을 입력하세요')).toBeInTheDocument()
+    expect(screen.queryByPlaceholderText('댓글을 입력하세요')).not.toBeInTheDocument()
+  })
+
+  it('상세에서는 답글 칸이 처음에 닫혀 있다', () => {
+    render(<CommentSection postId="36" comments={[COMMENT]} inputId="t" />)
+
+    expect(screen.queryByPlaceholderText('답글을 입력하세요')).not.toBeInTheDocument()
+    expect(screen.getByPlaceholderText('댓글을 입력하세요')).toBeInTheDocument()
   })
 
   it('기본값은 그린다', () => {
