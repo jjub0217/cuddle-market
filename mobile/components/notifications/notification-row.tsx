@@ -93,7 +93,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   // 안 읽음: 배경 + 점. 웹과 같은 방식이다.
-  unread: { backgroundColor: '#FDF6EC' },
+  // 웹 NotificationItem과 같은 값이다 — --color-primary-50.
+  // 같은 화면이 두 곳에서 다른 색이면 안 된다.
+  unread: { backgroundColor: '#faf3e6' },
   pressed: { opacity: 0.7 },
   // 배경색은 종류마다 달라서 여기 두지 않는다 — 쓰는 쪽에서 덧씌운다.
   icon: {
@@ -111,7 +113,8 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#C2620A',
+    // 웹의 안 읽음 점과 같은 값 — --color-primary-500
+    backgroundColor: '#b06f15',
     marginTop: 6,
   },
 });
