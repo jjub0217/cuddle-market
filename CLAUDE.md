@@ -36,7 +36,7 @@ NEXT_PUBLIC_WS_URL=https://cmarket-api.duckdns.org/ws-stomp
 ```bash
 pnpm gate:shared    # packages/shared — vitest
 pnpm gate:mobile    # 앱 — tsc + expo lint + jest
-pnpm gate           # 웹 — tsc + vitest(unit) + next build
+pnpm gate           # 웹 — tsc + lint + vitest(unit) + next build
 pnpm gate:all       # 셋 다 (shared → mobile → 웹 순)
 
 pnpm test           # 웹 유닛 테스트만 (jsdom + RTL)
@@ -48,7 +48,8 @@ git diff --name-only develop...HEAD -- 'src/**/*.ts*' 'packages/**/*.ts' | tr '\
 ```
 
 - ⚠️ **`cd mobile` 뒤에 루트 명령을 치면 실패한다.** `pnpm build`·`git add docs/...`가 그렇다. `gate:mobile`은 이 함정을 없애려고 만들었다 — 루트에서 앱 게이트를 돌린다.
-- ⚠️ 전체 `pnpm lint`는 exit 1이 정상이다 (#788의 잔여 10건). 바뀐 파일만 본다.
+- **`pnpm lint`는 이제 게이트다** (#788에서 오류 10건을 다 없앴다). 오류가 하나라도 생기면 `pnpm gate`가 막힌다.
+- 경고는 36건에서 **더 늘지 못하게 막아 뒀다**(`lint:strict`의 `--max-warnings 36`). 경고를 줄이면 그 숫자도 같이 낮춘다. 예전에 26,271건까지 불어난 적이 있어 되돌아가지 않게 잠가 둔 것이다.
 
 **러너가 셋이다.** 어디에 시험을 쓸지는 그 코드가 사는 곳으로 정한다.
 

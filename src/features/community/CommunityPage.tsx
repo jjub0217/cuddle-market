@@ -48,9 +48,14 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
 
   const [searchInput, setSearchInput] = useState(currentKeyword)
 
-  useEffect(() => {
+  // URL의 검색어가 바뀌면(뒤로가기 등) 입력칸을 거기에 맞춘다.
+  // SearchBar와 같은 규칙이다 — 렌더 도중에 맞춰야 깜빡임이 없고,
+  // 「이전 값과 다를 때만」이어야 치던 글자가 안 지워진다.
+  const [prevUrlKeyword, setPrevUrlKeyword] = useState(currentKeyword)
+  if (prevUrlKeyword !== currentKeyword) {
+    setPrevUrlKeyword(currentKeyword)
     setSearchInput(currentKeyword)
-  }, [currentKeyword])
+  }
 
   const handleTabChange = (tabId: string) => {
     router.replace(`?tab=${tabId}`)
