@@ -106,3 +106,31 @@ describe('스타일 값', () => {
     expect(time.className).not.toMatch(/md:font-/)
   })
 })
+
+describe('답글 달기가 링크인지 버튼인지', () => {
+  // 부모 댓글은 스레드 페이지로 옮겨 간다 — 그 대화만 보여 집중할 수 있고,
+  // 답글이 길어져도 다른 댓글을 안 밀어낸다.
+  // 답글의 「답글 달기」는 이미 그 스레드 안이라 그 자리에서 연다.
+
+  it('replyHref를 주면 링크로 그린다', () => {
+    render(<CommentItem comment={COMMENT} replyHref="/community/36/x/comments/34" />)
+
+    const link = screen.getByRole('link', { name: '답글 달기' })
+    expect(link).toHaveAttribute('href', '/community/36/x/comments/34')
+    expect(screen.queryByRole('button', { name: '답글 달기' })).not.toBeInTheDocument()
+  })
+
+  it('replyHref가 없으면 그 자리에서 여는 버튼이다', () => {
+    render(<CommentItem comment={COMMENT} isReply onHandleReply={vi.fn()} />)
+
+    expect(screen.getByRole('button', { name: '답글 달기' })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: '답글 달기' })).not.toBeInTheDocument()
+  })
+
+  it('둘 다 없으면 답글 달기가 아예 없다', () => {
+    render(<CommentItem comment={COMMENT} />)
+
+    expect(screen.queryByRole('link', { name: '답글 달기' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '답글 달기' })).not.toBeInTheDocument()
+  })
+})

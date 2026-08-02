@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { useRouter, useParams } from 'next/navigation'
 import { useQueryClient, useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api/api'
@@ -18,7 +17,7 @@ import { CommentSection } from './components/CommentSection'
 import ProfileAvatar from '@/components/commons/ProfileAvatar'
 import type { CommunityDetailItem, Comment } from '@/types'
 import { useEffect, useState } from 'react'
-import { ArrowLeft, ChevronRight } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 const PostReportModal = dynamic(() => import('@/components/modal/PostReportModal'))
 const DeletePostConfirmModal = dynamic(() => import('@/components/modal/DeletePostConfirmModal'))
 import { useUserStore } from '@/store/userStore'
@@ -198,30 +197,31 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
               <MdPreview value={data.content} className="p-0" />
             </div>
 
-            {/* 데스크톱: 상세 안에 댓글이 그대로 */}
-            {/* hidden … md:flex를 쓴다(md:block이 아니라). 원래 flex flex-col이라 block으로 바꾸면 gap-3.5가 죽는다 */}
+            {/* 댓글은 폭 상관없이 상세 안에 전부 펼친다.
+                좁은 폭에서 「댓글 N ›」 줄만 두면 대화가 있는지조차 안 보인다.
+
+                다만 **부모 댓글의 「답글 달기」는 스레드 페이지로 옮겨 간다** —
+                그 댓글과 그 답글만 보여 대화에 집중할 수 있고, 답글이 길어져도
+                다른 댓글을 안 밀어낸다. 답글의 「답글 달기」는 이미 그 스레드 안이라
+                그 자리에서 열린다. */}
             <section
               aria-label="댓글"
-              className="border-outline-variant/40 hidden flex-col gap-3.5 border-t py-5 md:flex md:border-t-0"
+              className="border-outline-variant/40 flex flex-col gap-3.5 border-t py-5 md:border-t-0"
             >
               <div className="md:text-md flex items-center gap-1 text-sm font-semibold">
                 <span>댓글</span>
                 <span className="text-primary-container font-semibold">{data.commentCount}</span>
               </div>
 
-              <CommentSection postId={id!} comments={commentData?.comments ?? []} inputId="comment-input-desktop" />
+              <CommentSection
+                postId={id!}
+                comments={commentData?.comments ?? []}
+                inputId="comment-input"
+                threadHref={(commentId) =>
+                  `/community/${data.id}/${toUrlName(data.title)}/comments/${commentId}`
+                }
+              />
             </section>
-
-            {/* 모바일: 줄 하나만. 누르면 댓글 페이지로 */}
-            <Link
-              href={`/community/${data.id}/${toUrlName(data.title)}/comments`}
-              className="flex items-center justify-between border-t border-gray-200 py-4 md:hidden"
-            >
-              <span className="text-base font-semibold">
-                댓글 <span className="text-primary-container">{data.commentCount}</span>
-              </span>
-              <ChevronRight className="h-5 w-5 text-gray-400" />
-            </Link>
           </div>
         </div>
       </div>

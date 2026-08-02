@@ -24,11 +24,27 @@ import { CommentList, type ReplyRequestFormValues } from './CommentList'
 interface CommentSectionProps {
   postId: string
   comments: Comment[]
-  /** 입력칸 id. 한 페이지에 둘이 있으면(데스크톱 상세) 겹치면 안 된다 */
+  /** 입력칸 id. 한 페이지에 둘이 있으면 겹치면 안 된다 */
   inputId: string
+  /** 부모 댓글의 「답글 달기」가 갈 스레드 페이지 주소. 스레드 안에서는 안 넘긴다 */
+  threadHref?: (commentId: number) => string
+  /**
+   * 맨 아래 「댓글 쓰기」 칸을 그릴지.
+   *
+   * 스레드 페이지에서는 끈다. 거기 입력칸은 **글에 새 댓글**을 다는 것이라,
+   * 답글을 달러 들어온 사람이 잘못 쓰기 쉽다. 스레드에서는 「답글 달기」로
+   * 그 자리에 열리는 칸만 쓴다.
+   */
+  showComposer?: boolean
 }
 
-export function CommentSection({ postId, comments, inputId }: CommentSectionProps) {
+export function CommentSection({
+  postId,
+  comments,
+  inputId,
+  threadHref,
+  showComposer = true,
+}: CommentSectionProps) {
   const queryClient = useQueryClient()
   const [postError, setPostError] = useState<React.ReactNode | null>(null)
 
@@ -75,7 +91,7 @@ export function CommentSection({ postId, comments, inputId }: CommentSectionProp
   return (
     <div className="flex flex-col gap-3.5">
       {comments.length > 0 ? (
-        <CommentList comments={comments} postId={postId} />
+        <CommentList comments={comments} postId={postId} threadHref={threadHref} />
       ) : (
         <div className="flex flex-col items-center gap-3 py-6">
           <MessageSquareText size={32} className="text-gray-300" />
@@ -91,14 +107,16 @@ export function CommentSection({ postId, comments, inputId }: CommentSectionProp
         ) : null}
       </AnimatePresence>
 
-      <CommentForm
-        id={inputId}
-        placeholder="댓글을 입력하세요"
-        legendText="댓글 작성폼"
-        value={content}
-        onChangeValue={(v) => setValue('content', v)}
-        onSubmit={handleSubmit(onSubmit)}
-      />
+      {showComposer ? (
+        <CommentForm
+          id={inputId}
+          placeholder="댓글을 입력하세요"
+          legendText="댓글 작성폼"
+          value={content}
+          onChangeValue={(v) => setValue('content', v)}
+          onSubmit={handleSubmit(onSubmit)}
+        />
+      ) : null}
     </div>
   )
 }

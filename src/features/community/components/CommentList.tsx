@@ -20,6 +20,15 @@ export interface ReplyRequestFormValues {
 interface CommentListProps {
   comments: Comment[]
   postId: string
+  /**
+   * 부모 댓글의 「답글 달기」가 갈 스레드 페이지 주소를 만든다.
+   *
+   * 넘기면 부모 댓글은 **페이지를 옮겨** 그 댓글과 답글만 보여준다.
+   * 안 넘기면(스레드 페이지 안에서) 부모도 그 자리에 입력칸을 연다.
+   *
+   * 답글의 「답글 달기」는 언제나 그 자리에서 연다 — 이미 그 스레드 안이다.
+   */
+  threadHref?: (commentId: number) => string
 }
 
 interface ReplyTarget {
@@ -28,7 +37,7 @@ interface ReplyTarget {
   mention?: string
 }
 
-export function CommentList({ comments, postId }: CommentListProps) {
+export function CommentList({ comments, postId, threadHref }: CommentListProps) {
   const queryClient = useQueryClient()
   const user = useUserStore((state) => state.user)
   const setRedirectUrl = useUserStore((state) => state.setRedirectUrl)
@@ -156,12 +165,16 @@ export function CommentList({ comments, postId }: CommentListProps) {
           <CommentItem
             comment={comment}
             showBorder={index !== 0}
-            onHandleReply={() =>
-              openReplyForm({
-                commentId: comment.id,
-                threadId: comment.id,
-                mention: comment.authorNickname,
-              })
+            replyHref={threadHref?.(comment.id)}
+            onHandleReply={
+              threadHref
+                ? undefined
+                : () =>
+                    openReplyForm({
+                      commentId: comment.id,
+                      threadId: comment.id,
+                      mention: comment.authorNickname,
+                    })
             }
             onDelete={handleDeleteComment}
           />

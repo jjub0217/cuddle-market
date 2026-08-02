@@ -67,3 +67,21 @@ describe('입력칸 id', () => {
     expect(screen.getByRole('textbox')).toHaveAttribute('id', 'comment-input-desktop')
   })
 })
+
+describe('스레드 페이지에서', () => {
+  it('맨 아래 「댓글 쓰기」 칸을 안 그린다', () => {
+    // 그 칸은 글에 **새 댓글**을 다는 것이다. 답글을 달러 들어온 사람이
+    // 잘못 쓰기 쉬워 스레드에서는 끈다.
+    render(
+      <CommentSection postId="36" comments={[COMMENT]} inputId="t" showComposer={false} />
+    )
+
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
+  })
+
+  it('기본값은 그린다', () => {
+    render(<CommentSection postId="36" comments={[COMMENT]} inputId="t" />)
+
+    expect(screen.getByRole('textbox')).toBeInTheDocument()
+  })
+})
