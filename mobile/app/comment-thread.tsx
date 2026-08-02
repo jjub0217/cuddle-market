@@ -4,7 +4,6 @@ import { ChevronLeft } from 'lucide-react-native';
 import { useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -109,12 +108,12 @@ export default function CommentThreadScreen() {
         <Text style={styles.heading}>답글 {comment?.childrenCount ?? 0}</Text>
       </View>
 
-      {/* 목록과 입력칸을 **함께** 밀어 올린다. 입력칸만 감싸면 키보드가 칸을 덮는다
-          (로그인 화면과 같은 방식이다). 안드로이드는 창이 저절로 줄어 안 준다. */}
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
+      {/* 목록과 입력칸을 **함께** 밀어 올린다. 입력칸만 감싸면 키보드가 칸을 덮는다.
+          ⚠️ 안드로이드에도 'padding'을 준다. 「안드로이드는 창이 저절로 줄어 안 줘도
+             된다」는 옛말이다 — app.json의 edgeToEdgeEnabled가 켜져 있으면 창이 안 줄고
+             앱이 키맵 뒤까지 그린다. 실기기에서 화면이 통째로 안 밀렸다(2026-08-02).
+             로그인 화면은 바닥에 붙은 칸이 없어 이 차이가 안 보였다. */}
+      <KeyboardAvoidingView style={styles.flex} behavior="padding">
         <ScrollView
           ref={scrollRef}
           contentContainerStyle={styles.body}

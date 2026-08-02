@@ -27,6 +27,8 @@ pnpm gate:mobile     # tsc --noEmit + expo lint + jest
 | 팬(병렬 에이전트) 동시 커밋 | `.git/index.lock`에서 부딪힌다 | 팬은 구현·게이트만. 커밋은 리드가 한다 |
 | Expo Go에서 됨 ≠ 독립 빌드에서 됨 | EAS가 `pnpm install`을 새로 돌린다 | 의존성을 바꿨으면 EAS 빌드로 한 번 확인한다 |
 | `setNativeProps` | 새 아키텍처(`newArchEnabled: true`)에서는 못 믿는다 | `TextInput`의 커서는 `selection` **prop**으로 옮기고, 그 자리에 닿으면 `undefined`로 놓는다. 계속 붙잡으면 사용자가 커서를 못 옮긴다 |
+| 「안드로이드는 창이 저절로 줄어든다」 | **옛말이다.** `app.json`의 `edgeToEdgeEnabled: true`라 창이 안 줄고 앱이 키보드 뒤까지 그린다 | `KeyboardAvoidingView`에 **양쪽 다** `behavior="padding"`을 준다. `Platform.OS === 'ios' ? 'padding' : undefined`로 두면 안드로이드에서 아무 일도 안 일어난다 |
+| `KeyboardAvoidingView`로 입력칸만 감싸기 | 위쪽 목록이 안 밀려서 키보드가 칸을 덮는다 | 화면이 **목록과 칸을 함께** 감싼다. 그리고 칸에 초점이 가면 쓸 자리로 스크롤한다 — 창이 좁아지면 아래 내용이 밀려난다 |
 | `@testing-library/react-native` 14의 `render`·`fireEvent` | 둘 다 **기다려야** 한다 | `await` 없이 쓰면 render는 «render function has not been called», **fireEvent는 오류 없이 옛 값을 준다** — 시험이 조용히 틀린 것을 통과시킨다 |
 | `react-native-marked`의 `<Markdown>` | 속이 `FlatList`라 `ScrollView` 안에 넣으면 경고가 난다. `MDImage`는 `useEffect` 의존성 배열이 없어 끝없이 다시 그린다(8.1.1) | `useMarkdown` 훅으로 조각만 받고, `Renderer`를 상속해 `image()`만 우리 것으로 바꾼다 |
 
