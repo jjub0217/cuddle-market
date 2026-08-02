@@ -1,6 +1,7 @@
-import { POST_REPORT_REASON } from '@/constants/constants'
+import { COMMUNITY_REPORT_REASON } from '@cuddle/shared'
 import ReportModalBase, { type ReportFormValues } from './ReportModalBase'
 import { fetchGraphQL } from '@/lib/api/graphql'
+import { isAlreadyReported } from '@/lib/api/reportErrors'
 import { useState } from 'react'
 
 interface PostReportModalProps {
@@ -22,11 +23,12 @@ export default function PostReportModal({ isOpen, postId, authorNickname, postTi
         }
       `, { postId, reason: data.reasonCode, details: data.detailReason })
       onCancel()
-    } catch {
+    } catch (error) {
+      const isDuplicate = isAlreadyReported(error)
       setPostReportError(
         <div className="flex flex-col gap-0.5">
-          <p className="text-base font-semibold">사용자 신고에 실패했습니다.</p>
-          <p>잠시 후 다시 시도해주세요.</p>
+          <p className="text-base font-semibold">{isDuplicate ? '이미 신고한 게시글입니다.' : '게시글 신고에 실패했습니다.'}</p>
+          {!isDuplicate ? <p>잠시 후 다시 시도해주세요.</p> : null}
         </div>,
       )
     }
@@ -50,7 +52,7 @@ export default function PostReportModal({ isOpen, postId, authorNickname, postTi
       isOpen={isOpen}
       heading="게시글 신고하기"
       description={description}
-      reasons={POST_REPORT_REASON}
+      reasons={COMMUNITY_REPORT_REASON}
       onCancel={onCancel}
       onSubmit={handleSubmit}
       error={postReportError}
