@@ -113,7 +113,10 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
 
   return (
     <>
-      <div className="min-h-screen bg-white pt-5 pb-16 md:pt-8 md:pb-0">
+      {/* 하단 여백을 여기서 안 준다. 레이아웃이 이미 탭바 높이만큼 비켜 준다
+          (app/(main)/layout.tsx의 pb-14). 여기 pb-16을 더하면 두 겹이 되어
+          입력칸 아래에 빈 공간이 남는다. */}
+      <div className="min-h-screen bg-white pt-5 md:pt-8">
         <div className="px-lg md:pb-4xl mx-auto max-w-7xl pb-0">
           <div className="flex flex-col justify-center gap-1 md:gap-3.5">
             <button
