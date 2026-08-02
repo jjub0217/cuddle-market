@@ -327,16 +327,22 @@ export default function ProfileData({
               </div>
             )}
           </div>
+          {/* 소개글.
+              비어 있을 때 「소개글을 작성해주세요」는 내 프로필에서만 뜬다 —
+              남의 프로필에서 보면 누구더러 쓰라는 건지 알 수 없다.
+              그래서 남의 프로필이면 줄을 아예 안 그린다. */}
           <div className="flex w-full flex-col gap-1">
-            <p
-              ref={introRef}
-              className={cn(
-                'w-full text-sm font-normal break-words whitespace-pre-wrap text-gray-500',
-                !isIntroExpanded && 'line-clamp-3'
-              )}
-            >
-              {data?.introduction || '소개글을 작성해주세요'}
-            </p>
+            {data?.introduction || isMyProfile ? (
+              <p
+                ref={introRef}
+                className={cn(
+                  'w-full text-sm font-normal break-words whitespace-pre-wrap text-gray-500',
+                  !isIntroExpanded && 'line-clamp-3'
+                )}
+              >
+                {data?.introduction || '소개글을 작성해주세요'}
+              </p>
+            ) : null}
             {data?.introduction && (isIntroExpanded || isIntroClamped) ? (
               <button
                 type="button"
