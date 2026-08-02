@@ -30,10 +30,16 @@ const HIDE_BOTTOMNAV_PATHS: string[] = [
 
 const HIDE_BOTTOMNAV_PATTERNS = [
   /^\/chat\/\d+$/, // 채팅방
-  /^\/community\/\d+$/, // 커뮤니티 상세
+  // 커뮤니티 댓글 스레드 — 하단에 답글 입력칸이 늘 열려 있어 탭바까지 있으면 아래가 두 겹이 된다.
+  // 답글에 집중하는 화면이라 앱도 탭바를 안 띄운다(10바퀴). 당근도 같다.
+  /^\/community\/\d+\/[^/]+\/comments\/\d+$/,
   /^\/community\/\d+\/edit$/, // 커뮤니티 수정
   /^\/products\/\d+\/edit$/, // 상품 수정
 ]
+
+// 「커뮤니티 상세(/community/{id})」 규칙은 뺐다. 그 주소는 slug가 붙은 곳으로
+// redirect만 하고 화면을 안 그려서 한 번도 안 걸렸다. 그리고 상세에서는 탭바를
+// 두는 게 맞다 — 거기서 다른 탭으로 가는 일이 흔하다.
 
 export default function BottomNav() {
   const pathname = usePathname()
