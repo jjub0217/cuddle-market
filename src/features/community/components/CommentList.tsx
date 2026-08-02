@@ -87,6 +87,10 @@ export function CommentList({
     input.scrollIntoView({ block: 'center', behavior: 'smooth' })
     // 옮기는 것과 초점을 따로 둔다 — focus가 또 움직이면 위 스크롤과 부딪힌다
     input.focus({ preventScroll: true })
+    // 커서를 글 끝으로. 그냥 focus만 하면 「@협주 」 앞에서 깜빡여서,
+    // 이어 치면 「안녕@협주 」가 된다.
+    const end = input.value.length
+    input.setSelectionRange(end, end)
   }, [replyOpenSeq])
   const [replyPostError, setReplyPostError] = useState<React.ReactNode | null>(null)
 

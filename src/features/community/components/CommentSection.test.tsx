@@ -120,6 +120,19 @@ describe('답글 칸이 눈에 보이게', () => {
     scrollSpy.mockRestore()
   })
 
+  it('커서가 @닉네임 뒤에 놓인다', async () => {
+    // 그냥 focus만 하면 「@협주 」 앞에서 깜빡여서, 이어 치면 「안녕@협주 」가 된다
+    const user = userEvent.setup()
+    render(<CommentSection postId="36" comments={[REPLY_TARGET]} inputId="t" />)
+
+    await user.click(screen.getByRole('button', { name: '답글 달기' }))
+
+    const input = (await screen.findByPlaceholderText('답글을 입력하세요')) as HTMLTextAreaElement
+    expect(input.value).toBe('@협주 ')
+    expect(input.selectionStart).toBe(input.value.length)
+    expect(input.selectionEnd).toBe(input.value.length)
+  })
+
   it('스레드 화면에 들어오자마자는 화면을 안 옮긴다', () => {
     // 칸이 처음부터 열려 있는데 들어오자마자 화면이 튀면 어리둥절하다
     const scrollSpy = vi.spyOn(Element.prototype, 'scrollIntoView')
