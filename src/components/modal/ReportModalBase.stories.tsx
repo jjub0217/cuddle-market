@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import ReportModalBase from './ReportModalBase'
-import { POST_REPORT_REASON } from '@/constants/constants'
+import { COMMUNITY_REPORT_REASON } from '@cuddle/shared'
 
 const meta = {
   title: 'Commons/Modal/ReportModalBase',
@@ -18,7 +18,7 @@ export const Open: Story = {
     isOpen: true,
     heading: '신고하기',
     description: '신고 사유를 선택해주세요',
-    reasons: POST_REPORT_REASON,
+    reasons: COMMUNITY_REPORT_REASON,
     onCancel: () => {},
     onSubmit: async () => {},
   },
@@ -29,7 +29,7 @@ export const WithError: Story = {
     isOpen: true,
     heading: '신고하기',
     description: '신고 사유를 선택해주세요',
-    reasons: POST_REPORT_REASON,
+    reasons: COMMUNITY_REPORT_REASON,
     onCancel: () => {},
     onSubmit: async () => {},
     error: (

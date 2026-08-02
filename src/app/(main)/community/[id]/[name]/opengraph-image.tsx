@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og'
+import { toPlainText } from '@/lib/utils/toPlainText'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { fetchCommunityDetail } from '@/lib/api/server/community'
@@ -30,7 +31,9 @@ export default async function OGImage({ params }: { params: Promise<{ id: string
   }
 
   const boardStyle = BOARD_TYPE_STYLE[post.boardType ?? 'QUESTION'] ?? BOARD_TYPE_STYLE.QUESTION
-  const preview = (post.contentPreview || '').slice(0, 120)
+  // 상세 응답에는 contentPreview가 없다(목록 전용). 본문을 잘라 쓴다.
+  // 마크다운 기호를 걷어내지 않으면 카드 그림에 `##`·`![](url)`이 그대로 찍힌다.
+  const preview = toPlainText(post.content, 120)
 
   return new ImageResponse(
     <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', backgroundColor: OG_COLORS.background }}>

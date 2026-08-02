@@ -6,7 +6,8 @@ export interface CommunityItem {
   thumbnailImageUrl?: string | null
   authorNickname: string
   boardType?: string
-  searchType: string
+  // searchType 삭제 — 이건 검색할 때 보내는 값("title"·"title_content"·"writer")이지
+  // 게시글의 속성이 아니다. 서버 PostListItemResponse에 없다.
   viewCount?: number
   commentCount: number
   createdAt: string
@@ -48,11 +49,25 @@ export interface CommunityPostResponse {
   }
 }
 
-export interface CommunityDetailItem extends CommunityItem {
+/**
+ * 상세는 목록과 필드가 다르다. 서버 DTO 둘을 그대로 옮긴 것이다.
+ *   PostListItemResponse   contentPreview · thumbnailImageUrl · isModified 가 있다
+ *   PostDetailResponse     authorId · authorProfileImageUrl · content · imageUrls 가 있다
+ * 그래서 extends로 묶지 않고 따로 적는다.
+ */
+export interface CommunityDetailItem {
+  id: number
   authorId: number
+  authorNickname: string
   authorProfileImageUrl: string
+  title: string
   content: string
   imageUrls: string[]
+  boardType?: string
+  viewCount?: number
+  commentCount: number
+  createdAt: string
+  updatedAt: string
 }
 
 export interface CommunityDetailItemResponse {
@@ -64,7 +79,8 @@ export interface CommunityDetailItemResponse {
 // ========== 댓글 타입 ==========
 export interface Comment {
   id: number
-  authorId: string
+  /** 서버는 Long이다. 예전에 string으로 적혀 있어 화면이 Number()로 되돌리고 있었다 */
+  authorId: number
   authorNickname: string
   authorProfileImageUrl: string
   content: string

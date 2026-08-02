@@ -281,15 +281,10 @@ export const PASSWORD_UPDATE_ALERT_LIST = [
 export { PRODUCT_REPORT_REASON, USER_REPORT_REASON, USER_BLOCK_ALERT_LIST } from '@cuddle/shared'
 export type { ReportReason } from '@cuddle/shared'
 
-// ========== 게시글 이유 관련 상수 ==========
-export const POST_REPORT_REASON = [
-  { id: 'ABUSE_OR_HATE', label: '욕설, 비방, 혐오 표현' },
-  { id: 'REPETITIVE_POST', label: '도배 게시물' },
-  { id: 'INAPPROPRIATE_CONTENT', label: '음란물/불건전 콘텐츠' },
-  { id: 'SPAM_OR_AD', label: '스팸/광고성 메시지' },
-  { id: 'SELF_HARM_OR_SUICIDE', label: '자해 또는 자살 의도를 포함' },
-  { id: 'OTHER', label: '기타' },
-]
+// 게시글 신고 사유는 여기 있던 POST_REPORT_REASON을 지우고
+// @cuddle/shared의 COMMUNITY_REPORT_REASON으로 옮겼다(#812).
+// 라벨과 차례는 그대로고, 「기타」가 보내는 값만 OTHER → ETC로 고쳤다 —
+// OTHER는 사용자 신고의 값이라 게시글로 보내면 서버가 못 알아봤다.
 
 // ========== 알림 타입 관련 상수 ==========
 export const NOTIFICATION_MESSAGES: Record<string, string> = {

@@ -1,7 +1,7 @@
 'use client'
 
-import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigation'
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
+import { useRouter, useParams } from 'next/navigation'
+import { useQueryClient, useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api/api'
 import Footer from '@/components/footer/Footer'
 import dynamic from 'next/dynamic'
@@ -13,19 +13,16 @@ const MdPreview = dynamic(() => import('./components/markdown/MdPreview'), {
 import { getBoardType } from '@/lib/utils/getBoardType'
 import Badge from '@/components/commons/badge/Badge'
 import { getTimeAgo } from '@cuddle/shared'
-import { CommentList, type ReplyRequestFormValues } from './components/CommentList'
-import { CommentForm } from './components/CommentForm'
+import { CommentSection } from './components/CommentSection'
 import ProfileAvatar from '@/components/commons/ProfileAvatar'
-import { useForm, useWatch } from 'react-hook-form'
-import type { CommentPostRequestData, CommunityDetailItem, Comment } from '@/types'
-import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, MessageSquareText } from 'lucide-react'
+import type { CommunityDetailItem, Comment } from '@/types'
+import { useEffect, useState } from 'react'
+import { ArrowLeft } from 'lucide-react'
 const PostReportModal = dynamic(() => import('@/components/modal/PostReportModal'))
 const DeletePostConfirmModal = dynamic(() => import('@/components/modal/DeletePostConfirmModal'))
 import { useUserStore } from '@/store/userStore'
 import { useLoginModalStore } from '@/store/modalStore'
-import { AnimatePresence } from 'framer-motion'
-import InlineNotification from '@/components/commons/InlineNotification'
+import { toUrlName } from '@/lib/utils/toUrlName'
 import Spinner from '@/components/commons/spinner/Spinner'
 
 interface CommunityDetailProps {
@@ -34,25 +31,11 @@ interface CommunityDetailProps {
 }
 
 export default function CommunityDetail({ initialPostData, initialCommentData }: CommunityDetailProps) {
-  const { handleSubmit, control, setValue, reset } = useForm<ReplyRequestFormValues>({
-    mode: 'onChange',
-    defaultValues: {
-      content: '',
-    },
-  })
-
-  const commentContent = useWatch({ control, name: 'content' }) ?? ''
-
   const user = useUserStore((state) => state.user)
-  const setRedirectUrl = useUserStore((state) => state.setRedirectUrl)
   const openLoginModal = useLoginModalStore((state) => state.openLoginModal)
-  const pathname = usePathname()
-  const searchParamsHook = useSearchParams()
   const [isReportModalOpen, setIsReportModalOpen] = useState(false)
   const [isPostDeleteModalOpen, setIsPostDeleteModalOpen] = useState(false)
   const [postDeleteError, setIsPostDeleteError] = useState<React.ReactNode | null>(null)
-  const [commentPostError, setCommentPostError] = useState<React.ReactNode | null>(null)
-  const mobileInputRef = useRef<HTMLTextAreaElement>(null)
 
   const router = useRouter()
   const queryClient = useQueryClient()
@@ -85,24 +68,6 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
 
   const commentData = commentQueryData ?? initialCommentData ?? undefined
 
-  const replyMutation = useMutation({
-    mutationFn: (requestData: CommentPostRequestData) =>
-      api.post(`/community/posts/${id}/comments`, { content: requestData.content }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['community', id, 'comments'] })
-      queryClient.invalidateQueries({ queryKey: ['community', id] })
-      reset()
-    },
-    onError: () => {
-      setCommentPostError(
-        <div className="flex flex-col gap-0.5">
-          <p className="text-base font-semibold">댓글 등록에 실패했습니다.</p>
-          <p>잠시 후 다시 시도해주세요.</p>
-        </div>
-      )
-    },
-  })
-
   const handlePostDelete = async (postId: number) => {
     try {
       await api.delete(`/community/posts/${postId}`)
@@ -119,16 +84,6 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
   }
   const handlePostEdit = (postId: number) => {
     router.push(`/community/${postId}/edit`)
-  }
-
-  const onSubmit = (data: ReplyRequestFormValues) => {
-    if (!data.content.trim()) return
-    if (!user) {
-      setRedirectUrl(pathname + (searchParamsHook.toString() ? `?${searchParamsHook.toString()}` : ''))
-      openLoginModal()
-      return
-    }
-    replyMutation.mutate(data)
   }
 
   useEffect(() => {
@@ -158,7 +113,10 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
 
   return (
     <>
-      <div className="min-h-screen bg-white pt-5 pb-16 md:pt-8 md:pb-0">
+      {/* 하단 여백을 여기서 안 준다. 레이아웃이 이미 탭바 높이만큼 비켜 준다
+          (app/(main)/layout.tsx의 pb-14). 여기 pb-16을 더하면 두 겹이 되어
+          입력칸 아래에 빈 공간이 남는다. */}
+      <div className="min-h-screen bg-white pt-5 md:pt-8">
         <div className="px-lg md:pb-4xl mx-auto max-w-7xl pb-0">
           <div className="flex flex-col justify-center gap-1 md:gap-3.5">
             <button
@@ -242,67 +200,31 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
               <MdPreview value={data.content} className="p-0" />
             </div>
 
-            <section aria-label="댓글" className="border-outline-variant/40 flex flex-col gap-3.5 border-t py-5 md:border-t-0">
+            {/* 댓글은 폭 상관없이 상세 안에 전부 펼친다.
+                좁은 폭에서 「댓글 N ›」 줄만 두면 대화가 있는지조차 안 보인다.
+
+                다만 **부모 댓글의 「답글 달기」는 스레드 페이지로 옮겨 간다** —
+                그 댓글과 그 답글만 보여 대화에 집중할 수 있고, 답글이 길어져도
+                다른 댓글을 안 밀어낸다. 답글의 「답글 달기」는 이미 그 스레드 안이라
+                그 자리에서 열린다. */}
+            <section
+              aria-label="댓글"
+              className="border-outline-variant/40 flex flex-col gap-3.5 border-t py-5 md:border-t-0"
+            >
               <div className="md:text-md flex items-center gap-1 text-sm font-semibold">
                 <span>댓글</span>
                 <span className="text-primary-container font-semibold">{data.commentCount}</span>
               </div>
 
-              {commentData?.comments && commentData.comments.length > 0 ? (
-                <CommentList comments={commentData.comments} postId={id!} />
-              ) : (
-                <div className="flex flex-col items-center gap-3 py-6 md:hidden">
-                  <MessageSquareText size={32} className="text-gray-300" />
-                  <p className="text-sm text-gray-400">첫 댓글을 남겨보세요</p>
-                  <button
-                    type="button"
-                    className="bg-primary-500 cursor-pointer rounded-full px-4 py-2 text-sm font-medium text-white"
-                    onClick={() => mobileInputRef.current?.focus()}
-                  >
-                    댓글 쓰기
-                  </button>
-                </div>
-              )}
-
-              <AnimatePresence>
-                {commentPostError ? (
-                  <InlineNotification type="error" onClose={() => setCommentPostError(null)}>
-                    {commentPostError}
-                  </InlineNotification>
-                ) : null}
-              </AnimatePresence>
-
-              {/* 데스크톱용 댓글 입력: 카드 안에 배치 */}
-              <div className="hidden md:block">
-                <CommentForm
-                  id="comment-input-desktop"
-                  placeholder="댓글을 입력하세요"
-                  legendText="댓글 작성폼"
-                  value={commentContent}
-                  onChangeValue={(v) => setValue('content', v)}
-                  onSubmit={handleSubmit(onSubmit)}
-                />
-              </div>
-            </section>
-
-            {/* 모바일용 댓글 입력: BottomNav(h-14 + iOS safe-area) 바로 위에 고정 */}
-            <div
-              className="fixed right-0 left-0 border-t border-gray-200 bg-white px-3 py-2 md:hidden"
-              style={{
-                bottom: 'calc(3.5rem + env(safe-area-inset-bottom))',
-                zIndex: 30,
-              }}
-            >
-              <CommentForm
-                id="comment-input-mobile"
-                placeholder="댓글을 입력하세요"
-                legendText="댓글 작성폼"
-                value={commentContent}
-                onChangeValue={(v) => setValue('content', v)}
-                onSubmit={handleSubmit(onSubmit)}
-                textareaRef={mobileInputRef}
+              <CommentSection
+                postId={id!}
+                comments={commentData?.comments ?? []}
+                inputId="comment-input"
+                threadHref={(commentId) =>
+                  `/community/${data.id}/${toUrlName(data.title)}/comments/${commentId}`
+                }
               />
-            </div>
+            </section>
           </div>
         </div>
       </div>

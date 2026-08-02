@@ -25,6 +25,20 @@ import { isAxiosError } from 'axios'
 /** ErrorCode.ALREADY_REPORTED(409) */
 const ALREADY_REPORTED_STATUS = 409
 
+// 게시글 신고는 axios가 아니라 /api/graphql을 지난다. 그 길에서는 AxiosError가
+// 남지 않는다 — 오는 동안 세 번 갈아탄다.
+//
+//   서버        409 { "message": "이미 신고된 대상입니다." }
+//   리졸버      throw new Error(`REST API error: ${res.status}`)   resolvers.ts fetchAPI
+//   Apollo      그 문구를 그대로 errors[0].message에 담는다 (문구를 안 가린다)
+//   fetchGraphQL  throw new Error(json.errors[0].message)          graphql.ts
+//
+// 그래서 GraphQL 쪽은 문구를 볼 수밖에 없다. 다만 이 문구는 서버가 아니라
+// **우리 코드가 지은 것**이라(resolvers.ts) 서버가 말을 바꿔도 안 흔들린다.
+// 예전에 서버 한국어 문구를 찾다가 한 번도 안 맞았던 것과는 다르다.
+const GRAPHQL_ALREADY_REPORTED_MESSAGE = `REST API error: ${ALREADY_REPORTED_STATUS}`
+
 export function isAlreadyReported(error: unknown): boolean {
-  return isAxiosError(error) && error.response?.status === ALREADY_REPORTED_STATUS
+  if (isAxiosError(error)) return error.response?.status === ALREADY_REPORTED_STATUS
+  return error instanceof Error && error.message.includes(GRAPHQL_ALREADY_REPORTED_MESSAGE)
 }

@@ -54,6 +54,10 @@ if (typeof HTMLDialogElement !== 'undefined') {
   }
 }
 
+// jsdom에는 스크롤이 없다 — 요소를 화면 안으로 옮기는 것도 못 한다.
+// 부르는 쪽이 죽지 않게 빈 함수로 둔다. 「불렀는지」는 시험에서 vi.spyOn으로 본다.
+Element.prototype.scrollIntoView = function scrollIntoView() {}
+
 window.IntersectionObserver = class {
   readonly root = null
   readonly rootMargin = ''

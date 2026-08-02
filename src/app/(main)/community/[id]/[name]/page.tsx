@@ -5,6 +5,7 @@ import CommunityDetail from '@/features/community/CommunityDetail'
 import CommunityDetailSkeleton from '@/features/community/components/CommunityDetailSkeleton'
 import { fetchCommunityDetail, fetchCommunityComments } from '@/lib/api/server/community'
 import { toUrlName } from '@/lib/utils/toUrlName'
+import { toPlainText } from '@/lib/utils/toPlainText'
 
 interface CommunityDetailPageProps {
   params: Promise<{ id: string; name: string }>
@@ -20,7 +21,9 @@ export async function generateMetadata({ params }: CommunityDetailPageProps): Pr
 
   const name = toUrlName(post.title)
   const title = `${post.title} | 커들마켓 커뮤니티`
-  const description = post.contentPreview?.slice(0, 155) || '커들마켓 커뮤니티에서 확인해보세요'
+  // 상세 응답에는 contentPreview가 없다(목록 전용). 본문을 잘라 쓴다.
+  // 본문은 마크다운이라 그대로 자르면 `##`·`**`·`![](url)`이 검색 결과에 그대로 나온다.
+  const description = toPlainText(post.content, 155) || '커들마켓 커뮤니티에서 확인해보세요'
 
   return {
     title,
@@ -63,7 +66,7 @@ export default async function CommunityDetailPage({ params }: CommunityDetailPag
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: initialPostData.title,
-    description: initialPostData.contentPreview || '',
+    description: toPlainText(initialPostData.content, 155),
     image: initialPostData.imageUrls,
     author: {
       '@type': 'Person',
