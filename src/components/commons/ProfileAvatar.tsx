@@ -6,11 +6,13 @@ import { getImageSrcSet, IMAGE_SIZES, toResizedWebpUrl } from '@/lib/utils/image
 interface ProfileAvatarProps {
   imageUrl?: string | null
   nickname: string
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'xs' | 'sm' | 'md' | 'lg'
   className?: string
 }
 
 const sizeClasses = {
+  // xs는 댓글 아래 답글용이다. 답글을 한 층 아래로 보이게 한다 (앱도 같다)
+  xs: 'h-6 w-6 text-xs',
   sm: 'h-8 w-8 text-sm',
   md: 'h-10 w-10 text-base',
   lg: 'h-12 w-12 text-lg',

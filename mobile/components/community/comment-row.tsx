@@ -40,10 +40,15 @@ export function CommentRow({ comment, isReply = false, isMine, onMenu, onReply }
   return (
     <View style={[styles.row, isReply && styles.replyRow]}>
       {comment.authorProfileImageUrl ? (
-        <Image source={{ uri: comment.authorProfileImageUrl }} style={styles.avatar} />
+        <Image
+          source={{ uri: comment.authorProfileImageUrl }}
+          style={[styles.avatar, isReply && styles.replyAvatar]}
+        />
       ) : (
-        <View style={[styles.avatar, styles.avatarFallback]}>
-          <Text style={styles.avatarLetter}>{comment.authorNickname.slice(0, 1)}</Text>
+        <View style={[styles.avatar, isReply && styles.replyAvatar, styles.avatarFallback]}>
+          <Text style={[styles.avatarLetter, isReply && styles.replyAvatarLetter]}>
+            {comment.authorNickname.slice(0, 1)}
+          </Text>
         </View>
       )}
 
@@ -88,11 +93,20 @@ export function CommentRow({ comment, isReply = false, isMine, onMenu, onReply }
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingVertical: 14 },
-  // 들여쓰기만. 안쪽 여백을 주면 ⋮ 가 밀려 댓글의 ⋮ 와 어긋난다.
-  replyRow: { marginLeft: 40 },
+  // 답글은 위아래를 좁힌다(14 → 8). 한 댓글에 딸린 답글이 여럿일 때 서로 붙어
+  // 보이는 편이 한 덩어리로 읽힌다.
+  //
+  // ⚠️ padding(사방)을 주면 안 된다 — 오른쪽에도 붙어서 ⋮ 가 안으로 밀리고
+  //    댓글의 ⋮ 와 세로로 어긋난다. 위아래만 바꿀 때는 paddingVertical을 쓴다.
+  replyRow: { marginLeft: 40, paddingVertical: 8 },
   avatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#F3F4F6' },
+  // 답글은 아바타를 줄여 댓글과 층을 나눈다(32 → 24). 들여쓰기만으로는 층이 잘 안 보인다.
+  // 웹도 같은 값이다 — ProfileAvatar의 size="xs"(h-6 w-6 = 24px).
+  // ⚠️ borderRadius는 늘 지름의 절반이어야 동그랗다.
+  replyAvatar: { width: 24, height: 24, borderRadius: 12 },
   avatarFallback: { alignItems: 'center', justifyContent: 'center' },
   avatarLetter: { fontSize: 14, color: '#6B7280' },
+  replyAvatarLetter: { fontSize: 12 },
   main: { flex: 1, gap: 4 },
   nameLine: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   name: { fontSize: 14, fontWeight: '600', color: '#111827' },

@@ -74,7 +74,8 @@ export function CommentItem({
         <ProfileAvatar
           imageUrl={comment.authorProfileImageUrl}
           nickname={comment.authorNickname}
-          size="sm"
+          // 답글은 작게 — 들여쓰기만으로는 층이 잘 안 보인다 (앱도 같은 값이다: 32 / 24)
+          size={isReply ? 'xs' : 'sm'}
           className="shrink-0"
         />
 
