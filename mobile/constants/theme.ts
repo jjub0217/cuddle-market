@@ -5,7 +5,14 @@
 
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
+// 탭바에서 고른 탭의 색. 웹 하단 탭바와 같은 값이다(--color-primary-container).
+//
+// #0a7ea4는 Expo 템플릿 기본 파랑이었다 — 우리 색이 아니다.
+// 웹이 쓰던 #ecc88e도 안 쓴다: 흰 배경 대비가 1.59:1이라 비활성 회색(2.54:1)보다
+// 더 흐려서, 고른 탭이 가장 안 보였다. 그 값은 배경으로 쓰라고 만든 색이다.
+const tintColorLight = '#825500';
+// 어두운 모드는 아직 손대지 않았다. 화면들이 흰 배경을 못 박아 쓰고 있어
+// 탭바만 어두워지는 상태다 — 색 정리는 이슈 #786에서 한다.
 const tintColorDark = '#fff';
 
 export const Colors = {
