@@ -158,4 +158,14 @@ describe('항목', () => {
     expect(screen.getByText('삭제').closest('button')).toHaveClass('text-danger-500')
     expect(screen.getByText('수정하기').closest('button')).not.toHaveClass('text-danger-500')
   })
+
+  it('글자가 가운데에 온다', () => {
+    // 항목 글자 길이가 제각각이라(「삭제」 ~ 「판매중으로 바꾸기」)
+    // 한쪽에 붙이면 줄마다 끝이 들쭉날쭉해 보인다
+    render(<Harness />)
+
+    const item = screen.getByText('수정하기').closest('button')
+    expect(item).toHaveClass('text-center')
+    expect(item).toHaveClass('justify-center')
+  })
 })

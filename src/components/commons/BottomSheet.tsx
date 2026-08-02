@@ -128,7 +128,9 @@ export function BottomSheetItem({
       type="button"
       onClick={onClick}
       className={cn(
-        'border-outline-variant/40 flex w-full cursor-pointer items-center gap-3 border-b px-5 py-4 text-left text-[15px] transition-colors last:border-b-0 hover:bg-gray-50 active:bg-gray-100',
+        // 가운데 정렬. 항목 글자 길이가 제각각이라(「삭제」 ~ 「판매중으로 바꾸기」)
+        // 한쪽에 붙이면 줄마다 끝이 들쭉날쭉해 보인다.
+        'border-outline-variant/40 flex w-full cursor-pointer items-center justify-center gap-3 border-b px-5 py-4 text-center text-[15px] transition-colors last:border-b-0 hover:bg-gray-50 active:bg-gray-100',
         tone === 'danger' ? 'text-danger-500' : 'text-gray-900'
       )}
     >
