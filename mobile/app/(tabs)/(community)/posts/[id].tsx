@@ -9,15 +9,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CommentInput } from '@/components/community/comment-input';
 import { CommentList } from '@/components/community/comment-list';
+import { CommentMenuSheet } from '@/components/community/comment-menu-sheet';
 import { PostBody } from '@/components/community/post-body';
 import { ErrorState, LoadingState } from '@/components/list-states';
 import { ProductActionSheet, type SheetAction } from '@/components/my/product-action-sheet';
 import { useMe } from '@/hooks/use-me';
 import { useAuthStore } from '@/lib/auth/store';
-import { createComment, fetchPostDetail } from '@/lib/community';
+import { createComment, fetchPostDetail, type CommentItem } from '@/lib/community';
 import { showToast } from '@/lib/toast';
 
-// 게시글 상세. 글 읽기 + 댓글 읽기·쓰기 — 고치기·지우기는 12바퀴다.
+// 게시글 상세. 글 읽기 + 댓글 읽기·쓰기 — 글 고치기·지우기는 아직 없다.
 //
 // 맨 아래 칸은 **글에 새 댓글**을 단다. 답글은 여기서 안 단다 —
 // 부모 댓글의 「답글 달기」를 누르면 스레드 화면(app/comment-thread.tsx)으로 옮겨 간다.
@@ -32,6 +33,8 @@ export default function PostDetailScreen() {
   const queryClient = useQueryClient();
   const { data: me } = useMe();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  /** ⋮ 를 연 댓글. 시트와 삭제 확인 창이 같이 쓴다 */
+  const [menuTarget, setMenuTarget] = useState<CommentItem | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const {
@@ -46,7 +49,7 @@ export default function PostDetailScreen() {
 
   const isMine = Boolean(me && post && me.id === post.authorId);
 
-  /** ⋮ 는 신고 하나뿐이다. 차단은 프로필 쪽에 있고, 글 지우기는 12바퀴다 */
+  /** 헤더 ⋮ 는 신고 하나뿐이다. 차단은 프로필 쪽에 있고, 글 지우기는 아직 없다 */
   const sheetActions: SheetAction[] = post
     ? [
         {
@@ -125,9 +128,10 @@ export default function PostDetailScreen() {
             <Text style={styles.commentsCount}>{post.commentCount}</Text>
           </View>
 
-          {/* ⋮ 는 아직 갈 데가 없다 — 12바퀴다 */}
           <CommentList
             postId={postId}
+            // ⋮ — 내 댓글이면 삭제, 남의 댓글이면 작성자 신고.
+            onMenu={setMenuTarget}
             onReply={(comment) =>
               // 상세에서는 답글을 안 단다. 부모든 답글이든 그 **부모의 스레드**로 옮긴다 —
               // 거기서 대상을 고르면 된다. 서버가 답글을 평평하게 주므로 답글의
@@ -190,6 +194,12 @@ export default function PostDetailScreen() {
         visible={isSheetOpen}
         onClose={() => setIsSheetOpen(false)}
         actions={sheetActions}
+      />
+
+      <CommentMenuSheet
+        postId={postId}
+        target={menuTarget}
+        onClose={() => setMenuTarget(null)}
       />
     </SafeAreaView>
   );

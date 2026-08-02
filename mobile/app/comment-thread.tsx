@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CommentInput, type ReplyTarget } from '@/components/community/comment-input';
 import { CommentList } from '@/components/community/comment-list';
+import { CommentMenuSheet } from '@/components/community/comment-menu-sheet';
 import { useAuthStore } from '@/lib/auth/store';
 import { createComment, fetchComments, type CommentItem } from '@/lib/community';
 import { showToast } from '@/lib/toast';
@@ -33,6 +34,8 @@ export default function CommentThreadScreen() {
 
   const scrollRef = useRef<ScrollView>(null);
   const [replyTo, setReplyTo] = useState<ReplyTarget | null>(null);
+  /** ⋮ 를 연 댓글. 시트와 삭제 확인 창이 같이 쓴다 */
+  const [menuTarget, setMenuTarget] = useState<CommentItem | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   // 상세와 **같은 키**를 쓴다 — 이미 받아 둔 목록을 그대로 쓰고(요청이 안 늘어난다),
@@ -109,6 +112,8 @@ export default function CommentThreadScreen() {
           <CommentList
             postId={postId}
             onlyParentId={commentId}
+            // ⋮ — 내 댓글이면 삭제, 남의 댓글이면 작성자 신고.
+            onMenu={setMenuTarget}
             // 여기서는 부모든 답글이든 화면을 안 옮긴다. 이미 그 스레드 안이다.
             onReply={handleReply}
           />
@@ -123,7 +128,16 @@ export default function CommentThreadScreen() {
         submitting={submitting}
       />
 
-      {/* ⋮ 시트는 Task 12에서 붙인다 — 지금은 넘길 동작이 없어 ⋮ 를 안 그린다 */}
+      <CommentMenuSheet
+        postId={postId}
+        target={menuTarget}
+        onClose={() => setMenuTarget(null)}
+        onDeleted={(comment) => {
+          // 이 스레드의 원 댓글을 지웠으면 볼 게 없다. 「댓글을 찾을 수 없어요.」만 남은
+          // 화면에 세워 두지 말고 상세로 되돌린다. 답글을 지웠으면 그대로 머문다.
+          if (comment.id === commentId) router.back();
+        }}
+      />
     </SafeAreaView>
   );
 }
