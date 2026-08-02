@@ -6,7 +6,6 @@ import {
   fetchPosts,
   fetchReplies,
   flattenComments,
-  replyParentId,
   reportPost,
 } from './community';
 import { isAlreadyReported } from './reports';
@@ -252,27 +251,6 @@ describe('flattenComments', () => {
 
   it('댓글이 없으면 빈 목록', () => {
     expect(flattenComments([], new Map())).toEqual([]);
-  });
-});
-
-describe('replyParentId', () => {
-  // 서버는 깊이 3까지만 받는다. 4가 되면 CommentDepthExceededException이 난다.
-  // 실기기에서 깊이 3짜리 답글에 답글을 달았더니 아무 일도 안 일어난 것처럼 보였다
-  // (오류 토스트가 키보드 뒤에 가려져 있었다).
-
-  it('대상을 안 골랐으면 스레드 부모에 단다', () => {
-    expect(replyParentId(34, null)).toBe(34);
-  });
-
-  it('깊이 2짜리 답글에는 그대로 단다', () => {
-    // 3이 되므로 서버가 받는다
-    expect(replyParentId(34, { commentId: 54, depth: 2 })).toBe(54);
-  });
-
-  it('깊이 3짜리 답글에는 스레드 부모에 단다', () => {
-    // 그대로 달면 4가 되어 서버가 거절한다. @닉네임이 대상을 알려 주므로
-    // 화면에 보이는 자리는 같다
-    expect(replyParentId(34, { commentId: 55, depth: 3 })).toBe(34);
   });
 });
 

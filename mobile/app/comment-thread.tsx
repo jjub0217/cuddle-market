@@ -1,3 +1,4 @@
+import { replyParentId } from '@cuddle/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
@@ -17,12 +18,7 @@ import { CommentInput, type ReplyTarget } from '@/components/community/comment-i
 import { CommentList } from '@/components/community/comment-list';
 import { CommentMenuSheet } from '@/components/community/comment-menu-sheet';
 import { useAuthStore } from '@/lib/auth/store';
-import {
-  createComment,
-  fetchComments,
-  replyParentId,
-  type CommentItem,
-} from '@/lib/community';
+import { createComment, fetchComments, type CommentItem } from '@/lib/community';
 import { showToast } from '@/lib/toast';
 
 // 댓글 하나와 그 답글만 보는 화면.

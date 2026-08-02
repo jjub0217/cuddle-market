@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useMutation, useQueries, useQueryClient } from '@tanstack/react-query'
+import { replyParentId } from '@cuddle/shared'
+
 import { api } from '@/lib/api/api'
 import type { Comment, CommentPostRequestData } from '@/types'
 import { CommentItem } from './CommentItem'
@@ -43,6 +45,8 @@ interface ReplyTarget {
   commentId: number
   threadId: number
   mention?: string
+  /** 그 댓글의 깊이. 서버가 3까지만 받아서 어디에 달지 정할 때 쓴다 */
+  depth: number
 }
 
 export function CommentList({
@@ -66,6 +70,13 @@ export function CommentList({
   const replyContent = useWatch({ control, name: 'content' })
   const [activeThreadId, setActiveThreadId] = useState<number | null>(alwaysOpenReplyFor ?? null)
   const [replyingToId, setReplyingToId] = useState<number | null>(alwaysOpenReplyFor ?? null)
+  /**
+   * 지금 고른 대상의 깊이. 서버가 깊이 3까지만 받아서 이걸 봐야 한다 —
+   * 어디에 달지는 shared의 replyParentId가 정한다.
+   *
+   * 처음 값이 1인 이유: 아무것도 안 골랐으면 대상은 그 스레드의 부모 댓글(depth 1)이다.
+   */
+  const [replyingToDepth, setReplyingToDepth] = useState(1)
   /** 지금 답글을 다는 대상의 닉네임. 칸 하나가 대상만 바꾸므로 화면에 알려 준다 */
   const [replyMention, setReplyMention] = useState<string | null>(null)
 
@@ -139,6 +150,7 @@ export function CommentList({
       // 스레드 화면에서는 칸이 늘 열려 있어야 한다. 대상만 그 스레드로 되돌린다.
       setReplyingToId(alwaysOpenReplyFor ?? null)
       setActiveThreadId(alwaysOpenReplyFor ?? null)
+      setReplyingToDepth(1)
       setReplyMention(null)
     },
     onError: () => {
@@ -179,12 +191,14 @@ export function CommentList({
       // 대상만 그 스레드로 되돌린다 — 칸이 사라지면 답글을 달 길이 없어진다.
       setReplyingToId(alwaysOpenReplyFor ?? null)
       setActiveThreadId(alwaysOpenReplyFor ?? null)
+      setReplyingToDepth(1)
       setReplyMention(null)
       setValue('content', '')
       return
     }
     setReplyingToId(target.commentId)
     setActiveThreadId(target.threadId)
+    setReplyingToDepth(target.depth)
     setReplyMention(target.mention ?? null)
     setValue('content', target.mention ? `@${target.mention} ` : '')
     setReplyOpenSeq((seq) => seq + 1)
@@ -199,7 +213,12 @@ export function CommentList({
       return
     }
     replyMutation.mutate({
-      request: { content: data.content, parentId: replyingToId },
+      // 깊이 3짜리 답글에 그대로 달면 4가 되어 서버가 거절한다.
+      // 그때는 그 스레드의 부모에 단다 — 보이는 자리는 같고 @닉네임이 대상을 알려 준다.
+      request: {
+        content: data.content,
+        parentId: replyParentId(activeThreadId, { commentId: replyingToId, depth: replyingToDepth }),
+      },
       threadId: activeThreadId,
     })
   }
@@ -220,6 +239,7 @@ export function CommentList({
                       commentId: comment.id,
                       threadId: comment.id,
                       mention: comment.authorNickname,
+                      depth: comment.depth,
                     })
             }
             onDelete={handleDeleteComment}
@@ -244,6 +264,7 @@ export function CommentList({
                             commentId: reply.id,
                             threadId: comment.id,
                             mention: reply.authorNickname,
+                            depth: reply.depth,
                           })
                         }
                       />
