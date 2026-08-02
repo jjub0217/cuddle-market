@@ -319,7 +319,9 @@ commentCount 의미     부모+답글 합계라는 것을 못 박는 테스트
 웹     npx tsc --noEmit && pnpm build              (저장소 루트에서!)
        바뀐 파일만 npx eslint
 ```
-> 전체 `pnpm lint`는 `#788` 잔여로 exit 1이 정상이다. 바뀐 파일만 본다.
+> `pnpm lint`는 이제 게이트다(`#788`에서 오류를 다 없앴다). `pnpm gate`가 `tsc → lint → vitest → build` 순으로 돈다. 경고는 36건에서 못 늘게 잠겨 있다.
+
+**웹에도 러너가 생겼다** (`#799`, vitest + RTL). 스펙을 쓸 때는 없어서 「사람이 봐야 함」으로 미뤄 둔 것 중 일부를 시험으로 덮을 수 있다 — 계획서 Task 3·5에 넣었다.
 
 ## 8. 미리 짚는 함정
 

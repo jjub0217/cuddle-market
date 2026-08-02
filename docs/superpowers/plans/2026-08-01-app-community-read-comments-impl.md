@@ -12,7 +12,8 @@
 
 - 앱은 **Expo SDK 54 · RN 0.81.5 · React 19.1.0**에 고정이다. `@latest`로 올리지 않는다 (사용자 Expo Go가 54).
 - 모든 게이트 명령은 **저장소 루트에서** 친다. `cd mobile` 뒤 루트 명령은 실패한다.
-- 웹 전체 `pnpm lint`는 exit 1이 정상이다(#788 잔여). **바뀐 파일만** eslint를 돌린다.
+- **웹 `lint`는 이제 게이트다** (#788에서 오류 10건을 다 없앴다). `pnpm gate`가 `tsc → lint → vitest → build` 순으로 돈다. 오류가 하나라도 생기면 막힌다.
+- 웹 경고는 **36건에서 더 못 늘게 잠겨 있다**(`lint:strict --max-warnings 36`). 새 파일에서 경고가 하나 나면 게이트가 막히므로, 안 쓰는 import 같은 것을 남기지 않는다.
 - 웹 Tailwind v4에서 `max-w-3xl` 같은 티셔츠 크기는 48px로 풀린다. 쓰지 않는다.
 - 서버 응답 필드는 **DTO 실물 기준**이다. 추측해서 쓰지 않는다.
 - `commentCount`는 **부모 댓글 + 답글 합계**다.
@@ -20,11 +21,12 @@
 - 댓글 신고 API·좋아요 API는 **없다**. ⋮ 는 내 것=삭제 / 남의 것=작성자 신고.
 - 커밋 메시지 끝에 `Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>`.
 - 팬(병렬 에이전트)에게 git 명령을 주지 않는다 — `.git/index.lock`에서 부딪힌다. 커밋은 리드가 한다.
-- ⚠️ **`pnpm gate:*` 명령은 #813(PR #814)에 있다.** 그게 develop에 머지되기 전에는 이 브랜치에 없다. 없으면 아래를 대신 친다.
+- 게이트 명령은 저장소 루트에서 친다 (#813에서 넣었다, 머지됨).
   ```bash
-  pnpm --filter @cuddle/shared test                            # gate:shared 대신
-  pnpm --filter ./mobile exec tsc --noEmit && pnpm --filter ./mobile lint && pnpm --filter ./mobile test   # gate:mobile 대신
-  npx tsc --noEmit && pnpm build                               # gate 대신
+  pnpm gate:shared    # packages/shared — vitest
+  pnpm gate:mobile    # 앱 — tsc + expo lint + jest
+  pnpm gate           # 웹 — tsc + lint + vitest(unit) + build
+  pnpm gate:all       # 셋 다
   ```
 
 ## 실제 값을 확인한 것 (추측 금지)
@@ -76,6 +78,40 @@ EmptyState (mobile/components/list-states.tsx)
      루트에 두면 탭바를 숨겼다 되돌리는 장치가 아예 필요 없다.
      화면이 뜨는 모양(탭바 안 보임 · 하단 전체가 입력창)은 합의한 그대로다.
 ```
+
+## 계획서를 쓴 뒤에 바뀐 것 (2026-08-02 검토)
+
+계획서를 쓴 날과 착수하는 날 사이에 이슈 여섯이 머지됐다. **전제가 바뀌었으니 그대로 따르지 말 것.**
+
+| 머지된 것 | 계획에 미치는 영향 |
+|---|---|
+| `#799` 웹 테스트 러너 (vitest + RTL) | **웹 과제(Task 2~5)에도 시험을 쓴다.** 계획서를 쓸 때는 웹에 러너가 없어 「눈으로 확인」만 적혀 있었다 |
+| `#813` 게이트 스크립트 | `pnpm gate:*`를 그냥 쓰면 된다 (대체 명령 안내는 지웠다) |
+| `#788` lint 게이트 승격 | **웹 경고가 36건에서 못 늘어난다.** 안 쓰는 import 하나가 게이트를 막는다 |
+| `#793` `BottomSheet` 신설 | 웹 모바일에서 「아래에서 올라오는 시트」가 필요하면 새로 만들지 말고 이걸 쓴다 |
+| `#808` `reportErrors.ts` 신설 | 웹에서 「이미 신고했다」를 가려낼 때 `isAlreadyReported(error)`(409 기준)를 쓴다. 게시글 신고에도 그대로 |
+| `#809` 백엔드 차단 필터 | 상품 목록은 이미 걸러진다. Task 0은 **커뮤니티 글과 상품 상세**만 하면 된다 |
+
+**바로 쓸 수 있게 된 도구**
+
+```
+src/test/render.tsx        QueryClient 감싸개. 웹 조각 시험은 여기서 render를 가져온다
+vitest.setup.ts            <dialog>.showModal() 흉내 · matchMedia · ResizeObserver가 이미 들어 있다
+src/lib/api/reportErrors.ts  isAlreadyReported(error) — 409를 본다
+src/components/commons/BottomSheet.tsx  BottomSheet · BottomSheetItem
+```
+
+**웹 시험을 쓸 때 걸렸던 것 (그대로 밟지 말 것)**
+
+```
+next/link            시험에서 <a href="/products/1">을 쓰면 @next/next/no-html-link-for-pages가
+                     오류로 잡혀 게이트가 막힌다. next/link를 쓴다
+portal + 이벤트       createPortal은 DOM에서만 body로 나간다. React 이벤트는 React 트리를 따라
+                     올라간다 — 바깥 <Link> 안에서 열리는 조각은 눌림을 멈춰야 한다
+키 이벤트            그렇다고 onKeyDown까지 막으면 ESC가 document에 못 닿아 안 닫힌다
+```
+
+---
 
 ## File Structure
 
@@ -917,6 +953,95 @@ git diff --name-only develop...HEAD -- 'src/**/*.ts*' | tr '\n' '\0' | xargs -0 
 ```
 Expected: 둘 다 오류 0. `ReplyOverlay`를 아직 부르는 곳이 있으면 tsc가 잡는다.
 
+- [ ] **Step 5-1: 시험을 쓴다 (#799로 러너가 생겼다)**
+
+`src/features/community/components/CommentItem.test.tsx`
+
+```tsx
+import { describe, expect, it, vi } from 'vitest'
+
+import { render, screen } from '@/test/render'
+
+import { CommentItem } from './CommentItem'
+
+// 답글 접기 버튼을 없애고 멘션을 shared에서 가져오게 바꿨다.
+// 눈으로만 보면 「답글 4개」 버튼이 슬그머니 되살아나도 모른다.
+
+vi.mock('@/store/userStore', () => ({
+  useUserStore: (selector: (s: unknown) => unknown) => selector({ user: { id: 7 } }),
+}))
+
+const COMMENT = {
+  id: 34,
+  authorId: 8,
+  authorNickname: '협주',
+  authorProfileImageUrl: '',
+  content: '좀만 더 줘봐요',
+  createdAt: '2026-04-01T10:00:00',
+  depth: 1,
+  parentId: 0,
+  hasChildren: true,
+  childrenCount: 4,
+}
+
+describe('접기 버튼', () => {
+  it('답글이 있어도 「답글 N개」 버튼이 없다', () => {
+    // 답글은 처음부터 펼쳐지므로 여닫는 단추가 필요 없다
+    render(<CommentItem comment={COMMENT} />)
+
+    expect(screen.queryByRole('button', { name: /답글 \d+개/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '답글 접기' })).not.toBeInTheDocument()
+  })
+})
+
+describe('멘션', () => {
+  it('맨 앞 @닉네임만 색을 다르게 한다', () => {
+    render(<CommentItem comment={{ ...COMMENT, content: '@협주 ㅇㅇㅇ' }} isReply />)
+
+    expect(screen.getByText('@협주')).toHaveClass('text-primary-container')
+  })
+
+  it('@가 없으면 그대로 그린다', () => {
+    render(<CommentItem comment={{ ...COMMENT, content: 'ddd' }} isReply />)
+
+    expect(screen.getByText('ddd')).toBeInTheDocument()
+  })
+
+  it('본문 중간의 @는 안 뗀다', () => {
+    render(<CommentItem comment={{ ...COMMENT, content: '메일은 a@b.com 이에요' }} isReply />)
+
+    expect(screen.getByText(/메일은 a@b.com 이에요/)).toBeInTheDocument()
+  })
+})
+
+describe('내 댓글', () => {
+  it('내 것이면 표가 붙고 삭제가 보인다', () => {
+    render(<CommentItem comment={{ ...COMMENT, authorId: 7 }} onDelete={vi.fn()} />)
+
+    expect(screen.getByText('내 댓글')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '삭제' })).toBeInTheDocument()
+  })
+
+  it('남의 것이면 둘 다 없다', () => {
+    render(<CommentItem comment={COMMENT} onDelete={vi.fn()} />)
+
+    expect(screen.queryByText('내 댓글')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '삭제' })).not.toBeInTheDocument()
+  })
+})
+```
+
+> `useUserStore`를 가짜로 두는 모양은 실제 파일이 그것을 어떻게 쓰는지(`useUserStore((state) => state.user)`) 보고 맞춘다. 위 코드가 안 맞으면 그 파일에 맞춘다.
+
+Run: `pnpm test src/features/community/components/CommentItem.test.tsx`
+Expected: 통과
+
+- [ ] **Step 5-2: 시험이 정말 잡는지 본다**
+
+접기 버튼을 되살려 보고 그 시험만 빨개지는지 확인한다. 확인했으면 되돌린다.
+
+> **통과 개수만 세지 않는다.** 새로 쓴 시험이 첫 실행에 다 통과하면 오히려 의심한다.
+
 - [ ] **Step 6: 눈으로 확인한다**
 
 Run: `pnpm dev` → `http://localhost:3000/community/36`
@@ -1328,6 +1453,78 @@ import { CommentSection } from './components/CommentSection'
 pnpm gate
 git diff --name-only develop...HEAD -- 'src/**/*.ts*' | tr '\n' '\0' | xargs -0 npx eslint
 ```
+
+- [ ] **Step 5-1: 시험을 쓴다**
+
+`src/features/community/components/CommentSection.test.tsx`
+
+```tsx
+import { describe, expect, it, vi } from 'vitest'
+
+import { render, screen } from '@/test/render'
+
+import { CommentSection } from './CommentSection'
+
+// 댓글 덩어리를 조각으로 뺐다(상세 데스크톱 · 댓글 페이지 모바일이 같이 쓴다).
+// 한쪽만 고쳐질 자리가 안 되게 여기서 묶는다.
+
+vi.mock('@/lib/api/api', () => ({ api: { post: vi.fn() } }))
+vi.mock('@/store/userStore', () => ({
+  useUserStore: (selector: (s: unknown) => unknown) =>
+    selector({ user: { id: 7 }, setRedirectUrl: vi.fn() }),
+}))
+vi.mock('@/store/modalStore', () => ({
+  useLoginModalStore: (selector: (s: unknown) => unknown) =>
+    selector({ openLoginModal: vi.fn() }),
+}))
+vi.mock('next/navigation', () => ({
+  usePathname: () => '/community/36',
+  useSearchParams: () => new URLSearchParams(),
+}))
+
+const COMMENT = {
+  id: 34,
+  authorId: 8,
+  authorNickname: '협주',
+  authorProfileImageUrl: '',
+  content: '좀만 더 줘봐요',
+  createdAt: '2026-04-01T10:00:00',
+  depth: 1,
+  parentId: 0,
+  hasChildren: false,
+  childrenCount: 0,
+}
+
+describe('빈 상태', () => {
+  it('댓글이 없으면 첫 댓글을 남기라고 한다', () => {
+    render(<CommentSection postId="36" comments={[]} inputId="t" />)
+
+    expect(screen.getByText('첫 댓글을 남겨보세요')).toBeInTheDocument()
+  })
+
+  it('빈 상태에서도 입력칸은 있다', () => {
+    // 예전에는 「댓글 쓰기」 단추로 아래 고정 입력칸에 초점을 옮겼다.
+    // 그 입력칸이 댓글 페이지로 옮겨 가면서 단추가 할 일이 없어졌다
+    render(<CommentSection postId="36" comments={[]} inputId="t" />)
+
+    expect(screen.getByRole('textbox')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '댓글 쓰기' })).not.toBeInTheDocument()
+  })
+})
+
+describe('목록', () => {
+  it('댓글이 있으면 그린다', () => {
+    render(<CommentSection postId="36" comments={[COMMENT]} inputId="t" />)
+
+    expect(screen.getByText('좀만 더 줘봐요')).toBeInTheDocument()
+    expect(screen.queryByText('첫 댓글을 남겨보세요')).not.toBeInTheDocument()
+  })
+})
+```
+
+> 가짜로 두는 store의 모양은 실제 파일이 쓰는 방식에 맞춘다. 위가 안 맞으면 그 파일을 보고 고친다.
+
+Run: `pnpm test src/features/community/components/CommentSection.test.tsx`
 
 - [ ] **Step 6: 눈으로 확인한다**
 
@@ -3782,8 +3979,9 @@ cd mobile && pnpm expo start --tunnel
 
 ```bash
 pnpm gate:all
-git diff --name-only develop...HEAD -- 'src/**/*.ts*' 'packages/**/*.ts' | tr '\n' '\0' | xargs -0 npx eslint
 ```
+
+`pnpm gate`에 lint가 들어 있으므로 따로 돌릴 필요가 없다 (#788). 경고가 36건을 넘으면 여기서 막힌다.
 
 - [ ] **Step 5: 스펙에 실기기 결과를 적는다**
 
