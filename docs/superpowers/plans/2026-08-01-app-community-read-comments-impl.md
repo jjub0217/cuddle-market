@@ -2706,13 +2706,15 @@ import { fetchPosts, type BoardType, type PostListItem } from '@/lib/community';
 // 검색·정렬은 이번 바퀴에서 뺐다(설계 §2). 서버는 받지만 읽기+댓글이 목표다.
 
 /**
- * 질문/정보 두 갈래. 웹 커뮤니티 탭과 같다.
+ * 질문/정보 두 갈래.
+ * 글자는 웹 COMMUNITY_TAB(constants.ts)에서 그대로 가져왔다 — 같은 화면을 웹과 앱이
+ * 다르게 부르면 안 된다.
  * 마이 목록·판매자 프로필과 같은 칩 조각을 쓴다 — 앱 안에서 「목록 위에서 고르는 줄」이
  * 두 모양이면 안 된다.
  */
 const BOARD_CHIPS: FilterChip<BoardType>[] = [
-  { id: 'QUESTION', label: '질문' },
-  { id: 'INFO', label: '정보' },
+  { id: 'QUESTION', label: '질문 있어요' },
+  { id: 'INFO', label: '정보 공유' },
 ];
 
 export default function CommunityListScreen() {
