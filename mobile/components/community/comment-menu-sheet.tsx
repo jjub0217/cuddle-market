@@ -68,6 +68,9 @@ export function CommentMenuSheet({ postId, target, onClose, onDeleted }: Props) 
       // 헤더의 댓글 수는 서버가 준 commentCount다. 상세를 다시 받아 맞춘다.
       queryClient.invalidateQueries({ queryKey: ['communityPost', postId] });
 
+      // 앱은 이런 동작마다 알린다 — 「차단했습니다」·「신고가 접수되었습니다」와 같은 말투다.
+      // 목록에서 사라지는 것만으로는 지워진 건지 화면이 튄 건지 헷갈린다.
+      showToast('댓글을 삭제했습니다');
       onDeleted?.(comment);
     } catch (error) {
       // 여기서 삼킨다. ConfirmDialog의 onConfirm이 던지면 창이 안 닫혀 사용자가 갇힌다.
