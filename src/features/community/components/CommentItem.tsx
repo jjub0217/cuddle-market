@@ -1,6 +1,6 @@
 'use client'
 
-import { getTimeAgo } from '@cuddle/shared'
+import { getTimeAgo, splitMention } from '@cuddle/shared'
 import { cn } from '@/lib/utils/cn'
 import type { Comment } from '@/types'
 import ProfileAvatar from '@/components/commons/ProfileAvatar'
@@ -10,12 +10,11 @@ import dynamic from 'next/dynamic'
 const DeleteReplyModal = dynamic(() => import('@/components/modal/DeleteReplyModal'))
 
 function renderContentWithMention(content: string) {
-  const match = content.match(/^(@\S+)([\s\S]*)$/)
-  if (!match) return content
-  const [, mention, rest] = match
+  const { mention, rest } = splitMention(content)
+  if (!mention) return content
   return (
     <>
-      <span className="text-primary-container text-sm md:text-base">{mention}</span>
+      <span className="text-primary-container text-sm">{mention}</span>
       {rest}
     </>
   )
@@ -24,26 +23,12 @@ function renderContentWithMention(content: string) {
 interface CommentItemProps {
   comment: Comment
   isReply?: boolean
-  hasChildren?: boolean
-  childrenCount?: number
-  onToggleReplies?: () => void
-  isRepliesOpen?: boolean
   showBorder?: boolean
   onHandleReply?: () => void
   onDelete?: (commentId: number) => Promise<void>
 }
 
-export function CommentItem({
-  comment,
-  isReply = false,
-  hasChildren,
-  childrenCount,
-  onToggleReplies,
-  isRepliesOpen,
-  showBorder = true,
-  onHandleReply,
-  onDelete,
-}: CommentItemProps) {
+export function CommentItem({ comment, isReply = false, showBorder = true, onHandleReply, onDelete }: CommentItemProps) {
   const user = useUserStore((state) => state.user)
   const isMyComment = user?.id === comment.authorId
   const [isReplyDeleteModalOpen, setIsReplyDeleteModalOpen] = useState(false)
@@ -63,9 +48,7 @@ export function CommentItem({
       <div
         className={cn(
           'flex items-start gap-3.5',
-          isReply
-            ? 'bg-surface-container-low rounded-lg px-2 py-3 md:px-4.5 md:py-4.5'
-            : cn(showBorder && 'border-t border-gray-300 pt-3.5', !isRepliesOpen && 'pb-3.5')
+          isReply ? 'bg-surface-container-low rounded-lg p-[14px]' : cn(showBorder && 'border-t border-gray-300 pt-3.5', 'pb-3.5')
         )}
       >
         <ProfileAvatar
@@ -100,22 +83,6 @@ export function CommentItem({
                     onClick={onHandleReply}
                   >
                     답글 달기
-                  </button>
-                </>
-              ) : null}
-
-              {/* 답글 버튼 (대댓글이 아니고, hasChildren이 있을 때만) */}
-              {!isReply && hasChildren ? (
-                <>
-                  <span aria-hidden="true" className="text-xs">
-                    ·
-                  </span>
-                  <button
-                    className="text-primary-container cursor-pointer self-start text-xs hover:underline md:font-medium"
-                    type="button"
-                    onClick={onToggleReplies}
-                  >
-                    {isRepliesOpen ? '답글 접기' : `답글 ${childrenCount}개`}
                   </button>
                 </>
               ) : null}

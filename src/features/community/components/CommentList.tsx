@@ -2,12 +2,11 @@
 
 import { useState } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueries, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api/api'
 import type { Comment, CommentPostRequestData } from '@/types'
 import { CommentItem } from './CommentItem'
 import { CommentForm } from './CommentForm'
-import { ReplyOverlay } from './ReplyOverlay'
 import { useForm, useWatch } from 'react-hook-form'
 import { useUserStore } from '@/store/userStore'
 import { useLoginModalStore } from '@/store/modalStore'
@@ -43,19 +42,39 @@ export function CommentList({ comments, postId }: CommentListProps) {
     },
   })
   const replyContent = useWatch({ control, name: 'content' })
-  const [openRepliesCommentId, setOpenRepliesCommentId] = useState<number | null>(null)
   const [activeThreadId, setActiveThreadId] = useState<number | null>(null)
   const [replyingToId, setReplyingToId] = useState<number | null>(null)
   const [replyPostError, setReplyPostError] = useState<React.ReactNode | null>(null)
 
-  const { data: repliesData } = useQuery({
-    queryKey: ['community', postId, 'replies', openRepliesCommentId],
-    queryFn: async () => {
-      const response = await api.get(`/community/comments/${openRepliesCommentId}/replies`)
-      return response.data.data as { comments: Comment[] }
-    },
-    enabled: !!openRepliesCommentId,
+  // 답글은 부모 댓글마다 따로 부른다 — 서버가 목록에 답글을 안 담아 준다.
+  //
+  // 왜 처음부터 다 부르나 (2026-08-01 실측):
+  //   글 28개 중 댓글이 달린 글이 5개, 가장 많은 글도 부모 2개 + 답글 5개다.
+  //   답글 있는 부모는 글당 1~2개라 요청이 최대 3번이고, 나란히 쏘면 +50ms다.
+  //   눌러야 펼쳐지면 글 36에서는 대화의 70%가 처음에 안 보인다.
+  //
+  // 정말 커지면 앱에서 감출 게 아니라 백엔드에 「목록에 답글도 담아 달라」고 요청한다.
+  const parentsWithReplies = comments.filter((comment) => comment.hasChildren)
+
+  const replyQueries = useQueries({
+    queries: parentsWithReplies.map((comment) => ({
+      queryKey: ['community', postId, 'replies', comment.id],
+      queryFn: async () => {
+        const response = await api.get(`/community/comments/${comment.id}/replies`)
+        return response.data.data as { comments: Comment[] }
+      },
+    })),
   })
+
+  /** 부모 댓글 id → 답글 목록. 아직 안 온 것은 빈 배열이다 */
+  const repliesByParent = new Map<number, Comment[]>(
+    parentsWithReplies.map((comment, index) => [comment.id, replyQueries[index]?.data?.comments ?? []])
+  )
+
+  /** 답글을 못 불러온 부모 id. 그 자리에만 한 줄 안내를 그린다 */
+  const failedParents = new Set<number>(
+    parentsWithReplies.filter((_, index) => replyQueries[index]?.isError).map((comment) => comment.id)
+  )
 
   const replyMutation = useMutation({
     mutationFn: (data: { request: CommentPostRequestData; threadId: number }) =>
@@ -71,7 +90,6 @@ export function CommentList({ comments, postId }: CommentListProps) {
       reset()
       setReplyingToId(null)
       setActiveThreadId(null)
-      setOpenRepliesCommentId(threadId)
     },
     onError: () => {
       setReplyPostError(
@@ -114,18 +132,7 @@ export function CommentList({ comments, postId }: CommentListProps) {
     }
     setReplyingToId(target.commentId)
     setActiveThreadId(target.threadId)
-    setOpenRepliesCommentId(target.threadId)
     setValue('content', target.mention ? `@${target.mention} ` : '')
-  }
-
-  const closeReplyForm = () => {
-    setReplyingToId(null)
-    setActiveThreadId(null)
-    reset()
-  }
-
-  const handleToggleReplies = (commentId: number) => {
-    setOpenRepliesCommentId(openRepliesCommentId === commentId ? null : commentId)
   }
 
   const onSubmit = (data: ReplyRequestFormValues) => {
@@ -143,107 +150,73 @@ export function CommentList({ comments, postId }: CommentListProps) {
   }
 
   return (
-    <>
-      <ul className="flex flex-col">
-        {comments.map((comment, index) => (
-          <li key={comment.id} className="flex flex-col">
-            <CommentItem
-              comment={comment}
-              hasChildren={comment.hasChildren}
-              childrenCount={comment.childrenCount}
-              onToggleReplies={() => handleToggleReplies(comment.id)}
-              isRepliesOpen={openRepliesCommentId === comment.id}
-              showBorder={index !== 0}
-              onHandleReply={() =>
-                openReplyForm({
-                  commentId: comment.id,
-                  threadId: comment.id,
-                  mention: comment.authorNickname,
-                })
-              }
-              onDelete={handleDeleteComment}
-            />
+    <ul className="flex flex-col">
+      {comments.map((comment, index) => (
+        <li key={comment.id} className="flex flex-col">
+          <CommentItem
+            comment={comment}
+            showBorder={index !== 0}
+            onHandleReply={() =>
+              openReplyForm({
+                commentId: comment.id,
+                threadId: comment.id,
+                mention: comment.authorNickname,
+              })
+            }
+            onDelete={handleDeleteComment}
+          />
 
-            {/* 대댓글 목록 */}
-            <div
-              className={`grid transition-all duration-500 ease-out ${
-                openRepliesCommentId === comment.id ? 'mt-3.5 grid-rows-[1fr]' : 'grid-rows-[0fr]'
-              }`}
-            >
-              <div className="overflow-hidden">
-                {openRepliesCommentId === comment.id && repliesData?.comments ? (
-                  <ul className="flex flex-col gap-2 pb-3.5 pl-10">
-                    {repliesData.comments.map((reply, index) => (
-                      <li key={reply.id}>
-                        <CommentItem
-                          comment={reply}
-                          isReply
-                          showBorder={index !== 0}
-                          onDelete={handleDeleteComment}
-                          onHandleReply={() =>
-                            openReplyForm({
-                              commentId: reply.id,
-                              threadId: comment.id,
-                              mention: reply.authorNickname,
-                            })
-                          }
-                        />
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-              </div>
+          {/* 답글 — 늘 펼쳐져 있다 */}
+          {comment.hasChildren ? (
+            <div className="mt-3.5">
+              {failedParents.has(comment.id) ? (
+                <p className="pb-3.5 pl-10 text-xs text-gray-500">답글을 불러오지 못했어요.</p>
+              ) : (
+                <ul className="flex flex-col gap-2 pb-3.5 pl-10">
+                  {(repliesByParent.get(comment.id) ?? []).map((reply, index) => (
+                    <li key={reply.id}>
+                      <CommentItem
+                        comment={reply}
+                        isReply
+                        showBorder={index !== 0}
+                        onDelete={handleDeleteComment}
+                        onHandleReply={() =>
+                          openReplyForm({
+                            commentId: reply.id,
+                            threadId: comment.id,
+                            mention: reply.authorNickname,
+                          })
+                        }
+                      />
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
-            {/* 데스크톱: 인라인 답글 폼 */}
-            {activeThreadId === comment.id ? (
-              <div className="hidden pb-3.5 pl-10 md:block">
-                <AnimatePresence>
-                  {replyPostError ? (
-                    <InlineNotification type="error" onClose={() => setReplyPostError(null)}>
-                      {replyPostError}
-                    </InlineNotification>
-                  ) : null}
-                </AnimatePresence>
-                <CommentForm
-                  id={String(comment.id)}
-                  placeholder="답글을 입력하세요"
-                  legendText="대댓글 작성폼"
-                  value={replyContent}
-                  onChangeValue={(v) => setValue('content', v)}
-                  onSubmit={handleSubmit(onSubmit)}
-                  variant="compact"
-                />
-              </div>
-            ) : null}
-          </li>
-        ))}
-      </ul>
-
-      {/* 모바일: 답글 오버레이 */}
-      {(() => {
-        if (!activeThreadId) return null
-        const targetComment = comments.find((c) => c.id === activeThreadId)
-        if (!targetComment) return null
-        return (
-          <div className="md:hidden">
-            <ReplyOverlay
-              comment={targetComment}
-              replies={openRepliesCommentId === activeThreadId ? repliesData?.comments : undefined}
-              value={replyContent}
-              onChangeValue={(v) => setValue('content', v)}
-              onSubmit={handleSubmit(onSubmit)}
-              onClose={closeReplyForm}
-              onReplyToReply={(reply) =>
-                openReplyForm({
-                  commentId: reply.id,
-                  threadId: targetComment.id,
-                  mention: reply.authorNickname,
-                })
-              }
-            />
-          </div>
-        )
-      })()}
-    </>
+          ) : null}
+          {/* 답글 폼 — 폭 상관없이 그 자리에 연다 */}
+          {activeThreadId === comment.id ? (
+            <div className="pb-3.5 pl-10">
+              <AnimatePresence>
+                {replyPostError ? (
+                  <InlineNotification type="error" onClose={() => setReplyPostError(null)}>
+                    {replyPostError}
+                  </InlineNotification>
+                ) : null}
+              </AnimatePresence>
+              <CommentForm
+                id={String(comment.id)}
+                placeholder="답글을 입력하세요"
+                legendText="대댓글 작성폼"
+                value={replyContent}
+                onChangeValue={(v) => setValue('content', v)}
+                onSubmit={handleSubmit(onSubmit)}
+                variant="compact"
+              />
+            </div>
+          ) : null}
+        </li>
+      ))}
+    </ul>
   )
 }
