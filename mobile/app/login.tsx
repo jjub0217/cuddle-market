@@ -1,3 +1,4 @@
+import { needsSocialSignup } from '@cuddle/shared';
 import { useRouter } from 'expo-router';
 import {
   KeyboardAvoidingView,
@@ -12,6 +13,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { LoginForm } from '@/components/auth/login-form';
 import { SocialLoginButtons } from '@/components/auth/social-login-buttons';
+import { fetchMe } from '@/lib/profile';
+import { showToast } from '@/lib/toast';
 import { ChevronLeft } from 'lucide-react-native';
 
 // 로그인. 탭바까지 덮는 루트 스택 화면이라, 닫으면 원래 보던 자리로 돌아간다.
@@ -33,6 +36,23 @@ export default function LoginScreen() {
       // 홈을 콕 집는다.
       router.replace('/(tabs)/(home)');
     }
+  };
+
+  // 소셜 로그인이 성공한 뒤 어디로 갈지는 **화면**이 정한다. 단추 조각은 로그인만 안다.
+  const handleSocialSignedIn = async () => {
+    try {
+      const me = await fetchMe();
+      if (needsSocialSignup(me)) {
+        // 건너뛸 수 없는 화면이라 push가 아니라 replace다 — 로그인 화면이 뒤에 남으면 안 된다.
+        router.replace('/social-signup');
+        return;
+      }
+    } catch {
+      // 프로필을 못 읽어도 **로그인은 이미 됐다.** 여기서 로그아웃시키면
+      // 방금 성공한 로그인을 되돌리는 셈이다. 그냥 닫고 알린다.
+      showToast('내 정보를 불러오지 못했어요. 마이에서 다시 확인해주세요.');
+    }
+    close();
   };
 
   return (
@@ -61,9 +81,8 @@ export default function LoginScreen() {
           <LoginForm onSuccess={close} />
 
           {/* 웹도 로그인 폼 아래·회원가입 링크 위에 둔다(Login.tsx:27-40). */}
-          {/* ⚠️ 지금은 성공하면 화면만 닫는다. 추가 정보 입력으로 보내는 것은 Task 9에서 잇는다. */}
           <View style={styles.social}>
-            <SocialLoginButtons onSignedIn={close} />
+            <SocialLoginButtons onSignedIn={() => void handleSocialSignedIn()} />
           </View>
 
           {/* 웹도 로그인 폼 아래에 같은 자리로 둔다(SignUpForm.tsx:195-200). */}

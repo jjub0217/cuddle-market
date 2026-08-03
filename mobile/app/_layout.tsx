@@ -35,6 +35,9 @@ export default function RootLayout() {
           <Stack.Screen name="login" options={{ headerShown: false }} />
           {/* 헤더는 화면이 직접 그린다(login과 같은 이유). */}
           <Stack.Screen name="signup" options={{ headerShown: false }} />
+          {/* 헤더는 화면이 직접 그린다(login과 같은 이유).
+              ⚠️ 이 화면은 건너뛸 수 없다 — 뒤로가기를 아예 안 그리고 하드웨어 뒤로가기도 막는다. */}
+          <Stack.Screen name="social-signup" options={{ headerShown: false }} />
           {/* 헤더는 화면이 직접 그린다(login과 같은 이유). */}
           <Stack.Screen name="notifications" options={{ headerShown: false }} />
           {/* 헤더는 화면이 직접 그린다(login과 같은 이유).
