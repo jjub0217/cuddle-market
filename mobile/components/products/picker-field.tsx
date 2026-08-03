@@ -13,8 +13,15 @@ import { BottomSheet, sheetItemStyles } from '@/components/ui/bottom-sheet';
 // 한 화면에 두 칸이 나란히 서는데 모양이 다르면 안 된다.
 
 interface Props {
-  /** 칸 위 이름표 — 「반려동물 종류」 같은 것 */
-  label: string;
+  /**
+   * 칸 위 이름표 — 「반려동물 종류」 같은 것.
+   *
+   * 안 넘기면 이름표를 아예 안 그린다. 칸 둘이 한 이름표를 나눠 쓰는 자리가 있어서다 —
+   * 웹 PetTypeField도 「반려동물 종류」 하나를 두고 그 아래 셀렉트 둘(대분류·소분류)을 놓는다.
+   * 빈 글자를 넘기는 길로 두지 않은 이유: 안드로이드에서 빈 Text가 한 줄 높이를 먹어
+   * 칸 사이가 벌어진다.
+   */
+  label?: string;
   /** 안 골랐을 때 회색으로 보이는 글 — 「카테고리를 선택해주세요」 */
   placeholder: string;
   value: string;
@@ -57,7 +64,7 @@ export function PickerField({
 
   return (
     <View style={styles.field}>
-      <Text style={styles.label}>{label}</Text>
+      {label ? <Text style={styles.label}>{label}</Text> : null}
 
       <Pressable
         onPress={openSheet}
