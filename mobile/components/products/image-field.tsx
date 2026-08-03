@@ -5,6 +5,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { Camera, RotateCcw, X } from 'lucide-react-native';
 
 import { messageStyles } from '@/components/signup/field';
+import { FieldLabel } from '@/components/ui/field-label';
 
 import {
   MAX_IMAGES,
@@ -108,7 +109,10 @@ export function ImageField({ slots, onChange, error }: Props) {
 
   return (
     <View style={styles.field}>
-      <Text style={styles.heading}>상품 사진</Text>
+      {/* 다른 칸 이름표와 같은 모양이다. 여기만 크고 진하면 한 화면에서 튄다 —
+          웹도 같은 이유로 맞춰 뒀다(FormSectionHeader.tsx 주석).
+          ⚠️ 사진은 필수가 아니라 별표를 안 붙인다. 웹도 안 붙인다 */}
+      <FieldLabel text="상품 사진" />
       <Text style={messageStyles.hint}>{DESCRIPTION}</Text>
 
       <View style={styles.row}>
@@ -185,7 +189,7 @@ export function ImageField({ slots, onChange, error }: Props) {
 
 const styles = StyleSheet.create({
   field: { gap: 6 },
-  heading: { fontSize: 15, fontWeight: '600', color: '#111827' },
+  // 이름표 모양은 ui/field-label.tsx가, 안내 문구는 messageStyles.hint가 들고 있다
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 2 },
 
   thumb: {
@@ -216,12 +220,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 4,
     bottom: 4,
-    borderRadius: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    borderRadius: 7,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     backgroundColor: '#825500',
   },
-  mainBadgeText: { fontSize: 11, fontWeight: '600', color: '#FFFFFF' },
+  mainBadgeText: { fontSize: 12, fontWeight: '600', color: '#FFFFFF' },
 
   // 웹과 같이 오른쪽 위 회색 동그라미. 사진 위라 흰 ✕가 묻히지 않게 바탕을 깐다.
   removeButton: {
@@ -245,7 +249,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: '#E5E7EB',
+    borderColor: '#D1D5DB',
     backgroundColor: '#FFFFFF',
   },
   addLabel: { fontSize: 12, fontWeight: '600', color: '#6B7280' },
