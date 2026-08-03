@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { LoginForm } from '@/components/auth/login-form';
+import { SocialLoginButtons } from '@/components/auth/social-login-buttons';
 import { ChevronLeft } from 'lucide-react-native';
 
 // 로그인. 탭바까지 덮는 루트 스택 화면이라, 닫으면 원래 보던 자리로 돌아간다.
@@ -59,6 +60,12 @@ export default function LoginScreen() {
         >
           <LoginForm onSuccess={close} />
 
+          {/* 웹도 로그인 폼 아래·회원가입 링크 위에 둔다(Login.tsx:27-40). */}
+          {/* ⚠️ 지금은 성공하면 화면만 닫는다. 추가 정보 입력으로 보내는 것은 Task 9에서 잇는다. */}
+          <View style={styles.social}>
+            <SocialLoginButtons onSignedIn={close} />
+          </View>
+
           {/* 웹도 로그인 폼 아래에 같은 자리로 둔다(SignUpForm.tsx:195-200). */}
           <Pressable
             onPress={() => router.push('/signup')}
@@ -97,6 +104,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 32,
+  },
+  // 폼(gap 16)과 붙지 않게 한 칸 띄운다. 웹도 폼과 소셜 사이를 벌려 둔다(Login.tsx:26 gap-9).
+  social: {
+    marginTop: 16,
   },
   signupLink: {
     marginTop: 24,
