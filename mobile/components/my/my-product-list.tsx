@@ -1,6 +1,6 @@
 import type { Product } from '@cuddle/shared';
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { useRouter } from 'expo-router';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { useRouter, type Href } from 'expo-router';
 import { useState, type ReactNode } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,7 +10,6 @@ import {
   ListFooter,
   LoadingState,
 } from '@/components/list-states';
-import { DeleteConfirmModal } from '@/components/my/delete-confirm-modal';
 import { MyListEmpty } from '@/components/my/my-list-empty';
 import { ProductActionSheet, type SheetAction } from '@/components/my/product-action-sheet';
 import {
@@ -19,12 +18,15 @@ import {
   type StatusFilter,
 } from '@/components/my/status-filter-chips';
 import { ProductCard } from '@/components/product-card';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ChevronLeft, Plus, type LucideIcon } from 'lucide-react-native';
 import { useFavorite } from '@/hooks/use-favorite';
 import { useProductActions } from '@/hooks/use-product-actions';
 import type { MyListPage } from '@/lib/my-lists';
 import type { TradeStatus } from '@/lib/product-actions';
-import { buildStatusActions, type MenuKind } from '@/lib/product-menu';
+import { buildOwnerActions, type MenuKind } from '@/lib/product-menu';
+import { deleteProduct } from '@/lib/products';
+import { showToast } from '@/lib/toast';
 
 // 마이 목록 화면 셋(찜한 상품 · 판매 내역 · 구매 내역)의 공통 껍데기.
 //
@@ -124,13 +126,14 @@ export function MyProductList({
 }: Props) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   // 시트를 연 상품. null이면 시트가 닫혀 있다.
   const [sheetProduct, setSheetProduct] = useState<Product | null>(null);
   // 삭제 확인 창을 연 상품.
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [filter, setFilter] = useState<StatusFilter>('ALL');
-  const { changeStatus, remove, isPending } = useProductActions(queryKey);
+  const { changeStatus, isPending } = useProductActions(queryKey);
 
   const {
     data,
@@ -154,34 +157,48 @@ export function MyProductList({
   // 서버가 첫 페이지에 전체 개수를 함께 준다. 아직 못 받았으면 개수 줄을 숨긴다.
   const total = data?.pages[0]?.total;
 
-  /** 시트에 그릴 항목. 상태 변경은 규칙 함수가 정하고, 삭제는 항상 맨 아래에 둔다. */
+  /**
+   * 시트에 그릴 항목. 무엇을 보일지는 lib/product-menu.ts가 정하고,
+   * 여기서는 눌렀을 때 할 일만 붙인다.
+   */
   const buildSheetActions = (): SheetAction[] => {
     if (!sheetProduct || !listKind) return [];
 
-    const statusActions: SheetAction[] = buildStatusActions(
-      listKind,
-      sheetProduct.tradeStatus
-    ).map((action) => ({
-      label: action.label,
-      onPress: () => {
-        changeStatus(sheetProduct.id, action.next);
-        setSheetProduct(null);
-      },
-    }));
+    // 시트가 닫히면서 sheetProduct가 null이 되므로 눌린 상품을 미리 붙잡아 둔다.
+    const target = sheetProduct;
 
-    return [
-      ...statusActions,
-      {
-        label: '삭제',
-        tone: 'danger',
+    return buildOwnerActions(listKind, target.tradeStatus).map((action): SheetAction => {
+      if (action.kind === 'status') {
+        return {
+          label: action.label,
+          onPress: () => {
+            if (action.next) changeStatus(target.id, action.next);
+            setSheetProduct(null);
+          },
+        };
+      }
+
+      if (action.kind === 'edit') {
+        return {
+          label: action.label,
+          onPress: () => {
+            setSheetProduct(null);
+            // as Href: 수정 화면은 아직 없어(Task 10) 자동 생성된 경로 목록에 안 잡힌다.
+            router.push(`/products/${target.id}/edit` as Href);
+          },
+        };
+      }
+
+      return {
+        label: action.label,
+        tone: action.tone,
         onPress: () => {
           // 시트를 먼저 닫고 확인 창을 연다. 두 개가 겹쳐 뜨지 않게.
-          const target = sheetProduct;
           setSheetProduct(null);
           setDeleteTarget(target);
         },
-      },
-    ];
+      };
+    });
   };
 
   // ----- 3상태 렌더 (로딩/오류/빈은 서로 섞지 않음) -----
@@ -275,13 +292,31 @@ export function MyProductList({
         actions={buildSheetActions()}
       />
 
-      <DeleteConfirmModal
+      {/* 문구는 웹 삭제 확인 창 그대로다. 지운 뒤에도 목록에 머문다(웹과 같다). */}
+      <ConfirmDialog
         visible={deleteTarget !== null}
-        productTitle={deleteTarget?.title ?? ''}
-        submitting={isPending}
+        heading="상품 삭제"
+        description="정말로 이 상품을 삭제하시겠습니까?"
+        notes={['삭제된 상품은 복구할 수 없습니다']}
+        confirmLabel="삭제하기"
+        tone="danger"
         onClose={() => setDeleteTarget(null)}
-        onConfirm={() => {
-          if (deleteTarget) remove(deleteTarget.id, () => setDeleteTarget(null));
+        onConfirm={async () => {
+          const target = deleteTarget;
+          if (!target) return;
+
+          try {
+            await deleteProduct(target.id);
+            // 목록(모든 필터)과 그 상품의 상세를 함께 다시 받는다.
+            queryClient.invalidateQueries({ queryKey });
+            queryClient.invalidateQueries({ queryKey: ['products'] });
+            queryClient.invalidateQueries({ queryKey: ['product', target.id] });
+            showToast('상품을 삭제했습니다');
+          } catch (error) {
+            showToast(error instanceof Error ? error.message : '상품 삭제에 실패했습니다.');
+          }
+          // 성공이든 실패든 닫는다 — 실패해도 창이 남으면 갇힌다.
+          setDeleteTarget(null);
         }}
       />
     </SafeAreaView>

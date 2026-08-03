@@ -1,4 +1,4 @@
-import { buildStatusActions } from './product-menu';
+import { buildOwnerActions, buildStatusActions } from './product-menu';
 
 describe('buildStatusActions — 판매 내역', () => {
   it('판매중이면 예약중 · 판매완료를 보여준다', () => {
@@ -41,6 +41,45 @@ describe('buildStatusActions — 값이 이상할 때', () => {
       { label: '판매중으로 변경', next: 'SELLING' },
       { label: '예약중으로 변경', next: 'RESERVED' },
       { label: '판매완료로 변경', next: 'COMPLETED' },
+    ]);
+  });
+});
+
+describe('내 상품 ⋮ 전체', () => {
+  // 상태 변경만 있던 것에 수정·삭제를 더한다.
+  // 완료된 거래도 지울 수는 있어야 한다 — 잘못 올린 것을 못 지우면 갇힌다.
+
+  it('판매중이면 상태 변경 + 수정 + 삭제', () => {
+    const actions = buildOwnerActions('sales', 'SELLING');
+
+    expect(actions.map((a) => a.label)).toEqual([
+      '예약중으로 변경',
+      '판매완료로 변경',
+      '수정하기',
+      '삭제',
+    ]);
+  });
+
+  it('완료면 삭제만 남는다', () => {
+    // 끝난 거래는 못 고친다(웹과 같다). 다만 지울 수는 있어야 갇히지 않는다
+    expect(buildOwnerActions('sales', 'COMPLETED').map((a) => a.label)).toEqual(['삭제']);
+  });
+
+  it('삭제는 danger다', () => {
+    const actions = buildOwnerActions('sales', 'SELLING');
+    const remove = actions.find((a) => a.label === '삭제');
+
+    expect(remove?.tone).toBe('danger');
+  });
+
+  it('상태 변경 항목만 next를 들고 있다', () => {
+    // 화면이 kind로 갈라 쓴다. 수정·삭제에 next가 붙으면 상태 변경으로 오인될 수 있다.
+    const actions = buildOwnerActions('purchases', 'SELLING');
+
+    expect(actions).toEqual([
+      { kind: 'status', label: '구매완료로 변경', next: 'COMPLETED' },
+      { kind: 'edit', label: '수정하기' },
+      { kind: 'delete', label: '삭제', tone: 'danger' },
     ]);
   });
 });
