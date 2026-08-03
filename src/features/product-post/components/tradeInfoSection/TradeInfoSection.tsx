@@ -9,7 +9,7 @@ interface TradeInfoSectionProps {
 
 export default function TradeInfoSection({ control, setValue }: TradeInfoSectionProps) {
   return (
-    <section className="border-outline-variant/30 flex flex-col gap-3 rounded-xl border p-6 shadow-sm">
+    <section className="border-outline-variant/30 flex flex-col gap-3 rounded-xl border p-4 shadow-sm md:p-6">
       <AddressField<ProductPostFormValues>
         control={control}
         setValue={setValue}

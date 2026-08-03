@@ -165,19 +165,24 @@ export function ProductPostForm({ isEditMode, productId: id, initialData }: Prod
             <TradeInfoSection control={control} setValue={setValue} />
           </div>
           <div className="flex justify-end gap-3 pt-2">
+            {/* 좁은 폭에서는 숨긴다 — 헤더의 ← 화살표(MobileBackHeader)가 하는 일과 같고,
+                「등록」 바로 옆이라 잘못 누르면 쓰던 것이 확인 없이 날아간다.
+                넓은 폭에는 그 화살표가 없어(md:hidden) 나갈 다른 길이 화면에 없으므로 남긴다. */}
             <button
               type="button"
               onClick={() => router.back()}
-              className="text-primary hover:bg-surface-container-high cursor-pointer rounded-full px-6 py-3 text-xs font-bold transition-colors"
+              className="text-primary hover:bg-surface-container-high hidden cursor-pointer rounded-full px-8 py-3.5 text-sm font-bold transition-colors md:block"
             >
               취소
             </button>
+            {/* 좁은 폭에서는 폭을 꽉 채운다 — 이 화면에서 할 유일한 행동이고,
+                엄지가 닿는 자리가 넓을수록 누르기 쉽다. */}
             <Button
               type="submit"
               disabled={!isValid}
               variant={isValid ? 'primary' : 'default'}
               className={cn(
-                'cursor-pointer rounded-full px-6 py-3 text-xs font-bold transition-all',
+                'w-full cursor-pointer rounded-full px-8 py-3.5 text-sm font-bold transition-all md:w-auto',
                 !isValid && 'cursor-not-allowed bg-gray-200 text-gray-400'
               )}
             >

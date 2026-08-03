@@ -20,7 +20,7 @@ export default function PriceAndStatusSection({
   productDescriptionPlaceHolder,
 }: PriceAndStatusSectionProps) {
   return (
-    <section className="border-outline-variant/30 flex flex-col gap-3 rounded-xl border p-6 shadow-sm">
+    <section className="border-outline-variant/30 flex flex-col gap-3 rounded-xl border p-4 shadow-sm md:p-6">
       <div className="flex flex-col gap-3.5">
         <PriceField register={register} errors={errors} label={priceLabel} suffix="원" />
         <ProductDescriptionFiled

@@ -27,7 +27,7 @@ export default function BasicInfoSection({
   showProductStatus = true,
 }: BasicInfoSectionProps) {
   return (
-    <section className="border-outline-variant/30 flex flex-col gap-3 rounded-xl border p-6 shadow-sm">
+    <section className="border-outline-variant/30 flex flex-col gap-3 rounded-xl border p-4 shadow-sm md:p-6">
       {/* <FormSectionHeader heading="기본 정보" /> */}
       <div className="flex flex-col gap-3.5">
         <ProductNameField register={register} errors={errors} label={productNameLabel} titleLength={titleLength} />
