@@ -1,6 +1,6 @@
 import type { Product, ProductDetailItem } from '@cuddle/shared';
 import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
-import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
+import { useLocalSearchParams, useRouter, useSegments, type Href } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -22,6 +22,7 @@ import { BlockConfirm } from '@/components/report/block-confirm';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useMe } from '@/hooks/use-me';
 import { buildOwnerActions } from '@/lib/product-menu';
+import { tabGroupOf } from '@/lib/product-routes';
 import { deleteProduct, fetchProductDetail, ProductNotFoundError } from '@/lib/products';
 
 // 상품 상세. 읽기 전용.
@@ -67,6 +68,9 @@ function readListCachePlaceholder(
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  // 이 화면은 홈·마이 두 스택에 다 있다(마이 것은 이 파일을 그대로 다시 내보낸다).
+  // string[]으로 넓히는 이유는 seller-card.tsx에 적어 뒀다(튜플 유니온이라 공통 원소가 never).
+  const segments = useSegments() as string[];
   const productId = Number(id);
   const queryClient = useQueryClient();
 
@@ -113,8 +117,9 @@ export default function ProductDetailScreen() {
                 label: action.label,
                 onPress: () => {
                   setIsSheetOpen(false);
-                  // as Href: 수정 화면은 아직 없어(Task 10) 자동 생성된 경로 목록에 안 잡힌다.
-                  router.push(`/products/${productId}/edit` as Href);
+                  // from: 수정 화면은 루트 스택이라 어느 탭에서 열렸는지 모른다. 끝나고
+                  // 이 탭의 상세로 돌아오게 하려면 지금 그룹을 알려 줘야 한다.
+                  router.push(`/products/${productId}/edit?from=${tabGroupOf(segments)}` as Href);
                 },
               }
             : {

@@ -50,8 +50,7 @@ interface Props {
   /**
    * 등록 버튼 문구. 없으면 버튼을 그리지 않는다(찜한 상품).
    *
-   * 지금은 눌리지 않는다 — 앱에 상품 등록 화면이 아직 없다(6바퀴).
-   * 웹과 같은 자리에 같은 문구로 두되, 갈 곳이 생기면 그때 연결한다.
+   * 11바퀴에 등록 화면이 생겨 이제 눌린다. 그전에는 흐린 채로 자리만 잡고 있었다.
    */
   registerLabel?: string;
   /** 찜한 상품 화면만 켠다. 판매 · 구매는 관리용이라 끈다(설계 §5). */
@@ -184,7 +183,8 @@ export function MyProductList({
           onPress: () => {
             setSheetProduct(null);
             // as Href: 수정 화면은 아직 없어(Task 10) 자동 생성된 경로 목록에 안 잡힌다.
-            router.push(`/products/${target.id}/edit` as Href);
+            // from=my: 끝나면 마이 스택의 상세로 돌아간다(홈 탭으로 튀지 않게)
+            router.push(`/products/${target.id}/edit?from=my` as Href);
           },
         };
       }
@@ -274,13 +274,16 @@ export function MyProductList({
           ) : null}
         </View>
         {registerLabel ? (
-          // 앱에 등록 화면이 아직 없어 눌리지 않는다(6바퀴에 연결).
-          // 숨기지 않고 흐리게 두는 이유: 웹과 자리·문구를 맞춰 두면 화면이 갑자기
-          // 바뀌지 않고, "여기서 등록한다"는 것도 미리 읽힌다.
-          <View style={styles.registerButton} accessibilityRole="button" accessibilityState={{ disabled: true }}>
+          // 홈의 떠 있는 단추와 같은 곳으로 간다. 웹도 이 자리에서 등록 화면으로 보낸다.
+          <Pressable
+            onPress={() => router.push('/products/new')}
+            accessibilityRole="button"
+            accessibilityLabel={registerLabel}
+            style={({ pressed }) => [styles.registerButton, pressed && styles.registerPressed]}
+          >
             <Plus size={16} color="#FFFFFF" />
             <Text style={styles.registerLabel}>{registerLabel}</Text>
-          </View>
+          </Pressable>
         ) : null}
       </View>
 
@@ -373,9 +376,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     // 웹 variant="primary"와 같은 브랜드 브라운. 앱 브레드크럼이 이미 쓰는 값이다.
     backgroundColor: '#633F00',
-    // 아직 연결할 화면이 없어 흐리게 둔다(웹 disabled와 같은 0.5).
-    opacity: 0.5,
   },
+  registerPressed: { opacity: 0.7 },
   registerLabel: {
     fontSize: 13,
     fontWeight: '700',

@@ -1,11 +1,12 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ProductForm } from '@/components/products/product-form';
 import { ErrorState, LoadingState } from '@/components/list-states';
+import { productDetailHref, tabGroupOf } from '@/lib/product-routes';
 import { fetchProductDetail, updateProduct, type ProductPayload } from '@/lib/products';
 import { showToast } from '@/lib/toast';
 
@@ -18,7 +19,8 @@ import { showToast } from '@/lib/toast';
 const HEADER_HEIGHT = 52; // 앱의 다른 헤더와 같은 값
 
 export default function EditProductScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  // from: 어느 탭에서 열렸는지. 이 화면은 루트 스택이라 스스로는 알 수 없어서 넘겨받는다
+  const { id, from } = useLocalSearchParams<{ id: string; from?: string }>();
   const productId = Number(id);
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -41,7 +43,14 @@ export default function EditProductScreen() {
       // 판매 내역은 my-products.tsx의 ['my', 'products'].
       queryClient.invalidateQueries({ queryKey: ['product', productId] });
       queryClient.invalidateQueries({ queryKey: ['my', 'products'] });
-      router.back();
+
+      // 목록이 아니라 **상세로** 보낸다. 수정은 전체 교체라 「가격만 바꿨는데 사진·설명이
+      // 날아가지 않았나」를 눈으로 확인할 자리가 필요하다 — 목록에는 가격·제목만 보인다.
+      // 웹도 수정 뒤 상세로 간다(ProductPostForm.tsx:101).
+      //
+      // dismissTo인 이유: 상세 → 수정으로 왔으면 **그 상세로 되돌아가** 상세가 두 겹 쌓이지
+      // 않고, 판매 내역 → 수정으로 왔으면 수정 화면을 상세로 갈아끼운다(뒤로 = 판매 내역).
+      router.dismissTo(productDetailHref(tabGroupOf(from), productId) as Href);
     } catch (error) {
       showToast(error instanceof Error ? error.message : '상품 수정에 실패했습니다.');
     }
