@@ -51,9 +51,19 @@ export function validateProductForm(values: ProductFormValues): ProductFormError
 
   // 숫자가 아닌 글자는 「안 적은 것」과 같이 다룬다 — 「가격은 0원 이상」이라고 하면
   // 「삼만원」이라고 적은 사람에게 도움이 안 된다
-  const price = Number(values.price);
-  if (!values.price.trim() || Number.isNaN(price)) errors.price = '가격을 입력해주세요';
-  else if (price < 0) errors.price = '가격은 0원 이상이어야 합니다';
+  //
+  // ⚠️ Number()로만 보면 안 된다. 너무 너그러워서 이런 것들이 통과한다:
+  //      '0x10' → 16      16원짜리 상품이 조용히 올라간다
+  //      '1e3'  → 1000    '12.5' → 12.5 (서버는 Long이다)
+  //      'Infinity' → JSON에 담기면 null이 되어 서버가 400으로 막는다
+  //    손으로는 못 친다(keyboardType="number-pad"). **붙여넣기로 들어온다.**
+  //    웹은 <input type="number">라 브라우저가 막아 주는데 앱에는 막는 게 없었다.
+  //
+  // 정규식에 '-'를 남기는 이유: 통째로 걸러 버리면 음수에도 「가격을 입력해주세요」가 나온다.
+  // 음수는 「0원 이상」이라고 짚어 줘야 무엇이 틀렸는지 안다.
+  const priceText = values.price.trim();
+  if (!priceText || !/^-?\d+$/.test(priceText)) errors.price = '가격을 입력해주세요';
+  else if (Number(priceText) < 0) errors.price = '가격은 0원 이상이어야 합니다';
 
   if (!values.petType) errors.petType = '대분류를 선택해주세요(예: 포유류)';
   if (!values.petDetailType) errors.petDetailType = '소분류를 선택해주세요';

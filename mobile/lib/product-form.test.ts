@@ -247,3 +247,32 @@ describe('글자를 치는 칸인가', () => {
     expect(isTextField('addressGugun')).toBe(false);
   });
 });
+
+describe('숫자가 아닌 가격', () => {
+  // Number()가 너그러워서 생기는 구멍이다. 웹은 <input type="number">라 브라우저가 막아 주는데
+  // 앱에는 막는 게 없다. 손으로는 못 치지만(number-pad) **붙여넣기로는 들어온다.**
+  //
+  // 서버는 Long이고 @NotNull · @Min(0)이다(ProductCreateRequest.java:42-44).
+  // 「0x10」을 그냥 보내면 16원짜리 상품이 조용히 올라간다.
+
+  it.each([
+    ['0x10', '십육진수'],
+    ['1e3', '지수 표기'],
+    ['12.5', '소수'],
+    ['Infinity', '무한대'],
+    ['3만원', '한글이 섞인 것'],
+  ])('%s(%s)는 안 적은 것과 같이 다룬다', (price) => {
+    expect(validateProductForm(values({ price })).price).toBe('가격을 입력해주세요');
+  });
+
+  it('그냥 숫자는 통과한다', () => {
+    expect(validateProductForm(values({ price: '10000' })).price).toBeUndefined();
+    expect(validateProductForm(values({ price: '0' })).price).toBeUndefined();
+  });
+
+  it('음수 문구는 그대로 나온다 — 정규식에서 통째로 걸러 버리면 안 된다', () => {
+    expect(validateProductForm(values({ price: '-1' })).price).toBe(
+      '가격은 0원 이상이어야 합니다'
+    );
+  });
+});
