@@ -28,12 +28,7 @@ export default function SellerOtherProducts({ productType, sellerInfo, sellerOth
       <h2 className="mb-lg text-[18px] leading-[26px] font-bold">{heading}</h2>
 
       {sellerOtherProducts?.length !== 0 ? (
-        <ProductList
-          products={sellerOtherProducts.slice(0, 3)}
-          showMoreButton
-          sellerId={sellerInfo.sellerId}
-          hideProductType
-        />
+        <ProductList products={sellerOtherProducts.slice(0, 3)} showMoreButton sellerId={sellerInfo.sellerId} hideProductType />
       ) : (
         <EmptyState icon={Package} title="등록된 다른 상품이 없어요" description={emptyDescription} />
       )}

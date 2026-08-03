@@ -33,15 +33,7 @@ describe('이전·다음 버튼', () => {
   })
 
   it('사진이 한 장이면 버튼이 없다', () => {
-    render(
-      <MainImage
-        mainImageUrl={IMAGES[0]}
-        subImageUrls={[]}
-        title="캣타워"
-        tradeStatus={null}
-        productTypeName="판매상품"
-      />
-    )
+    render(<MainImage mainImageUrl={IMAGES[0]} subImageUrls={[]} title="캣타워" tradeStatus={null} productTypeName="판매상품" />)
 
     expect(screen.queryByRole('button', { name: '이전 이미지' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '다음 이미지' })).not.toBeInTheDocument()
@@ -66,15 +58,7 @@ describe('사진', () => {
   })
 
   it('사진이 없어도 자리를 하나 그린다', () => {
-    render(
-      <MainImage
-        mainImageUrl={null}
-        subImageUrls={[]}
-        title="캣타워"
-        tradeStatus={null}
-        productTypeName="판매상품"
-      />
-    )
+    render(<MainImage mainImageUrl={null} subImageUrls={[]} title="캣타워" tradeStatus={null} productTypeName="판매상품" />)
 
     expect(screen.getByAltText('캣타워 - 1')).toBeInTheDocument()
   })
@@ -83,13 +67,7 @@ describe('사진', () => {
 describe('거래상태 배지', () => {
   it('예약중이면 배지가 뜬다', () => {
     render(
-      <MainImage
-        mainImageUrl={IMAGES[0]}
-        subImageUrls={[]}
-        title="캣타워"
-        tradeStatus="예약중"
-        productTypeName="판매상품"
-      />
+      <MainImage mainImageUrl={IMAGES[0]} subImageUrls={[]} title="캣타워" tradeStatus="예약중" productTypeName="판매상품" />
     )
 
     expect(screen.getByText('예약중')).toBeInTheDocument()
@@ -97,28 +75,14 @@ describe('거래상태 배지', () => {
 
   it('판매요청의 판매완료는 「요청완료」로 보여준다', () => {
     render(
-      <MainImage
-        mainImageUrl={IMAGES[0]}
-        subImageUrls={[]}
-        title="캣타워"
-        tradeStatus="판매완료"
-        productTypeName="판매요청"
-      />
+      <MainImage mainImageUrl={IMAGES[0]} subImageUrls={[]} title="캣타워" tradeStatus="판매완료" productTypeName="판매요청" />
     )
 
     expect(screen.getByText('요청완료')).toBeInTheDocument()
   })
 
   it('거래중이 아니면 배지가 없다', () => {
-    render(
-      <MainImage
-        mainImageUrl={IMAGES[0]}
-        subImageUrls={[]}
-        title="캣타워"
-        tradeStatus={null}
-        productTypeName="판매상품"
-      />
-    )
+    render(<MainImage mainImageUrl={IMAGES[0]} subImageUrls={[]} title="캣타워" tradeStatus={null} productTypeName="판매상품" />)
 
     expect(screen.queryByText('예약중')).not.toBeInTheDocument()
     expect(screen.queryByText('판매완료')).not.toBeInTheDocument()
