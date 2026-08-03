@@ -206,7 +206,20 @@ export default function SignupScreen() {
               </View>
 
               <View onLayout={registerField('birthDate')}>
-                <BirthDateField form={form} onFocus={focusField('birthDate')} />
+                {/* 오류는 세 칸을 합쳐 errors.birthYear 자리에 모아 둔다 */}
+                <BirthDateField
+                  year={form.values.birthYear}
+                  month={form.values.birthMonth}
+                  day={form.values.birthDay}
+                  error={form.errors.birthYear}
+                  onChange={(part, value) =>
+                    form.setValue(
+                      part === 'year' ? 'birthYear' : part === 'month' ? 'birthMonth' : 'birthDay',
+                      value
+                    )
+                  }
+                  onFocus={focusField('birthDate')}
+                />
               </View>
 
               <View onLayout={registerField('address')}>
