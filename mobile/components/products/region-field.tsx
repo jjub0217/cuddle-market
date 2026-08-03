@@ -1,8 +1,11 @@
 import { useState } from 'react';
+
+import { ChevronDown } from 'lucide-react-native';
 import { Keyboard, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { messageStyles } from '@/components/signup/field';
 import { BottomSheet, sheetItemStyles } from '@/components/ui/bottom-sheet';
+import { FieldLabel } from '@/components/ui/field-label';
 
 import { CITIES, PROVINCES } from '@/constants/cities';
 
@@ -24,11 +27,21 @@ interface Props {
   onOpen?: () => void;
   /** 칸 이름. 가입은 「거주지」, 상품 등록은 「거래 희망 지역」이다 */
   label?: string;
+  /** 필수 칸이면 이름표 뒤에 빨간 별표를 붙인다 */
+  required?: boolean;
 }
 
 type Sheet = 'sido' | 'gugun';
 
-export function RegionField({ sido, gugun, error, onChange, onOpen, label = '거주지' }: Props) {
+export function RegionField({
+  sido,
+  gugun,
+  error,
+  onChange,
+  onOpen,
+  label = '거주지',
+  required,
+}: Props) {
   const [open, setOpen] = useState<Sheet | null>(null);
 
   // keyboardShouldPersistTaps="handled" 때문에 버튼을 눌러도 키보드가 저절로 안 내려간다.
@@ -56,7 +69,7 @@ export function RegionField({ sido, gugun, error, onChange, onOpen, label = '거
 
   return (
     <View style={styles.field}>
-      <Text style={styles.label}>{label}</Text>
+      <FieldLabel text={label} required={required} />
 
       <Pressable
         onPress={() => openSheet('sido')}
@@ -68,6 +81,8 @@ export function RegionField({ sido, gugun, error, onChange, onOpen, label = '거
         ]}
       >
         <Text style={sido ? styles.value : styles.placeholder}>{sido || '시/도를 선택해주세요'}</Text>
+        {/* 「눌러서 고르는 칸」이라는 표시. picker-field.tsx와 같은 아이콘이다 */}
+        <ChevronDown size={18} color="#6B7280" strokeWidth={2} />
       </Pressable>
 
       <Pressable
@@ -83,6 +98,7 @@ export function RegionField({ sido, gugun, error, onChange, onOpen, label = '거
         <Text style={gugun ? styles.value : styles.placeholder}>
           {gugun || (sido ? '시/군/구를 선택해주세요' : '먼저 시/도를 선택해주세요')}
         </Text>
+        <ChevronDown size={18} color={sido ? '#6B7280' : '#D1D5DB'} strokeWidth={2} />
       </Pressable>
 
       {error ? <Text style={messageStyles.error}>{error}</Text> : null}
@@ -112,21 +128,25 @@ export function RegionField({ sido, gugun, error, onChange, onOpen, label = '거
 
 const styles = StyleSheet.create({
   field: { gap: 6 },
-  label: { fontSize: 13, color: '#6B7280' },
+  // 이름표 모양은 ui/field-label.tsx가 들고 있다
   select: {
     height: 48,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
     borderRadius: 8,
     paddingHorizontal: 12,
-    justifyContent: 'center',
+    // 글자는 왼쪽, 화살표는 오른쪽 끝
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
     backgroundColor: '#FFFFFF',
   },
   selectPressed: { opacity: 0.7 },
   selectDisabled: { backgroundColor: '#F9FAFB' },
   selectError: { borderColor: '#C91D1D' },
-  value: { fontSize: 15, color: '#111827' },
-  placeholder: { fontSize: 15, color: '#9CA3AF' },
+  value: { flex: 1, fontSize: 15, color: '#111827' },
+  placeholder: { flex: 1, fontSize: 15, color: '#9CA3AF' },
 
   // 시/도 17개 · 구/군은 최대 30개가 넘는다. 화면을 다 덮지 않게 여기서 끊는다.
   list: { maxHeight: 56 * 6 },

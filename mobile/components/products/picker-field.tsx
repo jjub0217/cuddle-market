@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { Keyboard, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { ChevronDown } from 'lucide-react-native';
+
 import type { Option } from '@cuddle/shared';
 
 import { messageStyles } from '@/components/signup/field';
 import { BottomSheet, sheetItemStyles } from '@/components/ui/bottom-sheet';
+import { FieldLabel } from '@/components/ui/field-label';
 
 // 값 하나를 아래에서 올라오는 목록으로 고르는 칸.
 // 앱에는 웹의 <select> 같은 요소가 없어서, 누르면 시트가 올라오는 방식으로 만든다.
@@ -22,6 +25,8 @@ interface Props {
    * 칸 사이가 벌어진다.
    */
   label?: string;
+  /** 필수 칸이면 이름표 뒤에 빨간 별표를 붙인다 */
+  required?: boolean;
   /** 안 골랐을 때 회색으로 보이는 글 — 「카테고리를 선택해주세요」 */
   placeholder: string;
   value: string;
@@ -36,6 +41,7 @@ interface Props {
 
 export function PickerField({
   label,
+  required,
   placeholder,
   value,
   options,
@@ -64,7 +70,7 @@ export function PickerField({
 
   return (
     <View style={styles.field}>
-      {label ? <Text style={styles.label}>{label}</Text> : null}
+      {label ? <FieldLabel text={label} required={required} /> : null}
 
       <Pressable
         onPress={openSheet}
@@ -78,6 +84,9 @@ export function PickerField({
         ]}
       >
         <Text style={selected ? styles.value : styles.placeholder}>{text}</Text>
+        {/* 「눌러서 고르는 칸」이라는 표시. 없으면 글자를 치는 칸처럼 보인다 —
+            웹도 SelectDropdown에 같은 아이콘(lucide ChevronDown)을 그린다 */}
+        <ChevronDown size={18} color="#6B7280" strokeWidth={2} />
       </Pressable>
 
       {error ? <Text style={messageStyles.error}>{error}</Text> : null}
@@ -107,21 +116,25 @@ export function PickerField({
 
 const styles = StyleSheet.create({
   field: { gap: 6 },
-  label: { fontSize: 13, color: '#6B7280' },
+  // 이름표 모양은 ui/field-label.tsx가 들고 있다
   select: {
     height: 48,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
     borderRadius: 8,
     paddingHorizontal: 12,
-    justifyContent: 'center',
+    // 글자는 왼쪽, 화살표는 오른쪽 끝
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
     backgroundColor: '#FFFFFF',
   },
   selectPressed: { opacity: 0.7 },
   selectDisabled: { backgroundColor: '#F9FAFB' },
   selectError: { borderColor: '#C91D1D' },
-  value: { fontSize: 15, color: '#111827' },
-  placeholder: { fontSize: 15, color: '#9CA3AF' },
+  value: { flex: 1, fontSize: 15, color: '#111827' },
+  placeholder: { flex: 1, fontSize: 15, color: '#9CA3AF' },
 
   // 세부 종류가 가장 길어야 여덟 개지만, 카테고리·상태까지 한 껍데기를 쓰므로
   // region-field와 같이 여섯 줄에서 끊는다. 화면을 다 덮지 않게 하려는 것이다.
