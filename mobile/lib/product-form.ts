@@ -7,6 +7,18 @@
 // (src/features/signup/validationRules.ts:80-).
 // ⚠️ 「2~ 50」의 이상한 띄어쓰기도 웹 그대로다. 여기만 고치면 웹과 달라진다.
 
+/**
+ * 등록 화면에 들어갔을 때 미리 골라 두는 상품 상태.
+ *
+ * ⚠️ **서버가 준 값이 아니다.** 서버에는 기본값이 없다 — ProductStatus enum에도 없고
+ *    엔티티는 nullable=false, 요청 DTO는 @NotNull로 막는다(ProductCreateRequest.java:46).
+ *    웹도 빈 값으로 시작한다. 이건 앱에서 정한 값이라 언제든 바꿀 수 있다.
+ *
+ * 값이 PRODUCT_STATUS_OPTIONS에 없는 코드면 알약이 하나도 안 채워진 채로 보이고,
+ * 그대로 보내면 서버가 400으로 막는다. product-form.test.ts가 그걸 잡는다.
+ */
+export const DEFAULT_PRODUCT_STATUS = 'NEW';
+
 export interface ProductFormValues {
   title: string;
   description: string;
@@ -55,4 +67,49 @@ export function validateProductForm(values: ProductFormValues): ProductFormError
 
 export function hasErrors(errors: ProductFormErrors): boolean {
   return Object.keys(errors).length > 0;
+}
+
+/**
+ * 화면에 그리는 차례. 막힌 칸으로 화면을 옮길 때 「어느 것이 위인가」를 이걸로 정한다.
+ *
+ * ⚠️ product-form.tsx가 그리는 차례와 **같아야 한다.** 폼에서 칸 자리를 옮기면 여기도 옮긴다
+ *    (product-form.test.ts가 어긋남을 잡아 준다).
+ * ⚠️ 사진은 없다 — 필수가 아니라 막히는 일이 없다.
+ * ⚠️ 지역은 시도·구군이 한 칸이고 오류도 addressGugun 하나로 붙는다.
+ */
+const FIELD_ORDER: readonly (keyof ProductFormValues)[] = [
+  'title',
+  'petType',
+  'petDetailType',
+  'category',
+  'productStatus',
+  'price',
+  'description',
+  'addressGugun',
+];
+
+/**
+ * 걸린 칸 중 **화면에서 가장 위**에 있는 것. 없으면 null.
+ *
+ * 왜 필요한가: 등록하기는 화면 맨 아래에 붙어 있는데 막힌 칸은 위에 있을 수 있다.
+ * 그러면 빨간 글씨가 화면 밖에서 떠서 사용자에게는 「눌렀는데 아무 일도 안 일어난 것」으로 보인다.
+ */
+export function firstErrorField(errors: ProductFormErrors): keyof ProductFormValues | null {
+  return FIELD_ORDER.find((key) => errors[key]) ?? null;
+}
+
+/** 글자를 쳐서 넣는 칸. 나머지는 눌러서 고르는 칸이라 자판이 없다 */
+const TEXT_FIELDS: readonly (keyof ProductFormValues)[] = ['title', 'price', 'description'];
+
+/**
+ * 이 칸이 글자를 치는 칸인가.
+ *
+ * 왜 필요한가: 막힌 칸으로 화면을 옮길 때 **커서도 같이 옮겨야** 한다. 실기기에서
+ * 이런 일이 나왔다 — 가격 칸에 커서를 둔 채 등록하기를 누르니 화면은 상품명으로 갔는데
+ * 커서와 숫자 자판은 가격에 남아, 거기서 글자를 치면 **가격에 붙었다.**
+ *
+ * 고르는 칸이면 옮길 커서가 없으니 자판을 내려서 화면을 가리지 않게 한다.
+ */
+export function isTextField(key: keyof ProductFormValues): boolean {
+  return TEXT_FIELDS.includes(key);
 }

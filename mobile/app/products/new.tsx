@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ProductForm } from '@/components/products/product-form';
-import type { ProductFormValues } from '@/lib/product-form';
+import { DEFAULT_PRODUCT_STATUS, type ProductFormValues } from '@/lib/product-form';
 import { createProduct, type ProductPayload } from '@/lib/products';
 import { showToast } from '@/lib/toast';
 
@@ -16,7 +16,15 @@ import { showToast } from '@/lib/toast';
 
 const HEADER_HEIGHT = 52; // 앱의 다른 헤더와 같은 값
 
-/** 빈 폼. 고르는 값은 빈 글자로 두면 PickerField가 안내 문구를 보여준다 */
+/**
+ * 빈 폼. 고르는 값은 빈 글자로 두면 PickerField가 안내 문구를 보여준다.
+ *
+ * ⚠️ 상품 상태만 예외로 **미리 골라 둔다**(NEW).
+ *    서버에는 기본값이 없다 — enum에도, 엔티티에도 없고 요청 DTO가 @NotNull로 막는다
+ *    (ProductCreateRequest.java:46). 웹도 빈 값으로 시작한다.
+ *    그러니 이건 서버를 따른 게 아니라 **앱에서 정한 값**이다. 알약을 펼쳐 두면서
+ *    하나도 안 채워져 있으면 빈 줄처럼 보여, 맨 앞 값을 채워 두기로 했다.
+ */
 const EMPTY_VALUES: ProductFormValues = {
   title: '',
   description: '',
@@ -24,7 +32,7 @@ const EMPTY_VALUES: ProductFormValues = {
   petType: '',
   petDetailType: '',
   category: '',
-  productStatus: '',
+  productStatus: DEFAULT_PRODUCT_STATUS,
   addressSido: '',
   addressGugun: '',
 };
