@@ -17,105 +17,26 @@ import {
   Activity,
   type LucideIcon,
 } from 'lucide-react'
+import {
+  CATEGORY_OPTIONS,
+  PET_DETAIL_OPTIONS_BY_TYPE,
+  PET_TYPE_OPTIONS,
+  PRODUCT_STATUS_OPTIONS,
+} from '@cuddle/shared'
 import type { ToastType } from '@/types/toast'
 
 // ========== 반려동물 관련 상수 ==========
-export const PETS = [
-  {
-    code: 'MAMMAL',
-    name: '포유류',
-    details: [
-      { code: 'DOG', name: '강아지' },
-      { code: 'CAT', name: '고양이' },
-      { code: 'RABBIT', name: '토끼' },
-      { code: 'HAMSTER', name: '햄스터' },
-      { code: 'GUINEA_PIG', name: '기니피그' },
-      { code: 'FERRET', name: '페럿' },
-      { code: 'CHINCHILLA', name: '친칠라' },
-      { code: 'HEDGEHOG', name: '고슴도치' },
-    ],
-  },
-  {
-    code: 'BIRD',
-    name: '조류',
-    details: [
-      { code: 'BUDGERIGAR', name: '잉꼬' },
-      { code: 'PARROT', name: '앵무새' },
-      { code: 'CANARY', name: '카나리아' },
-      { code: 'LOVEBIRD', name: '모란앵무' },
-    ],
-  },
-  {
-    code: 'REPTILE',
-    name: '파충류',
-    details: [
-      { code: 'LIZARD', name: '도마뱀' },
-      { code: 'SNAKE', name: '뱀' },
-      { code: 'TURTLE', name: '거북이' },
-      { code: 'GECKO', name: '게코' },
-    ],
-  },
-  {
-    code: 'FISH',
-    name: '수생동물',
-    details: [
-      { code: 'GOLDFISH', name: '금붕어' },
-      { code: 'TROPICAL_FISH', name: '열대어' },
-      { code: 'CHERRY_SHRIMP', name: '체리새우' },
-      { code: 'SNAIL', name: '달팽이' },
-    ],
-  },
-  {
-    code: 'AMPHIBIAN',
-    name: '곤충/절지동물',
-    details: [
-      { code: 'CRICKET', name: '귀뚜라미' },
-      { code: 'MANTIS', name: '사마귀' },
-      { code: 'BEETLE', name: '딱정벌레' },
-      { code: 'SPIDER', name: '거미' },
-    ],
-  },
-  {
-    code: 'AMPHIBIAN_REAL',
-    name: '양서류',
-    details: [
-      { code: 'FROG', name: '개구리' },
-      { code: 'SALAMANDER', name: '도롱뇽' },
-      { code: 'AXOLOTL', name: '우파루파' },
-      { code: 'NEWT', name: '트리프로그' },
-    ],
-  },
-  {
-    code: 'RODENT',
-    name: '설치류',
-    details: [
-      { code: 'SQUIRREL', name: '다람쥐' },
-      { code: 'MOUSE', name: '마우스' },
-      { code: 'RAT', name: '랫' },
-      { code: 'GERBIL', name: '저빌' },
-    ],
-  },
-  {
-    code: 'CRUSTACEAN',
-    name: '갑각류',
-    details: [
-      { code: 'CRAYFISH', name: '가재' },
-      { code: 'HERMIT_CRAB', name: '소라게' },
-      { code: 'CRAB', name: '크랩' },
-      { code: 'GIANT_CRAB', name: '대게' },
-    ],
-  },
-  {
-    code: 'PLANT',
-    name: '식물/수초',
-    details: [
-      { code: 'AQUATIC_PLANT', name: '수초' },
-      { code: 'MOSS', name: '이끼' },
-      { code: 'SUCCULENT', name: '다육이' },
-      { code: 'PET_PLANT', name: '반려식물' },
-    ],
-  },
-] as const
+// 값의 원본은 이제 packages/shared다. 웹·앱이 같은 목록을 쓴다.
+// 여기서는 웹 화면이 쓰던 모양({ code, name })으로 맞춰 다시 내보내기만 한다 —
+// 화면 파일을 여럿 고치는 것보다 한 곳에서 바꾸는 편이 덜 깨진다.
+export const PETS = PET_TYPE_OPTIONS.map((type) => ({
+  code: type.code,
+  name: type.label,
+  details: (PET_DETAIL_OPTIONS_BY_TYPE[type.code] ?? []).map((detail) => ({
+    code: detail.code,
+    name: detail.label,
+  })),
+}))
 
 export const PET_TYPE_TABS = [
   { id: 'pet-tab-all', label: '전체', code: 'ALL' },
@@ -143,24 +64,38 @@ PETS.forEach((category) => {
 })
 
 // ========== 상품 상태 관련 상수 ==========
-export const CONDITION_ITEMS: Array<{ value: string; title: string; subtitle: string }> = [
-  { value: 'NEW', title: '새 상품', subtitle: '미사용 상품' },
-  { value: 'LIKE_NEW', title: '거의 새것', subtitle: '사용감 거의 없음' },
-  { value: 'USED', title: '사용감 있음', subtitle: '일반적인 사용흔적' },
-  { value: 'NEED_REPAIR', title: '수리 필요', subtitle: '수리 후 사용가능' },
-]
+// 값(코드·이름)의 원본은 shared다. 아래 딸림 설명은 웹 화면에만 있는 것이라 여기 남긴다.
+const CONDITION_SUBTITLES: Record<string, string> = {
+  NEW: '미사용 상품',
+  LIKE_NEW: '사용감 거의 없음',
+  USED: '일반적인 사용흔적',
+  NEED_REPAIR: '수리 후 사용가능',
+}
+export const CONDITION_ITEMS: Array<{ value: string; title: string; subtitle: string }> =
+  PRODUCT_STATUS_OPTIONS.map((status) => ({
+    value: status.code,
+    title: status.label,
+    subtitle: CONDITION_SUBTITLES[status.code] ?? '',
+  }))
 
 // ========== 상품 카테고리 관련 상수 ==========
-export const PRODUCT_CATEGORIES = [
-  { code: 'FOOD', name: '사료/간식', iconImage: '/images/category/food.webp' },
-  { code: 'TOY', name: '장난감', iconImage: '/images/category/toy.webp' },
-  { code: 'HOUSE', name: '하우스', iconImage: '/images/category/house.webp' },
-  { code: 'HEALTH', name: '건강/위생', iconImage: '/images/category/health.webp' },
-  { code: 'CLOTHING', name: '의류/잡화', iconImage: '/images/category/clothing.webp' },
-  { code: 'WALKING', name: '외출용품', iconImage: '/images/category/walking.webp' },
-  { code: 'GROOMING', name: '미용/목욕', iconImage: '/images/category/grooming.webp' },
-  { code: 'ETC', name: '기타', iconImage: '/images/category/etc.webp' },
-] as const
+// 값(코드·이름)의 원본은 shared다. 아이콘 그림은 웹에만 있어 여기서 붙인다.
+const CATEGORY_ICON_IMAGES: Record<string, string> = {
+  FOOD: '/images/category/food.webp',
+  TOY: '/images/category/toy.webp',
+  HOUSE: '/images/category/house.webp',
+  HEALTH: '/images/category/health.webp',
+  CLOTHING: '/images/category/clothing.webp',
+  WALKING: '/images/category/walking.webp',
+  GROOMING: '/images/category/grooming.webp',
+  ETC: '/images/category/etc.webp',
+}
+export const PRODUCT_CATEGORIES: Array<{ code: string; name: string; iconImage: string }> =
+  CATEGORY_OPTIONS.map((category) => ({
+    code: category.code,
+    name: category.label,
+    iconImage: CATEGORY_ICON_IMAGES[category.code] ?? '/images/category/etc.webp',
+  }))
 export type CategoryFilter = string | null
 
 // ========== 거래상태 관련 상수 ==========
