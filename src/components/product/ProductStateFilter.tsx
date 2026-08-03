@@ -38,8 +38,11 @@ const VARIANT_STYLES: Record<
   },
   pill: {
     container: 'flex flex-wrap gap-2',
+    // 등록 폼에서 고르는 칸이라 손이 닿기 넉넉해야 한다.
+    // 좁은 폭은 글자를 조금 키우고(12 → 13) 여백은 줄인다 — 글자가 커진 만큼
+    // 알약이 부풀지 않게 맞바꾼 값이다.
     label:
-      'inline-block cursor-pointer rounded-full px-4 py-2 text-xs font-bold transition-colors',
+      'inline-block cursor-pointer rounded-full px-4 py-2 text-[13px] font-bold transition-colors md:px-4.5 md:py-2.5 md:text-xs',
     activeLabel: 'bg-primary-container text-on-primary-container border border-transparent',
     inactiveLabel:
       'border border-outline-variant text-on-surface-muted hover:bg-surface-container-low',
@@ -88,7 +91,10 @@ export function ProductStateFilter({
   const styles = VARIANT_STYLES[variant]
 
   return (
-    <div className="flex flex-col gap-2 max-md:gap-0">
+    // 좁은 폭에서 이름표와 고르는 칸이 붙어 보이던 것(max-md:gap-0)을 pill에서만 띄운다.
+    // pill은 등록 폼이 쓰고, 거기서는 이름표가 「무엇을 고르는 칸인지」를 알리는 역할이라
+    // 붙어 있으면 위 항목에 딸린 글처럼 읽힌다. card-chip(홈 거르개)은 지금 간격이 맞다.
+    <div className={cn('flex flex-col gap-2', variant === 'pill' ? 'max-md:gap-1.5' : 'max-md:gap-0')}>
       {useUrlSync ? (
         <h4 id="condition-filter-heading" className={headingClassName ?? 'heading-h5'}>
           상품 상태

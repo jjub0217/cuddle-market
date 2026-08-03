@@ -35,3 +35,36 @@ export function buildStatusActions(kind: MenuKind, current: string | null): Stat
   // 지금 상태를 다시 고르게 두면 눌러도 아무 일이 없는 항목이 생긴다.
   return SALES_ACTIONS.filter((action) => action.next !== current);
 }
+
+/** ⋮ 항목이 무엇을 하는 것인지. 화면이 이걸 보고 무슨 일을 할지 고른다. */
+export type OwnerActionKind = 'status' | 'edit' | 'delete';
+
+export interface OwnerAction {
+  kind: OwnerActionKind;
+  label: string;
+  /** 상태 변경일 때만 있다 */
+  next?: TradeStatus;
+  tone?: 'default' | 'danger';
+}
+
+/**
+ * 내 상품 ⋮ 에 보일 것 전부.
+ *
+ * ⚠️ 완료된 거래도 **지울 수는 있다.** 상태 변경과 수정만 막는다 —
+ *    잘못 올린 것을 못 지우면 갇힌다.
+ */
+export function buildOwnerActions(kind: MenuKind, current: string | null): OwnerAction[] {
+  const isCompleted = current === 'COMPLETED';
+
+  return [
+    ...buildStatusActions(kind, current).map((action) => ({
+      kind: 'status' as const,
+      label: action.label,
+      next: action.next,
+    })),
+    // 끝난 거래는 못 고친다 — 샀던 사람이 본 내용과 달라진다 (웹 MyList와 같은 규칙).
+    // 지우는 것은 남긴다. 잘못 올린 것을 못 지우면 갇힌다.
+    ...(isCompleted ? [] : [{ kind: 'edit' as const, label: '수정하기' }]),
+    { kind: 'delete' as const, label: '삭제', tone: 'danger' as const },
+  ];
+}

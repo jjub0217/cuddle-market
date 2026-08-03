@@ -181,19 +181,22 @@ export function ProductRequestForm({ isEditMode, productId: id, initialData }: P
           </div>
 
           <div className="flex justify-end gap-3 pt-2">
+            {/* 좁은 폭에서는 숨긴다 — 헤더의 ← 화살표가 하는 일과 같고, 「등록」 바로 옆이라
+                잘못 누르면 쓰던 것이 확인 없이 날아간다. 판매 상품 폼과 같은 판단이다. */}
             <button
               type="button"
               onClick={() => router.back()}
-              className="text-primary hover:bg-surface-container-high cursor-pointer rounded-full px-6 py-3 text-xs font-bold transition-colors"
+              className="text-primary hover:bg-surface-container-high hidden cursor-pointer rounded-full px-8 py-3.5 text-sm font-bold transition-colors md:block"
             >
               취소
             </button>
+            {/* 좁은 폭에서는 폭을 꽉 채운다 — 이 화면에서 할 유일한 행동이다 */}
             <Button
               type="submit"
               disabled={!isValid}
               variant={isValid ? 'primary' : 'default'}
               className={cn(
-                'cursor-pointer rounded-full px-6 py-3 text-xs font-bold transition-all',
+                'w-full cursor-pointer rounded-full px-8 py-3.5 text-sm font-bold transition-all md:w-auto',
                 !isValid && 'cursor-not-allowed bg-gray-200 text-gray-400'
               )}
             >

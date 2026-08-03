@@ -80,6 +80,9 @@ function ProductDetail({ initialData }: ProductDetailProps) {
                     productTitle={data.title}
                     viewCount={data.viewCount}
                     favoriteCount={data.favoriteCount}
+                    sellerId={data.sellerInfo?.sellerId}
+                    price={data.price}
+                    mainImageUrl={data.mainImageUrl}
                   />
                 </div>
                 {/* 비로그인 조회 시 isFavorite이 null → 찜 토글 초기값은 false로 */}

@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     flex: 1,
     maxHeight: 100,
     minHeight: 40,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
     borderColor: '#D1D5DB',
     borderRadius: 20,
     paddingHorizontal: 14,

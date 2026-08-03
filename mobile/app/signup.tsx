@@ -253,7 +253,9 @@ const styles = StyleSheet.create({
   stepLabel: { fontSize: 13, color: '#6B7280' },
   content: { paddingHorizontal: 20, paddingTop: 12, gap: 16 },
   heading: { fontSize: 22, fontWeight: '700', color: '#111827', marginBottom: 8 },
-  guide: { fontSize: 12, color: '#9CA3AF', textAlign: 'center' },
+  // 크기는 칸 아래 안내 문구(messageStyles.hint)와 같은 값이다. 같은 「안내」인데
+  // 여기만 작으면 눈에 안 들어온다 — 색은 단추 아래라 한 톤 더 연하게 둔다
+  guide: { fontSize: 13, color: '#9CA3AF', textAlign: 'center' },
   submit: {
     height: 48,
     borderRadius: 8,

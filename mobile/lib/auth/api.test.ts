@@ -16,10 +16,15 @@ function reply(status: number, body: unknown = {}) {
   return { ok: status >= 200 && status < 300, status, json: async () => body };
 }
 
+/** 요청에 실린 헤더를 통째로 꺼낸다. */
+function headersOf(call: unknown[]): Record<string, string> {
+  const init = call[1] as { headers?: Record<string, string> } | undefined;
+  return init?.headers ?? {};
+}
+
 /** 요청에 실린 Authorization 헤더를 꺼낸다. */
 function authHeaderOf(call: unknown[]): string | undefined {
-  const init = call[1] as { headers?: Record<string, string> } | undefined;
-  return init?.headers?.Authorization;
+  return headersOf(call).Authorization;
 }
 
 beforeEach(() => {
@@ -167,5 +172,49 @@ describe('apiFetch', () => {
     expect(res.status).toBe(401);
     expect(mockFetch).toHaveBeenCalledTimes(1);
     expect(useAuthStore.getState().status).toBe('guest');
+  });
+});
+
+describe('본문 종류에 따라 Content-Type을 가른다', () => {
+  // 사진을 보낼 때 Content-Type을 우리가 정하면 안 된다.
+  // 런타임이 경계 문자열(boundary)을 붙여 스스로 정해야 서버가 본문을 가를 수 있다.
+  //
+  // 이 시험이 없으면 사진이 **조용히** 안 올라가고 원인을 찾기 아주 어렵다.
+
+  it('JSON을 보낼 때는 붙인다', async () => {
+    mockFetch.mockResolvedValue(reply(200));
+
+    await apiFetch('/products', { method: 'POST', body: JSON.stringify({ a: 1 }) });
+
+    expect(headersOf(mockFetch.mock.calls[0])['Content-Type']).toBe('application/json');
+  });
+
+  it('본문이 없어도 붙인다', async () => {
+    // 지금까지 돌던 GET들이 그대로 돌아야 한다
+    mockFetch.mockResolvedValue(reply(200));
+
+    await apiFetch('/products');
+
+    expect(headersOf(mockFetch.mock.calls[0])['Content-Type']).toBe('application/json');
+  });
+
+  it('FormData를 보낼 때는 **안** 붙인다', async () => {
+    mockFetch.mockResolvedValue(reply(200));
+    const form = new FormData();
+    form.append('files', { uri: 'file:///a.webp', name: 'a.webp', type: 'image/webp' } as never);
+
+    await apiFetch('/images', { method: 'POST', body: form });
+
+    expect(headersOf(mockFetch.mock.calls[0])['Content-Type']).toBeUndefined();
+  });
+
+  it('FormData여도 토큰은 붙인다', async () => {
+    // 사진 올리기는 로그인이 필요하다
+    mockFetch.mockResolvedValue(reply(200));
+    const form = new FormData();
+
+    await apiFetch('/images', { method: 'POST', body: form });
+
+    expect(authHeaderOf(mockFetch.mock.calls[0])).toBe('Bearer old-token');
   });
 });
