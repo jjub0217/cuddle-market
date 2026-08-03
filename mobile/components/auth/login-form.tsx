@@ -154,8 +154,8 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 48,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
     borderRadius: 8,
     paddingHorizontal: 12,
     fontSize: 15,

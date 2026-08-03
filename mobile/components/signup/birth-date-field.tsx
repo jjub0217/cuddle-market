@@ -68,8 +68,8 @@ const styles = StyleSheet.create({
   label: { fontSize: 13, color: '#6B7280' },
   input: {
     height: 48,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
     borderRadius: 8,
     paddingHorizontal: 12,
     fontSize: 15,
