@@ -79,8 +79,13 @@ async function refreshAccessToken(): Promise<string | null> {
  */
 export async function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
   const send = (token: string | null) => {
+    // 사진을 보낼 때는 Content-Type을 우리가 정하면 안 된다.
+    // multipart는 본문을 가르는 경계 문자열(boundary)이 헤더에 들어가는데,
+    // 그 값은 런타임이 만든다. 우리가 'multipart/form-data'라고만 적으면
+    // 경계가 없어 서버가 본문을 못 가른다.
+    const isForm = init.body instanceof FormData;
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      ...(isForm ? {} : { 'Content-Type': 'application/json' }),
       ...((init.headers as Record<string, string> | undefined) ?? {}),
     };
     if (token) headers.Authorization = `Bearer ${token}`;
