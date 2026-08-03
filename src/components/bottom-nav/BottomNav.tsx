@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { Home, UsersRound, MapPin, MessageCircleMore, UserRound } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { ROUTES } from '@/constants/routes'
+import { isBottomNavHidden } from './isBottomNavHidden'
 import { Z_INDEX } from '@/constants/ui'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 
@@ -16,38 +17,15 @@ const NAV_ITEMS = [
   { href: ROUTES.MYPAGE, label: '마이', icon: UserRound, match: (p: string) => p.startsWith('/mypage') },
 ] as const
 
-// BottomNav 숨김 경로
-const HIDE_BOTTOMNAV_PATHS: string[] = [
-  ROUTES.LOGIN,
-  ROUTES.SIGNUP,
-  ROUTES.FIND_PASSWORD,
-  ROUTES.PRODUCT_POST,
-  ROUTES.COMMUNITY_POST,
-  ROUTES.PROFILE_UPDATE,
-  ROUTES.NOTIFICATIONS,
-  ROUTES.CHAT,
-]
-
-const HIDE_BOTTOMNAV_PATTERNS = [
-  /^\/chat\/\d+$/, // 채팅방
-  // 커뮤니티 댓글 스레드 — 하단에 답글 입력칸이 늘 열려 있어 탭바까지 있으면 아래가 두 겹이 된다.
-  // 답글에 집중하는 화면이라 앱도 탭바를 안 띄운다(10바퀴). 당근도 같다.
-  /^\/community\/\d+\/[^/]+\/comments\/\d+$/,
-  /^\/community\/\d+\/edit$/, // 커뮤니티 수정
-  /^\/products\/\d+\/edit$/, // 상품 수정
-]
-
-// 「커뮤니티 상세(/community/{id})」 규칙은 뺐다. 그 주소는 slug가 붙은 곳으로
-// redirect만 하고 화면을 안 그려서 한 번도 안 걸렸다. 그리고 상세에서는 탭바를
-// 두는 게 맞다 — 거기서 다른 탭으로 가는 일이 흔하다.
-
 export default function BottomNav() {
   const pathname = usePathname()
   const isXl = useMediaQuery('(min-width: 1280px)')
 
   if (isXl) return null
 
-  const shouldHide = HIDE_BOTTOMNAV_PATHS.includes(pathname) || HIDE_BOTTOMNAV_PATTERNS.some((pattern) => pattern.test(pathname))
+  // 규칙은 isBottomNavHidden 한 곳에 있다 — (main)/layout도 같은 답을 써서
+  // 탭바 높이만큼 아래를 비켜 줄지 정한다.
+  const shouldHide = isBottomNavHidden(pathname)
 
   if (shouldHide) return null
 
