@@ -14,6 +14,8 @@ export interface MyProfile {
   profileImageUrl: string | null;
   addressSido: string | null;
   addressGugun: string | null;
+  /** 소셜로 처음 들어오면 null이다. needsSocialSignup이 이 값을 본다 */
+  birthDate: string | null;
 }
 
 interface MyProfileResponse {
@@ -29,4 +31,24 @@ export async function fetchMe(): Promise<MyProfile> {
 
   const body = (await res.json()) as MyProfileResponse;
   return body.data;
+}
+
+/** 「추가 정보 입력」에서 보내는 값. 웹 SocialSignUpForm과 같은 네 개다 */
+export interface UpdateMeInput {
+  nickname: string;
+  /** YYYY-MM-DD */
+  birthDate: string;
+  addressSido: string;
+  addressGugun: string;
+}
+
+export async function updateMe(input: UpdateMeInput): Promise<void> {
+  const res = await apiFetch('/profile/me', {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  });
+
+  if (!res.ok) {
+    throw new Error('저장하지 못했어요. 잠시 후 다시 시도해주세요.');
+  }
 }
