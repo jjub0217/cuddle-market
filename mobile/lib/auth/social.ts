@@ -1,3 +1,9 @@
+import * as WebBrowser from 'expo-web-browser';
+
+import { apiBaseUrl } from './api';
+import { useAuthStore } from './store';
+import { saveTokens } from './tokens';
+
 // 소셜 로그인. 브라우저로 서버 흐름을 태우고, 돌아온 주소에서 토큰을 꺼낸다.
 //
 // 왜 브라우저인가: 카카오·구글을 한 방식으로 덮을 수 있고 네이티브 설정이 없다.
@@ -38,4 +44,63 @@ export function parseOAuthCallback(url: string): OAuthCallback {
   if (accessToken && refreshToken) return { kind: 'tokens', accessToken, refreshToken };
 
   return { kind: 'unknown' };
+}
+
+/** 브라우저가 이 주소로 오면 창이 저절로 닫히고 앱으로 돌아온다 */
+const REDIRECT_URL = 'cuddlemarket://oauth';
+
+/**
+ * 소셜 로그인만 쓰는 서버 뿌리 주소를 만든다.
+ *
+ * ⚠️ 왜 `/api`를 떼나: `apiBaseUrl()`이 주는 값은 `…duckdns.org/api`로 끝난다(mobile/.env).
+ *    그런데 `/oauth2/authorization/{provider}`는 우리가 만든 REST 경로가 아니라
+ *    스프링 시큐리티가 **서버 뿌리에** 직접 여는 자리다. `/api`를 붙인 채 부르면 404가 난다.
+ *    웹도 `https://cmarket-api.duckdns.org/oauth2/authorization/{provider}`로 부른다
+ *    (`src/features/login/components/SocialLoginButtons.tsx`).
+ *
+ * 끝에 붙은 `/api`만 떼고, 없으면 그대로 둔다.
+ */
+function oauthBaseUrl(): string {
+  return apiBaseUrl().replace(/\/api\/?$/, '');
+}
+
+export type SocialLoginResult =
+  | { kind: 'signedIn' }
+  | { kind: 'canceled' }
+  | { kind: 'failed'; message: string };
+
+/**
+ * 소셜 로그인을 시작한다. 브라우저를 열고, 돌아온 주소의 토큰으로 세션까지 세운다.
+ *
+ * ⚠️ `client=app` 깃발을 꼭 붙인다. 없으면 서버가 **웹 주소로** 돌려보내서
+ *    브라우저 창 안에 웹 화면이 뜬 채 앱으로 못 돌아온다.
+ * ⚠️ 돌아갈 주소를 파라미터로 보내지 않는다. 그대로 받아 쓰면 남이 만든 주소로
+ *    토큰이 날아간다(오픈 리다이렉트). 실제 주소는 서버 설정에 못 박혀 있다.
+ * ⚠️ 커스텀 스킴은 Expo Go에서 안 돈다. 개발 빌드로만 끝까지 확인된다.
+ */
+export async function startSocialLogin(provider: SocialProvider): Promise<SocialLoginResult> {
+  const authUrl = `${oauthBaseUrl()}/oauth2/authorization/${provider}?client=app`;
+
+  const result = await WebBrowser.openAuthSessionAsync(authUrl, REDIRECT_URL);
+
+  // 성공이 아니면 'cancel'(사용자가 닫음) · 'dismiss'(창이 사라짐) 둘 중 하나다.
+  // 사용자가 스스로 그만둔 것이니 아무 말도 하지 않는다.
+  if (result.type !== 'success') return { kind: 'canceled' };
+
+  const parsed = parseOAuthCallback(result.url);
+
+  if (parsed.kind === 'error') return { kind: 'failed', message: parsed.message };
+  if (parsed.kind === 'unknown') {
+    return { kind: 'failed', message: '로그인에 실패했습니다. 다시 시도해주세요.' };
+  }
+
+  // 기기 저장 → 메모리 store 순. 저장이 실패해도 saveTokens가 삼키므로
+  // 이번 세션은 정상으로 돈다(tokens.ts 주석 참고).
+  await saveTokens({ accessToken: parsed.accessToken, refreshToken: parsed.refreshToken });
+  useAuthStore.getState().setSession({
+    accessToken: parsed.accessToken,
+    refreshToken: parsed.refreshToken,
+  });
+
+  return { kind: 'signedIn' };
 }
