@@ -57,3 +57,69 @@ export async function fetchProductDetail(id: number): Promise<ProductDetailItem>
   const body: ProductDetailResponse = await res.json()
   return body.data
 }
+
+/**
+ * 상품을 만들거나 고칠 때 보내는 것.
+ *
+ * ⚠️ 등록과 수정이 **같은 모양**이다. 수정은 PATCH지만 실제로는 전체 교체라
+ *    (ProductServiceImpl:235-247) 안 바꾼 값도 전부 다시 보내야 한다.
+ *    하나라도 빠지면 400이 나거나 그 값이 비워진다.
+ */
+export interface ProductPayload {
+  petType: string
+  petDetailType: string
+  category: string
+  title: string
+  description: string
+  price: number
+  productStatus: string
+  mainImageUrl: string | null
+  subImageUrls: string[]
+  addressSido: string
+  addressGugun: string
+}
+
+/**
+ * 상품을 등록한다.
+ * `POST {base}/products` → 201
+ * @returns 만든 상품 id
+ */
+export async function createProduct(payload: ProductPayload): Promise<number> {
+  const res = await apiFetch('/products', { method: 'POST', body: JSON.stringify(payload) })
+
+  if (!res.ok) {
+    throw new Error('상품 등록에 실패했습니다.')
+  }
+
+  const body = (await res.json()) as { data?: { id?: number } }
+  const id = body.data?.id
+  if (!id) {
+    throw new Error('상품 등록에 실패했습니다.')
+  }
+  return id
+}
+
+/**
+ * 상품을 고친다.
+ * `PATCH {base}/products/{id}` → 200
+ * ⚠️ 전체 교체다. payload에 안 담긴 값은 서버에서 비워진다.
+ */
+export async function updateProduct(id: number, payload: ProductPayload): Promise<void> {
+  const res = await apiFetch(`/products/${id}`, { method: 'PATCH', body: JSON.stringify(payload) })
+
+  if (!res.ok) {
+    throw new Error('상품 수정에 실패했습니다.')
+  }
+}
+
+/**
+ * 상품을 지운다.
+ * `DELETE {base}/products/{id}` → 200 (data는 null)
+ */
+export async function deleteProduct(id: number): Promise<void> {
+  const res = await apiFetch(`/products/${id}`, { method: 'DELETE' })
+
+  if (!res.ok) {
+    throw new Error('상품 삭제에 실패했습니다.')
+  }
+}

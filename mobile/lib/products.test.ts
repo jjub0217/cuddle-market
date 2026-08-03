@@ -8,7 +8,15 @@ jest.mock('expo-secure-store', () => ({
 import type { Product } from '@cuddle/shared'
 
 import { useAuthStore } from './auth/store'
-import { fetchProductDetail, fetchProducts, ProductNotFoundError } from './products'
+import {
+  createProduct,
+  deleteProduct,
+  fetchProductDetail,
+  fetchProducts,
+  ProductNotFoundError,
+  updateProduct,
+  type ProductPayload,
+} from './products'
 
 // fetch를 mock으로 갈아끼워 네트워크 없이 순수 로직만 검증한다.
 const mockFetch = jest.fn()
@@ -17,6 +25,11 @@ const mockFetch = jest.fn()
 function authHeaderOf(call: unknown[]): string | undefined {
   const init = call[1] as { headers?: Record<string, string> } | undefined
   return init?.headers?.Authorization
+}
+
+/** 요청에 실린 두 번째 인자(method·body 등)를 꺼낸다. */
+function initOf(call: unknown[]): { method?: string; body?: string } {
+  return (call[1] ?? {}) as { method?: string; body?: string }
 }
 
 beforeEach(() => {
@@ -202,5 +215,136 @@ describe('fetchProductDetail', () => {
     await fetchProductDetail(61)
 
     expect(authHeaderOf(mockFetch.mock.calls[0])).toBeUndefined()
+  })
+})
+
+// ── 등록·수정·삭제 ─────────────────────────────────────────────
+//
+// 서버가 전체 교체를 요구하므로 등록과 수정이 **같은 모양**을 보낸다
+// (ProductServiceImpl:235-247 · 요청 DTO 필수 항목에 전부 @NotNull).
+// 하나라도 빠지면 400이 나거나 그 값이 비워진다.
+
+function payload(overrides: Partial<ProductPayload> = {}): ProductPayload {
+  return {
+    petType: 'MAMMAL',
+    petDetailType: 'DOG',
+    category: 'FOOD',
+    title: '강아지 사료 10kg',
+    description: '거의 새것입니다.',
+    price: 30000,
+    productStatus: 'LIKE_NEW',
+    mainImageUrl: 'https://cdn/a.webp',
+    subImageUrls: ['https://cdn/b.webp'],
+    addressSido: '서울특별시',
+    addressGugun: '강남구',
+    ...overrides,
+  }
+}
+
+describe('createProduct', () => {
+  it('만든 상품 id를 돌려준다', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ code: 'CREATED', message: '성공', data: { id: 123 } }),
+    })
+
+    await expect(createProduct(payload())).resolves.toBe(123)
+  })
+
+  it('POST /products로 보낸다', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: { id: 1 } }),
+    })
+
+    await createProduct(payload())
+
+    expect(mockFetch.mock.calls[0][0]).toContain('/products')
+    expect(initOf(mockFetch.mock.calls[0]).method).toBe('POST')
+  })
+
+  it('필드를 하나도 빠뜨리지 않고 보낸다', async () => {
+    // 서버가 전체 교체를 요구한다 — 빠진 값은 비워지거나 400이 난다
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: { id: 1 } }),
+    })
+
+    await createProduct(payload())
+
+    const sent = JSON.parse(initOf(mockFetch.mock.calls[0]).body as string)
+    expect(Object.keys(sent).sort()).toEqual(
+      [
+        'addressGugun',
+        'addressSido',
+        'category',
+        'description',
+        'mainImageUrl',
+        'petDetailType',
+        'petType',
+        'price',
+        'productStatus',
+        'subImageUrls',
+        'title',
+      ].sort()
+    )
+  })
+
+  it('실패하면 웹과 같은 문구로 던진다', async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 400, json: async () => ({}) })
+
+    await expect(createProduct(payload())).rejects.toThrow('상품 등록에 실패했습니다.')
+  })
+
+  it('200인데 id가 없으면 같은 문구로 던진다', async () => {
+    mockFetch.mockResolvedValue({ ok: true, json: async () => ({ data: {} }) })
+
+    await expect(createProduct(payload())).rejects.toThrow('상품 등록에 실패했습니다.')
+  })
+})
+
+describe('updateProduct', () => {
+  it('PATCH /products/{id}로 보낸다', async () => {
+    mockFetch.mockResolvedValue({ ok: true, json: async () => ({ data: {} }) })
+
+    await updateProduct(42, payload())
+
+    expect(mockFetch.mock.calls[0][0]).toContain('/products/42')
+    expect(initOf(mockFetch.mock.calls[0]).method).toBe('PATCH')
+  })
+
+  it('등록과 **같은** 필드를 보낸다', async () => {
+    // PATCH지만 실제로는 전체 교체다 (ProductServiceImpl:235-247)
+    mockFetch.mockResolvedValue({ ok: true, json: async () => ({ data: {} }) })
+
+    await updateProduct(42, payload())
+
+    const sent = JSON.parse(initOf(mockFetch.mock.calls[0]).body as string)
+    expect(sent.title).toBe('강아지 사료 10kg')
+    expect(sent.addressGugun).toBe('강남구')
+    expect(sent.subImageUrls).toEqual(['https://cdn/b.webp'])
+  })
+
+  it('실패하면 웹과 같은 문구로 던진다', async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 400, json: async () => ({}) })
+
+    await expect(updateProduct(42, payload())).rejects.toThrow('상품 수정에 실패했습니다.')
+  })
+})
+
+describe('deleteProduct', () => {
+  it('DELETE /products/{id}로 보낸다', async () => {
+    mockFetch.mockResolvedValue({ ok: true, json: async () => ({ data: null }) })
+
+    await deleteProduct(42)
+
+    expect(mockFetch.mock.calls[0][0]).toContain('/products/42')
+    expect(initOf(mockFetch.mock.calls[0]).method).toBe('DELETE')
+  })
+
+  it('실패하면 웹과 같은 문구로 던진다', async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 500, json: async () => ({}) })
+
+    await expect(deleteProduct(42)).rejects.toThrow('상품 삭제에 실패했습니다.')
   })
 })
