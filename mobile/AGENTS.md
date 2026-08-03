@@ -20,6 +20,7 @@ pnpm gate:mobile     # tsc --noEmit + expo lint + jest
 |---|---|---|
 | `Modal` 의 `animationType="slide"` | **아래에서만** 올라온다. 옆에서 미는 건 없는 값이다 | 옆에서 넣으려면 `animationType="none"` + Reanimated로 직접 |
 | `useSegments()` | 튜플 유니온을 돌려줘서 `includes()`가 타입 오류가 난다 | `as string[]`로 넓혀서 쓴다 |
+| **코드는 맞는데 폰 화면이 옛날 것** | Metro가 죽었다 다시 떠도 **폰은 저절로 안 붙는다.** Expo Go는 이미 받아 둔 화면을 계속 보여줘서 「코드가 원복됐다」로 보인다 | 코드를 뒤지기 전에 **폰에서 Reload부터**(흔들기 → Reload). 그래도 옛날 것이면 그때 코드를 본다. 11바퀴에 이걸로 한 바퀴 돌았다 |
 | `useBottomTabBarHeight()` | **탭 화면 안에서만** 돈다. 루트 화면에서 부르면 못 쓴다 | 루트에 그리는 것(토스트 등)은 값을 재서 못 박는다 (`insets.bottom + 72`) |
 | `textShadow` | **글자 기반 아이콘**(MaterialIcons)에만 먹는다. SVG 아이콘(Lucide)엔 안 먹는다 | 그림자용 아이콘을 뒤에 깐다. **타입체크도 린트도 안 잡아준다** — 실기기로 봐야 안다 |
 | 화면을 한 스택에만 두기 | 다른 탭에서 그 화면으로 가면 탭이 튄다 | 두 스택에 같은 화면을 두고, `useSegments()`로 지금 그룹을 읽어 경로를 만든다 |
