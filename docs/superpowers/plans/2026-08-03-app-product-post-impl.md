@@ -38,8 +38,8 @@
 
 | 필드 | 타입 | 서버 필수 | 제약 |
 |---|---|---|---|
-| `petType` | enum | ✅ | `MAMMAL BIRD REPTILE FISH AMPHIBIAN AMPHIBIAN_REAL RODENT CRUSTACEAN PLANT ETC` |
-| `petDetailType` | enum | ✅ | 41개 (웹 `PETS`의 `details`) |
+| `petType` | enum | ✅ | 서버는 열 개지만 **`ETC`는 폼에서 뺀다** — 딸린 세부 종류가 없어 고르면 막힌다. 쓰는 것은 `MAMMAL BIRD REPTILE FISH AMPHIBIAN AMPHIBIAN_REAL RODENT CRUSTACEAN PLANT` 아홉 개 |
+| `petDetailType` | enum | ✅ | **40개** (웹 `PETS`의 `details`) |
 | `category` | enum | ✅ | `FOOD TOY HOUSE CLOTHING HEALTH GROOMING WALKING ETC` |
 | `title` | String | ✅ | 2~50자 |
 | `description` | String | — | 최대 1,000자 |
@@ -242,14 +242,17 @@ describe('상품 상태', () => {
 })
 
 describe('펫 종류', () => {
-  it('서버 enum 열 개를 다 담는다', () => {
+  // ⚠️ 서버 PetType enum은 열 개지만 **ETC는 목록에서 뺀다.**
+  //    petDetailType이 필수인데(@NotNull) ETC에 딸린 세부 종류가 서버에 하나도 없다
+  //    (PetDetailType 40개에 ETC가 없다). 넣으면 고른 뒤 다음 칸에서 막힌다.
+  //    웹 PETS도 같은 이유로 아홉 개만 담는다.
+  it('고를 수 있는 아홉 종류를 담는다 (ETC는 뺀다)', () => {
     expect(PET_TYPE_OPTIONS.map((o) => o.code).sort()).toEqual(
       [
         'AMPHIBIAN',
         'AMPHIBIAN_REAL',
         'BIRD',
         'CRUSTACEAN',
-        'ETC',
         'FISH',
         'MAMMAL',
         'PLANT',
@@ -259,6 +262,11 @@ describe('펫 종류', () => {
     )
   })
 
+  it('ETC는 안 담는다', () => {
+    // 고르면 막다른 길이 된다
+    expect(PET_TYPE_OPTIONS.map((o) => o.code)).not.toContain('ETC')
+  })
+
   it('종류마다 세부 종류가 하나 이상 있다', () => {
     // 세부가 빈 종류를 고르면 다음 칸에서 고를 게 없어 막힌다
     for (const type of PET_TYPE_OPTIONS) {
@@ -266,9 +274,10 @@ describe('펫 종류', () => {
     }
   })
 
-  it('세부 종류를 다 합치면 41개다', () => {
+  it('세부 종류를 다 합치면 40개다', () => {
+    // 서버 PetDetailType과 같은 수 (2026-08-03에 세어 확인)
     const all = Object.values(PET_DETAIL_OPTIONS_BY_TYPE).flat()
-    expect(all).toHaveLength(41)
+    expect(all).toHaveLength(40)
   })
 
   it('세부 종류 코드가 겹치지 않는다', () => {
