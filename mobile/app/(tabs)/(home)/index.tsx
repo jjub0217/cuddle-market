@@ -84,7 +84,7 @@ export default function HomeScreen() {
           누르고 나서 로그인하라는 말을 듣는 것보다 아예 안 보이는 편이 낫다. */}
       {isLoggedIn ? (
         <Pressable
-          onPress={() => router.push('/products/new')}
+          onPress={() => router.push('/products/new?from=home')}
           accessibilityRole="button"
           accessibilityLabel="상품 등록"
           style={({ pressed }) => [

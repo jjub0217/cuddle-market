@@ -276,7 +276,7 @@ export function MyProductList({
         {registerLabel ? (
           // 홈의 떠 있는 단추와 같은 곳으로 간다. 웹도 이 자리에서 등록 화면으로 보낸다.
           <Pressable
-            onPress={() => router.push('/products/new')}
+            onPress={() => router.push('/products/new?from=my')}
             accessibilityRole="button"
             accessibilityLabel={registerLabel}
             style={({ pressed }) => [styles.registerButton, pressed && styles.registerPressed]}
