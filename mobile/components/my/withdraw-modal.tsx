@@ -104,13 +104,24 @@ export function WithdrawModal({ visible, onClose, onDone }: Props) {
             <Text style={styles.heading}>회원탈퇴</Text>
             <Text style={styles.description}>정말로 탈퇴하시겠습니까?</Text>
 
-            <View style={styles.alertBox}>
+            {/* 안내가 넷으로 늘면서 모달 전체가 스크롤되기 시작했다(#832). 높이를 여기서 막고
+                넘치는 만큼은 이 상자 안에서만 스크롤한다 — 사유·동의·단추는 늘 제자리에 있다.
+                nestedScrollEnabled 는 안드로이드에서 필요하다. 없으면 바깥 ScrollView 가
+                손짓을 다 가져가 이 상자가 안 움직인다. */}
+            <ScrollView
+              style={styles.alertBox}
+              contentContainerStyle={styles.alertBoxContent}
+              nestedScrollEnabled
+            >
               {ALERTS.map((text) => (
-                <Text key={text} style={styles.alertText}>
-                  · {text}
-                </Text>
+                // 불릿과 글을 따로 둔다. 「· 글」을 한 Text 에 넣으면 줄바꿈된 줄이 불릿 **밑**으로
+                // 들어가 목록이 흐트러진다. 글만 flex: 1 로 두면 둘째 줄도 첫 줄 글자에 맞춰 선다.
+                <View key={text} style={styles.alertRow}>
+                  <Text style={styles.alertBullet}>·</Text>
+                  <Text style={styles.alertText}>{text}</Text>
+                </View>
               ))}
-            </View>
+            </ScrollView>
 
             <Text style={styles.label}>탈퇴 사유</Text>
             <View style={styles.reasonList}>
@@ -228,11 +239,41 @@ const styles = StyleSheet.create({
   alertBox: {
     backgroundColor: '#F9FAFB',
     borderRadius: 8,
+    // 안내 넷을 다 펴면 모달이 화면을 넘긴다. 여기서 끊고 안에서 스크롤한다.
+    // flexGrow: 0 이 없으면 ScrollView 가 남은 자리를 다 차지하려 든다.
+    //
+    // 100 은 **줄 한가운데에서 잘리도록** 고른 값이다. 줄 끝에 딱 맞춰 자르면 아래에
+    // 글이 더 있다는 것이 안 보여서, 스크롤해 볼 생각을 못 하고 지나친다.
+    //
+    //   위 여백 12 + 두 줄짜리 36 + 사이 4 + 두 줄짜리 36 + 사이 4 = 92
+    //   여기서 8 을 더 두면 다음 줄의 **윗부분만** 걸쳐 보인다
+    //
+    // 글자 크기(13)나 줄 높이(18)를 바꾸면 이 값도 같이 다시 잡아야 한다.
+    maxHeight: 100,
+    flexGrow: 0,
+  },
+  alertBoxContent: {
     padding: 12,
     gap: 4,
+    // 아래 여백만 넉넉히. 끝까지 내렸을 때 마지막 줄이 상자 밑변에 붙지 않는다
+    paddingBottom: 14,
+  },
+  alertRow: {
+    flexDirection: 'row',
+    // 불릿을 첫 줄에 맞춰 세운다. center 로 두면 두 줄짜리에서 불릿이 가운데로 내려간다
+    alignItems: 'flex-start',
+    gap: 6,
+  },
+  // 줄 높이를 글과 같게 맞춰야 불릿이 첫 글자와 같은 줄에 선다
+  alertBullet: {
+    fontSize: 13,
+    lineHeight: 18,
+    color: '#6B7280',
   },
   alertText: {
+    flex: 1,
     fontSize: 13,
+    lineHeight: 18,
     color: '#6B7280',
   },
   label: {
