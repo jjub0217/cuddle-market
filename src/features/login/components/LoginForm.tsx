@@ -113,7 +113,9 @@ export function LoginForm() {
             />
             {errors.root ? <p className="text-danger-500 text-sm">{errors.root.message}</p> : null}
           </div>
-          <Link href={ROUTES.FIND_PASSWORD} className="text-primary text-xs font-medium">
+          {/* 밑줄 — 링크임을 색만으로 알리면 안 된다(WCAG 1.4.1 「색에 의존하지 않기」).
+              underline-offset-2 는 글자 아래 획(ㅁ·ㅂ 등)에 선이 닿지 않게 띄운 값이다. */}
+          <Link href={ROUTES.FIND_PASSWORD} className="text-primary text-xs font-medium underline underline-offset-2">
             비밀번호를 잊으셨나요?
           </Link>
         </div>
