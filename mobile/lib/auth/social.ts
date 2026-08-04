@@ -94,13 +94,30 @@ export async function startSocialLogin(provider: SocialProvider): Promise<Social
     return { kind: 'failed', message: '로그인에 실패했습니다. 다시 시도해주세요.' };
   }
 
-  // 기기 저장 → 메모리 store 순. 저장이 실패해도 saveTokens가 삼키므로
-  // 이번 세션은 정상으로 돈다(tokens.ts 주석 참고).
-  await saveTokens({ accessToken: parsed.accessToken, refreshToken: parsed.refreshToken });
-  useAuthStore.getState().setSession({
-    accessToken: parsed.accessToken,
-    refreshToken: parsed.refreshToken,
-  });
+  await completeSocialLogin(parsed.accessToken, parsed.refreshToken);
 
   return { kind: 'signedIn' };
+}
+
+/**
+ * 받은 토큰으로 세션을 세운다.
+ *
+ * 두 길이 이리로 모인다:
+ *   ① 브라우저가 돌아온 주소를 **가로챈** 경우 (위 startSocialLogin)
+ *   ② 안드로이드가 딥링크를 **앱에 던진** 경우 (app/oauth.tsx)
+ *
+ * ⚠️ ②가 실제로 일어난다. 실기기(갤럭시·개발 빌드)에서 카카오 로그인을 마치니
+ *    커스텀 탭이 가로채지 않고 cuddlemarket://oauth?... 가 앱으로 바로 왔고,
+ *    받을 화면이 없어 expo-router가 「Unmatched Route」를 띄웠다(2026-08-04).
+ *    그래서 두 길을 다 열어 두고, 세션 세우는 자리는 여기 하나로 모은다.
+ *
+ * 기기 저장 → 메모리 store 순. 저장이 실패해도 saveTokens가 삼키므로 이번 세션은
+ * 정상으로 돈다(tokens.ts 주석 참고).
+ */
+export async function completeSocialLogin(
+  accessToken: string,
+  refreshToken: string
+): Promise<void> {
+  await saveTokens({ accessToken, refreshToken });
+  useAuthStore.getState().setSession({ accessToken, refreshToken });
 }
