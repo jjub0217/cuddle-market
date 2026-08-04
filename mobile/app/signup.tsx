@@ -68,7 +68,16 @@ export default function SignupScreen() {
 
   const handleSubmit = async () => {
     const ok = await form.submit();
-    if (ok) router.back();
+    if (!ok) return;
+
+    // ⚠️ 가입에 성공하면 **이미 로그인된 상태다**(폼 훅이 가입 직후 로그인한다).
+    //    back() 한 번이면 로그인 관문이 나와서 「또 로그인해야 하나?」로 읽힌다 —
+    //    관문까지 함께 닫고 원래 보던 자리로 돌아간다(email-login.tsx와 같은 판단).
+    if (router.canDismiss()) {
+      router.dismissAll();
+      return;
+    }
+    router.replace('/(tabs)/(home)');
   };
 
   return (
