@@ -90,7 +90,7 @@ export default function HomeScreen() {
           style={({ pressed }) => [
             styles.fab,
             // 탭바 바로 위에 띄운다.
-            { bottom: insets.bottom + FAB_CLEARANCE },
+            { bottom: FAB_CLEARANCE },
             pressed && styles.fabPressed,
           ]}
         >
@@ -108,6 +108,12 @@ export default function HomeScreen() {
  * ⚠️ 이 화면의 SafeAreaView는 edges={['top']}이라 **아래 끝이 이미 탭바 위**다.
  *    그래서 탭바 높이(56)를 여기서 또 뺄 이유가 없다 — 예전 값 72는 탭바를 두 번
  *    비키고 있었다.
+ *
+ * ⚠️ insets.bottom도 더하면 안 된다. 탭바가 이미 제스처 바를 비켜 놓았으므로
+ *    같은 여백을 두 번 세게 된다.
+ *    **Expo Go에서는 이 실수가 안 보인다** — app.json의 edgeToEdgeEnabled가 Expo Go에는
+ *    안 먹어서 insets.bottom이 0이라 더해도 티가 안 난다. 개발 빌드·출시 빌드에서는
+ *    24~48이 들어와 단추가 그만큼 떠오른다(2026-08-04 실기기에서 드러났다).
  *
  * 토스트(toast-host.tsx)가 쓰는 72와 다른 이유도 그것이다. 토스트는 탭 화면 밖
  * 루트에 그려서 탭바 높이를 자기가 비켜야 한다.
