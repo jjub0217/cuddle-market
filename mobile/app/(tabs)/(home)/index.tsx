@@ -3,7 +3,7 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import { FlatList, Pressable, StyleSheet, Text } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ProductCard } from '@/components/product-card';
 import {
@@ -21,7 +21,6 @@ import { fetchProducts } from '@/lib/products';
 // 데이터층은 웹 홈과 동일하게 TanStack Query useInfiniteQuery.
 
 export default function HomeScreen() {
-  const insets = useSafeAreaInsets();
   const router = useRouter();
 
   // 그리는 것이라 getState()가 아니라 구독한다 — 로그인하고 돌아왔을 때 단추가 저절로
@@ -59,9 +58,13 @@ export default function HomeScreen() {
         data={products}
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => <HomeRow product={item} />}
+        // 떠 있는 단추가 마지막 카드를 가리지 않게 그만큼 비워 둔다.
+        // ⚠️ 단추가 있을 때만이다 — 게스트에겐 단추가 없어서, 늘 비워 두면
+        //    목록 끝이 허전하게 뚫린다(2026-08-04 실기기에서 두 화면을 비교해 잡았다).
+        // ⚠️ insets.bottom은 더하지 않는다. 이 화면의 아래 끝이 이미 탭바 위다(FAB_CLEARANCE 주석 참고).
         contentContainerStyle={[
           styles.listContent,
-          { paddingBottom: insets.bottom + 12 },
+          { paddingBottom: isLoggedIn ? FAB_CLEARANCE + FAB_HEIGHT + 12 : 12 },
         ]}
         showsVerticalScrollIndicator={false}
         onEndReachedThreshold={0.4}
@@ -119,6 +122,14 @@ export default function HomeScreen() {
  * 루트에 그려서 탭바 높이를 자기가 비켜야 한다.
  */
 const FAB_CLEARANCE = 16;
+
+/**
+ * 떠 있는 단추의 높이. 목록 끝에 그만큼을 비워 마지막 카드가 안 가리게 한다.
+ *
+ * 재서 못 박은 값이다 — 위아래 여백 12+12에 글자·아이콘 줄 높이 20쯤.
+ * 단추 안의 글자 크기를 바꾸면 이 값도 같이 봐야 한다.
+ */
+const FAB_HEIGHT = 44;
 
 /**
  * 목록의 한 줄. 카드마다 훅이 필요해 별도 컴포넌트로 뺀다
