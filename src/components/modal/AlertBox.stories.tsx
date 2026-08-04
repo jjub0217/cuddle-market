@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { Info } from 'lucide-react'
 import AlertBox from './AlertBox'
+import { WITH_DRAW_ALERT_LIST } from '@/constants/constants'
 
 const meta = {
   title: 'Commons/Modal/AlertBox',
@@ -26,14 +27,11 @@ export const SingleItem: Story = {
   ],
 }
 
+// 실제 탈퇴 안내를 그대로 쓴다. 문구를 여기 베껴 두면 화면과 이야기가 갈린다 —
+// 실제로 #832에서 세 줄을 고칠 때 이 파일에만 옛 문구가 남아 있었다.
 export const MultipleItems: Story = {
   args: {
-    alertList: [
-      '등록한 모든 상품이 삭제됩니다',
-      '거래 내역과 채팅 기록이 모두 삭제됩니다',
-      '찜한 상품 목록이 삭제됩니다',
-      '진행 중인 거래가 있다면 먼저 완료해 주세요',
-    ],
+    alertList: WITH_DRAW_ALERT_LIST,
   },
   decorators: [
     (StoryFn) => (

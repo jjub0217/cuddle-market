@@ -1,3 +1,4 @@
+import { WITH_DRAW_ALERT_LIST } from '@cuddle/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import {
@@ -29,8 +30,14 @@ const WITHDRAW_REASONS = [
   { id: 'OTHER', label: '기타' },
 ] as const;
 
-/** 웹 WITH_DRAW_ALERT_LIST 와 같은 안내. */
-const ALERTS = ['등록한 모든 상품이 삭제됩니다', '거래 내역과 채팅 기록이 모두 삭제됩니다'];
+/**
+ * 탈퇴 안내. 원본은 @cuddle/shared 에 있고 웹도 같은 것을 쓴다.
+ *
+ * 전에는 이 파일이 두 줄을 따로 들고 있었는데, 둘 다 서버가 하지 않는 일이었다
+ * (상품 삭제 · 거래·채팅 기록 삭제). 사실대로 고치면서 웹과 한 곳으로 모았다(#832) —
+ * 각자 들고 있으면 다음에 또 한쪽만 고치게 된다.
+ */
+const ALERTS = WITH_DRAW_ALERT_LIST;
 
 interface Props {
   visible: boolean;

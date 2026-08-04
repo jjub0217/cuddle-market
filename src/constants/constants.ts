@@ -196,12 +196,10 @@ export const WITHDRAW_REASON = [
 
 // ========== 주의사항 항목들 상수 ==========
 
-export const WITH_DRAW_ALERT_LIST = [
-  '등록한 모든 상품이 삭제됩니다',
-  '거래 내역과 채팅 기록이 모두 삭제됩니다',
-  '찜한 상품 목록이 삭제됩니다',
-  '진행 중인 거래가 있다면 먼저 완료해 주세요',
-]
+// 탈퇴 안내의 원본은 @cuddle/shared에 있다(앱도 같은 것을 쓴다). 여기 있던 목록은
+// 서버가 하지 않는 일을 셋이나 약속하고 있어서 사실대로 고치면서 옮겼다(#832).
+export { WITH_DRAW_ALERT_LIST } from '@cuddle/shared'
+
 export const PRODUCT_DELETE_ALERT_LIST = ['삭제된 상품은 복구할 수 없습니다']
 
 export const PASSWORD_UPDATE_ALERT_LIST = [
