@@ -53,6 +53,9 @@ export function useSignupForm() {
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [nicknameChecked, setNicknameChecked] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  // 인증코드를 보내는 동안. 중복확인 + 발송 두 번을 타서 몇 초 걸린다 —
+  // 아무 표시가 없으면 앱이 멈춘 것처럼 보인다(2026-08-04 실기기).
+  const [sendingCode, setSendingCode] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   // 화면이 사라진 뒤 setState가 불리지 않게 정리한다.
@@ -102,6 +105,7 @@ export function useSignupForm() {
     }
 
     const email = values.email.trim();
+    setSendingCode(true);
     try {
       const available = await checkEmailAvailable(email);
       if (!available) {
@@ -119,6 +123,8 @@ export function useSignupForm() {
         ...prev,
         email: '인증코드 발송에 실패했어요. 잠시 후 다시 시도해주세요.',
       }));
+    } finally {
+      setSendingCode(false);
     }
   }, [values.email, verification, startTimer]);
 
@@ -272,6 +278,7 @@ export function useSignupForm() {
     passwordChecks,
     passwordConfirmState,
     sendCode,
+    sendingCode,
     submitCode,
     changeEmail,
     nicknameChecked,

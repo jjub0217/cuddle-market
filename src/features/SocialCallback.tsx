@@ -1,5 +1,6 @@
 'use client'
 
+import { needsSocialSignup } from '@cuddle/shared'
 import { api } from '@/lib/api/api'
 import { useUserStore } from '@/store/userStore'
 import { useCallback, useEffect } from 'react'
@@ -20,7 +21,7 @@ export default function SocialCallback() {
         const userResponse = await api.get('/profile/me')
         const user = userResponse.data.data
 
-        if (!user.addressSido || !user.birthDate) {
+        if (needsSocialSignup(user)) {
           sessionStorage.setItem('socialSignupUser', JSON.stringify(user))
           router.push('/auth/social-signup')
           return

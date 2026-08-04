@@ -1,5 +1,7 @@
 import type { QueryClient } from '@tanstack/react-query';
 
+import { readMessage } from '../reports';
+
 import { apiBaseUrl, apiFetch } from './api';
 import { useAuthStore } from './store';
 import { clearTokens, loadTokens, saveTokens } from './tokens';
@@ -86,14 +88,28 @@ export async function withdraw(
   queryClient: QueryClient,
   input: { reason: string; detailReason: string }
 ): Promise<void> {
+  // ⚠️ 상세 사유가 비면 **아예 안 보낸다.** 서버에서 선택 필드지만 길이 규칙이 걸려 있어
+  //    (@Size(min=2)) 빈 글자를 보내면 「2자 이상」에 막힌다 — 안 적었는데 너무 짧다고
+  //    거절당하는 꼴이다(2026-08-04 실기기, HTTP 400).
+  //    reports.ts의 trimmed()가 같은 함정을 이미 이렇게 피하고 있다.
+  const detailReason = input.detailReason.trim();
+
   const res = await apiFetch('/auth/withdraw', {
     method: 'DELETE',
-    body: JSON.stringify({ reason: input.reason, detailReason: input.detailReason }),
+    body: JSON.stringify({
+      reason: input.reason,
+      ...(detailReason ? { detailReason } : {}),
+    }),
   });
 
   if (!res.ok) {
     // 탈퇴가 안 됐는데 로그아웃시키면 사용자가 "탈퇴됐구나"로 오해한다. 세션을 그대로 둔다.
-    throw new Error(`탈퇴에 실패했어요 (HTTP ${res.status})`);
+    //
+    // ⚠️ 서버 문구를 살린다. 상태 코드만으로는 무엇이 틀렸는지 못 가린다 —
+    //    실기기에서 400이 났는데 「사유가 필수」인지 다른 이유인지 알 수 없었다(2026-08-04).
+    //    reports.ts·community.ts가 쓰는 readMessage와 같은 방식이다.
+    const message = await readMessage(res);
+    throw new Error(message ?? `탈퇴에 실패했어요 (HTTP ${res.status})`);
   }
 
   await clearLocalSession(queryClient);

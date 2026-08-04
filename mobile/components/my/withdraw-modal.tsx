@@ -11,6 +11,8 @@ import {
   View,
 } from 'react-native';
 
+import { Check } from 'lucide-react-native';
+
 import { withdraw } from '@/lib/auth/session';
 
 // 회원 탈퇴. 웹 WithdrawModal과 같은 항목(사유 · 상세사유 · 주의사항 · 동의)을 담는다.
@@ -68,9 +70,20 @@ export function WithdrawModal({ visible, onClose, onDone }: Props) {
       await withdraw(queryClient, { reason, detailReason: detailReason.trim() });
       reset();
       onDone();
-    } catch {
+    } catch (caught) {
       // 실패해도 세션은 그대로다(session.ts). 모달을 닫지 않고 다시 시도할 수 있게 둔다.
-      setError('탈퇴에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      //
+      // ⚠️ 예전에는 오류를 통째로 버리고 「잠시 후 다시」만 보여 줬다. 그러면 사용자도
+      //    우리도 무엇이 잘못됐는지 알 길이 없다 — 실기기에서 탈퇴가 안 될 때 원인을
+      //    좁히지 못했다(2026-08-04). 세션이 풀린 경우는 갈라서 알리고,
+      //    나머지는 상태 코드를 함께 보여 준다.
+      const detail = caught instanceof Error ? caught.message : '';
+
+      if (detail.includes('401')) {
+        setError('로그인이 풀렸어요. 다시 로그인한 뒤 시도해주세요.');
+      } else {
+        setError(`탈퇴에 실패했습니다. 잠시 후 다시 시도해주세요. ${detail}`.trim());
+      }
     } finally {
       setSubmitting(false);
     }
@@ -136,7 +149,10 @@ export function WithdrawModal({ visible, onClose, onDone }: Props) {
               accessibilityState={{ checked: agreed }}
               style={({ pressed }) => [styles.agreeRow, pressed && styles.pressed]}
             >
-              <View style={[styles.checkbox, agreed && styles.checkboxChecked]} />
+              {/* 체크했을 때 ✓ 가 보여야 한다. 네모만 채우면 「무엇이 켜진 건지」가 안 읽힌다 */}
+              <View style={[styles.checkbox, agreed && styles.checkboxChecked]}>
+                {agreed ? <Check size={12} color="#FFFFFF" strokeWidth={3} /> : null}
+              </View>
               <Text style={styles.agreeLabel}>회원 탈퇴에 동의합니다.</Text>
             </Pressable>
 
@@ -275,6 +291,9 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     borderWidth: 2,
     borderColor: '#D1D5DB',
+    // ✓ 를 가운데에 놓는다
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   checkboxChecked: {
     borderColor: '#111827',

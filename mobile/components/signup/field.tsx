@@ -16,6 +16,8 @@ interface Props extends TextInputProps {
   trailing?: ReactNode;
   /** 칸 아래 회색 안내문. 오류가 있으면 오류가 우선한다 */
   hint?: string;
+  /** 안내문 색. 시간이 얼마 안 남았을 때처럼 눈에 띄어야 하면 'danger' */
+  hintTone?: 'muted' | 'danger';
   /** 초록 성공 문구(중복체크 통과 등). 오류가 있으면 오류가 우선한다 */
   success?: string;
   /**
@@ -31,6 +33,7 @@ export function Field({
   error,
   trailing,
   hint,
+  hintTone = 'muted',
   success,
   style,
   inputRef,
@@ -50,7 +53,9 @@ export function Field({
       </View>
       {error ? <Text style={messageStyles.error}>{error}</Text> : null}
       {!error && success ? <Text style={messageStyles.success}>{success}</Text> : null}
-      {!error && !success && hint ? <Text style={messageStyles.hint}>{hint}</Text> : null}
+      {!error && !success && hint ? (
+        <Text style={hintTone === 'danger' ? messageStyles.error : messageStyles.hint}>{hint}</Text>
+      ) : null}
     </View>
   );
 }

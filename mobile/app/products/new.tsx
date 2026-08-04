@@ -1,10 +1,11 @@
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ProductForm } from '@/components/products/product-form';
 import { DEFAULT_PRODUCT_STATUS, type ProductFormValues } from '@/lib/product-form';
+import { productDetailHref, tabGroupOf } from '@/lib/product-routes';
 import { createProduct, type ProductPayload } from '@/lib/products';
 import { showToast } from '@/lib/toast';
 
@@ -39,13 +40,30 @@ const EMPTY_VALUES: ProductFormValues = {
 
 export default function NewProductScreen() {
   const router = useRouter();
+  // from: 어느 탭에서 열렸는지. 이 화면은 루트 스택이라 스스로는 알 수 없어서 넘겨받는다
+  // (수정 화면과 같은 방식이다).
+  const { from } = useLocalSearchParams<{ from?: string }>();
 
   const handleSubmit = async (payload: ProductPayload) => {
     try {
       const id = await createProduct(payload);
       // 만든 상품을 바로 보여준다. 목록으로 보내면 자기 글을 또 찾아야 한다.
-      // ⚠️ replace다. push면 뒤로가기가 방금 다 채운 등록 화면으로 돌아간다.
-      router.replace(`/(tabs)/(home)/products/${id}`);
+      //
+      // ⚠️ **닫고 나서 쌓는다.** replace로 탭 주소를 바로 넣으면 탭이 두 겹이 된다 —
+      //    루트 스택이 [(tabs), (tabs)]가 되고, 새로 쌓인 탭의 홈 스택에는 상세 하나뿐이라
+      //    **홈 탭을 눌러도 아무 일이 안 일어난다**(2026-08-04 실기기).
+      //    dismissAll로 등록 화면을 닫아 원래 탭으로 돌아간 뒤, 그 탭 안에 상세를 쌓는다.
+      const detail = productDetailHref(tabGroupOf(from), id) as Href;
+
+      if (router.canDismiss()) {
+        router.dismissAll();
+        // ⚠️ **한 박자 늦춰서** 쌓는다. 같은 순간에 부르면 push가 「닫기 전 상태」를 보고
+        //    루트 스택에 얹혀 탭이 또 두 겹이 된다(2026-08-04 실기기에서 그랬다).
+        setTimeout(() => router.push(detail), 0);
+        return;
+      }
+
+      router.push(detail);
     } catch (error) {
       // 화면을 안 닫는다 — 적어 둔 값이 남아 있어야 다시 낼 수 있다
       showToast(error instanceof Error ? error.message : '상품 등록에 실패했습니다.');
