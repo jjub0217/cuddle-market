@@ -23,8 +23,12 @@ import { fetchUnreadCount } from '@/lib/notifications';
 
 const HEADER_HEIGHT = 52;
 
-/** logo.png의 실제 비율(826 x 357). 파일을 갈면 이 값도 같이 고쳐야 한다. */
-const LOGO_ASPECT_RATIO = 826 / 357;
+/**
+ * logo.png의 실제 비율(826 x 357). 파일을 갈면 이 값도 같이 고쳐야 한다.
+ * 로그인 화면(app/login.tsx)도 같은 그림을 크게 그려서 이 값을 함께 쓴다 —
+ * 두 곳에 각자 적어 두면 파일을 갈 때 한쪽만 고치게 된다.
+ */
+export const LOGO_ASPECT_RATIO = 826 / 357;
 
 /**
  * 헤더 아이콘 색.

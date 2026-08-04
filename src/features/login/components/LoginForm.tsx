@@ -80,19 +80,32 @@ export function LoginForm() {
           <div className="flex flex-col gap-2">
             {/* inputClass의 py-3은 모바일 폭에서만 효과가 있다 — Input의 기본값이 py-2/md:py-3이라
                 데스크탑은 원래 py-3이었다. 공통 Input을 고치면 회원가입·비밀번호찾기까지 같이 커진다. */}
+            {/* 테두리가 없으면 입력칸이 배경과 **밝기가 같아**(모바일 폭 1.00:1 · 데스크탑 흰 카드
+                1.05:1) 칸이 어디 있는지 안 보인다 — 크림과 회색은 색조만 다르다. 색을 잘 구분하지
+                못하는 사람에게는 안내 문구만이 칸의 존재를 알린다.
+                색은 가입 화면(NameField·PasswordField 등)이 쓰는 gray-400 에 맞췄다 — 두 화면이
+                같은 테두리를 갖는다.
+                ⚠️ gray-400 은 2.05:1(회색 배경)·2.15:1(흰 카드)이라 WCAG 1.4.11 이 UI 요소
+                   경계에 요구하는 3:1 에는 못 미친다. 3:1 을 넘기려면 #8d8d8d 이상이어야 하고
+                   (3.02:1 · 3.17:1), 그건 가입·검색바·상품 등록까지 함께 볼 문제라 따로 다룬다. */}
             <InputField
               type="email"
               placeholder="이메일 (example@cuddle.com)"
               backgroundColor="bg-primary-50"
+              border
+              borderColor="border-gray-400"
               size="text-xs"
               inputClass="py-3"
               error={errors.email}
               registration={register('email', authValidationRules.email)}
             />
+            {/* 위 이메일 칸과 같은 이유로 테두리를 준다. */}
             <InputField
               type="password"
               placeholder="비밀번호 (10~30자의 영문 대소문자, 숫자, 특수문자 포함)"
               backgroundColor="bg-primary-50"
+              border
+              borderColor="border-gray-400"
               size="text-xs"
               inputClass="py-3"
               error={errors.password}
@@ -100,7 +113,9 @@ export function LoginForm() {
             />
             {errors.root ? <p className="text-danger-500 text-sm">{errors.root.message}</p> : null}
           </div>
-          <Link href={ROUTES.FIND_PASSWORD} className="text-primary text-xs font-medium">
+          {/* 밑줄 — 링크임을 색만으로 알리면 안 된다(WCAG 1.4.1 「색에 의존하지 않기」).
+              underline-offset-2 는 글자 아래 획(ㅁ·ㅂ 등)에 선이 닿지 않게 띄운 값이다. */}
+          <Link href={ROUTES.FIND_PASSWORD} className="text-primary text-xs font-medium underline underline-offset-2">
             비밀번호를 잊으셨나요?
           </Link>
         </div>

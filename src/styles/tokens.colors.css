@@ -21,6 +21,8 @@
   /* Outline */
   --color-outline-variant: #d4c4b2; /* 일반 보더 (베이지) */
   --color-outline-strong: #bfa890; /* 진한 보더 (헤더 솔리드 상태) */
+  /* ⚠️ 위 보더 둘은 입력칸 경계로 쓰지 말 것. 밝은 배경 위에서 1.55:1·2.07:1 이라
+     칸이 어디 있는지 안 보인다. 입력칸에는 gray-400 을 쓴다(가입·로그인이 그렇다). */
 
   /* Primary action (브라운) */
   --color-primary-container: #825500; /* 메인 액션 배경 (활성 칩, CTA) */

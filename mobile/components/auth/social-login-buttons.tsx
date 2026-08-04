@@ -67,7 +67,7 @@ export function SocialLoginButtons({ onSignedIn }: Props) {
         ) : (
           <>
             <GoogleLogo />
-            <Text style={styles.label}>구글 간편 로그인</Text>
+            <Text style={[styles.label, styles.googleLabel]}>Google 계정으로 로그인</Text>
           </>
         )}
       </Pressable>
@@ -87,8 +87,15 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   pressed: { opacity: 0.7 },
-  // 웹과 같은 값(SocialLoginButtons.tsx의 bg-[#fee500] · bg-[#F2F2F2])
+  // 웹과 같은 값(SocialLoginButtons.tsx의 bg-[#fee500] · bg-white + border-[#747775])
   kakao: { backgroundColor: '#FEE500' },
-  google: { backgroundColor: '#F2F2F2' },
+  // 구글 브랜딩 가이드의 「라이트」 테마 — 배경 #FFFFFF + 테두리 #747775 1px(안쪽).
+  // https://developers.google.com/identity/branding-guidelines?hl=ko
+  // 예전에는 「중립」 테마(#F2F2F2, 테두리 없음)였는데, 중립은 버튼과 대비되는 배경을
+  // 전제한 값이다 — 웹에서 회색 배경과 1.02:1 로 묻혀 보이지 않아 둘 다 라이트로 옮겼다.
+  // 테두리는 height: 48 안쪽에 그려져서 카카오 단추와 높이가 그대로 맞는다.
+  google: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#747775' },
   label: { fontSize: 15, fontWeight: '600', color: '#111827' },
+  // 가이드가 정한 글자색. 카카오는 자체 가이드가 있어 위 기본값을 그대로 쓴다
+  googleLabel: { color: '#1F1F1F' },
 });
