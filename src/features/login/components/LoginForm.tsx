@@ -84,6 +84,12 @@ export function LoginForm() {
               type="email"
               placeholder="이메일 (example@cuddle.com)"
               backgroundColor="bg-primary-50"
+              // ⚠️ 테두리가 없으면 입력칸이 배경과 **밝기가 같아**(1.0:1) 칸이 어디 있는지
+              //    안 보인다 — 색조만 다르다. WCAG 1.4.11은 UI 요소 경계에 3:1을 요구한다.
+              //    primary-500(#b06f15)이 팔레트에서 3:1을 넘는 가장 옅은 색이다(3.7:1).
+              //    outline-variant(1.55)·outline-strong(2.07)은 둘 다 미달이다.
+              border
+              borderColor="border-primary-500"
               size="text-xs"
               inputClass="py-3"
               error={errors.email}
@@ -93,6 +99,12 @@ export function LoginForm() {
               type="password"
               placeholder="비밀번호 (10~30자의 영문 대소문자, 숫자, 특수문자 포함)"
               backgroundColor="bg-primary-50"
+              // ⚠️ 테두리가 없으면 입력칸이 배경과 **밝기가 같아**(1.0:1) 칸이 어디 있는지
+              //    안 보인다 — 색조만 다르다. WCAG 1.4.11은 UI 요소 경계에 3:1을 요구한다.
+              //    primary-500(#b06f15)이 팔레트에서 3:1을 넘는 가장 옅은 색이다(3.7:1).
+              //    outline-variant(1.55)·outline-strong(2.07)은 둘 다 미달이다.
+              border
+              borderColor="border-primary-500"
               size="text-xs"
               inputClass="py-3"
               error={errors.password}
