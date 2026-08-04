@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { GoogleLogo, KakaoLogo } from '@/components/auth/social-logos';
 import { startSocialLogin, type SocialProvider } from '@/lib/auth/social';
 import { showToast } from '@/lib/toast';
 
-// 웹 SocialLoginButtons.tsx와 같은 문구·같은 색·같은 차례(카카오 → 구글).
+// 웹 SocialLoginButtons.tsx와 같은 문구·같은 색·같은 차례(카카오 → 구글)·같은 로고.
 //
-// ⚠️ 아이콘은 넣지 않았다. 웹은 /images/kakao.svg를 쓰는데 앱에는 그 파일이 없고,
-//    SVG를 앱에서 그리려면 꾸러미가 하나 더 든다. 문구만으로도 어느 단추인지 분명하다.
+// ⚠️ 로고를 빼면 안 된다. 카카오·구글 모두 로그인 단추의 로고와 색을 가이드로 정해 두었다.
+//    로고는 social-logos.tsx가 그린다(웹의 svg를 그대로 옮겼다).
 
 interface Props {
   /** 로그인에 성공했을 때. 보통 화면을 닫거나 추가 정보로 보낸다 */
@@ -48,7 +49,10 @@ export function SocialLoginButtons({ onSignedIn }: Props) {
         {busy === 'kakao' ? (
           <ActivityIndicator color="#111827" />
         ) : (
-          <Text style={styles.label}>카카오 간편 로그인</Text>
+          <>
+            <KakaoLogo />
+            <Text style={styles.label}>카카오 간편 로그인</Text>
+          </>
         )}
       </Pressable>
 
@@ -61,7 +65,10 @@ export function SocialLoginButtons({ onSignedIn }: Props) {
         {busy === 'google' ? (
           <ActivityIndicator color="#111827" />
         ) : (
-          <Text style={styles.label}>구글 간편 로그인</Text>
+          <>
+            <GoogleLogo />
+            <Text style={styles.label}>구글 간편 로그인</Text>
+          </>
         )}
       </Pressable>
     </View>
@@ -73,8 +80,11 @@ const styles = StyleSheet.create({
   button: {
     height: 48, // 이메일 로그인 단추와 같은 높이 — 셋이 나란히 서면 높이가 맞아야 한다
     borderRadius: 8,
+    // 로고와 글자를 가운데에 나란히. 웹도 아이콘이 글자 왼쪽에 붙는다(Button.tsx:29)
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 8,
   },
   pressed: { opacity: 0.7 },
   // 웹과 같은 값(SocialLoginButtons.tsx의 bg-[#fee500] · bg-[#F2F2F2])

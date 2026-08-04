@@ -11,13 +11,15 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { LoginForm } from '@/components/auth/login-form';
 import { SocialLoginButtons } from '@/components/auth/social-login-buttons';
 import { fetchMe } from '@/lib/profile';
 import { showToast } from '@/lib/toast';
 import { ChevronLeft } from 'lucide-react-native';
 
-// 로그인. 탭바까지 덮는 루트 스택 화면이라, 닫으면 원래 보던 자리로 돌아간다.
+// 로그인 **관문**. 방법만 고르고, 이메일 폼은 다음 화면(email-login.tsx)에 있다.
+// 왜 둘로 나눴는지는 email-login.tsx 위에 적어 뒀다(3바퀴 설계 §8.1에서 합의).
+//
+// 탭바까지 덮는 루트 스택 화면이라, 닫으면 원래 보던 자리로 돌아간다.
 //
 // 헤더를 직접 그리는 이유는 상세 화면(detail-header.tsx)과 같다:
 // native-stack 헤더에는 상단 인셋 옵션이 없어 실기기에서 상태바와 붙어 보인다.
@@ -78,9 +80,17 @@ export default function LoginScreen() {
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
         >
-          <LoginForm onSuccess={close} />
+          <Text style={styles.heading}>로그인</Text>
 
-          {/* 웹도 로그인 폼 아래·회원가입 링크 위에 둔다(Login.tsx:27-40). */}
+          {/* 이메일이 맨 위, 그다음 소셜. 3바퀴 설계 §8.1의 A안 그림 그대로다. */}
+          <Pressable
+            onPress={() => router.push('/email-login')}
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.email, pressed && styles.emailPressed]}
+          >
+            <Text style={styles.emailLabel}>이메일로 로그인</Text>
+          </Pressable>
+
           <View style={styles.social}>
             <SocialLoginButtons onSignedIn={() => void handleSocialSignedIn()} />
           </View>
@@ -124,9 +134,26 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 32,
   },
-  // 폼(gap 16)과 붙지 않게 한 칸 띄운다. 웹도 폼과 소셜 사이를 벌려 둔다(Login.tsx:26 gap-9).
+  heading: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 24,
+  },
+  // 앱의 기본 단추 색(로그인 폼의 「로그인」과 같다). 소셜은 각자 브랜드 색이라
+  // 이것만 진하게 두면 「우리 계정으로 들어가는 길」이 먼저 읽힌다
+  email: {
+    height: 48,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#111827',
+  },
+  emailPressed: { opacity: 0.8 },
+  emailLabel: { fontSize: 15, fontWeight: '600', color: '#FFFFFF' },
+  // 소셜 단추 묶음. 이메일 단추와 같은 간격(8)으로 이어 붙인다
   social: {
-    marginTop: 16,
+    marginTop: 8,
   },
   signupLink: {
     marginTop: 24,
