@@ -13,12 +13,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { AddressField } from '@/components/signup/address-field';
 import { BirthDateField } from '@/components/signup/birth-date-field';
 import { EmailVerification } from '@/components/signup/email-verification';
 import { Field, fieldStyles, messageStyles } from '@/components/signup/field';
 import { PasswordChecklist } from '@/components/signup/password-checklist';
-import { ChevronLeft } from 'lucide-react-native';
 import { useFieldScroll } from '@/lib/signup/use-field-scroll';
 import { useSignupForm } from '@/lib/signup/use-signup-form';
 
@@ -32,8 +32,6 @@ import { useSignupForm } from '@/lib/signup/use-signup-form';
 //
 // 라우트를 둘로 쪼개지 않는 이유: 값이 한 컴포넌트에 모여 있어야 1단계로 돌아가도
 // 입력이 남는다. 쪼개면 값을 넘기는 장치가 따로 필요하다.
-
-const HEADER_HEIGHT = 52;
 
 export default function SignupScreen() {
   const router = useRouter();
@@ -82,18 +80,14 @@ export default function SignupScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <View style={styles.header}>
-        <Pressable
-          onPress={goBack}
-          hitSlop={12}
-          accessibilityRole="button"
-          accessibilityLabel="뒤로"
-          style={({ pressed }) => (pressed ? styles.backPressed : undefined)}
-        >
-          <ChevronLeft size={26} color="#111827" />
-        </Pressable>
-        <Text style={styles.stepLabel}>{step} / 2</Text>
-      </View>
+      {/* 헤더는 화면 이름(회원가입), 본문은 지금 할 일(계정 만들기 · 프로필 입력).
+          오른쪽 1/2 는 두 단계 중 어디인지 알린다 */}
+      <ScreenHeader
+        title="회원가입"
+        onPressIcon={goBack}
+        divider={false}
+        right={<Text style={styles.stepLabel}>{step} / 2</Text>}
+      />
 
       <KeyboardAvoidingView
         style={styles.flex}
@@ -264,13 +258,6 @@ export default function SignupScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF' },
   flex: { flex: 1 },
-  header: {
-    height: HEADER_HEIGHT,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 12,
-  },
   backPressed: { opacity: 0.5 },
   stepLabel: { fontSize: 13, color: '#6B7280' },
   content: { paddingHorizontal: 20, paddingTop: 12, gap: 16 },

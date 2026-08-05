@@ -13,12 +13,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { SocialLoginButtons } from '@/components/auth/social-login-buttons';
 import { LOGO_ASPECT_RATIO } from '@/components/ui/app-header';
 import { fetchMe } from '@/lib/profile';
 import { FIND_PASSWORD_URL } from '@/lib/support-links';
 import { showToast } from '@/lib/toast';
-import { ChevronLeft } from 'lucide-react-native';
 
 // 로그인 **관문**. 방법만 고르고, 이메일 폼은 다음 화면(email-login.tsx)에 있다.
 // 왜 둘로 나눴는지는 email-login.tsx 위에 적어 뒀다(3바퀴 설계 §8.1에서 합의).
@@ -27,8 +27,6 @@ import { ChevronLeft } from 'lucide-react-native';
 //
 // 헤더를 직접 그리는 이유는 상세 화면(detail-header.tsx)과 같다:
 // native-stack 헤더에는 상단 인셋 옵션이 없어 실기기에서 상태바와 붙어 보인다.
-
-const HEADER_HEIGHT = 52;
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -63,24 +61,9 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <Pressable
-          onPress={close}
-          hitSlop={12}
-          accessibilityRole="button"
-          accessibilityLabel="닫기"
-          style={({ pressed }) => (pressed ? styles.backPressed : undefined)}
-        >
-          <ChevronLeft size={26} color="#111827" />
-        </Pressable>
-
-        {/* 제목은 뒤로 단추와 같은 줄에 두되 **화면 한가운데**에 놓는다.
-            줄 안에서 밀어 넣으면 왼쪽 단추 폭만큼 오른쪽으로 밀리므로 절대 위치를 쓴다.
-            pointerEvents="none" — 글자가 뒤로 단추의 누름 영역(hitSlop 12)을 가리면 안 된다. */}
-        <View style={styles.headerTitleBox} pointerEvents="none">
-          <Text style={styles.headerTitle}>로그인</Text>
-        </View>
-      </View>
+      {/* 인증 화면이라 아래 선을 끈다 — 흰 화면 한 장에 내용이 가운데로 모여 있어
+          선이 화면을 가로로 자른다 */}
+      <ScreenHeader title="로그인" onPressIcon={close} divider={false} />
 
       {/* 키보드가 올라와도 로그인 버튼이 가려지지 않게 화면을 밀어 올린다. */}
       <KeyboardAvoidingView
@@ -156,23 +139,6 @@ const styles = StyleSheet.create({
   },
   flex: {
     flex: 1,
-  },
-  header: {
-    height: HEADER_HEIGHT,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-  },
-  headerTitleBox: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  // 크기는 홈·마이 헤더 제목과 같은 20이다(app-header.tsx의 title).
-  // 헤더 줄로 올라왔으니 본문 제목(22)이 아니라 헤더 제목을 따른다.
-  headerTitle: { fontSize: 20, fontWeight: '700', color: '#111827' },
-  backPressed: {
-    opacity: 0.5,
   },
   // 로고부터 「회원가입하기」까지가 화면 가운데에 오도록 세로로 모은다.
   //

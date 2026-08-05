@@ -1,13 +1,13 @@
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Pressable, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { EmptyState, ErrorState, ListFooter } from '@/components/list-states';
 import { NotificationSkeleton } from '@/components/notifications/notification-skeleton';
 import { NotificationRow } from '@/components/notifications/notification-row';
-import { ChevronLeft } from 'lucide-react-native';
 import { apiBaseUrl } from '@/lib/auth/api';
 import {
   fetchNotifications,
@@ -19,8 +19,6 @@ import {
 
 // 알림 목록. 헤더는 화면이 직접 그린다(login·signup과 같은 이유 —
 // native-stack 헤더에는 상단 인셋 옵션이 없어 실기기에서 상태바와 붙어 보인다).
-
-const HEADER_HEIGHT = 52;
 
 /** 웹 주소. API base에서 /api를 떼면 웹 도메인이 된다. */
 function webUrl(path: string): string {
@@ -106,21 +104,15 @@ export default function NotificationsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <View style={styles.header}>
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={12}
-          accessibilityRole="button"
-          accessibilityLabel="닫기"
-          style={({ pressed }) => (pressed ? styles.pressed : undefined)}
-        >
-          <ChevronLeft size={24} color="#111827" />
-        </Pressable>
-        <Text style={styles.heading}>알림</Text>
-        <Pressable onPress={handleReadAll} hitSlop={8} accessibilityRole="button">
-          <Text style={styles.readAll}>모두 읽음</Text>
-        </Pressable>
-      </View>
+      <ScreenHeader
+        title="알림"
+        onPressIcon={() => router.back()}
+        right={
+          <Pressable onPress={handleReadAll} hitSlop={8} accessibilityRole="button">
+            <Text style={styles.readAll}>모두 읽음</Text>
+          </Pressable>
+        }
+      />
 
       {renderBody()}
     </SafeAreaView>
@@ -129,16 +121,5 @@ export default function NotificationsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF' },
-  header: {
-    height: HEADER_HEIGHT,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
-  },
-  heading: { flex: 1, fontSize: 18, fontWeight: '700', color: '#111827' },
   readAll: { fontSize: 14, color: '#825500' },
-  pressed: { opacity: 0.5 },
 });
