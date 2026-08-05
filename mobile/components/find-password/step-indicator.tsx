@@ -24,7 +24,8 @@ const STEPS = [1, 2, 3] as const;
 const DONE = '#111827';
 const PENDING = '#D1D5DB'; // 아직 안 지나온 단계
 
-const DOT_SIZE = 22;
+// 웹 StepIndicator 와 같은 크기다(size-8 = 32). 실기기에서 22는 작아 보였다
+const DOT_SIZE = 32;
 
 /** 화면을 읽어주는 기능에 붙일 말. 눈으로는 숫자만 보이므로 여기서 이름을 알린다. */
 const NAMES = ['이메일 입력', '이메일 인증', '새 비밀번호'];
@@ -65,9 +66,8 @@ const styles = StyleSheet.create({
   line: {
     // 이름표를 뺀 만큼 선을 넉넉히 둔다. 셋이 한가운데 모여 진행이 한눈에 읽힌다
     width: 40,
-    // 기기가 그릴 수 있는 가장 얇은 선. 1(=1dp)은 고해상도 화면에서 3픽셀이라 굵어 보인다.
-    // 헤더 아래 선(screen-header.tsx)도 같은 값을 쓴다 — 앱 안에서 선 굵기가 갈리면 안 된다
-    height: StyleSheet.hairlineWidth,
+    // 1로 되돌렸다. hairlineWidth 로 얇게 해 봤는데 실기기에서 너무 흐렸다(2026-08-05).
+    height: 1,
     marginHorizontal: 8,
     backgroundColor: PENDING,
   },
@@ -83,6 +83,7 @@ const styles = StyleSheet.create({
   dotDone: { backgroundColor: DONE },
   // 아직 안 지나온 동그라미는 옅은 회색(#D1D5DB)이라 흰 숫자를 얹으면 거의 안 보인다.
   // 웹도 같은 자리에 회색 글자를 쓴다(bg-gray-300 에 text-gray-500).
-  number: { fontSize: 12, fontWeight: '700', color: '#6B7280' },
+  // 웹과 같은 16. 동그라미(32) 안에서 눌리지 않고 읽힌다
+  number: { fontSize: 16, fontWeight: '700', color: '#6B7280' },
   numberDone: { color: '#FFFFFF' },
 });
