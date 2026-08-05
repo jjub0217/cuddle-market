@@ -55,11 +55,20 @@ const FLING_SPEED = 500;
 // 붙는 데 걸리는 시간과 곡선. **용수철(withSpring)을 쓰지 않는다.**
 //
 // 처음엔 withSpring 으로 짰는데 실기기에서 **통통 튀었다**(2026-08-06). 이 앱의
-// 기존 시트(components/ui/bottom-sheet.tsx)가 같은 이유로 이미 시간·곡선 방식을
-// 쓰고 있었다 — 그 파일 주석에 「실기기에서 툭 튀어 보였다」고 적혀 있다.
-// 값도 그대로 가져온다. 두 시트가 다르게 움직이면 같은 앱으로 안 보인다.
+// 기존 시트(components/ui/bottom-sheet.tsx)가 같은 이유로 이미 시간·곡선 방식을 쓴다.
+//
+// ⚠️ **곡선은 그 시트와 다르게 간다. 하는 일이 다르기 때문이다.**
+//
+//    기존 시트   화면 **밖으로 사라진다**  → 닫을 때 Easing.in(가속)이 맞다.
+//                                          점점 빨라지며 나가는 게 자연스럽다
+//    이 시트     두 자리 **사이를 오간다**  → 양쪽 다 Easing.out(감속)이 맞다.
+//                                          도착해서 멈춰야 하니까
+//
+//    처음에 그 시트 값을 그대로 가져와 닫을 때 Easing.in 을 썼더니, 내릴 때
+//    **멈칫하다 덜컥 떨어졌다**(2026-08-06 실기기). 가속 곡선은 앞부분이 거의
+//    안 움직여서 「걸렸다」로 읽힌다.
 const OPEN_MS = 300;
-const CLOSE_MS = 200;
+const CLOSE_MS = 240;
 
 interface Props {
   places: PlaceListItemType[];
@@ -98,10 +107,10 @@ export function PlaceSheet({ places, loading, onPressPlace }: Props) {
             ? false
             : offset.value < hiddenAmount / 2;
 
-      // 펼칠 때는 느긋하게, 접을 때는 빠르게 — 접기는 이미 결정한 동작이라 기다릴 이유가 없다.
       offset.value = withTiming(펼침 ? 0 : hiddenAmount, {
         duration: 펼침 ? OPEN_MS : CLOSE_MS,
-        easing: 펼침 ? Easing.out(Easing.cubic) : Easing.in(Easing.cubic),
+        // 양쪽 다 감속이다. 접을 때만 조금 빠르다 — 이미 결정한 동작이라 기다릴 이유가 없다.
+        easing: Easing.out(Easing.cubic),
       });
     });
 
