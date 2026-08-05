@@ -210,10 +210,9 @@ export default function FindPasswordScreen() {
               <Pressable
                 onPress={form.goPreviousStep}
                 accessibilityRole="button"
-                hitSlop={8}
-                style={({ pressed }) => (pressed ? styles.pressed : undefined)}
+                style={({ pressed }) => [styles.secondary, pressed && styles.pressed]}
               >
-                <Text style={styles.linkText}>이메일 변경</Text>
+                <Text style={styles.secondaryLabel}>이메일 변경</Text>
               </Pressable>
 
               <Pressable
@@ -297,12 +296,20 @@ const styles = StyleSheet.create({
   },
   submitLabel: { fontSize: 15, fontWeight: '600', color: '#FFFFFF' },
   pressed: { opacity: 0.8 },
-  linkText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#4B5563',
-    textAlign: 'center',
+  // 보조 단추. 웹과 같은 모양이다(흰 배경 + 회색 테두리).
+  // 글자 링크로 뒀더니 바로 아래 진한 단추 옆에서 존재감이 너무 약해 눌러야 할 것으로
+  // 안 보였다 — 「테두리가 안 보인다」는 말을 들었다(2026-08-05 실기기).
+  // 높이·모서리는 주 단추와 같은 값이라 둘이 나란히 서도 어긋나지 않는다.
+  secondary: {
+    height: 48,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#9CA3AF',
   },
+  secondaryLabel: { fontSize: 15, fontWeight: '600', color: '#111827' },
   formError: { fontSize: 13, fontWeight: '600', color: '#C91D1D' },
   blockedBox: { backgroundColor: '#F9FAFB', borderRadius: 8, padding: 14, gap: 10 },
   blockedText: { fontSize: 13, lineHeight: 19, color: '#374151' },
