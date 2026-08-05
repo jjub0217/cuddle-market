@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Animated, Easing, Modal, Pressable, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // 아래에서 올라오는 시트의 껍데기. 안에 무엇을 담을지는 쓰는 쪽이 정한다.
 //
@@ -21,6 +22,8 @@ interface Props {
 }
 
 export function BottomSheet({ visible, onClose, children }: Props) {
+  // 기기 아래쪽 안전영역(제스처 바·내비게이션 바)의 높이. 바가 없는 기기에서는 0이다.
+  const insets = useSafeAreaInsets();
   // Modal을 언제 떼어낼지. 닫는 애니메이션이 끝난 뒤에 떼어야 사라지는 모습이 보인다.
   const [mounted, setMounted] = useState(visible);
   // 시트 높이를 재서 그만큼만 움직인다. 재기 전에는 넉넉한 값으로 시작한다.
@@ -62,6 +65,10 @@ export function BottomSheet({ visible, onClose, children }: Props) {
         {/* 시트 안을 눌렀을 때 닫히지 않도록 바깥 Pressable의 터치를 여기서 멈춘다. */}
         <Animated.View style={[styles.sheet, { transform: [{ translateY }] }]}>
           <Pressable
+            // 안전영역 여백을 「재는 상자」인 여기에 준다. 바깥 Animated.View에 주면
+            // onLayout이 재는 높이(sheetHeight)에 안 잡혀, 올라오기 전 시트가 그 높이만큼
+            // 덜 내려가 화면 아래에 미리 비죽 나와 보인다.
+            style={{ paddingBottom: insets.bottom }}
             onPress={() => {}}
             onLayout={(event) => setSheetHeight(event.nativeEvent.layout.height)}
           >
@@ -110,11 +117,15 @@ const styles = StyleSheet.create({
     // 아래는 화면 끝에 붙으므로 위쪽 모서리만 둥글게.
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
-    // 위아래 여백을 두지 않는다.
+    // 모양을 내기 위한 위아래 여백은 두지 않는다.
     // 여백이 있으면 첫·마지막 항목만 구분선 바깥으로 더 넓어 보인다 — 실기기에서
     // "삭제 버튼만 높아 보인다"로 나타났다. 항목 높이 56이 넉넉해 여백이 따로 필요 없다.
     //
-    // 안전영역(insets.bottom)도 더하지 않는다. 안드로이드에서 RN Modal은 시스템
-    // 내비게이션 바 아래까지 그리지 않아, 더하면 그 높이만큼 빈 자리가 남는다.
+    // 다만 안전영역(insets.bottom)만큼은 위쪽 Pressable에서 아래에 더한다(#843).
+    // 예전에는 「안드로이드 RN Modal은 내비게이션 바 아래까지 안 그리니 더하면 빈 자리만
+    // 남는다」고 적혀 있었는데, 그건 Expo Go에서만 맞는 이야기였다. app.json의
+    // edgeToEdgeEnabled: true가 Expo Go에는 안 먹어 거기서는 insets.bottom이 늘 0이었다.
+    // 개발·출시 빌드에서는 24~48이 들어오고 Modal이 바 아래까지 그려서, 안 더하면
+    // 마지막 항목이 제스처 바에 가린다. 되돌리기 전에 반드시 개발 빌드로 확인할 것.
   },
 });
