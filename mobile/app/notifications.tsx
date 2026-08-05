@@ -104,8 +104,11 @@ export default function NotificationsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      {/* 오른쪽에 「모두 읽음」이 있어 제목을 왼쪽에 붙인다 —
+          가운데에 두면 아이콘과 그 단추 사이에 끼어 보인다 */}
       <ScreenHeader
         title="알림"
+        align="left"
         onPressIcon={() => router.back()}
         right={
           <Pressable onPress={handleReadAll} hitSlop={8} accessibilityRole="button">

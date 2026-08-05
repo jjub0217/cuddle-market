@@ -29,6 +29,14 @@ interface Props {
   /** 오른쪽에 붙는 것. 알림의 「모두 읽음」 같은 것 */
   right?: ReactNode;
   /**
+   * 제목 자리. 기본은 화면 한가운데다.
+   *
+   * left 는 아이콘 바로 옆에 붙인다. **글자 크기는 그대로 20이다** — 자리만 옮긴다.
+   * 오른쪽에 누를 것이 있어 가운데 제목이 둘 사이에 끼어 보이는 화면에 쓴다
+   * — 알림(「모두 읽음」)이 그렇다.
+   */
+  align?: 'center' | 'left';
+  /**
    * 아래 선. 기본은 그린다.
    *
    * 아래가 목록·스크롤인 화면(알림·답글·신고·상품 등록)은 선이 「여기부터 내용」을 알린다.
@@ -38,7 +46,14 @@ interface Props {
   divider?: boolean;
 }
 
-export function ScreenHeader({ title, onPressIcon, icon = 'back', right, divider = true }: Props) {
+export function ScreenHeader({
+  title,
+  onPressIcon,
+  icon = 'back',
+  right,
+  divider = true,
+  align = 'center',
+}: Props) {
   return (
     <View style={[styles.header, divider && styles.headerDivider]}>
       {onPressIcon ? (
@@ -57,14 +72,21 @@ export function ScreenHeader({ title, onPressIcon, icon = 'back', right, divider
         </Pressable>
       ) : null}
 
-      {/* 제목은 줄 안에서 밀어 넣지 않고 **화면 한가운데**에 놓는다.
-          줄 안에 두면 왼쪽 아이콘과 오른쪽 것의 폭에 따라 좌우로 흔들린다.
-          pointerEvents="none" — 글자가 아이콘의 누름 영역(hitSlop 12)을 가리면 안 된다. */}
-      <View style={styles.titleBox} pointerEvents="none">
-        <Text style={styles.title} numberOfLines={1}>
+      {align === 'left' ? (
+        /* 아이콘 옆에 붙인다. 줄 안에 있으므로 오른쪽 것과 자리를 나눠 쓴다 */
+        <Text style={[styles.title, styles.titleLeft]} numberOfLines={1}>
           {title}
         </Text>
-      </View>
+      ) : (
+        /* 제목은 줄 안에서 밀어 넣지 않고 **화면 한가운데**에 놓는다.
+           줄 안에 두면 왼쪽 아이콘과 오른쪽 것의 폭에 따라 좌우로 흔들린다.
+           pointerEvents="none" — 글자가 아이콘의 누름 영역(hitSlop 12)을 가리면 안 된다. */
+        <View style={styles.titleBox} pointerEvents="none">
+          <Text style={styles.title} numberOfLines={1}>
+            {title}
+          </Text>
+        </View>
+      )}
 
       {/* 오른쪽 것을 줄 끝으로 민다. 없어도 자리를 차지하지 않는다 */}
       {right ? <View style={styles.right}>{right}</View> : null}
@@ -98,6 +120,8 @@ const styles = StyleSheet.create({
   },
   // 홈·마이 헤더 제목과 같은 20이다(app-header.tsx 의 title)
   title: { fontSize: 20, fontWeight: '700', color: '#111827' },
+  // 자리만 옮긴다. 크기(20)는 가운데일 때와 같아야 화면을 오갈 때 글자가 들썩이지 않는다
+  titleLeft: { marginLeft: 8, flexShrink: 1 },
   right: { marginLeft: 'auto' },
   pressed: { opacity: 0.5 },
 });
