@@ -1,14 +1,14 @@
-import { NaverMapMarkerOverlay, NaverMapView, type Region } from '@mj-studio/react-native-naver-map';
+import type { Region } from '@mj-studio/react-native-naver-map';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CategoryTabs } from '@/components/places/category-tabs';
+import { MapBoundary, MapUnavailable } from '@/components/places/map-fallback';
 import { PlaceSheet } from '@/components/places/place-sheet';
 import { getPlaces } from '@/lib/places/api';
 import {
-  DEFAULT_CENTER,
   type MapBounds,
   type PlaceCategory,
   type PlaceListItem,
@@ -22,8 +22,15 @@ import {
 // 화면이 지도로 꽉 차고, 위에 카테고리 알약, 아래에서 목록이 올라온다.
 // 웹은 지도 **옆에** 목록을 세우는데 폰은 가로가 좁아 그대로 못 옮긴다.
 
-/** 시 하나가 들어올 만한 배율. 너무 넓으면 핀이 수백 개가 되고, 너무 좁으면 빈 화면이 된다. */
-const INITIAL_ZOOM = 13;
+// 지도를 **늦게** 불러온다.
+//
+// ⚠️ 위에서 그냥 import 하면 안 된다. expo-router 는 앱을 켤 때 app/ 아래 화면 파일을
+//    전부 한 번씩 읽어서, 지도 부품이 없는 빌드에서는 **앱 자체가 안 열린다**
+//    (2026-08-06에 겪었다 — 홈·커뮤니티까지 다 죽었다).
+//    lazy 로 감싸면 이 탭을 열 때만 읽으므로, 부품이 없어도 나머지 앱은 멀쩡하다.
+//
+// 맨 위의 `import type` 은 타입만 가져오는 것이라 빌드 결과에 남지 않는다 — 안전하다.
+const PlaceMap = lazy(() => import('@/components/places/place-map'));
 
 /** 지도가 알려주는 영역을 서버가 받는 네 귀퉁이로 바꾼다. */
 function toBounds(region: Region): MapBounds {
@@ -104,26 +111,17 @@ export default function PlaceScreen() {
 
   return (
     <View style={styles.screen}>
-      <NaverMapView
-        style={StyleSheet.absoluteFill}
-        initialCamera={{ ...DEFAULT_CENTER, zoom: INITIAL_ZOOM }}
-        onCameraChanged={handleCameraChanged}
-        onCameraIdle={handleCameraIdle}
-        isShowZoomControls={false}
-        isShowScaleBar={false}
-      >
-        {places.map((place) => (
-          <NaverMapMarkerOverlay
-            key={place.id}
-            latitude={place.latitude}
-            longitude={place.longitude}
-            onTap={() => openDetail(place.id)}
-            // 크기를 안 주면 개발 빌드와 출시 빌드에서 다르게 나온다(SDK 문서 경고).
-            width={24}
-            height={32}
+      {/* 지도가 못 뜨더라도 알약과 목록은 그대로 쓸 수 있게, 지도만 그물로 감싼다. */}
+      <MapBoundary>
+        <Suspense fallback={<MapUnavailable />}>
+          <PlaceMap
+            places={places}
+            onCameraChanged={handleCameraChanged}
+            onCameraIdle={handleCameraIdle}
+            onPressPlace={openDetail}
           />
-        ))}
-      </NaverMapView>
+        </Suspense>
+      </MapBoundary>
 
       {/* 알약은 지도 위에 뜬다. 상태바를 비켜 놓는다. */}
       <View style={[styles.tabs, { paddingTop: insets.top + 8 }]} pointerEvents="box-none">
