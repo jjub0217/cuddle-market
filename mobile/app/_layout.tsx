@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
 import { ToastHost } from '@/components/ui/toast-host';
@@ -26,6 +27,12 @@ export default function RootLayout() {
   }, []);
 
   return (
+    // 손가락 제스처를 쓰려면 앱 맨 바깥을 이걸로 감싸야 한다. 안 감싸면 **안드로이드에서
+    // 조용히 아무 반응이 없다** — 타입체크도 시험도 못 잡고 실기기에서만 드러난다.
+    //
+    // 14바퀴 전까지는 앱이 제스처를 한 번도 안 써서 없어도 됐다. 플레이스의 끌어올리는
+    // 목록이 첫 사용처다.
+    <GestureHandlerRootView style={{ flex: 1 }}>
     <QueryClientProvider client={queryClient}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         {/* 헤더는 화면들이 직접 그린다 — native-stack 헤더에는 상단 인셋 옵션이 없어
@@ -72,5 +79,6 @@ export default function RootLayout() {
         <StatusBar style="auto" />
       </ThemeProvider>
     </QueryClientProvider>
+    </GestureHandlerRootView>
   );
 }
