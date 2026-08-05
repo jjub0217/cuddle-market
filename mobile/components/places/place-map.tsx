@@ -42,6 +42,12 @@ const naver: NaverMapModule | null = (() => {
   }
 })();
 
+/**
+ * 지도를 그릴 수 있는 빌드인가. 화면이 이걸 보고 「불러오는 중」을 띄울지 정한다 —
+ * 지도가 없으면 카메라 이벤트가 영영 안 와서 그냥 두면 인디케이터가 계속 돈다.
+ */
+export const isMapAvailable = naver !== null;
+
 interface Props {
   places: PlaceListItem[];
   onCameraChanged: (params: { region: Region }) => void;

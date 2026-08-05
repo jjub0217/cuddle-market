@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CategoryTabs } from '@/components/places/category-tabs';
 import { MapBoundary } from '@/components/places/map-fallback';
-import PlaceMap from '@/components/places/place-map';
+import PlaceMap, { isMapAvailable } from '@/components/places/place-map';
 import { PlaceSheet } from '@/components/places/place-sheet';
 import { getPlaces } from '@/lib/places/api';
 import {
@@ -45,7 +45,9 @@ export default function PlaceScreen() {
 
   const [category, setCategory] = useState<PlaceCategory>('HOSPITAL');
   const [places, setPlaces] = useState<PlaceListItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  // 지도가 있어야 첫 조회가 시작된다(카메라 이벤트로 영역을 알려주기 때문이다).
+  // 지도가 없는 빌드에서 true 로 두면 **인디케이터가 영영 돈다** — 실제로 그랬다.
+  const [loading, setLoading] = useState(isMapAvailable);
 
   // 지금 지도에 보이는 영역. 그릴 필요가 없어서 상태로 두지 않는다 —
   // 손가락을 움직일 때마다 화면을 다시 그리면 지도가 버벅인다.

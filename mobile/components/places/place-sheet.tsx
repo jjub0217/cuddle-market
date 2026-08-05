@@ -79,35 +79,57 @@ export function PlaceSheet({ places, loading, onPressPlace }: Props) {
     [onPressPlace]
   );
 
+  // 굴릴 목록이 있을 때만 손잡이로 자리를 한정한다.
+  //
+  // 왜 나누나 — 목록까지 끌리게 두면 세로로 굴리는 동작과 부딪혀 둘 다 어정쩡해진다.
+  // 하지만 목록이 비었을 때는 굴릴 게 없으므로 **시트 아무 데나 끌 수 있어야** 한다.
+  // 손잡이는 손가락보다 작아서, 거기만 되면 「안 끌린다」로 느껴진다(2026-08-06 실기기).
+  const 목록있음 = !loading && places.length > 0;
+
+  const 손잡이 = (
+    <View style={styles.handleArea} accessibilityLabel="목록 끌어올리기">
+      <View style={styles.handle} />
+    </View>
+  );
+
+  const 안내 = loading ? (
+    <View style={styles.notice}>
+      <ActivityIndicator />
+      <Text style={styles.noticeText}>불러오는 중</Text>
+    </View>
+  ) : (
+    <View style={styles.notice}>
+      <Text style={styles.noticeText}>이 지역에는 아직 없어요</Text>
+      <Text style={styles.noticeHint}>지도를 옮겨 다른 동네를 찾아보세요</Text>
+    </View>
+  );
+
   return (
     <Animated.View style={[styles.sheet, sheetStyle]}>
-      {/* 손잡이만 끌 수 있게 한다. 목록까지 끌리면 스크롤과 부딪혀 둘 다 어정쩡해진다. */}
-      <GestureDetector gesture={pan}>
-        <View style={styles.handleArea} accessibilityLabel="목록 끌어올리기">
-          <View style={styles.handle} />
-        </View>
-      </GestureDetector>
-
-      {loading ? (
-        <View style={styles.notice}>
-          <ActivityIndicator />
-          <Text style={styles.noticeText}>불러오는 중</Text>
-        </View>
-      ) : places.length === 0 ? (
-        <View style={styles.notice}>
-          <Text style={styles.noticeText}>이 지역에는 아직 없어요</Text>
-          <Text style={styles.noticeHint}>지도를 옮겨 다른 동네를 찾아보세요</Text>
-        </View>
+      {목록있음 ? (
+        <>
+          {/* 굴릴 목록이 있으니 손잡이에서만 끈다 — 목록까지 끌리면 세로로 굴리는
+              동작과 부딪혀 둘 다 어정쩡해진다. */}
+          <GestureDetector gesture={pan}>{손잡이}</GestureDetector>
+          <FlatList
+            data={places}
+            keyExtractor={(item) => String(item.id)}
+            renderItem={renderItem}
+            contentContainerStyle={styles.list}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          />
+        </>
       ) : (
-        <FlatList
-          data={places}
-          keyExtractor={(item) => String(item.id)}
-          renderItem={renderItem}
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
-          // 접힌 상태에서는 목록을 굴리지 않는다 — 먼저 끌어올리라는 뜻이다.
-          keyboardShouldPersistTaps="handled"
-        />
+        /* 굴릴 게 없으니 **시트 아무 데나** 끌 수 있게 한다.
+           손잡이는 손가락보다 작아서 거기만 되면 「안 끌린다」로 느껴진다
+           (2026-08-06 실기기에서 실제로 그렇게 느껴졌다). */
+        <GestureDetector gesture={pan}>
+          <View style={styles.wholeArea}>
+            {손잡이}
+            {안내}
+          </View>
+        </GestureDetector>
       )}
     </Animated.View>
   );
@@ -133,7 +155,10 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   // 손잡이는 눈에 보이는 막대보다 넓게 잡는다 — 얇은 막대만 노리면 잘 안 잡힌다.
-  handleArea: { paddingVertical: 12, alignItems: 'center' },
+  // 16이면 막대(4) 위아래로 손가락 하나가 들어간다.
+  handleArea: { paddingVertical: 16, alignItems: 'center' },
+  // 굴릴 목록이 없을 때 끄는 자리. 시트에 남은 자리를 다 차지해 아무 데나 끌린다.
+  wholeArea: { flex: 1 },
   handle: { width: 40, height: 4, borderRadius: 2, backgroundColor: '#D1D5DB' },
   list: { paddingHorizontal: 16, paddingBottom: 24, gap: 8 },
   notice: { alignItems: 'center', paddingTop: 16, gap: 6 },
