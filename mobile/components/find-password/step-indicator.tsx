@@ -65,7 +65,9 @@ const styles = StyleSheet.create({
   line: {
     // 이름표를 뺀 만큼 선을 넉넉히 둔다. 셋이 한가운데 모여 진행이 한눈에 읽힌다
     width: 40,
-    height: 1,
+    // 기기가 그릴 수 있는 가장 얇은 선. 1(=1dp)은 고해상도 화면에서 3픽셀이라 굵어 보인다.
+    // 헤더 아래 선(screen-header.tsx)도 같은 값을 쓴다 — 앱 안에서 선 굵기가 갈리면 안 된다
+    height: StyleSheet.hairlineWidth,
     marginHorizontal: 8,
     backgroundColor: PENDING,
   },
