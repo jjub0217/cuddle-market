@@ -22,6 +22,26 @@ interface FindPasswordFormValues {
   passwordConfirm: string
 }
 
+/**
+ * 막다른 길 안내 문구. 앱과 같은 말을 쓴다(mobile/app/find-password.tsx 의 blockedText).
+ *
+ * **「비밀번호 대신」이 핵심이다.** 여기 온 사람은 「비밀번호를 찾으러」 왔으므로,
+ * 「그럼 내 비밀번호는?」에 답이 있어야 발길을 돌린다. 「재설정이 불가능합니다」는 그 답이 없다.
+ *
+ * 어느 소셜인지 알면 콕 집어 말한다. 모를 때만 「카카오 또는 구글」로 벌려 쓴다 —
+ * 「카카오·구글로 가입한」은 **둘 다로 가입한 것처럼** 읽힌다.
+ */
+function blockedText(blocked: 'kakao' | 'google' | 'social' | 'notFound'): string {
+  if (blocked === 'notFound') {
+    return '가입 이력이 없는 이메일이에요.\n이메일을 다시 확인해주세요.'
+  }
+  if (blocked === 'social') {
+    return '카카오 또는 구글로 가입한 계정이에요.\n비밀번호 대신 그 방법으로 로그인해주세요.'
+  }
+  const name = blocked === 'kakao' ? '카카오' : '구글'
+  return `${name}로 가입한 계정이에요.\n비밀번호 대신 ${name} 로그인을 이용해주세요.`
+}
+
 export function FindPasswordForm() {
   // 결과에 **어느 이메일에 대한 것인지**를 함께 담는다.
   //
@@ -72,12 +92,20 @@ export function FindPasswordForm() {
   /** 지금 칸에 있는 이메일에 대한 결과인가. 아니면 옛 판단이라 안 보여준다. */
   const resultIsCurrent = sendValidCodeResult.email === email
 
-  const blocked: 'social' | 'notFound' | null =
-    sendValidCodeResult.status !== 'error' || !resultIsCurrent
-      ? null
-      : sendValidCodeResult.message.includes('소셜')
-        ? 'social'
-        : 'notFound'
+  // ⚠️ 옛 문구(「소셜 로그인 사용자는…」)도 함께 알아본다. 백엔드와 웹은 따로 배포되므로
+  //    그 사이에는 서버가 옛 문구를 준다. 안 받아주면 그동안 「가입 이력이 없는 이메일」로
+  //    잘못 안내하게 된다 — 없는 것보다 나쁜 안내다.
+  const blocked: 'kakao' | 'google' | 'social' | 'notFound' | null = !(
+    sendValidCodeResult.status === 'error' && resultIsCurrent
+  )
+    ? null
+    : sendValidCodeResult.message.includes('카카오')
+      ? 'kakao'
+      : sendValidCodeResult.message.includes('구글')
+        ? 'google'
+        : sendValidCodeResult.message.includes('소셜')
+          ? 'social'
+          : 'notFound'
   const code = useWatch({ control, name: 'AuthenticationCode' })
   const password = useWatch({ control, name: 'password' })
   const passwordConfirm = useWatch({ control, name: 'passwordConfirm' })
@@ -328,25 +356,12 @@ export function FindPasswordForm() {
                     앱도 같은 안내를 한다(#838). */}
                 {blocked ? (
                   <div className="bg-surface-container-low flex flex-col gap-3 rounded-lg p-4">
-                    <p className="text-sm text-gray-700">
-                      {blocked === 'social' ? (
-                        <>
-                          카카오·구글로 가입한 계정이에요.
-                          <br />그 방법으로 로그인해주세요.
-                        </>
-                      ) : (
-                        <>
-                          가입 이력이 없는 이메일이에요.
-                          <br />
-                          이메일을 다시 확인해주세요.
-                        </>
-                      )}
-                    </p>
+                    <p className="text-sm whitespace-pre-line text-gray-700">{blockedText(blocked)}</p>
                     <Link
-                      href={blocked === 'social' ? ROUTES.LOGIN : ROUTES.SIGNUP}
+                      href={blocked === 'notFound' ? ROUTES.SIGNUP : ROUTES.LOGIN}
                       className="bg-primary-100 text-primary rounded-lg px-4 py-2 text-center text-sm font-semibold"
                     >
-                      {blocked === 'social' ? '로그인하러 가기' : '회원가입하러 가기'}
+                      {blocked === 'notFound' ? '회원가입하러 가기' : '로그인하러 가기'}
                     </Link>
                   </div>
                 ) : null}

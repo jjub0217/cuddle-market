@@ -29,6 +29,27 @@ function mmss(totalSeconds: number): string {
   return `${m}:${String(s).padStart(2, '0')}`;
 }
 
+/**
+ * 막다른 길 안내 문구.
+ *
+ * **「비밀번호 대신」이 핵심이다.** 여기 온 사람은 「비밀번호를 찾으러」 왔으므로,
+ * 「그럼 내 비밀번호는?」에 답이 있어야 발길을 돌린다. 「재설정이 불가능합니다」는 그 답이 없다.
+ *
+ * 어느 소셜인지 알면 콕 집어 말한다. 서버가 문구에 담아 준다(AuthProvider.displayName).
+ * 모를 때(서버가 아직 옛 문구를 주는 동안)만 「카카오 또는 구글」로 벌려 쓴다 —
+ * 「카카오·구글로 가입한」은 **둘 다로 가입한 것처럼** 읽힌다.
+ */
+function blockedText(blocked: 'kakao' | 'google' | 'social' | 'notFound'): string {
+  if (blocked === 'notFound') {
+    return '가입 이력이 없는 이메일이에요.\n이메일을 다시 확인해주세요.';
+  }
+  if (blocked === 'social') {
+    return '카카오 또는 구글로 가입한 계정이에요.\n비밀번호 대신 그 방법으로 로그인해주세요.';
+  }
+  const name = blocked === 'kakao' ? '카카오' : '구글';
+  return `${name}로 가입한 계정이에요.\n비밀번호 대신 ${name} 로그인을 이용해주세요.`;
+}
+
 export default function FindPasswordScreen() {
   const router = useRouter();
   const form = useFindPassword();
@@ -129,20 +150,16 @@ export default function FindPasswordScreen() {
                   둘 다 갈 곳을 함께 준다. 「안 됩니다」로 끝나면 그 사람은 거기서 떠난다. */}
               {form.blocked ? (
                 <View style={styles.blockedBox}>
-                  <Text style={styles.blockedText}>
-                    {form.blocked === 'social'
-                      ? '카카오·구글로 가입한 계정이에요.\n그 방법으로 로그인해주세요.'
-                      : '가입 이력이 없는 이메일이에요.\n이메일을 다시 확인해주세요.'}
-                  </Text>
+                  <Text style={styles.blockedText}>{blockedText(form.blocked)}</Text>
                   <Pressable
                     onPress={() =>
-                      form.blocked === 'social' ? router.replace('/login') : router.replace('/signup')
+                      form.blocked === 'notFound' ? router.replace('/signup') : router.replace('/login')
                     }
                     accessibilityRole="button"
                     style={({ pressed }) => [styles.blockedButton, pressed && styles.pressed]}
                   >
                     <Text style={styles.blockedButtonLabel}>
-                      {form.blocked === 'social' ? '로그인하러 가기' : '회원가입하러 가기'}
+                      {form.blocked === 'notFound' ? '회원가입하러 가기' : '로그인하러 가기'}
                     </Text>
                   </Pressable>
                 </View>

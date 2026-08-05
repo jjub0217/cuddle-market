@@ -41,7 +41,7 @@ export function useFindPassword() {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   // 막다른 길 안내. 「고쳐서 다시 하세요」(칸 아래 빨간 오류)와 달리
   // 「여기 말고 저쪽으로 가세요」라서 화면이 다른 모양(박스)으로 그린다.
-  const [blocked, setBlocked] = useState<'social' | 'notFound' | null>(null);
+  const [blocked, setBlocked] = useState<'kakao' | 'google' | 'social' | 'notFound' | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [sending, setSending] = useState(false);
   const [verifying, setVerifying] = useState(false);
@@ -115,7 +115,7 @@ export function useFindPassword() {
       if (error instanceof PasswordResetRejectedError) {
         // 서버 문구를 칸 아래에 **또** 띄우지 않는다. 박스가 안내와 갈 길을 다 맡는다 —
         // 둘 다 두면 같은 말이 두 줄로 겹친다(웹이 그랬다).
-        setBlocked(error.reason === 'social' ? 'social' : 'notFound');
+        setBlocked(error.reason === 'unknown' ? 'notFound' : error.reason);
       } else {
         setErrors((prev) => ({
           ...prev,
