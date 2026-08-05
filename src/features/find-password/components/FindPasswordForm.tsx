@@ -38,6 +38,8 @@ export function FindPasswordForm() {
   // 이미 코드를 받아 넣고 있던 사용자가 1단계로 튕겨 나가 넣던 코드를 잃는다.
   const [isCodeSent, setIsCodeSent] = useState(false)
   const [passwordResetError, setPasswordResetError] = useState<string | null>(null)
+  // 바꾸기에 성공했는가. 로그인 화면으로 넘어가기까지 1.5초 동안 이 값으로 알림을 띄운다.
+  const [resetDone, setResetDone] = useState(false)
   const {
     handleSubmit,
     register,
@@ -148,6 +150,7 @@ export function FindPasswordForm() {
         newPassword: password,
         confirmPassword: passwordConfirm,
       })
+      setResetDone(true)
       setTimeout(() => {
         router.push(ROUTES.LOGIN)
       }, 1500)
@@ -218,6 +221,14 @@ export function FindPasswordForm() {
                     />
                   </div>
                 </div>
+                {/* 1.5초 뒤 로그인 화면으로 넘어간다. 그동안 아무 말도 없으면
+                    「눌렀는데 멈췄다가 갑자기 화면이 바뀐」 것으로 보인다.
+                    앱은 토스트로 같은 말을 한다(#838). */}
+                {resetDone ? (
+                  <p className="text-success-500 text-sm font-semibold">
+                    비밀번호를 바꿨어요. 새 비밀번호로 로그인해주세요.
+                  </p>
+                ) : null}
                 <Button
                   size="md"
                   className="w-full cursor-pointer bg-[#22C55E] text-white"
@@ -283,6 +294,23 @@ export function FindPasswordForm() {
                     registration={register('email', authValidationRules.email)}
                   />
                 </div>
+                {/* 서버가 막았을 때 「안 된다」로 끝내지 않고 갈 길을 준다.
+                    여기 온 사람은 대개 카카오·구글로 가입한 걸 잊고 이메일 로그인을 하려다 온 사람이다.
+                    앱도 같은 안내를 한다(#838). */}
+                {sendValidCodeResult.status === 'error' && sendValidCodeResult.message.includes('소셜') ? (
+                  <div className="bg-surface-container-low flex flex-col gap-3 rounded-lg p-4">
+                    <p className="text-sm text-gray-700">
+                      카카오·구글로 가입한 계정이에요.
+                      <br />그 방법으로 로그인해주세요.
+                    </p>
+                    <Link
+                      href={ROUTES.LOGIN}
+                      className="bg-primary-100 text-primary rounded-lg px-4 py-2 text-center text-sm font-semibold"
+                    >
+                      로그인하러 가기
+                    </Link>
+                  </div>
+                ) : null}
                 <Button size="md" className="bg-primary-600 w-full cursor-pointer text-sm text-white" type="submit">
                   인증코드 전송
                 </Button>
