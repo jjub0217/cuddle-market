@@ -7,7 +7,8 @@ import { ROUTES } from '@/constants/routes'
 import { useForm, useWatch } from 'react-hook-form'
 import InputField from '@/components/commons/InputField'
 import { authValidationRules, profileValidationRules } from '@/lib/utils/validation/authValidationRules'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { cn } from '@/lib/utils/cn'
 import RequiredLabel from '@/components/commons/RequiredLabel'
 import InputWithButton from '@/components/commons/InputWithButton'
 import { checkValidCode, reSettingPassword, sendValidCode } from '@/lib/api/profile'
@@ -40,6 +41,15 @@ function blockedText(blocked: 'kakao' | 'google' | 'social' | 'notFound'): strin
   }
   const name = blocked === 'kakao' ? '카카오' : '구글'
   return `${name}로 가입한 계정이에요.\n비밀번호 대신 ${name} 로그인을 이용해주세요.`
+}
+
+/** 서버 만료가 5분이다(EmailVerificationServiceImpl 의 VERIFICATION_CODE_EXPIRY_MINUTES). */
+const CODE_TTL_SECONDS = 300
+
+function mmss(totalSeconds: number): string {
+  const m = Math.floor(totalSeconds / 60)
+  const s = totalSeconds % 60
+  return `${m}:${String(s).padStart(2, '0')}`
 }
 
 // 이 화면의 칸과 단추는 **높이를 48(h-12)로 못 박는다.**
@@ -76,6 +86,15 @@ export function FindPasswordForm() {
   // 2단계에서 「재전송」이 실패하면 그 값이 'error'로 바뀌는데, 그걸로 단계를 정하면
   // 이미 코드를 받아 넣고 있던 사용자가 1단계로 튕겨 나가 넣던 코드를 잃는다.
   const [isCodeSent, setIsCodeSent] = useState(false)
+  /** 인증코드가 만료되기까지 남은 초. 0이면 안 돌고 있다는 뜻이다. */
+  const [secondsLeft, setSecondsLeft] = useState(0)
+  /**
+   * 시간이 다 돼서 1단계로 되돌아왔을 때 알리는 말.
+   *
+   * ⚠️ sendValidCodeResult 에 얹지 않는다 — 그 값은 「막다른 길」을 가리는 데 쓰여서
+   *    (blocked), 만료 문구를 넣으면 「가입된 계정을 찾지 못했어요」 박스가 뜬다.
+   */
+  const [expiredNotice, setExpiredNotice] = useState('')
   const [passwordResetError, setPasswordResetError] = useState<string | null>(null)
   // 바꾸기에 성공했는가. 로그인 화면으로 넘어가기까지 1.5초 동안 이 값으로 알림을 띄운다.
   const [resetDone, setResetDone] = useState(false)
@@ -148,13 +167,49 @@ export function FindPasswordForm() {
   // 표시만 3단계로 바뀌는 어긋남이 있었다.
   const currentStep: 1 | 2 | 3 = checkValidCodeResult.status === 'success' ? 3 : isCodeSent ? 2 : 1
 
+  /** 시간이 다 됐을 때 1단계로 되돌린다. 만료된 코드를 계속 넣게 두면 헷갈린다. */
+  const resetToStep1 = (notice: string) => {
+    setIsCodeSent(false)
+    setSecondsLeft(0)
+    setCheckValidCodeResult({ status: 'idle', message: '' })
+    setSendValidCodeResult({ status: 'idle', message: '', email: '' })
+    setExpiredNotice(notice)
+  }
+
+  // ⚠️ 되돌리는 함수를 아래 effect 의 의존성에 넣으면 매 렌더마다 타이머가 다시 걸린다.
+  //    그렇다고 렌더 중에 ref 에 대입하면 React Compiler 가 막는다(렌더는 순수해야 한다).
+  //    그래서 대입도 effect 안에서 한다 — 웹 회원가입이 같은 함정을 같은 방식으로 푼다
+  //    (EmailValidCode.tsx).
+  const resetRef = useRef(resetToStep1)
+  useEffect(() => {
+    resetRef.current = resetToStep1
+  })
+
+  useEffect(() => {
+    if (!isCodeSent) return
+
+    const id = setInterval(() => {
+      setSecondsLeft((prev) => {
+        if (prev <= 1) {
+          resetRef.current('인증 시간이 지났어요. 다시 받아주세요.')
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => clearInterval(id)
+  }, [isCodeSent])
+
   const onSubmit = async () => {
     // 재전송이면 앞서 뜬 코드 확인 결과를 지운다. 안 지우면 「만료된 인증 코드입니다」 같은
     // 옛 오류가 새로 보낸 결과 문구를 계속 가린다.
     setCheckValidCodeResult({ status: 'idle', message: '' })
+    setExpiredNotice('')
     try {
       await sendValidCode(email)
       setIsCodeSent(true)
+      setSecondsLeft(CODE_TTL_SECONDS - 1) // 화면에 4:59부터 보이게 한다
       setSendValidCodeResult({
         status: 'success',
         message: '인증 번호를 발송했습니다.',
@@ -203,6 +258,8 @@ export function FindPasswordForm() {
 
   const handlePreviousStep = () => {
     setIsCodeSent(false)
+    setSecondsLeft(0)
+    setExpiredNotice('')
     setSendValidCodeResult({ status: 'idle', message: '', email: '' })
     setCheckValidCodeResult({ status: 'idle', message: '' })
   }
@@ -334,6 +391,13 @@ export function FindPasswordForm() {
                     buttonText="재전송"
                     onButtonClick={() => onSubmit()}
                   />
+                  {/* 서버 코드는 5분 뒤 만료된다. 그 사실을 알리는 것이 없으면 메일을 기다리다
+                      스팸함을 뒤지다 5분이 지나고, **코드를 다 넣은 뒤에야** 만료를 알게 된다.
+                      1분이 남으면 붉게 바꾼다 — 회색으로만 두면 곧 만료된다는 걸 못 알아챈다
+                      (앱도 같은 규칙이다). */}
+                  <p className={cn('text-xs', secondsLeft <= 60 ? 'text-danger-500' : 'text-gray-500')}>
+                    남은 시간 {mmss(secondsLeft)} · 이메일로 받은 인증코드를 입력해주세요.
+                  </p>
                 </div>
                 <div className="flex flex-col gap-2.5">
                   {/* 「이전단계」가 아니라 「이메일 변경」이라 쓴다 — 시스템 말투 대신 목적을
@@ -377,9 +441,11 @@ export function FindPasswordForm() {
                     // 막다른 길(소셜·없는 이메일)은 아래 박스가 말한다. 여기까지 띄우면
                     // 같은 말이 두 줄로 겹친다. 그 밖의 실패(네트워크 등)만 칸 아래에 남긴다.
                     checkResult={
-                      sendValidCodeResult.status === 'error' && resultIsCurrent && blocked === null
-                        ? sendValidCodeResult
-                        : undefined
+                      expiredNotice
+                        ? { status: 'error', message: expiredNotice }
+                        : sendValidCodeResult.status === 'error' && resultIsCurrent && blocked === null
+                          ? sendValidCodeResult
+                          : undefined
                     }
                     registration={register('email', authValidationRules.email)}
                   />

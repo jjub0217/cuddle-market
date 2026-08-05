@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -187,6 +187,48 @@ describe('② 이메일 인증', () => {
 })
 
 // #838 — 서버 문구 한 줄로 끝내지 않고 다음에 할 일을 알려 준다.
+describe('인증코드 만료 시간', () => {
+  it('코드를 보내면 4:59부터 줄어든다', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    sendValidCode.mockResolvedValue(OK)
+    render(<FindPasswordForm />)
+
+    await user.type(screen.getByPlaceholderText(EMAIL_PLACEHOLDER), 'me@example.com')
+    await user.click(screen.getByRole('button', { name: '인증코드 전송' }))
+
+    expect(await screen.findByText(/남은 시간 4:59/)).toBeInTheDocument()
+
+    await act(async () => {
+      vi.advanceTimersByTime(2000)
+    })
+    expect(screen.getByText(/남은 시간 4:57/)).toBeInTheDocument()
+
+    vi.useRealTimers()
+  })
+
+  it('시간이 다 되면 ①로 돌아가고 이유를 알린다', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    sendValidCode.mockResolvedValue(OK)
+    render(<FindPasswordForm />)
+
+    await user.type(screen.getByPlaceholderText(EMAIL_PLACEHOLDER), 'me@example.com')
+    await user.click(screen.getByRole('button', { name: '인증코드 전송' }))
+    expect(await screen.findByPlaceholderText(CODE_PLACEHOLDER)).toBeInTheDocument()
+
+    await act(async () => {
+      vi.advanceTimersByTime(300_000)
+    })
+
+    // 만료된 코드를 계속 넣게 두지 않는다
+    expect(screen.queryByPlaceholderText(CODE_PLACEHOLDER)).not.toBeInTheDocument()
+    expect(screen.getByText('인증 시간이 지났어요. 다시 받아주세요.')).toBeInTheDocument()
+
+    vi.useRealTimers()
+  })
+})
+
 describe('소셜 계정 안내', () => {
   it('소셜 계정이면 「로그인하러 가기」 길을 함께 준다', async () => {
     const user = userEvent.setup()
