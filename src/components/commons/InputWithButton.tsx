@@ -20,6 +20,8 @@ interface InputWithButtonProps {
   buttonSize?: 'xs' | 'sm' | 'md' | 'lg'
   borderColor?: string
   inputClass?: string
+  /** 칸 상자의 클래스. 높이를 못 박을 때 쓴다 */
+  wrapperClassName?: string
   autoFocus?: boolean
 }
 
@@ -38,6 +40,7 @@ export default function InputWithButton({
   buttonSize = 'md',
   borderColor = 'border-gray-400',
   inputClass,
+  wrapperClassName,
   autoFocus,
 }: InputWithButtonProps) {
   return (
@@ -53,6 +56,7 @@ export default function InputWithButton({
         checkResult={checkResult}
         className="flex-1"
         inputClass={cn('py-2 md:py-2.5', inputClass)}
+        wrapperClassName={wrapperClassName}
         registration={registration}
         autoFocus={autoFocus}
       />
