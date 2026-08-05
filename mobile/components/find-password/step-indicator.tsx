@@ -45,6 +45,7 @@ export function StepIndicator({ current }: Props) {
               {/* 지금 어디인지가 색으로만 드러나서, 화면을 읽어주는 기능에는 말로 붙여준다.
                   가입 화면의 PasswordChecklist 가 ✓/✕ 를 말로 붙이는 것과 같은 방식이다. */}
               <Text
+                numberOfLines={1}
                 style={[styles.label, reached && styles.labelDone]}
                 accessibilityLabel={`${step}단계 ${label} ${
                   step === current ? '지금 단계' : reached ? '지나옴' : '아직'
@@ -62,12 +63,15 @@ export function StepIndicator({ current }: Props) {
 
 const styles = StyleSheet.create({
   // flex-start 로 세운다. center 로 두면 이름표 길이가 서로 달라 동그라미 줄이 어긋난다
-  row: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'center' },
-  item: { alignItems: 'center', gap: 6 },
+  row: { flexDirection: 'row', alignItems: 'flex-start' },
+  // ⚠️ flex: 1 로 **셋의 너비를 같게** 만든다.
+  //    이게 없으면 칸 너비가 이름표 길이에 끌려다닌다 —「인증」은 좁고 「새 비밀번호」는
+  //    넓어서, 동그라미에서 잇는 선까지의 거리가 칸마다 달라 보인다(실기기에서 잡혔다).
+  //    너비가 같으면 동그라미가 늘 칸 한가운데에 서므로 선 좌우 간격이 저절로 같아진다.
+  item: { flex: 1, alignItems: 'center', gap: 6 },
   line: {
     width: 24,
     height: 1,
-    marginHorizontal: 6,
     // 동그라미 한가운데 높이에 맞춘다
     marginTop: DOT_SIZE / 2,
     backgroundColor: PENDING,
