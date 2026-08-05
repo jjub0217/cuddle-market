@@ -12,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { StepIndicator } from '@/components/find-password/step-indicator';
-import { Field } from '@/components/signup/field';
+import { Field, fieldStyles } from '@/components/signup/field';
 import { PasswordChecklist } from '@/components/signup/password-checklist';
 import { useFindPassword } from '@/lib/find-password/use-find-password';
 import { showToast } from '@/lib/toast';
@@ -94,6 +94,10 @@ export default function FindPasswordScreen() {
 
           {form.step === 1 ? (
             <View style={styles.group}>
+              {/* 단추를 칸 **옆**에 둔다. 가입 화면의 이메일 인증과 같은 모양이다
+                  (components/signup/email-verification.tsx). 웹 비밀번호 찾기는 칸 아래
+                  전체폭 단추를 쓰지만, 앱 안에서 가입과 갈리는 편이 더 어색하다 —
+                  같은 사람이 며칠 사이에 두 화면을 다 겪는다. */}
               <Field
                 label="이메일 주소"
                 value={form.values.email}
@@ -103,6 +107,21 @@ export default function FindPasswordScreen() {
                 autoCapitalize="none"
                 autoComplete="email"
                 error={form.errors.email}
+                trailing={
+                  <Pressable
+                    onPress={() => void form.sendCode()}
+                    // 보내는 동안 또 누르면 코드가 두 번 나가고 뒤엣것만 유효해진다
+                    disabled={form.sending}
+                    accessibilityRole="button"
+                    style={({ pressed }) => [fieldStyles.button, pressed && fieldStyles.buttonPressed]}
+                  >
+                    {form.sending ? (
+                      <ActivityIndicator size="small" color="#111827" />
+                    ) : (
+                      <Text style={fieldStyles.buttonLabel}>인증받기</Text>
+                    )}
+                  </Pressable>
+                }
               />
 
               {/* 서버가 막았을 때 「안 된다」로 끝내지 않고 갈 길을 준다.
@@ -122,23 +141,12 @@ export default function FindPasswordScreen() {
                 </View>
               ) : null}
 
-              <Pressable
-                onPress={() => void form.sendCode()}
-                disabled={form.sending}
-                accessibilityRole="button"
-                style={({ pressed }) => [styles.submit, pressed && styles.pressed]}
-              >
-                {form.sending ? (
-                  <ActivityIndicator color="#FFFFFF" />
-                ) : (
-                  <Text style={styles.submitLabel}>인증코드 받기</Text>
-                )}
-              </Pressable>
             </View>
           ) : null}
 
           {form.step === 2 ? (
             <View style={styles.group}>
+              {/* 여기도 칸 옆이다. 가입 화면의 인증코드 칸과 같다 */}
               <Field
                 label="인증코드"
                 value={form.values.code}
@@ -149,20 +157,22 @@ export default function FindPasswordScreen() {
                 error={form.errors.code}
                 hint={form.secondsLeft > 0 ? `남은 시간 ${mmss(form.secondsLeft)}` : undefined}
                 hintTone={form.secondsLeft > 0 && form.secondsLeft <= 60 ? 'danger' : 'muted'}
+                trailing={
+                  <Pressable
+                    onPress={() => void form.submitCode()}
+                    disabled={form.verifying}
+                    accessibilityRole="button"
+                    style={({ pressed }) => [fieldStyles.button, pressed && fieldStyles.buttonPressed]}
+                  >
+                    {form.verifying ? (
+                      <ActivityIndicator size="small" color="#111827" />
+                    ) : (
+                      <Text style={fieldStyles.buttonLabel}>확인</Text>
+                    )}
+                  </Pressable>
+                }
               />
 
-              <Pressable
-                onPress={() => void form.submitCode()}
-                disabled={form.verifying}
-                accessibilityRole="button"
-                style={({ pressed }) => [styles.submit, pressed && styles.pressed]}
-              >
-                {form.verifying ? (
-                  <ActivityIndicator color="#FFFFFF" />
-                ) : (
-                  <Text style={styles.submitLabel}>확인</Text>
-                )}
-              </Pressable>
 
               <Pressable
                 onPress={() => void form.sendCode()}
