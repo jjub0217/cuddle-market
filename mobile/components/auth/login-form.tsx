@@ -1,4 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
   ActivityIndicator,
@@ -28,6 +29,7 @@ function looksLikeEmail(value: string): boolean {
 
 export function LoginForm({ onSuccess }: Props) {
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -60,7 +62,15 @@ export function LoginForm({ onSuccess }: Props) {
       onSuccess();
     } catch (err) {
       if (err instanceof InvalidCredentialsError) {
-        setError('이메일 또는 비밀번호가 일치하지 않습니다.');
+        // 소셜로 가입한 사람이 이메일 로그인을 시도하면 여기로 떨어진다. 그런데 화면은
+        // 「비밀번호가 틀렸나 보다」로 읽혀, 비밀번호 찾기까지 갔다가 거기서야 알게 된다.
+        // 한 줄을 더해 그 앞에서 풀어 준다.
+        //
+        // ⚠️ **누구에게나 같은 문구**여야 한다. 「이 계정은 소셜입니다」처럼 갈라서 말하면
+        //    남의 이메일을 넣어 가입 여부·가입 방법을 알아낼 수 있다(계정 열거).
+        setError(
+          '이메일 또는 비밀번호가 일치하지 않습니다.\n소셜로 가입하셨다면 아래 소셜 로그인을 이용해주세요.'
+        );
       } else if (err instanceof TypeError) {
         // fetch가 네트워크 자체에 실패하면 TypeError를 던진다.
         setError('인터넷 연결을 확인해주세요.');
@@ -112,6 +122,19 @@ export function LoginForm({ onSuccess }: Props) {
           returnKeyType="go"
         />
       </View>
+
+      {/* 웹도 비밀번호 칸 아래에 같은 링크를 둔다(LoginForm.tsx).
+          비밀번호를 떠올리지 못했을 때 빠져나갈 길은 **비밀번호를 치는 자리 옆**에 있어야 한다.
+          관문(app/login.tsx) 아래에도 같은 곳으로 가는 길이 하나 더 있다 — 여기서 막힌 사람이
+          한 화면 뒤로 나가지 않아도 되게. */}
+      <Pressable
+        onPress={() => router.push('/find-password')}
+        accessibilityRole="button"
+        hitSlop={8}
+        style={({ pressed }) => (pressed ? styles.findPasswordPressed : undefined)}
+      >
+        <Text style={styles.findPassword}>비밀번호를 잊으셨나요?</Text>
+      </Pressable>
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -168,6 +191,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#C91D1D',
   },
+  // 밑줄을 준다. 이 줄은 위아래가 칸과 단추라 링크임을 알릴 다른 단서가 없다
+  // (관문 아래 링크 줄은 통째로 링크라 밑줄을 안 준다 — app/login.tsx).
+  findPassword: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#4B5563',
+    textDecorationLine: 'underline',
+  },
+  findPasswordPressed: { opacity: 0.6 },
   submit: {
     height: 48,
     borderRadius: 8,

@@ -18,7 +18,7 @@ export function StepIndicator({ currentStep }: StepIndicatorProps) {
         </div>
         <div
           className={cn(
-            'h-1 w-20 rounded bg-gray-300',
+            'h-[1.5px] w-20 rounded bg-gray-300',
             currentStep >= 2 && 'bg-primary-600',
             currentStep === 3 && 'bg-[#22C55E]'
           )}
@@ -32,7 +32,7 @@ export function StepIndicator({ currentStep }: StepIndicatorProps) {
         >
           2
         </div>
-        <div className={cn('h-1 w-20 rounded bg-gray-300', currentStep === 3 && 'bg-[#22C55E]')} />
+        <div className={cn('h-[1.5px] w-20 rounded bg-gray-300', currentStep === 3 && 'bg-[#22C55E]')} />
         <div
           className={cn(
             'flex size-8 items-center justify-center rounded-full bg-gray-300 text-gray-500',

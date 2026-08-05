@@ -17,6 +17,8 @@ interface InputFieldProps {
   checkResult?: { status: string; message: string }
   className?: string
   inputClass?: string
+  /** 칸 상자(테두리·배경이 붙는 곳)의 클래스. 높이를 못 박을 때 쓴다 */
+  wrapperClassName?: string
   registration: UseFormRegisterReturn
   id?: string
   suffix?: string

@@ -1,10 +1,5 @@
 import { useRouter } from 'expo-router';
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-} from 'react-native';
+import { KeyboardAvoidingView, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
@@ -47,11 +42,13 @@ export default function EmailLoginScreen() {
           회원가입/계정 만들기, 로그인/이메일로 로그인하기. */}
       <ScreenHeader title="로그인" onPressIcon={() => router.back()} divider={false} />
 
-      {/* 키보드가 올라와도 로그인 버튼이 가려지지 않게 화면을 밀어 올린다. */}
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
+      {/* 키보드가 올라와도 로그인 버튼이 가려지지 않게 화면을 밀어 올린다.
+
+          ⚠️ behavior 를 **양쪽 다** 준다. 예전에는 iOS 에만 주고 안드로이드는 undefined 였는데,
+             그러면 안드로이드에서 아무 일도 안 일어난다 — 「안드로이드는 창이 저절로 줄어든다」는
+             옛말이고, app.json 의 edgeToEdgeEnabled: true 라 창이 안 줄고 앱이 키보드 뒤까지
+             그린다(mobile/AGENTS.md). 이 화면은 칸이 둘이라 실제로 덮일 수 있었다. */}
+      <KeyboardAvoidingView style={styles.flex} behavior="padding">
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <LoginForm onSuccess={close} />
         </ScrollView>

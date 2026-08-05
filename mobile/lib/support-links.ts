@@ -21,15 +21,6 @@ export const SUPPORT_MAIL_URL = 'mailto:devel.jjub@gmail.com?subject=커들마�
 export const PRIVACY_URL = 'https://cuddle-market.vercel.app/privacy';
 
 /**
- * 비밀번호 찾기.
- *
- * 앱에는 이 화면이 없다 — 3바퀴 설계 §8.2에서 「갈 곳이 없어」 링크를 아예 뺐었다.
- * 화면을 새로 만드는 대신(이메일 코드 → 확인 → 새 비밀번호) 웹 페이지를 연다.
- * 비밀번호 재설정은 메일을 오가는 흐름이라 어차피 앱 밖으로 나갔다 온다.
- */
-export const FIND_PASSWORD_URL = 'https://cuddle-market.vercel.app/auth/find-password';
-
-/**
  * 계정 삭제 안내.
  *
  * 앱 안 「탈퇴하기」와 별개로 필요하다 — Play는 앱을 지운 사람도 웹에서 계정 삭제
