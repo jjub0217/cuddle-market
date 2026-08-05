@@ -211,6 +211,26 @@ describe('소셜 계정 안내', () => {
     expect(screen.queryByRole('link', { name: '로그인하러 가기' })).not.toBeInTheDocument()
   })
 
+  it('막다른 길이면 인증코드 전송·로그인으로 돌아가기를 숨긴다', async () => {
+    const user = userEvent.setup()
+    sendValidCode.mockRejectedValue(serverError('카카오로 가입한 계정입니다. 카카오 로그인을 이용해주세요.'))
+    render(<FindPasswordForm />)
+
+    const emailInput = screen.getByPlaceholderText(EMAIL_PLACEHOLDER)
+    await user.type(emailInput, 'kakao@example.com')
+    await user.click(screen.getByRole('button', { name: '인증코드 전송' }))
+
+    // 남는 길은 하나뿐이다
+    expect(await screen.findByRole('link', { name: '로그인하러 가기' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '인증코드 전송' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: '로그인으로 돌아가기' })).not.toBeInTheDocument()
+
+    // 이메일을 고치면 원래대로 돌아온다 — 오타였을 수 있다
+    await user.clear(emailInput)
+    expect(screen.getByRole('button', { name: '인증코드 전송' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '로그인으로 돌아가기' })).toBeInTheDocument()
+  })
+
   it('서버가 어느 소셜인지 알려주면 콕 집어 말한다', async () => {
     const user = userEvent.setup()
     // 백엔드가 AuthProvider.displayName 을 담아 주는 새 문구

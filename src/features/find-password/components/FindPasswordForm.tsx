@@ -354,23 +354,39 @@ export function FindPasswordForm() {
                 {/* 서버가 막았을 때 「안 된다」로 끝내지 않고 갈 길을 준다.
                     여기 온 사람은 대개 카카오·구글로 가입한 걸 잊고 이메일 로그인을 하려다 온 사람이다.
                     앱도 같은 안내를 한다(#838). */}
+                {/* 막다른 길이면 **그 길만 남긴다.**
+                    ① 「인증코드 전송」을 숨긴다 — 방금 서버가 「안 된다」고 답한 행동이다.
+                       가장 진한 단추가 눌러도 같은 오류가 나는 단추이면 위계가 거꾸로다.
+                       흐리게(disabled) 두는 대신 숨기는 이유: 흐린 단추는 「왜 안 되지?」를
+                       만들지만, 숨기면 그 질문이 안 생긴다. 이유는 바로 위 박스가 말한다.
+                    ② 「로그인으로 돌아가기」도 숨긴다 — 박스 단추와 **가는 곳이 같다.**
+                       한 화면에 목적지가 같은 길이 둘이면 「뭐가 다르지?」를 생각하게 만든다.
+                    이메일 칸은 남긴다. 오타였을 수 있고, 고치면 이 박스가 사라지며
+                    아래 단추들이 돌아온다(resultIsCurrent). */}
                 {blocked ? (
                   <div className="bg-surface-container-low flex flex-col gap-3 rounded-lg p-4">
                     <p className="text-sm whitespace-pre-line text-gray-700">{blockedText(blocked)}</p>
                     <Link
                       href={blocked === 'notFound' ? ROUTES.SIGNUP : ROUTES.LOGIN}
-                      className="bg-primary-100 text-primary rounded-lg px-4 py-2 text-center text-sm font-semibold"
+                      className="bg-primary-600 rounded-lg px-4 py-2.5 text-center text-sm font-semibold text-white"
                     >
                       {blocked === 'notFound' ? '회원가입하러 가기' : '로그인하러 가기'}
                     </Link>
                   </div>
-                ) : null}
-                <Button size="md" className="bg-primary-600 w-full cursor-pointer text-sm text-white" type="submit">
-                  인증코드 전송
-                </Button>
-                <Link href={ROUTES.LOGIN} className="text-primary w-full text-center text-sm font-medium">
-                  로그인으로 돌아가기
-                </Link>
+                ) : (
+                  <>
+                    <Button
+                      size="md"
+                      className="bg-primary-600 w-full cursor-pointer text-sm text-white"
+                      type="submit"
+                    >
+                      인증코드 전송
+                    </Button>
+                    <Link href={ROUTES.LOGIN} className="text-primary w-full text-center text-sm font-medium">
+                      로그인으로 돌아가기
+                    </Link>
+                  </>
+                )}
               </div>
             )}
           </div>

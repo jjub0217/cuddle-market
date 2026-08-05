@@ -286,13 +286,16 @@ const styles = StyleSheet.create({
   formError: { fontSize: 13, fontWeight: '600', color: '#C91D1D' },
   blockedBox: { backgroundColor: '#F9FAFB', borderRadius: 8, padding: 14, gap: 10 },
   blockedText: { fontSize: 13, lineHeight: 19, color: '#374151' },
-  // 카카오 노란색·구글 흰색과 겹치지 않게 앱의 보조 단추 색(primary-100)을 쓴다
+  // 막다른 길에서는 **이 단추가 유일한 길**이라 주 단추 색을 쓴다(앱의 기본 단추와 같은 값).
+  // 연한 색으로 두면, 방금 서버가 「안 된다」고 답한 「인증받기」보다 덜 눈에 띄어 위계가
+  // 거꾸로가 된다. 웹은 아래 「인증코드 전송」을 숨겨서 같은 결과를 만든다 —
+  // 앱은 그 단추가 칸 안(trailing)에 있어 숨기면 칸이 갑자기 달라 보여서 색으로 가른다.
   blockedButton: {
-    height: 40,
+    height: 44,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F4E3BF',
+    backgroundColor: '#111827',
   },
-  blockedButtonLabel: { fontSize: 14, fontWeight: '600', color: '#633F00' },
+  blockedButtonLabel: { fontSize: 15, fontWeight: '600', color: '#FFFFFF' },
 });
