@@ -31,6 +31,12 @@ export function FindPasswordForm() {
     status: 'idle' | 'success' | 'error'
     message: string
   }>({ status: 'idle', message: '' })
+  // 「인증코드를 실제로 받아 낸 적이 있는가」. 단계를 앞으로 미는 건 이 값 하나뿐이다.
+  //
+  // sendValidCodeResult는 **마지막 전송의 결과 문구**를 담는 자리라서 단계 판단에는 못 쓴다.
+  // 2단계에서 「재전송」이 실패하면 그 값이 'error'로 바뀌는데, 그걸로 단계를 정하면
+  // 이미 코드를 받아 넣고 있던 사용자가 1단계로 튕겨 나가 넣던 코드를 잃는다.
+  const [isCodeSent, setIsCodeSent] = useState(false)
   const [passwordResetError, setPasswordResetError] = useState<string | null>(null)
   const {
     handleSubmit,
@@ -67,11 +73,24 @@ export function FindPasswordForm() {
     return passwordMatchResult
   }, [passwordResetError, passwordMatchResult])
 
-  const currentStep: 1 | 2 | 3 = checkValidCodeResult.status !== 'idle' ? 3 : sendValidCodeResult.status !== 'idle' ? 2 : 1
+  // 성공했을 때만 다음 단계로 민다.
+  //
+  // 예전에는 `!== 'idle'`이었다. 상태가 셋(idle·success·error)이라 실패도 참이 되어,
+  // 소셜 가입 이메일(400 「소셜 로그인 사용자는…」)이나 탈퇴한 계정 이메일처럼
+  // 서버가 거절한 경우에도 인증코드 칸으로 넘어가 버렸다.
+  //
+  // 아래 그리는 쪽의 조건과 **같은 값**을 봐야 한다. 예전에는 단계 표시(StepIndicator·
+  // StepHeader)와 실제 칸이 서로 다른 조건을 봐서, 코드를 틀리면 칸은 2단계인데
+  // 표시만 3단계로 바뀌는 어긋남이 있었다.
+  const currentStep: 1 | 2 | 3 = checkValidCodeResult.status === 'success' ? 3 : isCodeSent ? 2 : 1
 
   const onSubmit = async () => {
+    // 재전송이면 앞서 뜬 코드 확인 결과를 지운다. 안 지우면 「만료된 인증 코드입니다」 같은
+    // 옛 오류가 새로 보낸 결과 문구를 계속 가린다.
+    setCheckValidCodeResult({ status: 'idle', message: '' })
     try {
       await sendValidCode(email)
+      setIsCodeSent(true)
       setSendValidCodeResult({
         status: 'success',
         message: '인증 번호를 발송했습니다.',
@@ -116,6 +135,7 @@ export function FindPasswordForm() {
   }
 
   const handlePreviousStep = () => {
+    setIsCodeSent(false)
     setSendValidCodeResult({ status: 'idle', message: '' })
     setCheckValidCodeResult({ status: 'idle', message: '' })
   }
@@ -207,7 +227,7 @@ export function FindPasswordForm() {
                   비밀번호 변경 완료
                 </Button>
               </div>
-            ) : sendValidCodeResult.status !== 'idle' ? (
+            ) : isCodeSent ? (
               <div className="flex flex-col gap-6">
                 <div className="flex flex-col gap-1">
                   <RequiredLabel required={false} labelClass="font-medium text-sm">
@@ -257,6 +277,9 @@ export function FindPasswordForm() {
                     error={errors.email}
                     border
                     borderColor="border-gray-400"
+                    // 전송이 실패하면 1단계에 머무르므로, 실패 사유를 보여 줄 자리도 여기여야 한다.
+                    // 이게 없으면 서버가 거절한 이유(소셜 가입 이메일·없는 계정)를 아무도 못 본다.
+                    checkResult={sendValidCodeResult.status === 'error' ? sendValidCodeResult : undefined}
                     registration={register('email', authValidationRules.email)}
                   />
                 </div>
