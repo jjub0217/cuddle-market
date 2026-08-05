@@ -5,22 +5,23 @@
 
 ## 어디까지 됐나
 
-```
-1층  서버 붙이기 · 타입 · 시험         ✅ 폰에서 끝냄 (시험 8)
-2층  목록 조각 · 카테고리 알약 · 시험    ✅ 폰에서 끝냄 (시험 10)
-2층  상세 화면 · 훅 · 시험             ✅ 폰에서 끝냄
-3층  지도 · 탭 등록 · 실기기           ⬜ 맥 앞에서
-```
+### 1·2층 — 폰에서 끝냄 (커밋 `d815d793`)
 
-만들어 둔 것:
+- [x] **타입 못 박기** `mobile/lib/places/types.ts` — 서버 DTO 를 직접 열어 맞췄다. `CATEGORIES`·`DEFAULT_CENTER` 도 여기 있다
+- [x] **서버 붙이기** `mobile/lib/places/api.ts` + 시험 8 — `getPlaces` · `getPlaceDetail`
+- [x] **목록 항목** `mobile/components/places/place-list-item.tsx` + 시험
+- [x] **카테고리 알약** `mobile/components/places/category-tabs.tsx` + 시험 (둘 합쳐 10)
+- [x] **상세 훅** `mobile/lib/places/use-place-detail.ts` + 시험 6
+- [x] **상세 화면** `mobile/app/places/[id].tsx`
+- [x] 게이트 `pnpm gate:mobile` 초록 — 336시험 (312 → 336)
+- [x] 마커 검증 — 조회 좌표 망가뜨리기 · 실패 시 옛 값 지우는 줄 지우기 → 정확히 2개만 실패
 
-```
-mobile/lib/places/types.ts              타입 · CATEGORIES · DEFAULT_CENTER
-mobile/lib/places/api.ts                getPlaces · getPlaceDetail
-mobile/lib/places/use-place-detail.ts   상세 훅
-mobile/components/places/               목록 항목 · 카테고리 알약
-mobile/app/places/[id].tsx              상세 화면
-```
+### 3층 — 맥 앞에서
+
+- [ ] Task 1 지도 모듈 + 키 숨기기
+- [ ] Task 2 플레이스 화면 (탭 · 지도 · 목록)
+- [ ] Task 3 실기기 확인
+- [ ] PR (3층까지 끝내고 한 번에 — 지금 올리면 지도 없는 플레이스가 머지된다)
 
 ---
 
