@@ -83,6 +83,13 @@ export const fieldStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#F3F4F6',
+    // 최소 너비를 못 박는다. 안 그러면 **글자가 바뀔 때마다 단추 너비가 흔들리고**,
+    // 옆 칸이 flex: 1 이라 그만큼 늘었다 줄었다 한다. 실기기에서 이렇게 보였다:
+    //   [이메일 칸 ──────][인증받기]  누르면
+    //   [이메일 칸 ────────────][○]   ← 로딩 표시가 4글자보다 좁아 단추가 줄고 칸이 늘어남
+    //   [이메일 칸 ────────][재전송]   ← 라벨이 3글자라 처음과도 다름
+    // 84 는 이 자리에서 가장 긴 말(「인증받기」 4글자 · 14px)이 들어가는 너비다.
+    minWidth: 84,
   },
   buttonPressed: {
     opacity: 0.6,
