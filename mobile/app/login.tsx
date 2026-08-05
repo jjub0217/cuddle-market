@@ -3,7 +3,6 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import {
   KeyboardAvoidingView,
-  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -16,7 +15,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { SocialLoginButtons } from '@/components/auth/social-login-buttons';
 import { LOGO_ASPECT_RATIO } from '@/components/ui/app-header';
 import { fetchMe } from '@/lib/profile';
-import { FIND_PASSWORD_URL } from '@/lib/support-links';
 import { showToast } from '@/lib/toast';
 import { ChevronLeft } from 'lucide-react-native';
 
@@ -119,12 +117,14 @@ export default function LoginScreen() {
 
               웹은 문구가 다르다(폼 안의 「비밀번호를 잊으셨나요?」 · 「회원가입하기」).
               웹의 그 둘은 각자 다른 자리에 흩어져 있어서 문장으로 풀어 쓴 것이고, 여기는
-              나란한 링크 둘이라 이름만 남긴다. 「비밀번호 찾기」는 이 링크가 여는 웹 페이지의
-              제목과 같은 말이다(FindPasswordPage.tsx). */}
+              나란한 링크 둘이라 이름만 남긴다.
+
+              「비밀번호 찾기」는 #829 에서 웹 페이지를 열게 해 뒀던 것을 #838 에서 앱 안
+              화면으로 바꿨다. 문구는 그 화면의 제목과 같은 말이다(app/find-password.tsx). */}
           <View style={styles.bottomLinks}>
             <Pressable
-              onPress={() => void Linking.openURL(FIND_PASSWORD_URL)}
-              accessibilityRole="link"
+              onPress={() => router.push('/find-password')}
+              accessibilityRole="button"
               hitSlop={8}
               style={({ pressed }) => (pressed ? styles.bottomLinkPressed : undefined)}
             >

@@ -1,4 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
   ActivityIndicator,
@@ -28,6 +29,7 @@ function looksLikeEmail(value: string): boolean {
 
 export function LoginForm({ onSuccess }: Props) {
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -113,6 +115,19 @@ export function LoginForm({ onSuccess }: Props) {
         />
       </View>
 
+      {/* 웹도 비밀번호 칸 아래에 같은 링크를 둔다(LoginForm.tsx).
+          비밀번호를 떠올리지 못했을 때 빠져나갈 길은 **비밀번호를 치는 자리 옆**에 있어야 한다.
+          관문(app/login.tsx) 아래에도 같은 곳으로 가는 길이 하나 더 있다 — 여기서 막힌 사람이
+          한 화면 뒤로 나가지 않아도 되게. */}
+      <Pressable
+        onPress={() => router.push('/find-password')}
+        accessibilityRole="button"
+        hitSlop={8}
+        style={({ pressed }) => (pressed ? styles.findPasswordPressed : undefined)}
+      >
+        <Text style={styles.findPassword}>비밀번호를 잊으셨나요?</Text>
+      </Pressable>
+
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       <Pressable
@@ -168,6 +183,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#C91D1D',
   },
+  // 밑줄을 준다. 이 줄은 위아래가 칸과 단추라 링크임을 알릴 다른 단서가 없다
+  // (관문 아래 링크 줄은 통째로 링크라 밑줄을 안 준다 — app/login.tsx).
+  findPassword: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#4B5563',
+    textDecorationLine: 'underline',
+  },
+  findPasswordPressed: { opacity: 0.6 },
   submit: {
     height: 48,
     borderRadius: 8,
