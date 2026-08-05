@@ -1,5 +1,12 @@
 import { useCallback } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   Easing,
@@ -21,6 +28,20 @@ import type { PlaceListItem as PlaceListItemType } from '@/lib/places/types';
 //
 // ⚠️ 이게 앱에서 제스처를 쓰는 첫 자리다. app/_layout.tsx 를 GestureHandlerRootView 로
 //    감싸 두었다 — 없으면 안드로이드에서 **조용히 아무 반응이 없다**.
+
+// ⚠️⚠️ **높이를 애니메이션하지 않는다. 위아래로 옮긴다.**
+//
+// 처음엔 height 를 직접 움직였다. 실기기에서 이렇게 됐다(2026-08-06):
+//   끌어도 화면이 안 따라옴 → 탭을 나갔다 오니 그제야 올라가 있음 → 내릴 때 덜커덕거림
+//
+// 높이가 바뀌면 **매 프레임 배치를 다시 계산**해야 한다. 안드로이드에서 그 계산이
+// 프레임을 못 따라가면 값만 바뀌고 화면은 다시 그릴 때까지 안 움직인다.
+//
+// 그래서 시트는 **펼친 높이로 못 박아 두고**, 접힘은 아래로 밀어 둔 상태로 만든다.
+// 옮기기는 배치를 안 건드려서 매끄럽다.
+//
+//   펼침   translateY = 0
+//   접힘   translateY = 펼친높이 − 접힌높이   (그만큼 화면 밖으로 내려가 있다)
 
 /** 접었을 때 보이는 높이. 손잡이 + 한 줄 반쯤 보여서 「더 있다」가 읽힌다. */
 const COLLAPSED = 150;
@@ -48,43 +69,45 @@ interface Props {
 
 export function PlaceSheet({ places, loading, onPressPlace }: Props) {
   const { height: screenHeight } = useWindowDimensions();
-  const expanded = Math.round(screenHeight * EXPANDED_RATIO);
+  const expandedHeight = Math.round(screenHeight * EXPANDED_RATIO);
+  /** 접혔을 때 아래로 내려가 있는 거리. 0이면 완전히 펼쳐진 상태다. */
+  const hiddenAmount = expandedHeight - COLLAPSED;
 
-  // 시트 높이를 직접 움직인다. 위로 끌면 커지고 아래로 끌면 작아진다.
-  const height = useSharedValue(COLLAPSED);
-  // 손가락을 대기 시작한 순간의 높이. 끄는 동안 여기서부터 더하고 뺀다.
-  const startHeight = useSharedValue(COLLAPSED);
+  const offset = useSharedValue(hiddenAmount);
+  /** 손가락을 대기 시작한 순간의 자리. 끄는 동안 여기서부터 더하고 뺀다. */
+  const startOffset = useSharedValue(hiddenAmount);
 
   const pan = Gesture.Pan()
     .onStart(() => {
-      startHeight.value = height.value;
+      startOffset.value = offset.value;
     })
     .onUpdate((e) => {
-      // 화면 좌표는 아래로 갈수록 커진다. 위로 끌면 translationY 가 음수라 높이가 는다.
-      const next = startHeight.value - e.translationY;
-      // 두 자리 밖으로는 안 나가게 잡아 둔다. 안 잡으면 화면 밖까지 늘어난다.
-      height.value = Math.min(Math.max(next, COLLAPSED), expanded);
+      // 위로 끌면 translationY 가 음수 → offset 이 줄어 시트가 올라온다.
+      const next = startOffset.value + e.translationY;
+      // 두 자리 밖으로는 안 나가게 잡아 둔다.
+      offset.value = Math.min(Math.max(next, 0), hiddenAmount);
     })
     .onEnd((e) => {
       // 어디로 붙일지 먼저 정한다.
       // 빠르게 튕겼으면 그 방향을 따른다 — 사람은 「휙」 올리면 끝까지 가길 기대한다.
       // 천천히 놓았으면 가까운 쪽으로.
-      const middle = (COLLAPSED + expanded) / 2;
       const 펼침 =
         e.velocityY < -FLING_SPEED
           ? true
           : e.velocityY > FLING_SPEED
             ? false
-            : height.value > middle;
+            : offset.value < hiddenAmount / 2;
 
       // 펼칠 때는 느긋하게, 접을 때는 빠르게 — 접기는 이미 결정한 동작이라 기다릴 이유가 없다.
-      height.value = withTiming(펼침 ? expanded : COLLAPSED, {
+      offset.value = withTiming(펼침 ? 0 : hiddenAmount, {
         duration: 펼침 ? OPEN_MS : CLOSE_MS,
         easing: 펼침 ? Easing.out(Easing.cubic) : Easing.in(Easing.cubic),
       });
     });
 
-  const sheetStyle = useAnimatedStyle(() => ({ height: height.value }));
+  const sheetStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: offset.value }],
+  }));
 
   const renderItem = useCallback(
     ({ item }: { item: PlaceListItemType }) => (
@@ -93,11 +116,6 @@ export function PlaceSheet({ places, loading, onPressPlace }: Props) {
     [onPressPlace]
   );
 
-  // 굴릴 목록이 있을 때만 손잡이로 자리를 한정한다.
-  //
-  // 왜 나누나 — 목록까지 끌리게 두면 세로로 굴리는 동작과 부딪혀 둘 다 어정쩡해진다.
-  // 하지만 목록이 비었을 때는 굴릴 게 없으므로 **시트 아무 데나 끌 수 있어야** 한다.
-  // 손잡이는 손가락보다 작아서, 거기만 되면 「안 끌린다」로 느껴진다(2026-08-06 실기기).
   const 목록있음 = !loading && places.length > 0;
 
   const 손잡이 = (
@@ -119,7 +137,7 @@ export function PlaceSheet({ places, loading, onPressPlace }: Props) {
   );
 
   return (
-    <Animated.View style={[styles.sheet, sheetStyle]}>
+    <Animated.View style={[styles.sheet, { height: expandedHeight }, sheetStyle]}>
       {목록있음 ? (
         <>
           {/* 굴릴 목록이 있으니 손잡이에서만 끈다 — 목록까지 끌리면 세로로 굴리는
