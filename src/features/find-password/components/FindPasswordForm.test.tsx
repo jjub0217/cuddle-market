@@ -7,7 +7,7 @@ import { FindPasswordForm } from './FindPasswordForm'
 // 비밀번호 찾기 3단계. #836에서 「실패해도 다음 단계로 넘어가던 것」을 고쳤다.
 //
 //   ① 이메일 입력    이메일 칸 + [인증코드 전송]
-//   ② 이메일 인증    인증코드 칸 + [재전송] + [인증하기] + [이전단계]
+//   ② 이메일 인증    인증코드 칸 + [재전송] + [인증하기] + [이메일 변경]
 //   ③ 비밀번호 재설정 새 비밀번호 칸 둘 + [비밀번호 변경 완료]
 //
 // 서버가 실제로 메일을 보내므로 진짜 서버로는 시험을 못 한다.
@@ -104,7 +104,7 @@ describe('① 이메일 입력', () => {
     await user.type(screen.getByPlaceholderText(EMAIL_PLACEHOLDER), 'gone@example.com')
     await user.click(screen.getByRole('button', { name: '인증코드 전송' }))
 
-    expect(await screen.findByText(/가입 이력이 없는 이메일이에요/)).toBeInTheDocument()
+    expect(await screen.findByText(/가입된 계정을 찾지 못했어요/)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: '회원가입하러 가기' })).toHaveAttribute('href', '/auth/signup')
     expect(screen.queryByPlaceholderText(CODE_PLACEHOLDER)).not.toBeInTheDocument()
   })
@@ -160,10 +160,10 @@ describe('② 이메일 인증', () => {
     expect(screen.queryByText('만료된 인증 코드입니다. 인증코드를 재발급 받아주세요.')).not.toBeInTheDocument()
   })
 
-  it('「이전단계」를 누르면 ①로 돌아간다', async () => {
+  it('「이메일 변경」을 누르면 ①로 돌아간다', async () => {
     const user = await goToStep2()
 
-    await user.click(screen.getByRole('button', { name: '이전단계' }))
+    await user.click(screen.getByRole('button', { name: '이메일 변경' }))
 
     expect(await screen.findByRole('button', { name: '인증코드 전송' })).toBeInTheDocument()
     expect(screen.queryByPlaceholderText(CODE_PLACEHOLDER)).not.toBeInTheDocument()
@@ -206,7 +206,7 @@ describe('소셜 계정 안내', () => {
     await user.type(screen.getByPlaceholderText(EMAIL_PLACEHOLDER), 'gone@example.com')
     await user.click(screen.getByRole('button', { name: '인증코드 전송' }))
 
-    expect(await screen.findByText(/가입 이력이 없는 이메일이에요/)).toBeInTheDocument()
+    expect(await screen.findByText(/가입된 계정을 찾지 못했어요/)).toBeInTheDocument()
     expect(screen.queryByText(/카카오 또는 구글로 가입한 계정/)).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: '로그인하러 가기' })).not.toBeInTheDocument()
   })

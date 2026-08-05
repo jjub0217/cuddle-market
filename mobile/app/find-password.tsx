@@ -41,7 +41,7 @@ function mmss(totalSeconds: number): string {
  */
 function blockedText(blocked: 'kakao' | 'google' | 'social' | 'notFound'): string {
   if (blocked === 'notFound') {
-    return '가입 이력이 없는 이메일이에요.\n이메일을 다시 확인해주세요.';
+    return '가입된 계정을 찾지 못했어요.\n이메일을 다시 확인해주세요.';
   }
   if (blocked === 'social') {
     return '카카오 또는 구글로 가입한 계정이에요.\n비밀번호 대신 그 방법으로 로그인해주세요.';
@@ -198,15 +198,33 @@ export default function FindPasswordScreen() {
               />
 
 
-              <Pressable
-                onPress={() => void form.sendCode()}
-                disabled={form.sending}
-                accessibilityRole="button"
-                hitSlop={8}
-                style={({ pressed }) => (pressed ? styles.pressed : undefined)}
-              >
-                <Text style={styles.linkText}>인증코드 다시 받기</Text>
-              </Pressable>
+              {/* 보조 링크 두 줄기. 로그인 관문 아래와 같은 모양이다(세로 막대로 가른다).
+                  「이메일 변경」이 필요한 이유: 위 안내문에 방금 넣은 이메일이 보이는데,
+                  오타를 발견해도 고칠 자리가 없었다. 헤더 ‹ 로 돌아갈 수는 있었지만
+                  그건 「화면 닫기」로 읽혀서 아무도 안 누른다.
+                  「이전 단계」가 아니라 「이메일 변경」이라 쓴다 — 목적을 말해야 알아본다. */}
+              <View style={styles.bottomLinks}>
+                <Pressable
+                  onPress={() => void form.sendCode()}
+                  disabled={form.sending}
+                  accessibilityRole="button"
+                  hitSlop={8}
+                  style={({ pressed }) => (pressed ? styles.pressed : undefined)}
+                >
+                  <Text style={styles.linkText}>인증코드 다시 받기</Text>
+                </Pressable>
+
+                <View style={styles.bottomLinkDivider} />
+
+                <Pressable
+                  onPress={form.goPreviousStep}
+                  accessibilityRole="button"
+                  hitSlop={8}
+                  style={({ pressed }) => (pressed ? styles.pressed : undefined)}
+                >
+                  <Text style={styles.linkText}>이메일 변경</Text>
+                </Pressable>
+              </View>
             </View>
           ) : null}
 
@@ -276,12 +294,14 @@ const styles = StyleSheet.create({
   },
   submitLabel: { fontSize: 15, fontWeight: '600', color: '#FFFFFF' },
   pressed: { opacity: 0.8 },
+  bottomLinks: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+  // 희미한 회색 세로 막대. 로그인 관문 아래 줄과 같은 값이다
+  bottomLinkDivider: { width: 1, height: 12, marginHorizontal: 12, backgroundColor: '#D1D5DB' },
   linkText: {
     fontSize: 14,
     fontWeight: '500',
     color: '#4B5563',
     textAlign: 'center',
-    textDecorationLine: 'underline',
   },
   formError: { fontSize: 13, fontWeight: '600', color: '#C91D1D' },
   blockedBox: { backgroundColor: '#F9FAFB', borderRadius: 8, padding: 14, gap: 10 },

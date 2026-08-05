@@ -33,7 +33,7 @@ interface FindPasswordFormValues {
  */
 function blockedText(blocked: 'kakao' | 'google' | 'social' | 'notFound'): string {
   if (blocked === 'notFound') {
-    return '가입 이력이 없는 이메일이에요.\n이메일을 다시 확인해주세요.'
+    return '가입된 계정을 찾지 못했어요.\n이메일을 다시 확인해주세요.'
   }
   if (blocked === 'social') {
     return '카카오 또는 구글로 가입한 계정이에요.\n비밀번호 대신 그 방법으로 로그인해주세요.'
@@ -317,13 +317,16 @@ export function FindPasswordForm() {
                   >
                     인증하기
                   </Button>
+                  {/* 「이전단계」가 아니라 「이메일 변경」이라 쓴다 — 시스템 말투 대신 목적을
+                      말해야 알아본다. 위 안내문에 방금 넣은 이메일이 보이는데 오타를
+                      발견해도 무엇을 눌러야 할지 몰랐다. 앱도 같은 말을 쓴다. */}
                   <Button
                     size="md"
                     className="w-full cursor-pointer border border-gray-400 bg-white text-gray-900"
                     type="button"
                     onClick={handlePreviousStep}
                   >
-                    이전단계
+                    이메일 변경
                   </Button>
                 </div>
               </div>
