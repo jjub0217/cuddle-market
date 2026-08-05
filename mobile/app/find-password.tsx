@@ -207,26 +207,31 @@ export default function FindPasswordScreen() {
                   그건 「화면 닫기」로 읽혀서 아무도 안 누른다.
                   「이전 단계」가 아니라 「이메일 변경」이라 쓴다 — 목적을 말해야 알아본다.
                   되돌아가는 길을 위에, 앞으로 가는 길(인증하기)을 아래에 둔다(웹과 같은 차례). */}
-              <Pressable
-                onPress={form.goPreviousStep}
-                accessibilityRole="button"
-                style={({ pressed }) => [styles.secondary, pressed && styles.pressed]}
-              >
-                <Text style={styles.secondaryLabel}>이메일 변경</Text>
-              </Pressable>
+              {/* 단추 둘은 **한 덩어리**다 — 같은 자리에서 고르는 것이라 붙어 있어야 하고,
+                  위 칸과는 떨어져야 「입력」과 「행동」이 갈린다. 웹과 같은 간격(10)이다.
+                  묶음 밖 간격은 group 의 16 이 그대로 쓰인다. */}
+              <View style={styles.actions}>
+                <Pressable
+                  onPress={form.goPreviousStep}
+                  accessibilityRole="button"
+                  style={({ pressed }) => [styles.secondary, pressed && styles.pressed]}
+                >
+                  <Text style={styles.secondaryLabel}>이메일 변경</Text>
+                </Pressable>
 
-              <Pressable
-                onPress={() => void form.submitCode()}
-                disabled={form.verifying}
-                accessibilityRole="button"
-                style={({ pressed }) => [styles.submit, pressed && styles.pressed]}
-              >
-                {form.verifying ? (
-                  <ActivityIndicator color="#FFFFFF" />
-                ) : (
-                  <Text style={styles.submitLabel}>인증하기</Text>
-                )}
-              </Pressable>
+                <Pressable
+                  onPress={() => void form.submitCode()}
+                  disabled={form.verifying}
+                  accessibilityRole="button"
+                  style={({ pressed }) => [styles.submit, pressed && styles.pressed]}
+                >
+                  {form.verifying ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <Text style={styles.submitLabel}>인증하기</Text>
+                  )}
+                </Pressable>
+              </View>
             </View>
           ) : null}
 
@@ -286,6 +291,8 @@ const styles = StyleSheet.create({
   headlineTitle: { fontSize: 18, fontWeight: '700', color: '#111827' },
   headlineDesc: { fontSize: 14, color: '#6B7280' },
   group: { gap: 16 },
+  // 단추 묶음. 웹의 gap-2.5(10px)와 같은 값이다
+  actions: { gap: 10 },
   // 이메일 로그인 화면의 「로그인」 단추와 같은 값이다. 두 화면이 달라 보이면 안 된다
   submit: {
     height: 48,
