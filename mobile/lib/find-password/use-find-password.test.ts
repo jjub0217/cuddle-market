@@ -57,7 +57,7 @@ describe('1단계 — 인증코드 보내기', () => {
     expect(result.current.secondsLeft).toBeGreaterThan(0);
   });
 
-  it('소셜 계정이면 1단계에 머물고 socialBlocked 가 켜진다', async () => {
+  it('소셜 계정이면 1단계에 머물고 blocked 가 social 이 된다', async () => {
     const { result } = await renderHook(() => useFindPassword());
     await act(async () => result.current.setValue('email', 'me@cuddle.com'));
     mockedApi.sendResetCode.mockRejectedValue(
@@ -68,11 +68,11 @@ describe('1단계 — 인증코드 보내기', () => {
     });
 
     expect(result.current.step).toBe(1);
-    expect(result.current.socialBlocked).toBe(true);
-    expect(result.current.errors.email).toBe('소셜 로그인 사용자는 비밀번호 재설정이 불가능합니다.');
+    expect(result.current.blocked).toBe('social');
+    expect(result.current.errors.email).toBeUndefined(); // 박스가 말하므로 칸 아래엔 안 띄운다
   });
 
-  it('없는 이메일이면 1단계에 머물고 socialBlocked 는 꺼진 채다', async () => {
+  it('없는 이메일이면 1단계에 머물고 blocked 가 notFound 가 된다', async () => {
     const { result } = await renderHook(() => useFindPassword());
     await act(async () => result.current.setValue('email', 'nobody@cuddle.com'));
     mockedApi.sendResetCode.mockRejectedValue(
@@ -83,8 +83,8 @@ describe('1단계 — 인증코드 보내기', () => {
     });
 
     expect(result.current.step).toBe(1);
-    expect(result.current.socialBlocked).toBe(false);
-    expect(result.current.errors.email).toBe('등록되지 않은 이메일입니다.');
+    expect(result.current.blocked).toBe('notFound');
+    expect(result.current.errors.email).toBeUndefined();
   });
 
   it('막힌 뒤 이메일을 고치면 안내가 사라진다', async () => {
@@ -96,10 +96,10 @@ describe('1단계 — 인증코드 보내기', () => {
     await act(async () => {
       await result.current.sendCode();
     });
-    expect(result.current.socialBlocked).toBe(true);
+    expect(result.current.blocked).toBe('social');
 
     await act(async () => result.current.setValue('email', 'other@cuddle.com'));
-    expect(result.current.socialBlocked).toBe(false);
+    expect(result.current.blocked).toBeNull();
   });
 });
 

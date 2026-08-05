@@ -86,7 +86,11 @@ describe('① 이메일 입력', () => {
     await user.type(screen.getByPlaceholderText(EMAIL_PLACEHOLDER), 'kakao@example.com')
     await user.click(screen.getByRole('button', { name: '인증코드 전송' }))
 
-    expect(await screen.findByText('소셜 로그인 사용자는 비밀번호 재설정이 불가능합니다.')).toBeInTheDocument()
+    // 서버 문구를 그대로 띄우지 않는다 — 사람 말로 다시 쓰고 갈 길을 함께 준다
+    expect(await screen.findByText(/카카오·구글로 가입한 계정이에요/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '로그인하러 가기' })).toHaveAttribute('href', '/auth/login')
+    // 같은 말을 칸 아래에 또 띄우지 않는다
+    expect(screen.queryByText('소셜 로그인 사용자는 비밀번호 재설정이 불가능합니다.')).not.toBeInTheDocument()
     expect(screen.queryByPlaceholderText(CODE_PLACEHOLDER)).not.toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '이메일 입력' })).toBeInTheDocument()
   })
@@ -100,7 +104,8 @@ describe('① 이메일 입력', () => {
     await user.type(screen.getByPlaceholderText(EMAIL_PLACEHOLDER), 'gone@example.com')
     await user.click(screen.getByRole('button', { name: '인증코드 전송' }))
 
-    expect(await screen.findByText('등록되지 않은 이메일입니다')).toBeInTheDocument()
+    expect(await screen.findByText(/가입 이력이 없는 이메일이에요/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '회원가입하러 가기' })).toHaveAttribute('href', '/auth/signup')
     expect(screen.queryByPlaceholderText(CODE_PLACEHOLDER)).not.toBeInTheDocument()
   })
 
@@ -201,9 +206,28 @@ describe('소셜 계정 안내', () => {
     await user.type(screen.getByPlaceholderText(EMAIL_PLACEHOLDER), 'gone@example.com')
     await user.click(screen.getByRole('button', { name: '인증코드 전송' }))
 
-    expect(await screen.findByText('등록되지 않은 이메일입니다')).toBeInTheDocument()
+    expect(await screen.findByText(/가입 이력이 없는 이메일이에요/)).toBeInTheDocument()
     expect(screen.queryByText(/카카오·구글로 가입한 계정/)).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: '로그인하러 가기' })).not.toBeInTheDocument()
+  })
+
+  it('이메일을 고치면 앞서 뜬 안내가 사라진다', async () => {
+    const user = userEvent.setup()
+    sendValidCode.mockRejectedValue(serverError('소셜 로그인 사용자는 비밀번호 재설정이 불가능합니다.'))
+    render(<FindPasswordForm />)
+
+    const emailInput = screen.getByPlaceholderText(EMAIL_PLACEHOLDER)
+    await user.type(emailInput, 'kakao@example.com')
+    await user.click(screen.getByRole('button', { name: '인증코드 전송' }))
+    expect(await screen.findByText(/카카오·구글로 가입한 계정이에요/)).toBeInTheDocument()
+
+    // 값을 고치면 그 값에 대한 판단은 무효다. 안 지우면 화면이 거짓말을 한다 —
+    // 다른 이메일을 넣었는데 「소셜 계정이에요」가 그대로 보였다(2026-08-05 신고).
+    await user.clear(emailInput)
+    expect(screen.queryByText(/카카오·구글로 가입한 계정이에요/)).not.toBeInTheDocument()
+
+    await user.type(emailInput, 'other@example.com')
+    expect(screen.queryByText(/카카오·구글로 가입한 계정이에요/)).not.toBeInTheDocument()
   })
 })
 

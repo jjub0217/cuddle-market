@@ -124,19 +124,26 @@ export default function FindPasswordScreen() {
                 }
               />
 
-              {/* 서버가 막았을 때 「안 된다」로 끝내지 않고 갈 길을 준다.
-                  여기 온 사람은 대개 카카오·구글로 가입한 걸 잊고 헤매다 온 사람이다. */}
-              {form.socialBlocked ? (
-                <View style={styles.socialBox}>
-                  <Text style={styles.socialText}>
-                    카카오·구글로 가입한 계정이에요.{'\n'}그 방법으로 로그인해주세요.
+              {/* 막다른 길 안내. 「고쳐서 다시 하세요」(칸 아래 빨간 오류)와 성격이 달라
+                  모양도 다르게 둔다 — 이건 「여기 말고 저쪽으로 가세요」다.
+                  둘 다 갈 곳을 함께 준다. 「안 됩니다」로 끝나면 그 사람은 거기서 떠난다. */}
+              {form.blocked ? (
+                <View style={styles.blockedBox}>
+                  <Text style={styles.blockedText}>
+                    {form.blocked === 'social'
+                      ? '카카오·구글로 가입한 계정이에요.\n그 방법으로 로그인해주세요.'
+                      : '가입 이력이 없는 이메일이에요.\n이메일을 다시 확인해주세요.'}
                   </Text>
                   <Pressable
-                    onPress={() => router.replace('/login')}
+                    onPress={() =>
+                      form.blocked === 'social' ? router.replace('/login') : router.replace('/signup')
+                    }
                     accessibilityRole="button"
-                    style={({ pressed }) => [styles.socialButton, pressed && styles.pressed]}
+                    style={({ pressed }) => [styles.blockedButton, pressed && styles.pressed]}
                   >
-                    <Text style={styles.socialButtonLabel}>로그인하러 가기</Text>
+                    <Text style={styles.blockedButtonLabel}>
+                      {form.blocked === 'social' ? '로그인하러 가기' : '회원가입하러 가기'}
+                    </Text>
                   </Pressable>
                 </View>
               ) : null}
@@ -260,15 +267,15 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   formError: { fontSize: 13, fontWeight: '600', color: '#C91D1D' },
-  socialBox: { backgroundColor: '#F9FAFB', borderRadius: 8, padding: 14, gap: 10 },
-  socialText: { fontSize: 13, lineHeight: 19, color: '#374151' },
+  blockedBox: { backgroundColor: '#F9FAFB', borderRadius: 8, padding: 14, gap: 10 },
+  blockedText: { fontSize: 13, lineHeight: 19, color: '#374151' },
   // 카카오 노란색·구글 흰색과 겹치지 않게 앱의 보조 단추 색(primary-100)을 쓴다
-  socialButton: {
+  blockedButton: {
     height: 40,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#F4E3BF',
   },
-  socialButtonLabel: { fontSize: 14, fontWeight: '600', color: '#633F00' },
+  blockedButtonLabel: { fontSize: 14, fontWeight: '600', color: '#633F00' },
 });

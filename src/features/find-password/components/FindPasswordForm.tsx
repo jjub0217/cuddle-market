@@ -23,10 +23,17 @@ interface FindPasswordFormValues {
 }
 
 export function FindPasswordForm() {
+  // 결과에 **어느 이메일에 대한 것인지**를 함께 담는다.
+  //
+  // 이게 없으면 이메일을 고쳐도 옛 판단이 남아 화면이 거짓말을 한다 — 소셜 이메일로 막힌 뒤
+  // 다른 이메일을 넣었는데 「소셜 계정이에요」가 그대로 보였다(2026-08-05 신고).
+  // useEffect 로 지우는 방법도 있지만, 효과 안에서 setState 를 하면 렌더가 연쇄된다
+  // (lint 가 막는다). 값을 비교해 **그릴 때 거르는** 편이 단순하고 틀릴 여지가 없다.
   const [sendValidCodeResult, setSendValidCodeResult] = useState<{
     status: 'idle' | 'success' | 'error'
     message: string
-  }>({ status: 'idle', message: '' })
+    email: string
+  }>({ status: 'idle', message: '', email: '' })
   const [checkValidCodeResult, setCheckValidCodeResult] = useState<{
     status: 'idle' | 'success' | 'error'
     message: string
@@ -56,6 +63,21 @@ export function FindPasswordForm() {
     },
   })
   const email = useWatch({ control, name: 'email' })
+
+  // 막다른 길 안내. 「고쳐서 다시 하세요」(칸 아래 오류)와 성격이 달라 모양도 다르게 둔다 —
+  // 이건 「여기 말고 저쪽으로 가세요」다. 앱도 같은 규칙이다(app/find-password.tsx).
+  //
+  // ⚠️ 소셜인지 아닌지는 **서버 문구**로 가릴 수밖에 없다. 서버가 오류를 전부
+  //    code: 'BAD_REQUEST' 로 내려서 다른 단서가 없다(GlobalExceptionHandler:99).
+  /** 지금 칸에 있는 이메일에 대한 결과인가. 아니면 옛 판단이라 안 보여준다. */
+  const resultIsCurrent = sendValidCodeResult.email === email
+
+  const blocked: 'social' | 'notFound' | null =
+    sendValidCodeResult.status !== 'error' || !resultIsCurrent
+      ? null
+      : sendValidCodeResult.message.includes('소셜')
+        ? 'social'
+        : 'notFound'
   const code = useWatch({ control, name: 'AuthenticationCode' })
   const password = useWatch({ control, name: 'password' })
   const passwordConfirm = useWatch({ control, name: 'passwordConfirm' })
@@ -96,6 +118,7 @@ export function FindPasswordForm() {
       setSendValidCodeResult({
         status: 'success',
         message: '인증 번호를 발송했습니다.',
+        email,
       })
     } catch (error) {
       console.error('인증코드 전송 실패:', error)
@@ -103,11 +126,13 @@ export function FindPasswordForm() {
         setSendValidCodeResult({
           status: 'error',
           message: error.response?.data?.message || '인증코드 전송에 실패했습니다.',
+          email,
         })
       } else {
         setSendValidCodeResult({
           status: 'error',
           message: '네트워크 오류가 발생했습니다.',
+          email,
         })
       }
     }
@@ -138,7 +163,7 @@ export function FindPasswordForm() {
 
   const handlePreviousStep = () => {
     setIsCodeSent(false)
-    setSendValidCodeResult({ status: 'idle', message: '' })
+    setSendValidCodeResult({ status: 'idle', message: '', email: '' })
     setCheckValidCodeResult({ status: 'idle', message: '' })
   }
 
@@ -288,26 +313,40 @@ export function FindPasswordForm() {
                     error={errors.email}
                     border
                     borderColor="border-gray-400"
-                    // 전송이 실패하면 1단계에 머무르므로, 실패 사유를 보여 줄 자리도 여기여야 한다.
-                    // 이게 없으면 서버가 거절한 이유(소셜 가입 이메일·없는 계정)를 아무도 못 본다.
-                    checkResult={sendValidCodeResult.status === 'error' ? sendValidCodeResult : undefined}
+                    // 막다른 길(소셜·없는 이메일)은 아래 박스가 말한다. 여기까지 띄우면
+                    // 같은 말이 두 줄로 겹친다. 그 밖의 실패(네트워크 등)만 칸 아래에 남긴다.
+                    checkResult={
+                      sendValidCodeResult.status === 'error' && resultIsCurrent && blocked === null
+                        ? sendValidCodeResult
+                        : undefined
+                    }
                     registration={register('email', authValidationRules.email)}
                   />
                 </div>
                 {/* 서버가 막았을 때 「안 된다」로 끝내지 않고 갈 길을 준다.
                     여기 온 사람은 대개 카카오·구글로 가입한 걸 잊고 이메일 로그인을 하려다 온 사람이다.
                     앱도 같은 안내를 한다(#838). */}
-                {sendValidCodeResult.status === 'error' && sendValidCodeResult.message.includes('소셜') ? (
+                {blocked ? (
                   <div className="bg-surface-container-low flex flex-col gap-3 rounded-lg p-4">
                     <p className="text-sm text-gray-700">
-                      카카오·구글로 가입한 계정이에요.
-                      <br />그 방법으로 로그인해주세요.
+                      {blocked === 'social' ? (
+                        <>
+                          카카오·구글로 가입한 계정이에요.
+                          <br />그 방법으로 로그인해주세요.
+                        </>
+                      ) : (
+                        <>
+                          가입 이력이 없는 이메일이에요.
+                          <br />
+                          이메일을 다시 확인해주세요.
+                        </>
+                      )}
                     </p>
                     <Link
-                      href={ROUTES.LOGIN}
+                      href={blocked === 'social' ? ROUTES.LOGIN : ROUTES.SIGNUP}
                       className="bg-primary-100 text-primary rounded-lg px-4 py-2 text-center text-sm font-semibold"
                     >
-                      로그인하러 가기
+                      {blocked === 'social' ? '로그인하러 가기' : '회원가입하러 가기'}
                     </Link>
                   </div>
                 ) : null}

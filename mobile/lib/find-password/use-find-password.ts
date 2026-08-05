@@ -39,7 +39,9 @@ export function useFindPassword() {
   const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [socialBlocked, setSocialBlocked] = useState(false);
+  // 막다른 길 안내. 「고쳐서 다시 하세요」(칸 아래 빨간 오류)와 달리
+  // 「여기 말고 저쪽으로 가세요」라서 화면이 다른 모양(박스)으로 그린다.
+  const [blocked, setBlocked] = useState<'social' | 'notFound' | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [sending, setSending] = useState(false);
   const [verifying, setVerifying] = useState(false);
@@ -87,8 +89,8 @@ export function useFindPassword() {
     setValues((prev) => ({ ...prev, [key]: value }));
     setErrors((prev) => ({ ...prev, [key]: undefined }));
     setFormError(null);
-    // 이메일을 고치면 「소셜 계정이라 막혔다」는 안내도 무효가 된다.
-    if (key === 'email') setSocialBlocked(false);
+    // 이메일을 고치면 그 이메일에 대한 판단(막다른 길 안내)도 무효가 된다.
+    if (key === 'email') setBlocked(null);
   }, []);
 
   const sendCode = useCallback(async () => {
@@ -100,7 +102,7 @@ export function useFindPassword() {
 
     const email = values.email.trim();
     setSending(true);
-    setSocialBlocked(false);
+    setBlocked(null);
     try {
       await sendResetCode(email);
       setStep(2);
@@ -111,8 +113,9 @@ export function useFindPassword() {
       // ⚠️ 여기서 단계를 되돌리지 않는다. 2단계의 「다시 받기」가 실패한 경우까지
       //    1단계로 밀려나면 사용자가 넣고 있던 코드를 잃는다.
       if (error instanceof PasswordResetRejectedError) {
-        setSocialBlocked(error.reason === 'social');
-        setErrors((prev) => ({ ...prev, email: error.message }));
+        // 서버 문구를 칸 아래에 **또** 띄우지 않는다. 박스가 안내와 갈 길을 다 맡는다 —
+        // 둘 다 두면 같은 말이 두 줄로 겹친다(웹이 그랬다).
+        setBlocked(error.reason === 'social' ? 'social' : 'notFound');
       } else {
         setErrors((prev) => ({
           ...prev,
@@ -200,7 +203,7 @@ export function useFindPassword() {
     values,
     errors,
     formError,
-    socialBlocked,
+    blocked,
     secondsLeft,
     sending,
     verifying,
