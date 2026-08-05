@@ -1,8 +1,8 @@
 import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
-import { ChevronLeft } from 'lucide-react-native';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { ProductForm } from '@/components/products/product-form';
 import { DEFAULT_PRODUCT_STATUS, type ProductFormValues } from '@/lib/product-form';
 import { productDetailHref, tabGroupOf } from '@/lib/product-routes';
@@ -14,8 +14,6 @@ import { showToast } from '@/lib/toast';
 //
 // 헤더 제목은 「상품 등록」이다. 웹은 「판매 상품 등록」이지만 앱은 판매 요청을 안 만들어서
 // 「판매 상품」이라고 구별할 이유가 없다.
-
-const HEADER_HEIGHT = 52; // 앱의 다른 헤더와 같은 값
 
 /**
  * 빈 폼. 고르는 값은 빈 글자로 두면 PickerField가 안내 문구를 보여준다.
@@ -73,18 +71,7 @@ export default function NewProductScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       {/* 헤더는 화면이 직접 그린다(신고 화면과 같은 이유) */}
-      <View style={styles.header}>
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={12}
-          accessibilityRole="button"
-          accessibilityLabel="뒤로 가기"
-          style={({ pressed }) => (pressed ? styles.pressed : undefined)}
-        >
-          <ChevronLeft size={26} color="#111827" />
-        </Pressable>
-        <Text style={styles.heading}>상품 등록</Text>
-      </View>
+      <ScreenHeader title="상품 등록" onPressIcon={() => router.back()} />
 
       <ProductForm
         initialValues={EMPTY_VALUES}
@@ -98,15 +85,5 @@ export default function NewProductScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF' },
-  header: {
-    height: HEADER_HEIGHT,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
-  },
-  heading: { fontSize: 18, fontWeight: '700', color: '#111827' },
   pressed: { opacity: 0.5 },
 });

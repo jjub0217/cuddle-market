@@ -1,19 +1,17 @@
 import { replyParentId } from '@cuddle/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ChevronLeft } from 'lucide-react-native';
 import { useRef, useState } from 'react';
 import {
   Keyboard,
   KeyboardAvoidingView,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { CommentInput, type ReplyTarget } from '@/components/community/comment-input';
 import { CommentList } from '@/components/community/comment-list';
 import { CommentMenuSheet } from '@/components/community/comment-menu-sheet';
@@ -28,8 +26,6 @@ import { showToast } from '@/lib/toast';
 // 웹도 이 화면에서는 하단 탭바를 숨긴다.
 //
 // 칸은 **늘 열려 있고 대상만 바뀐다** — 규칙 다섯은 계획서 앞부분에 적어 뒀다.
-
-const HEADER_HEIGHT = 52; // 앱의 다른 헤더와 같은 값
 
 export default function CommentThreadScreen() {
   const router = useRouter();
@@ -104,19 +100,8 @@ export default function CommentThreadScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <View style={styles.header}>
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={12}
-          accessibilityRole="button"
-          accessibilityLabel="뒤로 가기"
-          style={({ pressed }) => (pressed ? styles.pressed : undefined)}
-        >
-          <ChevronLeft size={26} color="#111827" />
-        </Pressable>
-        {/* 원 댓글은 빼고 답글 수만. 서버 commentCount는 글 전체 수라 여기 쓸 수 없다 */}
-        <Text style={styles.heading}>답글 {comment?.childrenCount ?? 0}</Text>
-      </View>
+      {/* 원 댓글은 빼고 답글 수만. 서버 commentCount는 글 전체 수라 여기 쓸 수 없다 */}
+      <ScreenHeader title={`답글 ${comment?.childrenCount ?? 0}`} onPressIcon={() => router.back()} />
 
       {/* 목록과 입력칸을 **함께** 밀어 올린다. 입력칸만 감싸면 키보드가 칸을 덮는다.
           ⚠️ 안드로이드에도 'padding'을 준다. 「안드로이드는 창이 저절로 줄어 안 줘도
@@ -172,16 +157,6 @@ export default function CommentThreadScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF' },
   flex: { flex: 1 },
-  header: {
-    height: HEADER_HEIGHT,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
-  },
-  heading: { fontSize: 18, fontWeight: '700', color: '#111827' },
   body: { paddingHorizontal: 16, paddingBottom: 16 },
   notFound: { paddingVertical: 40, textAlign: 'center', fontSize: 14, color: '#9CA3AF' },
   pressed: { opacity: 0.6 },

@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { RegionField } from '@/components/products/region-field';
 import { BirthDateField } from '@/components/signup/birth-date-field';
 import { Field, fieldStyles, messageStyles } from '@/components/signup/field';
@@ -165,8 +166,9 @@ export default function SocialSignupScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      {/* 뒤로가기가 없는 헤더. 자리만 잡아 제목이 상태바에 붙지 않게 한다 */}
-      <View style={styles.header} />
+      {/* 뒤로가기가 없다 — 건너뛸 수 없는 화면이라 아이콘을 아예 안 그린다.
+          제목은 있어야 한다. 스크롤하면 본문 제목(추가 정보 입력)은 위로 사라진다. */}
+      <ScreenHeader title="회원가입" divider={false} />
 
       <KeyboardAvoidingView
         style={styles.flex}
@@ -270,12 +272,10 @@ export default function SocialSignupScreen() {
   );
 }
 
-const HEADER_HEIGHT = 52;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF' },
   flex: { flex: 1 },
-  header: { height: HEADER_HEIGHT },
   content: { paddingHorizontal: 20, paddingTop: 12, gap: 16 },
   // 크기는 가입 화면 제목과 같은 값이다(signup.tsx styles.heading).
   // marginBottom은 두지 않는다 — 바로 아래 설명 문구가 붙어야 한 덩어리로 읽힌다

@@ -1,6 +1,6 @@
 import { COMMUNITY_REPORT_REASON, PRODUCT_REPORT_REASON, USER_REPORT_REASON } from '@cuddle/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Check, X } from 'lucide-react-native';
+import { Check } from 'lucide-react-native';
 import { useState } from 'react';
 import {
   ActivityIndicator,
@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { reportPost } from '@/lib/community';
 import { isAlreadyReported, reportProduct, reportUser } from '@/lib/reports';
 import { showToast } from '@/lib/toast';
@@ -28,7 +29,6 @@ import { showToast } from '@/lib/toast';
 // 당근처럼 「사유 목록 화면 → 상세 입력 화면」 두 단계로 쪼개지는 않는다. 그러려면
 // 사유마다 부제 문구를 새로 지어야 하는데, 우리 상수에는 라벨만 있다.
 
-const HEADER_HEIGHT = 52; // 앱의 다른 헤더와 같은 값
 const DETAIL_MAX = 300; // 웹 ReportApiErrors.detailReason.maxLength와 같은 값
 
 export default function ReportScreen() {
@@ -89,24 +89,14 @@ export default function ReportScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <View style={styles.header}>
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={12}
-          accessibilityRole="button"
-          accessibilityLabel="닫기"
-          style={({ pressed }) => (pressed ? styles.pressed : undefined)}
-        >
-          <X size={24} color="#111827" />
-        </Pressable>
-        <Text style={styles.heading}>
-          {kind === 'product'
-            ? '상품 신고하기'
-            : kind === 'post'
-              ? '게시글 신고하기'
-              : '사용자 신고하기'}
-        </Text>
-      </View>
+      {/* 끝내고 나가는 화면이라 뒤로(‹)가 아니라 닫기(✕)다 */}
+      <ScreenHeader
+        title={
+          kind === 'product' ? '상품 신고하기' : kind === 'post' ? '게시글 신고하기' : '사용자 신고하기'
+        }
+        icon="close"
+        onPressIcon={() => router.back()}
+      />
 
       <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
         {name ? (
@@ -180,16 +170,6 @@ export default function ReportScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF' },
-  header: {
-    height: HEADER_HEIGHT,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
-  },
-  heading: { fontSize: 18, fontWeight: '700', color: '#111827' },
   pressed: { opacity: 0.5 },
   pressedRow: { backgroundColor: '#F9FAFB' },
   body: { padding: 16, gap: 8, paddingBottom: 24 },
