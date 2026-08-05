@@ -6,22 +6,28 @@ import { StyleSheet, Text, View } from 'react-native';
 // ⚠️ 넣을지 뺄지는 실기기에서 보고 정하기로 했다(설계 §3). 화면에서 한 줄만 지우면
 //    빠지도록 이 조각 하나에 가둬 뒀다 — 색·상태를 바깥으로 흘리지 않는다.
 //
-// 숫자 **아래**에 이름표를 둔다(2026-08-05 실기기 확인 뒤 요청). 웹도 같은 배치다.
-// 처음에는 숫자와 이름표를 옆으로 나란히 뒀는데 한 줄이 길어져 좁은 폰에서 여유가 없었다.
-
-// 단계 이름.
+// **이름표를 두지 않는다 — 숫자만이다** (2026-08-05 실기기 확인 뒤 결정).
 //
-// ⚠️ 웹과 **일부러 다르다.** 웹은 「이메일 입력 · 이메일 인증 · 비밀번호 재설정」인데
-//    앱은 짧게 줄였다. 세로로 쌓아도 이름표 셋이 가로로 나란히 서는 것은 같아서,
-//    긴 말을 쓰면 좁은 폰에서 칸끼리 부딪힌다.
-//    줄인 말은 앱이 같은 단계의 헤더에 쓰는 제목과 맞췄다 — 한 화면 안에서 두 이름이
-//    갈리면 안 된다(app/find-password.tsx 의 headline).
-const LABELS = ['이메일', '인증', '새 비밀번호'];
+// 처음에는 웹처럼 숫자 아래에 「이메일 · 인증 · 새 비밀번호」를 달았는데, **바로 아래
+// 본문 제목이 같은 말을 또 했다.** 웹도 같은 겹침을 갖고 있다 — StepIndicator 의 이름표
+// (이메일 입력 · 이메일 인증 · 비밀번호 재설정)와 StepHeader 의 제목이 글자까지 같다.
+//
+// 그래서 역할을 나눴다:
+//   여기(숫자)   「셋 중 어디쯤인가」만 말한다
+//   본문 제목     「지금 무엇을 하는가」를 말한다 (app/find-password.tsx 의 headline)
+//
+// 덤으로 폭 문제도 사라진다. 이름표 셋을 가로로 늘어놓느라 좁은 폰(320px)에서 여유가
+// 없었고, 글자 크기를 키운 사람에게서는 부딪혔다.
+
+const STEPS = [1, 2, 3] as const;
 
 const DONE = '#111827';
 const PENDING = '#D1D5DB'; // 아직 안 지나온 단계
 
 const DOT_SIZE = 22;
+
+/** 화면을 읽어주는 기능에 붙일 말. 눈으로는 숫자만 보이므로 여기서 이름을 알린다. */
+const NAMES = ['이메일 입력', '이메일 인증', '새 비밀번호'];
 
 interface Props {
   current: 1 | 2 | 3;
@@ -30,29 +36,21 @@ interface Props {
 export function StepIndicator({ current }: Props) {
   return (
     <View style={styles.row}>
-      {LABELS.map((label, index) => {
-        const step = index + 1;
+      {STEPS.map((step, index) => {
         const reached = step <= current;
         return (
-          <Fragment key={label}>
-            {/* 잇는 선. 이름표가 아래로 내려갔으니 선은 동그라미 높이의 한가운데에 맞춘다 */}
+          <Fragment key={step}>
             {index > 0 ? <View style={[styles.line, reached && styles.lineDone]} /> : null}
 
-            <View style={styles.item}>
-              <View style={[styles.dot, reached && styles.dotDone]}>
-                <Text style={[styles.number, reached && styles.numberDone]}>{step}</Text>
-              </View>
-              {/* 지금 어디인지가 색으로만 드러나서, 화면을 읽어주는 기능에는 말로 붙여준다.
-                  가입 화면의 PasswordChecklist 가 ✓/✕ 를 말로 붙이는 것과 같은 방식이다. */}
-              <Text
-                numberOfLines={1}
-                style={[styles.label, reached && styles.labelDone]}
-                accessibilityLabel={`${step}단계 ${label} ${
-                  step === current ? '지금 단계' : reached ? '지나옴' : '아직'
-                }`}
-              >
-                {label}
-              </Text>
+            {/* 눈에는 숫자만 보이지만, 읽어주는 기능에는 단계 이름과 지금 위치를 말해 준다.
+                가입 화면의 PasswordChecklist 가 ✓/✕ 를 말로 붙이는 것과 같은 방식이다. */}
+            <View
+              style={[styles.dot, reached && styles.dotDone]}
+              accessibilityLabel={`${step}단계 ${NAMES[index]} ${
+                step === current ? '지금 단계' : reached ? '지나옴' : '아직'
+              }`}
+            >
+              <Text style={[styles.number, reached && styles.numberDone]}>{step}</Text>
             </View>
           </Fragment>
         );
@@ -62,18 +60,13 @@ export function StepIndicator({ current }: Props) {
 }
 
 const styles = StyleSheet.create({
-  // flex-start 로 세운다. center 로 두면 이름표 길이가 서로 달라 동그라미 줄이 어긋난다
-  row: { flexDirection: 'row', alignItems: 'flex-start' },
-  // ⚠️ flex: 1 로 **셋의 너비를 같게** 만든다.
-  //    이게 없으면 칸 너비가 이름표 길이에 끌려다닌다 —「인증」은 좁고 「새 비밀번호」는
-  //    넓어서, 동그라미에서 잇는 선까지의 거리가 칸마다 달라 보인다(실기기에서 잡혔다).
-  //    너비가 같으면 동그라미가 늘 칸 한가운데에 서므로 선 좌우 간격이 저절로 같아진다.
-  item: { flex: 1, alignItems: 'center', gap: 6 },
+  // 이름표가 없어 줄 높이가 동그라미 하나뿐이다. 가운데로 모은다
+  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
   line: {
-    width: 24,
+    // 이름표를 뺀 만큼 선을 넉넉히 둔다. 셋이 한가운데 모여 진행이 한눈에 읽힌다
+    width: 40,
     height: 1,
-    // 동그라미 한가운데 높이에 맞춘다
-    marginTop: DOT_SIZE / 2,
+    marginHorizontal: 8,
     backgroundColor: PENDING,
   },
   lineDone: { backgroundColor: DONE },
@@ -90,6 +83,4 @@ const styles = StyleSheet.create({
   // 웹도 같은 자리에 회색 글자를 쓴다(bg-gray-300 에 text-gray-500).
   number: { fontSize: 12, fontWeight: '700', color: '#6B7280' },
   numberDone: { color: '#FFFFFF' },
-  label: { fontSize: 12, color: '#9CA3AF' },
-  labelDone: { color: '#111827', fontWeight: '600' },
 });
