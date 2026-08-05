@@ -1,5 +1,4 @@
 import { useRouter } from 'expo-router';
-import { ChevronLeft } from 'lucide-react-native';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -11,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { StepIndicator } from '@/components/find-password/step-indicator';
 import { Field } from '@/components/signup/field';
 import { PasswordChecklist } from '@/components/signup/password-checklist';
@@ -20,10 +20,7 @@ import { showToast } from '@/lib/toast';
 // 비밀번호 찾기. 한 화면 안에서 3단계로 간다 — 웹도 주소 하나에서 이렇게 한다.
 //
 // 앞 단계 값은 칸으로 남기지 않고 **헤더 문구**로 알린다(웹과 같은 방식).
-// 헤더를 직접 그리는 이유는 로그인 화면과 같다: native-stack 헤더에는 상단 인셋
-// 옵션이 없어 실기기에서 상태바와 붙어 보인다.
-
-const HEADER_HEIGHT = 52;
+// 헤더는 공용 조각(components/ui/screen-header.tsx)을 쓴다 — 앱의 모든 화면이 같은 틀이다(#841).
 
 /** 남은 시간을 4:59 꼴로. 가입 화면의 mmss 와 같은 규칙이다. */
 function mmss(totalSeconds: number): string {
@@ -71,23 +68,8 @@ export default function FindPasswordScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <Pressable
-          onPress={handleBack}
-          hitSlop={12}
-          accessibilityRole="button"
-          accessibilityLabel="뒤로"
-          style={({ pressed }) => (pressed ? styles.backPressed : undefined)}
-        >
-          <ChevronLeft size={26} color="#111827" />
-        </Pressable>
-
-        {/* 제목은 뒤로 단추와 같은 줄에 두되 화면 한가운데에 놓는다(로그인 화면과 같은 방식).
-            pointerEvents="none" — 글자가 뒤로 단추의 누름 영역을 가리면 안 된다. */}
-        <View style={styles.headerTitleBox} pointerEvents="none">
-          <Text style={styles.headerTitle}>비밀번호 찾기</Text>
-        </View>
-      </View>
+      {/* 인증 화면이라 아래 선을 끈다 — 흰 화면 한 장에 내용이 모여 있어 선이 화면을 자른다 */}
+      <ScreenHeader title="비밀번호 찾기" onPressIcon={handleBack} divider={false} />
 
       {/* ⚠️ behavior 를 **양쪽 다** 준다. Platform.OS === 'ios' ? 'padding' : undefined 로 두면
           안드로이드에서 아무 일도 안 일어난다 — app.json 의 edgeToEdgeEnabled 때문에 창이
@@ -237,19 +219,6 @@ export default function FindPasswordScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF' },
   flex: { flex: 1 },
-  header: {
-    height: HEADER_HEIGHT,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-  },
-  headerTitleBox: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: { fontSize: 20, fontWeight: '700', color: '#111827' },
-  backPressed: { opacity: 0.5 },
   content: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 40, gap: 24 },
   headline: { gap: 6 },
   headlineTitle: { fontSize: 18, fontWeight: '700', color: '#111827' },

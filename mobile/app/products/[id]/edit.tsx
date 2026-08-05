@@ -1,9 +1,9 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
-import { ChevronLeft } from 'lucide-react-native';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { ProductForm } from '@/components/products/product-form';
 import { ErrorState, LoadingState } from '@/components/list-states';
 import { productDetailHref, tabGroupOf } from '@/lib/product-routes';
@@ -15,8 +15,6 @@ import { showToast } from '@/lib/toast';
 //
 // ⚠️ 수정은 전체 교체다(PATCH지만 서버가 안 담긴 값을 비운다).
 //    그래서 폼이 보내는 값 하나하나가 상세 응답에서 제대로 채워져야 한다.
-
-const HEADER_HEIGHT = 52; // 앱의 다른 헤더와 같은 값
 
 export default function EditProductScreen() {
   // from: 어느 탭에서 열렸는지. 이 화면은 루트 스택이라 스스로는 알 수 없어서 넘겨받는다
@@ -112,25 +110,10 @@ export default function EditProductScreen() {
 /** 헤더는 화면이 직접 그린다(신고·등록 화면과 같은 이유). 세 상태가 다 같은 헤더를 쓴다 */
 function Header({ onBack }: { onBack: () => void }) {
   return (
-    <View style={styles.header}>
-      <Pressable onPress={onBack} accessibilityLabel="뒤로 가기" hitSlop={12}>
-        <ChevronLeft size={26} color="#111827" />
-      </Pressable>
-      <Text style={styles.heading}>상품 수정</Text>
-    </View>
+    <ScreenHeader title="상품 수정" onPressIcon={onBack} />
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF' },
-  header: {
-    height: HEADER_HEIGHT,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
-  },
-  heading: { fontSize: 18, fontWeight: '700', color: '#111827' },
 });

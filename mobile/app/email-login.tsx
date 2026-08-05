@@ -1,14 +1,8 @@
 import { useRouter } from 'expo-router';
-import { ChevronLeft } from 'lucide-react-native';
-import {
-  KeyboardAvoidingView,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { KeyboardAvoidingView, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { LoginForm } from '@/components/auth/login-form';
 
 // 이메일로 로그인하기. 로그인 관문(login.tsx)에서 「이메일로 로그인」을 누르면 온다.
@@ -21,8 +15,6 @@ import { LoginForm } from '@/components/auth/login-form';
 //   · 자동 로그인이 있어 이 화면은 토큰이 완전히 만료됐을 때만 본다 — +1탭 비용이 작다
 //
 // 데스크탑 웹은 1단계 그대로다(세로 공간이 넉넉하고 키보드가 화면을 안 덮는다).
-
-const HEADER_HEIGHT = 52;
 
 export default function EmailLoginScreen() {
   const router = useRouter();
@@ -45,17 +37,10 @@ export default function EmailLoginScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={12}
-          accessibilityRole="button"
-          accessibilityLabel="뒤로"
-          style={({ pressed }) => (pressed ? styles.backPressed : undefined)}
-        >
-          <ChevronLeft size={26} color="#111827" />
-        </Pressable>
-      </View>
+      {/* 헤더는 화면 이름, 본문은 지금 할 일(LoginForm 의 「이메일로 로그인하기」).
+          관문(login.tsx)과 헤더 이름이 같은 것은 가입과 같은 결이다 —
+          회원가입/계정 만들기, 로그인/이메일로 로그인하기. */}
+      <ScreenHeader title="로그인" onPressIcon={() => router.back()} divider={false} />
 
       {/* 키보드가 올라와도 로그인 버튼이 가려지지 않게 화면을 밀어 올린다.
 
@@ -75,12 +60,6 @@ export default function EmailLoginScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF' },
   flex: { flex: 1 },
-  header: {
-    height: HEADER_HEIGHT,
-    justifyContent: 'center',
-    paddingHorizontal: 8,
-  },
-  backPressed: { opacity: 0.6 },
   content: {
     paddingHorizontal: 20,
     paddingTop: 12,
