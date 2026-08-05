@@ -2,9 +2,10 @@ import { useCallback } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
+  Easing,
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
+  withTiming,
 } from 'react-native-reanimated';
 
 import { PlaceListItem } from '@/components/places/place-list-item';
@@ -29,6 +30,15 @@ const EXPANDED_RATIO = 0.7;
 
 /** 이만큼 빨리 튕기면 위치와 상관없이 그 방향으로 붙인다. 천천히 끌면 가까운 쪽으로. */
 const FLING_SPEED = 500;
+
+// 붙는 데 걸리는 시간과 곡선. **용수철(withSpring)을 쓰지 않는다.**
+//
+// 처음엔 withSpring 으로 짰는데 실기기에서 **통통 튀었다**(2026-08-06). 이 앱의
+// 기존 시트(components/ui/bottom-sheet.tsx)가 같은 이유로 이미 시간·곡선 방식을
+// 쓰고 있었다 — 그 파일 주석에 「실기기에서 툭 튀어 보였다」고 적혀 있다.
+// 값도 그대로 가져온다. 두 시트가 다르게 움직이면 같은 앱으로 안 보인다.
+const OPEN_MS = 300;
+const CLOSE_MS = 200;
 
 interface Props {
   places: PlaceListItemType[];
@@ -56,18 +66,22 @@ export function PlaceSheet({ places, loading, onPressPlace }: Props) {
       height.value = Math.min(Math.max(next, COLLAPSED), expanded);
     })
     .onEnd((e) => {
+      // 어디로 붙일지 먼저 정한다.
       // 빠르게 튕겼으면 그 방향을 따른다 — 사람은 「휙」 올리면 끝까지 가길 기대한다.
-      if (e.velocityY < -FLING_SPEED) {
-        height.value = withSpring(expanded, { damping: 20 });
-        return;
-      }
-      if (e.velocityY > FLING_SPEED) {
-        height.value = withSpring(COLLAPSED, { damping: 20 });
-        return;
-      }
-      // 천천히 놓았으면 가까운 쪽으로 붙인다.
+      // 천천히 놓았으면 가까운 쪽으로.
       const middle = (COLLAPSED + expanded) / 2;
-      height.value = withSpring(height.value > middle ? expanded : COLLAPSED, { damping: 20 });
+      const 펼침 =
+        e.velocityY < -FLING_SPEED
+          ? true
+          : e.velocityY > FLING_SPEED
+            ? false
+            : height.value > middle;
+
+      // 펼칠 때는 느긋하게, 접을 때는 빠르게 — 접기는 이미 결정한 동작이라 기다릴 이유가 없다.
+      height.value = withTiming(펼침 ? expanded : COLLAPSED, {
+        duration: 펼침 ? OPEN_MS : CLOSE_MS,
+        easing: 펼침 ? Easing.out(Easing.cubic) : Easing.in(Easing.cubic),
+      });
     });
 
   const sheetStyle = useAnimatedStyle(() => ({ height: height.value }));
