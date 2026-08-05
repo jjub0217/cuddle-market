@@ -114,7 +114,9 @@ describe('① 이메일 입력', () => {
 
     expect(screen.getByPlaceholderText(CODE_PLACEHOLDER)).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '이메일 인증' })).toBeInTheDocument()
-    expect(screen.getByText('인증 번호를 발송했습니다.')).toBeInTheDocument()
+    // 전송 성공은 헤더가 말한다. 칸 아래에 또 띄우면 같은 말이 두 줄이 된다
+    expect(screen.getByText(/인증코드를 발송했습니다/)).toBeInTheDocument()
+    expect(screen.queryByText('인증 번호를 발송했습니다.')).not.toBeInTheDocument()
   })
 })
 
@@ -156,7 +158,7 @@ describe('② 이메일 인증', () => {
     sendValidCode.mockResolvedValue(OK)
     await user.click(screen.getByRole('button', { name: '재전송' }))
 
-    expect(await screen.findByText('인증 번호를 발송했습니다.')).toBeInTheDocument()
+    expect(await screen.findByText(/인증코드를 발송했습니다/)).toBeInTheDocument()
     expect(screen.queryByText('만료된 인증 코드입니다. 인증코드를 재발급 받아주세요.')).not.toBeInTheDocument()
   })
 

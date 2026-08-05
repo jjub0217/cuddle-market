@@ -302,24 +302,26 @@ export function FindPasswordForm() {
                     type="text"
                     placeholder="6자리 인증코드 입력"
                     error={errors.AuthenticationCode}
-                    checkResult={checkValidCodeResult.status !== 'idle' ? checkValidCodeResult : sendValidCodeResult}
+                    // 전송 **성공** 문구는 안 띄운다 — 바로 위 헤더가 이미 같은 말을 한다
+                    // (「○○○로 인증코드를 발송했습니다」). 초록 줄이 하나 더 붙어 보였다.
+                    // 다만 재전송 **실패**는 여기 말고 말할 자리가 없으므로 남긴다.
+                    checkResult={
+                      checkValidCodeResult.status !== 'idle'
+                        ? checkValidCodeResult
+                        : sendValidCodeResult.status === 'error'
+                          ? sendValidCodeResult
+                          : undefined
+                    }
                     registration={register('AuthenticationCode', authValidationRules.emailCode)}
                     buttonText="재전송"
                     onButtonClick={() => onSubmit()}
                   />
                 </div>
                 <div className="flex flex-col gap-2.5">
-                  <Button
-                    size="md"
-                    className="bg-primary-600 w-full cursor-pointer text-white"
-                    type="button"
-                    onClick={onVerifyCode}
-                  >
-                    인증하기
-                  </Button>
                   {/* 「이전단계」가 아니라 「이메일 변경」이라 쓴다 — 시스템 말투 대신 목적을
                       말해야 알아본다. 위 안내문에 방금 넣은 이메일이 보이는데 오타를
-                      발견해도 무엇을 눌러야 할지 몰랐다. 앱도 같은 말을 쓴다. */}
+                      발견해도 무엇을 눌러야 할지 몰랐다. 앱도 같은 말을 쓴다.
+                      되돌아가는 길을 위에, 앞으로 가는 길(인증하기)을 아래에 둔다. */}
                   <Button
                     size="md"
                     className="w-full cursor-pointer border border-gray-400 bg-white text-gray-900"
@@ -327,6 +329,14 @@ export function FindPasswordForm() {
                     onClick={handlePreviousStep}
                   >
                     이메일 변경
+                  </Button>
+                  <Button
+                    size="md"
+                    className="bg-primary-600 w-full cursor-pointer text-white"
+                    type="button"
+                    onClick={onVerifyCode}
+                  >
+                    인증하기
                   </Button>
                 </div>
               </div>

@@ -181,50 +181,53 @@ export default function FindPasswordScreen() {
                 error={form.errors.code}
                 hint={form.secondsLeft > 0 ? `남은 시간 ${mmss(form.secondsLeft)}` : undefined}
                 hintTone={form.secondsLeft > 0 && form.secondsLeft <= 60 ? 'danger' : 'muted'}
+                // 칸 옆은 **재전송**이다. 가입 화면은 여기에 「확인」을 두지만, 거기는 이메일 칸이
+                // 그대로 남아 있어 재발송이 그 옆에 붙는다. 이 화면은 2단계에서 이메일 칸을
+                // 헤더 문구로 대신하므로 재전송이 붙을 데가 없다 — 그래서 코드 칸 옆에 온다.
+                // 웹도 같은 자리다(InputWithButton 의 buttonText="재전송").
                 trailing={
                   <Pressable
-                    onPress={() => void form.submitCode()}
-                    disabled={form.verifying}
+                    onPress={() => void form.sendCode()}
+                    disabled={form.sending}
                     accessibilityRole="button"
                     style={({ pressed }) => [fieldStyles.button, pressed && fieldStyles.buttonPressed]}
                   >
-                    {form.verifying ? (
+                    {form.sending ? (
                       <ActivityIndicator size="small" color="#111827" />
                     ) : (
-                      <Text style={fieldStyles.buttonLabel}>확인</Text>
+                      <Text style={fieldStyles.buttonLabel}>재전송</Text>
                     )}
                   </Pressable>
                 }
               />
 
 
-              {/* 보조 링크 두 줄기. 로그인 관문 아래와 같은 모양이다(세로 막대로 가른다).
-                  「이메일 변경」이 필요한 이유: 위 안내문에 방금 넣은 이메일이 보이는데,
+              {/* 「이메일 변경」이 필요한 이유: 위 안내문에 방금 넣은 이메일이 보이는데,
                   오타를 발견해도 고칠 자리가 없었다. 헤더 ‹ 로 돌아갈 수는 있었지만
                   그건 「화면 닫기」로 읽혀서 아무도 안 누른다.
-                  「이전 단계」가 아니라 「이메일 변경」이라 쓴다 — 목적을 말해야 알아본다. */}
-              <View style={styles.bottomLinks}>
-                <Pressable
-                  onPress={() => void form.sendCode()}
-                  disabled={form.sending}
-                  accessibilityRole="button"
-                  hitSlop={8}
-                  style={({ pressed }) => (pressed ? styles.pressed : undefined)}
-                >
-                  <Text style={styles.linkText}>인증코드 다시 받기</Text>
-                </Pressable>
+                  「이전 단계」가 아니라 「이메일 변경」이라 쓴다 — 목적을 말해야 알아본다.
+                  되돌아가는 길을 위에, 앞으로 가는 길(인증하기)을 아래에 둔다(웹과 같은 차례). */}
+              <Pressable
+                onPress={form.goPreviousStep}
+                accessibilityRole="button"
+                hitSlop={8}
+                style={({ pressed }) => (pressed ? styles.pressed : undefined)}
+              >
+                <Text style={styles.linkText}>이메일 변경</Text>
+              </Pressable>
 
-                <View style={styles.bottomLinkDivider} />
-
-                <Pressable
-                  onPress={form.goPreviousStep}
-                  accessibilityRole="button"
-                  hitSlop={8}
-                  style={({ pressed }) => (pressed ? styles.pressed : undefined)}
-                >
-                  <Text style={styles.linkText}>이메일 변경</Text>
-                </Pressable>
-              </View>
+              <Pressable
+                onPress={() => void form.submitCode()}
+                disabled={form.verifying}
+                accessibilityRole="button"
+                style={({ pressed }) => [styles.submit, pressed && styles.pressed]}
+              >
+                {form.verifying ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.submitLabel}>인증하기</Text>
+                )}
+              </Pressable>
             </View>
           ) : null}
 
@@ -294,9 +297,6 @@ const styles = StyleSheet.create({
   },
   submitLabel: { fontSize: 15, fontWeight: '600', color: '#FFFFFF' },
   pressed: { opacity: 0.8 },
-  bottomLinks: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
-  // 희미한 회색 세로 막대. 로그인 관문 아래 줄과 같은 값이다
-  bottomLinkDivider: { width: 1, height: 12, marginHorizontal: 12, backgroundColor: '#D1D5DB' },
   linkText: {
     fontSize: 14,
     fontWeight: '500',
