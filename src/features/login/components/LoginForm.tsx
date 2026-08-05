@@ -111,7 +111,9 @@ export function LoginForm() {
               error={errors.password}
               registration={register('password', authValidationRules.password)}
             />
-            {errors.root ? <p className="text-danger-500 text-sm">{errors.root.message}</p> : null}
+            {/* 글자 크기·굵기를 InputField 의 칸별 오류(text-xs font-semibold)와 똑같이 맞춘다.
+                같은 화면에서 같은 일(오류 알림)을 하는데 서로 달라 보이던 것을 없앤 것이다. */}
+            {errors.root ? <p className="text-danger-500 text-xs font-semibold">{errors.root.message}</p> : null}
           </div>
           {/* 밑줄 — 링크임을 색만으로 알리면 안 된다(WCAG 1.4.1 「색에 의존하지 않기」).
               underline-offset-2 는 글자 아래 획(ㅁ·ㅂ 등)에 선이 닿지 않게 띄운 값이다. */}
