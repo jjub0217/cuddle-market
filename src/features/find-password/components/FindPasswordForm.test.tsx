@@ -23,10 +23,12 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn() }),
 }))
 
-const { sendValidCode, checkValidCode } = vi.mocked(await import('@/lib/api/profile'))
+const { sendValidCode, checkValidCode, reSettingPassword } = vi.mocked(await import('@/lib/api/profile'))
 
 const EMAIL_PLACEHOLDER = '이메일 (example@cuddle.com)'
 const CODE_PLACEHOLDER = '6자리 인증코드 입력'
+const NEW_PASSWORD_PLACEHOLDER = '10자 이상 입력해주세요(영문 대소문자, 숫자, 특수문자 포함)'
+const NEW_PASSWORD_CONFIRM_PLACEHOLDER = '비밀번호를 다시 입력해주세요'
 
 /** 서버가 보내 준 응답 모양 (SuccessResponse) */
 const OK = { code: 'SUCCESS', message: '', data: '' }
@@ -51,6 +53,18 @@ async function goToStep2() {
   await user.type(screen.getByPlaceholderText(EMAIL_PLACEHOLDER), 'someone@example.com')
   await user.click(screen.getByRole('button', { name: '인증코드 전송' }))
   await screen.findByPlaceholderText(CODE_PLACEHOLDER)
+
+  return user
+}
+
+/** ③까지 간다 */
+async function goToStep3() {
+  const user = await goToStep2()
+  checkValidCode.mockResolvedValue(OK)
+
+  await user.type(screen.getByPlaceholderText(CODE_PLACEHOLDER), '123456')
+  await user.click(screen.getByRole('button', { name: '인증하기' }))
+  await screen.findByPlaceholderText(NEW_PASSWORD_PLACEHOLDER)
 
   return user
 }
@@ -162,5 +176,59 @@ describe('② 이메일 인증', () => {
     expect(await screen.findByRole('button', { name: '비밀번호 변경 완료' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '비밀번호 재설정' })).toBeInTheDocument()
     expect(screen.queryByPlaceholderText(CODE_PLACEHOLDER)).not.toBeInTheDocument()
+  })
+})
+
+// #838 — 서버 문구 한 줄로 끝내지 않고 다음에 할 일을 알려 준다.
+describe('소셜 계정 안내', () => {
+  it('소셜 계정이면 「로그인하러 가기」 길을 함께 준다', async () => {
+    const user = userEvent.setup()
+    sendValidCode.mockRejectedValue(serverError('소셜 로그인 사용자는 비밀번호 재설정이 불가능합니다.'))
+    render(<FindPasswordForm />)
+
+    await user.type(screen.getByPlaceholderText(EMAIL_PLACEHOLDER), 'kakao@example.com')
+    await user.click(screen.getByRole('button', { name: '인증코드 전송' }))
+
+    expect(await screen.findByText(/카카오·구글로 가입한 계정/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '로그인하러 가기' })).toHaveAttribute('href', '/auth/login')
+  })
+
+  it('그냥 없는 이메일이면 그 안내는 뜨지 않는다', async () => {
+    const user = userEvent.setup()
+    sendValidCode.mockRejectedValue(serverError('등록되지 않은 이메일입니다'))
+    render(<FindPasswordForm />)
+
+    await user.type(screen.getByPlaceholderText(EMAIL_PLACEHOLDER), 'gone@example.com')
+    await user.click(screen.getByRole('button', { name: '인증코드 전송' }))
+
+    expect(await screen.findByText('등록되지 않은 이메일입니다')).toBeInTheDocument()
+    expect(screen.queryByText(/카카오·구글로 가입한 계정/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: '로그인하러 가기' })).not.toBeInTheDocument()
+  })
+})
+
+// #838 — 바꾸고 나서 1.5초 동안 아무 말도 없으면 「눌렀는데 멈췄다」로 보인다.
+describe('성공 알림', () => {
+  it('비밀번호를 바꾸면 바꿨다고 알린다', async () => {
+    const user = await goToStep3()
+    reSettingPassword.mockResolvedValue(OK)
+
+    await user.type(screen.getByPlaceholderText(NEW_PASSWORD_PLACEHOLDER), 'Abcdef1!xy')
+    await user.type(screen.getByPlaceholderText(NEW_PASSWORD_CONFIRM_PLACEHOLDER), 'Abcdef1!xy')
+    await user.click(screen.getByRole('button', { name: '비밀번호 변경 완료' }))
+
+    expect(await screen.findByText(/비밀번호를 바꿨어요/)).toBeInTheDocument()
+  })
+
+  it('바꾸기가 실패하면 그 알림은 뜨지 않는다', async () => {
+    const user = await goToStep3()
+    reSettingPassword.mockRejectedValue(serverError('비밀번호 변경에 실패했습니다. 다시 시도해주세요.'))
+
+    await user.type(screen.getByPlaceholderText(NEW_PASSWORD_PLACEHOLDER), 'Abcdef1!xy')
+    await user.type(screen.getByPlaceholderText(NEW_PASSWORD_CONFIRM_PLACEHOLDER), 'Abcdef1!xy')
+    await user.click(screen.getByRole('button', { name: '비밀번호 변경 완료' }))
+
+    expect(await screen.findByText('비밀번호 변경에 실패했습니다. 다시 시도해주세요.')).toBeInTheDocument()
+    expect(screen.queryByText(/비밀번호를 바꿨어요/)).not.toBeInTheDocument()
   })
 })
