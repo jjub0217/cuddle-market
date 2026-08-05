@@ -125,7 +125,11 @@ export default function PlaceDetailScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScreenHeader title={place?.name ?? '장소'} onPressIcon={() => router.back()} />
+      {/* 제목을 넣지 않는다 — 이 앱의 상세 헤더는 뒤로가기만 둔다(상품 상세와 같다).
+          이름은 바로 아래 본문 맨 위에 크게 나오므로 헤더에 또 쓰면 같은 말이 두 번이고,
+          이름이 길면 헤더에서 잘린다. 이름이 오기 전에 「장소」 같은 임시 글자를 띄우면
+          진짜 이름으로 바뀌는 순간 글자가 튄다. */}
+      <ScreenHeader onPressIcon={() => router.back()} />
       {renderBody()}
     </SafeAreaView>
   );
