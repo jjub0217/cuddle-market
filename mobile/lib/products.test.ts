@@ -150,6 +150,73 @@ describe('fetchProducts', () => {
     expect(url).not.toContain('categories')
   })
 
+  it('세부 조건(소분류·판매유형·상태·지역·정렬)도 쿼리에 싣는다', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ code: 'SUCCESS', message: 'ok', data: { content: [], hasNext: false } }),
+    })
+
+    await fetchProducts({
+      page: 0,
+      petDetailType: 'DOG',
+      productType: 'SELL',
+      productStatuses: 'USED',
+      addressSido: '서울특별시',
+      addressGugun: '은평구',
+      sortBy: 'price',
+      sortOrder: 'asc',
+    })
+
+    const url = mockFetch.mock.calls[0][0] as string
+    expect(url).toContain('petDetailType=DOG')
+    expect(url).toContain('productType=SELL')
+    expect(url).toContain('productStatuses=USED')
+    expect(url).toContain('sortBy=price')
+    expect(url).toContain('sortOrder=asc')
+    // 한글 지역도 주소에 실을 수 있게 바뀐다
+    expect(url).toContain('addressSido=%EC%84%9C%EC%9A%B8%ED%8A%B9%EB%B3%84%EC%8B%9C')
+    expect(url).toContain('addressGugun=%EC%9D%80%ED%8F%89%EA%B5%AC')
+  })
+
+  it('가격 구간을 minPrice·maxPrice 로 싣는다', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ code: 'SUCCESS', message: 'ok', data: { content: [], hasNext: false } }),
+    })
+
+    await fetchProducts({ page: 0, minPrice: 10000, maxPrice: 50000 })
+
+    const url = mockFetch.mock.calls[0][0] as string
+    expect(url).toContain('minPrice=10000')
+    expect(url).toContain('maxPrice=50000')
+  })
+
+  it('minPrice 가 0이어도 싣는다', async () => {
+    // ⚠️ 0 은 거짓값이다. `if (값)` 으로 거르면 「0원부터」가 조용히 사라진다.
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ code: 'SUCCESS', message: 'ok', data: { content: [], hasNext: false } }),
+    })
+
+    await fetchProducts({ page: 0, minPrice: 0, maxPrice: 10000 })
+
+    const url = mockFetch.mock.calls[0][0] as string
+    expect(url).toContain('minPrice=0')
+  })
+
+  it('위 끝이 없는 구간은 maxPrice 를 안 싣는다', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ code: 'SUCCESS', message: 'ok', data: { content: [], hasNext: false } }),
+    })
+
+    await fetchProducts({ page: 0, minPrice: 100000 })
+
+    const url = mockFetch.mock.calls[0][0] as string
+    expect(url).toContain('minPrice=100000')
+    expect(url).not.toContain('maxPrice')
+  })
+
   it('res.ok가 false면 throw한다 (HTTP status 기준)', async () => {
     mockFetch.mockResolvedValue({
       ok: false,
