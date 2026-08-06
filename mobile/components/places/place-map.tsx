@@ -1,4 +1,5 @@
 import type {
+  CameraChangeReason,
   NaverMapMarkerOverlayProps,
   NaverMapViewProps,
   Region,
@@ -61,17 +62,12 @@ export const isMapAvailable = naver !== null;
 
 interface Props {
   places: PlaceListItem[];
-  onCameraChanged: (params: { region: Region }) => void;
-  onCameraIdle: (params: { region: Region }) => void;
+  // 끄는 동안 **매 프레임** 온다. 부르는 쪽이 한 번만 반응하도록 잡아야 한다.
+  onCameraChanged: (params: { region: Region; reason: CameraChangeReason }) => void;
   onPressPlace: (id: number) => void;
 }
 
-export default function PlaceMap({
-  places,
-  onCameraChanged,
-  onCameraIdle,
-  onPressPlace,
-}: Props) {
+export default function PlaceMap({ places, onCameraChanged, onPressPlace }: Props) {
   // 지도가 준비되기 전까지 그 위에 덮어 둘 안내.
   //
   // ⚠️ 왜 필요한가 — 준비되는 동안 회색 판만 보이는데, **못 불러왔을 때도 회색 판**이다.
@@ -96,7 +92,6 @@ export default function PlaceMap({
       style={StyleSheet.absoluteFill}
       initialCamera={{ ...DEFAULT_CENTER, zoom: INITIAL_ZOOM }}
       onCameraChanged={onCameraChanged}
-      onCameraIdle={onCameraIdle}
       onInitialized={() => set초기화됨(true)}
       isShowZoomControls={false}
       isShowScaleBar={false}

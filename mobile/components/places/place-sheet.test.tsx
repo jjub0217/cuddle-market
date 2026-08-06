@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { Text } from 'react-native';
 
 import { PlaceSheet } from '@/components/places/place-sheet';
 import type { PlaceListItem } from '@/lib/places/types';
@@ -68,12 +69,44 @@ describe('PlaceSheet', () => {
     await render(<PlaceSheet places={[]} loading={false} onPressPlace={jest.fn()} />);
 
     expect(screen.getByText('이 지역에는 아직 없어요')).toBeTruthy();
-    expect(screen.getByText('지도를 옮겨 다른 동네를 찾아보세요')).toBeTruthy();
+    expect(screen.getByText('지도를 옮겨 다시 찾아보세요')).toBeTruthy();
   });
 
   it('끌 수 있는 손잡이가 있다', async () => {
     await render(<PlaceSheet places={[장소()]} loading={false} onPressPlace={jest.fn()} />);
 
     expect(screen.getByLabelText('목록 끌어올리기')).toBeTruthy();
+  });
+
+  it('손잡이 아래에 넘긴 것(알약)이 보이고 눌린다', async () => {
+    // 알약은 시트 **안**에 있다(설계 §5-1). 손잡이와 한 덩어리로 묶여 제스처를 받는데,
+    // 그 바람에 알약이 안 눌리면 종류를 아예 못 바꾼다. 그걸 지킨다.
+    const 눌림 = jest.fn();
+    await render(
+      <PlaceSheet
+        places={[장소()]}
+        loading={false}
+        onPressPlace={jest.fn()}
+        header={<Text onPress={눌림}>동물병원</Text>}
+      />
+    );
+
+    expect(screen.getByText('동물병원')).toBeTruthy();
+    await fireEvent.press(screen.getByText('동물병원'));
+    expect(눌림).toHaveBeenCalled();
+  });
+
+  it('목록이 비어 있어도 알약은 보인다', async () => {
+    // 접힌 시트에서도 알약이 보여야 한다 — 안 보이면 종류를 바꾸려고 매번 올려야 한다.
+    await render(
+      <PlaceSheet
+        places={[]}
+        loading={false}
+        onPressPlace={jest.fn()}
+        header={<Text>동물병원</Text>}
+      />
+    );
+
+    expect(screen.getByText('동물병원')).toBeTruthy();
   });
 });

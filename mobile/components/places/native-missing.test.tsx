@@ -19,7 +19,6 @@ it('지도 부품이 없어도 터지지 않고 안내를 보여준다', async (
     <PlaceMap
       places={[]}
       onCameraChanged={jest.fn()}
-      onCameraIdle={jest.fn()}
       onPressPlace={jest.fn()}
     />
   );
