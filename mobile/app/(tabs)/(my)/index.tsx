@@ -101,6 +101,21 @@ export default function MyScreen() {
           <View style={styles.profileText}>
             <Text style={styles.nickname}>{me?.nickname ?? ''}</Text>
             {location ? <Text style={styles.location}>{location}</Text> : null}
+            {/*
+              ⚠️ **내 소개글은 없어도 자리를 보여준다.** 웹도 그렇다
+                 (`ProfileData.tsx:342` — `introduction || isMyProfile`).
+                 남의 프로필에서는 「작성해주세요」가 누구더러 쓰라는 건지 알 수 없어
+                 아예 안 그리지만(`user-profile/profile-head.tsx:54`), 내 프로필에서는
+                 그게 **쓰러 가는 길**이 된다 — 눌러서 프로필 수정으로 간다.
+
+              공백만 있는 소개글도 「없다」로 본다.
+            */}
+            <Text
+              style={[styles.introduction, !me?.introduction?.trim() && styles.introductionEmpty]}
+              numberOfLines={2}
+            >
+              {me?.introduction?.trim() || '소개글을 작성해주세요'}
+            </Text>
           </View>
           {/* 아래 줄들과 같은 화살표다(components/my/section-card.tsx:59) */}
           <ChevronRight size={22} color="#9CA3AF" />
@@ -227,6 +242,15 @@ const styles = StyleSheet.create({
     // 남는 자리를 다 먹어 화살표를 오른쪽 끝으로 민다
     flex: 1,
     gap: 4,
+  },
+  introduction: {
+    fontSize: 13,
+    color: '#4B5563',
+    lineHeight: 18,
+  },
+  // 아직 안 쓴 자리는 옅게 — 값이 아니라 안내라는 게 보여야 한다
+  introductionEmpty: {
+    color: '#9CA3AF',
   },
   nickname: {
     fontSize: 17,
