@@ -5,7 +5,7 @@ import type { PanGesture } from 'react-native-gesture-handler';
 import { fireGestureHandler, getByGestureTestId } from 'react-native-gesture-handler/jest-utils';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { BottomSheet, DRAG_TEST_ID } from './bottom-sheet';
+import { BottomSheet, DRAG_TEST_ID, SheetScrollView } from './bottom-sheet';
 
 // ⚠️ render·rerender·fireEvent는 셋 다 기다려야 한다(mobile/AGENTS.md).
 //
@@ -32,7 +32,7 @@ function Wrapper({ children }: { children: React.ReactNode }) {
   return <SafeAreaProvider initialMetrics={METRICS}>{children}</SafeAreaProvider>;
 }
 
-/** 손잡이를 잡고 아래로 쓸어내린다. */
+/** 시트를 잡고 아래로 쓸어내린다. 잡는 자리는 시트 어디든 같다(제스처가 하나뿐이다). */
 function 쓸어내린다(거리: number = 쓸어내린다_거리) {
   fireGestureHandler<PanGesture>(getByGestureTestId(DRAG_TEST_ID), [
     { translationY: 0, velocityY: 0 },
@@ -40,6 +40,26 @@ function 쓸어내린다(거리: number = 쓸어내린다_거리) {
     // 5 = 손을 뗀 상태(END)
     { state: 5, translationY: 거리, velocityY: 0 },
   ]);
+}
+
+const 안쪽스크롤 = '안쪽 스크롤';
+
+/** 안쪽 스크롤을 여기까지 굴려 둔다. 0이면 맨 위다. */
+async function 스크롤을둔다(y: number) {
+  await fireEvent.scroll(screen.getByTestId(안쪽스크롤), {
+    nativeEvent: {
+      contentOffset: { x: 0, y },
+      contentSize: { width: 390, height: 2000 },
+      layoutMeasurement: { width: 390, height: 500 },
+    },
+  });
+}
+
+/** 한 박자 기다린다. 「아직 안 왔을 뿐」과 「정말 안 불렀다」를 가르려면 필요하다. */
+async function 한박자쉰다() {
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 20));
+  });
 }
 
 describe('BottomSheet', () => {
@@ -86,9 +106,11 @@ describe('BottomSheet', () => {
     expect(screen.getByLabelText('끌어내려 닫기')).toBeTruthy();
   });
 
-  it('손잡이를 아래로 쓸면 닫힌다고 알린다', async () => {
+  it('시트를 아래로 쓸면 닫힌다고 알린다', async () => {
     // ⚠️ **얼마나 쓸어야 닫히는지는 여기서 못 잡는다**(위 상수 설명 참고).
     //    「살짝만 쓸어도 닫히는가」·「위로 쓸면 안 닫히는가」는 실기기로 봐야 한다.
+    //    **어디를 쓰느냐**도 여기서는 못 잡는다 — 제스처가 하나뿐이라 시험은 그것만
+    //    집어 흔들 뿐, 그 제스처가 손잡이에 붙었는지 시트 전체에 붙었는지 모른다.
     const 닫힘 = jest.fn();
     await render(
       <BottomSheet visible onClose={닫힘} dragToClose>
@@ -100,5 +122,65 @@ describe('BottomSheet', () => {
     쓸어내린다();
 
     await waitFor(() => expect(닫힘).toHaveBeenCalled());
+  });
+
+  it('쓸어 닫기를 안 켠 시트에는 쓸기 제스처가 아예 없다', async () => {
+    // 손잡이가 없던 다섯 시트(고르는 칸·지역·정렬·상품 ⋮ 메뉴)는 지금까지와 똑같아야 한다.
+    await render(
+      <BottomSheet visible onClose={jest.fn()}>
+        <Text>안에 담은 것</Text>
+      </BottomSheet>,
+      { wrapper: Wrapper }
+    );
+
+    expect(() => getByGestureTestId(DRAG_TEST_ID)).toThrow();
+  });
+
+  // 시트 전체를 쓸어 닫게 넓히면서 생긴 유일한 다툼이다.
+  // **판정은 쓸기가 시작될 때 한 번만** 한다 — 그때 안쪽 스크롤이 맨 위였는지만 본다.
+  describe('안이 굴러가는 시트에서 굴리기와 가르기', () => {
+    function 굴러가는시트(닫힘: () => void) {
+      return (
+        <BottomSheet visible onClose={닫힘} dragToClose>
+          <SheetScrollView testID={안쪽스크롤}>
+            <Text>안에 담은 것</Text>
+          </SheetScrollView>
+        </BottomSheet>
+      );
+    }
+
+    it('스크롤이 맨 위면 아래로 쓸어 닫는다', async () => {
+      const 닫힘 = jest.fn();
+      await render(굴러가는시트(닫힘), { wrapper: Wrapper });
+
+      await 스크롤을둔다(0);
+      쓸어내린다();
+
+      await waitFor(() => expect(닫힘).toHaveBeenCalled());
+    });
+
+    it('스크롤이 맨 위가 아니면 아래로 쓸어도 안 닫힌다', async () => {
+      // 안쪽을 한참 굴려 둔 상태. 여기서 아래로 쓰는 것은 「목록을 굴리려는 것」이다.
+      const 닫힘 = jest.fn();
+      await render(굴러가는시트(닫힘), { wrapper: Wrapper });
+
+      await 스크롤을둔다(300);
+      쓸어내린다();
+
+      await 한박자쉰다();
+      expect(닫힘).not.toHaveBeenCalled();
+    });
+
+    it('맨 위로 되돌려 놓으면 다시 쓸어 닫힌다', async () => {
+      // 굴렸다가 맨 위까지 되돌아오면 「닫으려는 것」으로 되돌아가야 한다.
+      const 닫힘 = jest.fn();
+      await render(굴러가는시트(닫힘), { wrapper: Wrapper });
+
+      await 스크롤을둔다(300);
+      await 스크롤을둔다(0);
+      쓸어내린다();
+
+      await waitFor(() => expect(닫힘).toHaveBeenCalled());
+    });
   });
 });

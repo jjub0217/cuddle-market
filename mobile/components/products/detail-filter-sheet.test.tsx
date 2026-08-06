@@ -1,12 +1,20 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import React from 'react';
+import type { PanGesture } from 'react-native-gesture-handler';
+import { fireGestureHandler, getByGestureTestId } from 'react-native-gesture-handler/jest-utils';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { PRODUCT_STATUS_OPTIONS } from '@cuddle/shared';
 
+import { DRAG_TEST_ID } from '@/components/ui/bottom-sheet';
+
 import { CITIES } from '@/constants/cities';
 
-import { DetailFilterSheet, EMPTY_DETAIL_FILTER } from './detail-filter-sheet';
+import {
+  DetailFilterSheet,
+  EMPTY_DETAIL_FILTER,
+  FILTER_LIST_TEST_ID,
+} from './detail-filter-sheet';
 
 // ⚠️ render·rerender·fireEvent는 셋 다 기다려야 한다(mobile/AGENTS.md) —
 //    안 기다리면 오류 없이 옛 값을 줘서 틀린 것을 조용히 통과시킨다.
@@ -152,6 +160,54 @@ it('시/도를 바꾸면 고른 시/군/구가 풀린다', async () => {
     ...EMPTY_DETAIL_FILTER,
     sido: '부산광역시',
     gugun: null,
+  });
+});
+
+// 앱에서 **안이 굴러가는 유일한 시트**라, 굴리기와 쓸어 닫기가 갈리는지는 여기서 본다.
+// 껍데기 쪽 시험(bottom-sheet.test.tsx)이 규칙 자체를 보고, 여기서는 **그 규칙이 이 시트에
+// 실제로 연결돼 있는지**를 본다 — SheetScrollView 를 그냥 ScrollView 로 되돌리면 여기서 걸린다.
+describe('굴리기와 쓸어 닫기 가르기', () => {
+  function 쓸어내린다() {
+    fireGestureHandler<PanGesture>(getByGestureTestId(DRAG_TEST_ID), [
+      { translationY: 0, velocityY: 0 },
+      { translationY: 40, velocityY: 0 },
+      // 5 = 손을 뗀 상태(END)
+      { state: 5, translationY: 40, velocityY: 0 },
+    ]);
+  }
+
+  async function 목록을굴려둔다(y: number) {
+    await fireEvent.scroll(screen.getByTestId(FILTER_LIST_TEST_ID), {
+      nativeEvent: {
+        contentOffset: { x: 0, y },
+        contentSize: { width: 390, height: 2000 },
+        layoutMeasurement: { width: 390, height: 500 },
+      },
+    });
+  }
+
+  it('목록이 맨 위면 아래로 쓸어 닫는다', async () => {
+    const { props, onClose } = setup();
+    await render(<DetailFilterSheet {...props} />, { wrapper: Wrapper });
+
+    await 목록을굴려둔다(0);
+    쓸어내린다();
+
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+  });
+
+  it('목록을 굴리는 중이면 아래로 쓸어도 안 닫힌다', async () => {
+    const { props, onClose } = setup();
+    await render(<DetailFilterSheet {...props} />, { wrapper: Wrapper });
+
+    await 목록을굴려둔다(300);
+    쓸어내린다();
+
+    // 「아직 안 왔을 뿐」이 아니라 정말 안 부른 것임을 보려면 한 박자 기다렸다 확인한다.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    });
+    expect(onClose).not.toHaveBeenCalled();
   });
 });
 
