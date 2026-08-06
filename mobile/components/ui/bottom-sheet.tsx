@@ -301,13 +301,22 @@ export function BottomSheet({ visible, onClose, dragToClose = false, children }:
       끌기시작.value = 0;
       시트가움직였다.value = false;
     })
+    // ⚠️ **끌기로 인정된 그 자리**를 기준으로 잡는다. activeOffsetY 때문에 여기 올 때는
+    //    손가락이 이미 10dp 가 있는데, 기준을 0으로 두면 첫 프레임에 그만큼 훌쩍 뛴다.
+    .onStart((event) => {
+      끌기시작.value = event.translationY;
+    })
     .onUpdate((event) => {
       // 안쪽이 아직 맨 위가 아니다 → 굴리는 중이다. 시트는 건드리지 않고,
       // 끌기 기준만 손가락을 따라 옮겨 둔다(위 끌기시작 설명).
-      if (scrollY.value > 0) {
+      //
+      // ⚠️ **시트가 한 번 움직이기 시작했으면 더는 안 묻는다.** 시트를 내리는 동안에도
+      //    안쪽 스크롤은 함께 살아 있어, 한 순간이라도 0이 아니게 읽히면 시트가 제자리로
+      //    튕겼다가 다음 프레임에 다시 따라온다 — 「내려가다 멈추고 마저 내려간다」로
+      //    보인다(2026-08-06 실기기). 굴리기냐 끌기냐는 **시작할 때 한 번만** 갈린다.
+      if (!시트가움직였다.value && scrollY.value > 0) {
         끌기시작.value = event.translationY;
         translateY.value = 0;
-        시트가움직였다.value = false;
         return;
       }
       // 위로 미는 것은 시트를 키우지 않는다 — 세부 필터 시트는 이미 최대 높이로 열려
