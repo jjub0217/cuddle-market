@@ -61,35 +61,31 @@ export function ProductListView({ keyword, bottomInset = 12 }: Props) {
   // 여러 페이지의 content를 하나의 Product[]로 이어붙임.
   const products: Product[] = data?.pages.flatMap((page) => page.content) ?? [];
 
-  // 목록이 비었을 때 뭐라고 할지. **세 경우가 다 다르다.**
+  // 목록이 비었을 때 뭐라고 할지.
   //
-  // ⚠️ 처음엔 홈의 문구(「아직 등록된 상품이 없어요 / 첫 상품이 올라오면…」)를 셋 다에
-  //    썼다. 검색 결과에서는 **완전히 틀린 말**이다 — 상품은 많은데 그 검색어에 안 걸린
-  //    것뿐인데 「아직 아무것도 없다」고 하니, 서비스가 텅 빈 것처럼 읽힌다
-  //    (2026-08-06 실기기에서 잡혔다).
-  const emptyText = () => {
-    if (keyword) {
-      return {
-        title: `'${keyword}' 검색 결과가 없어요.`,
-        description: '다른 말로 찾아보세요.',
-      };
-    }
-    if (petType || category) {
-      return {
-        title: '조건에 맞는 상품이 없어요.',
-        description: '위에서 조건을 바꿔보세요.',
-      };
-    }
-    // 홈에 상품이 정말 하나도 없을 때. list-states 의 기본 문구를 그대로 쓴다.
-    return undefined;
-  };
+  // ⚠️ **문구를 새로 짓지 않는다. 웹에 이미 있다.**
+  //    src/features/home/components/product-section/ProductsSection.tsx:136
+  //      「검색 결과가 없습니다 / 다른 필터 조건으로 검색해보세요」
+  //    웹은 **검색과 필터를 안 나눈다** — 목록이 비면 이 하나로 끝낸다. 여기도 그렇게 한다.
+  //
+  //    (2026-08-06: 처음엔 홈 문구가 검색 결과까지 따라갔고, 그걸 고치면서 내가 문구를
+  //     새로 지었다. 둘 다 잘못이었다. 웹을 먼저 찾았어야 했다.)
+  const 조건이걸렸다 = Boolean(keyword || petType || category);
 
   // ----- 3상태 렌더 (로딩/오류/빈은 서로 섞지 않음) -----
   const renderBody = () => {
     if (isLoading) return <LoadingState />;
     // 첫 로드 실패(보여줄 목록이 없음) → 전체 화면 오류.
     if (isError) return <ErrorState onRetry={() => refetch()} />;
-    if (products.length === 0) return <EmptyState {...emptyText()} />;
+    if (products.length === 0) {
+      // 조건 없이 비었다면 앱에 상품이 정말 하나도 없는 것이다 — 그때는 앱이 원래 쓰던
+      // 문구(「아직 등록된 상품이 없어요 / 첫 상품이 올라오면…」)가 맞다.
+      return 조건이걸렸다 ? (
+        <EmptyState title="검색 결과가 없습니다" description="다른 필터 조건으로 검색해보세요" />
+      ) : (
+        <EmptyState />
+      );
+    }
 
     return (
       <FlatList
