@@ -70,6 +70,12 @@ export default function SocialSignupScreen() {
     }, [])
   );
 
+  /** 이 화면에서 안 고치지만 저장할 때 되돌려 보내야 하는 값들 */
+  const [keep, setKeep] = useState<{
+    profileImageUrl: string | null;
+    introduction: string | null;
+  }>({ profileImageUrl: null, introduction: null });
+
   // 닉네임 첫 값은 서버가 소셜 계정에서 받아 만들어 둔 것으로 채운다.
   // 웹도 같다(SocialSignUpForm.tsx:50 defaultValues.nickname = user?.nickname).
   useEffect(() => {
@@ -79,6 +85,11 @@ export default function SocialSignupScreen() {
       .then((me) => {
         if (!alive) return;
         setNickname(me.nickname ?? '');
+        // ⚠️ **이 화면에서 안 고치는 값도 들고 있어야 한다.** 서버가 전체 교체라
+        //    저장할 때 안 실으면 지워진다(lib/profile.ts 의 UpdateMeInput 설명).
+        //    지금은 소셜 가입 직후라 둘 다 비어 있지만, 프로필 수정으로 사진을 넣은 뒤
+        //    이 화면에 다시 들어오는 길이 생기면 그때 지워진다.
+        setKeep({ profileImageUrl: me.profileImageUrl, introduction: me.introduction });
       })
       .catch(() => {
         // 못 읽어도 화면을 막지 않는다 — 직접 쳐 넣으면 저장은 된다.
@@ -149,6 +160,9 @@ export default function SocialSignupScreen() {
         birthDate: formatBirthDate(birth.year, birth.month, birth.day),
         addressSido: region.sido,
         addressGugun: region.gugun,
+        // ⚠️ 이 화면에서 안 고치는 값들. 그대로 되돌려 보내야 서버가 안 지운다
+        profileImageUrl: keep.profileImageUrl,
+        introduction: keep.introduction,
       });
       // 뒤로 갈 곳이 없는 화면이라 replace로 갈아탄다. '/'는 홈과 마이 양쪽을
       // 가리켜 어디로 갈지 정해지지 않는다(login.tsx:34와 같은 이유).
