@@ -10,7 +10,10 @@ import {
   DetailFilterSheet,
   type DetailFilterValue,
 } from '@/components/products/detail-filter-sheet';
-import { ProductFilterRow } from '@/components/products/product-filter-row';
+import {
+  ProductFilterRow,
+  ProductPetTypeTabs,
+} from '@/components/products/product-filter-row';
 import { ProductListToolbar } from '@/components/products/product-list-toolbar';
 import { useFavorite } from '@/hooks/use-favorite';
 import { fetchProducts } from '@/lib/products';
@@ -28,12 +31,13 @@ import { EMPTY_FILTERS, toParams, type ProductFilters } from '@/lib/products/fil
 // 화면(홈)에 남는 것: SafeAreaView · AppHeader · 떠 있는 「상품 등록」 단추.
 // 그건 목록의 일이 아니다.
 //
-// ## 왜 FlatList가 아니라 SectionList인가
+// ## 무엇이 붙어 있고 무엇이 사라지는가
 //
 // ```
-// 대분류·소분류·카테고리   ← 목록과 함께 스크롤되어 사라진다  (ListHeaderComponent)
+// [전체][포유류][조류]…       ← 목록 **밖**이라 늘 화면에 남는다   (SectionList 형제)
 // ────────────────────
-// [전체][판매][판매요청] [⚙] ← 위로 올라가면 화면에 붙는다    (섹션 헤더)
+// 소분류·카테고리            ← 목록과 함께 스크롤되어 사라진다     (ListHeaderComponent)
+// [전체][판매][판매요청] [⚙] ← 위로 올라가면 화면에 붙는다        (섹션 헤더)
 // 상품들
 // ```
 //
@@ -42,6 +46,10 @@ import { EMPTY_FILTERS, toParams, type ProductFilters } from '@/lib/products/fil
 // FlatList는 헤더 **전체**만 붙일 수 있어 이 둘을 갈라 놓지 못한다. SectionList는
 // 섹션 헤더만 붙는다(`stickySectionHeadersEnabled`).
 // ⚠️ 안드로이드는 그 값이 **기본으로 꺼져 있다** — 명시해야 한다.
+//
+// ⚠️ **붙는 것은 섹션 헤더 하나뿐이다.** 대분류 탭까지 늘 보이게 하려면 목록 **밖**에
+//    형제로 두는 수밖에 없다(#855 후속). 세로를 86dp쯤 더 쓰지만, 대분류는 계속 오가는
+//    축인데 홈에 「맨 위로」 단추가 없어 한 번 내려가면 닿기 어렵다.
 
 export interface ProductListViewRef {
   /**
@@ -121,12 +129,21 @@ export const ProductListView = forwardRef<ProductListViewRef, Props>(function Pr
   const { sortBy: _sortBy, ...좁히는조건 } = filters;
   const 조건이걸렸다 = Boolean(keyword) || Object.values(좁히는조건).some((v) => v !== null);
 
+  // 목록 밖에 서는 줄. 그래서 `ListHeaderComponent`가 아니라 `SectionList`의 형제로 그린다.
+  const 대분류탭 = (
+    <ProductPetTypeTabs
+      petType={filters.petType}
+      petDetailType={filters.petDetailType}
+      onChangePetType={(next) => patch({ petType: next })}
+      onChangePetDetailType={(next) => patch({ petDetailType: next })}
+    />
+  );
+
   const 필터줄 = (
     <ProductFilterRow
       petType={filters.petType}
       petDetailType={filters.petDetailType}
       category={filters.category}
-      onChangePetType={(next) => patch({ petType: next })}
       onChangePetDetailType={(next) => patch({ petDetailType: next })}
       onChangeCategory={(next) => patch({ category: next })}
     />
@@ -172,8 +189,10 @@ export const ProductListView = forwardRef<ProductListViewRef, Props>(function Pr
 
   return (
     <>
+      {대분류탭}
       <SectionList
         ref={listRef}
+        testID="product-list"
         // 섹션은 늘 하나다. 목록을 나누려는 게 아니라 **툴바를 붙이려고** 쓴다.
         sections={[{ data: products }]}
         keyExtractor={(item) => String(item.id)}

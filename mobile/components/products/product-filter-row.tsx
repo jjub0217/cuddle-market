@@ -25,6 +25,16 @@ import {
 
 // 상품 목록 위에 얹는 필터 세 줄 (반려동물 대분류 · 소분류 · 카테고리).
 //
+// ⚠️ **이 파일은 조각을 둘로 내보낸다.** 화면에서 서 있는 자리가 달라서다(#855 후속).
+//
+//   ProductPetTypeTabs  대분류 탭 — 목록 **밖**에 둔다. 스크롤해도 늘 화면에 남는다
+//   ProductFilterRow    소분류 + 카테고리 — 목록의 헤더라 스크롤되어 사라진다
+//
+// 왜 대분류만 남기나: 정렬·세부 필터는 한 번 정하면 잘 안 바꾸는데 대분류는 계속 오간다
+// (「포유류 봤으니 조류도」). 그런데 홈에 「맨 위로」 단추가 없어서, 고정 안 된 것은
+// 스크롤을 한참 올려야 닿는다. 그래서 **오가는 축**인 대분류를 남긴다.
+// (홈 탭을 다시 누르면 맨 위로 가지만 그건 필터까지 풀려서 이 용도로 못 쓴다)
+//
 // 줄마다 모양이 다르다 — 하는 일이 달라서다.
 //   대분류   글자 탭 + 고른 것 아래 바 (올리브영 홈 상단 탭)  ← 늘 하나가 골라져 있다
 //   소분류   알약 (components/places/category-tabs.tsx와 같다)  ← 대분류를 골라야 나온다
@@ -92,29 +102,34 @@ const CATEGORY_ICONS: Record<string, number> = {
   ETC: require('@/assets/images/category/etc.webp'),
 };
 
-interface Props {
+interface PetTypeTabsProps {
   petType: string | null;
+  /** 지금 고른 소분류. 대분류를 바꿀 때 이걸 풀어야 하는지 보려고 받는다 */
   petDetailType: string | null;
-  category: string | null;
   onChangePetType: (next: string | null) => void;
   onChangePetDetailType: (next: string | null) => void;
-  onChangeCategory: (next: string | null) => void;
 }
 
-export function ProductFilterRow({
+/**
+ * 대분류 탭 줄. **목록 밖에 두는 조각이다** — 스크롤해도 화면에 남는다.
+ *
+ * ⚠️ **「대분류를 바꾸면 소분류를 푼다」가 여기 있다.** 대분류를 옮기면서 함께 옮겼다.
+ *    두고 왔으면 「조류 + 강아지」처럼 서로 맞지 않는 조건이 서버로 간다.
+ *    그래서 소분류를 안 그리면서도 `petDetailType`·`onChangePetDetailType`을 받는다.
+ *
+ * ⚠️ **자기 흰 배경을 가져야 한다.** 목록 밖으로 나오면 뒤에 홈 배경(#F9FAFB)이 깔린다 —
+ *    예전에는 세 줄을 통째로 덮던 바깥 상자가 대신 덮어 줘서 안 보였을 뿐이다.
+ *
+ * ⚠️ 여백 없는 `View`로 한 겹 감싼다. 안 감싸면 안쪽 `ScrollView`의 `flexGrow: 1`
+ *    (RN 기본값 `baseHorizontal`)이 살아나, 세로로 세운 화면에서 이 줄이 목록과
+ *    남은 자리를 나눠 갖는다. `View`는 기본이 `flexGrow: 0`이라 내용만큼만 차지한다.
+ */
+export function ProductPetTypeTabs({
   petType,
   petDetailType,
-  category,
   onChangePetType,
   onChangePetDetailType,
-  onChangeCategory,
-}: Props) {
-  // 신원이 안 바뀌게 붙잡아 둔다 — 아래 접힘 애니메이션이 이 배열을 보고 움직인다.
-  const detailOptions = useMemo(
-    () => (petType ? (PET_DETAIL_OPTIONS_BY_TYPE[petType] ?? NO_OPTIONS) : NO_OPTIONS),
-    [petType],
-  );
-
+}: PetTypeTabsProps) {
   // 대분류를 바꾸면 고른 소분류를 푼다 — 「포유류/강아지」에서 대분류만 조류로 바꾸면
   // 강아지가 남아 서로 맞지 않는 조건이 서버로 간다.
   const handleChangePetType = (next: string | null) => {
@@ -125,11 +140,45 @@ export function ProductFilterRow({
   };
 
   return (
+    <View testID="product-pet-type-tabs" style={styles.sheet}>
+      <PetTypeTabRow selected={petType} options={PET_TYPE_OPTIONS} onChange={handleChangePetType} />
+    </View>
+  );
+}
+
+interface Props {
+  /** 소분류 목록을 정하는 데 쓴다. 대분류 탭은 위 `ProductPetTypeTabs`가 그린다 */
+  petType: string | null;
+  petDetailType: string | null;
+  category: string | null;
+  onChangePetDetailType: (next: string | null) => void;
+  onChangeCategory: (next: string | null) => void;
+}
+
+/**
+ * 소분류 + 카테고리 두 줄. **목록의 헤더라 스크롤되어 사라진다.**
+ *
+ * ⚠️ 이 둘은 계속 `ListHeaderComponent` 안에 함께 있어야 한다. 자리가 갈리면 React가
+ *    조각을 새로 만들어 **소분류 접힘 애니메이션이 죽는다**(2026-08-06 실기기).
+ */
+export function ProductFilterRow({
+  petType,
+  petDetailType,
+  category,
+  onChangePetDetailType,
+  onChangeCategory,
+}: Props) {
+  // 신원이 안 바뀌게 붙잡아 둔다 — 아래 접힘 애니메이션이 이 배열을 보고 움직인다.
+  const detailOptions = useMemo(
+    () => (petType ? (PET_DETAIL_OPTIONS_BY_TYPE[petType] ?? NO_OPTIONS) : NO_OPTIONS),
+    [petType],
+  );
+
+  return (
     // ⚠️ 흰 배경을 **줄마다** 준다. 안 주면 뒤에 깔린 홈 배경(#F9FAFB)이 그대로 비쳐
     //    필터 부분만 회색으로 보인다 — 바로 아래 툴바가 흰색이라 더 도드라진다
     //    (2026-08-06 실기기). 접히는 소분류 줄에도 줘야 접힐 때 회색이 안 샌다.
     <View testID="product-filter-row" style={styles.sheet}>
-      <PetTypeTabRow selected={petType} options={PET_TYPE_OPTIONS} onChange={handleChangePetType} />
       <CollapsibleDetailRow
         selected={petDetailType}
         options={detailOptions}
@@ -465,7 +514,10 @@ function CategoryTile({ code, label, icon, active, onPress }: CategoryTileProps)
 }
 
 const styles = StyleSheet.create({
-  /** 필터 세 줄을 통째로 덮는 흰 바탕. 앱의 다른 화면·바로 아래 툴바와 같은 흰색이다. */
+  /**
+   * 조각을 통째로 덮는 흰 바탕. 앱의 다른 화면·바로 아래 툴바와 같은 흰색이다.
+   * 대분류 탭과 소분류·카테고리 줄이 **둘 다** 쓴다 — 둘 다 홈 배경(#F9FAFB) 위에 뜬다.
+   */
   sheet: {
     backgroundColor: '#FFFFFF',
   },

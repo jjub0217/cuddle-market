@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react-native';
 import { createRef } from 'react';
 import type { ReactNode } from 'react';
 import { getAnimatedStyle } from 'react-native-reanimated';
@@ -95,31 +95,52 @@ it('검색어를 받으면 그대로 서버에 넘긴다 (검색 결과)', async
   );
 });
 
-it('목록이 비어도 필터와 툴바가 보인다', async () => {
-  // ⚠️ 필터 줄은 목록의 헤더다. 목록을 안 그리면 헤더도 안 그려져 조건을 되돌릴 길이
-  //    없어지고 빈 화면에 갇힌다(2026-08-06 실기기에서 나온 것).
-  //    그래서 **목록은 늘 그리고** 빈 화면은 그 안쪽(ListEmptyComponent)에 넣는다.
+it('목록이 비어도 대분류·필터·툴바가 다 보인다', async () => {
+  // ⚠️ 소분류·카테고리 줄은 목록의 헤더다. 목록을 안 그리면 헤더도 안 그려져 조건을
+  //    되돌릴 길이 없어지고 빈 화면에 갇힌다(2026-08-06 실기기에서 나온 것).
+  //    그래서 **목록은 늘 그리고** 빈 화면은 그 안쪽(ListFooterComponent)에 넣는다.
   //    이 시험이 그걸 지킨다 — 빈 섹션에서도 헤더와 섹션 헤더가 그려지는가.
+  //    대분류 탭은 목록 밖이라 목록과 상관없이 보여야 한다(#855 후속).
   fetchProducts.mockResolvedValue(한페이지([]));
 
   await render(<ProductListView />, { wrapper: 감싸기 });
 
   await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
-  // 대분류 줄의 알약이 보인다
+  // 늘 고정되는 대분류 탭
+  expect(screen.getByTestId('product-pet-type-tabs')).toBeTruthy();
   expect(screen.getByText('포유류')).toBeTruthy();
+  // 목록 헤더인 소분류·카테고리 줄
+  expect(screen.getByTestId('product-filter-row')).toBeTruthy();
   // 툴바도 보인다 — 종류·정렬을 되돌릴 길이다
   expect(screen.getByText('판매요청')).toBeTruthy();
   expect(screen.getByText('최신순')).toBeTruthy();
 });
 
-it('오류일 때도 필터와 툴바가 보인다', async () => {
+it('오류일 때도 대분류·필터·툴바가 다 보인다', async () => {
   fetchProducts.mockRejectedValue(new Error('그물이 끊겼어요'));
 
   await render(<ProductListView />, { wrapper: 감싸기 });
 
   await waitFor(() => expect(screen.getByText('다시 시도')).toBeTruthy());
+  expect(screen.getByTestId('product-pet-type-tabs')).toBeTruthy();
   expect(screen.getByText('포유류')).toBeTruthy();
+  expect(screen.getByTestId('product-filter-row')).toBeTruthy();
   expect(screen.getByText('판매요청')).toBeTruthy();
+});
+
+it('대분류 탭은 목록 **밖**에 있고 소분류·카테고리는 목록 헤더 안에 있다', async () => {
+  // ⚠️ 이 시험이 「대분류가 늘 고정된다」를 지킨다. `stickySectionHeadersEnabled`로
+  //    붙는 것은 **섹션 헤더 하나(툴바)**뿐이라, 대분류를 남기려면 목록 밖에 두는 수밖에
+  //    없다. 헤더 안으로 다시 들어가면 스크롤과 함께 사라진다.
+  fetchProducts.mockResolvedValue(한페이지([상품(1)]));
+
+  await render(<ProductListView />, { wrapper: 감싸기 });
+  await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
+
+  const 목록 = screen.getByTestId('product-list');
+  expect(within(목록).queryByTestId('product-pet-type-tabs')).toBeNull();
+  // 소분류·카테고리는 목록 안에 남아 있어야 한다 — 그래야 접힘 애니메이션이 산다
+  expect(within(목록).getByTestId('product-filter-row')).toBeTruthy();
 });
 
 it('첫 조회가 실패하면 오류 안내를 보여준다', async () => {
