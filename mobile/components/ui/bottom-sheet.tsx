@@ -69,14 +69,16 @@ function 걸리는시간(거리: number, msPerDp: number, 범위: { min: number;
 const MAX_HEIGHT_RATIO = 0.85;
 
 /**
- * 끌어 닫기 기준 — 시트 높이의 이만큼보다 더 내렸으면 닫는다.
- * ⚠️ 「올린 만큼 올라가 있는」 지도 시트(place-sheet.tsx)와 **다르다.** 여기는 손을 떼면
- *    열림/닫힘 둘 중 하나로 간다. 시트가 어중간하게 걸쳐 있을 자리가 없기 때문이다.
+ * 손잡이에서 아래로 이만큼(dp) 쓸면 닫는다. **살짝만 쓸어도 닫히는** 값이다.
+ *
+ * ⚠️ 시트 높이의 비율이 아니라 고정 거리다. 시트가 손을 따라 움직이지 않으니
+ *    「시트가 얼마나 왔나」가 아니라 「손이 얼마나 쓸었나」만 보면 되고, 손이 움직인
+ *    거리는 시트 크기와 상관없다.
  */
-const CLOSE_RATIO = 0.25;
+const DRAG_CLOSE_DP = 12;
 
-/** 조금만 내렸어도 이보다 빠르게 튕겨 내리면 닫는다(초당 몇 점). 「휙 내리기」를 받아 준다. */
-const FLING_VELOCITY = 800;
+/** 위로 쓰는 것은 안 받는다는 뜻의 큰 값. 시트는 이미 다 올라와 있어 더 갈 데가 없다. */
+const WON_T_ACTIVATE = 10000;
 
 /** 시험이 끌기 제스처를 집을 때 쓰는 이름. */
 export const DRAG_TEST_ID = 'bottom-sheet-drag';
@@ -118,8 +120,6 @@ export function BottomSheet({ visible, onClose, dragToClose = false, children }:
   const hiddenY = useSharedValue(screenHeight);
   /** 지금 시트가 내려가 있는 거리. 0이면 다 올라온 상태다. */
   const translateY = useSharedValue(screenHeight);
-  /** 손가락을 대기 시작한 순간의 자리. 끄는 동안 여기서부터 더한다. */
-  const startY = useSharedValue(0);
 
   useEffect(() => {
     if (visible) {
@@ -143,36 +143,27 @@ export function BottomSheet({ visible, onClose, dragToClose = false, children }:
     );
   }, [visible, translateY, hiddenY]);
 
+  /**
+   * 손잡이를 잡고 **아래로 살짝만 쓸어도 곧바로 닫는다.**
+   *
+   * ⚠️ **손을 뗄 때까지 기다리지 않는다.** 예전에는 손을 따라 내려오다가 손을 떼는 순간
+   *    「충분히 내렸나」를 재서 닫거나 제자리로 돌려놨다. 그러면 미는 동안 아무 결론이
+   *    안 나서 「1~2초 뒤에야 내려간다」로 느껴졌다(2026-08-06 실기기).
+   *
+   * ⚠️ 그래서 **손을 따라 움직이는 부분도, 제자리로 돌아가는 부분도 없다.** 쓸어내리는
+   *    순간 닫히기로 정해지므로 시트가 중간에 걸쳐 있을 자리가 아예 생기지 않는다.
+   *
+   * 위로 쓰는 것은 받지 않는다 — 시트는 이미 다 올라와 있어 더 갈 데가 없다.
+   */
   const pan = Gesture.Pan()
     // 시험에서 이 제스처를 집어 흔들어 보려고 붙인 이름이다(bottom-sheet.test.tsx).
     .withTestId(DRAG_TEST_ID)
+    .activeOffsetY([-WON_T_ACTIVATE, DRAG_CLOSE_DP])
     .onStart(() => {
-      startY.value = translateY.value;
-    })
-    .onUpdate((event) => {
-      // 위로는 안 늘어난다 — 시트는 제자리보다 더 올라가지 않는다.
-      translateY.value = Math.max(0, startY.value + event.translationY);
-    })
-    .onEnd((event) => {
-      // 「지금 어디 있나」가 아니라 「손이 얼마나 내려갔나」로 정한다(event.translationY).
-      // 잡는 순간 시트는 늘 다 올라와 있어 값은 같지만, 이쪽이 아직 안 끝난 움직임에
-      // 휘둘리지 않는다.
-      const 닫을만큼내렸다 =
-        event.translationY > hiddenY.value * CLOSE_RATIO || event.velocityY > FLING_VELOCITY;
-
-      if (닫을만큼내렸다) {
-        // 여기서 직접 내리지 않고 알리기만 한다. 알리면 쓰는 쪽이 visible을 내리고,
-        // 위 useEffect가 **손을 뗀 그 자리에서부터** 내려 준다 — 움직임이 한 번만 돈다.
-        runOnJS(onClose)();
-        return;
-      }
-
-      // 덜 내렸으면 제자리로. 중간에 걸쳐 두지 않는다.
-      // ⚠️ 여기는 **손을 뗀 자리**에서 0까지다. 조금만 내렸으면 거리도 짧아 금방 돌아간다.
-      translateY.value = withTiming(0, {
-        duration: 걸리는시간(translateY.value, OPEN_MS_PER_DP, OPEN_MS_RANGE),
-        easing: Easing.out(Easing.cubic),
-      });
+      // 여기 왔다는 것은 이미 아래로 DRAG_CLOSE_DP 만큼 쓸었다는 뜻이다.
+      // 직접 내리지 않고 알리기만 한다 — 알리면 쓰는 쪽이 visible을 내리고,
+      // 위 useEffect가 늘 하던 대로 내려 준다. 닫는 움직임이 한 곳에만 있다.
+      runOnJS(onClose)();
     });
 
   const sheetStyle = useAnimatedStyle(() => ({
@@ -187,12 +178,25 @@ export function BottomSheet({ visible, onClose, dragToClose = false, children }:
   });
 
   const 껍데기 = (
-    /* 취소 버튼을 따로 두지 않는다. 바깥을 누르면 닫힌다. */
-    <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="닫기">
-      <Animated.View style={[styles.backdropFill, backdropStyle]} />
-      {/* 시트 안을 눌렀을 때 닫히지 않도록 바깥 Pressable의 터치를 여기서 멈춘다. */}
+    <View style={styles.backdrop}>
+      {/*
+        취소 버튼을 따로 두지 않는다. 바깥을 누르면 닫힌다.
+
+        ⚠️ **누름판을 시트 아래에 따로 깐다. 시트를 감싸지 않는다.**
+           예전에는 이 누름판이 시트까지 감싸고, 시트 안에 또 하나(onPress={})를 둬서
+           바깥 누름을 막았다. 그런데 RN은 터치를 다루는 계통이 둘이고(누름판 쪽과
+           제스처 쪽), 손가락을 대면 양쪽이 서로 받겠다고 겨룬다. 손가락이 움직여야
+           누름판이 물러나는데 그 판정 동안 **끌기가 한 박자 밀린다** —
+           「내려가다 한 번 멈춘다」로 보였다(2026-08-06 실기기).
+
+           시트를 누름판 **위에** 얹으면 시트를 눌러도 누름판에 안 닿는다. 그래서
+           시트 안 누름판이 아예 필요 없어지고, 겨룰 일도 없어진다.
+      */}
+      <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="닫기">
+        <Animated.View style={[styles.backdropFill, backdropStyle]} />
+      </Pressable>
       <Animated.View style={[styles.sheet, sheetStyle]}>
-        <Pressable
+        <View
           // 안전영역 여백을 「재는 상자」인 여기에 준다. 바깥 Animated.View에 주면
           // onLayout이 재는 높이에 안 잡혀, 올라오기 전 시트가 그 높이만큼
           // 덜 내려가 화면 아래에 미리 비죽 나와 보인다.
@@ -201,7 +205,6 @@ export function BottomSheet({ visible, onClose, dragToClose = false, children }:
             // 여기서 끊어야 안쪽 스크롤이 줄어들 자리를 안다(MAX_HEIGHT_RATIO 설명 참고).
             maxHeight: Math.round(screenHeight * MAX_HEIGHT_RATIO),
           }}
-          onPress={() => {}}
           // 재고 나면 정확한 높이를 쓴다. 상태로 두지 않는 이유: 여기서 다시 그릴 필요가
           // 없다. 값이 쓰이는 곳은 움직임뿐이라 공유값에 바로 넣는다.
           onLayout={(event) => {
@@ -218,9 +221,9 @@ export function BottomSheet({ visible, onClose, dragToClose = false, children }:
             </GestureDetector>
           ) : null}
           {children}
-        </Pressable>
+        </View>
       </Animated.View>
-    </Pressable>
+    </View>
   );
 
   return (

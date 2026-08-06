@@ -22,23 +22,23 @@ const METRICS = {
   insets: { top: 47, left: 0, right: 0, bottom: 34 },
 };
 
-// 시험에서는 시트 높이를 못 잰다(진짜로 그려지지 않으니 onLayout 이 안 온다).
-// 그래서 「숨은 자리」가 화면 높이(844)이고, 닫히는 기준은 그 1/4인 211쯤이다.
-// 아래 숫자들은 그 선을 넉넉히 넘기거나 못 미치게 골랐다.
-const 충분히 = 400;
-const 조금 = 40;
+// ⚠️ **「얼마나 쓸어야 닫히나」는 여기서 못 잡는다.** 그 경계(DRAG_CLOSE_DP)는
+//    activeOffsetY 가 **네이티브에서** 재는 것이라, jest 의 흉내내기는 거리와 상관없이
+//    제스처를 활성 상태로 만들어 버린다. 여기서 지킬 수 있는 것은 「쓸면 닫힌다고
+//    알리는가」까지다 — 살짝만 쓸어도 닫히는지는 **실기기로** 봐야 한다.
+const 쓸어내린다_거리 = 40;
 
 function Wrapper({ children }: { children: React.ReactNode }) {
   return <SafeAreaProvider initialMetrics={METRICS}>{children}</SafeAreaProvider>;
 }
 
-/** 손잡이를 잡고 아래로 끌다 놓는다. */
-function 끌어내린다(거리: number, 속도: number) {
+/** 손잡이를 잡고 아래로 쓸어내린다. */
+function 쓸어내린다(거리: number = 쓸어내린다_거리) {
   fireGestureHandler<PanGesture>(getByGestureTestId(DRAG_TEST_ID), [
     { translationY: 0, velocityY: 0 },
-    { translationY: 거리, velocityY: 속도 },
+    { translationY: 거리, velocityY: 0 },
     // 5 = 손을 뗀 상태(END)
-    { state: 5, translationY: 거리, velocityY: 속도 },
+    { state: 5, translationY: 거리, velocityY: 0 },
   ]);
 }
 
@@ -86,7 +86,9 @@ describe('BottomSheet', () => {
     expect(screen.getByLabelText('끌어내려 닫기')).toBeTruthy();
   });
 
-  it('손잡이를 충분히 아래로 끌면 닫힌다고 알린다', async () => {
+  it('손잡이를 아래로 쓸면 닫힌다고 알린다', async () => {
+    // ⚠️ **얼마나 쓸어야 닫히는지는 여기서 못 잡는다**(위 상수 설명 참고).
+    //    「살짝만 쓸어도 닫히는가」·「위로 쓸면 안 닫히는가」는 실기기로 봐야 한다.
     const 닫힘 = jest.fn();
     await render(
       <BottomSheet visible onClose={닫힘} dragToClose>
@@ -95,39 +97,7 @@ describe('BottomSheet', () => {
       { wrapper: Wrapper }
     );
 
-    끌어내린다(충분히, 300);
-
-    await waitFor(() => expect(닫힘).toHaveBeenCalled());
-  });
-
-  it('조금만 끌다 놓으면 안 닫힌다 — 제자리로 돌아간다', async () => {
-    const 닫힘 = jest.fn();
-    await render(
-      <BottomSheet visible onClose={닫힘} dragToClose>
-        <Text>안에 담은 것</Text>
-      </BottomSheet>,
-      { wrapper: Wrapper }
-    );
-
-    끌어내린다(조금, 100);
-
-    // 「아직 안 왔을 뿐」이 아니라 정말 안 부른 것임을 보려면 한 박자 기다렸다 확인한다.
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 20));
-    });
-    expect(닫힘).not.toHaveBeenCalled();
-  });
-
-  it('조금만 내렸어도 휙 튕겨 내리면 닫힌다', async () => {
-    const 닫힘 = jest.fn();
-    await render(
-      <BottomSheet visible onClose={닫힘} dragToClose>
-        <Text>안에 담은 것</Text>
-      </BottomSheet>,
-      { wrapper: Wrapper }
-    );
-
-    끌어내린다(조금, 1500);
+    쓸어내린다();
 
     await waitFor(() => expect(닫힘).toHaveBeenCalled());
   });
