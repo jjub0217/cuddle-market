@@ -14,14 +14,50 @@ import { apiFetch } from './auth/api'
 // 성공/오류 판정은 응답 body의 code가 아니라 HTTP status(res.ok) 기준.
 // base URL 누락 가드는 apiFetch 안(apiBaseUrl)에 있다.
 
+/** 한 번에 받아오는 개수. 웹 홈과 같다. */
+const PAGE_SIZE = 20
+
+/**
+ * 목록을 좁히는 조건.
+ *
+ * 서버(`ProductSearchRequest`)는 12가지를 받지만 지금은 셋만 쓴다.
+ * 나머지(가격·지역·상태·정렬·상세 종류)는 #855에서.
+ */
+export interface ProductListParams {
+  /** 0부터 시작하는 페이지 번호 */
+  page: number
+  /** 검색어 */
+  keyword?: string
+  /** 반려동물 대분류 코드 */
+  petType?: string
+  /** 상품 카테고리 코드. 서버는 목록을 받지만 하나만 보낸다(웹과 같다) */
+  categories?: string
+}
+
 /**
  * 상품 목록 한 페이지를 가져온다.
- * `GET {base}/products/search?page={page}&size=20`
- * @param page 0부터 시작하는 페이지 번호
+ * `GET {base}/products/search?page={page}&size=20[&keyword=…][&petType=…][&categories=…]`
+ *
+ * 홈과 검색 결과가 **같은 함수**를 쓴다 — 조건 하나가 다를 뿐 같은 조회이기 때문이다.
+ *
  * @returns 응답의 data (무한스크롤에 content + hasNext 둘 다 필요)
  */
-export async function fetchProducts(page: number): Promise<ProductResponse['data']> {
-  const res = await apiFetch(`/products/search?page=${page}&size=20`)
+export async function fetchProducts({
+  page,
+  keyword,
+  petType,
+  categories,
+}: ProductListParams): Promise<ProductResponse['data']> {
+  const query = new URLSearchParams({ page: String(page), size: String(PAGE_SIZE) })
+
+  // ⚠️ **빈 값은 아예 안 싣는다.** 알약의 「전체」는 null 이고, 그걸 'ALL' 같은 글자로
+  //    보내면 서버가 그런 이름의 종류를 찾아 아무것도 안 나온다.
+  //    URLSearchParams 가 한글·공백을 알아서 주소용으로 바꿔 준다.
+  if (keyword) query.set('keyword', keyword)
+  if (petType) query.set('petType', petType)
+  if (categories) query.set('categories', categories)
+
+  const res = await apiFetch(`/products/search?${query.toString()}`)
 
   if (!res.ok) {
     throw new Error(`상품 목록을 불러오지 못했어요 (HTTP ${res.status})`)

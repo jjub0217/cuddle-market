@@ -77,7 +77,7 @@ describe('fetchProducts', () => {
       json: async () => ({ code: 'SUCCESS', message: 'ok', data }),
     })
 
-    const result = await fetchProducts(0)
+    const result = await fetchProducts({ page: 0 })
 
     expect(result.content).toHaveLength(1)
     expect(result.hasNext).toBe(true)
@@ -89,12 +89,65 @@ describe('fetchProducts', () => {
       json: async () => ({ code: 'SUCCESS', message: 'ok', data: { content: [], hasNext: false } }),
     })
 
-    await fetchProducts(2)
+    await fetchProducts({ page: 2 })
 
     const calledUrl = mockFetch.mock.calls[0][0] as string
     expect(calledUrl).toContain('/products/search')
     expect(calledUrl).toContain('page=2')
     expect(calledUrl).toContain('size=20')
+  })
+
+
+  // ----- 조건(검색어·필터) -----
+  //
+  // 홈과 검색 결과가 같은 함수를 쓴다. 조건은 있을 때만 실어야 한다 —
+  // 빈 값을 그대로 실으면 서버가 「이름이 빈 종류」를 찾는다.
+
+  it('조건을 안 주면 page·size 만 보낸다', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ code: 'SUCCESS', message: 'ok', data: { content: [], hasNext: false } }),
+    })
+
+    await fetchProducts({ page: 0 })
+
+    const url = mockFetch.mock.calls[0][0] as string
+    expect(url).not.toContain('keyword')
+    expect(url).not.toContain('petType')
+    expect(url).not.toContain('categories')
+  })
+
+  it('검색어·대분류·카테고리를 쿼리에 싣는다', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ code: 'SUCCESS', message: 'ok', data: { content: [], hasNext: false } }),
+    })
+
+    await fetchProducts({ page: 0, keyword: '강아지 사료', petType: 'MAMMAL', categories: 'FOOD' })
+
+    const url = mockFetch.mock.calls[0][0] as string
+    expect(url).toContain('petType=MAMMAL')
+    expect(url).toContain('categories=FOOD')
+    // 한글은 주소에 실을 수 있게 바뀐다.
+    // ⚠️ **공백은 %20 이 아니라 + 다.** URLSearchParams 가 그렇게 쓴다
+    //    (encodeURIComponent 는 %20 을 쓴다 — 둘이 다르다).
+    //    query string 에서 + 는 공백을 뜻하므로 서버(Spring)가 제대로 읽는다.
+    expect(url).toContain('keyword=%EA%B0%95%EC%95%84%EC%A7%80+%EC%82%AC%EB%A3%8C')
+  })
+
+  it('빈 값은 아예 안 싣는다 — 「전체」가 이 경우다', async () => {
+    // 알약의 「전체」는 null 이다. 'ALL' 같은 글자를 보내면 서버가 그런 종류를 찾는다.
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ code: 'SUCCESS', message: 'ok', data: { content: [], hasNext: false } }),
+    })
+
+    await fetchProducts({ page: 0, keyword: '', petType: undefined, categories: '' })
+
+    const url = mockFetch.mock.calls[0][0] as string
+    expect(url).not.toContain('keyword')
+    expect(url).not.toContain('petType')
+    expect(url).not.toContain('categories')
   })
 
   it('res.ok가 false면 throw한다 (HTTP status 기준)', async () => {
@@ -104,12 +157,12 @@ describe('fetchProducts', () => {
       json: async () => ({}),
     })
 
-    await expect(fetchProducts(0)).rejects.toThrow()
+    await expect(fetchProducts({ page: 0 })).rejects.toThrow()
   })
 
   it('EXPO_PUBLIC_API_BASE_URL 미설정이면 명확히 throw한다', async () => {
     delete process.env.EXPO_PUBLIC_API_BASE_URL
-    await expect(fetchProducts(0)).rejects.toThrow('EXPO_PUBLIC_API_BASE_URL')
+    await expect(fetchProducts({ page: 0 })).rejects.toThrow('EXPO_PUBLIC_API_BASE_URL')
   })
 
   it('로그인 상태면 목록 조회에도 토큰을 붙인다', async () => {
@@ -120,7 +173,7 @@ describe('fetchProducts', () => {
       json: async () => ({ code: 'SUCCESS', message: 'ok', data: { content: [], hasNext: false } }),
     })
 
-    await fetchProducts(0)
+    await fetchProducts({ page: 0 })
 
     expect(authHeaderOf(mockFetch.mock.calls[0])).toBe('Bearer a-token')
   })

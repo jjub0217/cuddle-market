@@ -37,7 +37,7 @@ export default function HomeScreen() {
     isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: ['products'],
-    queryFn: ({ pageParam }) => fetchProducts(pageParam),
+    queryFn: ({ pageParam }) => fetchProducts({ page: pageParam }),
     initialPageParam: 0,
     // 다음 페이지 번호 = 지금까지 받은 페이지 수(0-base). hasNext=false면 종료.
     getNextPageParam: (last, all) => (last.hasNext ? all.length : undefined),
