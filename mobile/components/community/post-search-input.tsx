@@ -34,6 +34,20 @@ export function PostSearchInput({ keyword, onSubmit }: Props) {
     setText(keyword);
   }, [keyword]);
 
+  /**
+   * 글자를 칠 때마다 부른다.
+   *
+   * ⚠️ **비었을 때만 곧바로 알린다.** 지우기(X)를 누른 것과 같아진다 — 손으로 다 지웠는데
+   *    확인 키를 또 눌러야 하면 「지웠는데 목록이 그대로」가 된다.
+   *
+   * ⚠️ 반대로 **글자가 있을 때는 안 알린다.** 한 글자마다 서버를 부르면 목록이 계속
+   *    깜빡인다. 그때는 확인 키를 기다린다.
+   */
+  const change = (next: string) => {
+    setText(next);
+    if (normalizeKeyword(next) === null) onSubmit('');
+  };
+
   const submit = () => {
     // normalizeKeyword 는 빈 값에 null 을 준다. 여기서는 **빈 글자로** 바꿔 넘긴다 —
     // 「검색을 그만둔다」도 알려야 하는 신호이기 때문이다.
@@ -56,7 +70,7 @@ export function PostSearchInput({ keyword, onSubmit }: Props) {
           ref={inputRef}
           testID="post-search-input"
           value={text}
-          onChangeText={setText}
+          onChangeText={change}
           // 문구는 웹에서 가져왔다(CommunityPage.tsx:219). 새로 짓지 않는다
           placeholder="궁금한 내용을 검색해보세요"
           placeholderTextColor="#9CA3AF"

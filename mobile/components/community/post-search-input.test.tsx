@@ -47,7 +47,7 @@ it('공백만 쳐도 빈 글자로 알린다', async () => {
   expect(onSubmit).toHaveBeenCalledWith('');
 });
 
-it('치는 동안에는 안 알린다 — 확인 키를 눌러야 한다', async () => {
+it('글자가 있는 동안에는 안 알린다 — 확인 키를 눌러야 한다', async () => {
   // 한 글자마다 서버를 부르면 목록이 계속 깜빡인다.
   const onSubmit = jest.fn();
   await render(<PostSearchInput keyword="" onSubmit={onSubmit} />);
@@ -56,6 +56,26 @@ it('치는 동안에는 안 알린다 — 확인 키를 눌러야 한다', async
   await fireEvent.changeText(screen.getByTestId(INPUT), '사료');
 
   expect(onSubmit).not.toHaveBeenCalled();
+});
+
+it('손으로 다 지우면 **확인 키 없이도** 곧바로 알린다', async () => {
+  // ⚠️ 지우기(X)를 누른 것과 같아야 한다. 손으로 지웠는데 확인 키를 또 눌러야 하면
+  //    「지웠는데 목록이 그대로」가 된다.
+  const onSubmit = jest.fn();
+  await render(<PostSearchInput keyword="사료" onSubmit={onSubmit} />);
+
+  await fireEvent.changeText(screen.getByTestId(INPUT), '');
+
+  expect(onSubmit).toHaveBeenCalledWith('');
+});
+
+it('공백만 남겨도 비운 것으로 본다', async () => {
+  const onSubmit = jest.fn();
+  await render(<PostSearchInput keyword="사료" onSubmit={onSubmit} />);
+
+  await fireEvent.changeText(screen.getByTestId(INPUT), '   ');
+
+  expect(onSubmit).toHaveBeenCalledWith('');
 });
 
 it('글자가 있으면 지우기가 보이고, 누르면 **곧바로** 빈 글자로 알린다', async () => {
