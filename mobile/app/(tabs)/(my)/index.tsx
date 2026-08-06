@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: '#FAF3E6',
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -235,10 +235,13 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  // ⚠️ 사진이 없을 때의 첫 글자. **웹과 같은 색이다**(`bg-primary-50` + `#825500`).
+  //    앱 안에서도 판매자 프로필·프로필 수정과 같아야 한다 — 같은 것이 화면마다 다른 색이면
+  //    다른 앱처럼 보인다(2026-08-07에 셋이 다 달랐다).
   avatarInitial: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#6B7280',
+    color: '#825500',
   },
   profileText: {
     // 남는 자리를 다 먹어 화살표를 오른쪽 끝으로 민다

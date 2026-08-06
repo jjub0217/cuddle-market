@@ -93,7 +93,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAF3E6',
   },
   avatarImage: { width: '100%', height: '100%' },
-  avatarInitial: { fontSize: 22, color: '#111827' },
+  // ⚠️ 웹과 같은 색이다(#825500). 마이 화면·프로필 수정과도 같아야 한다
+  avatarInitial: { fontSize: 22, fontWeight: '700', color: '#825500' },
   info: { flex: 1, gap: 4 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   nickname: { fontSize: 18, fontWeight: '700', color: '#111827' },
