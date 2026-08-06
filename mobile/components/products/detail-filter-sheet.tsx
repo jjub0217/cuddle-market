@@ -128,9 +128,22 @@ export function DetailFilterSheet({ visible, value, onClose, onApply }: Props) {
     setDraft((prev) => ({ ...prev, gugun: prev.gugun === gugun ? null : gugun }));
   };
 
+  /**
+   * 「초기화」 — 시트가 담은 셋(상태·가격·지역)을 지우고 **곧바로 반영한다.**
+   *
+   * ⚠️ 다른 것과 달리 「적용」을 기다리지 않는다. 조금씩 고르는 것과 성격이 다르기 때문이다 —
+   *    「다 지우고 처음으로」는 그 자체로 끝난 행동이라, 누른 뒤에 「이제 적용을 누르세요」가
+   *    한 번 더 필요하면 어색하다. 실제로 실기기에서 「초기화를 눌렀는데 목록이 그대로다」로
+   *    걸렸다(2026-08-06). 웹도 「필터 초기화」는 누르는 즉시 반영한다
+   *    (DetailFilterButton.tsx 의 filterReset — 웹에는 「적용」 자체가 없다).
+   *
+   * 지우는 범위는 **이 시트가 담은 것까지**다. 대분류·카테고리·정렬은 시트 밖에 있으니
+   * 건드리지 않는다.
+   */
   const resetAll = () => {
     setDraft(EMPTY_DETAIL_FILTER);
     setShowProvinces(false);
+    onApply(EMPTY_DETAIL_FILTER);
   };
 
   return (

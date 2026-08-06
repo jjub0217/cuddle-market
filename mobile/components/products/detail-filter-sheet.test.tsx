@@ -119,7 +119,10 @@ it('열 때 값이 있으면 그게 골라진 채로 보인다', async () => {
   expect(screen.getByRole('button', { name: SEOUL_GUGUN, selected: true })).toBeTruthy();
 });
 
-it('초기화를 누르면 시트 안의 조건이 다 풀린다', async () => {
+it('초기화를 누르면 **곧바로** 빈 조건으로 알린다', async () => {
+  // ⚠️ 다른 것과 달리 「적용」을 기다리지 않는다. 「다 지우고 처음으로」는 그 자체로 끝난
+  //    행동이라, 누른 뒤에 한 번 더 눌러야 하면 어색하다 — 실기기에서 「초기화를 눌렀는데
+  //    목록이 그대로다」로 걸렸다(2026-08-06). 웹도 「필터 초기화」는 즉시 반영한다.
   const { props, onApply } = setup({
     productStatus: STATUS.code,
     price: { min: 0, max: 10000 },
@@ -130,13 +133,13 @@ it('초기화를 누르면 시트 안의 조건이 다 풀린다', async () => {
 
   await fireEvent.press(screen.getByText('초기화'));
 
+  // 「적용」을 안 눌렀는데도 이미 알렸다
+  expect(onApply).toHaveBeenCalledWith(EMPTY_DETAIL_FILTER);
+
   // 시/도가 풀렸으니 시/군/구 단계에서 나와 시/도 목록으로 돌아온다
   expect(screen.queryByText(SEOUL_GUGUN)).toBeNull();
   expect(screen.queryByTestId(REGION_BACK_TEST_ID)).toBeNull();
   expect(screen.getByRole('button', { name: '서울특별시', selected: false })).toBeTruthy();
-
-  await fireEvent.press(screen.getByText('적용'));
-  expect(onApply).toHaveBeenCalledWith(EMPTY_DETAIL_FILTER);
 });
 
 // 지역은 **한 번에 한 목록만** 펼친다(#855 후속). 시/도 17개와 시/군/구 최대 30개를
