@@ -144,11 +144,17 @@ mobile/lib/password.ts (새로)               PATCH /auth/password/change
 
 재사용할 조각:
 ```
-components/products/region-field.tsx   지역 고르기 (시/도 → 시/군/구)
-components/products/image-field.tsx    사진 고르기
+components/products/region-field.tsx   지역 고르기 — **그대로 쓴다**
+lib/product-images.ts                  pickImages · shrinkImage · uploadOne — **함수만 쓴다**
 ```
 
-⚠️ **둘 다 옮기지 않는다.** `region-field` 는 이미 상품 밖에서 쓰이고 있다 —
+⚠️ **`components/products/image-field.tsx` 는 못 쓴다.** 그건 **여러 장**(`UploadSlot[]`)을
+   다루는 상품용이다 — 대표 사진 정하기, 다섯 장 제한, 실패한 칸만 다시 올리기까지 들어 있다.
+   프로필 사진은 **한 장**이라 그 구조가 통째로 남아돈다.
+   대신 **일하는 함수들은 그대로 쓴다**(`pickImages` · `shrinkImage` · `uploadOne`).
+   화면 조각만 한 장짜리로 새로 만든다.
+
+⚠️ **`region-field` 는 옮기지 않는다.** `region-field` 는 이미 상품 밖에서 쓰이고 있다 —
 소셜 가입(`social-signup.tsx`) · 회원가입(`components/signup/address-field.tsx`) ·
 상품 등록. 프로필 수정이 넷째가 될 뿐이라 **이번에 처음 어긋나는 게 아니다.**
 
