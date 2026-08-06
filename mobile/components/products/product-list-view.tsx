@@ -81,7 +81,11 @@ export function ProductListView({ keyword, bottomInset = 12 }: Props) {
       // 조건 없이 비었다면 앱에 상품이 정말 하나도 없는 것이다 — 그때는 앱이 원래 쓰던
       // 문구(「아직 등록된 상품이 없어요 / 첫 상품이 올라오면…」)가 맞다.
       return 조건이걸렸다 ? (
-        <EmptyState title="검색 결과가 없습니다" description="다른 필터 조건으로 검색해보세요" />
+        <EmptyState
+          icon="search"
+          title="검색 결과가 없습니다"
+          description="다른 필터 조건으로 검색해보세요"
+        />
       ) : (
         <EmptyState />
       );
