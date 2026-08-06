@@ -42,9 +42,16 @@ const ICON_COLOR = '#111827';
 interface Props {
   /** 문자열이면 제목으로, 아니면 그대로 그린다(홈은 로고 이미지) */
   left: ReactNode | string;
+  /**
+   * 오른쪽 아이콘 줄의 **맨 앞**에 끼워 넣을 것. 알림 벨·메뉴 앞에 온다.
+   *
+   * 홈의 검색 돋보기가 여기 들어온다. 세 탭이 이 헤더를 함께 쓰는데 검색은 상품에만
+   * 있는 것이라, 헤더에 박아 두면 커뮤니티·마이에도 생긴다.
+   */
+  right?: ReactNode;
 }
 
-export function AppHeader({ left }: Props) {
+export function AppHeader({ left, right }: Props) {
   const router = useRouter();
   const status = useAuthStore((state) => state.status);
   const isAuthed = status === 'authed';
@@ -66,6 +73,8 @@ export function AppHeader({ left }: Props) {
       </View>
 
       <View style={styles.right}>
+        {right}
+
         {/* 비로그인이면 벨을 아예 안 보여준다. 눌러서 로그인으로 보내는 것보다 정직하다. */}
         {isAuthed ? (
           <Pressable
@@ -101,14 +110,29 @@ export function AppHeader({ left }: Props) {
 }
 
 /** 홈이 쓰는 로고. 눌러도 아무 데도 안 간다 — 이미 홈이다. */
-export function HeaderLogo() {
-  return (
+export function HeaderLogo({ onPress }: { onPress?: () => void }) {
+  const logo = (
     <Image
       source={require('@/assets/images/logo.png')}
       style={styles.logo}
       contentFit="contain"
       accessibilityLabel="커들마켓"
     />
+  );
+
+  // 누를 일이 없으면 그냥 그림이다. 홈만 누를 거리를 준다 —
+  // 웹도 로고를 누르면 홈(맨 주소)으로 간다(Header.tsx:165).
+  if (!onPress) return logo;
+
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel="홈으로"
+      style={({ pressed }) => (pressed ? styles.iconPressed : undefined)}
+    >
+      {logo}
+    </Pressable>
   );
 }
 

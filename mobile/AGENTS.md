@@ -21,6 +21,7 @@ pnpm gate:mobile     # tsc --noEmit + expo lint + jest
 | `Modal` 의 `animationType="slide"` | **아래에서만** 올라온다. 옆에서 미는 건 없는 값이다 | 옆에서 넣으려면 `animationType="none"` + Reanimated로 직접 |
 | `useSegments()` | 튜플 유니온을 돌려줘서 `includes()`가 타입 오류가 난다 | `as string[]`로 넓혀서 쓴다 |
 | **Expo Go에서 맞춘 아래쪽 여백** | `app.json`의 `edgeToEdgeEnabled: true`가 **Expo Go에는 안 먹는다.** 그래서 Expo Go에서는 `insets.bottom = 0`이고, 개발·출시 빌드에서는 24~48이 들어온다 | 탭 화면 안(탭바가 보이는 화면)에서는 `insets.bottom`을 **더하지 마라** — 탭바가 이미 제스처 바를 비켜 놓아 두 번 세게 된다. 루트에 그리는 것(토스트)만 자기가 더한다. **여백은 개발 빌드로 맞춰라** — Expo Go에서 맞추면 진짜 빌드에서 어긋난다 |
+| **루트 화면에서 목록 끝이 기기 바에 가림** | 탭 화면은 탭바가 기기 바를 비켜 주지만, **루트에 뜨는 화면은 아래에 탭바가 없다.** 자기가 비켜야 한다 | `SafeAreaView`에 **`edges={['top', 'bottom']}`**. 알림·답글·검색 결과가 다 그렇다. `['top']`만 주면 마지막 항목이 3버튼 바에 깔린다 (2026-08-06 검색 결과에서 또 걸렸다) |
 | **코드는 맞는데 폰 화면이 옛날 것** | Metro가 죽었다 다시 떠도 **폰은 저절로 안 붙는다.** Expo Go는 이미 받아 둔 화면을 계속 보여줘서 「코드가 원복됐다」로 보인다 | 코드를 뒤지기 전에 **폰에서 Reload부터**(흔들기 → Reload). 그래도 옛날 것이면 그때 코드를 본다. 11바퀴에 이걸로 한 바퀴 돌았다 |
 | `useBottomTabBarHeight()` | **탭 화면 안에서만** 돈다. 루트 화면에서 부르면 못 쓴다 | 루트에 그리는 것(토스트 등)은 값을 재서 못 박는다 (`insets.bottom + 72`) |
 | `textShadow` | **글자 기반 아이콘**(MaterialIcons)에만 먹는다. SVG 아이콘(Lucide)엔 안 먹는다 | 그림자용 아이콘을 뒤에 깐다. **타입체크도 린트도 안 잡아준다** — 실기기로 봐야 안다 |
