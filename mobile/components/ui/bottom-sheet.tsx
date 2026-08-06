@@ -1,25 +1,12 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-  type ComponentProps,
-  type ComponentRef,
-  type ComponentType,
-  type ReactNode,
-  type RefObject,
-} from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Modal, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, {
   Easing,
   runOnJS,
-  useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-  type SharedValue,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -82,106 +69,35 @@ function 걸리는시간(거리: number, msPerDp: number, 범위: { min: number;
 const MAX_HEIGHT_RATIO = 0.85;
 
 /**
- * 손을 떼는 순간 아래로 이만큼(dp) 넘게 와 있으면 닫는다. 못 미치면 제자리로 돌아간다.
+ * 아래로 이만큼(dp) 넘게 밀면 닫는다.
  *
- * 시트 높이의 비율이 아니라 **고정 거리**인 이유: 큰 시트든 작은 시트든 「닫으려고 미는
- * 손의 크기」는 같다. 비율로 두면 낮은 시트는 손가락만 얹어도 닫히고, 큰 시트는 화면
- * 절반을 끌어내려야 닫힌다.
+ * ⚠️ **시트가 손을 따라 움직이지 않는다.** 지도 시트(place-sheet.tsx)는 올린 만큼 올라가고
+ *    내린 만큼 내려가지만, 여기는 아래로 미는 것을 **닫기 신호로만** 받는다.
+ *    그래서 「어중간하게 걸쳐 있다가 제자리로 돌아가는」 자리가 아예 없다.
+ *
+ *    시트 높이의 비율이 아니라 **고정 거리**인 이유: 따라 움직이지 않으니 「얼마나 왔나」가
+ *    아니라 「얼마나 밀었나」만 보면 된다. 손이 움직인 거리는 시트 크기와 상관없다.
  */
 const DRAG_CLOSE_DP = 56;
 
 /** 조금만 밀었어도 이보다 빠르게 튕겨 내리면 닫는다(초당 몇 점). 「휙 내리기」를 받아 준다. */
 const FLING_VELOCITY = 800;
 
-/**
- * 덜 밀고 놓았을 때 제자리(0)로 돌아가는 시간.
- *
- * 여는 것보다 짧은 범위를 쓴다 — 되돌아가는 거리는 길어야 56dp 남짓이라, 여는 범위
- * (최소 300ms)를 그대로 쓰면 「손을 놓고 한참 뒤에야 붙는다」로 보인다.
- */
-const RETURN_MS_RANGE = { min: 120, max: 240 };
-
 /** 시험이 끌기 제스처를 집을 때 쓰는 이름. */
 export const DRAG_TEST_ID = 'bottom-sheet-drag';
-
-/** 시험이 **움직이는 상자**를 집을 때 쓰는 이름. 얼마나 내려가 있는지를 여기서 읽는다. */
-export const SHEET_TEST_ID = 'bottom-sheet-box';
-
-/** 그려진 안쪽 스크롤 그 자체(Animated.ScrollView 의 알맹이). */
-type 스크롤알맹이 = ComponentRef<typeof Animated.ScrollView>;
-
-/**
- * 시트 안쪽 스크롤과 시트 끌기를 이어 주는 자리.
- *
- * 껍데기(BottomSheet)가 넣어 주고, 안쪽 스크롤(SheetScrollView)이 꺼내 쓴다.
- * 안쪽이 스크롤되는 시트는 「지금 스크롤이 어디쯤인지」를 껍데기가 알아야 끌기와
- * 굴리기를 가를 수 있다(아래 SheetScrollView 설명).
- */
-interface 시트속스크롤 {
-  scrollRef: RefObject<스크롤알맹이 | null>;
-  /** 안쪽 스크롤이 맨 위에서 얼마나 내려가 있나. 0이면 맨 위다. */
-  scrollY: SharedValue<number>;
-}
-
-const SheetScrollContext = createContext<시트속스크롤 | null>(null);
-
-/**
- * 시트 안에서 쓰는 스크롤. 그냥 `ScrollView` 대신 이걸 쓴다.
- *
- * 하는 일은 둘뿐이다 — 스크롤 자리를 껍데기에 알려 주고, 자기 자신을 껍데기의 끌기
- * 제스처에 소개해 준다(`simultaneousWithExternalGesture`). 그래야 아래 규칙이 선다.
- *
- * ```
- * 스크롤이 맨 위 + 아래로 밀기   →  시트가 손을 따라 내려간다
- * 그 밖(중간이거나 위로 밀기)     →  안쪽 내용이 굴러간다
- * ```
- *
- * ⚠️ **왜 `onScroll`을 그냥 함수로 안 받고 `useAnimatedScrollHandler`인가:**
- *    보통 `onScroll`은 자바스크립트 쪽에서 돈다. 그런데 끌기 판정은 손가락 쪽(UI 쓰레드)에서
- *    매 프레임 일어나므로, 자바스크립트를 거쳐 온 값은 한 박자 늦은 옛 값이다. 이 훅으로
- *    받으면 값이 UI 쓰레드의 공유값에 바로 담겨 제스처와 같은 박자로 읽힌다.
- *
- * ⚠️ **끝에서 튕기는 것(bounces)을 끈다.** 시트를 끌어 내리는 동안 안쪽 내용까지 같이
- *    늘어지면 두 개가 따로 움직이는 것처럼 보인다.
- */
-export function SheetScrollView(props: ComponentProps<typeof Animated.ScrollView>) {
-  const 시트속 = useContext(SheetScrollContext);
-  // 시트 밖에서 써도 터지지 않게 둘 자리. 시트 안이면 껍데기 것을 쓴다.
-  const 혼자쓸값 = useSharedValue(0);
-  const scrollY = 시트속?.scrollY ?? 혼자쓸값;
-
-  const onScroll = useAnimatedScrollHandler({
-    onScroll: (event) => {
-      scrollY.value = event.contentOffset.y;
-    },
-  });
-
-  return (
-    <Animated.ScrollView
-      bounces={false}
-      overScrollMode="never"
-      {...props}
-      // ⚠️ 이 셋은 받은 값 **뒤**에 둔다. 앞에 두면 쓰는 쪽이 실수로 onScroll을 넘겼을 때
-      //    이걸 덮어써서, 오류 없이 조용히 끌기와 굴리기가 안 갈린다.
-      ref={시트속?.scrollRef}
-      onScroll={onScroll}
-      // 16 = 한 프레임(60fps)마다. 기본값(0)이면 스크롤이 끝나야 한 번 온다.
-      scrollEventThrottle={16}
-    />
-  );
-}
 
 interface Props {
   visible: boolean;
   onClose: () => void;
   /**
-   * 손잡이를 달고, **시트 아무 데나 아래로 끌면 손을 따라 내려가며 닫히게** 한다.
+   * 손잡이를 달고, **그 손잡이를 아래로 끌면 닫히게** 한다.
    *
-   * 손잡이는 「여기 끌 수 있다」는 표시로만 남는다 — 잡는 자리는 시트 전체다.
-   * 카카오맵·네이버지도의 목록 시트가 그렇다(2026-08-06 실기기 확인).
-   *
-   * 안이 스크롤되는 시트는 안쪽 스크롤을 `SheetScrollView`로 바꿔 준다. 그러면
-   * 「스크롤이 맨 위일 때만 시트가 끌린다」로 갈라져 굴리기와 부딪히지 않는다.
+   * ⚠️ 왜 시트 아무 데나가 아니라 손잡이인가(#855에서 고른 길 ①):
+   * 안이 스크롤되는 시트(세부 필터)에서 내용 위를 아래로 끌면 「목록을 굴리려는 것」인지
+   * 「시트를 닫으려는 것」인지 가릴 수 없다. 둘 다 받으려 하면 굴리다가 시트가 닫히거나,
+   * 반대로 닫으려는데 목록만 움직인다. 손잡이에서만 받으면 헷갈릴 일이 없고, iOS 기본
+   * 시트도 이 방식이다. (다른 길 ②는 「스크롤이 맨 위일 때만 끌면 닫힌다」인데, 손이
+   * 한 번 더 가고 맨 위인지 아닌지를 사용자가 알 수 없어 안 골랐다.)
    *
    * 손잡이가 없던 다섯 시트는 이 값을 안 주므로 지금까지와 똑같이 돈다.
    */
@@ -208,16 +124,6 @@ export function BottomSheet({ visible, onClose, dragToClose = false, children }:
   /** 지금 시트가 내려가 있는 거리. 0이면 다 올라온 상태다. */
   const translateY = useSharedValue(screenHeight);
 
-  /**
-   * 안쪽 스크롤과 이어 주는 두 값. 안이 안 굴러가는 다섯 시트에서는
-   * scrollY가 0에 머무르고 scrollRef가 비어 있어, 시트 전체가 그냥 끌린다.
-   */
-  const scrollRef = useRef<스크롤알맹이 | null>(null);
-  const scrollY = useSharedValue(0);
-  // 둘 다 살아 있는 동안 안 바뀌는 값이라 한 번만 만들어 둔다 — 매번 새 객체를 넣으면
-  // 안쪽 스크롤이 까닭 없이 다시 그려진다.
-  const 시트속 = useRef<시트속스크롤>({ scrollRef, scrollY }).current;
-
   useEffect(() => {
     if (visible) {
       setMounted(true);
@@ -231,13 +137,7 @@ export function BottomSheet({ visible, onClose, dragToClose = false, children }:
     translateY.value = withTiming(
       hiddenY.value,
       {
-        // ⚠️ 남은 거리로 잰다. 끌어 내리다 닫히면 시트는 이미 절반쯤 내려가 있는데,
-        //    전체 거리로 시간을 잡으면 남은 조금을 가는 데 그 시간을 다 써서 굼떠 보인다.
-        duration: 걸리는시간(
-          Math.max(0, hiddenY.value - translateY.value),
-          CLOSE_MS_PER_DP,
-          CLOSE_MS_RANGE
-        ),
+        duration: 걸리는시간(hiddenY.value, CLOSE_MS_PER_DP, CLOSE_MS_RANGE),
         easing: Easing.in(Easing.cubic),
       },
       (finished) => {
@@ -246,108 +146,20 @@ export function BottomSheet({ visible, onClose, dragToClose = false, children }:
     );
   }, [visible, translateY, hiddenY]);
 
-  /** 덜 밀고 놓았을 때. 손을 뗀 자리에서 제자리(0)로 붙인다. */
-  const 제자리로 = () => {
-    'worklet';
-    translateY.value = withTiming(0, {
-      duration: 걸리는시간(translateY.value, OPEN_MS_PER_DP, RETURN_MS_RANGE),
-      easing: Easing.out(Easing.cubic),
-    });
-  };
-
-  /**
-   * 「시트 끌기가 시작된 지점」. 손가락이 움직인 거리(translationY)에서 이만큼을 뺀 것이
-   * 시트가 내려가야 할 거리다.
-   *
-   * 왜 0이 아닐 수 있나: 안쪽을 한참 굴리다가 손을 안 뗀 채로 맨 위까지 되돌아오면,
-   * 그 순간 손가락은 이미 한참 움직인 뒤다. 그 값을 그대로 쓰면 시트가 **훌쩍 뛴다.**
-   * 굴리는 동안 이 값을 손가락 자리에 붙여 두면, 맨 위에 닿은 그 자리부터 0에서 시작한다.
-   */
-  const 끌기시작 = useSharedValue(0);
-
-  /**
-   * 이번에 손을 댄 뒤로 시트가 **실제로** 손을 따라 내려간 적이 있나.
-   *
-   * ⚠️ 이게 없으면 굴리기만 했는데 닫힌다. 굴러가 있는 목록을 아래로 휙 튕기면 시트는
-   *    가만히 있었는데도 손을 떼는 순간의 속도가 크다 — 그 속도만 보고 「휙 내렸다」로
-   *    받아 버린다. 시트가 움직인 적이 없으면 손을 뗄 때 아무 일도 없어야 한다.
-   */
-  const 시트가움직였다 = useSharedValue(false);
-
-  /**
-   * 시트 끌기. **시트 아무 데서나** 받는다.
-   *
-   * ⚠️ 안쪽 스크롤과 어떻게 가르나 — `simultaneousWithExternalGesture`를 골랐다.
-   *    - `Gesture.Native()` + `Gesture.Simultaneous`도 같은 일을 하지만, 스크롤을
-   *      `GestureDetector`로 한 겹 더 감싸야 한다. 감싸는 쪽은 쓰는 사람(세부 필터 시트)이라
-   *      빠뜨리기 쉽다. 지금 방식은 `SheetScrollView` 하나로 바꿔 끼우면 끝이다.
-   *    - 「둘 중 하나만」(`blocksExternalGesture`)로 가르면 손을 뗐다 다시 대야 다른 쪽이
-   *      먹는다. 카카오맵은 한 번 댄 손으로 굴리다 그대로 시트를 내릴 수 있다.
-   *    그래서 **둘 다 살려 두고**, 어느 쪽이 움직일지는 아래 onUpdate에서 스크롤 자리를
-   *    보고 정한다. 스크롤이 맨 위가 아니면 시트는 가만히 있고 안쪽만 굴러간다.
-   */
+  // ⚠️ **시트는 손을 따라 움직이지 않는다.** 아래로 미는 것을 닫기 신호로만 받는다.
+  //    따라 움직이게 하면(onUpdate로 translateY를 손에 붙이면) 그건 지도 시트 방식이고,
+  //    그때부터 「덜 내렸으면 제자리로 돌려놓기」가 딸려 온다. 이 시트는 올라가 있거나
+  //    내려가 있거나 둘뿐이라 그 중간 자리가 필요 없다.
   const pan = Gesture.Pan()
     // 시험에서 이 제스처를 집어 흔들어 보려고 붙인 이름이다(bottom-sheet.test.tsx).
     .withTestId(DRAG_TEST_ID)
-    // ⚠️ 타입만 갈아 끼운다. gesture-handler 는 「같이 돌 상대」를 컴포넌트 **종류**의
-    //    ref 로 적어 두었는데, 실제로 넣어야 하는 것은 그려진 스크롤 그 자체다.
-    //    값은 맞고 적힌 이름만 다르다. 안 굴러가는 다섯 시트에서는 비어(null) 있고,
-    //    비어 있으면 라이브러리가 그냥 건너뛴다.
-    .simultaneousWithExternalGesture(scrollRef as unknown as RefObject<ComponentType>)
-    // 위아래로 10dp 넘게 움직여야 끌기로 친다. 시트 전체가 잡는 자리가 됐으니,
-    // 알약이나 「적용」을 누를 때 손가락이 옆으로 조금 흔들려도 누르기가 살아 있어야 한다.
-    .activeOffsetY([-10, 10])
-    .onBegin(() => {
-      끌기시작.value = 0;
-      시트가움직였다.value = false;
-    })
-    // ⚠️ **끌기로 인정된 그 자리**를 기준으로 잡는다. activeOffsetY 때문에 여기 올 때는
-    //    손가락이 이미 10dp 가 있는데, 기준을 0으로 두면 첫 프레임에 그만큼 훌쩍 뛴다.
-    .onStart((event) => {
-      끌기시작.value = event.translationY;
-    })
-    .onUpdate((event) => {
-      // 안쪽이 아직 맨 위가 아니다 → 굴리는 중이다. 시트는 건드리지 않고,
-      // 끌기 기준만 손가락을 따라 옮겨 둔다(위 끌기시작 설명).
-      //
-      // ⚠️ **시트가 한 번 움직이기 시작했으면 더는 안 묻는다.** 시트를 내리는 동안에도
-      //    안쪽 스크롤은 함께 살아 있어, 한 순간이라도 0이 아니게 읽히면 시트가 제자리로
-      //    튕겼다가 다음 프레임에 다시 따라온다 — 「내려가다 멈추고 마저 내려간다」로
-      //    보인다(2026-08-06 실기기). 굴리기냐 끌기냐는 **시작할 때 한 번만** 갈린다.
-      if (!시트가움직였다.value && scrollY.value > 0) {
-        끌기시작.value = event.translationY;
-        translateY.value = 0;
-        return;
-      }
-      // 위로 미는 것은 시트를 키우지 않는다 — 세부 필터 시트는 이미 최대 높이로 열려
-      // 커질 자리가 없다. 위로 밀면 안쪽이 굴러가면 된다. 그래서 0 아래로는 안 간다.
-      const 내려온거리 = Math.max(0, event.translationY - 끌기시작.value);
-      translateY.value = 내려온거리;
-      if (내려온거리 > 0) 시트가움직였다.value = true;
-    })
     .onEnd((event) => {
-      // 굴리기만 했다면 시트는 제자리 그대로다 — 손을 떼도 아무 일도 없어야 한다.
-      if (!시트가움직였다.value) return;
+      const 닫을만큼밀었다 =
+        event.translationY > DRAG_CLOSE_DP || event.velocityY > FLING_VELOCITY;
 
-      const 내려온거리 = Math.max(0, event.translationY - 끌기시작.value);
-      const 닫을만큼밀었다 = 내려온거리 > DRAG_CLOSE_DP || event.velocityY > FLING_VELOCITY;
-
-      // 닫을 때는 여기서 직접 내리지 않고 알리기만 한다. 알리면 쓰는 쪽이 visible을 내리고,
-      // 위 useEffect가 늘 하던 대로 **지금 있는 자리에서 이어서** 내려 준다 —
-      // 닫는 움직임이 한 곳에만 있다.
-      if (닫을만큼밀었다) {
-        runOnJS(onClose)();
-        return;
-      }
-      // ⚠️ 손을 따라 움직이는 이상 이게 반드시 있어야 한다. 없으면 덜 민 시트가
-      //    중간에 걸쳐 있는 채로 남는다.
-      제자리로();
-    })
-    .onFinalize((_event, 제대로끝났다) => {
-      끌기시작.value = 0;
-      시트가움직였다.value = false;
-      // 다른 제스처에 밀려 취소된 경우에도 걸쳐 있지 않게 한다.
-      if (!제대로끝났다) 제자리로();
+      // 여기서 직접 내리지 않고 알리기만 한다. 알리면 쓰는 쪽이 visible을 내리고,
+      // 위 useEffect가 늘 하던 대로 내려 준다 — 닫는 움직임이 한 곳에만 있다.
+      if (닫을만큼밀었다) runOnJS(onClose)();
     });
 
   const sheetStyle = useAnimatedStyle(() => ({
@@ -361,47 +173,39 @@ export function BottomSheet({ visible, onClose, dragToClose = false, children }:
     return { opacity: Math.min(1, Math.max(0, 올라온정도)) };
   });
 
-  const 재는상자 = (
-    <Pressable
-      // 안전영역 여백을 「재는 상자」인 여기에 준다. 바깥 Animated.View에 주면
-      // onLayout이 재는 높이에 안 잡혀, 올라오기 전 시트가 그 높이만큼
-      // 덜 내려가 화면 아래에 미리 비죽 나와 보인다.
-      style={{
-        paddingBottom: insets.bottom,
-        // 여기서 끊어야 안쪽 스크롤이 줄어들 자리를 안다(MAX_HEIGHT_RATIO 설명 참고).
-        maxHeight: Math.round(screenHeight * MAX_HEIGHT_RATIO),
-      }}
-      onPress={() => {}}
-      // 재고 나면 정확한 높이를 쓴다. 상태로 두지 않는 이유: 여기서 다시 그릴 필요가
-      // 없다. 값이 쓰이는 곳은 움직임뿐이라 공유값에 바로 넣는다.
-      onLayout={(event) => {
-        hiddenY.value = event.nativeEvent.layout.height;
-      }}
-    >
-      {dragToClose ? (
-        // 손잡이는 이제 **표시**다. 잡는 자리는 시트 전체라 여기만 노릴 필요가 없다.
-        // 그래도 그린다 — 막대가 없으면 「끌 수 있다」는 걸 알 길이 없다.
-        <View style={styles.handleArea} accessibilityLabel="끌어내려 닫기">
-          <View style={styles.handle} />
-        </View>
-      ) : null}
-      {children}
-    </Pressable>
-  );
-
   const 껍데기 = (
     /* 취소 버튼을 따로 두지 않는다. 바깥을 누르면 닫힌다. */
     <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="닫기">
       <Animated.View style={[styles.backdropFill, backdropStyle]} />
       {/* 시트 안을 눌렀을 때 닫히지 않도록 바깥 Pressable의 터치를 여기서 멈춘다. */}
-      <Animated.View testID={SHEET_TEST_ID} style={[styles.sheet, sheetStyle]}>
-        {dragToClose ? (
-          // 시트 통째로 끌기를 받는다. 누르기(적용·초기화·알약)는 그대로 먹는다 —
-          // Pan은 손가락이 얼마쯤 움직여야 시작되므로 톡 누르는 것과 안 부딪힌다.
-          <GestureDetector gesture={pan}>{재는상자}</GestureDetector>
-        ) : (
-          재는상자
-        )}
+      <Animated.View style={[styles.sheet, sheetStyle]}>
+        <Pressable
+          // 안전영역 여백을 「재는 상자」인 여기에 준다. 바깥 Animated.View에 주면
+          // onLayout이 재는 높이에 안 잡혀, 올라오기 전 시트가 그 높이만큼
+          // 덜 내려가 화면 아래에 미리 비죽 나와 보인다.
+          style={{
+            paddingBottom: insets.bottom,
+            // 여기서 끊어야 안쪽 스크롤이 줄어들 자리를 안다(MAX_HEIGHT_RATIO 설명 참고).
+            maxHeight: Math.round(screenHeight * MAX_HEIGHT_RATIO),
+          }}
+          onPress={() => {}}
+          // 재고 나면 정확한 높이를 쓴다. 상태로 두지 않는 이유: 여기서 다시 그릴 필요가
+          // 없다. 값이 쓰이는 곳은 움직임뿐이라 공유값에 바로 넣는다.
+          onLayout={(event) => {
+            hiddenY.value = event.nativeEvent.layout.height;
+          }}
+        >
+          {dragToClose ? (
+            <GestureDetector gesture={pan}>
+              {/* 눈에 보이는 막대보다 넓게 잡는다 — 얇은 막대만 노리면 「안 끌린다」로
+                  느껴진다(지도 시트에서 실제로 겪었다). */}
+              <View style={styles.handleArea} accessibilityLabel="끌어내려 닫기">
+                <View style={styles.handle} />
+              </View>
+            </GestureDetector>
+          ) : null}
+          {children}
+        </Pressable>
       </Animated.View>
     </Pressable>
   );
@@ -413,13 +217,11 @@ export function BottomSheet({ visible, onClose, dragToClose = false, children }:
           조용히 안 끌린다.** 공식 설치 문서가 시키는 대로다.
           끌지 않는 다섯 시트에는 씌우지 않는다 — 안 쓰는 곳의 터치 흐름까지 건드릴
           이유가 없다. */}
-      <SheetScrollContext.Provider value={시트속}>
-        {dragToClose ? (
-          <GestureHandlerRootView style={styles.gestureRoot}>{껍데기}</GestureHandlerRootView>
-        ) : (
-          껍데기
-        )}
-      </SheetScrollContext.Provider>
+      {dragToClose ? (
+        <GestureHandlerRootView style={styles.gestureRoot}>{껍데기}</GestureHandlerRootView>
+      ) : (
+        껍데기
+      )}
     </Modal>
   );
 }

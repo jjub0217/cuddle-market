@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { PRODUCT_STATUS_OPTIONS } from '@cuddle/shared';
 
-import { BottomSheet, SheetScrollView } from '@/components/ui/bottom-sheet';
+import { BottomSheet } from '@/components/ui/bottom-sheet';
 
 import { CITIES, PROVINCES } from '@/constants/cities';
 
@@ -37,9 +37,6 @@ export interface DetailFilterValue {
   sido: string | null;
   gugun: string | null;
 }
-
-/** 시험이 안쪽 목록을 집을 때 쓰는 이름. 굴려 놓고 시트를 끌어 보려면 필요하다. */
-export const FILTER_LIST_TEST_ID = 'detail-filter-list';
 
 export const EMPTY_DETAIL_FILTER: DetailFilterValue = {
   productStatus: null,
@@ -99,18 +96,12 @@ export function DetailFilterSheet({ visible, value, onClose, onApply }: Props) {
   };
 
   return (
-    // dragToClose: 손잡이를 껍데기가 그리고, **시트 아무 데나** 아래로 끌면 손을 따라
-    // 내려가며 닫힌다. 카카오맵·네이버지도 목록 시트와 같다.
+    // dragToClose: 손잡이를 껍데기가 그리고, 그 손잡이를 아래로 끌면 닫힌다.
+    // 왜 손잡이에서만 끄는지는 bottom-sheet.tsx 의 dragToClose 설명에 적어 두었다 —
+    // 안이 스크롤되는 시트라, 내용 위에서도 끌리게 하면 굴리기와 부딪힌다.
     <BottomSheet visible={visible} onClose={onClose} dragToClose>
-      {/* 지역까지 다 펼치면 화면을 넘어서므로 안쪽만 스크롤한다. 단추 두 개는 늘 보여야 한다.
-          ⚠️ 그냥 ScrollView 가 아니라 껍데기가 주는 SheetScrollView 다. 이걸 써야
-             「스크롤이 맨 위일 때만 시트가 끌린다」로 갈라진다 — 그냥 ScrollView 로
-             되돌리면 굴리는 중에 시트가 같이 내려간다(bottom-sheet.tsx 의 설명). */}
-      <SheetScrollView
-        testID={FILTER_LIST_TEST_ID}
-        style={styles.body}
-        contentContainerStyle={styles.bodyContent}
-      >
+      {/* 지역까지 다 펼치면 화면을 넘어서므로 안쪽만 스크롤한다. 단추 두 개는 늘 보여야 한다 */}
+      <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent}>
         <Section title="상품 상태">
           {PRODUCT_STATUS_OPTIONS.map((option) => (
             <Pill
@@ -157,7 +148,7 @@ export function DetailFilterSheet({ visible, value, onClose, onApply }: Props) {
             ))}
           </View>
         ) : null}
-      </SheetScrollView>
+      </ScrollView>
 
       <View style={styles.footer}>
         <Pressable
