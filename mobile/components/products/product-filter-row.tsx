@@ -638,7 +638,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
-    borderWidth: 2,
+    // 안 고른 것도 같은 두께를 미리 잡아 둔다 — 안 그러면 고를 때마다 그림이 그만큼 줄어든다.
+    borderWidth: 1.5,
     borderColor: 'transparent',
   },
   // 고른 것이 눈에 띄게 — 동그라미에 브라운 테두리를 두르고 이름을 굵게 한다
