@@ -91,9 +91,6 @@ const MAX_HEIGHT_RATIO = 0.85;
  */
 const DRAG_CLOSE_DP = 12;
 
-/** 위로 쓰는 것은 안 받는다는 뜻의 큰 값. 시트는 이미 다 올라와 있어 더 갈 데가 없다. */
-const WON_T_ACTIVATE = 10000;
-
 /** 시험이 끌기 제스처를 집을 때 쓰는 이름. */
 export const DRAG_TEST_ID = 'bottom-sheet-drag';
 
@@ -178,7 +175,12 @@ export function BottomSheet({ visible, onClose, dragToClose = false, children }:
   const pan = Gesture.Pan()
     // 시험에서 이 제스처를 집어 흔들어 보려고 붙인 이름이다(bottom-sheet.test.tsx).
     .withTestId(DRAG_TEST_ID)
-    .activeOffsetY([-WON_T_ACTIVATE, DRAG_CLOSE_DP])
+    // ⚠️ **숫자 하나로 준다.** 양수는 「아래로 이만큼」이라는 뜻이고, 위로 쓰는 것은
+    //    애초에 안 받는다 — 시트는 이미 다 올라와 있어 더 갈 데가 없다.
+    //    예전에는 `[-10000, 12]` 처럼 두 값으로 줬는데, 그 극단값을 라이브러리가 정상으로
+    //    보지 않아 활성화 판정이 손 뗄 때까지 미뤄진 것으로 보인다(2026-08-06 실기기에서
+    //    「손을 떼야 반응한다」로 나타났다).
+    .activeOffsetY(DRAG_CLOSE_DP)
     .onStart(() => {
       // 여기 왔다는 것은 이미 아래로 DRAG_CLOSE_DP 만큼 쓸었다는 뜻이다.
       //
