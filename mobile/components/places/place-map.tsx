@@ -3,7 +3,7 @@ import type {
   NaverMapViewProps,
   Region,
 } from '@mj-studio/react-native-naver-map';
-import { useState, type ComponentType } from 'react';
+import { useEffect, useState, type ComponentType } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import { MapUnavailable } from '@/components/places/map-fallback';
@@ -25,6 +25,17 @@ import { DEFAULT_CENTER, type PlaceListItem } from '@/lib/places/types';
 
 /** 시 하나가 들어올 만한 배율. 너무 넓으면 핀이 수백 개, 너무 좁으면 빈 화면이 된다. */
 const INITIAL_ZOOM = 13;
+
+// 초기화된 뒤에도 그림이 다 그려지기까지 더 걸린다. 그동안 도는 표시를 남겨 둘 시간.
+//
+// ⚠️ 이건 **재 본 값이지 정확한 신호가 아니다.** 이 지도 SDK 에는 「다 그렸다」를
+//    알려주는 이벤트가 없다(초기화·카메라·탭이 전부다). 실기기에서 초기화 1초,
+//    그림까지 3초 더 걸렸다(2026-08-06).
+//
+//    그래서 이 시간이 지나도 안 그려졌거나 먼저 그려졌을 수 있다. 어긋나도 괜찮게
+//    **배경 없이 도는 표시만** 남긴다 — 지도가 먼저 그려지면 그 위로 비쳐 보이고,
+//    누르는 것도 막지 않는다.
+const GRACE_MS = 3000;
 
 interface NaverMapModule {
   NaverMapView: ComponentType<NaverMapViewProps>;
@@ -66,7 +77,14 @@ export default function PlaceMap({
   // ⚠️ 왜 필요한가 — 준비되는 동안 회색 판만 보이는데, **못 불러왔을 때도 회색 판**이다.
   //    사용자는 고장인지 기다리는 중인지 구분할 수 없다. 실기기에서 「회색 판이 보이다가
   //    지도가 나온다」고 느껴졌다(2026-08-06). 말로 구분해 준다.
-  const [준비됨, set준비됨] = useState(false);
+  const [초기화됨, set초기화됨] = useState(false);
+  const [유예끝, set유예끝] = useState(false);
+
+  useEffect(() => {
+    if (!초기화됨) return;
+    const id = setTimeout(() => set유예끝(true), GRACE_MS);
+    return () => clearTimeout(id);
+  }, [초기화됨]);
 
   if (!naver) return <MapUnavailable />;
 
@@ -79,7 +97,7 @@ export default function PlaceMap({
       initialCamera={{ ...DEFAULT_CENTER, zoom: INITIAL_ZOOM }}
       onCameraChanged={onCameraChanged}
       onCameraIdle={onCameraIdle}
-      onInitialized={() => set준비됨(true)}
+      onInitialized={() => set초기화됨(true)}
       isShowZoomControls={false}
       isShowScaleBar={false}
     >
@@ -96,11 +114,15 @@ export default function PlaceMap({
       ))}
     </NaverMapView>
 
-      {/* 지도가 그려지면 사라진다. 지도 위에 덮으므로 눌러도 지도로 안 넘어가게 둔다. */}
-      {준비됨 ? null : (
-        <View style={styles.loading}>
+      {유예끝 ? null : (
+        // 누르는 것을 막지 않는다 — 지도가 먼저 그려졌으면 바로 만질 수 있어야 한다.
+        <View
+          style={[styles.loading, 초기화됨 && styles.loadingClear]}
+          pointerEvents="none"
+        >
           <ActivityIndicator />
-          <Text style={styles.loadingText}>지도를 불러오는 중</Text>
+          {/* 글자는 회색 판일 때만. 지도가 비쳐 보이기 시작하면 글자가 지저분하다. */}
+          {초기화됨 ? null : <Text style={styles.loadingText}>지도를 불러오는 중</Text>}
         </View>
       )}
     </>
@@ -117,5 +139,7 @@ const styles = StyleSheet.create({
     // 색까지 다르면 잠깐 사이에 두 번 바뀌어 어수선하다.
     backgroundColor: '#F3F4F6',
   },
+  // 초기화된 뒤. 배경을 걷어 지도가 그려지는 대로 비쳐 보이게 한다.
+  loadingClear: { backgroundColor: 'transparent' },
   loadingText: { fontSize: 13, color: '#6B7280' },
 });
