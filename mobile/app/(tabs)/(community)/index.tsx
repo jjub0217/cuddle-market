@@ -40,7 +40,7 @@ export default function CommunityListScreen() {
     isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: ['communityPosts', boardType],
-    queryFn: ({ pageParam }) => fetchPosts(boardType, pageParam),
+    queryFn: ({ pageParam }) => fetchPosts({ boardType, page: pageParam }),
     initialPageParam: 0,
     getNextPageParam: (last, all) => (last.hasNext ? all.length : undefined),
   });

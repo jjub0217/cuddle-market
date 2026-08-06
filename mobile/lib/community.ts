@@ -69,10 +69,48 @@ export interface PostPage {
   hasNext: boolean;
 }
 
-export async function fetchPosts(boardType: BoardType, page: number): Promise<PostPage> {
-  const res = await apiFetch(
-    `/community/posts?boardType=${boardType}&page=${page}&size=${PAGE_SIZE}`
-  );
+/**
+ * 검색은 늘 「제목+내용」이다.
+ *
+ * ⚠️ 서버는 `title` · `title_content` · `writer` 셋을 다 받고 진짜로 돈다
+ *    (`PostRepositoryCustomImpl.java:56-72`). 그런데 **고르는 자리를 안 뒀다** —
+ *    「제목」은 「제목+내용」의 부분집합이고, 「작성자로 찾기」는 프로필 화면이 하는 일이다
+ *    (#857 설계 §2). 웹도 같은 값으로 못 박혀 있다(`CommunityPage.tsx` 의 SEARCH_TYPE).
+ */
+const SEARCH_TYPE = 'title_content';
+
+/** 글 목록을 좁히는 조건. */
+export interface PostListParams {
+  boardType: BoardType;
+  /** 0부터 시작하는 페이지 번호 */
+  page: number;
+  /** 검색어. 빈 값이면 안 싣는다 */
+  keyword?: string;
+  /** 'latest'(기본) | 'views' | 'comments'. 안 주면 서버가 latest 로 본다 */
+  sortBy?: string;
+}
+
+export async function fetchPosts({
+  boardType,
+  page,
+  keyword,
+  sortBy,
+}: PostListParams): Promise<PostPage> {
+  const query = new URLSearchParams({
+    boardType,
+    page: String(page),
+    size: String(PAGE_SIZE),
+  });
+
+  // ⚠️ **빈 값은 아예 안 싣는다.** 빈 글자를 보내면 서버가 그런 조건을 찾는다.
+  //    URLSearchParams 가 한글을 알아서 주소용으로 바꿔 준다.
+  if (keyword) {
+    query.set('searchType', SEARCH_TYPE);
+    query.set('keyword', keyword);
+  }
+  if (sortBy) query.set('sortBy', sortBy);
+
+  const res = await apiFetch(`/community/posts?${query.toString()}`);
   if (!res.ok) throw new Error(`글 목록을 불러오지 못했어요 (HTTP ${res.status})`);
 
   const body = (await res.json()) as { data?: { content?: PostListItem[]; hasNext?: boolean } };
