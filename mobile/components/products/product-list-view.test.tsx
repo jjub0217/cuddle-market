@@ -123,3 +123,39 @@ it('알약을 고르면 그 조건으로 **처음부터** 다시 받는다', asy
     expect.objectContaining({ page: 0, petType: 'MAMMAL' })
   );
 });
+
+// ----- 목록이 비었을 때 뭐라고 하는가 -----
+//
+// 세 경우가 다 다르다. 처음엔 홈 문구를 셋 다에 써서, 검색 결과에서 「아직 등록된 상품이
+// 없어요」가 나왔다 — 상품은 많은데 그 검색어에 안 걸린 것뿐인데 서비스가 텅 빈 것처럼
+// 읽힌다(2026-08-06 실기기에서 잡힌 것).
+
+it('검색 결과가 비면 검색어를 넣어 알린다', async () => {
+  fetchProducts.mockResolvedValue(한페이지([]));
+
+  await render(<ProductListView keyword="강아지 사료" />, { wrapper: 감싸기 });
+
+  await waitFor(() => expect(screen.getByText(/'강아지 사료' 검색 결과가 없어요/)).toBeTruthy());
+  // 홈 문구가 새어 나오면 안 된다
+  expect(screen.queryByText(/아직 등록된 상품이 없어요/)).toBeNull();
+});
+
+it('필터 때문에 비면 조건을 바꿔보라고 한다', async () => {
+  fetchProducts.mockResolvedValue(한페이지([]));
+
+  await render(<ProductListView />, { wrapper: 감싸기 });
+  await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
+
+  await fireEvent.press(screen.getByText('포유류'));
+
+  await waitFor(() => expect(screen.getByText(/조건에 맞는 상품이 없어요/)).toBeTruthy());
+  expect(screen.queryByText(/아직 등록된 상품이 없어요/)).toBeNull();
+});
+
+it('홈에 상품이 정말 없으면 홈 문구를 쓴다', async () => {
+  fetchProducts.mockResolvedValue(한페이지([]));
+
+  await render(<ProductListView />, { wrapper: 감싸기 });
+
+  await waitFor(() => expect(screen.getByText(/아직 등록된 상품이 없어요/)).toBeTruthy());
+});

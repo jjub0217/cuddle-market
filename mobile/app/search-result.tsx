@@ -3,15 +3,15 @@ import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ProductListView } from '@/components/products/product-list-view';
-import { ScreenHeader } from '@/components/ui/screen-header';
+import { SearchBarHeader } from '@/components/products/search-bar-header';
 
 // 검색 결과.
 //
 // **이 파일이 짧은 것이 설계가 맞았다는 증거다.** 목록도 필터도 무한스크롤도
 // ProductListView 가 이미 갖고 있다 — 검색어만 넘기면 된다(설계 §2).
 //
-// ⚠️ 검색 화면은 여기로 `replace` 로 온다. 그래서 뒤로 가면 검색 화면이 아니라 **홈**이다.
-//    검색어를 고치고 싶으면 헤더의 검색어를 누른다.
+// 헤더는 검색 화면과 **같은 검색 줄**이다. 검색어가 들어 있어 지금 무엇을 찾고 있는지
+// 늘 보이고, 눌러서 바로 고칠 수 있다. 네이버 지도 앱도 결과 화면에서 검색창을 그대로 둔다.
 
 export default function SearchResultScreen() {
   const router = useRouter();
@@ -19,12 +19,12 @@ export default function SearchResultScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* 제목이 곧 검색어다 — 지금 무엇을 찾고 있는지가 늘 보여야 한다.
-          누르면 검색 화면으로 돌아가 고칠 수 있다. */}
-      <ScreenHeader
-        title={keyword}
-        onPressIcon={() => router.back()}
-        align="left"
+      <SearchBarHeader
+        initialKeyword={keyword}
+        onBack={() => router.back()}
+        // 화면을 새로 밀지 않고 **이 화면의 검색어만 바꾼다.** push 하면 검색을 고칠 때마다
+        // 화면이 쌓여서, 뒤로가기를 여러 번 눌러야 홈에 닿는다.
+        onSubmit={(next) => router.setParams({ keyword: next })}
       />
       <ProductListView keyword={keyword} />
     </SafeAreaView>
