@@ -189,8 +189,19 @@ export function BottomSheet({ visible, onClose, dragToClose = false, children }:
       //    값이 한 박자만 어긋나도 시트가 제자리로 튕겼다 다시 따라와 「내려가다 멈춘다」가
       //    났다(되돌림 e40d9805). 쓸면 곧바로 닫히는 지금은 물어볼 자리가 한 곳뿐이다.
       //
-      // 직접 내리지 않고 알리기만 한다 — 알리면 쓰는 쪽이 visible을 내리고,
-      // 위 useEffect가 늘 하던 대로 내려 준다. 닫는 움직임이 한 곳에만 있다.
+      // ⚠️ **여기서 곧바로 내린다. 화면 담당(JS)을 기다리지 않는다.**
+      //    예전에는 `onClose()`만 알리고 내리는 일은 쓰는 쪽 → visible → useEffect 로
+      //    돌아오게 뒀다. 그런데 손가락이 닿아 있는 동안 화면 담당은 제스처 이벤트를
+      //    처리하느라 바빠서 그 알림이 밀린다 — **손을 떼야 한가해져 그때 내려갔다**
+      //    (2026-08-06 실기기). 시트를 내리는 일은 UI 담당 혼자 할 수 있으므로
+      //    여기서 바로 시작한다.
+      translateY.value = withTiming(hiddenY.value, {
+        duration: 걸리는시간(hiddenY.value, CLOSE_MS_PER_DP, CLOSE_MS_RANGE),
+        easing: Easing.in(Easing.cubic),
+      });
+      // 알리는 것은 그대로 한다. 쓰는 쪽이 visible을 내리고 useEffect가 뒤따라 돌지만,
+      // 이미 같은 자리로 가는 중이라 눈에 보이는 것은 달라지지 않는다.
+      // 시트를 떼어내는 일(mounted)도 그 useEffect가 맡는다.
       runOnJS(onClose)();
     });
 
