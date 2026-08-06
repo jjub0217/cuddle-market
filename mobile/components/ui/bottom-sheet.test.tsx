@@ -25,7 +25,10 @@ const METRICS = {
 // 시험에서는 시트 높이를 못 잰다(진짜로 그려지지 않으니 onLayout 이 안 온다).
 // 그래서 「숨은 자리」가 화면 높이(844)이고, 닫히는 기준은 그 1/4인 211쯤이다.
 // 아래 숫자들은 그 선을 넉넉히 넘기거나 못 미치게 골랐다.
-const 충분히 = 400;
+// 조각의 DRAG_CLOSE_DP(56dp)를 넘느냐 못 넘느냐로 갈린다.
+// ⚠️ 시트 높이와 상관없는 값이다 — 시트가 손을 따라 움직이지 않으니
+//    「얼마나 왔나」가 아니라 「얼마나 밀었나」만 본다.
+const 충분히 = 80;
 const 조금 = 40;
 
 function Wrapper({ children }: { children: React.ReactNode }) {
@@ -86,7 +89,7 @@ describe('BottomSheet', () => {
     expect(screen.getByLabelText('끌어내려 닫기')).toBeTruthy();
   });
 
-  it('손잡이를 충분히 아래로 끌면 닫힌다고 알린다', async () => {
+  it('손잡이를 충분히 아래로 밀면 닫힌다고 알린다', async () => {
     const 닫힘 = jest.fn();
     await render(
       <BottomSheet visible onClose={닫힘} dragToClose>
@@ -100,7 +103,7 @@ describe('BottomSheet', () => {
     await waitFor(() => expect(닫힘).toHaveBeenCalled());
   });
 
-  it('조금만 끌다 놓으면 안 닫힌다 — 제자리로 돌아간다', async () => {
+  it('조금만 밀면 안 닫힌다', async () => {
     const 닫힘 = jest.fn();
     await render(
       <BottomSheet visible onClose={닫힘} dragToClose>
@@ -118,7 +121,7 @@ describe('BottomSheet', () => {
     expect(닫힘).not.toHaveBeenCalled();
   });
 
-  it('조금만 내렸어도 휙 튕겨 내리면 닫힌다', async () => {
+  it('조금만 밀었어도 휙 튕겨 내리면 닫힌다', async () => {
     const 닫힘 = jest.fn();
     await render(
       <BottomSheet visible onClose={닫힘} dragToClose>
