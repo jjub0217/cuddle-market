@@ -1,11 +1,11 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import React from 'react';
-import { Text } from 'react-native';
+import { ScrollView, Text } from 'react-native';
 import type { PanGesture } from 'react-native-gesture-handler';
 import { fireGestureHandler, getByGestureTestId } from 'react-native-gesture-handler/jest-utils';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { BottomSheet, DRAG_TEST_ID, SheetScrollView } from './bottom-sheet';
+import { BottomSheet, DRAG_TEST_ID } from './bottom-sheet';
 
 // ⚠️ render·rerender·fireEvent는 셋 다 기다려야 한다(mobile/AGENTS.md).
 //
@@ -40,26 +40,6 @@ function 쓸어내린다(거리: number = 쓸어내린다_거리) {
     // 5 = 손을 뗀 상태(END)
     { state: 5, translationY: 거리, velocityY: 0 },
   ]);
-}
-
-const 안쪽스크롤 = '안쪽 스크롤';
-
-/** 안쪽 스크롤을 여기까지 굴려 둔다. 0이면 맨 위다. */
-async function 스크롤을둔다(y: number) {
-  await fireEvent.scroll(screen.getByTestId(안쪽스크롤), {
-    nativeEvent: {
-      contentOffset: { x: 0, y },
-      contentSize: { width: 390, height: 2000 },
-      layoutMeasurement: { width: 390, height: 500 },
-    },
-  });
-}
-
-/** 한 박자 기다린다. 「아직 안 왔을 뿐」과 「정말 안 불렀다」를 가르려면 필요하다. */
-async function 한박자쉰다() {
-  await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 20));
-  });
 }
 
 describe('BottomSheet', () => {
@@ -136,51 +116,24 @@ describe('BottomSheet', () => {
     expect(() => getByGestureTestId(DRAG_TEST_ID)).toThrow();
   });
 
-  // 시트 전체를 쓸어 닫게 넓히면서 생긴 유일한 다툼이다.
-  // **판정은 쓸기가 시작될 때 한 번만** 한다 — 그때 안쪽 스크롤이 맨 위였는지만 본다.
-  describe('안이 굴러가는 시트에서 굴리기와 가르기', () => {
-    function 굴러가는시트(닫힘: () => void) {
-      return (
-        <BottomSheet visible onClose={닫힘} dragToClose>
-          <SheetScrollView testID={안쪽스크롤}>
-            <Text>안에 담은 것</Text>
-          </SheetScrollView>
-        </BottomSheet>
-      );
-    }
+  // 예전에는 안이 굴러가는 시트(세부 필터)를 위해 껍데기가 안쪽 스크롤과 쓸기를
+  // 조율했다(SheetScrollView · simultaneousWithExternalGesture). 그 장치를 걷어내면서
+  // **자기 ScrollView 를 쓰는 다섯 시트가 안 깨지는지**는 여기서 지킨다 —
+  // 그쪽은 dragToClose 를 안 줘서 제스처가 아예 없다.
+  it('쓸어 닫기를 안 켠 시트는 자기 ScrollView 를 그대로 쓴다', async () => {
+    // 고르는 칸 · 지역 · 정렬 · 상품 ⋮ 메뉴가 이 모양이다.
+    await render(
+      <BottomSheet visible onClose={jest.fn()}>
+        <ScrollView testID="자기 스크롤">
+          <Text>안에 담은 것</Text>
+        </ScrollView>
+      </BottomSheet>,
+      { wrapper: Wrapper }
+    );
 
-    it('스크롤이 맨 위면 아래로 쓸어 닫는다', async () => {
-      const 닫힘 = jest.fn();
-      await render(굴러가는시트(닫힘), { wrapper: Wrapper });
-
-      await 스크롤을둔다(0);
-      쓸어내린다();
-
-      await waitFor(() => expect(닫힘).toHaveBeenCalled());
-    });
-
-    it('스크롤이 맨 위가 아니면 아래로 쓸어도 안 닫힌다', async () => {
-      // 안쪽을 한참 굴려 둔 상태. 여기서 아래로 쓰는 것은 「목록을 굴리려는 것」이다.
-      const 닫힘 = jest.fn();
-      await render(굴러가는시트(닫힘), { wrapper: Wrapper });
-
-      await 스크롤을둔다(300);
-      쓸어내린다();
-
-      await 한박자쉰다();
-      expect(닫힘).not.toHaveBeenCalled();
-    });
-
-    it('맨 위로 되돌려 놓으면 다시 쓸어 닫힌다', async () => {
-      // 굴렸다가 맨 위까지 되돌아오면 「닫으려는 것」으로 되돌아가야 한다.
-      const 닫힘 = jest.fn();
-      await render(굴러가는시트(닫힘), { wrapper: Wrapper });
-
-      await 스크롤을둔다(300);
-      await 스크롤을둔다(0);
-      쓸어내린다();
-
-      await waitFor(() => expect(닫힘).toHaveBeenCalled());
-    });
+    expect(screen.getByTestId('자기 스크롤')).toBeTruthy();
+    expect(screen.getByText('안에 담은 것')).toBeTruthy();
+    // 껍데기가 스크롤에 손대지 않는다 — 조율 장치가 없으니 끼어들 자리도 없다.
+    expect(() => getByGestureTestId(DRAG_TEST_ID)).toThrow();
   });
 });

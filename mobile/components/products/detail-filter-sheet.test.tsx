@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import React from 'react';
 import type { PanGesture } from 'react-native-gesture-handler';
 import { fireGestureHandler, getByGestureTestId } from 'react-native-gesture-handler/jest-utils';
@@ -13,7 +13,7 @@ import { CITIES } from '@/constants/cities';
 import {
   DetailFilterSheet,
   EMPTY_DETAIL_FILTER,
-  FILTER_LIST_TEST_ID,
+  REGION_BACK_TEST_ID,
 } from './detail-filter-sheet';
 
 // ⚠️ render·rerender·fireEvent는 셋 다 기다려야 한다(mobile/AGENTS.md) —
@@ -42,6 +42,11 @@ function setup(value = EMPTY_DETAIL_FILTER) {
     onClose,
     props: { visible: true, value, onApply, onClose },
   };
+}
+
+/** 시/군/구를 보다가 시/도 목록으로 되돌아간다. 글자 대신 표식으로 누른다. */
+async function 되돌아간다() {
+  await fireEvent.press(screen.getByTestId(REGION_BACK_TEST_ID));
 }
 
 it('상태·가격·지역을 고르고 적용하면 고른 값으로 알린다', async () => {
@@ -125,90 +130,134 @@ it('초기화를 누르면 시트 안의 조건이 다 풀린다', async () => {
 
   await fireEvent.press(screen.getByText('초기화'));
 
-  // 시/도가 풀렸으니 시/군/구 줄도 사라진다
+  // 시/도가 풀렸으니 시/군/구 단계에서 나와 시/도 목록으로 돌아온다
   expect(screen.queryByText(SEOUL_GUGUN)).toBeNull();
+  expect(screen.queryByTestId(REGION_BACK_TEST_ID)).toBeNull();
+  expect(screen.getByRole('button', { name: '서울특별시', selected: false })).toBeTruthy();
 
   await fireEvent.press(screen.getByText('적용'));
   expect(onApply).toHaveBeenCalledWith(EMPTY_DETAIL_FILTER);
 });
 
-it('시/도를 골라야 시/군/구가 나타난다', async () => {
-  const { props } = setup();
-  await render(<DetailFilterSheet {...props} />, { wrapper: Wrapper });
-
-  expect(screen.queryByText(SEOUL_GUGUN)).toBeNull();
-
-  await fireEvent.press(screen.getByText('서울특별시'));
-
-  expect(screen.getByText(SEOUL_GUGUN)).toBeTruthy();
-});
-
-it('시/도를 바꾸면 고른 시/군/구가 풀린다', async () => {
-  const { props, onApply } = setup();
-  await render(<DetailFilterSheet {...props} />, { wrapper: Wrapper });
-
-  await fireEvent.press(screen.getByText('서울특별시'));
-  await fireEvent.press(screen.getByText(SEOUL_GUGUN));
-  await fireEvent.press(screen.getByText('부산광역시'));
-
-  // 서울의 구는 이제 안 보이고, 고른 것도 남아 있지 않다
-  expect(screen.queryByText(SEOUL_GUGUN)).toBeNull();
-  expect(screen.getByRole('button', { name: BUSAN_GUGUN, selected: false })).toBeTruthy();
-
-  await fireEvent.press(screen.getByText('적용'));
-  expect(onApply).toHaveBeenCalledWith({
-    ...EMPTY_DETAIL_FILTER,
-    sido: '부산광역시',
-    gugun: null,
-  });
-});
-
-// 앱에서 **안이 굴러가는 유일한 시트**라, 굴리기와 쓸어 닫기가 갈리는지는 여기서 본다.
-// 껍데기 쪽 시험(bottom-sheet.test.tsx)이 규칙 자체를 보고, 여기서는 **그 규칙이 이 시트에
-// 실제로 연결돼 있는지**를 본다 — SheetScrollView 를 그냥 ScrollView 로 되돌리면 여기서 걸린다.
-describe('굴리기와 쓸어 닫기 가르기', () => {
-  function 쓸어내린다() {
-    fireGestureHandler<PanGesture>(getByGestureTestId(DRAG_TEST_ID), [
-      { translationY: 0, velocityY: 0 },
-      { translationY: 40, velocityY: 0 },
-      // 5 = 손을 뗀 상태(END)
-      { state: 5, translationY: 40, velocityY: 0 },
-    ]);
-  }
-
-  async function 목록을굴려둔다(y: number) {
-    await fireEvent.scroll(screen.getByTestId(FILTER_LIST_TEST_ID), {
-      nativeEvent: {
-        contentOffset: { x: 0, y },
-        contentSize: { width: 390, height: 2000 },
-        layoutMeasurement: { width: 390, height: 500 },
-      },
-    });
-  }
-
-  it('목록이 맨 위면 아래로 쓸어 닫는다', async () => {
-    const { props, onClose } = setup();
+// 지역은 **한 번에 한 목록만** 펼친다(#855 후속). 시/도 17개와 시/군/구 최대 30개를
+// 함께 펼치면 시트가 화면을 넘어 안쪽 스크롤이 필요했고, 그 스크롤 때문에 쓸어 닫기가
+// 손을 떼야 반응했다.
+describe('지역 2단계', () => {
+  it('시/도를 고르면 시/도 목록이 사라지고 시/군/구가 나온다', async () => {
+    const { props } = setup();
     await render(<DetailFilterSheet {...props} />, { wrapper: Wrapper });
 
-    await 목록을굴려둔다(0);
-    쓸어내린다();
+    expect(screen.queryByText(SEOUL_GUGUN)).toBeNull();
 
-    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    await fireEvent.press(screen.getByText('서울특별시'));
+
+    expect(screen.getByText(SEOUL_GUGUN)).toBeTruthy();
+    // 다른 시/도 알약은 이제 없다 — 그 자리를 시/군/구가 차지했다
+    expect(screen.queryByText('부산광역시')).toBeNull();
+    // 고른 시/도는 되돌아가기 표시에 남는다
+    expect(screen.getByTestId(REGION_BACK_TEST_ID)).toBeTruthy();
   });
 
-  it('목록을 굴리는 중이면 아래로 쓸어도 안 닫힌다', async () => {
-    const { props, onClose } = setup();
+  it('되돌아가면 시/도 목록이 다시 나오고 고른 시/도가 그대로다', async () => {
+    const { props, onApply } = setup();
     await render(<DetailFilterSheet {...props} />, { wrapper: Wrapper });
 
-    await 목록을굴려둔다(300);
-    쓸어내린다();
+    await fireEvent.press(screen.getByText('서울특별시'));
+    await fireEvent.press(screen.getByText(SEOUL_GUGUN));
+    await 되돌아간다();
 
-    // 「아직 안 왔을 뿐」이 아니라 정말 안 부른 것임을 보려면 한 박자 기다렸다 확인한다.
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 20));
+    // 시/도 목록이 돌아왔고, 서울은 골라진 채다
+    expect(screen.getByRole('button', { name: '서울특별시', selected: true })).toBeTruthy();
+    expect(screen.getByText('부산광역시')).toBeTruthy();
+    expect(screen.queryByText(SEOUL_GUGUN)).toBeNull();
+    // 되돌아간 것만으로는 아무것도 안 풀린다 — 고른 시/군/구도 그대로 나간다
+    await fireEvent.press(screen.getByText('적용'));
+    expect(onApply).toHaveBeenCalledWith({
+      ...EMPTY_DETAIL_FILTER,
+      sido: '서울특별시',
+      gugun: SEOUL_GUGUN,
     });
-    expect(onClose).not.toHaveBeenCalled();
   });
+
+  it('되돌아가서 다른 시/도를 고르면 시/군/구가 풀린다', async () => {
+    const { props, onApply } = setup();
+    await render(<DetailFilterSheet {...props} />, { wrapper: Wrapper });
+
+    await fireEvent.press(screen.getByText('서울특별시'));
+    await fireEvent.press(screen.getByText(SEOUL_GUGUN));
+    await 되돌아간다();
+    await fireEvent.press(screen.getByText('부산광역시'));
+
+    // 부산의 시/군/구 단계로 넘어갔다. 서울의 구는 남아 있지 않다
+    expect(screen.queryByText(SEOUL_GUGUN)).toBeNull();
+    expect(screen.getByRole('button', { name: BUSAN_GUGUN, selected: false })).toBeTruthy();
+
+    await fireEvent.press(screen.getByText('적용'));
+    expect(onApply).toHaveBeenCalledWith({
+      ...EMPTY_DETAIL_FILTER,
+      sido: '부산광역시',
+      gugun: null,
+    });
+  });
+
+  it('되돌아가서 고른 시/도를 다시 누르면 지역이 풀린다', async () => {
+    const { props, onApply } = setup();
+    await render(<DetailFilterSheet {...props} />, { wrapper: Wrapper });
+
+    await fireEvent.press(screen.getByText('서울특별시'));
+    await fireEvent.press(screen.getByText(SEOUL_GUGUN));
+    await 되돌아간다();
+    await fireEvent.press(screen.getByText('서울특별시'));
+
+    // 풀렸으니 시/도 목록에 그대로 머무르고, 되돌아가기 표시도 없다
+    expect(screen.getByRole('button', { name: '서울특별시', selected: false })).toBeTruthy();
+    expect(screen.queryByTestId(REGION_BACK_TEST_ID)).toBeNull();
+
+    await fireEvent.press(screen.getByText('적용'));
+    expect(onApply).toHaveBeenCalledWith(EMPTY_DETAIL_FILTER);
+  });
+
+  it('시/도가 있는 채로 열면 시/군/구 단계로 열린다', async () => {
+    const { props } = setup({ ...EMPTY_DETAIL_FILTER, sido: '서울특별시', gugun: SEOUL_GUGUN });
+    await render(<DetailFilterSheet {...props} />, { wrapper: Wrapper });
+
+    expect(screen.getByRole('button', { name: SEOUL_GUGUN, selected: true })).toBeTruthy();
+    expect(screen.queryByText('부산광역시')).toBeNull();
+  });
+
+  it('되돌아간 채로 닫았다 다시 열면 시/군/구 단계로 돌아온다', async () => {
+    const { props } = setup({ ...EMPTY_DETAIL_FILTER, sido: '서울특별시', gugun: SEOUL_GUGUN });
+    const view = await render(<DetailFilterSheet {...props} />, { wrapper: Wrapper });
+
+    await 되돌아간다();
+    expect(screen.getByText('부산광역시')).toBeTruthy();
+
+    await view.rerender(<DetailFilterSheet {...props} visible={false} />);
+    await view.rerender(<DetailFilterSheet {...props} visible />);
+
+    // 이어서 좁히려는 것이지 시/도부터 다시 고르려는 게 아니다
+    expect(screen.getByText(SEOUL_GUGUN)).toBeTruthy();
+    expect(screen.queryByText('부산광역시')).toBeNull();
+  });
+});
+
+// 안쪽 스크롤이 없어져 「굴리기냐 닫기냐」를 가릴 일이 사라졌다. 남은 것은 하나 —
+// 이 시트가 여전히 쓸어 닫기를 켜 두었는가.
+// ⚠️ **얼마나 쓸어야 닫히는지는 여기서 못 잡는다.** activeOffsetY 는 네이티브가 재는
+//    값이라 jest 의 흉내내기는 거리와 상관없이 제스처를 활성 상태로 만든다
+//    (bottom-sheet.test.tsx 의 같은 설명). 손을 떼기 전에 반응하는지는 실기기로 봐야 한다.
+it('시트를 아래로 쓸면 닫힌다고 알린다', async () => {
+  const { props, onClose } = setup();
+  await render(<DetailFilterSheet {...props} />, { wrapper: Wrapper });
+
+  fireGestureHandler<PanGesture>(getByGestureTestId(DRAG_TEST_ID), [
+    { translationY: 0, velocityY: 0 },
+    { translationY: 40, velocityY: 0 },
+    // 5 = 손을 뗀 상태(END)
+    { state: 5, translationY: 40, velocityY: 0 },
+  ]);
+
+  await waitFor(() => expect(onClose).toHaveBeenCalled());
 });
 
 it('고른 알약을 다시 누르면 풀린다', async () => {

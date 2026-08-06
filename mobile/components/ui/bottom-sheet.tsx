@@ -1,25 +1,12 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-  type ComponentProps,
-  type ComponentRef,
-  type ComponentType,
-  type ReactNode,
-  type RefObject,
-} from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Modal, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, {
   Easing,
   runOnJS,
-  useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-  type SharedValue,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -36,11 +23,17 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // animationType="none"으로 두고 직접 움직인다.
 //
 // 왜 내장 Animated 대신 Reanimated인가(#855 후속):
-// 손가락으로 쓸어 닫는 동작이 붙었다. 「지금 안쪽 스크롤이 맨 위인가」를 손가락 쪽
-// (UI 쓰레드)에서 그 자리에서 읽어야 하는데, 내장 Animated는 값을 자바스크립트 쪽에서
-// 만들어 넘겨 한 박자 늦은 옛 값이 온다. 제스처(react-native-gesture-handler)와
-// Reanimated는 같은 UI 쓰레드에서 돌아 값이 어긋나지 않는다.
+// 손가락으로 쓸어 닫는 동작이 붙었다. 제스처(react-native-gesture-handler)는 손가락 쪽
+// (UI 쓰레드)에서 도는데, 내장 Animated는 값을 자바스크립트 쪽에서 만들어 넘겨 한 박자
+// 늦은 옛 값이 온다. Reanimated는 제스처와 같은 UI 쓰레드에서 돌아 값이 어긋나지 않는다.
 // 앱에 이미 둘 다 있다(지도의 place-sheet.tsx가 먼저 썼다).
+//
+// ⚠️ **시트 안에는 스크롤이 없다.** 한때 세부 필터 시트만 안이 굴러가서, 「지금 안쪽
+//    스크롤이 맨 위인가」를 보고 쓸기와 굴리기를 가르는 장치(SheetScrollView ·
+//    simultaneousWithExternalGesture)가 여기 있었다. 그런데 스크롤과 겨루느라 제스처가
+//    **시작 판정을 늦춰** 쓸어 닫기가 손을 떼야 반응했다. 세부 필터의 지역 고르기를
+//    2단계(시/도 → 시/군/구)로 바꿔 스크롤이 필요 없어지면서 그 장치를 통째로 걷어냈다.
+//    다시 「안이 굴러가는 시트」를 만들려거든, 이 다툼부터 어떻게 할지 정하고 시작할 것.
 
 // 열고 닫는 시간을 **가야 할 거리에 맞춘다**.
 //
@@ -78,7 +71,10 @@ function 걸리는시간(거리: number, msPerDp: number, 범위: { min: number;
 /**
  * 시트가 차지할 수 있는 최대 높이(화면 대비).
  * 위쪽에 화면이 조금 남아야 「덮개 위에 뜬 시트」로 읽힌다 — 다 덮으면 새 화면처럼 보인다.
- * 여기서 끊어 두면 내용이 아무리 길어도 시트가 화면을 넘지 않고, 안쪽 스크롤이 대신 줄어든다.
+ *
+ * ⚠️ **여기서 끊기면 넘치는 만큼 그냥 잘린다.** 시트 안에 스크롤이 없어졌기 때문이다.
+ *    담는 쪽이 「늘 보여야 하는 것」(세부 필터의 [초기화][적용])을 안 줄어드는 자리에
+ *    두고, 줄어도 되는 것만 줄어들게 짜야 한다.
  */
 const MAX_HEIGHT_RATIO = 0.85;
 
@@ -101,70 +97,6 @@ const WON_T_ACTIVATE = 10000;
 /** 시험이 끌기 제스처를 집을 때 쓰는 이름. */
 export const DRAG_TEST_ID = 'bottom-sheet-drag';
 
-/** 그려진 안쪽 스크롤 그 자체(Animated.ScrollView 의 알맹이). */
-type 스크롤알맹이 = ComponentRef<typeof Animated.ScrollView>;
-
-/**
- * 시트 안쪽 스크롤과 시트 쓸기를 이어 주는 자리.
- *
- * 껍데기(BottomSheet)가 넣어 주고, 안쪽 스크롤(SheetScrollView)이 꺼내 쓴다.
- * 안이 굴러가는 시트는 「지금 스크롤이 어디쯤인지」를 껍데기가 알아야 쓸기와 굴리기를
- * 가를 수 있다(아래 SheetScrollView 설명).
- */
-interface 시트속스크롤 {
-  scrollRef: RefObject<스크롤알맹이 | null>;
-  /** 안쪽 스크롤이 맨 위에서 얼마나 내려가 있나. 0이면 맨 위다. */
-  scrollY: SharedValue<number>;
-}
-
-const SheetScrollContext = createContext<시트속스크롤 | null>(null);
-
-/**
- * 시트 안에서 쓰는 스크롤. 그냥 `ScrollView` 대신 이걸 쓴다.
- *
- * 하는 일은 둘뿐이다 — 스크롤 자리를 껍데기에 알려 주고, 자기 자신을 껍데기의 쓸기
- * 제스처에 소개해 준다(`simultaneousWithExternalGesture`). 그래야 아래 규칙이 선다.
- *
- * ```
- * 안쪽 스크롤이 맨 위 + 아래로 쓸기    →  시트를 닫는다
- * 그 밖(스크롤이 중간이거나 위로 쓸기)  →  안쪽만 굴러간다
- * ```
- *
- * ⚠️ **왜 `onScroll`을 그냥 함수로 안 받고 `useAnimatedScrollHandler`인가:**
- *    보통 `onScroll`은 자바스크립트 쪽에서 돈다. 그런데 쓸기 판정은 손가락 쪽
- *    (UI 쓰레드)에서 일어나므로, 자바스크립트를 거쳐 온 값은 한 박자 늦은 옛 값이다.
- *    이 훅으로 받으면 값이 UI 쓰레드의 공유값에 바로 담겨 제스처와 같은 박자로 읽힌다.
- *
- * ⚠️ **끝에서 튕기는 것(bounces)을 끈다.** 맨 위에서 아래로 쓸 때 안쪽 내용이 늘어지면,
- *    스크롤 자리가 0에서 벗어나(음수) 「맨 위가 아니다」로 읽힐 수 있다.
- */
-export function SheetScrollView(props: ComponentProps<typeof Animated.ScrollView>) {
-  const 시트속 = useContext(SheetScrollContext);
-  // 시트 밖에서 써도 터지지 않게 둘 자리. 시트 안이면 껍데기 것을 쓴다.
-  const 혼자쓸값 = useSharedValue(0);
-  const scrollY = 시트속?.scrollY ?? 혼자쓸값;
-
-  const onScroll = useAnimatedScrollHandler({
-    onScroll: (event) => {
-      scrollY.value = event.contentOffset.y;
-    },
-  });
-
-  return (
-    <Animated.ScrollView
-      bounces={false}
-      overScrollMode="never"
-      {...props}
-      // ⚠️ 이 셋은 받은 값 **뒤**에 둔다. 앞에 두면 쓰는 쪽이 실수로 onScroll을 넘겼을 때
-      //    이걸 덮어써서, 오류 없이 조용히 쓸기와 굴리기가 안 갈린다.
-      ref={시트속?.scrollRef}
-      onScroll={onScroll}
-      // 16 = 한 프레임(60fps)마다. 기본값(0)이면 스크롤이 끝나야 한 번 온다.
-      scrollEventThrottle={16}
-    />
-  );
-}
-
 interface Props {
   visible: boolean;
   onClose: () => void;
@@ -175,10 +107,11 @@ interface Props {
    * 처음에는 손잡이에서만 받았는데, 얇은 막대를 정확히 노려야 해서 「안 닫힌다」로
    * 느껴졌다(#855 후속).
    *
-   * 안이 굴러가는 시트는 안쪽 스크롤을 `SheetScrollView` 로 바꿔 준다. 그러면
-   * 「스크롤이 맨 위일 때만 쓸어 닫힌다」로 갈라져 굴리기와 부딪히지 않는다.
+   * ⚠️ **이 값을 주는 시트 안에는 스크롤을 두지 마라.** 스크롤과 겨루면 제스처가
+   *    시작 판정을 늦춰 「손을 떼야 닫힌다」가 된다(맨 위 설명).
    *
-   * 손잡이가 없던 다섯 시트는 이 값을 안 주므로 지금까지와 똑같이 돈다.
+   * 손잡이가 없던 다섯 시트(고르는 칸 · 지역 · 정렬 · 상품 ⋮ 메뉴)는 이 값을 안 준다.
+   * 그쪽은 제스처가 아예 안 붙으니 자기 `ScrollView` 를 그대로 써도 된다.
    */
   dragToClose?: boolean;
   children: ReactNode;
@@ -202,16 +135,6 @@ export function BottomSheet({ visible, onClose, dragToClose = false, children }:
   const hiddenY = useSharedValue(screenHeight);
   /** 지금 시트가 내려가 있는 거리. 0이면 다 올라온 상태다. */
   const translateY = useSharedValue(screenHeight);
-
-  /**
-   * 안쪽 스크롤과 이어 주는 두 값. 안이 안 굴러가는 다섯 시트에서는 scrollY 가 0에
-   * 머무르고 scrollRef 가 비어 있어, 시트 어디를 쓸든 그냥 닫힌다.
-   */
-  const scrollRef = useRef<스크롤알맹이 | null>(null);
-  const scrollY = useSharedValue(0);
-  // 둘 다 살아 있는 동안 안 바뀌는 값이라 한 번만 만들어 둔다 — 매번 새 객체를 넣으면
-  // 안쪽 스크롤이 까닭 없이 다시 그려진다.
-  const 시트속 = useRef<시트속스크롤>({ scrollRef, scrollY }).current;
 
   useEffect(() => {
     if (visible) {
@@ -247,21 +170,14 @@ export function BottomSheet({ visible, onClose, dragToClose = false, children }:
    *
    * 위로 쓰는 것은 받지 않는다 — 시트는 이미 다 올라와 있어 더 갈 데가 없다.
    *
-   * ⚠️ **안쪽 스크롤과 어떻게 가르나.** 세부 필터 시트는 안이 굴러간다(지역 알약이 많다).
-   *    그냥 시트 전체로 넓히면 목록을 굴리려는데 시트가 닫힌다.
-   *    `simultaneousWithExternalGesture` 로 스크롤과 이 제스처를 **둘 다 살려 두고**,
-   *    어느 쪽 일인지는 아래 onStart 에서 스크롤 자리를 보고 한 번에 정한다.
-   *    「둘 중 하나만」(`blocksExternalGesture`)로 가르면 손을 뗐다 다시 대야 다른 쪽이
-   *    먹어서, 굴리다 그대로 이어서 닫을 수가 없다.
+   * ⚠️ **겨룰 상대가 없다.** 시트 안에 스크롤도 누름판도 없어서(맨 위 설명 · 아래 재는상자
+   *    설명), 이 제스처는 활성 조건(`activeOffsetY`)만 넘으면 바로 시작한다. 예전에
+   *    안쪽 스크롤과 `simultaneousWithExternalGesture` 로 같이 돌던 때는, 어느 쪽 일인지
+   *    가리느라 시작이 늦어 「손을 떼야 닫힌다」로 느껴졌다.
    */
   const pan = Gesture.Pan()
     // 시험에서 이 제스처를 집어 흔들어 보려고 붙인 이름이다(bottom-sheet.test.tsx).
     .withTestId(DRAG_TEST_ID)
-    // ⚠️ 타입만 갈아 끼운다. gesture-handler 는 「같이 돌 상대」를 컴포넌트 **종류**의
-    //    ref 로 적어 두었는데, 실제로 넣어야 하는 것은 그려진 스크롤 그 자체다.
-    //    값은 맞고 적힌 이름만 다르다. 안 굴러가는 다섯 시트에서는 비어(null) 있고,
-    //    비어 있으면 라이브러리가 그냥 건너뛴다.
-    .simultaneousWithExternalGesture(scrollRef as unknown as RefObject<ComponentType>)
     .activeOffsetY([-WON_T_ACTIVATE, DRAG_CLOSE_DP])
     .onStart(() => {
       // 여기 왔다는 것은 이미 아래로 DRAG_CLOSE_DP 만큼 쓸었다는 뜻이다.
@@ -271,10 +187,6 @@ export function BottomSheet({ visible, onClose, dragToClose = false, children }:
       //    값이 한 박자만 어긋나도 시트가 제자리로 튕겼다 다시 따라와 「내려가다 멈춘다」가
       //    났다(되돌림 e40d9805). 쓸면 곧바로 닫히는 지금은 물어볼 자리가 한 곳뿐이다.
       //
-      // 안쪽이 아직 맨 위가 아니면 「목록을 굴리려는 것」이다 — 시트는 가만히 둔다.
-      // 스크롤은 simultaneous 로 같이 살아 있으니 알아서 굴러간다.
-      if (scrollY.value > 0) return;
-
       // 직접 내리지 않고 알리기만 한다 — 알리면 쓰는 쪽이 visible을 내리고,
       // 위 useEffect가 늘 하던 대로 내려 준다. 닫는 움직임이 한 곳에만 있다.
       runOnJS(onClose)();
@@ -306,7 +218,7 @@ export function BottomSheet({ visible, onClose, dragToClose = false, children }:
       // 덜 내려가 화면 아래에 미리 비죽 나와 보인다.
       style={{
         paddingBottom: insets.bottom,
-        // 여기서 끊어야 안쪽 스크롤이 줄어들 자리를 안다(MAX_HEIGHT_RATIO 설명 참고).
+        // 시트가 화면을 넘지 않게 끊는다(MAX_HEIGHT_RATIO 설명 참고).
         maxHeight: Math.round(screenHeight * MAX_HEIGHT_RATIO),
       }}
       // 재고 나면 정확한 높이를 쓴다. 상태로 두지 않는 이유: 여기서 다시 그릴 필요가
@@ -364,13 +276,11 @@ export function BottomSheet({ visible, onClose, dragToClose = false, children }:
           조용히 안 끌린다.** 공식 설치 문서가 시키는 대로다.
           끌지 않는 다섯 시트에는 씌우지 않는다 — 안 쓰는 곳의 터치 흐름까지 건드릴
           이유가 없다. */}
-      <SheetScrollContext.Provider value={시트속}>
-        {dragToClose ? (
-          <GestureHandlerRootView style={styles.gestureRoot}>{껍데기}</GestureHandlerRootView>
-        ) : (
-          껍데기
-        )}
-      </SheetScrollContext.Provider>
+      {dragToClose ? (
+        <GestureHandlerRootView style={styles.gestureRoot}>{껍데기}</GestureHandlerRootView>
+      ) : (
+        껍데기
+      )}
     </Modal>
   );
 }
