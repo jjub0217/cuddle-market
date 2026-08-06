@@ -2,7 +2,7 @@ import { Tabs, useRouter } from 'expo-router';
 import React from 'react';
 
 import { HapticTab } from '@/components/haptic-tab';
-import { Home, UsersRound, UserRound } from 'lucide-react-native';
+import { Home, MapPin, UsersRound, UserRound } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAuthStore } from '@/lib/auth/store';
@@ -37,8 +37,8 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <Home size={TAB_ICON_SIZE} color={color} strokeWidth={TAB_ICON_STROKE} />,
         }}
       />
-      {/* 웹 BottomNav과 같은 순서·아이콘이다 — 홈 → 커뮤니티 → 마이.
-          13·14바퀴에 플레이스·채팅이 그 사이에 끼면 웹과 똑같은 다섯이 된다.
+      {/* 웹 BottomNav과 같은 순서·아이콘이다 — 홈 → 커뮤니티 → 플레이스 → (채팅) → 마이.
+          채팅이 15바퀴에 플레이스와 마이 사이로 들어오면 웹과 똑같은 다섯이 된다.
           게스트를 막지 않는다 — 서버가 비회원 조회를 허용한다. */}
       <Tabs.Screen
         name="(community)"
@@ -46,6 +46,17 @@ export default function TabLayout() {
           title: '커뮤니티',
           tabBarIcon: ({ color }) => (
             <UsersRound size={TAB_ICON_SIZE} color={color} strokeWidth={TAB_ICON_STROKE} />
+          ),
+        }}
+      />
+      {/* 이름은 웹이 쓰는 「플레이스」다. 「지도」로 새로 짓지 않는다 —
+          탭 이름과 화면 이름이 다르면 같은 곳인지 헷갈린다. 아이콘도 웹과 같은 MapPin. */}
+      <Tabs.Screen
+        name="(place)"
+        options={{
+          title: '플레이스',
+          tabBarIcon: ({ color }) => (
+            <MapPin size={TAB_ICON_SIZE} color={color} strokeWidth={TAB_ICON_STROKE} />
           ),
         }}
       />

@@ -15,11 +15,13 @@
   "dependencies": {
     "@cuddle/shared": "workspace:*",
     "@expo/vector-icons": "^15.0.3",
+    "@mj-studio/react-native-naver-map": "^2.9.0",
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
     "@tanstack/react-query": "^5.101.3",
     "expo": "~54.0.35",
+    "expo-build-properties": "~1.0.10",
     "expo-constants": "~18.0.13",
     "expo-dev-client": "~6.0.21",
     "expo-font": "~14.0.12",

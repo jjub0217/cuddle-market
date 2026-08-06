@@ -38,7 +38,18 @@
           }
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "@mj-studio/react-native-naver-map",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "extraMavenRepos": [
+              "https://repository.map.naver.com/archive/maven"
+            ]
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

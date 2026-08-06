@@ -17,8 +17,13 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 export const SCREEN_HEADER_HEIGHT = 52;
 
 interface Props {
-  /** 화면 이름. 「지금 어디에 있는가」를 알린다 — 본문 제목(무엇을 하는가)과 다른 일이다 */
-  title: string;
+  /**
+   * 화면 이름. 「지금 어디에 있는가」를 알린다 — 본문 제목(무엇을 하는가)과 다른 일이다.
+   *
+   * 주지 않으면 제목 없이 아이콘만 있는 막대가 된다. 이름이 본문 맨 위에 크게 나오는
+   * 상세 화면이 그렇다 — 헤더에 또 쓰면 같은 말이 두 번이고, 긴 이름은 잘린다.
+   */
+  title?: string;
   /**
    * 왼쪽 아이콘을 눌렀을 때. 주지 않으면 아이콘을 그리지 않는다
    * (소셜 추가정보처럼 건너뛸 수 없는 화면).
@@ -72,7 +77,7 @@ export function ScreenHeader({
         </Pressable>
       ) : null}
 
-      {align === 'left' ? (
+      {!title ? null : align === 'left' ? (
         /* 아이콘 옆에 붙인다. 줄 안에 있으므로 오른쪽 것과 자리를 나눠 쓴다 */
         <Text style={[styles.title, styles.titleLeft]} numberOfLines={1}>
           {title}
