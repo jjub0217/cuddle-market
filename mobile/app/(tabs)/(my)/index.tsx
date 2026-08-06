@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Handbag, Headphones, Heart, LogOut, Tag, UserMinus, UserX } from 'lucide-react-native';
+import { ChevronRight, Handbag, Headphones, Heart, LogOut, Tag, UserMinus, UserX } from 'lucide-react-native';
 
 import { LogoutModal } from '@/components/my/logout-modal';
 import { SectionCard, SectionRow } from '@/components/my/section-card';
@@ -72,7 +72,19 @@ export default function MyScreen() {
 
     return (
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.profileCard}>
+        {/*
+          계정 카드를 누르면 프로필 수정으로 간다. **웹도 여기가 유일한 길이다**
+          (`ProfileData.tsx:382` — 카드 안의 「프로필 수정」 단추).
+          웹은 단추지만 앱은 오른쪽에 `〉` 를 붙인다 — 아래 줄들(판매 내역·찜한 상품 …)이
+          다 그 모양이라, 같은 방식이어야 「누르면 들어간다」가 앱 안에서 한 모양이 된다.
+        */}
+        <Pressable
+          testID="profile-card"
+          onPress={() => router.push('/profile-edit')}
+          accessibilityRole="button"
+          accessibilityLabel="프로필 수정"
+          style={({ pressed }) => [styles.profileCard, pressed && styles.pressed]}
+        >
           <View style={styles.avatar}>
             {me?.profileImageUrl ? (
               <Image
@@ -90,7 +102,9 @@ export default function MyScreen() {
             <Text style={styles.nickname}>{me?.nickname ?? ''}</Text>
             {location ? <Text style={styles.location}>{location}</Text> : null}
           </View>
-        </View>
+          {/* 아래 줄들과 같은 화살표다(components/my/section-card.tsx:59) */}
+          <ChevronRight size={22} color="#9CA3AF" />
+        </Pressable>
 
         {/* 웹 모바일 마이페이지와 같은 묶음·이름. 웹은 「구매내역」으로 붙여 썼는데
             나머지 둘은 띄어써서, 여기서는 띄어쓰고 웹 표기도 함께 고친다. */}
@@ -183,6 +197,7 @@ const styles = StyleSheet.create({
   profileCard: {
     flexDirection: 'row',
     alignItems: 'center',
+    // 글자 묶음이 남는 자리를 다 먹어야 화살표가 오른쪽 끝에 붙는다
     gap: 12,
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
@@ -209,6 +224,8 @@ const styles = StyleSheet.create({
     color: '#6B7280',
   },
   profileText: {
+    // 남는 자리를 다 먹어 화살표를 오른쪽 끝으로 민다
+    flex: 1,
     gap: 4,
   },
   nickname: {
