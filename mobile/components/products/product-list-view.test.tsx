@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { createRef } from 'react';
 import type { ReactNode } from 'react';
+import { SafeAreaProvider, type Metrics } from 'react-native-safe-area-context';
 
 import {
   ProductListView,
@@ -40,12 +41,23 @@ function 한페이지(items: ReturnType<typeof 상품>[], hasNext = false) {
   return { content: items, hasNext, page: 0, size: 20, total: items.length };
 }
 
+// 세부 필터 시트가 쓰는 BottomSheet가 useSafeAreaInsets를 부른다. 시험에서는 재는 사람이
+// 없어 「No safe area value available」로 터지므로, 값을 못 박아 감싸 준다(아이폰 14 기준).
+const METRICS: Metrics = {
+  frame: { x: 0, y: 0, width: 390, height: 844 },
+  insets: { top: 47, left: 0, right: 0, bottom: 34 },
+};
+
 /** 시험마다 새 클라이언트를 준다 — 앞 시험이 받아 둔 것을 물려받으면 안 된다. */
 function 감싸기({ children }: { children: ReactNode }) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
-  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+  return (
+    <SafeAreaProvider initialMetrics={METRICS}>
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    </SafeAreaProvider>
+  );
 }
 
 beforeEach(() => {
@@ -67,12 +79,8 @@ it('조건이 없으면 검색어·필터를 안 보낸다 (홈)', async () => {
   await render(<ProductListView />, { wrapper: 감싸기 });
 
   await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
-  expect(fetchProducts).toHaveBeenCalledWith({
-    page: 0,
-    keyword: undefined,
-    petType: undefined,
-    categories: undefined,
-  });
+  // 「전체」는 빈 값이라 키 자체가 안 실린다. 정렬만 늘 실린다(기본 최신순).
+  expect(fetchProducts).toHaveBeenCalledWith({ page: 0, sortBy: 'createdAt' });
 });
 
 it('검색어를 받으면 그대로 서버에 넘긴다 (검색 결과)', async () => {
@@ -86,15 +94,30 @@ it('검색어를 받으면 그대로 서버에 넘긴다 (검색 결과)', async
   );
 });
 
-it('목록이 비어도 알약은 보인다', async () => {
-  // 알약이 사라지면 조건을 되돌릴 방법이 없어진다 — 빈 화면에 갇힌다.
+it('목록이 비어도 필터와 툴바가 보인다', async () => {
+  // ⚠️ 필터 줄은 목록의 헤더로 들어가 있다 — 목록이 안 그려지면 헤더도 안 그려진다.
+  //    그래서 빈 화면·오류일 때는 **밖에 따로** 그린다. 안 그러면 조건을 되돌릴 길이
+  //    없어져 빈 화면에 갇힌다(2026-08-06 실기기에서 나온 것).
   fetchProducts.mockResolvedValue(한페이지([]));
 
   await render(<ProductListView />, { wrapper: 감싸기 });
 
   await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
-  // 「전체」는 두 줄 모두에 있다(대분류·카테고리).
-  expect(screen.getAllByText('전체').length).toBeGreaterThanOrEqual(2);
+  // 대분류 줄의 알약이 보인다
+  expect(screen.getByText('포유류')).toBeTruthy();
+  // 툴바도 보인다 — 종류·정렬을 되돌릴 길이다
+  expect(screen.getByText('판매요청')).toBeTruthy();
+  expect(screen.getByText('최신순')).toBeTruthy();
+});
+
+it('오류일 때도 필터와 툴바가 보인다', async () => {
+  fetchProducts.mockRejectedValue(new Error('그물이 끊겼어요'));
+
+  await render(<ProductListView />, { wrapper: 감싸기 });
+
+  await waitFor(() => expect(screen.getByText('다시 시도')).toBeTruthy());
+  expect(screen.getByText('포유류')).toBeTruthy();
+  expect(screen.getByText('판매요청')).toBeTruthy();
 });
 
 it('첫 조회가 실패하면 오류 안내를 보여준다', async () => {
@@ -165,6 +188,99 @@ it('홈에 상품이 정말 없으면 홈 문구를 쓴다', async () => {
   await waitFor(() => expect(screen.getByText(/아직 등록된 상품이 없어요/)).toBeTruthy());
 });
 
+// ----- 세부 조건이 서버까지 가는가 (#855) -----
+//
+// 조각들은 각자 자기 시험이 있다. 여기서 지키는 것은 **그 알림이 서버 요청까지 이어지는가**다.
+// 중간에 하나만 끊겨도 「눌러도 목록이 그대로」가 된다.
+
+it('판매요청을 고르면 productType이 실린다', async () => {
+  fetchProducts.mockResolvedValue(한페이지([상품(1)]));
+
+  await render(<ProductListView />, { wrapper: 감싸기 });
+  await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
+  fetchProducts.mockClear();
+
+  await fireEvent.press(screen.getByTestId('product-type-REQUEST'));
+
+  await waitFor(() =>
+    expect(fetchProducts).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 0, productType: 'REQUEST' })
+    )
+  );
+});
+
+it('정렬을 바꾸면 서버가 받는 값으로 바뀌어 실린다', async () => {
+  // 웹의 id(orderedLowPriced)가 아니라 sortBy=price + sortOrder=asc 로 가야 한다
+  fetchProducts.mockResolvedValue(한페이지([상품(1)]));
+
+  await render(<ProductListView />, { wrapper: 감싸기 });
+  await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
+  fetchProducts.mockClear();
+
+  // ⚠️ **글자가 아니라 표식(testID)으로 누른다.** 글자는 단추 *안쪽*이라 누름이 단추까지
+  //    안 올라갈 때가 있다 — 빠를 땐 통과하고 느릴 땐 「저가순을 못 찾겠다」로 깨진다.
+  //    표식은 툴바가 이미 붙여 뒀다.
+  await fireEvent.press(screen.getByTestId('open-sort'));
+  await waitFor(() => expect(screen.getByTestId('sort-orderedLowPriced')).toBeTruthy());
+  await fireEvent.press(screen.getByTestId('sort-orderedLowPriced'));
+
+  await waitFor(() =>
+    expect(fetchProducts).toHaveBeenCalledWith(
+      expect.objectContaining({ sortBy: 'price', sortOrder: 'asc' })
+    )
+  );
+});
+
+it('대분류를 바꾸면 고른 소분류가 풀린 채로 요청된다', async () => {
+  // ⚠️ 이 시험이 지키는 것은 **상태를 함수형으로 고치는가**다.
+  //    필터 줄이 「소분류 풀기」와 「대분류 바꾸기」를 연달아 부르는데, 지금 값을 펴서
+  //    쓰면 뒤엣것이 앞엣것을 덮어써서 푼 소분류가 되살아난다.
+  //    그러면 「조류 + 강아지」처럼 서로 맞지 않는 조건이 서버로 간다.
+  fetchProducts.mockResolvedValue(한페이지([상품(1)]));
+
+  await render(<ProductListView />, { wrapper: 감싸기 });
+  await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
+
+  await fireEvent.press(screen.getByText('포유류'));
+  await waitFor(() => expect(screen.getByText('강아지')).toBeTruthy());
+  await fireEvent.press(screen.getByText('강아지'));
+  await waitFor(() =>
+    expect(fetchProducts).toHaveBeenCalledWith(
+      expect.objectContaining({ petDetailType: 'DOG' })
+    )
+  );
+  fetchProducts.mockClear();
+
+  // 대분류만 조류로 바꾼다
+  await fireEvent.press(screen.getByText('조류'));
+
+  await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
+  const 마지막 = fetchProducts.mock.calls.at(-1)?.[0];
+  expect(마지막).toEqual(expect.objectContaining({ petType: 'BIRD' }));
+  expect(마지막).not.toHaveProperty('petDetailType');
+});
+
+it('세부 필터 시트에서 적용하면 그 조건이 실린다', async () => {
+  fetchProducts.mockResolvedValue(한페이지([상품(1)]));
+
+  await render(<ProductListView />, { wrapper: 감싸기 });
+  await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
+  fetchProducts.mockClear();
+
+  await fireEvent.press(screen.getByTestId('open-detail-filter'));
+  // 시트가 그려지기를 기다린다(위 정렬 시험과 같은 이유)
+  await waitFor(() => expect(screen.getByText('사용감 있음')).toBeTruthy());
+  await fireEvent.press(screen.getByText('사용감 있음'));
+  await fireEvent.press(screen.getByText('1만원~5만원'));
+  await fireEvent.press(screen.getByText('적용'));
+
+  await waitFor(() =>
+    expect(fetchProducts).toHaveBeenCalledWith(
+      expect.objectContaining({ productStatuses: 'USED', minPrice: 10000, maxPrice: 50000 })
+    )
+  );
+});
+
 it('reset() 하면 필터가 풀리고 조건 없이 다시 받는다', async () => {
   // 홈에서 **로고를 누르거나 홈 탭을 다시 누를 때** 부르는 길이다.
   // 이게 끊기면 필터로 결과가 0개일 때 「어떻게 벗어나지」가 된다
@@ -186,10 +302,5 @@ it('reset() 하면 필터가 풀리고 조건 없이 다시 받는다', async ()
   });
 
   await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
-  expect(fetchProducts).toHaveBeenCalledWith({
-    page: 0,
-    keyword: undefined,
-    petType: undefined,
-    categories: undefined,
-  });
+  expect(fetchProducts).toHaveBeenCalledWith({ page: 0, sortBy: 'createdAt' });
 });
