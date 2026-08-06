@@ -1,9 +1,13 @@
-import { useRouter } from 'expo-router';
+import { useNavigation, useRouter } from 'expo-router';
 import { Plus, Search } from 'lucide-react-native';
+import { useEffect, useRef } from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ProductListView } from '@/components/products/product-list-view';
+import {
+  ProductListView,
+  type ProductListViewRef,
+} from '@/components/products/product-list-view';
 import { AppHeader, HeaderLogo } from '@/components/ui/app-header';
 import { useAuthStore } from '@/lib/auth/store';
 
@@ -21,6 +25,23 @@ export default function HomeScreen() {
   // 나타나야 한다. comment-thread.tsx도 같은 방식으로 본다.
   const isLoggedIn = useAuthStore((state) => state.status) === 'authed';
 
+  const listRef = useRef<ProductListViewRef>(null);
+  const navigation = useNavigation();
+
+  // 홈 탭을 **다시** 누르면 처음 상태로 되돌린다(필터 풀고 맨 위로).
+  //
+  // ⚠️ 다른 탭에서 홈으로 올 때는 안 되돌린다. 탭은 「서랍」이라 열어 두면 그대로 있는
+  //    편이 자연스럽다. **이미 홈에 있는데 또 누르는 것**만 「처음으로」 신호다.
+  //    (웹은 주소가 하나뿐이라 이 둘을 구분 못 한다 — 앱이니까 구분한다.)
+  useEffect(() => {
+    const tabs = navigation.getParent();
+    if (!tabs) return;
+    // @ts-expect-error tabPress 는 탭 네비게이터에만 있어 타입에 안 잡힌다
+    return tabs.addListener('tabPress', () => {
+      if (navigation.isFocused()) listRef.current?.reset();
+    });
+  }, [navigation]);
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* 손으로 만들었던 「커들마켓」 헤더를 공용 조각으로 바꿨다(#806).
@@ -30,7 +51,7 @@ export default function HomeScreen() {
           누르면 덮개를 띄운다(Header.tsx:214). 검색창을 늘 띄우지 않는 이유는
           알약 두 줄만으로도 세로가 빠듯하기 때문이다(설계 §3). */}
       <AppHeader
-        left={<HeaderLogo />}
+        left={<HeaderLogo onPress={() => listRef.current?.reset()} />}
         right={
           <Pressable
             onPress={() => router.push('/search')}
@@ -48,6 +69,7 @@ export default function HomeScreen() {
           ⚠️ 단추가 있을 때만이다 — 게스트에겐 단추가 없어서, 늘 비워 두면
              목록 끝이 허전하게 뚫린다(2026-08-04 실기기에서 두 화면을 비교해 잡았다). */}
       <ProductListView
+        ref={listRef}
         bottomInset={isLoggedIn ? FAB_CLEARANCE + FAB_HEIGHT + 12 : 12}
       />
 

@@ -110,14 +110,29 @@ export function AppHeader({ left, right }: Props) {
 }
 
 /** 홈이 쓰는 로고. 눌러도 아무 데도 안 간다 — 이미 홈이다. */
-export function HeaderLogo() {
-  return (
+export function HeaderLogo({ onPress }: { onPress?: () => void }) {
+  const logo = (
     <Image
       source={require('@/assets/images/logo.png')}
       style={styles.logo}
       contentFit="contain"
       accessibilityLabel="커들마켓"
     />
+  );
+
+  // 누를 일이 없으면 그냥 그림이다. 홈만 누를 거리를 준다 —
+  // 웹도 로고를 누르면 홈(맨 주소)으로 간다(Header.tsx:165).
+  if (!onPress) return logo;
+
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel="홈으로"
+      style={({ pressed }) => (pressed ? styles.iconPressed : undefined)}
+    >
+      {logo}
+    </Pressable>
   );
 }
 

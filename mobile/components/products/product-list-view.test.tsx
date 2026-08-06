@@ -1,8 +1,12 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { createRef } from 'react';
 import type { ReactNode } from 'react';
 
-import { ProductListView } from '@/components/products/product-list-view';
+import {
+  ProductListView,
+  type ProductListViewRef,
+} from '@/components/products/product-list-view';
 
 // 홈에서 오려낸 조각이라 **전과 똑같이 도는지**가 핵심이다.
 // 홈은 앱에서 가장 중요한 화면인데, 뜯어내면서 조용히 달라지면 알아채기 어렵다.
@@ -159,4 +163,33 @@ it('홈에 상품이 정말 없으면 홈 문구를 쓴다', async () => {
   await render(<ProductListView />, { wrapper: 감싸기 });
 
   await waitFor(() => expect(screen.getByText(/아직 등록된 상품이 없어요/)).toBeTruthy());
+});
+
+it('reset() 하면 필터가 풀리고 조건 없이 다시 받는다', async () => {
+  // 홈에서 **로고를 누르거나 홈 탭을 다시 누를 때** 부르는 길이다.
+  // 이게 끊기면 필터로 결과가 0개일 때 「어떻게 벗어나지」가 된다
+  // (2026-08-06 실기기에서 나온 것).
+  const ref = createRef<ProductListViewRef>();
+  fetchProducts.mockResolvedValue(한페이지([]));
+
+  await render(<ProductListView ref={ref} />, { wrapper: 감싸기 });
+  await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
+
+  await fireEvent.press(screen.getByText('포유류'));
+  await waitFor(() =>
+    expect(fetchProducts).toHaveBeenCalledWith(expect.objectContaining({ petType: 'MAMMAL' }))
+  );
+  fetchProducts.mockClear();
+
+  await act(async () => {
+    ref.current?.reset();
+  });
+
+  await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
+  expect(fetchProducts).toHaveBeenCalledWith({
+    page: 0,
+    keyword: undefined,
+    petType: undefined,
+    categories: undefined,
+  });
 });

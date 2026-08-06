@@ -1,7 +1,7 @@
 import type { Product } from '@cuddle/shared';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import { FlatList, Pressable, StyleSheet } from 'react-native';
 
 import { EmptyState, ErrorState, ListFooter, LoadingState } from '@/components/list-states';
@@ -22,6 +22,17 @@ import { fetchProducts } from '@/lib/products';
 // 화면(홈)에 남는 것: SafeAreaView · AppHeader · 떠 있는 「상품 등록」 단추.
 // 그건 목록의 일이 아니다.
 
+export interface ProductListViewRef {
+  /**
+   * 처음 상태로 되돌린다 — 필터를 풀고 맨 위로 올린다.
+   *
+   * 홈에서 **로고를 누르거나 홈 탭을 다시 누를 때** 부른다. 「홈으로」는 「처음 상태로」라는
+   * 뜻이고, 거의 모든 앱에서 탭을 다시 누르는 건 그 신호다. 웹도 로고·하단바 홈이
+   * 조건 없는 맨 주소(`/`)로 간다.
+   */
+  reset: () => void;
+}
+
 interface Props {
   /** 있으면 검색 결과, 없으면 홈 */
   keyword?: string;
@@ -29,9 +40,22 @@ interface Props {
   bottomInset?: number;
 }
 
-export function ProductListView({ keyword, bottomInset = 12 }: Props) {
+export const ProductListView = forwardRef<ProductListViewRef, Props>(function ProductListView(
+  { keyword, bottomInset = 12 },
+  ref
+) {
   const [petType, setPetType] = useState<string | null>(null);
   const [category, setCategory] = useState<string | null>(null);
+  const listRef = useRef<FlatList<Product>>(null);
+
+  useImperativeHandle(ref, () => ({
+    reset: () => {
+      setPetType(null);
+      setCategory(null);
+      // 목록이 안 그려져 있을 수도 있다(빈 화면·오류일 때). 그때는 올릴 것이 없다.
+      listRef.current?.scrollToOffset({ offset: 0, animated: true });
+    },
+  }));
 
   const {
     data,
@@ -93,6 +117,7 @@ export function ProductListView({ keyword, bottomInset = 12 }: Props) {
 
     return (
       <FlatList
+        ref={listRef}
         data={products}
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => <ProductRow product={item} />}
@@ -119,7 +144,7 @@ export function ProductListView({ keyword, bottomInset = 12 }: Props) {
       {renderBody()}
     </>
   );
-}
+});
 
 /**
  * 목록의 한 줄. 카드마다 훅이 필요해 별도 컴포넌트로 뺀다
