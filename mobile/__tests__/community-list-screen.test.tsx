@@ -2,11 +2,19 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
 
-import CommunityListScreen from './index';
+import CommunityListScreen from '@/app/(tabs)/(community)/index';
 
-// 조각들(정렬 줄·검색칸)은 각자 시험이 있다.
-// 여기서 지키는 것은 **그 알림이 서버 요청까지 이어지는가**다 —
-// 중간에 하나만 끊겨도 「눌러도 목록이 그대로」가 된다.
+// 커뮤니티 목록 **화면**의 시험.
+//
+// 조각들(정렬 줄·검색칸)은 각자 시험이 있다. 여기서 지키는 것은
+// **그 알림이 서버 요청까지 이어지는가**다 — 중간에 하나만 끊겨도
+// 「눌러도 목록이 그대로」가 된다. 탭을 바꿀 때 조건을 푸는 것도 화면에만 있는 일이다.
+//
+// ⚠️ **왜 `app/` 안에 안 두고 여기 두나 — expo-router 는 `app/` 의 모든 파일을 화면으로 본다.**
+//    시험 파일을 거기 두면 앱 번들에 끼워 넣으려다 `@testing-library/react-native` 를 못 찾아
+//    **실기기가 아예 안 뜬다**(2026-08-07에 겪었다. `UnableToResolveError`).
+//    타입체크도 린트도 안 잡아준다 — 폰에서만 드러난다.
+//    앱의 첫 화면 시험이라 여기에 자리를 만든다. 다음 화면 시험도 여기 둔다.
 
 jest.mock('@/lib/community', () => ({
   ...jest.requireActual('@/lib/community'),

@@ -62,6 +62,9 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
+    // 오른쪽에 붙인다. 웹도 모바일 폭에서는 그렇다
+    // (`CommunityPage.tsx` 의 `max-md:ml-auto` — 데스크탑만 왼쪽이다).
+    justifyContent: 'flex-end',
     paddingHorizontal: 16,
     paddingVertical: 10,
     backgroundColor: '#FFFFFF',
