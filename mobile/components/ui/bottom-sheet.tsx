@@ -69,18 +69,13 @@ function 걸리는시간(거리: number, msPerDp: number, 범위: { min: number;
 const MAX_HEIGHT_RATIO = 0.85;
 
 /**
- * 아래로 이만큼(dp) 넘게 밀면 닫는다.
- *
- * ⚠️ **시트가 손을 따라 움직이지 않는다.** 지도 시트(place-sheet.tsx)는 올린 만큼 올라가고
- *    내린 만큼 내려가지만, 여기는 아래로 미는 것을 **닫기 신호로만** 받는다.
- *    그래서 「어중간하게 걸쳐 있다가 제자리로 돌아가는」 자리가 아예 없다.
- *
- *    시트 높이의 비율이 아니라 **고정 거리**인 이유: 따라 움직이지 않으니 「얼마나 왔나」가
- *    아니라 「얼마나 밀었나」만 보면 된다. 손이 움직인 거리는 시트 크기와 상관없다.
+ * 끌어 닫기 기준 — 시트 높이의 이만큼보다 더 내렸으면 닫는다.
+ * ⚠️ 「올린 만큼 올라가 있는」 지도 시트(place-sheet.tsx)와 **다르다.** 여기는 손을 떼면
+ *    열림/닫힘 둘 중 하나로 간다. 시트가 어중간하게 걸쳐 있을 자리가 없기 때문이다.
  */
-const DRAG_CLOSE_DP = 56;
+const CLOSE_RATIO = 0.25;
 
-/** 조금만 밀었어도 이보다 빠르게 튕겨 내리면 닫는다(초당 몇 점). 「휙 내리기」를 받아 준다. */
+/** 조금만 내렸어도 이보다 빠르게 튕겨 내리면 닫는다(초당 몇 점). 「휙 내리기」를 받아 준다. */
 const FLING_VELOCITY = 800;
 
 /** 시험이 끌기 제스처를 집을 때 쓰는 이름. */
@@ -123,6 +118,8 @@ export function BottomSheet({ visible, onClose, dragToClose = false, children }:
   const hiddenY = useSharedValue(screenHeight);
   /** 지금 시트가 내려가 있는 거리. 0이면 다 올라온 상태다. */
   const translateY = useSharedValue(screenHeight);
+  /** 손가락을 대기 시작한 순간의 자리. 끄는 동안 여기서부터 더한다. */
+  const startY = useSharedValue(0);
 
   useEffect(() => {
     if (visible) {
@@ -146,20 +143,36 @@ export function BottomSheet({ visible, onClose, dragToClose = false, children }:
     );
   }, [visible, translateY, hiddenY]);
 
-  // ⚠️ **시트는 손을 따라 움직이지 않는다.** 아래로 미는 것을 닫기 신호로만 받는다.
-  //    따라 움직이게 하면(onUpdate로 translateY를 손에 붙이면) 그건 지도 시트 방식이고,
-  //    그때부터 「덜 내렸으면 제자리로 돌려놓기」가 딸려 온다. 이 시트는 올라가 있거나
-  //    내려가 있거나 둘뿐이라 그 중간 자리가 필요 없다.
   const pan = Gesture.Pan()
     // 시험에서 이 제스처를 집어 흔들어 보려고 붙인 이름이다(bottom-sheet.test.tsx).
     .withTestId(DRAG_TEST_ID)
+    .onStart(() => {
+      startY.value = translateY.value;
+    })
+    .onUpdate((event) => {
+      // 위로는 안 늘어난다 — 시트는 제자리보다 더 올라가지 않는다.
+      translateY.value = Math.max(0, startY.value + event.translationY);
+    })
     .onEnd((event) => {
-      const 닫을만큼밀었다 =
-        event.translationY > DRAG_CLOSE_DP || event.velocityY > FLING_VELOCITY;
+      // 「지금 어디 있나」가 아니라 「손이 얼마나 내려갔나」로 정한다(event.translationY).
+      // 잡는 순간 시트는 늘 다 올라와 있어 값은 같지만, 이쪽이 아직 안 끝난 움직임에
+      // 휘둘리지 않는다.
+      const 닫을만큼내렸다 =
+        event.translationY > hiddenY.value * CLOSE_RATIO || event.velocityY > FLING_VELOCITY;
 
-      // 여기서 직접 내리지 않고 알리기만 한다. 알리면 쓰는 쪽이 visible을 내리고,
-      // 위 useEffect가 늘 하던 대로 내려 준다 — 닫는 움직임이 한 곳에만 있다.
-      if (닫을만큼밀었다) runOnJS(onClose)();
+      if (닫을만큼내렸다) {
+        // 여기서 직접 내리지 않고 알리기만 한다. 알리면 쓰는 쪽이 visible을 내리고,
+        // 위 useEffect가 **손을 뗀 그 자리에서부터** 내려 준다 — 움직임이 한 번만 돈다.
+        runOnJS(onClose)();
+        return;
+      }
+
+      // 덜 내렸으면 제자리로. 중간에 걸쳐 두지 않는다.
+      // ⚠️ 여기는 **손을 뗀 자리**에서 0까지다. 조금만 내렸으면 거리도 짧아 금방 돌아간다.
+      translateY.value = withTiming(0, {
+        duration: 걸리는시간(translateY.value, OPEN_MS_PER_DP, OPEN_MS_RANGE),
+        easing: Easing.out(Easing.cubic),
+      });
     });
 
   const sheetStyle = useAnimatedStyle(() => ({
