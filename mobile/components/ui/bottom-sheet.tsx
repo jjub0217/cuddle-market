@@ -28,9 +28,38 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // 못한다. 제스처(react-native-gesture-handler)와 Reanimated는 같은 UI 쓰레드에서 돌아
 // 손에 붙는다. 앱에 이미 둘 다 있다(지도의 place-sheet.tsx가 먼저 썼다).
 
-/** 열 때는 조금 느긋하게, 닫을 때는 빠르게 — 닫기는 이미 결정한 동작이라 기다릴 이유가 없다. */
-const OPEN_MS = 300;
-const CLOSE_MS = 200;
+// 열고 닫는 시간을 **가야 할 거리에 맞춘다**.
+//
+// ⚠️ 시간을 하나로 못 박으면 **큰 시트일수록 빨라진다.** 같은 시간에 더 먼 거리를 가기 때문이다.
+//    ```
+//    상품 ⋮ 메뉴    높이 168 → 300ms 에 168 이동   초당 560
+//    세부 필터 시트  높이 550 → 300ms 에 550 이동   초당 1830   ← 세 배 빠르다
+//    ```
+//    그래서 작은 시트는 멀쩡한데 세부 필터 시트만 「확 급하게 나타난다」로 보였다
+//    (2026-08-06 실기기). 속도를 맞추면 크기가 달라도 같은 느낌으로 움직인다.
+//
+// 열 때는 조금 느긋하게, 닫을 때는 빠르게 — 닫기는 이미 결정한 동작이라 기다릴 이유가 없다.
+
+/** 열 때 1dp를 가는 데 쓰는 시간(ms). 커질수록 느긋해진다. */
+const OPEN_MS_PER_DP = 0.8;
+/** 닫을 때. 열 때보다 빠르다. */
+const CLOSE_MS_PER_DP = 0.45;
+
+/**
+ * 아무리 짧아도·길어도 이 사이다.
+ *
+ * 아래를 두는 이유: 아주 낮은 시트가 눈에 안 띄게 지나가면 안 된다.
+ * 위를 두는 이유: 화면을 거의 덮는 시트가 굼떠 보이면 안 된다.
+ * (첫 열림에는 아직 높이를 못 재서 화면 높이로 잡히는데, 그때 위 한계가 걸린다)
+ */
+const OPEN_MS_RANGE = { min: 300, max: 520 };
+const CLOSE_MS_RANGE = { min: 200, max: 340 };
+
+/** 갈 거리에 맞는 시간. 제스처(UI 쓰레드)에서도 부르므로 worklet이다. */
+function 걸리는시간(거리: number, msPerDp: number, 범위: { min: number; max: number }) {
+  'worklet';
+  return Math.min(범위.max, Math.max(범위.min, 거리 * msPerDp));
+}
 
 /**
  * 시트가 차지할 수 있는 최대 높이(화면 대비).
@@ -95,13 +124,19 @@ export function BottomSheet({ visible, onClose, dragToClose = false, children }:
   useEffect(() => {
     if (visible) {
       setMounted(true);
-      translateY.value = withTiming(0, { duration: OPEN_MS, easing: Easing.out(Easing.cubic) });
+      translateY.value = withTiming(0, {
+        duration: 걸리는시간(hiddenY.value, OPEN_MS_PER_DP, OPEN_MS_RANGE),
+        easing: Easing.out(Easing.cubic),
+      });
       return;
     }
 
     translateY.value = withTiming(
       hiddenY.value,
-      { duration: CLOSE_MS, easing: Easing.in(Easing.cubic) },
+      {
+        duration: 걸리는시간(hiddenY.value, CLOSE_MS_PER_DP, CLOSE_MS_RANGE),
+        easing: Easing.in(Easing.cubic),
+      },
       (finished) => {
         if (finished) runOnJS(setMounted)(false);
       }
@@ -133,7 +168,11 @@ export function BottomSheet({ visible, onClose, dragToClose = false, children }:
       }
 
       // 덜 내렸으면 제자리로. 중간에 걸쳐 두지 않는다.
-      translateY.value = withTiming(0, { duration: OPEN_MS, easing: Easing.out(Easing.cubic) });
+      // ⚠️ 여기는 **손을 뗀 자리**에서 0까지다. 조금만 내렸으면 거리도 짧아 금방 돌아간다.
+      translateY.value = withTiming(0, {
+        duration: 걸리는시간(translateY.value, OPEN_MS_PER_DP, OPEN_MS_RANGE),
+        easing: Easing.out(Easing.cubic),
+      });
     });
 
   const sheetStyle = useAnimatedStyle(() => ({
