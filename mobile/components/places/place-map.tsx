@@ -3,8 +3,8 @@ import type {
   NaverMapViewProps,
   Region,
 } from '@mj-studio/react-native-naver-map';
-import type { ComponentType } from 'react';
-import { StyleSheet } from 'react-native';
+import { useState, type ComponentType } from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import { MapUnavailable } from '@/components/places/map-fallback';
 import { DEFAULT_CENTER, type PlaceListItem } from '@/lib/places/types';
@@ -61,16 +61,25 @@ export default function PlaceMap({
   onCameraIdle,
   onPressPlace,
 }: Props) {
+  // 지도가 준비되기 전까지 그 위에 덮어 둘 안내.
+  //
+  // ⚠️ 왜 필요한가 — 준비되는 동안 회색 판만 보이는데, **못 불러왔을 때도 회색 판**이다.
+  //    사용자는 고장인지 기다리는 중인지 구분할 수 없다. 실기기에서 「회색 판이 보이다가
+  //    지도가 나온다」고 느껴졌다(2026-08-06). 말로 구분해 준다.
+  const [준비됨, set준비됨] = useState(false);
+
   if (!naver) return <MapUnavailable />;
 
   const { NaverMapView, NaverMapMarkerOverlay } = naver;
 
   return (
+    <>
     <NaverMapView
       style={StyleSheet.absoluteFill}
       initialCamera={{ ...DEFAULT_CENTER, zoom: INITIAL_ZOOM }}
       onCameraChanged={onCameraChanged}
       onCameraIdle={onCameraIdle}
+      onInitialized={() => set준비됨(true)}
       isShowZoomControls={false}
       isShowScaleBar={false}
     >
@@ -86,5 +95,27 @@ export default function PlaceMap({
         />
       ))}
     </NaverMapView>
+
+      {/* 지도가 그려지면 사라진다. 지도 위에 덮으므로 눌러도 지도로 안 넘어가게 둔다. */}
+      {준비됨 ? null : (
+        <View style={styles.loading}>
+          <ActivityIndicator />
+          <Text style={styles.loadingText}>지도를 불러오는 중</Text>
+        </View>
+      )}
+    </>
   );
 }
+
+const styles = StyleSheet.create({
+  loading: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    // 못 불러왔을 때(map-fallback.tsx)와 같은 회색이다. 글자로만 구분한다 —
+    // 색까지 다르면 잠깐 사이에 두 번 바뀌어 어수선하다.
+    backgroundColor: '#F3F4F6',
+  },
+  loadingText: { fontSize: 13, color: '#6B7280' },
+});
