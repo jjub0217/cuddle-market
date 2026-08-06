@@ -39,7 +39,7 @@ export async function fetchPosts(params: PostListParams): Promise<PostPage>
 - 고침: `mobile/lib/community.ts`
 - 고침: `mobile/lib/community.test.ts`
 
-- [ ] **1-1.** 시험 먼저. `community.test.ts` 의 `describe('fetchPosts')` 에 넣는다
+- [x] **1-1.** 시험 먼저. `community.test.ts` 의 `describe('fetchPosts')` 에 넣는다
 
 ```ts
 it('검색어를 주면 searchType 과 함께 싣는다', async () => {
@@ -80,14 +80,14 @@ it('정렬을 안 주면 sortBy 를 안 싣는다 — 서버 기본이 latest �
 });
 ```
 
-- [ ] **1-2.** 돌려서 **깨지는지** 본다
+- [x] **1-2.** 돌려서 **깨지는지** 본다
 
 ```bash
 cd /Users/osejin/Desktop/cuddle-market/mobile && npx jest lib/community
 ```
 기대: 새 시험 넷이 실패. 기존 시험도 `fetchPosts(boardType, page)` 시그니처가 바뀌어 깨진다
 
-- [ ] **1-3.** `fetchPosts` 를 객체 받게 고치고 조건을 싣는다
+- [x] **1-3.** `fetchPosts` 를 객체 받게 고치고 조건을 싣는다
 
 ```ts
 /** 검색은 늘 「제목+내용」이다. 서버는 title·writer 도 받지만 고르는 자리를 안 뒀다(설계 §2) */
@@ -117,9 +117,9 @@ export async function fetchPosts({
 }
 ```
 
-- [ ] **1-4.** 기존 호출부를 고친다 — `index.tsx` 의 `fetchPosts(boardType, pageParam)` 하나뿐이다
+- [x] **1-4.** 기존 호출부를 고친다 — `index.tsx` 의 `fetchPosts(boardType, pageParam)` 하나뿐이다
       (`grep -rn "fetchPosts(" mobile/` 로 확인)
-- [ ] **1-5.** 다시 돌려 초록. 커밋
+- [x] **1-5.** 다시 돌려 초록. 커밋
 
 ---
 
@@ -128,7 +128,7 @@ export async function fetchPosts({
 **파일**
 - 만듦: `mobile/components/community/community-sort-row.tsx` · `.test.tsx`
 
-- [ ] **2-1.** 값을 웹에서 가져온다. `src/constants/constants.ts:171` 의 `COMMUNITY_SORT_TYPE`
+- [x] **2-1.** 값을 웹에서 가져온다. `src/constants/constants.ts:171` 의 `COMMUNITY_SORT_TYPE`
 
 ```ts
 /** 웹 COMMUNITY_SORT_TYPE 을 그대로 옮겼다 — 웹에서 바뀌면 여기도 바꾼다.
@@ -140,7 +140,7 @@ const SORT_TYPES = [
 ] as const;
 ```
 
-- [ ] **2-2.** 시험 먼저. ⚠️ `render`·`fireEvent` 를 **기다린다**(mobile/AGENTS.md).
+- [x] **2-2.** 시험 먼저. ⚠️ `render`·`fireEvent` 를 **기다린다**(mobile/AGENTS.md).
       누를 때는 글자가 아니라 **표식(testID)**으로 — 글자는 단추 안쪽이라 누름이 안 올라갈 때가 있다
 
 ```tsx
@@ -169,7 +169,7 @@ it('지금 고른 것이 선택 상태로 표시된다', async () => {
 });
 ```
 
-- [ ] **2-3.** 조각을 만든다. 모양은 웹과 같다 — 나란히 놓고 사이에 세로 구분선
+- [x] **2-3.** 조각을 만든다. 모양은 웹과 같다 — 나란히 놓고 사이에 세로 구분선
 
 ```tsx
 interface Props {
@@ -184,7 +184,7 @@ export function CommunitySortRow({ sortBy, onChange }: Props) { … }
 - 구분선: 웹은 `h-3 w-px` 다. 앱에서는 높이 12 · 너비 1 · `#E5E7EB`
 - 각 단추에 `testID={`community-sort-${id}`}` 와 `accessibilityState={{ selected }}`
 
-- [ ] **2-4.** 시험 초록 확인. 커밋
+- [x] **2-4.** 시험 초록 확인. 커밋
 
 ---
 
@@ -197,7 +197,7 @@ export function CommunitySortRow({ sortBy, onChange }: Props) { … }
 **빈 검색어를 안 넘긴다**(`if (!normalized) return`). 커뮤니티는 검색어를 지우면 전체 목록으로
 돌아와야 하므로 그 규칙과 어긋난다.
 
-- [ ] **3-1.** 시험 먼저
+- [x] **3-1.** 시험 먼저
 
 ```tsx
 it('확인 키를 누르면 다듬어진 검색어로 알린다', async () => {
@@ -232,7 +232,7 @@ it('밖에서 검색어가 바뀌면 칸에 따라 들어온다', async () => {
 });
 ```
 
-- [ ] **3-2.** 조각을 만든다
+- [x] **3-2.** 조각을 만든다
 
 ```tsx
 interface Props {
@@ -281,7 +281,7 @@ export function PostSearchInput({ keyword, onSubmit }: Props) {
 ⚠️ 지우기(`X`)는 **누르는 즉시** 반영한다. 「지웠는데 목록이 그대로」가 되면 안 된다 —
 16바퀴에서 초기화가 그 문제로 걸렸다.
 
-- [ ] **3-3.** 시험 초록 확인. 커밋
+- [x] **3-3.** 시험 초록 확인. 커밋
 
 ---
 
@@ -291,7 +291,7 @@ export function PostSearchInput({ keyword, onSubmit }: Props) {
 - 고침: `mobile/app/(tabs)/(community)/index.tsx`
 - 만듦: `mobile/app/(tabs)/(community)/index.test.tsx`
 
-- [ ] **4-1.** 상태를 더한다
+- [x] **4-1.** 상태를 더한다
 
 ```tsx
 const [boardType, setBoardType] = useState<BoardType>('QUESTION');
@@ -299,7 +299,7 @@ const [keyword, setKeyword] = useState('');
 const [sortBy, setSortBy] = useState('latest');
 ```
 
-- [ ] **4-2.** ⚠️ **탭을 바꾸면 검색어·정렬을 푼다**(설계 §4 — 웹이 그렇다)
+- [x] **4-2.** ⚠️ **탭을 바꾸면 검색어·정렬을 푼다**(설계 §4 — 웹이 그렇다)
 
 ```tsx
 const changeBoardType = (next: BoardType) => {
@@ -309,7 +309,7 @@ const changeBoardType = (next: BoardType) => {
 };
 ```
 
-- [ ] **4-3.** ⚠️ **`queryKey` 에 조건을 다 넣는다.** 하나라도 빠지면 그 조건만 안 먹고
+- [x] **4-3.** ⚠️ **`queryKey` 에 조건을 다 넣는다.** 하나라도 빠지면 그 조건만 안 먹고
       뒤섞인 목록이 된다(16바퀴에서 겪었다)
 
 ```tsx
@@ -317,7 +317,7 @@ queryKey: ['communityPosts', boardType, keyword, sortBy],
 queryFn: ({ pageParam }) => fetchPosts({ boardType, page: pageParam, keyword, sortBy }),
 ```
 
-- [ ] **4-4.** 화면을 짠다. **고정 두 줄 + 스크롤되는 정렬 줄**
+- [x] **4-4.** 화면을 짠다. **고정 두 줄 + 스크롤되는 정렬 줄**
 
 ```
 [질문 있어요][정보 공유]      FlatList 밖 (고정)
@@ -332,7 +332,7 @@ queryFn: ({ pageParam }) => fetchPosts({ boardType, page: pageParam, keyword, so
 ⚠️ **빈 화면·오류일 때도 칩 줄과 검색창이 보여야 한다.** 둘 다 `FlatList` 밖이라 저절로
    보이지만, 정렬 줄은 헤더라 목록이 없으면 안 그려진다 — 그건 괜찮다(고를 게 없으니).
 
-- [ ] **4-5.** 빈 화면 문구를 가른다
+- [x] **4-5.** 빈 화면 문구를 가른다
 
 ```tsx
 // 검색해서 0건인지, 원래 글이 없는지에 따라 다르다.
@@ -347,7 +347,7 @@ if (posts.length === 0) {
 }
 ```
 
-- [ ] **4-6.** 시험. ⚠️ `@tanstack/react-query` 를 쓰므로 `QueryClientProvider` 로 감싼다
+- [x] **4-6.** 시험. ⚠️ `@tanstack/react-query` 를 쓰므로 `QueryClientProvider` 로 감싼다
       (`product-list-view.test.tsx` 의 `감싸기` 를 본으로)
 
 덮을 것:
@@ -357,7 +357,7 @@ if (posts.length === 0) {
 - **탭을 바꾸면 검색어·정렬이 풀린 채로 부른다**
 - 검색해서 0건이면 「검색 결과가 없습니다」, 조건 없이 0건이면 「아직 게시글이 없어요」
 
-- [ ] **4-7.** 저장소 루트에서 게이트. 커밋
+- [x] **4-7.** 저장소 루트에서 게이트. 커밋
 
 ```bash
 cd /Users/osejin/Desktop/cuddle-market && pnpm gate:mobile
@@ -373,7 +373,7 @@ cd /Users/osejin/Desktop/cuddle-market && pnpm gate:mobile
 ⚠️ **기능 변경이 아니다.** 이 상수를 아무도 안 쓰는데 있어서, #857 이슈 본문이
 「웹은 이걸 쓴다」로 잘못 적혔고 서버까지 열어보고서야 밝혀졌다. 다음 사람이 또 속지 않게 한다.
 
-- [ ] **5-1.** 주석을 단다
+- [x] **5-1.** 주석을 단다
 
 ```ts
 /**
@@ -389,7 +389,7 @@ cd /Users/osejin/Desktop/cuddle-market && pnpm gate:mobile
 export const COMMUNITY_SEARCH_TYPE = [ … ]
 ```
 
-- [ ] **5-2.** 웹 게이트. 커밋
+- [x] **5-2.** 웹 게이트. 커밋
 
 ```bash
 cd /Users/osejin/Desktop/cuddle-market && pnpm gate
@@ -401,14 +401,14 @@ cd /Users/osejin/Desktop/cuddle-market && pnpm gate
 
 게이트가 초록이어도 따로 봐야 한다.
 
-- [ ] 검색어를 치면 목록이 좁혀진다
-- [ ] **검색어를 지우면 원래대로 돌아온다**
-- [ ] **질문 ↔ 정보를 오가면 검색어·정렬이 풀린다** (칸도 비워진다)
-- [ ] 정렬만 바꿀 때는 검색어가 남는다
-- [ ] 정렬 셋이 다 먹는다
-- [ ] 스크롤하면 정렬 줄은 사라지고 칩 줄·검색창은 남는다
-- [ ] 검색해서 0건이면 「검색 결과가 없습니다」가 뜬다
-- [ ] **게시글이 몇 장 보이는지** — 고정 두 줄이 세로를 너무 먹지 않는지
+- [x] 검색어를 치면 목록이 좁혀진다
+- [x] **검색어를 지우면 원래대로 돌아온다**
+- [x] **질문 ↔ 정보를 오가면 검색어·정렬이 풀린다** (칸도 비워진다)
+- [x] 정렬만 바꿀 때는 검색어가 남는다
+- [x] 정렬 셋이 다 먹는다
+- [x] 스크롤하면 정렬 줄은 사라지고 칩 줄·검색창은 남는다
+- [x] 검색해서 0건이면 「검색 결과가 없습니다」가 뜬다
+- [x] **게시글이 몇 장 보이는지** — 고정 두 줄이 세로를 너무 먹지 않는지
 
 ---
 
@@ -423,3 +423,56 @@ queryKey          조건을 다 넣는다. 하나라도 빠지면 뒤섞인 목�
 검색창 재사용      products/search-bar-header 는 빈 검색어를 안 넘긴다 — 새로 만든다
 시험의 await      render·rerender·fireEvent 셋 다 기다린다. 안 하면 조용히 틀린 게 통과한다
 ```
+
+---
+
+# 하면서 달라진 것
+
+Task 1~6은 계획대로 갔다. 그 밖에 세 가지가 더 생겼다.
+
+## 계획서가 틀렸던 곳
+
+```
+Task 3   `onSubmit(normalizeKeyword(text))`
+         → normalizeKeyword 는 빈 값에 **null** 을 준다. 타입이 안 맞는다.
+           `?? ''` 로 빈 글자로 바꿔 넘긴다 — 「검색을 그만둔다」도 알려야 하는 신호다
+```
+
+## 실기기에서 드러난 것 — **앱이 아예 안 떴다**
+
+```
+mobile/app/(tabs)/(community)/index.test.tsx   ← 화면 시험을 여기 뒀다
+```
+
+⚠️ **expo-router 는 `app/` 의 모든 파일을 화면으로 본다.** 시험 파일도 앱 번들에 끼워
+넣으려다 `@testing-library/react-native`(devDependency)를 못 찾아 `UnableToResolveError`.
+
+**게이트 406개가 초록인 채로 폰만 죽었다.** 타입체크도 린트도 안 잡아준다 —
+게이트가 원리상 못 잡는 종류다. 앱의 **첫 화면 시험**이라 아무도 안 밟아본 자리였다.
+
+→ `mobile/__tests__/` 에 자리를 만들고 `@/app/...` 로 불러온다.
+→ `mobile/AGENTS.md` 함정 표에도 넣었다. 기록이 유일한 방어다.
+
+## 사용자가 짚어 준 것 둘
+
+```
+정렬 줄이 왼쪽에 있다     웹도 모바일 폭에서는 오른쪽이다(`max-md:ml-auto`).
+                        만들 때 정렬 단추의 **모양**만 보고 **어디에 붙는지**는 안 봤다
+
+검색어를 손으로 지우면?   확인 키를 눌러야 반영됐다. X 를 누른 것과 같아야 자연스럽다
+                        ⚠️ **웹은 더 심했다** — X 단추도 없어 검색 결과에 갇혔다.
+                          Enter 를 안 누르면 빠져나올 길이 아예 없었다
+```
+
+**앱을 만들면서 웹의 구멍이 드러났다.** 앱을 새로 만들 때 웹을 자세히 읽게 되니
+이런 것이 나온다. 웹도 두 곳 고쳤다(죽은 상수 주석 · 검색어 비우기).
+
+## 상품(#855)과 견주면
+
+```
+#855   커밋 27개 · 시험 312 → 456   조각 넷 · SectionList 전환 · 시트 여섯 바퀴
+#857   커밋 8개  · 시험 380 → 406   조각 둘 · FlatList 그대로 · 시트 없음
+```
+
+설계에서 **안 만들 것을 정한 것**이 컸다 — 검색 종류를 안 고르고, 목록을 조각으로 안 빼고,
+`SectionList` 로 안 바꿨다. 셋 다 「상품이 그랬으니」로 따라갔으면 훨씬 커졌을 일이다.
