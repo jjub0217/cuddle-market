@@ -48,12 +48,23 @@ export function ProfileHead({ profile }: Props) {
         </View>
       </View>
 
-      {/* 소개글이 없으면 줄을 아예 안 그린다.
-          웹은 남의 프로필에서도 「소개글을 작성해주세요」가 뜨는데(#810), 남에게
-          작성하라고 할 이유가 없다. 앱은 처음부터 안 그런다. */}
-      {profile.introduction ? (
-        <Text style={styles.introduction}>{profile.introduction}</Text>
-      ) : null}
+      {/*
+        소개글이 없으면 **「소개글이 없습니다」**를 그린다.
+
+        ⚠️ **「소개글을 작성해주세요」가 아니다.** 남의 프로필에서 그러면 누구더러 쓰라는
+           건지 알 수 없다(#810에서 웹이 그랬고, 그래서 앱은 아예 안 그렸다).
+           「없습니다」는 **사실을 적는 것**이라 그 문제가 없고, 빈 자리도 덜 허전하다.
+           내 프로필(마이 화면 계정 카드)에서는 반대로 「작성해주세요」다 — 거기서는
+           그 자리가 곧 쓰러 가는 길이다.
+
+        공백만 있는 소개글도 「없다」로 본다 — 웹은 저장할 때 앞뒤 공백을 안 떼고 최소
+        2자만 봐서 공백 두 칸도 저장된다.
+      */}
+      <Text
+        style={[styles.introduction, !profile.introduction?.trim() && styles.introductionEmpty]}
+      >
+        {profile.introduction?.trim() || '소개글이 없습니다'}
+      </Text>
     </View>
   );
 }
@@ -94,4 +105,6 @@ const styles = StyleSheet.create({
   blockedLabel: { fontSize: 12, fontWeight: '600', color: '#DC2626' },
   location: { fontSize: 13, color: '#6B7280' },
   introduction: { fontSize: 14, color: '#4B5563', lineHeight: 20 },
+  // 값이 아니라 「없다」는 안내라는 게 보이게 옅게
+  introductionEmpty: { color: '#9CA3AF' },
 });

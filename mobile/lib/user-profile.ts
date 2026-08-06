@@ -18,7 +18,7 @@ export interface UserProfile {
   profileImageUrl: string | null;
   addressSido: string | null;
   addressGugun: string | null;
-  /** 소개글. 없으면 화면이 그 줄을 아예 안 그린다 */
+  /** 소개글. 없으면 화면이 「소개글이 없습니다」를 대신 그린다 */
   introduction: string | null;
   /** 내가 이 사람을 이미 차단했는지 */
   isBlocked: boolean;
