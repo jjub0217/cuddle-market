@@ -96,11 +96,10 @@ export function DetailFilterSheet({ visible, value, onClose, onApply }: Props) {
   };
 
   return (
-    <BottomSheet visible={visible} onClose={onClose}>
-      <View style={styles.handleArea}>
-        <View style={styles.handle} />
-      </View>
-
+    // dragToClose: 손잡이를 껍데기가 그리고, 그 손잡이를 아래로 끌면 닫힌다.
+    // 왜 손잡이에서만 끄는지는 bottom-sheet.tsx 의 dragToClose 설명에 적어 두었다 —
+    // 안이 스크롤되는 시트라, 내용 위에서도 끌리게 하면 굴리기와 부딪힌다.
+    <BottomSheet visible={visible} onClose={onClose} dragToClose>
       {/* 지역까지 다 펼치면 화면을 넘어서므로 안쪽만 스크롤한다. 단추 두 개는 늘 보여야 한다 */}
       <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent}>
         <Section title="상품 상태">
@@ -211,19 +210,15 @@ function Pill({ label, active, onPress }: PillProps) {
 }
 
 const styles = StyleSheet.create({
-  handleArea: {
-    alignItems: 'center',
-    paddingTop: 8,
-    paddingBottom: 4,
-  },
-  handle: {
-    width: 36,
-    height: 4,
-    borderRadius: 999,
-    backgroundColor: '#E5E7EB',
-  },
-  // 화면을 다 덮지 않게 여기서 끊는다. region-field.tsx의 목록과 같은 생각이다
-  body: { maxHeight: 420 },
+  // ⚠️ 높이를 못 박지 않는다.
+  //
+  // 예전에는 maxHeight: 420 이었다. 그래서 시트 아래쪽(손잡이·단추 줄 사이의 빈 자리)을
+  // 잡으면 아무 일도 안 났고, 사용자에게는 「올라가는 자리가 따로 있는」 것으로 보였다(#855).
+  //
+  // 지금은 껍데기가 시트 전체 높이를 화면의 85%로 끊어 주고(bottom-sheet.tsx),
+  // 이 스크롤 영역이 flexShrink 로 **남는 자리를 다 차지한 뒤 필요한 만큼만 줄어든다.**
+  // 아래 단추 줄은 flexShrink 가 0(리액트 네이티브 기본값)이라 줄지 않고 늘 보인다.
+  body: { flexShrink: 1 },
   bodyContent: {
     paddingHorizontal: 16,
     paddingTop: 8,

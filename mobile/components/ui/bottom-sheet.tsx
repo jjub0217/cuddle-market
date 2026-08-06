@@ -1,5 +1,13 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Animated, Easing, Modal, Pressable, StyleSheet } from 'react-native';
+import { useEffect, useState, type ReactNode } from 'react';
+import { Modal, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
+import Animated, {
+  Easing,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // 아래에서 올라오는 시트의 껍데기. 안에 무엇을 담을지는 쓰는 쪽이 정한다.
@@ -7,75 +15,187 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // 원래 product-action-sheet.tsx 안에만 있던 것을 빼냈다. 회원가입의 거주지 선택도
 // 같은 모양이어야 해서다 — 두 시트가 따로 놀면 같은 앱으로 안 보인다.
 //
+// ⚠️ **여섯 곳이 같이 쓴다.** 상품 등록의 고르는 칸 · 지역 고르기 · 정렬 목록 ·
+//    세부 필터 · 상품 ⋮ 메뉴. 여기를 고치면 다섯 곳이 같이 바뀐다.
+//
 // 왜 Modal의 animationType="slide"를 안 쓰나:
 // 그 값은 길이·곡선을 정할 수 없고, 실기기에서 올라오는 속도가 툭 튀어 보였다.
-// animationType="none"으로 두고 직접 움직인다. 새 의존성 없이 내장 Animated면 된다.
+// animationType="none"으로 두고 직접 움직인다.
+//
+// 왜 내장 Animated 대신 Reanimated인가(#855 후속):
+// 손가락으로 끌어 닫는 동작이 붙었다. 끄는 동안 매 프레임 시트를 따라 움직여야 하는데,
+// 내장 Animated는 그 값을 자바스크립트 쪽에서 만들어 넘겨 안드로이드에서 손을 따라오지
+// 못한다. 제스처(react-native-gesture-handler)와 Reanimated는 같은 UI 쓰레드에서 돌아
+// 손에 붙는다. 앱에 이미 둘 다 있다(지도의 place-sheet.tsx가 먼저 썼다).
 
 /** 열 때는 조금 느긋하게, 닫을 때는 빠르게 — 닫기는 이미 결정한 동작이라 기다릴 이유가 없다. */
 const OPEN_MS = 300;
 const CLOSE_MS = 200;
 
+/**
+ * 시트가 차지할 수 있는 최대 높이(화면 대비).
+ * 위쪽에 화면이 조금 남아야 「덮개 위에 뜬 시트」로 읽힌다 — 다 덮으면 새 화면처럼 보인다.
+ * 여기서 끊어 두면 내용이 아무리 길어도 시트가 화면을 넘지 않고, 안쪽 스크롤이 대신 줄어든다.
+ */
+const MAX_HEIGHT_RATIO = 0.85;
+
+/**
+ * 끌어 닫기 기준 — 시트 높이의 이만큼보다 더 내렸으면 닫는다.
+ * ⚠️ 「올린 만큼 올라가 있는」 지도 시트(place-sheet.tsx)와 **다르다.** 여기는 손을 떼면
+ *    열림/닫힘 둘 중 하나로 간다. 시트가 어중간하게 걸쳐 있을 자리가 없기 때문이다.
+ */
+const CLOSE_RATIO = 0.25;
+
+/** 조금만 내렸어도 이보다 빠르게 튕겨 내리면 닫는다(초당 몇 점). 「휙 내리기」를 받아 준다. */
+const FLING_VELOCITY = 800;
+
+/** 시험이 끌기 제스처를 집을 때 쓰는 이름. */
+export const DRAG_TEST_ID = 'bottom-sheet-drag';
+
 interface Props {
   visible: boolean;
   onClose: () => void;
+  /**
+   * 손잡이를 달고, **그 손잡이를 아래로 끌면 닫히게** 한다.
+   *
+   * ⚠️ 왜 시트 아무 데나가 아니라 손잡이인가(#855에서 고른 길 ①):
+   * 안이 스크롤되는 시트(세부 필터)에서 내용 위를 아래로 끌면 「목록을 굴리려는 것」인지
+   * 「시트를 닫으려는 것」인지 가릴 수 없다. 둘 다 받으려 하면 굴리다가 시트가 닫히거나,
+   * 반대로 닫으려는데 목록만 움직인다. 손잡이에서만 받으면 헷갈릴 일이 없고, iOS 기본
+   * 시트도 이 방식이다. (다른 길 ②는 「스크롤이 맨 위일 때만 끌면 닫힌다」인데, 손이
+   * 한 번 더 가고 맨 위인지 아닌지를 사용자가 알 수 없어 안 골랐다.)
+   *
+   * 손잡이가 없던 다섯 시트는 이 값을 안 주므로 지금까지와 똑같이 돈다.
+   */
+  dragToClose?: boolean;
   children: ReactNode;
 }
 
-export function BottomSheet({ visible, onClose, children }: Props) {
+export function BottomSheet({ visible, onClose, dragToClose = false, children }: Props) {
   // 기기 아래쪽 안전영역(제스처 바·내비게이션 바)의 높이. 바가 없는 기기에서는 0이다.
   const insets = useSafeAreaInsets();
+  const { height: screenHeight } = useWindowDimensions();
   // Modal을 언제 떼어낼지. 닫는 애니메이션이 끝난 뒤에 떼어야 사라지는 모습이 보인다.
   const [mounted, setMounted] = useState(visible);
-  // 시트 높이를 재서 그만큼만 움직인다. 재기 전에는 넉넉한 값으로 시작한다.
-  const [sheetHeight, setSheetHeight] = useState(0);
-  const progress = useRef(new Animated.Value(0)).current;
+
+  /**
+   * 「숨은 자리」 — 시트가 화면 밖으로 완전히 내려갔을 때의 거리.
+   *
+   * ⚠️ 재기 전에는 **화면 높이**를 쓴다. 예전에는 320을 못 박아 뒀는데, 그보다 큰 시트는
+   *    320만 내려간 채로 시작해 **나머지가 이미 화면에 보인 상태**에서 올라왔다 —
+   *    세부 필터 시트(높이 550쯤)가 「갑자기 튀어나온다」로 보인 까닭이다(#855).
+   *    화면 높이만큼 내려놓으면 크기가 얼마든 확실히 밖에서 시작한다.
+   */
+  const hiddenY = useSharedValue(screenHeight);
+  /** 지금 시트가 내려가 있는 거리. 0이면 다 올라온 상태다. */
+  const translateY = useSharedValue(screenHeight);
+  /** 손가락을 대기 시작한 순간의 자리. 끄는 동안 여기서부터 더한다. */
+  const startY = useSharedValue(0);
 
   useEffect(() => {
     if (visible) {
       setMounted(true);
-      Animated.timing(progress, {
-        toValue: 1,
-        duration: OPEN_MS,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      }).start();
+      translateY.value = withTiming(0, { duration: OPEN_MS, easing: Easing.out(Easing.cubic) });
       return;
     }
 
-    Animated.timing(progress, {
-      toValue: 0,
-      duration: CLOSE_MS,
-      easing: Easing.in(Easing.cubic),
-      useNativeDriver: true,
-    }).start(({ finished }) => {
-      if (finished) setMounted(false);
-    });
-  }, [visible, progress]);
+    translateY.value = withTiming(
+      hiddenY.value,
+      { duration: CLOSE_MS, easing: Easing.in(Easing.cubic) },
+      (finished) => {
+        if (finished) runOnJS(setMounted)(false);
+      }
+    );
+  }, [visible, translateY, hiddenY]);
 
-  const translateY = progress.interpolate({
-    inputRange: [0, 1],
-    outputRange: [sheetHeight || 320, 0],
+  const pan = Gesture.Pan()
+    // 시험에서 이 제스처를 집어 흔들어 보려고 붙인 이름이다(bottom-sheet.test.tsx).
+    .withTestId(DRAG_TEST_ID)
+    .onStart(() => {
+      startY.value = translateY.value;
+    })
+    .onUpdate((event) => {
+      // 위로는 안 늘어난다 — 시트는 제자리보다 더 올라가지 않는다.
+      translateY.value = Math.max(0, startY.value + event.translationY);
+    })
+    .onEnd((event) => {
+      // 「지금 어디 있나」가 아니라 「손이 얼마나 내려갔나」로 정한다(event.translationY).
+      // 잡는 순간 시트는 늘 다 올라와 있어 값은 같지만, 이쪽이 아직 안 끝난 움직임에
+      // 휘둘리지 않는다.
+      const 닫을만큼내렸다 =
+        event.translationY > hiddenY.value * CLOSE_RATIO || event.velocityY > FLING_VELOCITY;
+
+      if (닫을만큼내렸다) {
+        // 여기서 직접 내리지 않고 알리기만 한다. 알리면 쓰는 쪽이 visible을 내리고,
+        // 위 useEffect가 **손을 뗀 그 자리에서부터** 내려 준다 — 움직임이 한 번만 돈다.
+        runOnJS(onClose)();
+        return;
+      }
+
+      // 덜 내렸으면 제자리로. 중간에 걸쳐 두지 않는다.
+      translateY.value = withTiming(0, { duration: OPEN_MS, easing: Easing.out(Easing.cubic) });
+    });
+
+  const sheetStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  // 덮개는 시트를 따라 짙어지고 옅어진다. 끌어 내리는 동안에도 같이 옅어져야
+  // 「내가 닫고 있다」는 게 손에 보인다.
+  const backdropStyle = useAnimatedStyle(() => {
+    const 올라온정도 = hiddenY.value > 0 ? 1 - translateY.value / hiddenY.value : 1;
+    return { opacity: Math.min(1, Math.max(0, 올라온정도)) };
   });
+
+  const 껍데기 = (
+    /* 취소 버튼을 따로 두지 않는다. 바깥을 누르면 닫힌다. */
+    <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="닫기">
+      <Animated.View style={[styles.backdropFill, backdropStyle]} />
+      {/* 시트 안을 눌렀을 때 닫히지 않도록 바깥 Pressable의 터치를 여기서 멈춘다. */}
+      <Animated.View style={[styles.sheet, sheetStyle]}>
+        <Pressable
+          // 안전영역 여백을 「재는 상자」인 여기에 준다. 바깥 Animated.View에 주면
+          // onLayout이 재는 높이에 안 잡혀, 올라오기 전 시트가 그 높이만큼
+          // 덜 내려가 화면 아래에 미리 비죽 나와 보인다.
+          style={{
+            paddingBottom: insets.bottom,
+            // 여기서 끊어야 안쪽 스크롤이 줄어들 자리를 안다(MAX_HEIGHT_RATIO 설명 참고).
+            maxHeight: Math.round(screenHeight * MAX_HEIGHT_RATIO),
+          }}
+          onPress={() => {}}
+          // 재고 나면 정확한 높이를 쓴다. 상태로 두지 않는 이유: 여기서 다시 그릴 필요가
+          // 없다. 값이 쓰이는 곳은 움직임뿐이라 공유값에 바로 넣는다.
+          onLayout={(event) => {
+            hiddenY.value = event.nativeEvent.layout.height;
+          }}
+        >
+          {dragToClose ? (
+            <GestureDetector gesture={pan}>
+              {/* 눈에 보이는 막대보다 넓게 잡는다 — 얇은 막대만 노리면 「안 끌린다」로
+                  느껴진다(지도 시트에서 실제로 겪었다). */}
+              <View style={styles.handleArea} accessibilityLabel="끌어내려 닫기">
+                <View style={styles.handle} />
+              </View>
+            </GestureDetector>
+          ) : null}
+          {children}
+        </Pressable>
+      </Animated.View>
+    </Pressable>
+  );
 
   return (
     <Modal visible={mounted} transparent animationType="none" onRequestClose={onClose}>
-      {/* 취소 버튼을 따로 두지 않는다. 바깥을 누르면 닫힌다. */}
-      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="닫기">
-        <Animated.View style={[styles.backdropFill, { opacity: progress }]} />
-        {/* 시트 안을 눌렀을 때 닫히지 않도록 바깥 Pressable의 터치를 여기서 멈춘다. */}
-        <Animated.View style={[styles.sheet, { transform: [{ translateY }] }]}>
-          <Pressable
-            // 안전영역 여백을 「재는 상자」인 여기에 준다. 바깥 Animated.View에 주면
-            // onLayout이 재는 높이(sheetHeight)에 안 잡혀, 올라오기 전 시트가 그 높이만큼
-            // 덜 내려가 화면 아래에 미리 비죽 나와 보인다.
-            style={{ paddingBottom: insets.bottom }}
-            onPress={() => {}}
-            onLayout={(event) => setSheetHeight(event.nativeEvent.layout.height)}
-          >
-            {children}
-          </Pressable>
-        </Animated.View>
-      </Pressable>
+      {/* ⚠️ 안드로이드에서는 Modal 안이 별도의 창이라, 앱 바깥(app/_layout.tsx)에 씌운
+          GestureHandlerRootView가 여기까지 닿지 않는다. 다시 감싸지 않으면 **오류 없이
+          조용히 안 끌린다.** 공식 설치 문서가 시키는 대로다.
+          끌지 않는 다섯 시트에는 씌우지 않는다 — 안 쓰는 곳의 터치 흐름까지 건드릴
+          이유가 없다. */}
+      {dragToClose ? (
+        <GestureHandlerRootView style={styles.gestureRoot}>{껍데기}</GestureHandlerRootView>
+      ) : (
+        껍데기
+      )}
     </Modal>
   );
 }
@@ -101,6 +221,7 @@ export const sheetItemStyles = StyleSheet.create({
 });
 
 const styles = StyleSheet.create({
+  gestureRoot: { flex: 1 },
   backdrop: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -127,5 +248,17 @@ const styles = StyleSheet.create({
     // edgeToEdgeEnabled: true가 Expo Go에는 안 먹어 거기서는 insets.bottom이 늘 0이었다.
     // 개발·출시 빌드에서는 24~48이 들어오고 Modal이 바 아래까지 그려서, 안 더하면
     // 마지막 항목이 제스처 바에 가린다. 되돌리기 전에 반드시 개발 빌드로 확인할 것.
+  },
+  // 잡는 자리. 위아래로 넉넉히 벌려 손가락이 닿게 한다.
+  handleArea: {
+    alignItems: 'center',
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+  handle: {
+    width: 36,
+    height: 4,
+    borderRadius: 999,
+    backgroundColor: '#E5E7EB',
   },
 });
