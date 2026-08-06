@@ -144,37 +144,34 @@ export const ProductListView = forwardRef<ProductListViewRef, Props>(function Pr
 
   // ----- 3상태 렌더 (로딩/오류/빈은 서로 섞지 않음) -----
   //
-  // ⚠️ **이 세 경우에는 필터를 목록 밖에 따로 그린다.** 목록이 안 그려지면 헤더도 안 그려지는데,
-  //    그러면 조건을 되돌릴 길이 없어져 빈 화면에 갇힌다(2026-08-06 실기기에서 나온 것).
-  const renderState = (child: React.ReactNode) => (
-    <>
-      {필터줄}
-      {툴바}
-      {child}
-    </>
-  );
-
-  const renderBody = () => {
-    if (isLoading) return renderState(<LoadingState />);
+  // ⚠️ **목록은 늘 그린다.** 로딩·오류·빈 화면은 목록 **안쪽**(ListEmptyComponent)에 넣는다.
+  //
+  //    처음에는 이 셋일 때 목록을 통째로 안 그리고 필터를 밖에 따로 그렸다. 조건을 되돌릴
+  //    길을 남기려던 것이었는데, 그러면 **필터 줄이 두 자리를 오간다** — 조건을 바꿀 때마다
+  //    「불러오는 중」을 지나며 헤더 안 → 밖 → 헤더 안으로 옮겨 다닌다.
+  //    자리가 바뀌면 React가 조각을 새로 만들고, 소분류 줄의 접힘 상태가 초기화되어
+  //    **펼쳐지는 모습 없이 툭 나타난다**(2026-08-06 실기기에서 나온 것).
+  //
+  //    한 자리에 못 박으니 되돌릴 길도 남고 움직임도 살아난다.
+  const renderEmpty = () => {
+    if (isLoading) return <LoadingState />;
     // 첫 로드 실패(보여줄 목록이 없음) → 전체 화면 오류.
-    if (isError) return renderState(<ErrorState onRetry={() => refetch()} />);
-    if (products.length === 0) {
-      // 조건 없이 비었다면 앱에 상품이 정말 하나도 없는 것이다 — 그때는 앱이 원래 쓰던
-      // 문구(「아직 등록된 상품이 없어요 / 첫 상품이 올라오면…」)가 맞다.
-      return renderState(
-        조건이걸렸다 ? (
-          <EmptyState
-            icon="search"
-            title="검색 결과가 없습니다"
-            description="다른 필터 조건으로 검색해보세요"
-          />
-        ) : (
-          <EmptyState />
-        )
-      );
-    }
+    if (isError) return <ErrorState onRetry={() => refetch()} />;
+    // 조건 없이 비었다면 앱에 상품이 정말 하나도 없는 것이다 — 그때는 앱이 원래 쓰던
+    // 문구(「아직 등록된 상품이 없어요 / 첫 상품이 올라오면…」)가 맞다.
+    return 조건이걸렸다 ? (
+      <EmptyState
+        icon="search"
+        title="검색 결과가 없습니다"
+        description="다른 필터 조건으로 검색해보세요"
+      />
+    ) : (
+      <EmptyState />
+    );
+  };
 
-    return (
+  return (
+    <>
       <SectionList
         ref={listRef}
         // 섹션은 늘 하나다. 목록을 나누려는 게 아니라 **툴바를 붙이려고** 쓴다.
@@ -195,14 +192,17 @@ export const ProductListView = forwardRef<ProductListViewRef, Props>(function Pr
         onEndReached={() => {
           if (hasNextPage && !isFetchingNextPage) fetchNextPage();
         }}
-        ListFooterComponent={<ListFooter loading={isFetchingNextPage} />}
+        // ⚠️ 빈 화면 안내를 `ListEmptyComponent` 에 못 넣는다. 그건 **섹션이 하나도 없을 때만**
+        //    그려지는데, 우리는 「빈 섹션 하나」라서 안 걸린다(실측). 섹션을 없애면 섹션 헤더인
+        //    툴바까지 사라져 조건을 되돌릴 길이 없어진다.
+        //    그래서 목록 끝자리에 넣는다 — 항목이 없으니 자리는 똑같다.
+        ListFooterComponent={
+          <>
+            {products.length === 0 && renderEmpty()}
+            <ListFooter loading={isFetchingNextPage} />
+          </>
+        }
       />
-    );
-  };
-
-  return (
-    <>
-      {renderBody()}
       <DetailFilterSheet
         visible={sheetOpen}
         value={{

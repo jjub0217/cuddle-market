@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { createRef } from 'react';
 import type { ReactNode } from 'react';
+import { getAnimatedStyle } from 'react-native-reanimated';
 import { SafeAreaProvider, type Metrics } from 'react-native-safe-area-context';
 
 import {
@@ -95,9 +96,10 @@ it('검색어를 받으면 그대로 서버에 넘긴다 (검색 결과)', async
 });
 
 it('목록이 비어도 필터와 툴바가 보인다', async () => {
-  // ⚠️ 필터 줄은 목록의 헤더로 들어가 있다 — 목록이 안 그려지면 헤더도 안 그려진다.
-  //    그래서 빈 화면·오류일 때는 **밖에 따로** 그린다. 안 그러면 조건을 되돌릴 길이
-  //    없어져 빈 화면에 갇힌다(2026-08-06 실기기에서 나온 것).
+  // ⚠️ 필터 줄은 목록의 헤더다. 목록을 안 그리면 헤더도 안 그려져 조건을 되돌릴 길이
+  //    없어지고 빈 화면에 갇힌다(2026-08-06 실기기에서 나온 것).
+  //    그래서 **목록은 늘 그리고** 빈 화면은 그 안쪽(ListEmptyComponent)에 넣는다.
+  //    이 시험이 그걸 지킨다 — 빈 섹션에서도 헤더와 섹션 헤더가 그려지는가.
   fetchProducts.mockResolvedValue(한페이지([]));
 
   await render(<ProductListView />, { wrapper: 감싸기 });
@@ -142,7 +144,7 @@ it('알약을 고르면 그 조건으로 **처음부터** 다시 받는다', asy
   fetchProducts.mockClear();
 
   // 대분류 「포유류」를 고른다. 이름은 @cuddle/shared 의 PET_TYPE_OPTIONS 에서 온다.
-  await fireEvent.press(screen.getByText('포유류'));
+  await fireEvent.press(screen.getByTestId('pet-type-tab-MAMMAL'));
 
   await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
   expect(fetchProducts).toHaveBeenCalledWith(
@@ -174,7 +176,7 @@ it('필터 때문에 비어도 같은 문구다 (웹이 안 나눈다)', async (
   await render(<ProductListView />, { wrapper: 감싸기 });
   await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
 
-  await fireEvent.press(screen.getByText('포유류'));
+  await fireEvent.press(screen.getByTestId('pet-type-tab-MAMMAL'));
 
   await waitFor(() => expect(screen.getByText('검색 결과가 없습니다')).toBeTruthy());
   expect(screen.queryByText(/아직 등록된 상품이 없어요/)).toBeNull();
@@ -241,9 +243,9 @@ it('대분류를 바꾸면 고른 소분류가 풀린 채로 요청된다', asyn
   await render(<ProductListView />, { wrapper: 감싸기 });
   await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
 
-  await fireEvent.press(screen.getByText('포유류'));
-  await waitFor(() => expect(screen.getByText('강아지')).toBeTruthy());
-  await fireEvent.press(screen.getByText('강아지'));
+  await fireEvent.press(screen.getByTestId('pet-type-tab-MAMMAL'));
+  await waitFor(() => expect(screen.getByTestId('pet-detail-pill-DOG')).toBeTruthy());
+  await fireEvent.press(screen.getByTestId('pet-detail-pill-DOG'));
   await waitFor(() =>
     expect(fetchProducts).toHaveBeenCalledWith(
       expect.objectContaining({ petDetailType: 'DOG' })
@@ -252,7 +254,7 @@ it('대분류를 바꾸면 고른 소분류가 풀린 채로 요청된다', asyn
   fetchProducts.mockClear();
 
   // 대분류만 조류로 바꾼다
-  await fireEvent.press(screen.getByText('조류'));
+  await fireEvent.press(screen.getByTestId('pet-type-tab-BIRD'));
 
   await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
   const 마지막 = fetchProducts.mock.calls.at(-1)?.[0];
@@ -281,6 +283,37 @@ it('세부 필터 시트에서 적용하면 그 조건이 실린다', async () =
   );
 });
 
+// ----- 소분류 줄이 목록 화면 **안에서도** 움직이는가 -----
+//
+// 조각만 따로 그리는 product-filter-row.test.tsx 는 접힘·펼침을 다 통과한다.
+// 그런데 실기기에서는 **접힐 때만** 툭 사라졌다(2026-08-06). 조각은 멀쩡한데 목록 화면에
+// 얹으면 달라진다는 뜻이라, 여기서 따로 지킨다.
+
+/** 소분류 줄의 지금 높이. 0이면 접혀 있다. Reanimated가 주는 값이라 애니메이션 도중 값이다. */
+function 소분류줄높이() {
+  const style = getAnimatedStyle(screen.getByTestId('pet-detail-collapse')) as { height: number };
+  return style.height;
+}
+
+it('목록 화면 안에서도 소분류 줄이 접히는 모습이 보인다', async () => {
+  fetchProducts.mockResolvedValue(한페이지([상품(1)]));
+
+  await render(<ProductListView />, { wrapper: 감싸기 });
+  await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
+
+  // 펼친다
+  await fireEvent.press(screen.getByTestId('pet-type-tab-MAMMAL'));
+  await waitFor(() => expect(소분류줄높이()).toBeGreaterThan(0));
+
+  // 「전체」로 돌아가 접는다
+  await fireEvent.press(screen.getByTestId('pet-type-tab-ALL'));
+
+  // ⚠️ 누른 **직후**에는 아직 줄어드는 중이어야 한다.
+  //    여기서 0이면 애니메이션이 아예 안 돈 것이다 — 조각이 새로 태어나 접힌 자리에서
+  //    시작했다는 뜻이고, 화면에서는 「갑자기 사라짐」으로 보인다.
+  expect(소분류줄높이()).toBeGreaterThan(0);
+});
+
 it('reset() 하면 필터가 풀리고 조건 없이 다시 받는다', async () => {
   // 홈에서 **로고를 누르거나 홈 탭을 다시 누를 때** 부르는 길이다.
   // 이게 끊기면 필터로 결과가 0개일 때 「어떻게 벗어나지」가 된다
@@ -291,7 +324,7 @@ it('reset() 하면 필터가 풀리고 조건 없이 다시 받는다', async ()
   await render(<ProductListView ref={ref} />, { wrapper: 감싸기 });
   await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
 
-  await fireEvent.press(screen.getByText('포유류'));
+  await fireEvent.press(screen.getByTestId('pet-type-tab-MAMMAL'));
   await waitFor(() =>
     expect(fetchProducts).toHaveBeenCalledWith(expect.objectContaining({ petType: 'MAMMAL' }))
   );
