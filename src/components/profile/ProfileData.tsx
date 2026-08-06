@@ -143,9 +143,25 @@ export default function ProfileData({
       const uploaded = await uploadImage([compressed])
       const nextUrl = uploaded.mainImageUrl
 
+      // ⚠️ **사진만 보내면 안 된다.** 두 가지가 걸린다.
+      //    ① 닉네임이 필수다(ProfileUpdateRequest.java 의 @NotBlank) — 빼면 400 이 난다.
+      //       실제로 ?panel=profile 에서 사진 변경이 계속 실패했다(/profile-update 는
+      //       폼 전체를 보내서 통과했다).
+      //    ② 서버는 **전체 교체**다(User.java:225-240 — 받은 값을 조건 없이 그대로 넣는다).
+      //       안 보낸 지역·소개글이 null 로 덮여 **지워진다.**
+      //    그래서 지금 값을 다 실어 보내고 사진만 갈아 끼운다.
       const { updateProfile: response } = await fetchGraphQL<{ updateProfile: { success: boolean; code: string } }>(
         `mutation UpdateProfile($input: ProfileUpdateInput!) { updateProfile(input: $input) { success code } }`,
-        { input: { profileImageUrl: nextUrl } }
+        {
+          input: {
+            nickname: data.nickname,
+            birthDate: data.birthDate,
+            addressSido: data.addressSido,
+            addressGugun: data.addressGugun,
+            introduction: data.introduction,
+            profileImageUrl: nextUrl,
+          },
+        }
       )
 
       if (response.code === 'SUCCESS') {

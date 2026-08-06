@@ -211,7 +211,9 @@ const styles = StyleSheet.create({
   },
   profileCard: {
     flexDirection: 'row',
-    alignItems: 'center',
+    // ⚠️ **위쪽 정렬이다.** 가운데로 두면 소개글이 들어가 카드가 길어질 때 화살표가
+    //    한가운데로 내려앉는다. 웹도 위쪽이다(`MyPage.tsx` 의 `items-start`).
+    alignItems: 'flex-start',
     // 글자 묶음이 남는 자리를 다 먹어야 화살표가 오른쪽 끝에 붙는다
     gap: 12,
     backgroundColor: '#FFFFFF',

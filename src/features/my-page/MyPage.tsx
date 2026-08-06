@@ -458,26 +458,29 @@ function MyPage() {
                 <div className="flex flex-1 flex-col gap-0.5">
                   <p className="text-base font-bold text-[#1c1b1b]">{myData?.nickname}</p>
                   <p className="text-sm text-gray-500">{`${myData?.addressSido ?? ''} ${myData?.addressGugun ?? ''}`.trim()}</p>
+                  {/*
+                    ⚠️ **주소 바로 밑에 둔다.** 닉네임·주소와 한 묶음이라 눈이 위에서 아래로
+                       한 번에 읽힌다. 사진 아래로 떨어뜨리면 사진과 글이 따로 노는 카드가 된다.
+                       프로필 전체 화면(?panel=profile)도 이 차례다.
+
+                    ⚠️ **없어도 자리를 보여준다.** 예전에는 `introduction &&` 이라 비어 있으면
+                       통째로 사라졌다 — 데스크탑에서는 보이는 소개글이 모바일 /mypage 에서만
+                       안 보였다. **내 프로필에서는 그 빈 자리가 곧 쓰러 가는 길**이다.
+
+                    공백만 있는 소개글도 「없다」로 본다 — 저장할 때 앞뒤 공백을 안 떼고
+                    최소 2자만 봐서(authValidationRules.introduction) 공백 두 칸도 저장된다.
+                  */}
+                  <p
+                    className={cn(
+                      'line-clamp-1 text-sm',
+                      myData?.introduction?.trim() ? 'text-gray-500' : 'text-gray-400'
+                    )}
+                  >
+                    {myData?.introduction?.trim() || '소개글을 작성해주세요'}
+                  </p>
                 </div>
                 <ChevronRight size={22} strokeWidth={1.5} className="text-on-surface-muted" />
               </div>
-              {/*
-                ⚠️ **소개글이 없어도 자리를 보여준다.** 예전에는 `introduction &&` 이라
-                   비어 있으면 아무것도 안 나왔다 — 데스크탑(ProfileData)은 내 프로필이면
-                   「소개글을 작성해주세요」를 띄우는데 여기만 빠져 있었다.
-                   **내 프로필에서는 그 빈 자리가 곧 쓰러 가는 길**이다(눌러서 프로필로 간다).
-
-                공백만 있는 소개글도 「없다」로 본다 — 저장할 때 앞뒤 공백을 안 떼고 최소
-                2자만 봐서(authValidationRules.introduction) 공백 두 칸도 저장된다.
-              */}
-              <p
-                className={cn(
-                  'line-clamp-1 text-sm',
-                  myData?.introduction?.trim() ? 'text-gray-500' : 'text-gray-400'
-                )}
-              >
-                {myData?.introduction?.trim() || '소개글을 작성해주세요'}
-              </p>
             </button>
 
             {/* 모바일 전용 섹션 */}
