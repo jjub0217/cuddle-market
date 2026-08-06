@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react-native';
 import React from 'react';
+import { StyleSheet } from 'react-native';
 import { getAnimatedStyle } from 'react-native-reanimated';
 
 import { CATEGORY_OPTIONS, PET_DETAIL_OPTIONS_BY_TYPE, PET_TYPE_OPTIONS } from '@cuddle/shared';
@@ -21,7 +22,7 @@ const FIRST_DETAIL = PET_DETAIL_OPTIONS_BY_TYPE[FIRST_PET.code][0]; // 강아지
 /** 펼쳐진 소분류 줄의 높이. 조각의 DETAIL_ROW_HEIGHT와 같은 값이다. */
 const DETAIL_ROW_HEIGHT = 46;
 
-/** 접힘·펼침에 걸리는 시간(조각의 COLLAPSE_MS = 260)보다 넉넉히 큰 값. */
+/** 접힘·펼침에 걸리는 시간(조각의 COLLAPSE_MS = 400)보다 넉넉히 큰 값. */
 const 애니메이션_넉넉히 = 800;
 
 function renderRow(overrides: Partial<Parameters<typeof ProductFilterRow>[0]> = {}) {
@@ -394,21 +395,25 @@ it('카테고리 여덟 개가 다 이름과 함께 나온다', async () => {
   }
 });
 
-it('카테고리가 4열 2줄이고 왼쪽부터 위·아래 짝으로 채워진다', async () => {
+it('카테고리는 옆으로 밀지 않고 기기 폭에 맞춰 줄바꿈한다', async () => {
+  // 줄을 몇 개로 나눌지는 못 박지 않는다 — 좁은 폰은 3~4개씩, 넓은 폰은 5개씩 놓인다.
+  // 시험이 지킬 수 있는 것은 「가로로 밀지 않고 넘어가게 돼 있는가」와 「여덟 개가 다 있는가」다.
   const { props } = renderRow();
   await render(<ProductFilterRow {...props} />);
 
-  const 윗줄 = screen.getByTestId('category-grid-row-0');
-  const 아랫줄 = screen.getByTestId('category-grid-row-1');
+  const 격자 = screen.getByTestId('category-grid');
+  const 모양 = StyleSheet.flatten(격자.props.style) as {
+    flexWrap?: string;
+    flexDirection?: string;
+  };
 
-  // 여덟 개가 넷씩 두 줄로 갈린다
-  expect(within(윗줄).getAllByRole('button')).toHaveLength(4);
-  expect(within(아랫줄).getAllByRole('button')).toHaveLength(4);
+  expect(모양.flexDirection).toBe('row');
+  expect(모양.flexWrap).toBe('wrap');
 
-  // 1·2가 첫 열, 3·4가 둘째 열 — 윗줄은 짝수 자리, 아랫줄은 홀수 자리다
-  for (const [index, option] of CATEGORY_OPTIONS.entries()) {
-    const 있어야할줄 = index % 2 === 0 ? 윗줄 : 아랫줄;
-    expect(within(있어야할줄).getByText(option.label)).toBeTruthy();
+  // 여덟 개가 순서대로 다 있다
+  expect(within(격자).getAllByRole('button')).toHaveLength(CATEGORY_OPTIONS.length);
+  for (const option of CATEGORY_OPTIONS) {
+    expect(within(격자).getByText(option.label)).toBeTruthy();
   }
 });
 

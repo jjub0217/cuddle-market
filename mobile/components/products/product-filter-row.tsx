@@ -28,7 +28,7 @@ import {
 // 줄마다 모양이 다르다 — 하는 일이 달라서다.
 //   대분류   글자 탭 + 고른 것 아래 바 (올리브영 홈 상단 탭)  ← 늘 하나가 골라져 있다
 //   소분류   알약 (components/places/category-tabs.tsx와 같다)  ← 대분류를 골라야 나온다
-//   카테고리 동그란 그림 + 이름 2줄 격자 (웹 CategoryFilter.tsx)  ← 아무것도 안 고를 수 있다
+//   카테고리 동그란 그림 + 이름, 기기 폭에 맞춰 줄바꿈 (웹 CategoryFilter.tsx)  ← 아무것도 안 고를 수 있다
 //
 // 「전체」는 대분류·소분류 줄 맨 앞에 두고 값은 null이다(빈 문자열이나 'ALL'이 아니다) —
 // 서버에 빈 값으로 쿼리가 안 실려야 하기 때문이다(mobile/lib/products.ts 쪽 계약, 계획서 Task 1 참고).
@@ -403,13 +403,6 @@ interface CategoryIconGridProps {
   onChange: (next: string | null) => void;
 }
 
-// 여덟 개를 **4열 × 2줄**로 놓는다. 채우는 방향은 **왼쪽부터 위·아래 짝**이다 —
-// 1·2가 첫 열, 3·4가 둘째 열… 그래서 윗줄은 짝수 자리(0·2·4·6), 아랫줄은 홀수 자리(1·3·5·7)다.
-// (위에 1~4, 아래 5~8로 놓는 방법도 있으나, 옆으로 밀 때 짝이 함께 들어와야
-//  「한 칸씩 넘어간다」로 읽힌다.)
-const CATEGORY_TOP_ROW = CATEGORY_OPTIONS.filter((_, index) => index % 2 === 0);
-const CATEGORY_BOTTOM_ROW = CATEGORY_OPTIONS.filter((_, index) => index % 2 === 1);
-
 /**
  * 카테고리는 알약이 아니라 「동그란 그림 + 이름」이다 (웹 CategoryFilter.tsx와 같은 모양).
  *
@@ -430,21 +423,13 @@ function CategoryIconGrid({ selected, onChange }: CategoryIconGridProps) {
     />
   );
 
+  // ⚠️ 옆으로 미는 게 아니라 **줄바꿈**이다. 한 줄에 몇 개가 들어갈지는 기기 폭이 정한다
+  //    (타일 64 + 사이 12로 채우다가 자리가 없으면 다음 줄로 넘어간다).
+  //    좁은 폰에서는 3~4개씩, 넓은 폰에서는 5개씩 놓인다 — 줄 수를 못 박지 않는다.
   return (
-    <ScrollView
-      horizontal
-      testID="category-grid"
-      showsHorizontalScrollIndicator={false}
-      style={styles.gridScroll}
-      contentContainerStyle={styles.grid}
-    >
-      <View testID="category-grid-row-0" style={styles.gridRow}>
-        {CATEGORY_TOP_ROW.map(tile)}
-      </View>
-      <View testID="category-grid-row-1" style={styles.gridRow}>
-        {CATEGORY_BOTTOM_ROW.map(tile)}
-      </View>
-    </ScrollView>
+    <View testID="category-grid" style={styles.grid}>
+      {CATEGORY_OPTIONS.map(tile)}
+    </View>
   );
 }
 
@@ -577,20 +562,15 @@ const styles = StyleSheet.create({
   },
 
   // ── 카테고리 그림 격자 ──────────────────────────────────────────
-  gridScroll: {
-    backgroundColor: '#FFFFFF',
-  },
   grid: {
-    // 두 줄을 위아래로 쌓고, 이 덩어리째 옆으로 민다.
-    flexDirection: 'column',
+    backgroundColor: '#FFFFFF',
+    // ⚠️ 줄 수를 못 박지 않는다. 기기 폭에 맞춰 넘어간다 —
+    //    좁은 폰은 3~4개씩, 넓은 폰은 5개씩 한 줄에 놓인다.
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 12,
     paddingHorizontal: 16,
     paddingVertical: 8,
-    paddingRight: 32,
-  },
-  gridRow: {
-    flexDirection: 'row',
-    gap: 12,
   },
   tile: {
     width: 64,
