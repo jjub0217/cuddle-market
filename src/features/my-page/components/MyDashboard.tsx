@@ -11,6 +11,14 @@ interface MyDashboardProps {
   myProducts?: Product[]
   myRequests?: Product[]
   myFavorites?: Product[]
+  /**
+   * 「전체보기」를 눌렀을 때. **모바일에서만 준다.**
+   *
+   * ⚠️ 안 주면 `?nav=` 링크로 간다 — 데스크탑은 그걸로 화면이 바뀌지만 **모바일에서는
+   *    아무 일도 안 일어난다.** 모바일은 `effectiveNav` 를 늘 `nav-dash` 로 덮기 때문이다
+   *    (`MyPage.tsx:65`). 모바일이 쓰는 길은 `?panel=` 이다(#819).
+   */
+  onSeeAll?: (tab: DashboardTab) => void
 }
 
 type DashboardTab = 'sales' | 'purchases' | 'wishlist'
@@ -35,7 +43,7 @@ const DASHBOARD_TABS_LIST: { id: DashboardTab; label: string; code: DashboardTab
   code: id,
 }))
 
-export default function MyDashboard({ myProducts, myRequests, myFavorites }: MyDashboardProps) {
+export default function MyDashboard({ myProducts, myRequests, myFavorites, onSeeAll }: MyDashboardProps) {
   const [activeTab, setActiveTab] = useState<DashboardTab>('sales')
 
   const dataMap: Record<DashboardTab, Product[] | undefined> = {
@@ -58,13 +66,26 @@ export default function MyDashboard({ myProducts, myRequests, myFavorites }: MyD
           ariaLabel="대시보드 거래 탭"
           className="mb-6"
           rightSlot={
-            <Link
-              href={`?nav=${currentConfig.nav}&tab=${currentConfig.tab}`}
-              className="text-primary flex items-center gap-1 text-sm font-semibold hover:underline"
-            >
-              전체보기
-              <ChevronRight size={16} />
-            </Link>
+            onSeeAll ? (
+              // 모바일: 주소의 ?panel= 로 전체 화면 패널을 연다
+              <button
+                type="button"
+                onClick={() => onSeeAll(activeTab)}
+                className="text-primary flex cursor-pointer items-center gap-1 text-sm font-semibold hover:underline"
+              >
+                전체보기
+                <ChevronRight size={16} />
+              </button>
+            ) : (
+              // 데스크탑: 옆 nav 를 바꾼다
+              <Link
+                href={`?nav=${currentConfig.nav}&tab=${currentConfig.tab}`}
+                className="text-primary flex items-center gap-1 text-sm font-semibold hover:underline"
+              >
+                전체보기
+                <ChevronRight size={16} />
+              </Link>
+            )
           }
         />
         <div role="tabpanel" id={`panel-${activeTab}`} aria-labelledby={activeTab}>

@@ -86,6 +86,22 @@ function MyPage() {
   }
 
   const openMobilePanel = (tab: MyPageTabId | 'activity') => openPanel(tab)
+
+  /**
+   * 대시보드의 「전체보기」에서 여는 길.
+   *
+   * ⚠️ 대시보드가 쓰는 이름(`sales`)과 패널 이름(`tab-sales`)이 **다르다.** 여기서 잇는다.
+   *    예전에는 `?nav=` 링크였는데, 모바일은 `effectiveNav` 를 늘 `nav-dash` 로 덮어서
+   *    **주소만 바뀌고 아무 일도 안 일어났다**(위 65줄).
+   */
+  const openDashboardPanel = (tab: 'sales' | 'purchases' | 'wishlist') => {
+    const 패널: Record<typeof tab, MyPageTabId> = {
+      sales: 'tab-sales',
+      purchases: 'tab-purchases',
+      wishlist: 'tab-wishlist',
+    }
+    openPanel(패널[tab])
+  }
   const openProfileFullView = () => openPanel('profile')
 
   const closeMobileOverlay = () => {
@@ -681,6 +697,7 @@ function MyPage() {
             myProducts={myProductsData?.pages.flatMap((page) => page.content)}
             myRequests={myRequestData?.pages.flatMap((page) => page.content)}
             myFavorites={myFavoriteData?.pages.flatMap((page) => page.content)}
+            onSeeAll={openDashboardPanel}
           />
         </div>
       </div>
