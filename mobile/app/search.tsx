@@ -1,6 +1,6 @@
 import { X } from 'lucide-react-native';
 import { useRef, useState } from 'react';
-import { useRouter, type Href } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -12,9 +12,9 @@ import { normalizeKeyword } from '@/lib/search';
 // 헤더는 뒤로가기만 있다 — 「지금 어디에 있는가」를 알릴 이름이 따로 없다(입력칸 자체가
 // 무엇을 하는 화면인지 말해 준다). 새 헤더를 만들지 않고 공용 조각을 그대로 쓴다(#841).
 //
-// ⚠️ 결과 화면(app/search-result.tsx)은 이 브랜치의 다른 조각(Task 6)이 만드는 중이라
-// 아직 저장소에 없다. typedRoutes가 그 경로를 모르는 동안은 `as Href`로 눌러 둔다 —
-// 그 화면이 생기면 지워도 되지만, 안 지워도 동작에는 지장이 없다.
+// ⚠️ 결과로 갈 때 push 가 아니라 **replace** 다. 결과에서 뒤로 가면 검색 화면이 아니라
+//    **홈**으로 가야 한다 — 검색을 끝낸 사람이 뒤로 가서 빈 입력칸을 다시 보는 건 이상하다.
+//    검색어를 고치고 싶으면 결과 화면 헤더의 검색어를 누른다.
 
 export default function SearchScreen() {
   const router = useRouter();
@@ -36,10 +36,7 @@ export default function SearchScreen() {
     // 빈 검색어(공백만도 포함)는 넘기지 않는다 — 결과가 사실상 홈과 같아진다.
     if (!normalized) return;
     // replace — 결과 화면에서 뒤로 가면 이 검색 화면이 아니라 홈으로 가야 한다.
-    router.replace({
-      pathname: '/search-result',
-      params: { keyword: normalized },
-    } as unknown as Href);
+    router.replace({ pathname: '/search-result', params: { keyword: normalized } });
   };
 
   return (

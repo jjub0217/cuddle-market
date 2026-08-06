@@ -42,9 +42,16 @@ const ICON_COLOR = '#111827';
 interface Props {
   /** 문자열이면 제목으로, 아니면 그대로 그린다(홈은 로고 이미지) */
   left: ReactNode | string;
+  /**
+   * 오른쪽 아이콘 줄의 **맨 앞**에 끼워 넣을 것. 알림 벨·메뉴 앞에 온다.
+   *
+   * 홈의 검색 돋보기가 여기 들어온다. 세 탭이 이 헤더를 함께 쓰는데 검색은 상품에만
+   * 있는 것이라, 헤더에 박아 두면 커뮤니티·마이에도 생긴다.
+   */
+  right?: ReactNode;
 }
 
-export function AppHeader({ left }: Props) {
+export function AppHeader({ left, right }: Props) {
   const router = useRouter();
   const status = useAuthStore((state) => state.status);
   const isAuthed = status === 'authed';
@@ -66,6 +73,8 @@ export function AppHeader({ left }: Props) {
       </View>
 
       <View style={styles.right}>
+        {right}
+
         {/* 비로그인이면 벨을 아예 안 보여준다. 눌러서 로그인으로 보내는 것보다 정직하다. */}
         {isAuthed ? (
           <Pressable

@@ -1,24 +1,18 @@
-import type { Product } from '@cuddle/shared';
-import { useInfiniteQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
-import { Plus } from 'lucide-react-native';
-import { FlatList, Pressable, StyleSheet, Text } from 'react-native';
+import { Plus, Search } from 'lucide-react-native';
+import { Pressable, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ProductCard } from '@/components/product-card';
-import {
-  EmptyState,
-  ErrorState,
-  ListFooter,
-  LoadingState,
-} from '@/components/list-states';
+import { ProductListView } from '@/components/products/product-list-view';
 import { AppHeader, HeaderLogo } from '@/components/ui/app-header';
-import { useFavorite } from '@/hooks/use-favorite';
 import { useAuthStore } from '@/lib/auth/store';
-import { fetchProducts } from '@/lib/products';
 
-// 홈: 로그인 없이 /products/search 실데이터를 무한스크롤로 렌더.
-// 데이터층은 웹 홈과 동일하게 TanStack Query useInfiniteQuery.
+// 홈: 로그인 없이 상품 목록을 본다.
+//
+// **목록은 이 파일에 없다.** components/products/product-list-view.tsx 가 갖고 있고,
+// 검색 결과 화면이 같은 조각을 쓴다 — 둘은 조건 하나(검색어)가 다를 뿐 같은 것이다(설계 §2).
+//
+// 이 화면에 남는 것은 껍데기뿐이다: 안전영역 · 헤더 · 떠 있는 「상품 등록」 단추.
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -27,61 +21,35 @@ export default function HomeScreen() {
   // 나타나야 한다. comment-thread.tsx도 같은 방식으로 본다.
   const isLoggedIn = useAuthStore((state) => state.status) === 'authed';
 
-  const {
-    data,
-    isLoading,
-    isError,
-    refetch,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteQuery({
-    queryKey: ['products'],
-    queryFn: ({ pageParam }) => fetchProducts({ page: pageParam }),
-    initialPageParam: 0,
-    // 다음 페이지 번호 = 지금까지 받은 페이지 수(0-base). hasNext=false면 종료.
-    getNextPageParam: (last, all) => (last.hasNext ? all.length : undefined),
-  });
-
-  // 여러 페이지의 content를 하나의 Product[]로 이어붙임.
-  const products: Product[] = data?.pages.flatMap((page) => page.content) ?? [];
-
-  // ----- 3상태 렌더 (로딩/오류/빈은 서로 섞지 않음) -----
-  const renderBody = () => {
-    if (isLoading) return <LoadingState />;
-    // 첫 로드 실패(보여줄 목록이 없음) → 전체 화면 오류.
-    if (isError) return <ErrorState onRetry={() => refetch()} />;
-    if (products.length === 0) return <EmptyState />;
-
-    return (
-      <FlatList
-        data={products}
-        keyExtractor={(item) => String(item.id)}
-        renderItem={({ item }) => <HomeRow product={item} />}
-        // 떠 있는 단추가 마지막 카드를 가리지 않게 그만큼 비워 둔다.
-        // ⚠️ 단추가 있을 때만이다 — 게스트에겐 단추가 없어서, 늘 비워 두면
-        //    목록 끝이 허전하게 뚫린다(2026-08-04 실기기에서 두 화면을 비교해 잡았다).
-        // ⚠️ insets.bottom은 더하지 않는다. 이 화면의 아래 끝이 이미 탭바 위다(FAB_CLEARANCE 주석 참고).
-        contentContainerStyle={[
-          styles.listContent,
-          { paddingBottom: isLoggedIn ? FAB_CLEARANCE + FAB_HEIGHT + 12 : 12 },
-        ]}
-        showsVerticalScrollIndicator={false}
-        onEndReachedThreshold={0.4}
-        onEndReached={() => {
-          if (hasNextPage && !isFetchingNextPage) fetchNextPage();
-        }}
-        ListFooterComponent={<ListFooter loading={isFetchingNextPage} />}
-      />
-    );
-  };
-
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* 손으로 만들었던 「커들마켓」 헤더를 공용 조각으로 바꿨다(#806).
-          같은 자리에 로고와 알림 벨이 함께 들어간다. */}
-      <AppHeader left={<HeaderLogo />} />
-      {renderBody()}
+          같은 자리에 로고와 알림 벨이 함께 들어간다.
+
+          돋보기는 오른쪽 줄 맨 앞에 온다. 모바일 웹도 좁은 화면에서는 돋보기만 두고
+          누르면 덮개를 띄운다(Header.tsx:214). 검색창을 늘 띄우지 않는 이유는
+          알약 두 줄만으로도 세로가 빠듯하기 때문이다(설계 §3). */}
+      <AppHeader
+        left={<HeaderLogo />}
+        right={
+          <Pressable
+            onPress={() => router.push('/search')}
+            hitSlop={12}
+            accessibilityRole="button"
+            accessibilityLabel="검색"
+            style={({ pressed }) => (pressed ? styles.iconPressed : undefined)}
+          >
+            <Search size={24} color="#111827" />
+          </Pressable>
+        }
+      />
+
+      {/* 떠 있는 단추가 마지막 카드를 가리지 않게 그만큼 비워 둔다.
+          ⚠️ 단추가 있을 때만이다 — 게스트에겐 단추가 없어서, 늘 비워 두면
+             목록 끝이 허전하게 뚫린다(2026-08-04 실기기에서 두 화면을 비교해 잡았다). */}
+      <ProductListView
+        bottomInset={isLoggedIn ? FAB_CLEARANCE + FAB_HEIGHT + 12 : 12}
+      />
 
       {/* 웹 Home.tsx와 같은 자리(오른쪽 아래)·같은 색(#825500). 로그인했을 때만 보인다 —
           누르고 나서 로그인하라는 말을 듣는 것보다 아예 안 보이는 편이 낫다. */}
@@ -131,44 +99,13 @@ const FAB_CLEARANCE = 16;
  */
 const FAB_HEIGHT = 44;
 
-/**
- * 목록의 한 줄. 카드마다 훅이 필요해 별도 컴포넌트로 뺀다
- * (renderItem 안에서는 훅을 부를 수 없다).
- */
-function HomeRow({ product }: { product: Product }) {
-  const router = useRouter();
-  const { toggle, isPending } = useFavorite(product.id, product.isFavorite === true);
-
-  return (
-    <Pressable
-      onPress={() => router.push(`/(tabs)/(home)/products/${product.id}`)}
-      // 누르는 동안 살짝 흐려져서 눌린 걸 알 수 있게 한다
-      style={({ pressed }) => (pressed ? styles.cardPressed : undefined)}
-    >
-      <ProductCard
-        product={product}
-        favorite={{
-          isFavorite: product.isFavorite === true,
-          onToggle: toggle,
-          disabled: isPending,
-        }}
-      />
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
   },
-  listContent: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    gap: 8,
-  },
-  cardPressed: {
-    opacity: 0.7,
+  iconPressed: {
+    opacity: 0.5,
   },
   // bottom은 안전영역 + FAB_CLEARANCE로 그리는 자리에서 정한다.
   fab: {

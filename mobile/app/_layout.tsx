@@ -70,6 +70,10 @@ export default function RootLayout() {
           <Stack.Screen name="comment-thread" />
           {/* 헤더는 화면이 직접 그린다(login과 같은 이유).
               탭 안이 아니라 루트에 두는 이유: 끝내고 나가는 화면이라 탭바가 보이면 안 된다. */}
+          {/* 검색은 홈 위로 덮는다. 결과에서 뒤로 가면 검색 화면이 아니라 홈으로
+              가야 해서, 검색 화면이 결과로 갈 때 replace 를 쓴다(app/search.tsx). */}
+          <Stack.Screen name="search" />
+          <Stack.Screen name="search-result" />
           <Stack.Screen name="products/new" />
           <Stack.Screen name="products/[id]/edit" />
         </Stack>
