@@ -165,7 +165,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 8,
     paddingHorizontal: 16,
-    paddingVertical: 6,
+    // 알약 줄이 자기 위아래 여백(tabs.paddingVertical)을 갖고 있어 여기서는 적게 준다.
+    // 둘을 더한 값이 줄 높이다 — 여기만 키우면 알약은 여전히 잘린다.
+    paddingVertical: 3,
     backgroundColor: '#FFFFFF',
     // 아래 목록과 붙어 보이지 않게 선을 하나 긋는다. 웹도 이 줄 아래에 border-b가 있다.
     borderBottomWidth: StyleSheet.hairlineWidth,
@@ -176,6 +178,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     paddingRight: 8,
+    // ⚠️ **이 여백이 없으면 알약 아래쪽이 깎인다.** 가로로 미는 상자는 넘치는 것을 잘라내는데,
+    //    알약 높이(30)와 상자 높이가 똑같아 테두리·둥근 모서리가 경계에 닿는다
+    //    (2026-08-06 실기기). 위쪽 소분류 알약 줄은 같은 자리에 8이 있어서 안 잘렸다.
+    paddingVertical: 4,
   },
   // 알약 색은 위쪽 필터 줄(product-filter-row.tsx)과 **같은 값**이다.
   // 두 줄이 붙어 있는데 색이 다르면 다른 앱처럼 보인다.
