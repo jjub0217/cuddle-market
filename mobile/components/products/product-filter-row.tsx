@@ -51,18 +51,12 @@ const NO_OPTIONS: readonly Option[] = [];
 /**
  * 소분류 줄이 펼쳐졌을 때의 높이.
  *
- * 알약 한 줄이라 높이가 늘 같다 — `styles.chip`의 34 + `styles.row`의 위아래 여백 8+8 = 50.
+ * 알약 한 줄이라 높이가 늘 같다 — `styles.chip`의 30 + `styles.row`의 위아래 여백 8+8 = 46.
  * (재서 쓰지 않고 못 박은 이유: 재려면 한 번 그려 본 뒤라야 해서 처음 펼칠 때 한 박자 늦는다.
- *  두 값 중 하나를 고치면 여기도 같이 고쳐야 한다.)
+ *  두 값 중 하나를 고치면 여기도 같이 고쳐야 한다. 시험에도 같은 숫자가 있다.)
  */
-const DETAIL_ROW_HEIGHT = 50;
+const DETAIL_ROW_HEIGHT = 46;
 
-/**
- * 접히고 펼쳐지는 시간.
- *
- * 처음엔 200이었는데 실기기에서 짧아 「그냥 나타났다 없어진다」로 보였다(2026-08-06) —
- * place-sheet(240)보다 살짝 길게 잡아 접히는 게 눈에 남게 했다.
- */
 /**
  * 접히고 펼쳐지는 시간.
  *
@@ -526,7 +520,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#825500',
   },
   tabLabel: {
-    fontSize: 14,
+    fontSize: 15,
   },
   tabLabelActive: {
     color: '#825500',
@@ -551,10 +545,12 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingRight: 32,
   },
+  // 대분류 탭보다 한 단계 작다 — 아래 단계이니 눈에도 그렇게 읽혀야 한다.
+  // ⚠️ height를 고치면 위 DETAIL_ROW_HEIGHT도 같이 고친다(접히는 줄의 높이다).
   chip: {
-    height: 34,
+    height: 30,
     justifyContent: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     borderRadius: 999,
     borderWidth: StyleSheet.hairlineWidth,
   },
@@ -567,7 +563,7 @@ const styles = StyleSheet.create({
     borderColor: '#D4C4B2',
   },
   label: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '400',
   },
   labelActive: {

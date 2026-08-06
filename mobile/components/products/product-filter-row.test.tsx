@@ -19,7 +19,7 @@ const SECOND_PET = PET_TYPE_OPTIONS[1]; // 조류
 const FIRST_DETAIL = PET_DETAIL_OPTIONS_BY_TYPE[FIRST_PET.code][0]; // 강아지
 
 /** 펼쳐진 소분류 줄의 높이. 조각의 DETAIL_ROW_HEIGHT와 같은 값이다. */
-const DETAIL_ROW_HEIGHT = 50;
+const DETAIL_ROW_HEIGHT = 46;
 
 /** 접힘·펼침에 걸리는 시간(조각의 COLLAPSE_MS = 260)보다 넉넉히 큰 값. */
 const 애니메이션_넉넉히 = 800;
