@@ -332,24 +332,29 @@ export default function ProfileData({
           </div>
           {/* 소개글.
               비어 있을 때 「소개글을 작성해주세요」는 내 프로필에서만 뜬다 —
-              남의 프로필에서 보면 누구더러 쓰라는 건지 알 수 없다.
-              그래서 남의 프로필이면 줄을 아예 안 그린다.
+              **문구가 갈린다.**
+                내 프로필   「소개글을 작성해주세요」  그 자리가 곧 쓰러 가는 길이다
+                남의 프로필 「소개글이 없습니다」      사실을 적는다
+
+              ⚠️ 남에게 「작성해주세요」라고 하면 안 된다 — 누구더러 쓰라는 건지 알 수 없다.
+                 예전에는 그래서 남의 프로필이면 **아예 안 그렸는데**, 빈 자리가 허전해
+                 문구를 갈라 두 문제를 다 푼다(앱도 같다 —
+                 mobile/components/user-profile/profile-head.tsx).
 
               공백만 있는 소개글도 「없다」로 본다. 저장할 때 앞뒤 공백을 안 떼고
               최소 2자만 보기 때문에(authValidationRules.introduction) 공백 두 칸도
               저장된다. 그걸 그대로 그리면 남의 프로필에 빈 줄이 생긴다. */}
           <div className="flex w-full flex-col gap-1">
-            {introduction || isMyProfile ? (
-              <p
-                ref={introRef}
-                className={cn(
-                  'w-full text-sm font-normal break-words whitespace-pre-wrap text-gray-500',
-                  !isIntroExpanded && 'line-clamp-3'
-                )}
-              >
-                {introduction || '소개글을 작성해주세요'}
-              </p>
-            ) : null}
+            <p
+              ref={introRef}
+              className={cn(
+                'w-full text-sm font-normal break-words whitespace-pre-wrap',
+                introduction ? 'text-gray-500' : 'text-gray-400',
+                !isIntroExpanded && 'line-clamp-3'
+              )}
+            >
+              {introduction || (isMyProfile ? '소개글을 작성해주세요' : '소개글이 없습니다')}
+            </p>
             {introduction && (isIntroExpanded || isIntroClamped) ? (
               <button
                 type="button"

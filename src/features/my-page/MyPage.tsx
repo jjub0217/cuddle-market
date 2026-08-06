@@ -461,7 +461,23 @@ function MyPage() {
                 </div>
                 <ChevronRight size={22} strokeWidth={1.5} className="text-on-surface-muted" />
               </div>
-              {myData?.introduction ? <p className="line-clamp-1 text-sm text-gray-500">{myData.introduction}</p> : null}
+              {/*
+                ⚠️ **소개글이 없어도 자리를 보여준다.** 예전에는 `introduction &&` 이라
+                   비어 있으면 아무것도 안 나왔다 — 데스크탑(ProfileData)은 내 프로필이면
+                   「소개글을 작성해주세요」를 띄우는데 여기만 빠져 있었다.
+                   **내 프로필에서는 그 빈 자리가 곧 쓰러 가는 길**이다(눌러서 프로필로 간다).
+
+                공백만 있는 소개글도 「없다」로 본다 — 저장할 때 앞뒤 공백을 안 떼고 최소
+                2자만 봐서(authValidationRules.introduction) 공백 두 칸도 저장된다.
+              */}
+              <p
+                className={cn(
+                  'line-clamp-1 text-sm',
+                  myData?.introduction?.trim() ? 'text-gray-500' : 'text-gray-400'
+                )}
+              >
+                {myData?.introduction?.trim() || '소개글을 작성해주세요'}
+              </p>
             </button>
 
             {/* 모바일 전용 섹션 */}

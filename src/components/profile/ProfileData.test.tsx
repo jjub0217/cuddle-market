@@ -24,12 +24,16 @@ const BASE: MyPageData = {
 }
 
 const EMPTY_INTRO_NOTICE = '소개글을 작성해주세요'
+/** 남의 프로필에서는 「작성해주세요」가 아니라 사실을 적는다 — 누구더러 쓰라는 건지 알 수 없다 */
+const EMPTY_INTRO_OTHER = '소개글이 없습니다'
 
 describe('소개글', () => {
   it('남의 프로필이고 소개글이 없으면 줄을 아예 안 그린다', () => {
     render(<ProfileData data={BASE} isMyProfile={false} />)
 
+    // ⚠️ 남에게 「작성해주세요」라고 하지 않는다. 대신 사실을 적는다
     expect(screen.queryByText(EMPTY_INTRO_NOTICE)).not.toBeInTheDocument()
+    expect(screen.getByText(EMPTY_INTRO_OTHER)).toBeInTheDocument()
   })
 
   it('내 프로필이고 소개글이 없으면 쓰라고 안내한다', () => {
@@ -43,6 +47,7 @@ describe('소개글', () => {
 
     expect(screen.getByText('강아지 둘 키웁니다')).toBeInTheDocument()
     expect(screen.queryByText(EMPTY_INTRO_NOTICE)).not.toBeInTheDocument()
+    expect(screen.queryByText(EMPTY_INTRO_OTHER)).not.toBeInTheDocument()
   })
 
   it('내 프로필에 소개글이 있으면 안내 대신 소개글이 보인다', () => {
@@ -63,9 +68,10 @@ describe('빈 소개글', () => {
     expect(screen.getByText(EMPTY_INTRO_NOTICE)).toBeInTheDocument()
   })
 
-  it('빈 문자열은 없는 것과 같다 — 남의 프로필이면 아무것도 안 그린다', () => {
+  it('빈 문자열은 없는 것과 같다 — 남의 프로필이면 「소개글이 없습니다」', () => {
     render(<ProfileData data={{ ...BASE, introduction: '' }} isMyProfile={false} />)
 
+    expect(screen.getByText(EMPTY_INTRO_OTHER)).toBeInTheDocument()
     expect(screen.queryByText(EMPTY_INTRO_NOTICE)).not.toBeInTheDocument()
   })
 
@@ -75,14 +81,13 @@ describe('빈 소개글', () => {
     expect(screen.getByText(EMPTY_INTRO_NOTICE)).toBeInTheDocument()
   })
 
-  it('공백만 있는 소개글도 없는 것과 같다 — 남의 프로필은 빈 줄도 안 그린다', () => {
-    const { container } = render(
-      <ProfileData data={{ ...BASE, introduction: '   ' }} isMyProfile={false} />
-    )
+  it('공백만 있는 소개글도 없는 것과 같다 — 남의 프로필은 「소개글이 없습니다」', () => {
+    // 예전에는 빈 줄조차 안 그렸다. 지금은 문구가 갈려서 남의 프로필에도 안내가 뜬다 —
+    // 「소개글이 없습니다」는 사실을 적는 것이라 남에게 보여도 어색하지 않다.
+    render(<ProfileData data={{ ...BASE, introduction: '   ' }} isMyProfile={false} />)
 
+    expect(screen.getByText(EMPTY_INTRO_OTHER)).toBeInTheDocument()
     expect(screen.queryByText(EMPTY_INTRO_NOTICE)).not.toBeInTheDocument()
-    // 공백만 든 문단이 남아 있으면 안 된다
-    expect(container.querySelector('.whitespace-pre-wrap')).toBeNull()
   })
 
   it('앞뒤 공백은 떼고 보여준다', () => {
