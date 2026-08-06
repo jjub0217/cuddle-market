@@ -18,7 +18,7 @@ export default function SearchResultScreen() {
   const { keyword } = useLocalSearchParams<{ keyword: string }>();
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <SearchBarHeader
         initialKeyword={keyword}
         onBack={() => router.back()}
@@ -26,6 +26,10 @@ export default function SearchResultScreen() {
         // 화면이 쌓여서, 뒤로가기를 여러 번 눌러야 홈에 닿는다.
         onSubmit={(next) => router.setParams({ keyword: next })}
       />
+      {/* ⚠️ 이 화면은 **탭 안이 아니라 루트**다. 아래에 탭바가 없어서 기기 바(제스처 바·
+          3버튼 바)를 자기가 비켜야 한다 — SafeAreaView 의 edges 에 'bottom' 을 넣은
+          이유다. 안 넣으면 마지막 카드가 기기 바에 가린다(2026-08-06 실기기).
+          알림·답글 화면도 같은 이유로 그렇게 한다. */}
       <ProductListView keyword={keyword} />
     </SafeAreaView>
   );
