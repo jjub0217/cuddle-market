@@ -113,7 +113,11 @@ function ProfileUpdate() {
       <div className="pb-4xl bg-[#F3F4F6] pt-0 md:pt-8">
         <h1 className="sr-only">프로필 수정</h1>
         <div className="mx-auto flex max-w-7xl flex-col gap-0 md:flex-row md:gap-8 md:p-0">
-          {isMd ? <ProfileData data={myData!} isMyProfile showJoinDate /> : null}
+          {/* ⚠️ 가입일을 여기서 뺐다. 이 화면은 **고치러 오는** 화면이라 가입일이 답할
+              질문 자체가 없다. 값어치가 있는 자리는 남의 프로필이다 — 「3년 된 사람」과
+              「어제 가입한 사람」은 거래를 결정할 때 다르게 읽힌다(UserPage.tsx 로 옮겼다).
+              게다가 이 옆 칸은 데스크탑에만 그려져서, 여기 두면 모바일에서는 영영 못 본다 */}
+          {isMd ? <ProfileData data={myData!} isMyProfile /> : null}
           <div className="flex w-full flex-col gap-8 p-5 md:p-0">
             <ProfileUpdateBaseForm myData={myData!} onWithdrawClick={() => setIsWithdrawModalOpen(true)} />
             {!isSocialLogin ? <ProfileUpdatePasswordForm /> : null}

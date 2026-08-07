@@ -18,8 +18,15 @@ export interface UserProfile {
   profileImageUrl: string | null;
   addressSido: string | null;
   addressGugun: string | null;
-  /** 소개글. 없으면 화면이 그 줄을 아예 안 그린다 */
+  /** 소개글. 없으면 화면이 「소개글이 없습니다」를 대신 그린다 */
   introduction: string | null;
+  /**
+   * 가입한 때. 서버가 이미 준다(`UserProfileResponse.java:26`).
+   *
+   * 중고거래에서 **신뢰 신호**라 남의 프로필에 그린다 — 「3년 된 사람」과 「어제 가입한
+   * 사람」은 거래를 결정할 때 다르게 읽힌다. 시각까지 오지만 화면에는 날짜만 그린다.
+   */
+  createdAt: string | null;
   /** 내가 이 사람을 이미 차단했는지 */
   isBlocked: boolean;
   /** 내가 이 사람을 이미 신고했는지 */
@@ -40,6 +47,7 @@ export async function fetchUserProfile(userId: number): Promise<UserProfile> {
     addressSido: data.addressSido ?? null,
     addressGugun: data.addressGugun ?? null,
     introduction: data.introduction ?? null,
+    createdAt: data.createdAt ?? null,
     // 서버가 안 주면 "아직 아니다"로 본다 — 화면이 「차단 해제」를 잘못 그리는 것보다 낫다.
     isBlocked: data.isBlocked ?? false,
     isReported: data.isReported ?? false,

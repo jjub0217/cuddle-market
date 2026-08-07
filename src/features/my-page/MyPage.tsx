@@ -86,6 +86,22 @@ function MyPage() {
   }
 
   const openMobilePanel = (tab: MyPageTabId | 'activity') => openPanel(tab)
+
+  /**
+   * 대시보드의 「전체보기」에서 여는 길.
+   *
+   * ⚠️ 대시보드가 쓰는 이름(`sales`)과 패널 이름(`tab-sales`)이 **다르다.** 여기서 잇는다.
+   *    예전에는 `?nav=` 링크였는데, 모바일은 `effectiveNav` 를 늘 `nav-dash` 로 덮어서
+   *    **주소만 바뀌고 아무 일도 안 일어났다**(위 65줄).
+   */
+  const openDashboardPanel = (tab: 'sales' | 'purchases' | 'wishlist') => {
+    const 패널: Record<typeof tab, MyPageTabId> = {
+      sales: 'tab-sales',
+      purchases: 'tab-purchases',
+      wishlist: 'tab-wishlist',
+    }
+    openPanel(패널[tab])
+  }
   const openProfileFullView = () => openPanel('profile')
 
   const closeMobileOverlay = () => {
@@ -442,10 +458,29 @@ function MyPage() {
                 <div className="flex flex-1 flex-col gap-0.5">
                   <p className="text-base font-bold text-[#1c1b1b]">{myData?.nickname}</p>
                   <p className="text-sm text-gray-500">{`${myData?.addressSido ?? ''} ${myData?.addressGugun ?? ''}`.trim()}</p>
+                  {/*
+                    ⚠️ **주소 바로 밑에 둔다.** 닉네임·주소와 한 묶음이라 눈이 위에서 아래로
+                       한 번에 읽힌다. 사진 아래로 떨어뜨리면 사진과 글이 따로 노는 카드가 된다.
+                       프로필 전체 화면(?panel=profile)도 이 차례다.
+
+                    ⚠️ **없어도 자리를 보여준다.** 예전에는 `introduction &&` 이라 비어 있으면
+                       통째로 사라졌다 — 데스크탑에서는 보이는 소개글이 모바일 /mypage 에서만
+                       안 보였다. **내 프로필에서는 그 빈 자리가 곧 쓰러 가는 길**이다.
+
+                    공백만 있는 소개글도 「없다」로 본다 — 저장할 때 앞뒤 공백을 안 떼고
+                    최소 2자만 봐서(authValidationRules.introduction) 공백 두 칸도 저장된다.
+                  */}
+                  <p
+                    className={cn(
+                      'line-clamp-1 text-sm',
+                      myData?.introduction?.trim() ? 'text-gray-500' : 'text-gray-400'
+                    )}
+                  >
+                    {myData?.introduction?.trim() || '소개글을 작성해주세요'}
+                  </p>
                 </div>
                 <ChevronRight size={22} strokeWidth={1.5} className="text-on-surface-muted" />
               </div>
-              {myData?.introduction ? <p className="line-clamp-1 text-sm text-gray-500">{myData.introduction}</p> : null}
             </button>
 
             {/* 모바일 전용 섹션 */}
@@ -681,6 +716,7 @@ function MyPage() {
             myProducts={myProductsData?.pages.flatMap((page) => page.content)}
             myRequests={myRequestData?.pages.flatMap((page) => page.content)}
             myFavorites={myFavoriteData?.pages.flatMap((page) => page.content)}
+            onSeeAll={openDashboardPanel}
           />
         </div>
       </div>
