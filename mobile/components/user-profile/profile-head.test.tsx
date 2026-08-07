@@ -21,6 +21,7 @@ function 프로필(overrides: Partial<UserProfile> = {}): UserProfile {
     addressSido: '서울특별시',
     addressGugun: '은평구',
     introduction: null,
+    createdAt: '2023-04-12T10:30:00',
     isBlocked: false,
     isReported: false,
     ...overrides,
@@ -51,4 +52,30 @@ it('공백만 있는 소개글도 없는 것으로 본다', async () => {
   await render(<ProfileHead profile={프로필({ introduction: '   ' })} />);
 
   expect(screen.getByText('소개글이 없습니다')).toBeTruthy();
+});
+
+// ----- 가입일 -----
+//
+// 중고거래에서 가입일은 **신뢰 신호**다 — 「3년 된 사람」과 「어제 가입한 사람」은
+// 거래를 결정할 때 다르게 읽힌다. 웹의 남의 프로필도 같은 자리에 그린다.
+//
+// ⚠️ **날짜로 그린다. 「2년 전」이 아니다.** 이름표가 「가입일」이라 상대 표기와 어긋나고,
+//    「2년 전」은 1년 7개월도 2년 11개월도 된다 — 거래 상대를 가늠하는 자리에서 뭉뚱그리면
+//    안 좋다. 앱이 getTimeAgo 를 쓰는 곳(게시글·댓글·알림)은 「방금 것인가」가 중요한 값이라
+//    성격이 다르다.
+
+it('가입일을 날짜로 보여준다', async () => {
+  // ⚠️ 「가입일 ↔ 2023.04.12」가 아니라 **한 줄로 이어 쓴다.** 이름표·구분선을 두면
+  //    설정 화면 항목처럼 보인다 — 한 줄뿐인데 그 짜임을 쓰면 떠 보인다
+  await render(<ProfileHead profile={프로필()} />);
+
+  // 웹·생년월일과 같은 모양이다(@cuddle/shared 의 formatJoinDate)
+  expect(screen.getByText('2023.04.12 가입')).toBeTruthy();
+});
+
+it('가입일이 없으면 줄 자체를 안 그린다', async () => {
+  // 서버가 안 줄 수도 있다. 빈 줄을 그리면 「고장났나」로 보인다
+  await render(<ProfileHead profile={프로필({ createdAt: null })} />);
+
+  expect(screen.queryByText(/가입/)).toBeNull();
 });

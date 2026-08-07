@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Camera, Flag, Ban, LockOpen, ShieldAlert, EllipsisVertical } from 'lucide-react'
+import { formatJoinDate } from '@cuddle/shared'
 import { getImageSrcSet, IMAGE_SIZES, toResizedWebpUrl } from '@/lib/utils/imageUrl'
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 import { ROUTES } from '@/constants/routes'
@@ -54,15 +55,8 @@ interface ProfileDataProps {
   showJoinDate?: boolean
 }
 
-function formatJoinDate(iso?: string) {
-  if (!iso) return ''
-  const date = new Date(iso)
-  if (Number.isNaN(date.getTime())) return ''
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}.${month}.${day}`
-}
+// 가입일 모양은 packages/shared 로 옮겼다. 앱의 남의 프로필도 같은 함수를 쓴다 —
+// 여기 갇혀 있던 탓에 앱은 가입일을 아예 못 그렸다(생년월일도 같은 이유로 갈렸었다).
 
 const SUMMARY_ITEMS: Array<{ key: keyof ProfileSummaryCounts; label: string }> = [
   { key: 'sales', label: '판매내역' },
@@ -96,6 +90,9 @@ export default function ProfileData({
 
   /** 앞뒤 공백을 뗀 소개글. 공백만 있으면 「없다」와 같게 다룬다 */
   const introduction = data?.introduction?.trim() ?? ''
+
+  // 웹·앱이 같은 함수를 쓴다. 날짜로 못 읽으면 빈 글자가 와서 줄을 안 그린다
+  const joinDate = formatJoinDate(data?.createdAt)
 
   const introRef = useRef<HTMLParagraphElement>(null)
   const [isIntroExpanded, setIsIntroExpanded] = useState(false)
@@ -269,7 +266,9 @@ export default function ProfileData({
               ) : null}
             </div>
           ) : null}
-          <div className="flex flex-row items-center gap-3.5">
+          {/* ⚠️ items-start 다. 가운데 정렬이면 오른쪽 글자 줄 수가 늘 때마다(가입일이 생겼다)
+              사진이 아래로 밀려 닉네임과 눈높이가 안 맞는다 */}
+          <div className="flex flex-row items-start gap-3.5">
             <div className="relative h-14 w-14 shrink-0">
               {enableImageUpload ? (
                 <input
@@ -327,6 +326,11 @@ export default function ProfileData({
                 ) : null}
                 <p className="text-text-primary text-base leading-none font-semibold">{data?.nickname}</p>
                 <p className="text-text-primary text-sm leading-none">{`${data?.addressSido} ${data?.addressGugun}`}</p>
+                {/* ⚠️ **지역 바로 밑이다. 소개글 뒤가 아니다.** 소개글 뒤에 두면 붕 뜬다 —
+                    소개글은 「그 사람이 쓴 말」이고 가입일은 「계정에 대한 사실」이라
+                    성격이 다른데, 비슷한 회색 글자가 이어지니 소개글의 둘째 문단처럼
+                    읽히다가 아닌 걸 알게 된다. 지역과 같은 종류라 거기 붙어야 한다 */}
+                {showJoinDate && joinDate ? <p className="text-[13px] leading-none text-gray-500">{joinDate} 가입</p> : null}
               </div>
             ) : (
               // 모바일 내 정보
@@ -343,6 +347,8 @@ export default function ProfileData({
                 <p className="text-sm font-normal text-gray-500">
                   {data?.addressSido} {data?.addressGugun}
                 </p>
+                {/* 데스크탑 쪽과 같은 이유로 지역 바로 밑이다 */}
+                {showJoinDate && joinDate ? <p className="mt-0.5 text-[13px] text-gray-500">{joinDate} 가입</p> : null}
               </div>
             )}
           </div>
@@ -382,12 +388,33 @@ export default function ProfileData({
               </button>
             ) : null}
           </div>
-          {showJoinDate ? (
-            <div className="border-outline-variant/40 flex items-center justify-between border-t pt-4 text-sm">
-              <span className="text-on-surface-muted text-[13px]">가입일</span>
-              <span className="text-on-surface-muted text-[13px]">{formatJoinDate(data?.createdAt)}</span>
+          {/* ⚠️ **`isMyProfile` 이 유일한 벽이다. 절대 지우지 마라.**
+              서버가 남의 프로필 응답에도 이메일을 실어 보낸다(UserProfileResponse.java:57).
+              즉 남의 이메일은 이미 브라우저에 와 있고, 이 조건만 없으면 그대로 화면에 뜬다.
+              「남의 프로필에는 이메일이 안 보인다」를 시험으로 못 박아 뒀다.
+
+              왜 여기 있나: 데스크탑에만 이메일을 볼 곳이 없었다. 모바일 웹은 폼 안의
+              「계정 정보」 묶음(md:hidden)에, 앱은 프로필 수정 화면에 있는데 데스크탑만
+              빠져 있었다. 그 묶음에 「데스크탑에서는 사이드바에 표시」라는 주석이 달려 있고
+              이 조각이 email 을 받고만 있던 걸 보면, 정한 것이 아니라 **옮기다 만 것**이다. */}
+          {/* ⚠️ **프로필 수정 화면에서는 안 그린다.** 거기는 폼 안에 이메일 칸이 따로 있어
+              (ProfileUpdateBaseForm) 여기까지 그리면 한 화면에 같은 값이 두 번 나온다.
+              마이페이지는 폼이 없어 옆 칸이 이메일을 볼 수 있는 유일한 자리다 */}
+          {isMyProfile && !isProfileEditPage && data?.email ? (
+            <div className="border-outline-variant/40 flex items-center justify-between gap-2 border-t pt-4 text-sm">
+              <span className="text-on-surface-muted text-[13px]">이메일</span>
+              <span className="text-on-surface-muted text-[13px] break-all">{data.email}</span>
             </div>
           ) : null}
+          {/* ⚠️ **선도 이름표도 없다.** 처음엔 「가입일 ↔ 2023.04.12」에 구분선을 그었는데,
+              그건 설정 화면처럼 값이 여럿 나열될 때 쓰는 짜임이라 한 줄만 있으면 떠 보였다.
+              「가입」이라는 말꼬리가 붙어 있어 이름표도 따로 필요 없다.
+              ⚠️ **자기 줄을 갖는다.** 지역 줄에 「서울 은평구 · 2023.04.12 가입」으로 이어
+              붙이는 안도 있었지만, 이 옆 칸이 max-w-72(288px)라 가장 긴 지역명
+              (제주특별자치도 서귀포시)에서 넘친다. 앱도 같은 모양이다(profile-head.tsx) */}
+          {/* 가입일은 위 닉네임·지역 묶음으로 옮겼다. 여기(소개글 뒤)에 두니 붕 떴다.
+              ⚠️ 색으로도 한 번 헤맸다 — text-on-surface-muted 는 이름과 달리 **갈색**이다
+                 (tokens.colors.css:15 — rgba(99,63,0,.85)). 회색인 줄 알고 쓰면 튄다 */}
           {isMyProfile && summaryCounts ? (
             <div className="border-outline-variant/40 grid grid-cols-3 gap-2 border-t pt-4">
               {SUMMARY_ITEMS.map((item) => (
