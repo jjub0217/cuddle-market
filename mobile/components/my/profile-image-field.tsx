@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { Camera } from 'lucide-react-native';
 import { useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -13,6 +14,11 @@ import { pickImages, shrinkImage, uploadOne } from '@/lib/product-images';
 //
 // 사진이 없으면 **닉네임 첫 글자**를 그린다. 웹·앱이 이미 그렇게 한다
 // (`ProfileAvatar.tsx:42` · `user-profile/profile-head.tsx:32`).
+//
+// 오른쪽 아래 **카메라 표시도 웹에서 가져왔다**(`ProfileUpdateBaseForm.tsx` 의 사진 자리).
+// 처음엔 아래에 「사진 바꾸기」 글자를 뒀는데, 웹에 있는 것을 근거 없이 안 가져온 것이었다.
+// ⚠️ **카메라는 표시일 뿐 따로 누르는 곳이 아니다.** 누르는 것은 바깥 `Pressable` 하나뿐이라
+//    동그라미 어디를 눌러도 같은 일이 일어난다. 웹도 이번에 같은 모양으로 맞췄다.
 
 interface Props {
   /** 지금 사진. 없으면 null */
@@ -72,42 +78,54 @@ export function ProfileImageField({ url, nickname, onChange }: Props) {
         accessibilityRole="button"
         accessibilityLabel="프로필 사진 바꾸기"
         accessibilityState={{ disabled: busy }}
-        style={({ pressed }) => [styles.avatar, pressed && !busy && styles.pressed]}
+        style={({ pressed }) => [styles.frame, pressed && !busy && styles.pressed]}
       >
-        {보여줄사진 ? (
-          <Image
-            source={{ uri: 보여줄사진 }}
-            style={styles.avatarImage}
-            contentFit="cover"
-            onError={() => setFailed(true)}
-          />
-        ) : (
-          <Text style={styles.initial}>{첫글자}</Text>
-        )}
+        {/* ⚠️ 동그라미가 자기 안을 잘라내는(overflow) 몫을 맡는다. 카메라 표시는 이 밖에
+            둬야 한다 — 안에 두면 동그라미 모서리에서 잘린다 */}
+        <View style={styles.avatar}>
+          {보여줄사진 ? (
+            <Image
+              source={{ uri: 보여줄사진 }}
+              style={styles.avatarImage}
+              contentFit="cover"
+              onError={() => setFailed(true)}
+            />
+          ) : (
+            <Text style={styles.initial}>{첫글자}</Text>
+          )}
 
-        {busy ? (
-          // 올리는 동안 사진 위에 덮는다. 자리를 따로 차지하지 않아 화면이 안 흔들린다
-          <View style={styles.busyCover}>
-            <ActivityIndicator color="#FFFFFF" />
-          </View>
-        ) : null}
+          {busy ? (
+            // 올리는 동안 사진 위에 덮는다. 자리를 따로 차지하지 않아 화면이 안 흔들린다
+            <View style={styles.busyCover}>
+              <ActivityIndicator color="#FFFFFF" />
+            </View>
+          ) : null}
+        </View>
+
+        <View style={styles.badge}>
+          <Camera size={18} color="#111827" />
+        </View>
       </Pressable>
-
-      <Text style={styles.hint}>사진 바꾸기</Text>
     </View>
   );
 }
 
 const AVATAR = 88;
 
+const BADGE = 28;
+
 const styles = StyleSheet.create({
   wrap: {
     alignItems: 'center',
-    gap: 8,
   },
-  avatar: {
+  // 동그라미와 카메라 표시를 함께 담는 네모. 카메라가 동그라미 밖으로 걸치도록 자리를 준다
+  frame: {
     width: AVATAR,
     height: AVATAR,
+  },
+  avatar: {
+    width: '100%',
+    height: '100%',
     borderRadius: AVATAR / 2,
     // 웹 bg-primary-50(#faf3e6)와 같은 연한 베이지. 앱의 다른 동그라미도 이 색이다
     backgroundColor: '#FAF3E6',
@@ -130,10 +148,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(17, 24, 39, 0.4)',
   },
-  hint: {
-    fontSize: 13,
-    color: '#825500',
-    fontWeight: '600',
+  // 웹과 같은 자리·같은 색이다 — 오른쪽 아래, primary-100(tokens.colors.css:65)
+  badge: {
+    position: 'absolute',
+    right: 0,
+    bottom: 6,
+    width: BADGE,
+    height: BADGE,
+    borderRadius: BADGE / 2,
+    backgroundColor: '#F4E3BF',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   pressed: {
     opacity: 0.7,
