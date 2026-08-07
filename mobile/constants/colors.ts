@@ -36,6 +36,10 @@ export const colors = {
   onAction: '#FFFFFF',
   selected: '#825500', // 필터 칩·탭·툴바·상태 칩 (웹 primary-600)
   onSelected: '#FFFFFF',
+  // selected 와 값이 같지만 이름을 나눴다. 같은 갈색이 바탕일 때와 글자일 때
+  // 하는 일이 다르다 — 「고른 것」과 「눌러서 뭔가 하는 글자」다.
+  // color: colors.accent / backgroundColor: colors.selected 로 갈라 읽힌다.
+  accent: '#825500', // 「모두 읽음」·「취소」·댓글 수·멘션·정렬 이름
 
   // ── 알림 계열
   // #DC2626 이 아니다 — 웹이 「흰 바탕 4.5:1 borderline」이라며 뺀 값이라

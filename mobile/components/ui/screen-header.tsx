@@ -2,6 +2,8 @@ import { ChevronLeft, X } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { colors } from '@/constants/colors';
+
 // 뒤로/닫기가 있는 화면들의 헤더. 탭 화면은 이것 말고 app-header.tsx 를 쓴다
 // (뒤로가 없어 틀이 다르다 — 왼쪽에 로고나 제목이 온다).
 //
@@ -100,7 +102,7 @@ export function ScreenHeader({
 }
 
 /** 웹의 --color-header-icon 과 같은 값(app-header.tsx 와도 같다) */
-const ICON_COLOR = '#111827';
+const ICON_COLOR = colors.onSurface;
 
 const styles = StyleSheet.create({
   header: {
@@ -110,11 +112,11 @@ const styles = StyleSheet.create({
     // 탭 화면의 AppHeader 와 같은 16. 화면을 옮겨 다닐 때 아이콘의 왼쪽 시작선이
     // 흔들리면 안 된다. (전에는 화면마다 12와 16이 섞여 있었다)
     paddingHorizontal: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   headerDivider: {
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: colors.outlineVariant,
   },
   titleBox: {
     ...StyleSheet.absoluteFillObject,
@@ -124,7 +126,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 56,
   },
   // 홈·마이 헤더 제목과 같은 20이다(app-header.tsx 의 title)
-  title: { fontSize: 20, fontWeight: '700', color: '#111827' },
+  title: { fontSize: 20, fontWeight: '700', color: colors.onSurface },
   // 자리만 옮긴다. 크기(20)는 가운데일 때와 같아야 화면을 오갈 때 글자가 들썩이지 않는다
   titleLeft: { marginLeft: 8, flexShrink: 1 },
   right: { marginLeft: 'auto' },

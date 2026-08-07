@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, StyleSheet, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { colors } from '@/constants/colors';
 import { TOAST_DURATION_MS, useToastStore } from '@/lib/toast';
 
 // 토스트가 실제로 그려지는 곳. 앱 맨 바깥(_layout)에 한 번만 둔다.
@@ -98,7 +99,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    color: '#FFFFFF',
+    color: colors.onAction,
     textAlign: 'center',
   },
 });

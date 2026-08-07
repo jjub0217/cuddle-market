@@ -6,6 +6,7 @@ import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { LogoutModal } from '@/components/my/logout-modal';
+import { colors } from '@/constants/colors';
 import { useAuthStore } from '@/lib/auth/store';
 import { ACCOUNT_DELETION_URL, PRIVACY_URL, SUPPORT_MAIL_URL } from '@/lib/support-links';
 
@@ -39,8 +40,8 @@ const SLIDE_MS = 300;
 //
 // 같은 이유로 로그아웃 확인 창(logout-modal.tsx)도 아직 검정을 쓴다 — 그쪽에 먼저
 // 적어 둔 판단을 여기서도 따른다. 두 창이 나란히 뜨므로 색이 갈리면 더 어색하다.
-const BUTTON_FILL = '#111827';
-const BUTTON_BORDER = '#D1D5DB';
+const BUTTON_FILL = colors.action;
+const BUTTON_BORDER = colors.outline;
 
 interface MenuItem {
   label: string;
@@ -122,7 +123,7 @@ export function AppMenuOverlay({ visible, onClose }: Props) {
               accessibilityLabel="메뉴 닫기"
               style={({ pressed }) => (pressed ? styles.pressed : undefined)}
             >
-              <X size={24} color="#111827" />
+              <X size={24} color={colors.onSurface} />
             </Pressable>
             <Text style={styles.heading}>메뉴</Text>
           </View>
@@ -162,7 +163,7 @@ export function AppMenuOverlay({ visible, onClose }: Props) {
                 ]}
               >
                 <Text style={styles.rowLabel}>{menuItem.label}</Text>
-                <ChevronRight size={20} color="#9CA3AF" />
+                <ChevronRight size={20} color={colors.onSurfaceSubtle} />
               </Pressable>
             ))}
           </View>
@@ -188,7 +189,7 @@ export function AppMenuOverlay({ visible, onClose }: Props) {
 const styles = StyleSheet.create({
   /** 미끄러져 들어오는 판. 화면을 다 덮는다(웹도 w-full이다). */
   panel: { flex: 1 },
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  container: { flex: 1, backgroundColor: colors.surface },
   header: {
     height: HEADER_HEIGHT,
     flexDirection: 'row',
@@ -196,9 +197,9 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingHorizontal: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: colors.outlineVariant,
   },
-  heading: { fontSize: 18, fontWeight: '700', color: '#111827' },
+  heading: { fontSize: 18, fontWeight: '700', color: colors.onSurface },
   pressed: { opacity: 0.5 },
   // 웹은 두 버튼이 gap-2(8)로 붙고 각각 flex-1로 반씩 나눠 갖는다.
   authRow: {
@@ -207,7 +208,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: colors.outlineVariant,
   },
   authOutline: {
     flex: 1,
@@ -228,7 +229,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  authFilledLabel: { fontSize: 14, fontWeight: '600', color: '#FFFFFF' },
+  authFilledLabel: { fontSize: 14, fontWeight: '600', color: colors.onAction },
   row: {
     height: 56,
     flexDirection: 'row',
@@ -238,8 +239,8 @@ const styles = StyleSheet.create({
   },
   rowDivider: {
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#F3F4F6',
+    borderTopColor: colors.surfaceSunken,
   },
-  rowPressed: { backgroundColor: '#F9FAFB' },
-  rowLabel: { fontSize: 16, color: '#111827' },
+  rowPressed: { backgroundColor: colors.surfaceMuted },
+  rowLabel: { fontSize: 16, color: colors.onSurface },
 });

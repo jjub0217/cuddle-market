@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { colors } from '@/constants/colors';
+
 // 「정말 할까요?」를 묻는 창. 로그아웃 확인 창(components/my/logout-modal.tsx)과 같은 결이다.
 //
 // 왜 조각으로 빼나:
@@ -84,7 +86,7 @@ export function ConfirmDialog({
               ]}
             >
               {submitting ? (
-                <ActivityIndicator color="#FFFFFF" />
+                <ActivityIndicator color={colors.onAction} />
               ) : (
                 <Text style={styles.confirmLabel}>{confirmLabel}</Text>
               )}
@@ -106,43 +108,43 @@ const styles = StyleSheet.create({
   },
   sheet: {
     width: '100%',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     // 8은 로그아웃 확인 창과 같은 값이다.
     borderRadius: 8,
     padding: 20,
     gap: 10,
   },
-  heading: { fontSize: 19, fontWeight: '700', color: '#111827' },
-  description: { fontSize: 14, color: '#6B7280' },
+  heading: { fontSize: 19, fontWeight: '700', color: colors.onSurface },
+  description: { fontSize: 14, color: colors.onSurfaceMuted },
   noteBox: {
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.surfaceMuted,
     borderRadius: 8,
     padding: 12,
     gap: 6,
   },
-  noteLine: { fontSize: 13, color: '#4B5563', lineHeight: 18 },
+  noteLine: { fontSize: 13, color: colors.onSurfaceMedium, lineHeight: 18 },
   actions: { flexDirection: 'row', gap: 10, marginTop: 6 },
   cancel: {
     flex: 1,
     height: 46,
     borderRadius: 8,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#D1D5DB',
+    borderColor: colors.outline,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cancelLabel: { fontSize: 15, fontWeight: '600', color: '#111827' },
+  cancelLabel: { fontSize: 15, fontWeight: '600', color: colors.onSurface },
   confirm: {
     flex: 1,
     height: 46,
     borderRadius: 8,
-    backgroundColor: '#111827',
+    backgroundColor: colors.action,
     alignItems: 'center',
     justifyContent: 'center',
   },
   // 웹 BlockModal도 되돌리기 어려운 동작에 bg-danger-600을 쓴다.
   confirmDanger: { backgroundColor: '#DC2626' },
   confirmDisabled: { opacity: 0.5 },
-  confirmLabel: { fontSize: 15, fontWeight: '600', color: '#FFFFFF' },
+  confirmLabel: { fontSize: 15, fontWeight: '600', color: colors.onAction },
   pressed: { opacity: 0.7 },
 });

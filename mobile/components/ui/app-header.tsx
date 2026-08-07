@@ -11,6 +11,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Bell, Menu } from 'lucide-react-native';
 
 import { AppMenuOverlay } from '@/components/ui/app-menu-overlay';
+import { colors } from '@/constants/colors';
 import { useAuthStore } from '@/lib/auth/store';
 import { fetchUnreadCount } from '@/lib/notifications';
 
@@ -37,7 +38,7 @@ export const LOGO_ASPECT_RATIO = 826 / 357;
  * 전에는 웹이 브라운(`text-primary`), 앱이 먹색으로 갈려 있었는데 먹색으로 모았다.
  * 웹의 검색·알림·메뉴 아이콘도 같이 바꿨다 — 한쪽만 바꾸면 다시 갈린다.
  */
-const ICON_COLOR = '#111827';
+const ICON_COLOR = colors.onSurface;
 
 interface Props {
   /** 문자열이면 제목으로, 아니면 그대로 그린다(홈은 로고 이미지) */
@@ -145,14 +146,14 @@ const styles = StyleSheet.create({
     // 웹과 같은 16. 한때 왼쪽만 8로 줄여뒀는데, 그건 로고 상자가 만든
     // 빈칸(아래 logo 주석)을 로고 탓으로 잘못 보고 증상만 덮은 것이었다.
     paddingHorizontal: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: colors.outlineVariant,
   },
   left: { flexShrink: 1 },
   // 벨과 햄버거 사이. hitSlop이 12라 이보다 좁으면 두 누름 영역이 겹친다.
   right: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-  title: { fontSize: 20, fontWeight: '700', color: '#111827' },
+  title: { fontSize: 20, fontWeight: '700', color: colors.onSurface },
   // 폭을 직접 정하지 않고 비율로 맡긴다.
   //
   // 전에는 120x32 상자에 contentFit:'contain'을 걸었는데, 로고 그림 비율(2.31)이
@@ -177,6 +178,6 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     // 웹과 같은 값(--color-danger-500)
-    backgroundColor: '#C91D1D',
+    backgroundColor: colors.danger,
   },
 });

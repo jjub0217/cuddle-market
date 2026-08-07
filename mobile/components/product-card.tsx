@@ -8,6 +8,7 @@ import {
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { ProductThumbnail, type FavoriteControl } from '@/components/product-thumbnail';
+import { colors } from '@/constants/colors';
 import { EllipsisVertical } from 'lucide-react-native';
 
 // 가로형 상품 카드(UI 스펙 §4). 좌 썸네일 + 우 정보영역.
@@ -47,7 +48,7 @@ export function ProductCard({ product, favorite, onMorePress }: Props) {
             accessibilityLabel="상품 관리 메뉴 열기"
             style={({ pressed }) => [styles.more, pressed && styles.morePressed]}
           >
-            <EllipsisVertical size={20} color="#9CA3AF" />
+            <EllipsisVertical size={20} color={colors.onSurfaceSubtle} />
           </Pressable>
         ) : null}
 
@@ -97,9 +98,9 @@ const styles = StyleSheet.create({
     // 카드에 안쪽 패딩을 두지 않아 썸네일이 위·아래·좌측에 꽉 찬다(웹 모바일 카드와 같은 구조).
     // 라운드 밖으로 삐져나온 썸네일 모서리는 overflow로 잘라낸다.
     overflow: 'hidden',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: colors.outlineVariant,
   },
   info: {
     flex: 1,
@@ -122,29 +123,29 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   badgeSell: {
-    backgroundColor: '#EFF6FF',
+    backgroundColor: colors.badgeSellBg,
   },
   badgeRequest: {
-    backgroundColor: '#FFF7ED',
+    backgroundColor: colors.badgeRequestBg,
   },
   badgeOutline: {
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#D1D5DB',
+    borderColor: colors.outline,
   },
   badgeText: {
     fontSize: 11,
     fontWeight: '600',
   },
   badgeTextSell: {
-    color: '#2563EB',
+    color: colors.badgeSell,
   },
   badgeTextRequest: {
-    color: '#EA580C',
+    color: colors.badgeRequest,
   },
   badgeTextOutline: {
     // 같은 줄의 타입 뱃지(badgeText)와 글자 크기를 맞춘다.
     fontSize: 11,
-    color: '#6B7280',
+    color: colors.onSurfaceMuted,
   },
   more: {
     // 정보 영역 오른쪽 위. 제목이 길어져도 자리를 뺏기지 않게 절대 배치로 띄운다.
@@ -163,7 +164,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '400',
-    color: '#111827',
+    color: colors.onSurface,
     // 줄 높이를 명시해야(기기·플랫폼 기본값이 제각각) 2줄 자리를 정확히 계산할 수 있다.
     lineHeight: TITLE_LINE_HEIGHT,
     // ⋮ 가 붙는 화면에서 제목이 그 아래로 파고들지 않게. 없는 화면에서도 빈 여백일 뿐이다.
@@ -174,7 +175,7 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#111827',
+    color: colors.onSurface,
   },
   metaRow: {
     flexDirection: 'row',
@@ -185,10 +186,10 @@ const styles = StyleSheet.create({
   metaText: {
     flex: 1,
     fontSize: 12,
-    color: '#6B7280',
+    color: colors.onSurfaceMuted,
   },
   metaTime: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: colors.onSurfaceSubtle,
   },
 });

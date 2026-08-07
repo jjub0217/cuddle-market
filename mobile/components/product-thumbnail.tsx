@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Heart } from 'lucide-react-native';
+import { colors } from '@/constants/colors';
 import { getOverlay } from '@/lib/tradeStatus';
 
 // 1:1 정사각 썸네일 + 거래상태 오버레이(UI 스펙 §4.2, §5).
@@ -86,9 +87,9 @@ export function ProductThumbnail({ imageUrl, tradeStatus, productType, favorite 
             <Heart
               size={20}
               // 안 찜한 상태는 흰색이다. 사진 위라 회색은 밝은 사진에서 묻힌다(설계 §5).
-              color={favorite.isFavorite ? '#FC8181' : '#FFFFFF'}
+              color={favorite.isFavorite ? colors.favorite : colors.surface}
               // 찜한 상태만 속을 채운다(Lucide는 이름이 아니라 fill로 채움을 켠다).
-              fill={favorite.isFavorite ? '#FC8181' : 'none'}
+              fill={favorite.isFavorite ? colors.favorite : 'none'}
             />
           </View>
         </Pressable>
@@ -106,7 +107,7 @@ const styles = StyleSheet.create({
     minHeight: THUMB_SIZE,
     // 모서리 라운드는 카드가 overflow로 잘라준다(카드 모서리와 어긋나지 않게).
     overflow: 'hidden',
-    backgroundColor: '#E5E7EB', // 로드 전/실패 시 보이는 회색 placeholder
+    backgroundColor: colors.outlineVariant, // 로드 전/실패 시 보이는 회색 placeholder
   },
   image: {
     // 컨테이너 높이가 카드에 따라 늘어나므로 퍼센트 대신 절대 채움을 쓴다(웹도 absolute 이미지).
@@ -125,7 +126,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 4,
     // 스크림 위에서 살짝 떠 보이게(약한 그림자 1단계).
-    shadowColor: '#000',
+    shadowColor: colors.black,
     shadowOpacity: 0.2,
     shadowRadius: 2,
     shadowOffset: { width: 0, height: 1 },
@@ -134,7 +135,7 @@ const styles = StyleSheet.create({
   pillText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#111827', // 웹 gray-900
+    color: colors.onSurface, // 웹 gray-900
   },
   favoriteButton: {
     position: 'absolute',

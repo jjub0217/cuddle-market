@@ -32,7 +32,8 @@ describe('색 토큰', () => {
     // 일부러 겹쳐 둔 값만 예외로 둔다 — 뜻이 달라 따로 부르는 것이 맞다.
     //   #111827  onSurface(글자) = action(단추 바탕)
     //   #FFFFFF  surface(바탕) = onAction = onSelected = onDanger(진한 바탕 위 글자)
-    const 겹쳐도_되는_값 = ['#111827', '#FFFFFF'];
+    //   #825500  selected(고른 것의 바탕) = accent(눌러서 뭔가 하는 글자)
+    const 겹쳐도_되는_값 = ['#111827', '#FFFFFF', '#825500'];
     const 먼저_본_이름 = new Map<string, string>();
 
     for (const [name, value] of Object.entries(colors)) {
