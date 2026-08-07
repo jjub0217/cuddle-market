@@ -105,34 +105,28 @@ describe('빈 소개글', () => {
 })
 
 describe('이메일', () => {
-  // 데스크탑 웹에만 이메일을 볼 곳이 없었다. 모바일 웹은 폼 안(계정 정보 묶음),
-  // 앱은 프로필 수정 화면에 있는데 데스크탑만 빠져 있었다.
-  // 「데스크탑에서는 사이드바에 표시」라는 주석과 email 프로퍼티까지 있는데 안 그렸다 —
-  // 정한 것이 아니라 옮기다 만 것이었다.
+  // ⚠️ **이 조각은 이메일을 어디서도 안 그린다.** 볼 자리는 프로필 수정 폼 하나뿐이다
+  //    (ProfileUpdateBaseForm — 폭에 상관없이 그린다).
   //
-  // ⚠️ 소셜 로그인이 섞여 있어 「내가 어느 이메일로 가입했나」가 실제 질문이다.
-  //    비밀번호를 찾을 때도 고객센터에 물을 때도 필요하다.
+  // 세 쓰임이 다 안 그리는 쪽이다.
+  //   남의 프로필      개인정보다. 남이 볼 이유가 없다
+  //   프로필 수정 옆 칸  폼 안에 있다. 한 화면에 두 번 나오면 안 된다
+  //   마이페이지 옆 칸   내 계정을 확인하는 자리는 프로필 수정으로 모은다
+  //
+  // ⚠️ 「데스크탑에서는 사이드바에 표시」라는 옛 주석과 email 프로퍼티가 남아 있어
+  //    여기 그리고 싶어지는 자리다. 그리면 아래 시험이 잡는다.
 
   const 내정보: MyPageData = { ...BASE, email: 'devel.jjub@gmail.com' }
 
-  it('내 프로필에는 이메일이 보인다', () => {
-    render(<ProfileData data={내정보} isMyProfile />)
-
-    expect(screen.getByText('devel.jjub@gmail.com')).toBeInTheDocument()
-  })
-
   it('⚠️ 남의 프로필에는 이메일이 **안** 보인다', () => {
-    // 이 시험이 유일한 벽이다. 서버가 남의 프로필 응답에도 이메일을 실어 보내고 있어
-    // (UserProfileResponse.java:57) 데이터는 이미 브라우저에 와 있다.
-    // isMyProfile 조건을 지우면 남의 이메일이 그대로 화면에 뜬다.
+    // 개인정보다. 서버에서도 뺐지만(cmarket_api d42f71d) 화면 쪽 벽도 남겨 둔다
     render(<ProfileData data={내정보} isMyProfile={false} />)
 
     expect(screen.queryByText('devel.jjub@gmail.com')).not.toBeInTheDocument()
   })
 
-  it('⚠️ 프로필 수정 화면에서는 옆 칸에 **안** 보인다', () => {
-    // 그 화면은 폼 안에 이메일 칸이 따로 있다(ProfileUpdateBaseForm).
-    // 옆 칸에도 그리면 한 화면에 같은 값이 두 번 나온다
+  it('⚠️ 프로필 수정 화면 옆 칸에도 **안** 보인다', () => {
+    // 그 화면은 폼 안에 이메일 칸이 따로 있다. 여기까지 그리면 같은 값이 두 번 나온다
     지금경로 = '/profile-update'
 
     render(<ProfileData data={내정보} isMyProfile />)
@@ -140,19 +134,13 @@ describe('이메일', () => {
     expect(screen.queryByText('devel.jjub@gmail.com')).not.toBeInTheDocument()
   })
 
-  it('마이페이지 옆 칸에는 보인다', () => {
-    // 거기엔 폼이 없어 옆 칸이 이메일을 볼 수 있는 유일한 자리다
+  it('⚠️ 마이페이지 옆 칸에도 **안** 보인다', () => {
+    // 내 계정 정보를 확인하는 자리는 프로필 수정 한 곳으로 모은다
     지금경로 = '/mypage'
 
     render(<ProfileData data={내정보} isMyProfile />)
 
-    expect(screen.getByText('devel.jjub@gmail.com')).toBeInTheDocument()
-  })
-
-  it('이메일이 없으면 줄 자체를 안 그린다', () => {
-    // 소셜로 갓 들어온 사람 등. 빈 칸을 그리면 「고장났나」로 보인다
-    render(<ProfileData data={BASE} isMyProfile />)
-
+    expect(screen.queryByText('devel.jjub@gmail.com')).not.toBeInTheDocument()
     expect(screen.queryByText('이메일')).not.toBeInTheDocument()
   })
 })

@@ -388,24 +388,16 @@ export default function ProfileData({
               </button>
             ) : null}
           </div>
-          {/* ⚠️ **`isMyProfile` 이 유일한 벽이다. 절대 지우지 마라.**
-              서버가 남의 프로필 응답에도 이메일을 실어 보낸다(UserProfileResponse.java:57).
-              즉 남의 이메일은 이미 브라우저에 와 있고, 이 조건만 없으면 그대로 화면에 뜬다.
-              「남의 프로필에는 이메일이 안 보인다」를 시험으로 못 박아 뒀다.
+          {/* ⚠️ **이메일은 여기서 안 그린다. 어느 화면에서도.**
+              볼 자리는 프로필 수정 폼 하나뿐이다(ProfileUpdateBaseForm — 폭에 상관없이 그린다).
+              세 쓰임이 다 안 그리는 쪽이다:
+                남의 프로필      개인정보다. 남이 볼 이유가 없다
+                프로필 수정 옆 칸  폼 안에 있다. 한 화면에 두 번 나오면 안 된다
+                마이페이지 옆 칸   내 계정을 확인하는 자리는 프로필 수정으로 모은다
 
-              왜 여기 있나: 데스크탑에만 이메일을 볼 곳이 없었다. 모바일 웹은 폼 안의
-              「계정 정보」 묶음(md:hidden)에, 앱은 프로필 수정 화면에 있는데 데스크탑만
-              빠져 있었다. 그 묶음에 「데스크탑에서는 사이드바에 표시」라는 주석이 달려 있고
-              이 조각이 email 을 받고만 있던 걸 보면, 정한 것이 아니라 **옮기다 만 것**이다. */}
-          {/* ⚠️ **프로필 수정 화면에서는 안 그린다.** 거기는 폼 안에 이메일 칸이 따로 있어
-              (ProfileUpdateBaseForm) 여기까지 그리면 한 화면에 같은 값이 두 번 나온다.
-              마이페이지는 폼이 없어 옆 칸이 이메일을 볼 수 있는 유일한 자리다 */}
-          {isMyProfile && !isProfileEditPage && data?.email ? (
-            <div className="border-outline-variant/40 flex items-center justify-between gap-2 border-t pt-4 text-sm">
-              <span className="text-on-surface-muted text-[13px]">이메일</span>
-              <span className="text-on-surface-muted text-[13px] break-all">{data.email}</span>
-            </div>
-          ) : null}
+              ⚠️ MyPageData 에 email 프로퍼티가 남아 있고 「데스크탑에서는 사이드바에 표시」라는
+                 옛 주석도 있어 **여기 그리고 싶어지는 자리다.** 그리면 시험 셋이 잡는다.
+                 서버에서도 남의 프로필 응답에서 뺐다(cmarket_api d42f71d). */}
           {/* ⚠️ **선도 이름표도 없다.** 처음엔 「가입일 ↔ 2023.04.12」에 구분선을 그었는데,
               그건 설정 화면처럼 값이 여럿 나열될 때 쓰는 짜임이라 한 줄만 있으면 떠 보였다.
               「가입」이라는 말꼬리가 붙어 있어 이름표도 따로 필요 없다.
