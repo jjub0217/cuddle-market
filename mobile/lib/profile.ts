@@ -25,6 +25,13 @@ export interface MyProfile {
   provider: string | null;
   /** 소개글 */
   introduction: string | null;
+  /**
+   * 본인 인증으로 들어온 이름. **못 고친다** — 보여주기만 한다.
+   * 서버가 이미 준다(`UserProfileResponse.java:28`).
+   */
+  name: string | null;
+  /** 가입한 이메일. **못 고친다**(`UserProfileResponse.java:30`) */
+  email: string | null;
 }
 
 /** 서버가 주는 그대로. 안 온 값은 undefined 라 아래에서 null로 채운다 */
@@ -53,6 +60,8 @@ export async function fetchMe(): Promise<MyProfile> {
     birthDate: data.birthDate ?? null,
     provider: data.provider ?? null,
     introduction: data.introduction ?? null,
+    name: data.name ?? null,
+    email: data.email ?? null,
   };
 }
 
