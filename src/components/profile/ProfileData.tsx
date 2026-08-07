@@ -266,9 +266,16 @@ export default function ProfileData({
               ) : null}
             </div>
           ) : null}
-          {/* ⚠️ items-start 다. 가운데 정렬이면 오른쪽 글자 줄 수가 늘 때마다(가입일이 생겼다)
-              사진이 아래로 밀려 닉네임과 눈높이가 안 맞는다 */}
-          <div className="flex flex-row items-start gap-3.5">
+          {/* ⚠️ **줄 수에 따라 맞춤이 갈린다.** 오른쪽 열이 사진(56px)보다 긴지 짧은지로 갈린다.
+
+              가입일 있음  닉네임·주소·가입일  3줄 ≈ 68px  >  사진   → items-start
+                          가운데로 맞추면 사진이 아래로 밀려 닉네임과 눈높이가 어긋난다
+              가입일 없음  닉네임·주소        2줄 ≈ 42px  <  사진   → items-center
+                          위로 맞추면 글자 아래가 비어 위쪽만 무거워 보인다
+
+              지금은 남의 프로필만 가입일을 그린다(UserPage 에서만 showJoinDate 를 넘긴다).
+              마이페이지·프로필 수정 옆 칸은 두 줄이다. */}
+          <div className={cn('flex flex-row gap-3.5', showJoinDate ? 'items-start' : 'items-center')}>
             <div className="relative h-14 w-14 shrink-0">
               {enableImageUpload ? (
                 <input
