@@ -60,13 +60,16 @@ grep -rhoE "['\"]#[0-9a-fA-F]{3,8}['\"]" --include="*.ts" --include="*.tsx" \
 어떤 속성에 쓰였는지로 셌다.
 
 ```
-글자(color)          #111827 본문·제목   #4B5563 중간(17)
-                    #6B7280 보조(47)    #9CA3AF 안내글·비활성(20)
+글자(color)          #111827 본문·제목    #374151 진한 보조(5)  #4B5563 중간(17)
+                    #6B7280 보조(47)     #9CA3AF 안내글·비활성(20)
 바탕(backgroundColor) #FFFFFF 화면·카드(70)  #F9FAFB 연함(15)  #F3F4F6 더 연함(11)
-테두리(border*)       #D1D5DB 칸 테두리(23)  #E5E7EB 구분선(24)
+테두리(border*)       #D1D5DB 칸 테두리(23)  #E5E7EB 구분선(24)  #D4C4B2 칩·툴바(7)
 ```
 
 `#E5E7EB` 하나만 역할이 둘이다 — 구분선(24회)이면서 회색 바탕(18회)이기도 하다.
+
+⚠️ **회색 다섯 단은 Tailwind gray 스케일 그대로다**(900·700·600·500·400). 웹이
+`--color-gray-*` 를 그대로 둔 것과 같은 자리에 있다.
 
 ### 이슈 본문에서 이미 해결된 항목
 
@@ -130,41 +133,89 @@ const styles = StyleSheet.create({
 surface           #FFFFFF   화면·카드 바탕
 surfaceMuted      #F9FAFB   한 단계 눈치채운 바탕
 surfaceSunken     #F3F4F6   움패인 바탕 (입력칸·구역)
+surfaceCream      #FAF8F3   크림 바탕 (프로필 수정)
 
-[글자]
+[글자 — 진한 것부터 다섯 단]
 onSurface         #111827   본문·제목
-onSurfaceStrong   #4B5563   중간 글자
+onSurfaceStrong   #374151   진한 보조 글자
+onSurfaceMedium   #4B5563   중간 글자
 onSurfaceMuted    #6B7280   보조 글자
 onSurfaceSubtle   #9CA3AF   안내글·비활성
 
 [선]
 outline           #D1D5DB   칸 테두리
 outlineVariant    #E5E7EB   구분선
+outlineBrand      #D4C4B2   칩·툴바·검색칸 테두리 (웹 --color-outline-variant)
 
 [앱에만 있는 역할 — 새로 지은 이름]
 action / onAction       #111827 / #FFFFFF   끝내는 단추
-selected / onSelected   #825500 / #FFFFFF   여럿 중 고른 것
+selected / onSelected   #825500 / #FFFFFF   여럿 중 고른 것 (웹 primary-600)
 danger / onDanger       #C91D1D / #FFFFFF   위험
 dangerSurface           #FEE2E2             위험 바탕
+success                 #15803D             확인 통과 (웹 --color-success-500)
+warningSurface          #FFF5E0             빈 목록 아이콘 바탕 (웹 --color-warning-container)
 favorite                #FC8181             찜 하트
+rating                  #FBBF24             별점
+black                   #000000             사진 뒷바탕·그림자
 
 [웹에서 그대로 가져오는 것]
 brandSurface            #FAF3E6   웹 primary-50    판매자 카드 바탕
 brandText               #633F00   웹 primary-700   브랜드 글자
 badgeSell / badgeSellBg          #2563EB / #EFF6FF
 badgeRequest / badgeRequestBg    #EA580C / #FFF7ED
+
+[브랜드 갈색 스케일 — 웹 단계 이름 그대로]
+brand100  #F4E3BF   프로필 사진 자리 바탕
+brand200  #ECC88E   댓글 작성자 표시 바탕
+brand300  #E2A958   빈 목록 아이콘
+brand500  #B06F15   알림 줄 바탕
 ```
 
-`brand700` 같은 **값을 그대로 옮겨 적은 이름은 쓰지 않는다.** 이슈가 「그런 이름은 토큰의
-이점이 거의 없다」고 미뤄 둔 이유가 그것이다.
+### ⚠️ 「값 이름 금지」 규칙은 실물 앞에서 접었다
 
-### 토큰으로 안 만드는 것
+처음에는 이슈 본문을 그대로 옮겨 **`brand700` 같은 값 이름을 쓰지 않는다**고 적었다.
+그런데 색 56개를 끝까지 세어 보니 **지킬 수 없는 규칙이었다.**
+
+브랜드 갈색이 스케일째 흩어져 있는데, 가운데 넷은 **각각 딱 한 번씩, 서로 다른 화면의
+서로 다른 역할**에 쓰인다.
 
 ```
-카카오 #FEE500 · 구글 #747775 #1F1F1F
-  → components/auth/social-login-buttons.tsx
-  → 남의 브랜드가 정한 색이라 우리가 못 바꾼다. 그 자리에 이유를 주석으로 남긴다
+#F4E3BF  프로필 사진 자리 바탕      1회
+#ECC88E  댓글 작성자 표시 바탕      1회
+#E2A958  빈 목록 아이콘            1회
+#B06F15  알림 줄 바탕              1회
 ```
+
+넷을 묶을 역할 이름이 없다. 억지로 지으면 `avatarSurface` 처럼 **그 한 줄 전용 이름**이
+되어, 다음에 다른 화면이 같은 갈색을 쓰려 할 때 이름을 또 지어야 한다.
+
+「값 이름은 이점이 없다」는 말은 **역할이 하나뿐일 때** 맞는 말이다. 한 색이 화면마다
+다른 일을 할 때는 단계 이름이 오히려 정직하고, 웹 `primary-50~900`과 1대 1로 맞아떨어져
+양쪽을 견주기도 쉽다.
+
+여러 곳에서 쓰이거나 뜻이 분명한 셋은 그대로 역할 이름으로 둔다 — `selected`(#825500,
+10곳) · `brandText`(#633F00) · `brandSurface`(#FAF3E6).
+
+⚠️ `brand50`은 만들지 않는다. `brandSurface`와 값이 같아(`#FAF3E6`) 한 색에 이름이 둘이
+되면 어느 쪽을 써야 할지 매번 헷갈린다.
+
+### 토큰으로 안 만드는 것 — lint 예외 네 곳
+
+```
+constants/colors.ts                      토큰 원본
+
+components/auth/social-login-buttons.tsx  카카오 #FEE500 · 구글 #747775 #1F1F1F
+components/auth/social-logos.tsx          구글 로고 SVG #4285F4 #34A853 #FBBC05 #EA4335
+  → 남의 브랜드가 정한 색이라 우리가 못 바꾼다
+
+lib/notifications.ts                      알림 종류별 색 짝 6쌍(12색)
+  → NOTIFICATION_COLORS 로 **이미 한곳에 모여 있고** 이름도 뜻이 드러난다
+    (CHAT_NEW_ROOM · COMMENT_REPLY …). 이슈가 말한 「화면마다 흩어짐」 문제가 없어
+    지금 옮길 값어치가 없다. colors.ts 로 올리면 notifyChatBg 같은 토큰 12개가 느는데
+    하나같이 그 파일 밖에서는 안 쓰인다
+```
+
+⚠️ 예외를 넷 두었으므로 **「리터럴 0」은 목표가 아니다.** 이 넷 밖에서 0이면 된다.
 
 ### 주 버튼 색은 역할로 가른다
 
@@ -196,20 +247,22 @@ selected  #825500   여럿 중 고른 것          필터 칩·탭·툴바·상�
 
 ```
 1단계  constants/colors.ts 만들기                          화면 무변화
-2단계  순수 치환 — 값 그대로, 이름만                        화면 무변화 · 네 묶음
-       ① components/ui + components 최상위 3개    71회
-       ② components/products                     94회
-       ③ components/my + components/community   128회
-       ④ 나머지 전부                            306회
-          app 화면들 · auth · signup · places · product-detail
-          · user-profile · notifications · report · find-password
-          · constants · lib
+2단계  순수 치환 — 값 그대로, 이름만                        화면 무변화 · 다섯 묶음
+       ① components/ui + components 최상위 3개    71회  10파일
+       ② components/products                     94회  11파일
+       ③ components/my + components/community   128회  17파일
+       ④ app 화면들                             140회  22파일
+       ⑤ 남은 컴포넌트 + constants/theme.ts      134회  22파일
+                                          합계  567회
 3단계  값 통일 — 여기서만 화면이 바뀐다                      실기기 확인 ⚠️
        chip-field 고른 칩      먹색 → 갈색         2곳
        profile-edit 저장 단추   갈색 → 먹색         1곳
        위험색                 #DC2626 → #C91D1D   12곳
 4단계  theme.ts 잔재 정리 + 리터럴 재유입 차단
 ```
+
+전체 599회 중 **32회는 예외 넷에 들어 있어 손대지 않는다**(카카오 7 · 구글 로고 5 ·
+알림 색 16 + 그 시험 4). 그래서 치환 대상은 567회다.
 
 **3단계를 맨 뒤에 두는 이유가 하나 더 있다.** 2단계를 끝내면 어긋난 자리가 **이름으로**
 드러난다. 지금은 `chipActive: { backgroundColor: '#111827' }`이라 눈에 안 띄지만,
@@ -232,12 +285,12 @@ selected  #825500   여럿 중 고른 것          필터 칩·탭·툴바·상�
 }]
 ```
 
-예외는 두 파일뿐이다.
+예외는 3절에 적은 네 파일이다 — `constants/colors.ts` · `social-login-buttons.tsx` ·
+`social-logos.tsx` · `lib/notifications.ts`.
 
-```
-constants/colors.ts                     토큰 원본
-components/auth/social-login-buttons.tsx  카카오·구글이 정한 색
-```
+⚠️ **이 규칙이 진짜 도는지 먼저 확인해야 한다.** `Literal[value=/…/]` 라는 selector 문법이
+안 먹을 수 있다. 일부러 색을 한 줄 적어 보고 lint 가 잡는 것을 눈으로 본 다음에야
+「잠갔다」고 말한다.
 
 ## 6. 어떻게 확인하나
 
