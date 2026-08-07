@@ -1,4 +1,7 @@
-export const formatJoinDate = (dateString: string): string => {
-  const date = new Date(dateString)
-  return `${date.getFullYear()}년 ${date.getMonth() + 1}월`
-}
+// 원본은 packages/shared에 있다. 웹·앱이 같은 함수를 쓰게 하려고 여기서는 재수출만 한다.
+// (기존 import 경로를 유지해 호출부를 고치지 않기 위한 껍데기 — formatPrice.ts와 같은 방식)
+//
+// ⚠️ 여기 있던 옛 구현은 `2023년 4월`을 돌려줬다. 공유 함수는 `2023.04.12`다 —
+//    쓰는 곳이 0건이라 아무도 못 느끼고 있었지만, 나중에 누가 이 파일을 집어 쓰면
+//    **웹에만 다른 모양**이 뜬다. 그래서 지우지 않고 같은 것을 가리키게 했다.
+export { formatJoinDate } from '@cuddle/shared'

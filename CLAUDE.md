@@ -59,6 +59,18 @@ mobile/            Jest      앱 화면·로직 (jest-expo)
 src/ (웹)          vitest    웹 화면·훅 (jsdom + React Testing Library)
 ```
 
+**웹에서 shared를 쓸 때는 기존 경로에 껍데기를 남긴다.** 호출부를 안 고쳐도 되게 `src/lib/utils/<이름>.ts`를 재수출 한 줄로 바꾼다. 앱은 `@cuddle/shared`를 바로 부른다.
+
+```ts
+// src/lib/utils/formatBirthDate.ts
+// 원본은 packages/shared에 있다. 웹·앱이 같은 함수를 쓰게 하려고 여기서는 재수출만 한다.
+export { formatBirthDate } from '@cuddle/shared'
+```
+
+지금 이렇게 된 것: `formatPrice` · `formatBirthDate` · `formatJoinDate`.
+
+⚠️ **한쪽에만 있는 함수는 같은 값을 화면마다 다르게 보이게 한다.** 18바퀴에 실제로 그랬다 — 날짜 표기가 웹에 셋, 앱에 하나였고 웹의 `formatJoinDate`는 조각 파일 안에 갇혀 있어 앱이 아예 못 썼다.
+
 ## 백엔드 저장소
 
 이 저장소가 **아니다**.
@@ -70,6 +82,8 @@ src/ (웹)          vitest    웹 화면·훅 (jsdom + React Testing Library)
                            service/cmarket/          웹 계층 (컨트롤러·요청/응답 DTO)
                            service/cmarket-domain/   도메인 (enum·모델)
 ```
+
+⚠️ **이 저장소에는 GitHub 이슈를 만들지 않는다.** 남의 저장소(`jinioh88/cmarket_api`)라 이슈판을 안 쓴다. 백엔드를 고칠 일이 생기면 **이 저장소 이슈에 같이 적는다** — #862가 그 예다(프론트 이슈인데 백엔드 커밋이 그 번호를 단다). 2026-08-07에 모르고 만들었다가 닫았고, **삭제 권한이 없어 닫는 것밖에 못 했다.**
 
 **응답 DTO 찾는 법** — API를 붙일 때 「다른 API가 이러니 이것도 그렇겠지」로 추측하지 말고 직접 열어본다. 9바퀴에 이걸 안 해서 차단 목록이 늘 비어 있었다.
 
@@ -99,7 +113,26 @@ grep -nE "private |public class" <그 파일>
 3. 작업 브랜치 정리 (삭제)
 
 ```bash
-git checkout main && git pull origin main && git merge develop && git push origin main
+git fetch origin
+git checkout main && git pull --ff-only origin main
+git merge origin/develop        # ⚠️ 로컬 develop 이 아니라 origin/develop
+git push origin main
+```
+
+⚠️ **`git merge develop` 이라고 쓰면 안 된다.** 그건 **로컬** `develop` 을 본다.
+`git fetch` 는 `origin/develop` 만 갱신하므로, 로컬 `develop` 이 뒤처져 있으면
+**머지가 조용히 커밋을 빠뜨린다. 오류도 안 난다** — Fast-forward 로 성공해 버린다.
+
+```
+2026-08-01   23커밋을 빠뜨렸다. 푸시 전에 알아채 피해는 없었다
+2026-08-07   같은 곳에서 또. 65커밋을 빠뜨린 채 「완료」로 보고하고 푸시까지 했다
+```
+
+**푸시한 뒤 두 줄이 같은지 눈으로 확인한다.**
+
+```bash
+git log --oneline -1 main
+git log --oneline -1 origin/develop   # 해시가 같아야 한다
 ```
 
 ## 기존 소스 복사 명령어
