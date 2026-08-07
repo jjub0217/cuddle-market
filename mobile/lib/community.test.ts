@@ -58,7 +58,7 @@ describe('fetchPosts', () => {
       })
     );
 
-    const page = await fetchPosts('QUESTION', 0);
+    const page = await fetchPosts({ boardType: 'QUESTION', page: 0 });
 
     expect(page.content).toHaveLength(1);
     expect(page.content[0].id).toBe(36);
@@ -69,7 +69,7 @@ describe('fetchPosts', () => {
   it('boardType과 page를 주소에 담는다', async () => {
     apiFetch.mockResolvedValue(okJson({ data: { content: [], hasNext: false } }));
 
-    await fetchPosts('INFO', 2);
+    await fetchPosts({ boardType: 'INFO', page: 2 });
 
     expect(apiFetch).toHaveBeenCalledWith('/community/posts?boardType=INFO&page=2&size=10');
   });
@@ -77,7 +77,7 @@ describe('fetchPosts', () => {
   it('data가 비어도 빈 목록을 돌려준다', async () => {
     apiFetch.mockResolvedValue(okJson({}));
 
-    const page = await fetchPosts('QUESTION', 0);
+    const page = await fetchPosts({ boardType: 'QUESTION', page: 0 });
 
     expect(page.content).toEqual([]);
     expect(page.hasNext).toBe(false);
@@ -86,7 +86,63 @@ describe('fetchPosts', () => {
   it('실패하면 던진다', async () => {
     apiFetch.mockResolvedValue(errJson(500));
 
-    await expect(fetchPosts('QUESTION', 0)).rejects.toThrow('글 목록을 불러오지 못했어요');
+    await expect(fetchPosts({ boardType: 'QUESTION', page: 0 })).rejects.toThrow(
+      '글 목록을 불러오지 못했어요'
+    );
+  });
+
+  // ----- 검색·정렬 (#857) -----
+  //
+  // 서버는 searchType 셋(title · title_content · writer)과 정렬 넷(latest · oldest ·
+  // views · comments)을 다 받는다(PostRepositoryCustomImpl.java:56-72, :112-127).
+  // 우리가 쓰는 것만 싣는다.
+  //
+  // ⚠️ 서버는 모르는 값을 받아도 400을 안 준다 — 조용히 무시하고 조건 없이 조회한다.
+  //    그래서 오타가 화면에 안 드러난다. 여기서 값을 못 박아 둔다.
+
+  it('검색어를 주면 searchType 과 함께 싣는다', async () => {
+    apiFetch.mockResolvedValue(okJson({ data: { content: [], hasNext: false } }));
+
+    await fetchPosts({ boardType: 'QUESTION', page: 0, keyword: '사료' });
+
+    const url = apiFetch.mock.calls[0][0] as string;
+    // ⚠️ 검색 종류는 늘 title_content 다. 고르는 자리를 안 뒀다(설계 §2)
+    expect(url).toContain('searchType=title_content');
+    expect(url).toContain('keyword=%EC%82%AC%EB%A3%8C');
+  });
+
+  it('검색어가 없으면 searchType 도 안 싣는다', async () => {
+    apiFetch.mockResolvedValue(okJson({ data: { content: [], hasNext: false } }));
+
+    await fetchPosts({ boardType: 'QUESTION', page: 0 });
+
+    const url = apiFetch.mock.calls[0][0] as string;
+    expect(url).not.toContain('searchType');
+    expect(url).not.toContain('keyword');
+  });
+
+  it('빈 검색어도 안 싣는다 — 전체 목록으로 돌아가는 길이다', async () => {
+    apiFetch.mockResolvedValue(okJson({ data: { content: [], hasNext: false } }));
+
+    await fetchPosts({ boardType: 'QUESTION', page: 0, keyword: '' });
+
+    expect(apiFetch.mock.calls[0][0]).not.toContain('keyword');
+  });
+
+  it('정렬을 싣는다', async () => {
+    apiFetch.mockResolvedValue(okJson({ data: { content: [], hasNext: false } }));
+
+    await fetchPosts({ boardType: 'INFO', page: 0, sortBy: 'views' });
+
+    expect(apiFetch.mock.calls[0][0]).toContain('sortBy=views');
+  });
+
+  it('정렬을 안 주면 sortBy 를 안 싣는다 — 서버 기본이 latest 다', async () => {
+    apiFetch.mockResolvedValue(okJson({ data: { content: [], hasNext: false } }));
+
+    await fetchPosts({ boardType: 'QUESTION', page: 0 });
+
+    expect(apiFetch.mock.calls[0][0]).not.toContain('sortBy');
   });
 });
 

@@ -35,6 +35,7 @@ pnpm gate:mobile     # tsc --noEmit + expo lint + jest
 | `@testing-library/react-native` 14의 `render`·`rerender`·`fireEvent` | **셋 다 기다려야** 한다 | `await` 없이 쓰면 render는 «render function has not been called», **fireEvent·rerender는 오류 없이 옛 값을 준다** — 시험이 조용히 틀린 것을 통과시킨다 |
 | `TextInput` 글자 일부에만 색 주기 | `value`로는 못 한다. 통째로 한 덩어리다 | 값을 **children**으로 준다: `<TextInput>{<Text style={…}>@닉</Text>}{<Text>나머지</Text>}</TextInput>`. 맨 글자를 그냥 두면 «Text strings must be rendered within a `<Text>`»가 난다. **한글 입력과 부딪힐 수 있어 실기기로 봐야 한다** |
 | `react-native-marked`의 `<Markdown>` | 속이 `FlatList`라 `ScrollView` 안에 넣으면 경고가 난다. `MDImage`는 `useEffect` 의존성 배열이 없어 끝없이 다시 그린다(8.1.1) | `useMarkdown` 훅으로 조각만 받고, `Renderer`를 상속해 `image()`만 우리 것으로 바꾼다 |
+| **`app/` 안에 시험 파일** | expo-router는 `app/`의 **모든 파일을 화면으로 본다.** 시험 파일도 앱 번들에 끼워 넣으려다 `@testing-library/react-native`를 못 찾아 **실기기가 아예 안 뜬다**(`UnableToResolveError`). ⚠️ **타입체크도 린트도 안 잡아준다** — 게이트가 초록인데 폰만 죽는다 (2026-08-07) | 화면 시험은 `mobile/__tests__/`에 두고 `@/app/...`로 불러온다 |
 
 ## API를 붙일 때
 

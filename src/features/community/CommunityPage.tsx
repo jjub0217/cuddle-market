@@ -8,7 +8,7 @@ import { UnderlineTabs } from '@/components/UnderlineTabs'
 import { ROUTES } from '@/constants/routes'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api/api'
-import { Eye, MessageSquare, MessageSquareText, PenLine, Plus, Search } from 'lucide-react'
+import { Eye, MessageSquare, MessageSquareText, PenLine, Plus, Search, X } from 'lucide-react'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import { getTimeAgo } from '@cuddle/shared'
 import { useUserStore } from '@/store/userStore'
@@ -67,17 +67,37 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
     router.push(`?${params.toString()}`)
   }
 
+  /** 검색어를 주소에 반영한다. 빈 값이면 아예 뺀다. */
+  const applyKeyword = (keyword: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (keyword) {
+      params.set('communityKeyword', keyword)
+    } else {
+      params.delete('communityKeyword')
+    }
+    router.push(`?${params.toString()}`)
+  }
+
+  /**
+   * 글자를 칠 때마다 부른다.
+   *
+   * ⚠️ **비었을 때만 곧바로 반영한다.** 지우기(X)를 누른 것과 같아진다 — 손으로 다 지웠는데
+   *    Enter 를 또 눌러야 하면 검색 결과에 갇힌다.
+   *
+   * ⚠️ 반대로 **글자가 있을 때는 안 건드린다.** 한 글자마다 다시 조회하면 목록이 계속
+   *    깜빡인다. 그때는 Enter 를 기다린다.
+   */
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const next = e.target.value
+    setSearchInput(next)
+    // 이미 검색어가 없으면 주소를 건드릴 이유가 없다
+    if (!next.trim() && currentKeyword) applyKeyword('')
+  }
+
   const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.nativeEvent.isComposing) return
     if (e.key === 'Enter') {
-      const params = new URLSearchParams(searchParams.toString())
-      const keyword = e.currentTarget.value.trim()
-      if (keyword) {
-        params.set('communityKeyword', keyword)
-      } else {
-        params.delete('communityKeyword')
-      }
-      router.push(`?${params.toString()}`)
+      applyKeyword(e.currentTarget.value.trim())
     }
   }
 
@@ -214,12 +234,26 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
             <input
               type="text"
               value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+              onChange={handleSearchChange}
               onKeyDown={handleSearchSubmit}
               placeholder="궁금한 내용을 검색해보세요"
               enterKeyHint="search"
-              className="border-outline-variant/40 bg-surface-container-low focus:border-primary focus:ring-primary/20 w-full rounded-full border py-2 pr-4 pl-11 text-sm text-[#1c1b1b] placeholder:text-sm placeholder:text-[#827565] focus:ring-2 focus:outline-none"
+              className="border-outline-variant/40 bg-surface-container-low focus:border-primary focus:ring-primary/20 w-full rounded-full border py-2 pr-11 pl-11 text-sm text-[#1c1b1b] placeholder:text-sm placeholder:text-[#827565] focus:ring-2 focus:outline-none"
             />
+            {/* 글자가 있을 때만 보인다. 누르면 곧바로 전체 목록으로 돌아간다 */}
+            {searchInput ? (
+              <button
+                type="button"
+                aria-label="입력 내용 지우기"
+                onClick={() => {
+                  setSearchInput('')
+                  applyKeyword('')
+                }}
+                className="absolute top-1/2 right-4 -translate-y-1/2 cursor-pointer text-[#827565] hover:text-[#1c1b1b]"
+              >
+                <X size={16} />
+              </button>
+            ) : null}
           </div>
         </section>
 

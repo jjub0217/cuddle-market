@@ -174,6 +174,20 @@ export const COMMUNITY_SORT_TYPE = [
   { id: 'comments', label: '댓글 순' },
 ]
 
+/**
+ * 커뮤니티 검색 종류.
+ *
+ * ⚠️ **아무 데서도 안 쓴다.** 웹도 앱도 늘 `title_content`(제목+내용)로만 찾는다
+ *    (`CommunityPage.tsx` 의 `SEARCH_TYPE` 이 그 값으로 못 박혀 있다).
+ *
+ * 서버는 셋 다 받고 진짜로 돈다(`PostRepositoryCustomImpl.java:56-72`).
+ * 그런데 **고르는 자리를 안 뒀다** — 「제목」은 「제목+내용」의 부분집합이고,
+ * 「작성자로 찾기」는 프로필 화면이 하는 일이라서다(#857 설계 §2).
+ *
+ * 이 상수가 남아 있는 탓에 #857 이슈 본문이 「웹은 이걸 쓴다」로 잘못 적혔고,
+ * 서버까지 열어보고서야 밝혀졌다. **지우지 않고 남기는 이유**는 서버가 셋을 받는다는
+ * 사실 자체가 기록할 값어치가 있어서다 — 필요해지면 웹·앱에 함께 넣는다.
+ */
 export const COMMUNITY_SEARCH_TYPE = [
   { id: 'title', label: '제목' },
   { id: 'title_content', label: '제목 + 내용' },
