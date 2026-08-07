@@ -2,13 +2,22 @@ import type { Product } from '@cuddle/shared';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
-import { FlatList, Pressable, StyleSheet } from 'react-native';
+import { Pressable, SectionList, StyleSheet, View } from 'react-native';
 
 import { EmptyState, ErrorState, ListFooter, LoadingState } from '@/components/list-states';
 import { ProductCard } from '@/components/product-card';
-import { ProductFilterRow } from '@/components/products/product-filter-row';
+import {
+  DetailFilterSheet,
+  type DetailFilterValue,
+} from '@/components/products/detail-filter-sheet';
+import {
+  ProductFilterRow,
+  ProductPetTypeTabs,
+} from '@/components/products/product-filter-row';
+import { ProductListToolbar } from '@/components/products/product-list-toolbar';
 import { useFavorite } from '@/hooks/use-favorite';
 import { fetchProducts } from '@/lib/products';
+import { EMPTY_FILTERS, toParams, type ProductFilters } from '@/lib/products/filters';
 
 // 상품 목록. **홈과 검색 결과가 이 조각 하나를 나눠 쓴다.**
 //
@@ -21,6 +30,26 @@ import { fetchProducts } from '@/lib/products';
 //
 // 화면(홈)에 남는 것: SafeAreaView · AppHeader · 떠 있는 「상품 등록」 단추.
 // 그건 목록의 일이 아니다.
+//
+// ## 무엇이 붙어 있고 무엇이 사라지는가
+//
+// ```
+// [전체][포유류][조류]…       ← 목록 **밖**이라 늘 화면에 남는다   (SectionList 형제)
+// ────────────────────
+// 소분류·카테고리            ← 목록과 함께 스크롤되어 사라진다     (ListHeaderComponent)
+// [전체][판매][판매요청] [⚙] ← 위로 올라가면 화면에 붙는다        (섹션 헤더)
+// 상품들
+// ```
+//
+// 필터 넷을 다 고정하면 폰 세로의 3분의 1이 필터가 된다(설계 §2). 그렇다고 툴바까지
+// 사라지면 종류·정렬을 바꾸려고 매번 맨 위로 올라가야 한다.
+// FlatList는 헤더 **전체**만 붙일 수 있어 이 둘을 갈라 놓지 못한다. SectionList는
+// 섹션 헤더만 붙는다(`stickySectionHeadersEnabled`).
+// ⚠️ 안드로이드는 그 값이 **기본으로 꺼져 있다** — 명시해야 한다.
+//
+// ⚠️ **붙는 것은 섹션 헤더 하나뿐이다.** 대분류 탭까지 늘 보이게 하려면 목록 **밖**에
+//    형제로 두는 수밖에 없다(#855 후속). 세로를 86dp쯤 더 쓰지만, 대분류는 계속 오가는
+//    축인데 홈에 「맨 위로」 단추가 없어 한 번 내려가면 닿기 어렵다.
 
 export interface ProductListViewRef {
   /**
@@ -44,16 +73,22 @@ export const ProductListView = forwardRef<ProductListViewRef, Props>(function Pr
   { keyword, bottomInset = 12 },
   ref
 ) {
-  const [petType, setPetType] = useState<string | null>(null);
-  const [category, setCategory] = useState<string | null>(null);
-  const listRef = useRef<FlatList<Product>>(null);
+  // 조건 여덟 개를 한 덩어리로 든다. 흩어 두면 queryKey에 하나 빠뜨리기 쉽다.
+  const [filters, setFilters] = useState<ProductFilters>(EMPTY_FILTERS);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const listRef = useRef<SectionList<Product>>(null);
+
+  // ⚠️ **꼭 함수형으로 고친다.** 대분류를 바꾸면 필터 줄이 「소분류 풀기」와 「대분류 바꾸기」를
+  //    **연달아** 부른다. 지금 값을 펴서 쓰면(`{...filters, …}`) 두 번째가 첫 번째를 덮어써서
+  //    푼 소분류가 되살아난다.
+  const patch = (next: Partial<ProductFilters>) => setFilters((prev) => ({ ...prev, ...next }));
 
   useImperativeHandle(ref, () => ({
     reset: () => {
-      setPetType(null);
-      setCategory(null);
+      setFilters(EMPTY_FILTERS);
       // 목록이 안 그려져 있을 수도 있다(빈 화면·오류일 때). 그때는 올릴 것이 없다.
-      listRef.current?.scrollToOffset({ offset: 0, animated: true });
+      // scrollToLocation은 첫 상품 기준이라 위쪽 필터 줄이 가려진다 — 스크롤 자체를 0으로 보낸다.
+      listRef.current?.getScrollResponder()?.scrollTo({ y: 0, animated: true });
     },
   }));
 
@@ -66,17 +101,11 @@ export const ProductListView = forwardRef<ProductListViewRef, Props>(function Pr
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    // ⚠️ **조건을 열쇠에 넣는다.** 안 넣으면 필터를 바꿔도 이미 받아 둔 페이지를 그대로
-    //    쓰고 2페이지부터 이어 받아 **뒤섞인 목록**이 된다.
-    queryKey: ['products', { keyword, petType, category }],
-    queryFn: ({ pageParam }) =>
-      fetchProducts({
-        page: pageParam,
-        keyword,
-        // null 이면 안 보낸다 — 「전체」가 이 경우다(lib/products.ts 주석 참고).
-        petType: petType ?? undefined,
-        categories: category ?? undefined,
-      }),
+    // ⚠️ **조건을 열쇠에 다 넣는다.** 하나라도 빠지면 그 조건만 안 먹는다 —
+    //    이미 받아 둔 페이지를 그대로 쓰고 2페이지부터 이어 받아 **뒤섞인 목록**이 된다.
+    //    덩어리째 펼쳐 넣는 이유가 이것이다. 조건이 늘어도 여기를 고칠 일이 없다.
+    queryKey: ['products', { keyword, ...filters }],
+    queryFn: ({ pageParam }) => fetchProducts(toParams(filters, pageParam, keyword)),
     initialPageParam: 0,
     // 다음 페이지 번호 = 지금까지 받은 페이지 수(0-base). hasNext=false면 종료.
     getNextPageParam: (last, all) => (last.hasNext ? all.length : undefined),
@@ -94,54 +123,119 @@ export const ProductListView = forwardRef<ProductListViewRef, Props>(function Pr
   //
   //    (2026-08-06: 처음엔 홈 문구가 검색 결과까지 따라갔고, 그걸 고치면서 내가 문구를
   //     새로 지었다. 둘 다 잘못이었다. 웹을 먼저 찾았어야 했다.)
-  const 조건이걸렸다 = Boolean(keyword || petType || category);
+  //
+  // 정렬은 여기서 뺀다 — 「최신순」이 「고른 조건」은 아니다. 정렬만 바꿨는데 목록이 비면
+  // 그건 앱에 상품이 없는 것이지 조건이 좁아서가 아니다.
+  const { sortBy: _sortBy, ...좁히는조건 } = filters;
+  const 조건이걸렸다 = Boolean(keyword) || Object.values(좁히는조건).some((v) => v !== null);
+
+  // 목록 밖에 서는 줄. 그래서 `ListHeaderComponent`가 아니라 `SectionList`의 형제로 그린다.
+  const 대분류탭 = (
+    <ProductPetTypeTabs
+      petType={filters.petType}
+      petDetailType={filters.petDetailType}
+      onChangePetType={(next) => patch({ petType: next })}
+      onChangePetDetailType={(next) => patch({ petDetailType: next })}
+    />
+  );
+
+  const 필터줄 = (
+    <ProductFilterRow
+      petType={filters.petType}
+      petDetailType={filters.petDetailType}
+      category={filters.category}
+      onChangePetDetailType={(next) => patch({ petDetailType: next })}
+      onChangeCategory={(next) => patch({ category: next })}
+    />
+  );
+
+  const 툴바 = (
+    <ProductListToolbar
+      productType={filters.productType}
+      sortBy={filters.sortBy}
+      onChangeProductType={(next) => patch({ productType: next })}
+      onChangeSort={(next) => patch({ sortBy: next })}
+      onPressFilter={() => setSheetOpen(true)}
+    />
+  );
 
   // ----- 3상태 렌더 (로딩/오류/빈은 서로 섞지 않음) -----
-  const renderBody = () => {
+  //
+  // ⚠️ **목록은 늘 그린다.** 로딩·오류·빈 화면은 목록 **안쪽**(ListEmptyComponent)에 넣는다.
+  //
+  //    처음에는 이 셋일 때 목록을 통째로 안 그리고 필터를 밖에 따로 그렸다. 조건을 되돌릴
+  //    길을 남기려던 것이었는데, 그러면 **필터 줄이 두 자리를 오간다** — 조건을 바꿀 때마다
+  //    「불러오는 중」을 지나며 헤더 안 → 밖 → 헤더 안으로 옮겨 다닌다.
+  //    자리가 바뀌면 React가 조각을 새로 만들고, 소분류 줄의 접힘 상태가 초기화되어
+  //    **펼쳐지는 모습 없이 툭 나타난다**(2026-08-06 실기기에서 나온 것).
+  //
+  //    한 자리에 못 박으니 되돌릴 길도 남고 움직임도 살아난다.
+  const renderEmpty = () => {
     if (isLoading) return <LoadingState />;
     // 첫 로드 실패(보여줄 목록이 없음) → 전체 화면 오류.
     if (isError) return <ErrorState onRetry={() => refetch()} />;
-    if (products.length === 0) {
-      // 조건 없이 비었다면 앱에 상품이 정말 하나도 없는 것이다 — 그때는 앱이 원래 쓰던
-      // 문구(「아직 등록된 상품이 없어요 / 첫 상품이 올라오면…」)가 맞다.
-      return 조건이걸렸다 ? (
-        <EmptyState
-          icon="search"
-          title="검색 결과가 없습니다"
-          description="다른 필터 조건으로 검색해보세요"
-        />
-      ) : (
-        <EmptyState />
-      );
-    }
-
-    return (
-      <FlatList
-        ref={listRef}
-        data={products}
-        keyExtractor={(item) => String(item.id)}
-        renderItem={({ item }) => <ProductRow product={item} />}
-        contentContainerStyle={[styles.listContent, { paddingBottom: bottomInset }]}
-        showsVerticalScrollIndicator={false}
-        onEndReachedThreshold={0.4}
-        onEndReached={() => {
-          if (hasNextPage && !isFetchingNextPage) fetchNextPage();
-        }}
-        ListFooterComponent={<ListFooter loading={isFetchingNextPage} />}
+    // 조건 없이 비었다면 앱에 상품이 정말 하나도 없는 것이다 — 그때는 앱이 원래 쓰던
+    // 문구(「아직 등록된 상품이 없어요 / 첫 상품이 올라오면…」)가 맞다.
+    return 조건이걸렸다 ? (
+      <EmptyState
+        icon="search"
+        title="검색 결과가 없습니다"
+        description="다른 필터 조건으로 검색해보세요"
       />
+    ) : (
+      <EmptyState />
     );
   };
 
   return (
     <>
-      {/* 목록이 비어도 알약은 보인다 — 안 보이면 조건을 되돌릴 방법이 없다. */}
-      <ProductFilterRow
-        petType={petType}
-        category={category}
-        onChangePetType={setPetType}
-        onChangeCategory={setCategory}
+      {대분류탭}
+      <SectionList
+        ref={listRef}
+        testID="product-list"
+        // 섹션은 늘 하나다. 목록을 나누려는 게 아니라 **툴바를 붙이려고** 쓴다.
+        sections={[{ data: products }]}
+        keyExtractor={(item) => String(item.id)}
+        renderItem={({ item }) => (
+          <View style={styles.item}>
+            <ProductRow product={item} />
+          </View>
+        )}
+        ListHeaderComponent={필터줄}
+        renderSectionHeader={() => 툴바}
+        // ⚠️ 안드로이드는 기본이 false다. 안 주면 툴바가 같이 스크롤되어 사라진다
+        stickySectionHeadersEnabled
+        contentContainerStyle={{ paddingBottom: bottomInset }}
+        showsVerticalScrollIndicator={false}
+        onEndReachedThreshold={0.4}
+        onEndReached={() => {
+          if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+        }}
+        // ⚠️ 빈 화면 안내를 `ListEmptyComponent` 에 못 넣는다. 그건 **섹션이 하나도 없을 때만**
+        //    그려지는데, 우리는 「빈 섹션 하나」라서 안 걸린다(실측). 섹션을 없애면 섹션 헤더인
+        //    툴바까지 사라져 조건을 되돌릴 길이 없어진다.
+        //    그래서 목록 끝자리에 넣는다 — 항목이 없으니 자리는 똑같다.
+        ListFooterComponent={
+          <>
+            {products.length === 0 && renderEmpty()}
+            <ListFooter loading={isFetchingNextPage} />
+          </>
+        }
       />
-      {renderBody()}
+      <DetailFilterSheet
+        visible={sheetOpen}
+        value={{
+          productStatus: filters.productStatus,
+          price: filters.price,
+          sido: filters.sido,
+          gugun: filters.gugun,
+        }}
+        onClose={() => setSheetOpen(false)}
+        onApply={(next: DetailFilterValue) => {
+          patch(next);
+          setSheetOpen(false);
+        }}
+      />
     </>
   );
 });
@@ -173,10 +267,11 @@ function ProductRow({ product }: { product: Product }) {
 }
 
 const styles = StyleSheet.create({
-  listContent: {
+  // 여백을 카드 줄이 스스로 갖는다. contentContainerStyle에 주면 필터 줄·툴바까지
+  // 같이 밀려 좌우가 두 겹이 된다(그 둘은 자기 여백을 이미 갖고 있다).
+  item: {
     paddingHorizontal: 16,
-    paddingTop: 12,
-    gap: 8,
+    paddingTop: 8,
   },
   cardPressed: {
     opacity: 0.7,

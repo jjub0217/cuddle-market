@@ -20,8 +20,9 @@ const PAGE_SIZE = 20
 /**
  * 목록을 좁히는 조건.
  *
- * 서버(`ProductSearchRequest`)는 12가지를 받지만 지금은 셋만 쓴다.
- * 나머지(가격·지역·상태·정렬·상세 종류)는 #855에서.
+ * 서버(`ProductSearchRequest`)가 받는 것들이다.
+ * 화면에서는 이걸 직접 만들지 말고 `lib/products/filters.ts` 의 `toParams` 를 쓴다 —
+ * 조건이 여덟 개라 한 덩어리(`ProductFilters`)로 다루는 편이 낫다.
  */
 export interface ProductListParams {
   /** 0부터 시작하는 페이지 번호 */
@@ -30,8 +31,26 @@ export interface ProductListParams {
   keyword?: string
   /** 반려동물 대분류 코드 */
   petType?: string
+  /** 반려동물 소분류 코드 */
+  petDetailType?: string
   /** 상품 카테고리 코드. 서버는 목록을 받지만 하나만 보낸다(웹과 같다) */
   categories?: string
+  /** SELL(판매) | REQUEST(판매요청) */
+  productType?: string
+  /** 상품 상태 코드. 이것도 서버는 목록을 받지만 하나만 보낸다 */
+  productStatuses?: string
+  /** 가격 구간 아래 끝 */
+  minPrice?: number
+  /** 가격 구간 위 끝. 「10만원 이상」처럼 끝이 없으면 안 보낸다 */
+  maxPrice?: number
+  /** 지역 시/도 */
+  addressSido?: string
+  /** 지역 시/군/구 */
+  addressGugun?: string
+  /** 정렬 기준. ⚠️ 웹 SORT_TYPE 의 id 가 아니라 **서버가 받는 값**이다(price 등) */
+  sortBy?: string
+  /** 정렬 방향(asc·desc). 가격순일 때만 붙는다 */
+  sortOrder?: string
 }
 
 /**
@@ -46,7 +65,16 @@ export async function fetchProducts({
   page,
   keyword,
   petType,
+  petDetailType,
   categories,
+  productType,
+  productStatuses,
+  minPrice,
+  maxPrice,
+  addressSido,
+  addressGugun,
+  sortBy,
+  sortOrder,
 }: ProductListParams): Promise<ProductResponse['data']> {
   const query = new URLSearchParams({ page: String(page), size: String(PAGE_SIZE) })
 
@@ -55,7 +83,19 @@ export async function fetchProducts({
   //    URLSearchParams 가 한글·공백을 알아서 주소용으로 바꿔 준다.
   if (keyword) query.set('keyword', keyword)
   if (petType) query.set('petType', petType)
+  if (petDetailType) query.set('petDetailType', petDetailType)
   if (categories) query.set('categories', categories)
+  if (productType) query.set('productType', productType)
+  if (productStatuses) query.set('productStatuses', productStatuses)
+  if (addressSido) query.set('addressSido', addressSido)
+  if (addressGugun) query.set('addressGugun', addressGugun)
+  if (sortBy) query.set('sortBy', sortBy)
+  if (sortOrder) query.set('sortOrder', sortOrder)
+
+  // ⚠️ **가격은 숫자다.** `if (값)` 으로 거르면 **0원이 사라진다**(0 은 거짓값).
+  //    「없음」은 undefined 뿐이므로 그것만 걸러낸다.
+  if (minPrice !== undefined) query.set('minPrice', String(minPrice))
+  if (maxPrice !== undefined) query.set('maxPrice', String(maxPrice))
 
   const res = await apiFetch(`/products/search?${query.toString()}`)
 
