@@ -12,6 +12,7 @@ import { ProductCard } from '@/components/product-card';
 import { BlockConfirm } from '@/components/report/block-confirm';
 import { StatusFilterChips, type FilterChip } from '@/components/my/status-filter-chips';
 import { ProfileHead } from '@/components/user-profile/profile-head';
+import { colors } from '@/constants/colors';
 import { useMe } from '@/hooks/use-me';
 import { unblockUser } from '@/lib/reports';
 import { showToast } from '@/lib/toast';
@@ -206,7 +207,7 @@ export default function UserProfileScreen() {
           accessibilityLabel="뒤로 가기"
           style={({ pressed }) => (pressed ? styles.pressed : undefined)}
         >
-          <ChevronLeft size={26} color="#111827" />
+          <ChevronLeft size={26} color={colors.onSurface} />
         </Pressable>
 
         {/* 내 프로필에는 ⋮ 를 안 그린다 — 나를 신고·차단할 이유가 없다. */}
@@ -218,7 +219,7 @@ export default function UserProfileScreen() {
             accessibilityLabel="더보기"
             style={({ pressed }) => (pressed ? styles.pressed : undefined)}
           >
-            <EllipsisVertical size={24} color="#111827" />
+            <EllipsisVertical size={24} color={colors.onSurface} />
           </Pressable>
         ) : null}
       </View>
@@ -248,16 +249,16 @@ export default function UserProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F9FAFB' },
+  container: { flex: 1, backgroundColor: colors.surfaceMuted },
   header: {
     height: HEADER_HEIGHT,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: colors.outlineVariant,
   },
   pressed: { opacity: 0.5 },
   list: { paddingHorizontal: 16, paddingTop: 12, gap: 12 },

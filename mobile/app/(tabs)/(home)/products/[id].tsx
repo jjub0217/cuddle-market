@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { colors } from '@/constants/colors';
 import { showToast } from '@/lib/toast';
 import { ProductActionSheet, type SheetAction } from '@/components/my/product-action-sheet';
 import { Breadcrumb } from '@/components/product-detail/breadcrumb';
@@ -281,7 +282,7 @@ export default function ProductDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   scroll: {
     flex: 1,
@@ -299,22 +300,22 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: colors.outlineVariant,
     marginHorizontal: 16,
   },
   description: {
     fontSize: 15,
     lineHeight: 22,
-    color: '#111827',
+    color: colors.onSurface,
   },
   counts: {
     fontSize: 13,
-    color: '#6B7280',
+    color: colors.onSurfaceMuted,
   },
   bar: {
     height: 40,
     width: '45%',
     borderRadius: 4,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: colors.outlineVariant,
   },
 });

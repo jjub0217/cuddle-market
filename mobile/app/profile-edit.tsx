@@ -18,6 +18,7 @@ import { Field, fieldStyles } from '@/components/signup/field';
 import { RegionField } from '@/components/products/region-field';
 import { FieldLabel } from '@/components/ui/field-label';
 import { ScreenHeader } from '@/components/ui/screen-header';
+import { colors } from '@/constants/colors';
 import { useMe } from '@/hooks/use-me';
 import { changePassword, PasswordChangeRejectedError } from '@/lib/password';
 import { updateMe } from '@/lib/profile';
@@ -411,7 +412,7 @@ function PasswordSection() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  container: { flex: 1, backgroundColor: colors.surface },
   flex: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   content: {
@@ -423,7 +424,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#111827',
+    color: colors.onSurface,
   },
   readOnlyRow: { gap: 6 },
   // 이름·생년월일을 나란히. 12은 웹의 모바일 폭에서 쓰는 간격과 같다(gap-3)
@@ -437,7 +438,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    backgroundColor: '#FAF8F3',
+    backgroundColor: colors.surfaceCream,
   },
   readOnlyValue: {
     fontSize: 15,
@@ -445,12 +446,12 @@ const styles = StyleSheet.create({
     //    가벼워야 「읽기만 하는 값」이라는 게 굵기로도 드러난다
     fontWeight: '400',
     // 웹 text-gray-400 과 같은 결. 「읽는 값」이라 본문보다 물러나 있다
-    color: '#9CA3AF',
+    color: colors.onSurfaceSubtle,
   },
   notice: { gap: 2 },
   noticeLine: {
     fontSize: 13,
-    color: '#6B7280',
+    color: colors.onSurfaceMuted,
     lineHeight: 19,
   },
   // 두 묶음 사이에 선을 그어 다른 일이라는 게 보이게 한다
@@ -459,19 +460,19 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     gap: 16,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: colors.outlineVariant,
   },
   primaryButton: {
     height: 52,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#825500',
+    backgroundColor: colors.selected,
   },
   primaryLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.onSelected,
   },
   error: {
     fontSize: 13,

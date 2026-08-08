@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ProductListView } from '@/components/products/product-list-view';
 import { SearchBarHeader } from '@/components/products/search-bar-header';
+import { colors } from '@/constants/colors';
 
 // 검색 결과.
 //
@@ -38,6 +39,6 @@ export default function SearchResultScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.surfaceMuted,
   },
 });

@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
+import { colors } from '@/constants/colors';
 import { reportPost } from '@/lib/community';
 import { isAlreadyReported, reportProduct, reportUser } from '@/lib/reports';
 import { showToast } from '@/lib/toast';
@@ -126,7 +127,7 @@ export default function ReportScreen() {
               ]}
             >
               <Text style={styles.reasonLabel}>{reason.label}</Text>
-              {reasonCode === reason.id ? <Check size={20} color="#111827" /> : null}
+              {reasonCode === reason.id ? <Check size={20} color={colors.onSurface} /> : null}
             </Pressable>
           ))}
         </View>
@@ -136,7 +137,7 @@ export default function ReportScreen() {
           value={detail}
           onChangeText={setDetail}
           placeholder="신고 상세 사유를 입력해주세요."
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={colors.onSurfaceSubtle}
           multiline
           maxLength={DETAIL_MAX}
           style={styles.detailInput}
@@ -158,7 +159,7 @@ export default function ReportScreen() {
           ]}
         >
           {submitting ? (
-            <ActivityIndicator color="#FFFFFF" />
+            <ActivityIndicator color={colors.onAction} />
           ) : (
             <Text style={styles.submitLabel}>신고하기</Text>
           )}
@@ -169,16 +170,16 @@ export default function ReportScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  container: { flex: 1, backgroundColor: colors.surface },
   pressed: { opacity: 0.5 },
-  pressedRow: { backgroundColor: '#F9FAFB' },
+  pressedRow: { backgroundColor: colors.surfaceMuted },
   body: { padding: 16, gap: 8, paddingBottom: 24 },
-  description: { fontSize: 14, color: '#6B7280', marginBottom: 4 },
-  label: { fontSize: 15, fontWeight: '600', color: '#111827', marginTop: 8 },
+  description: { fontSize: 14, color: colors.onSurfaceMuted, marginBottom: 4 },
+  label: { fontSize: 15, fontWeight: '600', color: colors.onSurface, marginTop: 8 },
   required: { color: '#DC2626' },
   reasonBox: {
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#D1D5DB',
+    borderColor: colors.outline,
     borderRadius: 8,
   },
   reasonRow: {
@@ -190,32 +191,32 @@ const styles = StyleSheet.create({
   },
   reasonDivider: {
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#F3F4F6',
+    borderTopColor: colors.surfaceSunken,
   },
-  reasonLabel: { fontSize: 15, color: '#111827' },
+  reasonLabel: { fontSize: 15, color: colors.onSurface },
   detailInput: {
     minHeight: 110,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#D1D5DB',
+    borderColor: colors.outline,
     borderRadius: 8,
     padding: 12,
     fontSize: 14,
-    color: '#111827',
+    color: colors.onSurface,
     textAlignVertical: 'top',
   },
-  counter: { fontSize: 12, color: '#9CA3AF', alignSelf: 'flex-end' },
+  counter: { fontSize: 12, color: colors.onSurfaceSubtle, alignSelf: 'flex-end' },
   footer: {
     padding: 16,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: colors.outlineVariant,
   },
   submit: {
     height: 48,
     borderRadius: 8,
-    backgroundColor: '#111827',
+    backgroundColor: colors.action,
     alignItems: 'center',
     justifyContent: 'center',
   },
   submitDisabled: { opacity: 0.4 },
-  submitLabel: { fontSize: 15, fontWeight: '600', color: '#FFFFFF' },
+  submitLabel: { fontSize: 15, fontWeight: '600', color: colors.onAction },
 });

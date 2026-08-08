@@ -9,6 +9,7 @@ import {
   type ProductListViewRef,
 } from '@/components/products/product-list-view';
 import { AppHeader, HeaderLogo } from '@/components/ui/app-header';
+import { colors } from '@/constants/colors';
 import { useAuthStore } from '@/lib/auth/store';
 
 // 홈: 로그인 없이 상품 목록을 본다.
@@ -60,7 +61,7 @@ export default function HomeScreen() {
             accessibilityLabel="검색"
             style={({ pressed }) => (pressed ? styles.iconPressed : undefined)}
           >
-            <Search size={24} color="#111827" />
+            <Search size={24} color={colors.onSurface} />
           </Pressable>
         }
       />
@@ -87,7 +88,7 @@ export default function HomeScreen() {
             pressed && styles.fabPressed,
           ]}
         >
-          <Plus size={20} color="#FFFFFF" strokeWidth={2.5} />
+          <Plus size={20} color={colors.onSelected} strokeWidth={2.5} />
           <Text style={styles.fabLabel}>상품 등록</Text>
         </Pressable>
       ) : null}
@@ -124,7 +125,7 @@ const FAB_HEIGHT = 44;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.surfaceMuted,
   },
   iconPressed: {
     opacity: 0.5,
@@ -139,10 +140,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 999,
-    backgroundColor: '#825500',
+    backgroundColor: colors.selected,
     // 목록 위에 떠 있는 것이라 그림자가 없으면 카드에 붙어 보인다
     elevation: 4,
-    shadowColor: '#000000',
+    shadowColor: colors.black,
     shadowOpacity: 0.2,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
@@ -153,6 +154,6 @@ const styles = StyleSheet.create({
   fabLabel: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: colors.onSelected,
   },
 });

@@ -15,6 +15,7 @@ import { ScreenHeader } from '@/components/ui/screen-header';
 import { CommentInput, type ReplyTarget } from '@/components/community/comment-input';
 import { CommentList } from '@/components/community/comment-list';
 import { CommentMenuSheet } from '@/components/community/comment-menu-sheet';
+import { colors } from '@/constants/colors';
 import { useAuthStore } from '@/lib/auth/store';
 import { createComment, fetchComments, type CommentItem } from '@/lib/community';
 import { showToast } from '@/lib/toast';
@@ -155,9 +156,9 @@ export default function CommentThreadScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  container: { flex: 1, backgroundColor: colors.surface },
   flex: { flex: 1 },
   body: { paddingHorizontal: 16, paddingBottom: 16 },
-  notFound: { paddingVertical: 40, textAlign: 'center', fontSize: 14, color: '#9CA3AF' },
+  notFound: { paddingVertical: 40, textAlign: 'center', fontSize: 14, color: colors.onSurfaceSubtle },
   pressed: { opacity: 0.6 },
 });

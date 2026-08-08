@@ -14,6 +14,7 @@ import { ScreenHeader } from '@/components/ui/screen-header';
 import { StepIndicator } from '@/components/find-password/step-indicator';
 import { Field, fieldStyles } from '@/components/signup/field';
 import { PasswordChecklist } from '@/components/signup/password-checklist';
+import { colors } from '@/constants/colors';
 import { useFindPassword } from '@/lib/find-password/use-find-password';
 import { showToast } from '@/lib/toast';
 
@@ -137,7 +138,7 @@ export default function FindPasswordScreen() {
                     style={({ pressed }) => [fieldStyles.button, pressed && fieldStyles.buttonPressed]}
                   >
                     {form.sending ? (
-                      <ActivityIndicator size="small" color="#111827" />
+                      <ActivityIndicator size="small" color={colors.onSurface} />
                     ) : (
                       <Text style={fieldStyles.buttonLabel}>인증받기</Text>
                     )}
@@ -193,7 +194,7 @@ export default function FindPasswordScreen() {
                     style={({ pressed }) => [fieldStyles.button, pressed && fieldStyles.buttonPressed]}
                   >
                     {form.sending ? (
-                      <ActivityIndicator size="small" color="#111827" />
+                      <ActivityIndicator size="small" color={colors.onSurface} />
                     ) : (
                       <Text style={fieldStyles.buttonLabel}>재전송</Text>
                     )}
@@ -226,7 +227,7 @@ export default function FindPasswordScreen() {
                   style={({ pressed }) => [styles.submit, pressed && styles.pressed]}
                 >
                   {form.verifying ? (
-                    <ActivityIndicator color="#FFFFFF" />
+                    <ActivityIndicator color={colors.onAction} />
                   ) : (
                     <Text style={styles.submitLabel}>인증하기</Text>
                   )}
@@ -270,7 +271,7 @@ export default function FindPasswordScreen() {
                 style={({ pressed }) => [styles.submit, pressed && styles.pressed]}
               >
                 {form.submitting ? (
-                  <ActivityIndicator color="#FFFFFF" />
+                  <ActivityIndicator color={colors.onAction} />
                 ) : (
                   <Text style={styles.submitLabel}>비밀번호 변경</Text>
                 )}
@@ -284,12 +285,12 @@ export default function FindPasswordScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  container: { flex: 1, backgroundColor: colors.surface },
   flex: { flex: 1 },
   content: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 40, gap: 24 },
   headline: { gap: 6 },
-  headlineTitle: { fontSize: 18, fontWeight: '700', color: '#111827' },
-  headlineDesc: { fontSize: 14, color: '#6B7280' },
+  headlineTitle: { fontSize: 18, fontWeight: '700', color: colors.onSurface },
+  headlineDesc: { fontSize: 14, color: colors.onSurfaceMuted },
   group: { gap: 16 },
   // 단추 묶음. 웹의 gap-2.5(10px)와 같은 값이다
   actions: { gap: 10 },
@@ -299,9 +300,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#111827',
+    backgroundColor: colors.action,
   },
-  submitLabel: { fontSize: 15, fontWeight: '600', color: '#FFFFFF' },
+  submitLabel: { fontSize: 15, fontWeight: '600', color: colors.onAction },
   pressed: { opacity: 0.8 },
   // 보조 단추. 웹과 같은 모양이다(흰 배경 + 회색 테두리).
   // 글자 링크로 뒀더니 바로 아래 진한 단추 옆에서 존재감이 너무 약해 눌러야 할 것으로
@@ -312,14 +313,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#9CA3AF',
+    borderColor: colors.onSurfaceSubtle,
   },
-  secondaryLabel: { fontSize: 15, fontWeight: '600', color: '#111827' },
-  formError: { fontSize: 13, fontWeight: '600', color: '#C91D1D' },
-  blockedBox: { backgroundColor: '#F9FAFB', borderRadius: 8, padding: 14, gap: 10 },
-  blockedText: { fontSize: 13, lineHeight: 19, color: '#374151' },
+  secondaryLabel: { fontSize: 15, fontWeight: '600', color: colors.onSurface },
+  formError: { fontSize: 13, fontWeight: '600', color: colors.danger },
+  blockedBox: { backgroundColor: colors.surfaceMuted, borderRadius: 8, padding: 14, gap: 10 },
+  blockedText: { fontSize: 13, lineHeight: 19, color: colors.onSurfaceStrong },
   // 막다른 길에서는 **이 단추가 유일한 길**이라 주 단추 색을 쓴다(앱의 기본 단추와 같은 값).
   // 연한 색으로 두면, 방금 서버가 「안 된다」고 답한 「인증받기」보다 덜 눈에 띄어 위계가
   // 거꾸로가 된다. 웹은 아래 「인증코드 전송」을 숨겨서 같은 결과를 만든다 —
@@ -329,7 +330,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#111827',
+    backgroundColor: colors.action,
   },
-  blockedButtonLabel: { fontSize: 15, fontWeight: '600', color: '#FFFFFF' },
+  blockedButtonLabel: { fontSize: 15, fontWeight: '600', color: colors.onAction },
 });

@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { ProductForm } from '@/components/products/product-form';
+import { colors } from '@/constants/colors';
 import { DEFAULT_PRODUCT_STATUS, type ProductFormValues } from '@/lib/product-form';
 import { productDetailHref, tabGroupOf } from '@/lib/product-routes';
 import { createProduct, type ProductPayload } from '@/lib/products';
@@ -84,6 +85,6 @@ export default function NewProductScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  container: { flex: 1, backgroundColor: colors.surface },
   pressed: { opacity: 0.5 },
 });

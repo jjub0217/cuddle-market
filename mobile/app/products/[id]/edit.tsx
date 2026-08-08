@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { ProductForm } from '@/components/products/product-form';
 import { ErrorState, LoadingState } from '@/components/list-states';
+import { colors } from '@/constants/colors';
 import { productDetailHref, tabGroupOf } from '@/lib/product-routes';
 import { fetchProductDetail, updateProduct, type ProductPayload } from '@/lib/products';
 import { showToast } from '@/lib/toast';
@@ -115,5 +116,5 @@ function Header({ onBack }: { onBack: () => void }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  container: { flex: 1, backgroundColor: colors.surface },
 });
