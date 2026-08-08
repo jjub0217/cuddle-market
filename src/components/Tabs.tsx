@@ -34,7 +34,9 @@ const VARIANT_STYLES: Record<TabsVariant, { container: string; tab: string; tabA
   },
   'card-pill': {
     container: 'flex flex-wrap items-center gap-2',
-    tab: 'cursor-pointer rounded-full border px-5 py-1.5 text-sm whitespace-nowrap transition-all max-md:px-4 max-md:py-1 max-md:font-normal',
+    // h-8 (32) — Button 의 md(40)·sm(36)보다 작다. 목록 위에 늘어서는 칩이라
+    // 단추만 한 크기면 화면을 잡아먹는다. 모바일은 한 단계 더 작다(#847).
+    tab: 'h-8 cursor-pointer rounded-full border px-5 py-1.5 text-sm whitespace-nowrap transition-all max-md:h-7 max-md:px-4 max-md:py-1 max-md:font-normal',
     tabActive: 'border-[#825500] bg-[#825500] text-white shadow-sm',
     tabInactive: 'border-[#d4c4b2] bg-white text-gray-600 hover:border-[#825500] hover:text-[#825500]',
   },

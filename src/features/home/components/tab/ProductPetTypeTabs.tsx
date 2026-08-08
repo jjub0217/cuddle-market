@@ -52,7 +52,9 @@ export function ProductPetTypeTabs({ activeTab, onTabChange }: ProductPetTypeTab
               size="sm"
               onClick={() => onTabChange(tab.id)}
               className={cn(
-                '-mb-px cursor-pointer rounded-none border-b-2 px-3 pt-3 pb-1 whitespace-nowrap md:px-3 md:pb-3',
+                // h-auto — 이 탭은 아래 밑줄(border-b-2)이 붙는 자리라 높이를 padding 이 정한다.
+                // Button 의 sm(h-9)이 들어오면 밑줄과 글자 사이가 벌어진다(#847).
+                '-mb-px h-auto cursor-pointer rounded-none border-b-2 px-3 pt-3 pb-1 whitespace-nowrap md:px-3 md:pb-3',
                 isActive
                   ? 'border-[#825500] font-bold text-[#825500]'
                   : 'border-transparent font-medium text-gray-500 hover:text-[#825500]'
