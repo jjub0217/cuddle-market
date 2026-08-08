@@ -191,21 +191,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 12,
     borderRadius: 999,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
   },
   pillActive: {
-    backgroundColor: colors.selectedSurface,
+    backgroundColor: colors.selected,
     borderColor: colors.selected,
   },
   pillIdle: {
     backgroundColor: colors.surface,
-    borderColor: colors.outlineBrand,
+    borderColor: colors.outline,
   },
   pillLabel: {
     fontSize: 13,
     fontWeight: '400',
   },
-  pillLabelActive: { color: colors.accent },
+  pillLabelActive: { color: colors.onSelected, fontWeight: '600' },
   pillLabelIdle: { color: colors.onSurfaceMedium },
 
   right: {

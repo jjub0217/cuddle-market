@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
     gap: 8,
     borderRadius: 8,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.outlineStrong,
+    borderColor: colors.outline,
     backgroundColor: colors.surface,
   },
   buttonActive: {

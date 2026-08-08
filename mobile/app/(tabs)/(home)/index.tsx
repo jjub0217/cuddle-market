@@ -140,6 +140,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 999,
+    // 누르면 등록 화면으로 넘어가는 행동이라 「고른 상태」가 아니다 — action 을 쓴다
     backgroundColor: colors.action,
     // 목록 위에 떠 있는 것이라 그림자가 없으면 카드에 붙어 보인다
     elevation: 4,

@@ -372,21 +372,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 12,
     borderRadius: 999,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
   },
   chipActive: {
-    backgroundColor: colors.selectedSurface,
+    backgroundColor: colors.selected,
     borderColor: colors.selected,
   },
   chipIdle: {
     backgroundColor: colors.surface,
-    borderColor: colors.outlineBrand,
+    borderColor: colors.outline,
   },
   label: {
     fontSize: 13,
     fontWeight: '400',
   },
-  labelActive: { color: colors.accent },
+  labelActive: { color: colors.onSelected, fontWeight: '600' },
   labelIdle: { color: colors.onSurfaceMedium },
   pressed: { opacity: 0.7 },
 
@@ -409,11 +409,12 @@ const styles = StyleSheet.create({
   resetButton: {
     flex: 1,
     borderWidth: 1,
-    borderColor: colors.outlineBrand,
+    borderColor: colors.outline,
     backgroundColor: colors.surface,
   },
   applyButton: {
     flex: 2,
+    // 칩이 아니라 시트를 끝내는 단추다
     backgroundColor: colors.action,
   },
   resetLabel: {

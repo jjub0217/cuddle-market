@@ -72,15 +72,14 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     borderWidth: 1,
   },
-  // 고른 것은 연한 갈색 바탕에 갈색 글자로 그린다.
+  // 고른 것은 브랜드 갈색으로 채운다. 테두리 색은 입력칸과 같은 값이다.
   //
-  // 19바퀴(#786)에 두 번 옮겼다. 먹색 → 갈색 꽉 채움 → 지금 모양.
-  // 꽉 채웠을 때는 바로 아래 「등록하기」 단추와 거의 같아 보였다(대비 1.45:1).
-  // 칩은 상태 표시라 단추보다 약해야 한다 — 색이 아니라 채움 강도로 가른다.
-  chipActive: { backgroundColor: colors.selectedSurface, borderColor: colors.selected },
-  chipInactive: { backgroundColor: colors.surface, borderColor: colors.outlineStrong },
+  // 19바퀴(#786)에 먹색에서 갈색으로 옮겼다 — 필터 칩·플레이스 탭은 갈색인데
+  // 이 칩만 먹색이라, 같은 「고른 것」이 화면마다 달라 보였다.
+  chipActive: { backgroundColor: colors.selected, borderColor: colors.selected },
+  chipInactive: { backgroundColor: colors.surface, borderColor: colors.outline },
   chipPressed: { opacity: 0.7 },
 
-  labelActive: { fontSize: 13, fontWeight: '600', color: colors.accent },
-  labelInactive: { fontSize: 13, fontWeight: '600', color: colors.onSurfaceMuted },
+  labelActive: { fontSize: 13, fontWeight: '600', color: colors.onSelected },
+  labelInactive: { fontSize: 13, fontWeight: '400', color: colors.onSurfaceMuted },
 });

@@ -8,6 +8,9 @@ import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAuthStore } from '@/lib/auth/store';
 
+// ⚠️ 아래 <Tabs.Screen> 차례는 **탭바에 보이는 순서**만 정한다.
+//    앱을 켰을 때 어느 탭이 열리는지는 `app/index.tsx` 가 정한다 — 그 파일 참고.
+
 /**
  * 탭바 아이콘 선 굵기. Lucide 기본값은 2인데 28px로 크게 그리니 둔해 보였다.
  * (웹 BottomNav은 활성 2.5 / 비활성 2 — 웹은 20px이라 같은 굵기여도 덜 두껍게 보인다.)

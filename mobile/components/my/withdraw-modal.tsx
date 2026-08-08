@@ -307,13 +307,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   radioSelected: {
-    borderColor: colors.control,
+    borderColor: colors.selected,
   },
   radioDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.control,
+    backgroundColor: colors.selected,
   },
   reasonLabel: {
     fontSize: 15,
@@ -345,8 +345,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   checkboxChecked: {
-    borderColor: colors.control,
-    backgroundColor: colors.control,
+    borderColor: colors.selected,
+    backgroundColor: colors.selected,
   },
   agreeLabel: {
     fontSize: 14,
@@ -365,8 +365,8 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 46,
     borderRadius: 8,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.outlineStrong,
+    borderWidth: 1,
+    borderColor: colors.outline,
     alignItems: 'center',
     justifyContent: 'center',
   },

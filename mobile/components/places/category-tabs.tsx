@@ -59,22 +59,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 16,
     borderRadius: 999,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
   },
   chipActive: {
-    backgroundColor: colors.selectedSurface,
+    backgroundColor: colors.selected,
     borderColor: colors.selected,
   },
   chipIdle: {
     backgroundColor: colors.surface,
-    borderColor: colors.outlineBrand,
+    borderColor: colors.outline,
   },
   label: {
     fontSize: 14,
     fontWeight: '400',
   },
   labelActive: {
-    color: colors.accent,
+    color: colors.onSelected,
+    fontWeight: '600',
   },
   labelIdle: {
     color: colors.onSurfaceMedium,

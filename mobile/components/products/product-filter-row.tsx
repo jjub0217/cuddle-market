@@ -556,7 +556,8 @@ const styles = StyleSheet.create({
     left: 0,
     bottom: 0,
     height: TAB_BAR_HEIGHT,
-    backgroundColor: colors.selected,
+    // 글자(accent)와 같은 색으로 둔다 — 얇은 선이라 연한 색이면 안 보인다
+    backgroundColor: colors.accent,
   },
   tabLabel: {
     fontSize: 15,
@@ -591,22 +592,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 12,
     borderRadius: 999,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
   },
   chipActive: {
-    backgroundColor: colors.selectedSurface,
+    backgroundColor: colors.selected,
     borderColor: colors.selected,
   },
   chipIdle: {
     backgroundColor: colors.surface,
-    borderColor: colors.outlineBrand,
+    borderColor: colors.outline,
   },
   label: {
     fontSize: 13,
     fontWeight: '400',
   },
   labelActive: {
-    color: colors.accent,
+    color: colors.onSelected,
+    fontWeight: '600',
   },
   labelIdle: {
     color: colors.onSurfaceMedium,

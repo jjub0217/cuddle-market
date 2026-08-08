@@ -80,17 +80,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 16,
     borderRadius: 999,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
   },
   chipActive: {
     // 웹 card-pill의 선택 상태와 같은 값(border-[#825500] bg-[#825500]).
-    backgroundColor: colors.selectedSurface,
+    backgroundColor: colors.selected,
     borderColor: colors.selected,
   },
   chipIdle: {
     // 웹은 연한 베이지 테두리(border-[#d4c4b2])라 선택된 칩이 더 도드라진다.
     backgroundColor: colors.surface,
-    borderColor: colors.outlineBrand,
+    borderColor: colors.outline,
   },
   label: {
     fontSize: 14,
@@ -98,7 +98,8 @@ const styles = StyleSheet.create({
     fontWeight: '400',
   },
   labelActive: {
-    color: colors.accent,
+    color: colors.onSelected,
+    fontWeight: '600',
   },
   labelIdle: {
     // 웹 text-gray-600.

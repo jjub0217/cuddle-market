@@ -108,8 +108,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     // 웹도 둥근 칸이다(rounded-full)
     borderRadius: 999,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.outlineBrand,
+    borderWidth: 1,
+    borderColor: colors.outline,
     backgroundColor: colors.surface,
   },
   input: {

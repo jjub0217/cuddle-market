@@ -39,7 +39,7 @@ const SLIDE_MS = 300;
 // 로그아웃 확인 창(logout-modal.tsx)도 같은 값을 쓴다 — 두 창이 나란히 뜨므로
 // 색이 갈리면 어색하다.
 const BUTTON_FILL = colors.action;
-const BUTTON_BORDER = colors.outlineStrong;
+const BUTTON_BORDER = colors.outline;
 
 interface MenuItem {
   label: string;
