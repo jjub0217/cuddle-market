@@ -1,5 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
+import { colors } from '@/constants/colors';
+
 // 알림 목록의 첫 로딩 뼈대.
 //
 // 왜 따로 만드나: 처음에는 홈의 list-states.tsx를 그대로 썼는데, 그건 상품 카드
@@ -40,19 +42,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: colors.surfaceSunken,
   },
   icon: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.surfaceSunken,
   },
   body: { flex: 1, gap: 8, paddingTop: 2 },
   bar: {
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.surfaceSunken,
   },
   time: { height: 10, marginTop: 2 },
 });

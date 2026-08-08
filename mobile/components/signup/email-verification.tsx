@@ -1,5 +1,6 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text, View, type TextInputProps } from 'react-native';
 
+import { colors } from '@/constants/colors';
 import type { useSignupForm } from '@/lib/signup/use-signup-form';
 import { Field, fieldStyles, messageStyles } from './field';
 
@@ -61,7 +62,7 @@ export function EmailVerification({ form, onFocus }: Props) {
               style={({ pressed }) => [fieldStyles.button, pressed && fieldStyles.buttonPressed]}
             >
               {form.sendingCode ? (
-                <ActivityIndicator size="small" color="#111827" />
+                <ActivityIndicator size="small" color={colors.onSurface} />
               ) : (
                 <Text style={fieldStyles.buttonLabel}>
                   {verification === 'sent' ? '재발송' : '인증받기'}
@@ -117,7 +118,7 @@ export function EmailVerification({ form, onFocus }: Props) {
 
 const styles = StyleSheet.create({
   wrap: { gap: 16 },
-  locked: { backgroundColor: '#F9FAFB', color: '#6B7280' },
+  locked: { backgroundColor: colors.surfaceMuted, color: colors.onSurfaceMuted },
   // 이 줄은 **칸의 안내문 자리**에 놓여야 한다. wrap의 gap이 16이라 그대로 두면
   // 입력칸에서 너무 멀어진다 — Field가 자기 안내문을 두는 거리(6)에 맞춘다.
   verifiedRow: {
@@ -128,5 +129,5 @@ const styles = StyleSheet.create({
   },
   // 옆에 나란히 서는 안내 문구(messageStyles.hint)와 같은 크기다.
   // 링크라는 건 밑줄이 알려 주니 크기까지 다를 이유가 없다.
-  changeLink: { fontSize: 13, color: '#6B7280', textDecorationLine: 'underline' },
+  changeLink: { fontSize: 13, color: colors.onSurfaceMuted, textDecorationLine: 'underline' },
 });

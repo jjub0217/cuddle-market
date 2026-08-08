@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 
+import { colors } from '@/constants/colors';
 import { useAuthStore } from '@/lib/auth/store';
 
 // 댓글·답글을 쓰는 칸.
@@ -196,7 +197,7 @@ export function CommentInput({
           onSelectionChange={handleSelectionChange}
           onFocus={onFocus}
           placeholder={placeholder}
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={colors.onSurfaceSubtle}
           style={styles.input}
           multiline
           maxLength={1000}
@@ -216,7 +217,7 @@ export function CommentInput({
           ]}
         >
           {submitting ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
+            <ActivityIndicator size="small" color={colors.onAction} />
           ) : (
             <Text style={styles.submitLabel}>등록</Text>
           )}
@@ -228,21 +229,21 @@ export function CommentInput({
 
 const styles = StyleSheet.create({
   // 진짜 칸의 placeholder와 같은 색·크기로 둔다 — 눌러야 아는 차이여야 한다
-  guestPlaceholder: { fontSize: 15, color: '#9CA3AF' },
+  guestPlaceholder: { fontSize: 15, color: colors.onSurfaceSubtle },
   // 답글 목록의 @닉네임과 같은 색이다 (comment-row.tsx의 mention · 웹 --color-primary-container)
-  mention: { color: '#825500' },
+  mention: { color: colors.accent },
   replyBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.surfaceMuted,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: colors.outlineVariant,
   },
-  replyLabel: { fontSize: 13, color: '#6B7280' },
-  cancel: { fontSize: 13, fontWeight: '600', color: '#825500' }, // 웹 --color-primary-container
+  replyLabel: { fontSize: 13, color: colors.onSurfaceMuted },
+  cancel: { fontSize: 13, fontWeight: '600', color: colors.accent }, // 웹 --color-primary-container
   bar: {
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -250,30 +251,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#E5E7EB',
-    backgroundColor: '#FFFFFF',
+    borderTopColor: colors.outlineVariant,
+    backgroundColor: colors.surface,
   },
   input: {
     flex: 1,
     maxHeight: 100,
     minHeight: 40,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: colors.outline,
     borderRadius: 20,
     paddingHorizontal: 14,
     paddingVertical: 10,
     fontSize: 15,
-    color: '#111827',
+    color: colors.onSurface,
   },
   submit: {
     height: 40,
     paddingHorizontal: 16,
     borderRadius: 20,
-    backgroundColor: '#111827',
+    backgroundColor: colors.action,
     alignItems: 'center',
     justifyContent: 'center',
   },
   submitDisabled: { opacity: 0.4 },
-  submitLabel: { fontSize: 14, fontWeight: '600', color: '#FFFFFF' },
+  submitLabel: { fontSize: 14, fontWeight: '600', color: colors.onAction },
   pressed: { opacity: 0.7 },
 });

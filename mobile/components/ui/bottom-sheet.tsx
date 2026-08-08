@@ -10,6 +10,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { colors } from '@/constants/colors';
+
 // 아래에서 올라오는 시트의 껍데기. 안에 무엇을 담을지는 쓰는 쪽이 정한다.
 //
 // 원래 product-action-sheet.tsx 안에만 있던 것을 빼냈다. 회원가입의 거주지 선택도
@@ -307,14 +309,14 @@ export const sheetItemStyles = StyleSheet.create({
   },
   itemDivider: {
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#F3F4F6',
+    borderTopColor: colors.surfaceSunken,
   },
   itemPressed: {
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.surfaceMuted,
   },
   label: {
     fontSize: 16,
-    color: '#111827',
+    color: colors.onSurface,
   },
 });
 
@@ -332,7 +334,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(17, 24, 39, 0.7)',
   },
   sheet: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     // 아래는 화면 끝에 붙으므로 위쪽 모서리만 둥글게.
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
@@ -358,6 +360,6 @@ const styles = StyleSheet.create({
     width: 36,
     height: 4,
     borderRadius: 999,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: colors.outlineVariant,
   },
 });

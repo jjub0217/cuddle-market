@@ -5,6 +5,7 @@ import { getAnimatedStyle } from 'react-native-reanimated';
 
 import { CATEGORY_OPTIONS, PET_DETAIL_OPTIONS_BY_TYPE, PET_TYPE_OPTIONS } from '@cuddle/shared';
 
+import { colors } from '@/constants/colors';
 import { ProductFilterRow } from './product-filter-row';
 
 // 소분류 + 카테고리 두 줄. **목록의 헤더라 스크롤되어 사라지는 조각이다**(#855 후속).
@@ -103,7 +104,7 @@ it('필터 두 줄이 다 흰 바탕이다', async () => {
   const { props } = renderRow({ petType: FIRST_PET.code });
   await render(<ProductFilterRow {...props} />);
 
-  const 흰색 = { backgroundColor: '#FFFFFF' };
+  const 흰색 = { backgroundColor: colors.surface };
   // 두 줄을 통째로 덮는 바깥 상자
   expect(screen.getByTestId('product-filter-row')).toHaveStyle(흰색);
   // 줄마다도 자기 바탕을 가진다 — 특히 접히는 소분류 줄은 거기만 비면 접힐 때 회색이 샌다

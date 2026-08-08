@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { colors } from '@/constants/colors';
 import type { TradeStatus } from '@/lib/product-actions';
 
 // 목록 위 칩 줄. 웹의 Tabs variant="card-pill"과 같은 모양이다.
@@ -79,17 +80,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 16,
     borderRadius: 999,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
   },
   chipActive: {
     // 웹 card-pill의 선택 상태와 같은 값(border-[#825500] bg-[#825500]).
-    backgroundColor: '#825500',
-    borderColor: '#825500',
+    backgroundColor: colors.selected,
+    borderColor: colors.selected,
   },
   chipIdle: {
     // 웹은 연한 베이지 테두리(border-[#d4c4b2])라 선택된 칩이 더 도드라진다.
-    backgroundColor: '#FFFFFF',
-    borderColor: '#D4C4B2',
+    backgroundColor: colors.surface,
+    borderColor: colors.outline,
   },
   label: {
     fontSize: 14,
@@ -97,11 +98,12 @@ const styles = StyleSheet.create({
     fontWeight: '400',
   },
   labelActive: {
-    color: '#FFFFFF',
+    color: colors.onSelected,
+    fontWeight: '600',
   },
   labelIdle: {
     // 웹 text-gray-600.
-    color: '#4B5563',
+    color: colors.onSurfaceMedium,
   },
   pressed: {
     opacity: 0.7,

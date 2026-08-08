@@ -1,5 +1,7 @@
 import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { colors } from '@/constants/colors';
+
 // 삭제 확인. 탈퇴 모달과 같은 껍데기(가운데 · 모서리 8 · 확인 버튼 빨강)를 쓴다.
 //
 // 상품 제목을 보여주는 이유:
@@ -51,7 +53,7 @@ export function DeleteConfirmModal({
               ]}
             >
               {submitting ? (
-                <ActivityIndicator color="#FFFFFF" />
+                <ActivityIndicator color={colors.onAction} />
               ) : (
                 <Text style={styles.confirmLabel}>삭제</Text>
               )}
@@ -73,7 +75,7 @@ const styles = StyleSheet.create({
   },
   sheet: {
     width: '100%',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: 8,
     padding: 20,
     gap: 8,
@@ -81,16 +83,16 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 19,
     fontWeight: '700',
-    color: '#111827',
+    color: colors.onSurface,
   },
   title: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.onSurface,
   },
   description: {
     fontSize: 14,
-    color: '#6B7280',
+    color: colors.onSurfaceMuted,
   },
   actions: {
     flexDirection: 'row',
@@ -101,21 +103,21 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 46,
     borderRadius: 8,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#D1D5DB',
+    borderWidth: 1,
+    borderColor: colors.outline,
     alignItems: 'center',
     justifyContent: 'center',
   },
   cancelLabel: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.onSurface,
   },
   confirm: {
     flex: 1,
     height: 46,
     borderRadius: 8,
-    backgroundColor: '#DC2626',
+    backgroundColor: colors.danger,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -125,7 +127,7 @@ const styles = StyleSheet.create({
   confirmLabel: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.onDanger,
   },
   pressed: {
     opacity: 0.7,

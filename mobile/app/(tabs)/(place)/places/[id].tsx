@@ -5,6 +5,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
+import { colors } from '@/constants/colors';
 import { CATEGORIES, type PlaceCategory } from '@/lib/places/types';
 import { usePlaceDetail } from '@/lib/places/use-place-detail';
 
@@ -16,9 +17,9 @@ import { usePlaceDetail } from '@/lib/places/use-place-detail';
 //    서버가 그 값들을 자주 비워 보낸다(types.ts 주석).
 
 /** 목록 조각(place-list-item.tsx)의 별 색과 같은 값. 새로 짓지 않는다. */
-const STAR_COLOR = '#FBBF24';
+const STAR_COLOR = colors.rating;
 /** 주소·전화·영업시간 아이콘. comment-row.tsx의 EllipsisVertical과 같은 회색. */
-const MUTED_ICON = '#9CA3AF';
+const MUTED_ICON = colors.onSurfaceSubtle;
 
 function categoryLabel(category: PlaceCategory): string {
   return CATEGORIES.find((item) => item.key === category)?.label ?? category;
@@ -138,7 +139,7 @@ export default function PlaceDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   scroll: {
     flex: 1,
@@ -150,7 +151,7 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     aspectRatio: 1,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: colors.outlineVariant,
   },
   imageFill: {
     ...StyleSheet.absoluteFillObject,
@@ -163,20 +164,20 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#111827',
+    color: colors.onSurface,
   },
   // 카테고리 알약 — 상품 상세의 상태 뱃지(badgeOutline)와 같은 값.
   categoryTag: {
     alignSelf: 'flex-start',
     borderRadius: 999,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#D1D5DB',
+    borderWidth: 1,
+    borderColor: colors.outline,
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
   categoryTagText: {
     fontSize: 12,
-    color: '#6B7280',
+    color: colors.onSurfaceMuted,
   },
   row: {
     flexDirection: 'row',
@@ -186,7 +187,7 @@ const styles = StyleSheet.create({
   // 주소·전화·영업시간·별점 글자 — profile-head.tsx의 introduction과 같은 값.
   infoText: {
     fontSize: 14,
-    color: '#4B5563',
+    color: colors.onSurfaceMedium,
   },
   badgeRow: {
     flexDirection: 'row',
@@ -195,26 +196,26 @@ const styles = StyleSheet.create({
   // 24시간 — place-list-item.tsx의 24시 뱃지와 같은 값(주황).
   badge24: {
     borderRadius: 999,
-    backgroundColor: '#FFF7ED',
+    backgroundColor: colors.badgeRequestBg,
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
   badge24Text: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#EA580C',
+    color: colors.badgeRequest,
   },
   // 응급진료 — profile-head.tsx의 차단 뱃지와 같은 값(빨강).
   badgeEmergency: {
     borderRadius: 999,
-    backgroundColor: '#FEE2E2',
+    backgroundColor: colors.dangerSurface,
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
   badgeEmergencyText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#DC2626',
+    color: colors.danger,
   },
   skeletonWrap: {
     flex: 1,
@@ -222,7 +223,7 @@ const styles = StyleSheet.create({
   skeletonImage: {
     width: '100%',
     aspectRatio: 1,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: colors.outlineVariant,
   },
   skeletonBody: {
     padding: 16,
@@ -231,7 +232,7 @@ const styles = StyleSheet.create({
   bar: {
     height: 14,
     borderRadius: 4,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: colors.outlineVariant,
   },
   center: {
     flex: 1,
@@ -241,7 +242,7 @@ const styles = StyleSheet.create({
   },
   message: {
     fontSize: 15,
-    color: '#6B7280',
+    color: colors.onSurfaceMuted,
     textAlign: 'center',
   },
 });

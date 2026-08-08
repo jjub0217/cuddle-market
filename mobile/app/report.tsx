@@ -1,6 +1,5 @@
 import { COMMUNITY_REPORT_REASON, PRODUCT_REPORT_REASON, USER_REPORT_REASON } from '@cuddle/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Check } from 'lucide-react-native';
 import { useState } from 'react';
 import {
   ActivityIndicator,
@@ -14,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
+import { colors } from '@/constants/colors';
 import { reportPost } from '@/lib/community';
 import { isAlreadyReported, reportProduct, reportUser } from '@/lib/reports';
 import { showToast } from '@/lib/toast';
@@ -113,22 +113,28 @@ export default function ReportScreen() {
           신고 사유 <Text style={styles.required}>*</Text>
         </Text>
         <View style={styles.reasonBox}>
-          {reasons.map((reason, index) => (
-            <Pressable
-              key={reason.id}
-              onPress={() => setReasonCode(reason.id)}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: reasonCode === reason.id }}
-              style={({ pressed }) => [
-                styles.reasonRow,
-                index > 0 && styles.reasonDivider,
-                pressed && styles.pressedRow,
-              ]}
-            >
-              <Text style={styles.reasonLabel}>{reason.label}</Text>
-              {reasonCode === reason.id ? <Check size={20} color="#111827" /> : null}
-            </Pressable>
-          ))}
+          {reasons.map((reason, index) => {
+            const selected = reasonCode === reason.id;
+            return (
+              <Pressable
+                key={reason.id}
+                onPress={() => setReasonCode(reason.id)}
+                accessibilityRole="radio"
+                accessibilityState={{ selected }}
+                style={({ pressed }) => [
+                  styles.reasonRow,
+                  index > 0 && styles.reasonDivider,
+                  pressed && styles.pressedRow,
+                ]}
+              >
+                <View style={[styles.radio, selected && styles.radioSelected]}>
+                  {/* 선택 표시는 안을 꽉 채우지 않고 가운데 점으로 — 흔히 보는 라디오 모양. */}
+                  {selected ? <View style={styles.radioDot} /> : null}
+                </View>
+                <Text style={styles.reasonLabel}>{reason.label}</Text>
+              </Pressable>
+            );
+          })}
         </View>
 
         <Text style={styles.label}>신고 상세 사유 (선택)</Text>
@@ -136,7 +142,7 @@ export default function ReportScreen() {
           value={detail}
           onChangeText={setDetail}
           placeholder="신고 상세 사유를 입력해주세요."
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={colors.onSurfaceSubtle}
           multiline
           maxLength={DETAIL_MAX}
           style={styles.detailInput}
@@ -158,7 +164,7 @@ export default function ReportScreen() {
           ]}
         >
           {submitting ? (
-            <ActivityIndicator color="#FFFFFF" />
+            <ActivityIndicator color={colors.onAction} />
           ) : (
             <Text style={styles.submitLabel}>신고하기</Text>
           )}
@@ -169,53 +175,74 @@ export default function ReportScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  container: { flex: 1, backgroundColor: colors.surface },
   pressed: { opacity: 0.5 },
-  pressedRow: { backgroundColor: '#F9FAFB' },
+  pressedRow: { backgroundColor: colors.surfaceMuted },
   body: { padding: 16, gap: 8, paddingBottom: 24 },
-  description: { fontSize: 14, color: '#6B7280', marginBottom: 4 },
-  label: { fontSize: 15, fontWeight: '600', color: '#111827', marginTop: 8 },
-  required: { color: '#DC2626' },
+  description: { fontSize: 14, color: colors.onSurfaceMuted, marginBottom: 4 },
+  label: { fontSize: 15, fontWeight: '600', color: colors.onSurface, marginTop: 8 },
+  required: { color: colors.danger },
   reasonBox: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#D1D5DB',
+    borderWidth: 1,
+    borderColor: colors.outline,
     borderRadius: 8,
   },
+  // 라디오 동그라미가 왼쪽에 서고 이름이 그 옆에 붙는다.
+  // 탈퇴 화면(withdraw-modal.tsx)과 같은 모양이다 — 앱 안에서 「하나만 고르는 줄」이
+  // 두 모양이면 안 된다. 전에는 이름만 있고 고르면 오른쪽에 ✓ 가 붙었다.
   reasonRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 10,
     minHeight: 48,
     paddingHorizontal: 14,
   },
   reasonDivider: {
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#F3F4F6',
+    borderTopColor: colors.surfaceSunken,
   },
-  reasonLabel: { fontSize: 15, color: '#111827' },
+  radio: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 2,
+    borderColor: colors.outline,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  radioSelected: {
+    borderColor: colors.control,
+  },
+  radioDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.control,
+  },
+  reasonLabel: { fontSize: 15, color: colors.onSurface },
   detailInput: {
     minHeight: 110,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#D1D5DB',
+    borderWidth: 1,
+    borderColor: colors.outline,
     borderRadius: 8,
     padding: 12,
     fontSize: 14,
-    color: '#111827',
+    color: colors.onSurface,
     textAlignVertical: 'top',
   },
-  counter: { fontSize: 12, color: '#9CA3AF', alignSelf: 'flex-end' },
+  counter: { fontSize: 12, color: colors.onSurfaceSubtle, alignSelf: 'flex-end' },
   footer: {
     padding: 16,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: colors.outlineVariant,
   },
   submit: {
     height: 48,
     borderRadius: 8,
-    backgroundColor: '#111827',
+    backgroundColor: colors.action,
     alignItems: 'center',
     justifyContent: 'center',
   },
   submitDisabled: { opacity: 0.4 },
-  submitLabel: { fontSize: 15, fontWeight: '600', color: '#FFFFFF' },
+  submitLabel: { fontSize: 15, fontWeight: '600', color: colors.onAction },
 });

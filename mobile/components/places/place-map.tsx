@@ -8,6 +8,7 @@ import { useEffect, useState, type ComponentType } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import { MapUnavailable } from '@/components/places/map-fallback';
+import { colors } from '@/constants/colors';
 import { DEFAULT_CENTER, type PlaceListItem } from '@/lib/places/types';
 
 // 지도만 담당하는 조각. **네이티브 부품을 쓰는 코드를 여기 한 곳에 가둔다.**
@@ -132,9 +133,9 @@ const styles = StyleSheet.create({
     gap: 8,
     // 못 불러왔을 때(map-fallback.tsx)와 같은 회색이다. 글자로만 구분한다 —
     // 색까지 다르면 잠깐 사이에 두 번 바뀌어 어수선하다.
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.surfaceSunken,
   },
   // 초기화된 뒤. 배경을 걷어 지도가 그려지는 대로 비쳐 보이게 한다.
   loadingClear: { backgroundColor: 'transparent' },
-  loadingText: { fontSize: 13, color: '#6B7280' },
+  loadingText: { fontSize: 13, color: colors.onSurfaceMuted },
 });

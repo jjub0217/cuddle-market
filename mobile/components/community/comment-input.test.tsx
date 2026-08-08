@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import React from 'react';
 
+import { colors } from '@/constants/colors';
 import { useAuthStore } from '@/lib/auth/store';
 
 import { CommentInput } from './comment-input';
@@ -53,7 +54,7 @@ describe('답글 대상이 생기면', () => {
     await renderInput({ commentId: 34, nickname: '협주', depth: 2 });
 
     expect(screen.getByText('@협주').props.style).toEqual(
-      expect.objectContaining({ color: '#825500' })
+      expect.objectContaining({ color: colors.accent })
     );
   });
 

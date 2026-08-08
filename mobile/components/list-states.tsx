@@ -8,6 +8,8 @@ import {
   View,
 } from 'react-native';
 
+import { colors } from '@/constants/colors';
+
 // 홈 목록의 3상태(로딩/빈/오류) + 무한스크롤 footer 컴포넌트.
 // 근거: 요구사항 §5, UI 스펙 §6. 세 상태는 서로 명확히 구분한다.
 
@@ -57,9 +59,9 @@ export function LoadingState() {
 // (src/features/home/components/product-section/ProductsSection.tsx:131).
 
 /** 브랜드 갈색. 웹 primary-700 과 같은 값이다. */
-const ICON_COLOR = '#825500';
+const ICON_COLOR = colors.accent;
 /** 아이콘을 감싸는 연한 원. 웹과 같은 값이다. */
-const ICON_BG = '#FFF5E0';
+const ICON_BG = colors.warningSurface;
 
 function IconCircle({ children, label }: { children: ReactNode; label: string }) {
   // 그림에 이름을 붙인다. 화면을 읽어주는 기능이 이걸 말해 주고,
@@ -134,7 +136,7 @@ export function ListFooter({ loading }: { loading: boolean }) {
   if (!loading) return null;
   return (
     <View style={styles.footer}>
-      <ActivityIndicator size="small" color="#9CA3AF" />
+      <ActivityIndicator size="small" color={colors.onSurfaceSubtle} />
       <Text style={styles.footerText}>더 불러오는 중</Text>
     </View>
   );
@@ -167,26 +169,28 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#374151',
+    color: colors.onSurfaceStrong,
   },
   emptySub: {
     fontSize: 13,
-    color: '#9CA3AF',
+    color: colors.onSurfaceSubtle,
     textAlign: 'center',
   },
+  // 19바퀴(#786)에 파랑에서 먹색으로 옮겼다. 앱에서 이 단추만 파랑이었고,
+  // 상세 화면의 같은 「다시 시도」는 주황이었다.
   retryBtn: {
     marginTop: 12,
     minHeight: 44,
     justifyContent: 'center',
     paddingHorizontal: 24,
     borderRadius: 12,
-    backgroundColor: '#2563EB',
+    backgroundColor: colors.action,
   },
   retryBtnPressed: {
     opacity: 0.85,
   },
   retryText: {
-    color: '#FFFFFF',
+    color: colors.onAction,
     fontSize: 15,
     fontWeight: '600',
   },
@@ -199,7 +203,7 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 13,
-    color: '#9CA3AF',
+    color: colors.onSurfaceSubtle,
   },
   // ---- 스켈레톤 ----
   card: {
@@ -207,15 +211,15 @@ const styles = StyleSheet.create({
     gap: 12,
     padding: 12,
     borderRadius: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: colors.outlineVariant,
   },
   skelThumb: {
     width: 100,
     height: 100,
     borderRadius: 8,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: colors.outlineVariant,
   },
   skelInfo: {
     flex: 1,
@@ -229,7 +233,7 @@ const styles = StyleSheet.create({
   skelBar: {
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: colors.outlineVariant,
   },
   skelPrice: {
     height: 16,

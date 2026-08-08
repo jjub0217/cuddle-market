@@ -1,6 +1,8 @@
 import { Fragment } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { colors } from '@/constants/colors';
+
 // 1-2-3 진행 표시. 웹의 StepIndicator 와 같은 자리에 같은 뜻으로 둔다.
 //
 // ⚠️ 넣을지 뺄지는 실기기에서 보고 정하기로 했다(설계 §3). 화면에서 한 줄만 지우면
@@ -21,8 +23,8 @@ import { StyleSheet, Text, View } from 'react-native';
 
 const STEPS = [1, 2, 3] as const;
 
-const DONE = '#111827';
-const PENDING = '#D1D5DB'; // 아직 안 지나온 단계
+const DONE = colors.action;
+const PENDING = colors.outline; // 아직 안 지나온 단계
 
 // 웹 StepIndicator 와 같은 크기다(size-8 = 32). 실기기에서 22는 작아 보였다
 const DOT_SIZE = 32;
@@ -84,6 +86,6 @@ const styles = StyleSheet.create({
   // 아직 안 지나온 동그라미는 옅은 회색(#D1D5DB)이라 흰 숫자를 얹으면 거의 안 보인다.
   // 웹도 같은 자리에 회색 글자를 쓴다(bg-gray-300 에 text-gray-500).
   // 웹과 같은 16. 동그라미(32) 안에서 눌리지 않고 읽힌다
-  number: { fontSize: 16, fontWeight: '700', color: '#6B7280' },
-  numberDone: { color: '#FFFFFF' },
+  number: { fontSize: 16, fontWeight: '700', color: colors.onSurfaceMuted },
+  numberDone: { color: colors.onAction },
 });

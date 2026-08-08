@@ -8,6 +8,7 @@ import type { Option } from '@cuddle/shared';
 import { messageStyles } from '@/components/signup/field';
 import { BottomSheet, sheetItemStyles } from '@/components/ui/bottom-sheet';
 import { FieldLabel } from '@/components/ui/field-label';
+import { colors } from '@/constants/colors';
 
 // 값 하나를 아래에서 올라오는 목록으로 고르는 칸.
 // 앱에는 웹의 <select> 같은 요소가 없어서, 누르면 시트가 올라오는 방식으로 만든다.
@@ -86,7 +87,7 @@ export function PickerField({
         <Text style={selected ? styles.value : styles.placeholder}>{text}</Text>
         {/* 「눌러서 고르는 칸」이라는 표시. 없으면 글자를 치는 칸처럼 보인다 —
             웹도 SelectDropdown에 같은 아이콘(lucide ChevronDown)을 그린다 */}
-        <ChevronDown size={18} color="#6B7280" strokeWidth={2} />
+        <ChevronDown size={18} color={colors.onSurfaceMuted} strokeWidth={2} />
       </Pressable>
 
       {error ? <Text style={messageStyles.error}>{error}</Text> : null}
@@ -120,7 +121,7 @@ const styles = StyleSheet.create({
   select: {
     height: 48,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: colors.outline,
     borderRadius: 8,
     paddingHorizontal: 12,
     // 글자는 왼쪽, 화살표는 오른쪽 끝
@@ -128,13 +129,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 8,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   selectPressed: { opacity: 0.7 },
-  selectDisabled: { backgroundColor: '#F9FAFB' },
-  selectError: { borderColor: '#C91D1D' },
-  value: { flex: 1, fontSize: 15, color: '#111827' },
-  placeholder: { flex: 1, fontSize: 15, color: '#9CA3AF' },
+  selectDisabled: { backgroundColor: colors.surfaceMuted },
+  selectError: { borderColor: colors.danger },
+  value: { flex: 1, fontSize: 15, color: colors.onSurface },
+  placeholder: { flex: 1, fontSize: 15, color: colors.onSurfaceSubtle },
 
   // 세부 종류가 가장 길어야 여덟 개지만, 카테고리·상태까지 한 껍데기를 쓰므로
   // region-field와 같이 여섯 줄에서 끊는다. 화면을 다 덮지 않게 하려는 것이다.

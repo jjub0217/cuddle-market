@@ -3,6 +3,7 @@ import { Image } from 'expo-image';
 import { EllipsisVertical } from 'lucide-react-native';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { colors } from '@/constants/colors';
 import type { CommentItem } from '@/lib/community';
 
 // 댓글·답글 한 줄. 웹 CommentItem과 같은 재료·같은 숫자를 쓴다.
@@ -84,7 +85,7 @@ export function CommentRow({ comment, isReply = false, isMine, onMenu, onReply }
           accessibilityLabel="더보기"
           style={({ pressed }) => (pressed ? styles.pressed : undefined)}
         >
-          <EllipsisVertical size={18} color="#9CA3AF" />
+          <EllipsisVertical size={18} color={colors.onSurfaceSubtle} />
         </Pressable>
       ) : null}
     </View>
@@ -99,32 +100,32 @@ const styles = StyleSheet.create({
   // ⚠️ padding(사방)을 주면 안 된다 — 오른쪽에도 붙어서 ⋮ 가 안으로 밀리고
   //    댓글의 ⋮ 와 세로로 어긋난다. 위아래만 바꿀 때는 paddingVertical을 쓴다.
   replyRow: { marginLeft: 40, paddingVertical: 8 },
-  avatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#F3F4F6' },
+  avatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.surfaceSunken },
   // 답글은 아바타를 줄여 댓글과 층을 나눈다(32 → 24). 들여쓰기만으로는 층이 잘 안 보인다.
   // 웹도 같은 값이다 — ProfileAvatar의 size="xs"(h-6 w-6 = 24px).
   // ⚠️ borderRadius는 늘 지름의 절반이어야 동그랗다.
   replyAvatar: { width: 24, height: 24, borderRadius: 12 },
   avatarFallback: { alignItems: 'center', justifyContent: 'center' },
-  avatarLetter: { fontSize: 14, color: '#6B7280' },
+  avatarLetter: { fontSize: 14, color: colors.onSurfaceMuted },
   replyAvatarLetter: { fontSize: 12 },
   main: { flex: 1, gap: 4 },
   nameLine: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  name: { fontSize: 14, fontWeight: '600', color: '#111827' },
+  name: { fontSize: 14, fontWeight: '600', color: colors.onSurface },
   mineBadge: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#FFFFFF',
-    backgroundColor: '#ecc88e', // 웹 --color-primary-200
+    color: colors.onSelected,
+    backgroundColor: colors.brand200, // 웹 --color-primary-200
     borderRadius: 999,
     paddingHorizontal: 8,
     paddingVertical: 2,
     overflow: 'hidden',
   },
-  content: { fontSize: 15, lineHeight: 21, color: '#111827' }, // 웹 leading-snug와 같은 비율
-  mention: { fontSize: 14, color: '#825500' }, // 웹 --color-primary-container
+  content: { fontSize: 15, lineHeight: 21, color: colors.onSurface }, // 웹 leading-snug와 같은 비율
+  mention: { fontSize: 14, color: colors.accent }, // 웹 --color-primary-container
   metaLine: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  time: { fontSize: 12, color: '#9CA3AF' },
-  dot: { fontSize: 12, color: '#9CA3AF' },
-  action: { fontSize: 12, fontWeight: '500', color: '#825500' },
+  time: { fontSize: 12, color: colors.onSurfaceSubtle },
+  dot: { fontSize: 12, color: colors.onSurfaceSubtle },
+  action: { fontSize: 12, fontWeight: '500', color: colors.accent },
   pressed: { opacity: 0.5 },
 });

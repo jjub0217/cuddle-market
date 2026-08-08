@@ -10,6 +10,7 @@ import { PostSearchInput } from '@/components/community/post-search-input';
 import { EmptyState, ErrorState, ListFooter, LoadingState } from '@/components/list-states';
 import { StatusFilterChips, type FilterChip } from '@/components/my/status-filter-chips';
 import { AppHeader } from '@/components/ui/app-header';
+import { colors } from '@/constants/colors';
 import { fetchPosts, type BoardType, type PostListItem } from '@/lib/community';
 
 // 커뮤니티 목록.
@@ -145,7 +146,7 @@ export default function CommunityListScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  container: { flex: 1, backgroundColor: colors.surface },
   list: { paddingHorizontal: 16 },
   pressed: { opacity: 0.6 },
 });

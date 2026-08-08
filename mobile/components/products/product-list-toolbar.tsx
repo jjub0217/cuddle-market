@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ChevronDown, SlidersHorizontal } from 'lucide-react-native';
 
 import { BottomSheet, sheetItemStyles } from '@/components/ui/bottom-sheet';
+import { colors } from '@/constants/colors';
 
 // 상품 목록 **바로 위에 고정되는** 줄.
 //
@@ -111,7 +112,7 @@ export function ProductListToolbar({
           accessibilityLabel="세부 필터"
           style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
         >
-          <SlidersHorizontal size={18} color="#4B5563" strokeWidth={2} />
+          <SlidersHorizontal size={18} color={colors.onSurfaceMedium} strokeWidth={2} />
         </Pressable>
 
         <Pressable
@@ -124,7 +125,7 @@ export function ProductListToolbar({
         >
           {/* 지금 고른 정렬은 늘 눈에 보여야 한다 — 열어 보지 않고도 알 수 있게 */}
           <Text style={styles.sortLabel}>{selectedSort.label}</Text>
-          <ChevronDown size={16} color="#4B5563" strokeWidth={2} />
+          <ChevronDown size={16} color={colors.onSurfaceMedium} strokeWidth={2} />
         </Pressable>
       </View>
 
@@ -168,10 +169,10 @@ const styles = StyleSheet.create({
     // 알약 줄이 자기 위아래 여백(tabs.paddingVertical)을 갖고 있어 여기서는 적게 준다.
     // 둘을 더한 값이 줄 높이다 — 여기만 키우면 알약은 여전히 잘린다.
     paddingVertical: 3,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     // 아래 목록과 붙어 보이지 않게 선을 하나 긋는다. 웹도 이 줄 아래에 border-b가 있다.
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: colors.outlineVariant,
   },
   tabs: {
     flexDirection: 'row',
@@ -190,22 +191,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 12,
     borderRadius: 999,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
   },
   pillActive: {
-    backgroundColor: '#825500',
-    borderColor: '#825500',
+    backgroundColor: colors.selected,
+    borderColor: colors.selected,
   },
   pillIdle: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#D4C4B2',
+    backgroundColor: colors.surface,
+    borderColor: colors.outline,
   },
   pillLabel: {
     fontSize: 13,
     fontWeight: '400',
   },
-  pillLabelActive: { color: '#FFFFFF' },
-  pillLabelIdle: { color: '#4B5563' },
+  pillLabelActive: { color: colors.onSelected, fontWeight: '600' },
+  pillLabelIdle: { color: colors.onSurfaceMedium },
 
   right: {
     flexDirection: 'row',
@@ -229,10 +230,10 @@ const styles = StyleSheet.create({
   },
   sortLabel: {
     fontSize: 13,
-    color: '#4B5563',
+    color: colors.onSurfaceMedium,
   },
   sheetLabelActive: {
-    color: '#825500',
+    color: colors.accent,
     fontWeight: '600',
   },
   pressed: { opacity: 0.7 },

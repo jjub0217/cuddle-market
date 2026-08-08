@@ -23,6 +23,8 @@ import {
   type Option,
 } from '@cuddle/shared';
 
+import { colors } from '@/constants/colors';
+
 // 상품 목록 위에 얹는 필터 세 줄 (반려동물 대분류 · 소분류 · 카테고리).
 //
 // ⚠️ **이 파일은 조각을 둘로 내보낸다.** 화면에서 서 있는 자리가 달라서다(#855 후속).
@@ -519,15 +521,15 @@ const styles = StyleSheet.create({
    * 대분류 탭과 소분류·카테고리 줄이 **둘 다** 쓴다 — 둘 다 홈 배경(#F9FAFB) 위에 뜬다.
    */
   sheet: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
 
   // ── 대분류 탭 줄 ────────────────────────────────────────────────
   tabScroll: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     // 탭 줄임을 보이는 옅은 밑줄. 고른 탭의 바(#825500)는 이 위에 겹쳐 그어진다.
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: colors.outlineVariant,
   },
   /** 바깥 여백은 여기에만 준다 — 안쪽 상자를 여백 없이 두어야 바의 기준점이 탭과 같아진다. */
   tabRowPadding: {
@@ -554,17 +556,18 @@ const styles = StyleSheet.create({
     left: 0,
     bottom: 0,
     height: TAB_BAR_HEIGHT,
-    backgroundColor: '#825500',
+    // 글자(accent)와 같은 색으로 둔다 — 얇은 선이라 연한 색이면 안 보인다
+    backgroundColor: colors.accent,
   },
   tabLabel: {
     fontSize: 15,
   },
   tabLabelActive: {
-    color: '#825500',
+    color: colors.accent,
     fontWeight: '700',
   },
   tabLabelIdle: {
-    color: '#4B5563',
+    color: colors.onSurfaceMedium,
     fontWeight: '400',
   },
 
@@ -573,7 +576,7 @@ const styles = StyleSheet.create({
     // 접히는 동안 알약이 줄 밖으로 나오지 않게 잘라 낸다.
     overflow: 'hidden',
     // ⚠️ 여기에도 흰 배경이 있어야 한다. 없으면 접히는 동안 이 줄만 회색으로 비친다.
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   row: {
     flexDirection: 'row',
@@ -589,25 +592,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 12,
     borderRadius: 999,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
   },
   chipActive: {
-    backgroundColor: '#825500',
-    borderColor: '#825500',
+    backgroundColor: colors.selected,
+    borderColor: colors.selected,
   },
   chipIdle: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#D4C4B2',
+    backgroundColor: colors.surface,
+    borderColor: colors.outline,
   },
   label: {
     fontSize: 13,
     fontWeight: '400',
   },
   labelActive: {
-    color: '#FFFFFF',
+    color: colors.onSelected,
+    fontWeight: '600',
   },
   labelIdle: {
-    color: '#4B5563',
+    color: colors.onSurfaceMedium,
   },
   pressed: {
     opacity: 0.7,
@@ -615,7 +619,7 @@ const styles = StyleSheet.create({
 
   // ── 카테고리 그림 격자 ──────────────────────────────────────────
   grid: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     // ⚠️ 줄 수를 못 박지 않는다. 기기 폭에 맞춰 넘어간다 —
     //    좁은 폰은 3~4개씩, 넓은 폰은 5개씩 한 줄에 놓인다.
     flexDirection: 'row',
@@ -634,7 +638,7 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: 28,
     // 웹 bg-primary-50(#faf3e6)와 같은 연한 베이지
-    backgroundColor: '#FAF3E6',
+    backgroundColor: colors.brandSurface,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -644,7 +648,7 @@ const styles = StyleSheet.create({
   },
   // 고른 것이 눈에 띄게 — 동그라미에 브라운 테두리를 두르고 이름을 굵게 한다
   tileCircleActive: {
-    borderColor: '#825500',
+    borderColor: colors.selected,
   },
   tileImage: {
     width: '100%',
@@ -654,11 +658,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   tileLabelActive: {
-    color: '#825500',
+    color: colors.accent,
     fontWeight: '700',
   },
   tileLabelIdle: {
-    color: '#4B5563',
+    color: colors.onSurfaceMedium,
     fontWeight: '400',
   },
 });

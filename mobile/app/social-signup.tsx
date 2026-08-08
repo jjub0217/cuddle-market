@@ -17,6 +17,7 @@ import { ScreenHeader } from '@/components/ui/screen-header';
 import { RegionField } from '@/components/products/region-field';
 import { BirthDateField } from '@/components/signup/birth-date-field';
 import { Field, fieldStyles, messageStyles } from '@/components/signup/field';
+import { colors } from '@/constants/colors';
 import { fetchMe, updateMe } from '@/lib/profile';
 import { checkNicknameAvailable } from '@/lib/signup/api';
 import { useFieldScroll } from '@/lib/signup/use-field-scroll';
@@ -202,7 +203,7 @@ export default function SocialSignupScreen() {
           <Text style={styles.desc}>서비스 이용을 위해 아래 정보가 필요합니다</Text>
 
           {loading ? (
-            <ActivityIndicator style={styles.loading} color="#111827" />
+            <ActivityIndicator style={styles.loading} color={colors.onSurface} />
           ) : (
             <>
               <View onLayout={registerField('nickname')}>
@@ -272,7 +273,7 @@ export default function SocialSignupScreen() {
                 ]}
               >
                 {submitting ? (
-                  <ActivityIndicator color="#FFFFFF" />
+                  <ActivityIndicator color={colors.onAction} />
                 ) : (
                   // 웹 SocialSignUpForm.tsx:142의 단추 문구 그대로다
                   <Text style={styles.submitLabel}>회원가입</Text>
@@ -288,24 +289,24 @@ export default function SocialSignupScreen() {
 
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  container: { flex: 1, backgroundColor: colors.surface },
   flex: { flex: 1 },
   content: { paddingHorizontal: 20, paddingTop: 12, gap: 16 },
   // 크기는 가입 화면 제목과 같은 값이다(signup.tsx styles.heading).
   // marginBottom은 두지 않는다 — 바로 아래 설명 문구가 붙어야 한 덩어리로 읽힌다
-  heading: { fontSize: 22, fontWeight: '700', color: '#111827' },
+  heading: { fontSize: 22, fontWeight: '700', color: colors.onSurface },
   // 설명은 칸 아래 안내 문구(messageStyles.hint)와 같은 값이다
-  desc: { fontSize: 13, color: '#6B7280', marginTop: -8 },
+  desc: { fontSize: 13, color: colors.onSurfaceMuted, marginTop: -8 },
   loading: { marginTop: 24 },
   submit: {
     height: 48,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#111827',
+    backgroundColor: colors.action,
     marginTop: 8,
   },
   submitPressed: { opacity: 0.8 },
   submitDisabled: { opacity: 0.4 },
-  submitLabel: { fontSize: 16, fontWeight: '600', color: '#FFFFFF' },
+  submitLabel: { fontSize: 15, fontWeight: '600', color: colors.onAction },
 });

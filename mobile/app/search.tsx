@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { SearchBarHeader } from '@/components/products/search-bar-header';
+import { colors } from '@/constants/colors';
 
 // 검색 화면. 홈 헤더의 돋보기를 누르면 여기로 온다(#854).
 //
@@ -38,5 +39,5 @@ export default function SearchScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  container: { flex: 1, backgroundColor: colors.surface },
 });

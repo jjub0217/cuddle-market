@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { SocialLoginButtons } from '@/components/auth/social-login-buttons';
 import { LOGO_ASPECT_RATIO } from '@/components/ui/app-header';
+import { colors } from '@/constants/colors';
 import { fetchMe } from '@/lib/profile';
 import { showToast } from '@/lib/toast';
 
@@ -135,7 +136,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   flex: {
     flex: 1,
@@ -173,10 +174,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#111827',
+    backgroundColor: colors.action,
   },
   emailPressed: { opacity: 0.8 },
-  emailLabel: { fontSize: 15, fontWeight: '600', color: '#FFFFFF' },
+  emailLabel: { fontSize: 15, fontWeight: '600', color: colors.onAction },
   // 소셜 단추 묶음. 이메일 단추와 같은 간격(8)으로 이어 붙인다
   social: {
     marginTop: 8,
@@ -196,13 +197,13 @@ const styles = StyleSheet.create({
   bottomLinkText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#4B5563',
+    color: colors.onSurfaceMedium,
   },
   // 희미한 회색 세로 막대. 높이 12는 글자(14)보다 낮아 글자를 누르지 않는다
   bottomLinkDivider: {
     width: 1,
     height: 12,
     marginHorizontal: 12,
-    backgroundColor: '#D1D5DB',
+    backgroundColor: colors.outline,
   },
 });

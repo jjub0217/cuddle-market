@@ -6,6 +6,7 @@ import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { LogoutModal } from '@/components/my/logout-modal';
+import { colors } from '@/constants/colors';
 import { useAuthStore } from '@/lib/auth/store';
 import { ACCOUNT_DELETION_URL, PRIVACY_URL, SUPPORT_MAIL_URL } from '@/lib/support-links';
 
@@ -29,18 +30,17 @@ const HEADER_HEIGHT = 52;
 /** 웹 MobileNavigation의 `duration-300`과 같은 값. */
 const SLIDE_MS = 300;
 
-// 위쪽 버튼 두 개의 색은 일부러 무채색이다.
+// 위쪽 버튼 두 개는 앱의 다른 「끝내는 단추」와 같은 브랜드 갈색이다(#786에서 정했다).
 //
-// 웹은 여기 `--color-primary-200`(#ECC88E)을 쓰는데 그 값을 안 가져왔다. 두 가지 이유다.
-//  1. 앱 색을 웹 토큰에 매핑하는 일은 #786(앱 색 토큰 체계 도입)에서 통째로 다룬다.
-//     지금 한 곳만 옮겨 두면 그때 다시 걷어내야 한다.
-//  2. 그 값은 대비가 나쁘다 — 흰 글자 대 #ECC88E가 1.59:1로, WCAG AA(본문 4.5:1)에
-//     한참 못 미친다. #786에서 웹까지 함께 정하는 게 맞다.
+// ⚠️ 웹은 여기 `--color-primary-200`(#ECC88E)을 쓰는데 **그 값은 안 가져온다.**
+//    흰 글자 대비가 1.59:1 로 WCAG AA(본문 4.5:1)에 한참 못 미친다.
+//    지금 값(#633F00)은 9.37:1 이다. 웹의 그 자리를 고치는 일은 아직 남아 있다.
 //
-// 같은 이유로 로그아웃 확인 창(logout-modal.tsx)도 아직 검정을 쓴다 — 그쪽에 먼저
-// 적어 둔 판단을 여기서도 따른다. 두 창이 나란히 뜨므로 색이 갈리면 더 어색하다.
-const BUTTON_FILL = '#111827';
-const BUTTON_BORDER = '#D1D5DB';
+// 로그아웃 확인 창(logout-modal.tsx)도 같은 값을 쓴다 — 두 창이 나란히 뜨므로
+// 색이 갈리면 어색하다.
+const BUTTON_FILL = colors.action;
+// 테두리도 브랜드 갈색이다 — 글자와 같은 색이라 단추 하나가 한 덩어리로 읽힌다.
+const BUTTON_BORDER = colors.action;
 
 interface MenuItem {
   label: string;
@@ -122,7 +122,7 @@ export function AppMenuOverlay({ visible, onClose }: Props) {
               accessibilityLabel="메뉴 닫기"
               style={({ pressed }) => (pressed ? styles.pressed : undefined)}
             >
-              <X size={24} color="#111827" />
+              <X size={24} color={colors.onSurface} />
             </Pressable>
             <Text style={styles.heading}>메뉴</Text>
           </View>
@@ -162,7 +162,7 @@ export function AppMenuOverlay({ visible, onClose }: Props) {
                 ]}
               >
                 <Text style={styles.rowLabel}>{menuItem.label}</Text>
-                <ChevronRight size={20} color="#9CA3AF" />
+                <ChevronRight size={20} color={colors.onSurfaceSubtle} />
               </Pressable>
             ))}
           </View>
@@ -188,7 +188,7 @@ export function AppMenuOverlay({ visible, onClose }: Props) {
 const styles = StyleSheet.create({
   /** 미끄러져 들어오는 판. 화면을 다 덮는다(웹도 w-full이다). */
   panel: { flex: 1 },
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  container: { flex: 1, backgroundColor: colors.surface },
   header: {
     height: HEADER_HEIGHT,
     flexDirection: 'row',
@@ -196,9 +196,9 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingHorizontal: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: colors.outlineVariant,
   },
-  heading: { fontSize: 18, fontWeight: '700', color: '#111827' },
+  heading: { fontSize: 18, fontWeight: '700', color: colors.onSurface },
   pressed: { opacity: 0.5 },
   // 웹은 두 버튼이 gap-2(8)로 붙고 각각 flex-1로 반씩 나눠 갖는다.
   authRow: {
@@ -207,14 +207,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: colors.outlineVariant,
   },
   authOutline: {
     flex: 1,
     height: 42,
     // 8은 앱의 다른 버튼·창과 같은 값이다(로그아웃 확인 창도 8).
     borderRadius: 8,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
     borderColor: BUTTON_BORDER,
     alignItems: 'center',
     justifyContent: 'center',
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  authFilledLabel: { fontSize: 14, fontWeight: '600', color: '#FFFFFF' },
+  authFilledLabel: { fontSize: 14, fontWeight: '600', color: colors.onAction },
   row: {
     height: 56,
     flexDirection: 'row',
@@ -238,8 +238,8 @@ const styles = StyleSheet.create({
   },
   rowDivider: {
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#F3F4F6',
+    borderTopColor: colors.surfaceSunken,
   },
-  rowPressed: { backgroundColor: '#F9FAFB' },
-  rowLabel: { fontSize: 16, color: '#111827' },
+  rowPressed: { backgroundColor: colors.surfaceMuted },
+  rowLabel: { fontSize: 16, color: colors.onSurface },
 });

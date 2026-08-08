@@ -3,6 +3,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { ChevronRight, type LucideIcon } from 'lucide-react-native';
 
+import { colors } from '@/constants/colors';
+
 // 마이페이지의 카드 한 장. 웹 모바일 마이페이지(MyPage.tsx의 md:hidden 블록)와
 // 같은 결 — 제목 + 「왼쪽 아이콘 · 이름 · 오른쪽 화살표」로 된 줄 목록.
 //
@@ -12,8 +14,7 @@ import { ChevronRight, type LucideIcon } from 'lucide-react-native';
 
 // 색은 앱이 지금 쓰는 무채색 그대로다. 웹 토큰(text-on-surface 등)에 맞추는 일은
 // #786(앱 색 토큰 체계 도입)에서 통째로 다룬다.
-const LABEL = '#111827';
-const DANGER = '#DC2626';
+const LABEL = colors.onSurface;
 
 interface SectionCardProps {
   title: string;
@@ -45,7 +46,7 @@ interface SectionRowProps {
 
 export function SectionRow({ label, onPress, icon: Icon, tone = 'default' }: SectionRowProps) {
   // 아이콘도 글자와 같은 색을 쓴다 — 탈퇴는 둘 다 빨강이라야 한 덩어리로 읽힌다.
-  const color = tone === 'danger' ? DANGER : LABEL;
+  const color = tone === 'danger' ? colors.danger : LABEL;
 
   return (
     <Pressable
@@ -56,17 +57,17 @@ export function SectionRow({ label, onPress, icon: Icon, tone = 'default' }: Sec
       {/* 크기·굵기는 웹 모바일과 같은 20 / 1.5다. */}
       {Icon ? <Icon size={20} strokeWidth={1.5} color={color} /> : null}
       <Text style={[styles.rowLabel, tone === 'danger' && styles.rowLabelDanger]}>{label}</Text>
-      <ChevronRight size={22} color="#9CA3AF" />
+      <ChevronRight size={22} color={colors.onSurfaceSubtle} />
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: 16,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
     paddingHorizontal: 20,
     paddingVertical: 16,
     gap: 8,
@@ -74,7 +75,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#111827',
+    color: colors.onSurface,
   },
   row: {
     flexDirection: 'row',
@@ -93,6 +94,6 @@ const styles = StyleSheet.create({
     color: LABEL,
   },
   rowLabelDanger: {
-    color: DANGER,
+    color: colors.danger,
   },
 });

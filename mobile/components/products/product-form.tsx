@@ -24,6 +24,7 @@ import { ImageField } from '@/components/products/image-field';
 import { PickerField } from '@/components/products/picker-field';
 import { RegionField } from '@/components/products/region-field';
 import { Field } from '@/components/signup/field';
+import { colors } from '@/constants/colors';
 
 import { toImageUrls, type UploadSlot } from '@/lib/product-images';
 import {
@@ -323,7 +324,7 @@ export function ProductForm({ initialValues, initialSlots, submitLabel, onSubmit
           ]}
         >
           {submitting ? (
-            <ActivityIndicator color="#FFFFFF" />
+            <ActivityIndicator color={colors.onAction} />
           ) : (
             <Text style={styles.submitLabel}>{submitLabel}</Text>
           )}
@@ -343,7 +344,7 @@ const styles = StyleSheet.create({
 
   // 가격 칸 오른쪽의 「원」. 입력칸과 키를 맞춰야 글자가 위로 뜨지 않는다
   suffix: { height: 48, justifyContent: 'center' },
-  suffixLabel: { fontSize: 15, color: '#6B7280' },
+  suffixLabel: { fontSize: 15, color: colors.onSurfaceMuted },
 
   // 여러 줄 칸. Field의 기본 높이(48)를 덮어쓴다.
   // textAlignVertical은 안드로이드에서 글이 가운데로 오지 않게 막는다 — 신고 화면과 같은 값.
@@ -353,17 +354,17 @@ const styles = StyleSheet.create({
   footer: {
     padding: 16,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#E5E7EB',
-    backgroundColor: '#FFFFFF',
+    borderTopColor: colors.outlineVariant,
+    backgroundColor: colors.surface,
   },
   submit: {
     height: 48,
     borderRadius: 8,
-    backgroundColor: '#111827',
+    backgroundColor: colors.action,
     alignItems: 'center',
     justifyContent: 'center',
   },
   submitDisabled: { opacity: 0.4 },
-  submitLabel: { fontSize: 15, fontWeight: '600', color: '#FFFFFF' },
+  submitLabel: { fontSize: 15, fontWeight: '600', color: colors.onAction },
   pressed: { opacity: 0.5 },
 });

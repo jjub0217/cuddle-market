@@ -10,6 +10,7 @@ import { LogoutModal } from '@/components/my/logout-modal';
 import { SectionCard, SectionRow } from '@/components/my/section-card';
 import { WithdrawModal } from '@/components/my/withdraw-modal';
 import { AppHeader } from '@/components/ui/app-header';
+import { colors } from '@/constants/colors';
 import { useMe } from '@/hooks/use-me';
 import { useAuthStore } from '@/lib/auth/store';
 import { ACCOUNT_DELETION_URL, PRIVACY_URL, SUPPORT_MAIL_URL } from '@/lib/support-links';
@@ -118,7 +119,7 @@ export default function MyScreen() {
             </Text>
           </View>
           {/* 아래 줄들과 같은 화살표다(components/my/section-card.tsx:59) */}
-          <ChevronRight size={22} color="#9CA3AF" />
+          <ChevronRight size={22} color={colors.onSurfaceSubtle} />
         </Pressable>
 
         {/* 웹 모바일 마이페이지와 같은 묶음·이름. 웹은 「구매내역」으로 붙여 썼는데
@@ -179,7 +180,7 @@ export default function MyScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.surfaceMuted,
   },
   content: {
     padding: 16,
@@ -193,18 +194,18 @@ const styles = StyleSheet.create({
   },
   centerText: {
     fontSize: 15,
-    color: '#6B7280',
+    color: colors.onSurfaceMuted,
   },
   loginButton: {
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 8,
-    backgroundColor: '#111827',
+    backgroundColor: colors.action,
   },
   loginButtonLabel: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.onAction,
   },
   pressed: {
     opacity: 0.7,
@@ -216,17 +217,17 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     // 글자 묶음이 남는 자리를 다 먹어야 화살표가 오른쪽 끝에 붙는다
     gap: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: 16,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
     padding: 20,
   },
   avatar: {
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#FAF3E6',
+    backgroundColor: colors.brandSurface,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -241,7 +242,7 @@ const styles = StyleSheet.create({
   avatarInitial: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#825500',
+    color: colors.accent,
   },
   profileText: {
     // 남는 자리를 다 먹어 화살표를 오른쪽 끝으로 민다
@@ -250,20 +251,20 @@ const styles = StyleSheet.create({
   },
   introduction: {
     fontSize: 13,
-    color: '#4B5563',
+    color: colors.onSurfaceMedium,
     lineHeight: 18,
   },
   // 아직 안 쓴 자리는 옅게 — 값이 아니라 안내라는 게 보여야 한다
   introductionEmpty: {
-    color: '#9CA3AF',
+    color: colors.onSurfaceSubtle,
   },
   nickname: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#111827',
+    color: colors.onSurface,
   },
   location: {
     fontSize: 13,
-    color: '#6B7280',
+    color: colors.onSurfaceMuted,
   },
 });

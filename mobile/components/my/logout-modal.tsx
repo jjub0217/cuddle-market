@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { colors } from '@/constants/colors';
 import { logout } from '@/lib/auth/session';
 
 // 로그아웃 확인.
@@ -67,7 +68,7 @@ export function LogoutModal({ visible, onClose, onDone }: Props) {
               ]}
             >
               {submitting ? (
-                <ActivityIndicator color="#FFFFFF" />
+                <ActivityIndicator color={colors.onAction} />
               ) : (
                 <Text style={styles.confirmLabel}>로그아웃</Text>
               )}
@@ -89,7 +90,7 @@ const styles = StyleSheet.create({
   },
   sheet: {
     width: '100%',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     // 8은 앱에서 가장 많이 쓰는 값이자 웹 모달(rounded-lg)과 같은 값이다.
     // 카드류가 쓰는 16과 구분된다 — 카드는 웹도 rounded-2xl(16)이라 그쪽이 맞다.
     borderRadius: 8,
@@ -99,12 +100,12 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 19,
     fontWeight: '700',
-    color: '#111827',
+    color: colors.onSurface,
     textAlign: 'center',
   },
   description: {
     fontSize: 14,
-    color: '#6B7280',
+    color: colors.onSurfaceMuted,
     textAlign: 'center',
   },
   actions: {
@@ -116,21 +117,21 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 46,
     borderRadius: 8,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#D1D5DB',
+    borderWidth: 1,
+    borderColor: colors.outline,
     alignItems: 'center',
     justifyContent: 'center',
   },
   cancelLabel: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.onSurface,
   },
   confirm: {
     flex: 1,
     height: 46,
     borderRadius: 8,
-    backgroundColor: '#111827',
+    backgroundColor: colors.action,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -140,7 +141,7 @@ const styles = StyleSheet.create({
   confirmLabel: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.onAction,
   },
   pressed: {
     opacity: 0.7,

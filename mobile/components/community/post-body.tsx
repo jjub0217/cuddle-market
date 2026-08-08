@@ -3,6 +3,8 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { StyleSheet, View, type ImageStyle } from 'react-native';
 import { Renderer, useMarkdown, type MarkedStyles } from 'react-native-marked';
 
+import { colors } from '@/constants/colors';
+
 // 게시글 본문. 서버가 마크다운으로 준다.
 //
 // 웹 MdPreview.tsx가 정한 모양을 그대로 옮긴다. 웹과 앱이 같은 글을 다르게
@@ -23,7 +25,7 @@ interface PostBodyProps {
 }
 
 // 본문 글자 기본값. 라이브러리 기본은 16/24/#333333이라 앱 값으로 덮는다.
-const BODY_TEXT = { fontSize: 15, lineHeight: 22, color: '#111827' } as const;
+const BODY_TEXT = { fontSize: 15, lineHeight: 22, color: colors.onSurface } as const;
 
 // 사진을 아직 못 읽었을 때 잡아 두는 가로세로 비. 읽고 나면 진짜 비로 바꾼다.
 const FALLBACK_RATIO = 4 / 3;
@@ -73,18 +75,18 @@ const MARKDOWN_STYLES: MarkedStyles = {
   },
   li: BODY_TEXT,
   list: { marginVertical: 4 },
-  link: { ...BODY_TEXT, color: '#2563EB', textDecorationLine: 'underline', fontStyle: 'normal' },
+  link: { ...BODY_TEXT, color: colors.link, textDecorationLine: 'underline', fontStyle: 'normal' },
   codespan: {
     ...BODY_TEXT,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.surfaceSunken,
     borderRadius: 4,
     fontStyle: 'normal',
     fontWeight: '400',
   },
-  code: { backgroundColor: '#F3F4F6', borderRadius: 4, padding: 12 },
+  code: { backgroundColor: colors.surfaceSunken, borderRadius: 4, padding: 12 },
   blockquote: {
     borderLeftWidth: 4,
-    borderLeftColor: '#D1D5DB',
+    borderLeftColor: colors.outline,
     paddingLeft: 12,
     marginVertical: 8,
     opacity: 1,
@@ -151,6 +153,6 @@ const styles = StyleSheet.create({
     width: '100%',
     marginVertical: 8,
     borderRadius: 8,
-    backgroundColor: '#E5E7EB', // 읽기 전·실패했을 때 보이는 회색 자리
+    backgroundColor: colors.outlineVariant, // 읽기 전·실패했을 때 보이는 회색 자리
   },
 });

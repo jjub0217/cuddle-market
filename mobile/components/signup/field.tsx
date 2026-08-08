@@ -2,6 +2,7 @@ import type { ReactNode, RefObject } from 'react';
 import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 
 import { FieldLabel } from '@/components/ui/field-label';
+import { colors } from '@/constants/colors';
 
 // 라벨 + 입력칸 + 오류문구 한 벌. 회원가입 화면의 칸이 전부 이 모양이다.
 // 색·크기는 login-form.tsx의 styles를 그대로 따른다 — 두 화면이 달라 보이면 안 된다.
@@ -46,7 +47,7 @@ export function Field({
         <TextInput
           ref={inputRef}
           style={[styles.input, styles.grow, error ? styles.inputError : null, style]}
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={colors.onSurfaceSubtle}
           {...inputProps}
         />
         {trailing}
@@ -69,9 +70,9 @@ export function Field({
 // 색은 웹 토큰 그대로다 — tokens.colors.css에 WCAG AA 대비를 맞춘 값이라고 적혀 있다.
 // 표시 기호도 웹과 같이 이모지가 아닌 ✓(U+2713)를 쓴다. 이모지는 기기마다 모양이 다르다.
 export const messageStyles = StyleSheet.create({
-  error: { fontSize: 13, fontWeight: '600', color: '#C91D1D' },
-  success: { fontSize: 13, fontWeight: '600', color: '#15803D' },
-  hint: { fontSize: 13, color: '#6B7280' },
+  error: { fontSize: 13, fontWeight: '600', color: colors.danger },
+  success: { fontSize: 13, fontWeight: '600', color: colors.success },
+  hint: { fontSize: 13, color: colors.onSurfaceMuted },
 });
 
 /** 칸 오른쪽에 붙는 버튼 모양. 여러 조각이 같이 쓴다. */
@@ -82,7 +83,7 @@ export const fieldStyles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.surfaceSunken,
     // 최소 너비를 못 박는다. 안 그러면 **글자가 바뀔 때마다 단추 너비가 흔들리고**,
     // 옆 칸이 flex: 1 이라 그만큼 늘었다 줄었다 한다. 실기기에서 이렇게 보였다:
     //   [이메일 칸 ──────][인증받기]  누르면
@@ -97,7 +98,7 @@ export const fieldStyles = StyleSheet.create({
   buttonLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.onSurface,
   },
 });
 
@@ -109,12 +110,12 @@ const styles = StyleSheet.create({
   input: {
     height: 48,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: colors.outline,
     borderRadius: 8,
     paddingHorizontal: 12,
     fontSize: 15,
-    color: '#111827',
-    backgroundColor: '#FFFFFF',
+    color: colors.onSurface,
+    backgroundColor: colors.surface,
   },
-  inputError: { borderColor: '#C91D1D' },
+  inputError: { borderColor: colors.danger },
 });

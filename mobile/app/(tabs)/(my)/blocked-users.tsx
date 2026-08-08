@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState, ErrorState, ListFooter, LoadingState } from '@/components/list-states';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { colors } from '@/constants/colors';
 import { fetchBlockedUsers, unblockUser, type BlockedUser } from '@/lib/reports';
 import { showToast } from '@/lib/toast';
 
@@ -112,7 +113,7 @@ export default function BlockedUsersScreen() {
           accessibilityLabel="뒤로 가기"
           style={({ pressed }) => (pressed ? styles.pressed : undefined)}
         >
-          <ChevronLeft size={26} color="#111827" />
+          <ChevronLeft size={26} color={colors.onSurface} />
         </Pressable>
         <Text style={styles.heading}>차단 목록</Text>
       </View>
@@ -133,7 +134,7 @@ export default function BlockedUsersScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  container: { flex: 1, backgroundColor: colors.surface },
   header: {
     height: HEADER_HEIGHT,
     flexDirection: 'row',
@@ -141,9 +142,9 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingHorizontal: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: colors.outlineVariant,
   },
-  heading: { fontSize: 18, fontWeight: '700', color: '#111827' },
+  heading: { fontSize: 18, fontWeight: '700', color: colors.onSurface },
   pressed: { opacity: 0.5 },
   row: {
     flexDirection: 'row',
@@ -152,7 +153,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: colors.surfaceSunken,
   },
   avatar: {
     width: 40,
@@ -161,18 +162,18 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FAF3E6',
+    backgroundColor: colors.brandSurface,
   },
   avatarImage: { width: '100%', height: '100%' },
-  avatarInitial: { fontSize: 16, color: '#111827' },
-  nickname: { flex: 1, fontSize: 15, color: '#111827' },
+  avatarInitial: { fontSize: 16, color: colors.onSurface },
+  nickname: { flex: 1, fontSize: 15, color: colors.onSurface },
   unblock: {
     minHeight: 34,
     justifyContent: 'center',
     paddingHorizontal: 12,
     borderRadius: 8,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#D1D5DB',
+    borderWidth: 1,
+    borderColor: colors.outline,
   },
-  unblockLabel: { fontSize: 13, fontWeight: '600', color: '#111827' },
+  unblockLabel: { fontSize: 14, fontWeight: '600', color: colors.onSurface },
 });

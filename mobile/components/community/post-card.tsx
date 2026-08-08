@@ -2,6 +2,7 @@ import { getTimeAgo } from '@cuddle/shared';
 import { Image } from 'expo-image';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { colors } from '@/constants/colors';
 import type { PostListItem } from '@/lib/community';
 
 // 목록 한 줄. 웹 커뮤니티 목록과 같은 재료를 쓴다 —
@@ -43,11 +44,11 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingVertical: 14,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: colors.outlineVariant,
   },
   text: { flex: 1, gap: 4 },
-  title: { fontSize: 16, fontWeight: '600', color: '#111827' },
-  preview: { fontSize: 14, lineHeight: 20, color: '#6B7280' },
-  meta: { fontSize: 12, color: '#9CA3AF', marginTop: 2 },
-  thumb: { width: 76, height: 76, borderRadius: 8, backgroundColor: '#F3F4F6' },
+  title: { fontSize: 16, fontWeight: '600', color: colors.onSurface },
+  preview: { fontSize: 14, lineHeight: 20, color: colors.onSurfaceMuted },
+  meta: { fontSize: 12, color: colors.onSurfaceSubtle, marginTop: 2 },
+  thumb: { width: 76, height: 76, borderRadius: 8, backgroundColor: colors.surfaceSunken },
 });

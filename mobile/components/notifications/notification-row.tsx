@@ -20,6 +20,8 @@ import {
   type NotificationType,
 } from '@/lib/notifications';
 
+import { colors } from '@/constants/colors';
+
 /**
  * 알림 종류별 아이콘.
  *
@@ -89,13 +91,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#F3F4F6',
-    backgroundColor: '#FFFFFF',
+    borderBottomColor: colors.surfaceSunken,
+    backgroundColor: colors.surface,
   },
   // 안 읽음: 배경 + 점. 웹과 같은 방식이다.
   // 웹 NotificationItem과 같은 값이다 — --color-primary-50.
   // 같은 화면이 두 곳에서 다른 색이면 안 된다.
-  unread: { backgroundColor: '#faf3e6' },
+  unread: { backgroundColor: colors.brandSurface },
   pressed: { opacity: 0.7 },
   // 배경색은 종류마다 달라서 여기 두지 않는다 — 쓰는 쪽에서 덧씌운다.
   icon: {
@@ -106,15 +108,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   body: { flex: 1, gap: 2 },
-  title: { fontSize: 15, fontWeight: '600', color: '#111827' },
-  content: { fontSize: 14, color: '#4B5563' },
-  time: { fontSize: 12, color: '#9CA3AF', marginTop: 2 },
+  title: { fontSize: 15, fontWeight: '600', color: colors.onSurface },
+  content: { fontSize: 14, color: colors.onSurfaceMedium },
+  time: { fontSize: 12, color: colors.onSurfaceSubtle, marginTop: 2 },
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
     // 웹의 안 읽음 점과 같은 값 — --color-primary-500
-    backgroundColor: '#b06f15',
+    backgroundColor: colors.brand500,
     marginTop: 6,
   },
 });

@@ -1,5 +1,7 @@
 import { StyleSheet, Text } from 'react-native';
 
+import { colors } from '@/constants/colors';
+
 // 폼 칸 위에 붙는 이름표. 입력칸·고르는 칸·사진 칸이 **모두 이것 하나**를 쓴다.
 //
 // 왜 조각으로 뺐나: 11바퀴 실기기 확인에서 두 가지가 드러났다.
@@ -35,7 +37,7 @@ export const labelStyles = StyleSheet.create({
   // (login-form.tsx → signup/field.tsx → 상품 폼), 칸이 둘뿐인 로그인에서 잘 맞던 값이
   // 이름표 여덟 줄짜리 상품 폼에서는 뼈대가 안 잡혔다. 읽기 대비는 둘 다 통과하지만
   // (회색 4.83:1 · 지금 17.74:1) 훑을 때 이름표가 뒤로 물러나 보였다.
-  label: { fontSize: 14, fontWeight: '600', color: '#111827' },
+  label: { fontSize: 14, fontWeight: '600', color: colors.onSurface },
   // 웹 토큰 --color-danger-500(#c91d1d)과 같은 값. 오류 문구에 쓰는 빨강과도 같다
-  required: { color: '#C91D1D' },
+  required: { color: colors.danger },
 });

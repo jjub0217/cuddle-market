@@ -4,6 +4,7 @@ import { getAnimatedStyle } from 'react-native-reanimated';
 
 import { PET_DETAIL_OPTIONS_BY_TYPE, PET_TYPE_OPTIONS } from '@cuddle/shared';
 
+import { colors } from '@/constants/colors';
 import { ProductPetTypeTabs } from './product-filter-row';
 
 // 대분류 탭 줄. **목록 밖에 서는 조각이다** — 스크롤해도 화면에 남는다(#855 후속).
@@ -199,7 +200,7 @@ it('대분류 탭 줄이 자기 흰 바탕을 가진다', async () => {
   const { props } = renderTabs({ petType: FIRST_PET.code });
   await render(<ProductPetTypeTabs {...props} />);
 
-  const 흰색 = { backgroundColor: '#FFFFFF' };
+  const 흰색 = { backgroundColor: colors.surface };
   expect(screen.getByTestId('product-pet-type-tabs')).toHaveStyle(흰색);
   expect(screen.getByTestId('pet-type-tab-row')).toHaveStyle(흰색);
 });

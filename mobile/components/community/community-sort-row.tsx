@@ -1,5 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { colors } from '@/constants/colors';
+
 // 커뮤니티 목록의 정렬 줄.
 //
 // 셋뿐이라 시트로 감추지 않고 나란히 펼쳐 둔다 — 한 번에 고를 수 있고, 지금 무엇으로
@@ -67,7 +69,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   item: {
     flexDirection: 'row',
@@ -78,7 +80,7 @@ const styles = StyleSheet.create({
     width: 1,
     height: 12,
     marginHorizontal: 12,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: colors.outlineVariant,
   },
   button: {
     // 글자만 있는 단추라 누를 자리가 좁다. 위아래로 넓혀 손가락이 닿게 한다
@@ -89,11 +91,11 @@ const styles = StyleSheet.create({
   },
   // 고른 것은 앱의 다른 곳과 같은 브라운이다
   labelActive: {
-    color: '#825500',
+    color: colors.accent,
     fontWeight: '700',
   },
   labelIdle: {
-    color: '#4B5563',
+    color: colors.onSurfaceMedium,
     fontWeight: '400',
   },
   pressed: {

@@ -16,6 +16,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { PlaceListItem } from '@/components/places/place-list-item';
+import { colors } from '@/constants/colors';
 import type { PlaceListItem as PlaceListItemType } from '@/lib/places/types';
 
 // 지도 위에 떠 있는 목록. 손가락으로 끌어올린다.
@@ -178,11 +179,11 @@ const styles = StyleSheet.create({
     // ⚠️ insets.bottom 을 더하지 않는다. 여기는 **탭 화면 안**이라 탭바가 이미 제스처 바를
     //    비켜 놓았다. 더하면 두 번 세게 된다 (mobile/AGENTS.md).
     bottom: 0,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     // 지도 위에 떠 있다는 게 보이게. 안 그러면 지도와 붙어 한 덩어리로 읽힌다.
-    shadowColor: '#000000',
+    shadowColor: colors.black,
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -192,9 +193,9 @@ const styles = StyleSheet.create({
   handleArea: { paddingVertical: 12, alignItems: 'center' },
   // 굴릴 목록이 없을 때 끄는 자리. 시트에 남은 자리를 다 차지해 아무 데나 끌린다.
   wholeArea: { flex: 1 },
-  handle: { width: 40, height: 4, borderRadius: 2, backgroundColor: '#D1D5DB' },
+  handle: { width: 40, height: 4, borderRadius: 2, backgroundColor: colors.outline },
   list: { paddingHorizontal: 16, paddingBottom: 24, gap: 8 },
   notice: { alignItems: 'center', paddingTop: 16, gap: 6 },
-  noticeText: { fontSize: 14, color: '#6B7280' },
-  noticeHint: { fontSize: 13, color: '#9CA3AF' },
+  noticeText: { fontSize: 14, color: colors.onSurfaceMuted },
+  noticeHint: { fontSize: 13, color: colors.onSurfaceSubtle },
 });

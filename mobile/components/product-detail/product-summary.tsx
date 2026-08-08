@@ -7,6 +7,8 @@ import {
 } from '@cuddle/shared';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { colors } from '@/constants/colors';
+
 // 뱃지 → 제목 → 가격 → 시간·지역. 웹 모바일 폭과 같은 순서.
 // 뱃지 색은 홈 카드와 같다(판매=파랑, 판매요청=주황).
 
@@ -61,45 +63,45 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
   },
   badgeSell: {
-    backgroundColor: '#EFF6FF',
+    backgroundColor: colors.badgeSellBg,
   },
   badgeRequest: {
-    backgroundColor: '#FFF7ED',
+    backgroundColor: colors.badgeRequestBg,
   },
   badgeOutline: {
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#D1D5DB',
+    borderColor: colors.outline,
   },
   badgeText: {
     fontSize: 12,
     fontWeight: '600',
   },
   badgeTextSell: {
-    color: '#2563EB',
+    color: colors.badgeSell,
   },
   badgeTextRequest: {
-    color: '#EA580C',
+    color: colors.badgeRequest,
   },
   badgeTextOutline: {
     fontSize: 12,
-    color: '#6B7280',
+    color: colors.onSurfaceMuted,
   },
   title: {
     // 제목 20/700 = 가격과 크기·굵기 동일(사용자가 실물 보고 이 크기를 택함).
     fontSize: 20,
     fontWeight: '700',
     lineHeight: 26,
-    color: '#111827',
+    color: colors.onSurface,
   },
   price: {
     fontSize: 20,
     // 가격은 굵게(700) 강조. 제목과 크기·굵기가 같다(위 title 참고).
     fontWeight: '700',
     // 가격은 제목과 같은 검정(styles.title과 동일).
-    color: '#111827',
+    color: colors.onSurface,
   },
   meta: {
     fontSize: 13,
-    color: '#6B7280',
+    color: colors.onSurfaceMuted,
   },
 });

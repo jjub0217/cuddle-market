@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { LoginForm } from '@/components/auth/login-form';
+import { colors } from '@/constants/colors';
 
 // 이메일로 로그인하기. 로그인 관문(login.tsx)에서 「이메일로 로그인」을 누르면 온다.
 //
@@ -58,7 +59,7 @@ export default function EmailLoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  container: { flex: 1, backgroundColor: colors.surface },
   flex: { flex: 1 },
   content: {
     paddingHorizontal: 20,

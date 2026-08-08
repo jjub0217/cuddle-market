@@ -5,6 +5,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { needsSocialSignup } from '@cuddle/shared';
 
+import { colors } from '@/constants/colors';
 import { completeSocialLogin } from '@/lib/auth/social';
 import { fetchMe } from '@/lib/profile';
 import { showToast } from '@/lib/toast';
@@ -87,7 +88,7 @@ export default function OAuthCallbackScreen() {
 
   return (
     <View style={styles.container}>
-      <ActivityIndicator size="large" color="#111827" />
+      <ActivityIndicator size="large" color={colors.onSurface} />
     </View>
   );
 }
@@ -97,6 +98,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
 });

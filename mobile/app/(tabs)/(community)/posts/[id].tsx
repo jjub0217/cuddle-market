@@ -20,6 +20,7 @@ import { CommentMenuSheet } from '@/components/community/comment-menu-sheet';
 import { PostBody } from '@/components/community/post-body';
 import { ErrorState, LoadingState } from '@/components/list-states';
 import { ProductActionSheet, type SheetAction } from '@/components/my/product-action-sheet';
+import { colors } from '@/constants/colors';
 import { useMe } from '@/hooks/use-me';
 import { useAuthStore } from '@/lib/auth/store';
 import { createComment, fetchPostDetail, type CommentItem } from '@/lib/community';
@@ -173,7 +174,7 @@ export default function PostDetailScreen() {
           accessibilityLabel="뒤로 가기"
           style={({ pressed }) => (pressed ? styles.pressed : undefined)}
         >
-          <ChevronLeft size={26} color="#111827" />
+          <ChevronLeft size={26} color={colors.onSurface} />
         </Pressable>
 
         {/* 내 글에는 ⋮ 를 안 그린다 — 나를 신고할 이유가 없다 */}
@@ -185,7 +186,7 @@ export default function PostDetailScreen() {
             accessibilityLabel="더보기"
             style={({ pressed }) => (pressed ? styles.pressed : undefined)}
           >
-            <EllipsisVertical size={24} color="#111827" />
+            <EllipsisVertical size={24} color={colors.onSurface} />
           </Pressable>
         ) : null}
       </View>
@@ -230,7 +231,7 @@ export default function PostDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  container: { flex: 1, backgroundColor: colors.surface },
   flex: { flex: 1 },
   header: {
     height: HEADER_HEIGHT,
@@ -239,31 +240,31 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: colors.outlineVariant,
   },
   body: { paddingBottom: 32 },
   title: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#111827',
+    color: colors.onSurface,
     paddingHorizontal: 16,
     paddingTop: 16,
   },
   author: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 16 },
-  avatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#F3F4F6' },
+  avatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.surfaceSunken },
   avatarFallback: { alignItems: 'center', justifyContent: 'center' },
-  avatarLetter: { fontSize: 14, color: '#6B7280' },
-  meta: { fontSize: 13, color: '#6B7280' },
-  divider: { height: StyleSheet.hairlineWidth, backgroundColor: '#E5E7EB', marginBottom: 16 },
+  avatarLetter: { fontSize: 14, color: colors.onSurfaceMuted },
+  meta: { fontSize: 13, color: colors.onSurfaceMuted },
+  divider: { height: StyleSheet.hairlineWidth, backgroundColor: colors.outlineVariant, marginBottom: 16 },
   comments: {
     marginTop: 20,
     paddingHorizontal: 16,
     paddingTop: 20,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: colors.outlineVariant,
   },
   commentsHead: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  commentsTitle: { fontSize: 15, fontWeight: '600', color: '#111827' },
-  commentsCount: { fontSize: 15, fontWeight: '600', color: '#825500' }, // 웹 --color-primary-container
+  commentsTitle: { fontSize: 15, fontWeight: '600', color: colors.onSurface },
+  commentsCount: { fontSize: 15, fontWeight: '600', color: colors.accent }, // 웹 --color-primary-container
   pressed: { opacity: 0.6 },
 });

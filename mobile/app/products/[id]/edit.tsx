@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { ProductForm } from '@/components/products/product-form';
 import { ErrorState, LoadingState } from '@/components/list-states';
+import { colors } from '@/constants/colors';
 import { productDetailHref, tabGroupOf } from '@/lib/product-routes';
 import { fetchProductDetail, updateProduct, type ProductPayload } from '@/lib/products';
 import { showToast } from '@/lib/toast';
@@ -60,7 +61,7 @@ export default function EditProductScreen() {
   //    웹 ProductPost.tsx:89-95도 같은 이유로 데이터가 올 때까지 폼을 안 그린다.
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         <Header onBack={() => router.back()} />
         <LoadingState />
       </SafeAreaView>
@@ -69,7 +70,7 @@ export default function EditProductScreen() {
 
   if (isError || !product) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         <Header onBack={() => router.back()} />
         <ErrorState onRetry={() => refetch()} title="상품을 불러오지 못했어요." />
       </SafeAreaView>
@@ -77,7 +78,7 @@ export default function EditProductScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <Header onBack={() => router.back()} />
 
       <ProductForm
@@ -115,5 +116,5 @@ function Header({ onBack }: { onBack: () => void }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  container: { flex: 1, backgroundColor: colors.surface },
 });

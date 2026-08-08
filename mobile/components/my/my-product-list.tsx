@@ -25,6 +25,7 @@ import { useProductActions } from '@/hooks/use-product-actions';
 import type { MyListPage } from '@/lib/my-lists';
 import type { TradeStatus } from '@/lib/product-actions';
 import { buildOwnerActions, type MenuKind } from '@/lib/product-menu';
+import { colors } from '@/constants/colors';
 import { deleteProduct } from '@/lib/products';
 import { showToast } from '@/lib/toast';
 
@@ -253,7 +254,7 @@ export function MyProductList({
           accessibilityLabel="뒤로"
           style={({ pressed }) => (pressed ? styles.backPressed : undefined)}
         >
-          <ChevronLeft size={26} color="#111827" />
+          <ChevronLeft size={26} color={colors.onSurface} />
         </Pressable>
         <Text style={styles.headerTitle}>{title}</Text>
       </View>
@@ -281,7 +282,7 @@ export function MyProductList({
             accessibilityLabel={registerLabel}
             style={({ pressed }) => [styles.registerButton, pressed && styles.registerPressed]}
           >
-            <Plus size={16} color="#FFFFFF" />
+            <Plus size={16} color={colors.onAction} />
             <Text style={styles.registerLabel}>{registerLabel}</Text>
           </Pressable>
         ) : null}
@@ -329,7 +330,7 @@ export function MyProductList({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.surfaceMuted,
   },
   header: {
     height: HEADER_HEIGHT,
@@ -338,8 +339,8 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
-    backgroundColor: '#FFFFFF',
+    borderBottomColor: colors.outlineVariant,
+    backgroundColor: colors.surface,
   },
   backPressed: {
     opacity: 0.5,
@@ -347,7 +348,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#111827',
+    color: colors.onSurface,
   },
   titleRow: {
     flexDirection: 'row',
@@ -360,11 +361,11 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.onSurface,
   },
   count: {
     fontSize: 13,
-    color: '#6B7280',
+    color: colors.onSurfaceMuted,
     marginTop: 2,
   },
   registerButton: {
@@ -374,14 +375,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
-    // 웹 variant="primary"와 같은 브랜드 브라운. 앱 브레드크럼이 이미 쓰는 값이다.
-    backgroundColor: '#633F00',
+    // 19바퀴(#786)에 #633F00 에서 홈 등록 단추와 같은 갈색으로 옮겼다.
+    // 같은 「등록」인데 홈은 #825500, 여기는 #633F00 이라 화면마다 달랐다.
+    backgroundColor: colors.action,
   },
   registerPressed: { opacity: 0.7 },
   registerLabel: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.onAction,
   },
   listContent: {
     paddingHorizontal: 16,

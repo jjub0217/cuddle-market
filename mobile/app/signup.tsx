@@ -19,6 +19,7 @@ import { BirthDateField } from '@/components/signup/birth-date-field';
 import { EmailVerification } from '@/components/signup/email-verification';
 import { Field, fieldStyles, messageStyles } from '@/components/signup/field';
 import { PasswordChecklist } from '@/components/signup/password-checklist';
+import { colors } from '@/constants/colors';
 import { useFieldScroll } from '@/lib/signup/use-field-scroll';
 import { useSignupForm } from '@/lib/signup/use-signup-form';
 
@@ -242,7 +243,7 @@ export default function SignupScreen() {
                 ]}
               >
                 {form.submitting ? (
-                  <ActivityIndicator color="#FFFFFF" />
+                  <ActivityIndicator color={colors.onAction} />
                 ) : (
                   <Text style={styles.submitLabel}>가입하기</Text>
                 )}
@@ -256,24 +257,24 @@ export default function SignupScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  container: { flex: 1, backgroundColor: colors.surface },
   flex: { flex: 1 },
   backPressed: { opacity: 0.5 },
-  stepLabel: { fontSize: 13, color: '#6B7280' },
+  stepLabel: { fontSize: 13, color: colors.onSurfaceMuted },
   content: { paddingHorizontal: 20, paddingTop: 12, gap: 16 },
-  heading: { fontSize: 22, fontWeight: '700', color: '#111827', marginBottom: 8 },
+  heading: { fontSize: 22, fontWeight: '700', color: colors.onSurface, marginBottom: 8 },
   // 크기는 칸 아래 안내 문구(messageStyles.hint)와 같은 값이다. 같은 「안내」인데
   // 여기만 작으면 눈에 안 들어온다 — 색은 단추 아래라 한 톤 더 연하게 둔다
-  guide: { fontSize: 13, color: '#9CA3AF', textAlign: 'center' },
+  guide: { fontSize: 13, color: colors.onSurfaceSubtle, textAlign: 'center' },
   submit: {
     height: 48,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#111827',
+    backgroundColor: colors.action,
     marginTop: 8,
   },
   submitPressed: { opacity: 0.8 },
   submitDisabled: { opacity: 0.4 },
-  submitLabel: { fontSize: 16, fontWeight: '600', color: '#FFFFFF' },
+  submitLabel: { fontSize: 15, fontWeight: '600', color: colors.onAction },
 });

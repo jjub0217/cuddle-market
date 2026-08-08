@@ -8,6 +8,7 @@ import { ScreenHeader } from '@/components/ui/screen-header';
 import { EmptyState, ErrorState, ListFooter } from '@/components/list-states';
 import { NotificationSkeleton } from '@/components/notifications/notification-skeleton';
 import { NotificationRow } from '@/components/notifications/notification-row';
+import { colors } from '@/constants/colors';
 import { apiBaseUrl } from '@/lib/auth/api';
 import {
   fetchNotifications,
@@ -123,6 +124,6 @@ export default function NotificationsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
-  readAll: { fontSize: 14, color: '#825500' },
+  container: { flex: 1, backgroundColor: colors.surface },
+  readAll: { fontSize: 14, color: colors.accent },
 });

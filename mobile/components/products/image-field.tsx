@@ -6,6 +6,7 @@ import { Camera, RotateCcw, X } from 'lucide-react-native';
 
 import { messageStyles } from '@/components/signup/field';
 import { FieldLabel } from '@/components/ui/field-label';
+import { colors } from '@/constants/colors';
 
 import {
   MAX_IMAGES,
@@ -135,13 +136,13 @@ export function ImageField({ slots, onChange, error }: Props) {
 
                 {uploading ? (
                   <View style={styles.overlay}>
-                    <ActivityIndicator color="#FFFFFF" />
+                    <ActivityIndicator color={colors.onAction} />
                   </View>
                 ) : null}
 
                 {slot.failed ? (
                   <View style={styles.overlay}>
-                    <RotateCcw size={20} color="#FFFFFF" />
+                    <RotateCcw size={20} color={colors.onAction} />
                     <Text style={styles.overlayLabel}>다시</Text>
                   </View>
                 ) : null}
@@ -161,7 +162,7 @@ export function ImageField({ slots, onChange, error }: Props) {
                 accessibilityLabel="사진 빼기"
                 style={({ pressed }) => [styles.removeButton, pressed && styles.pressed]}
               >
-                <X size={14} color="#FFFFFF" strokeWidth={2} />
+                <X size={14} color={colors.onAction} strokeWidth={2} />
               </Pressable>
             </View>
           );
@@ -176,7 +177,7 @@ export function ImageField({ slots, onChange, error }: Props) {
             accessibilityLabel="이미지 등록"
             style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}
           >
-            <Camera size={24} color="#6B7280" strokeWidth={1.5} />
+            <Camera size={24} color={colors.onSurfaceMuted} strokeWidth={1.5} />
             <Text style={styles.addLabel}>이미지 등록</Text>
           </Pressable>
         ) : null}
@@ -201,7 +202,7 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 8,
     overflow: 'hidden',
-    backgroundColor: '#E5E7EB', // 사진이 뜨기 전 회색 자리
+    backgroundColor: colors.outlineVariant, // 사진이 뜨기 전 회색 자리
   },
   image: { ...StyleSheet.absoluteFillObject },
 
@@ -213,7 +214,7 @@ const styles = StyleSheet.create({
     gap: 2,
     backgroundColor: 'rgba(17, 24, 39, 0.55)',
   },
-  overlayLabel: { fontSize: 12, fontWeight: '600', color: '#FFFFFF' },
+  overlayLabel: { fontSize: 12, fontWeight: '600', color: colors.onAction },
 
   // 웹 SortableImageItem과 같은 자리(왼쪽 아래) · 같은 색(--color-primary-container #825500).
   mainBadge: {
@@ -223,9 +224,9 @@ const styles = StyleSheet.create({
     borderRadius: 7,
     paddingHorizontal: 8,
     paddingVertical: 3,
-    backgroundColor: '#825500',
+    backgroundColor: colors.selected,
   },
-  mainBadgeText: { fontSize: 12, fontWeight: '600', color: '#FFFFFF' },
+  mainBadgeText: { fontSize: 12, fontWeight: '600', color: colors.onSelected },
 
   // 웹과 같이 오른쪽 위 회색 동그라미. 사진 위라 흰 ✕가 묻히지 않게 바탕을 깐다.
   removeButton: {
@@ -237,7 +238,7 @@ const styles = StyleSheet.create({
     borderRadius: 11,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#6B7280',
+    backgroundColor: colors.onSurfaceMuted,
   },
 
   addButton: {
@@ -249,10 +250,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: '#D1D5DB',
-    backgroundColor: '#FFFFFF',
+    borderColor: colors.outline,
+    backgroundColor: colors.surface,
   },
-  addLabel: { fontSize: 12, fontWeight: '600', color: '#6B7280' },
+  addLabel: { fontSize: 12, fontWeight: '600', color: colors.onSurfaceMuted },
 
   pressed: { opacity: 0.6 },
 });

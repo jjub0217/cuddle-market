@@ -2,6 +2,7 @@ import { ChevronLeft, X } from 'lucide-react-native';
 import { useRef, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
+import { colors } from '@/constants/colors';
 import { normalizeKeyword } from '@/lib/search';
 
 // 뒤로가기와 검색 입력칸이 **한 줄에** 있는 헤더.
@@ -51,7 +52,7 @@ export function SearchBarHeader({ initialKeyword = '', autoFocus, onSubmit, onBa
         accessibilityLabel="뒤로"
         style={({ pressed }) => (pressed ? styles.pressed : undefined)}
       >
-        <ChevronLeft size={26} color="#111827" />
+        <ChevronLeft size={26} color={colors.onSurface} />
       </Pressable>
 
       <View style={styles.inputBox}>
@@ -60,7 +61,7 @@ export function SearchBarHeader({ initialKeyword = '', autoFocus, onSubmit, onBa
           value={keyword}
           onChangeText={setKeyword}
           placeholder="원하는 반려동물 용품을 검색해보세요"
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={colors.onSurfaceSubtle}
           style={styles.input}
           // ⚠️ 실기기에서 눈으로 봐야 한다 — RNTL 은 진짜 자판을 안 띄운다.
           autoFocus={autoFocus}
@@ -77,7 +78,7 @@ export function SearchBarHeader({ initialKeyword = '', autoFocus, onSubmit, onBa
             accessibilityRole="button"
             accessibilityLabel="입력 내용 지우기"
           >
-            <X size={16} color="#6B7280" />
+            <X size={16} color={colors.onSurfaceMuted} />
           </Pressable>
         ) : null}
       </View>
@@ -93,7 +94,7 @@ const styles = StyleSheet.create({
     gap: 8,
     // 다른 헤더와 같은 16. 화면을 오갈 때 아이콘의 왼쪽 시작선이 흔들리면 안 된다.
     paddingHorizontal: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   // 색·테두리·모서리는 signup/field.tsx 의 입력칸과 같은 값이다(새로 짓지 않았다).
   inputBox: {
@@ -103,15 +104,15 @@ const styles = StyleSheet.create({
     gap: 8,
     height: 40,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: colors.outline,
     borderRadius: 8,
     paddingHorizontal: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   input: {
     flex: 1,
     fontSize: 15,
-    color: '#111827',
+    color: colors.onSurface,
     // 안드로이드는 기본 세로 여백이 있어 줄 높이가 들쭉날쭉해진다. 0으로 눌러 둔다.
     paddingVertical: 0,
   },
