@@ -33,9 +33,8 @@ describe('색 토큰', () => {
     //   #111827  onSurface(글자) = action(단추 바탕)
     //   #FFFFFF  surface(바탕) = onAction = onSelected = onDanger(진한 바탕 위 글자)
     //   #825500  selected(고른 것의 바탕) = accent(눌러서 뭔가 하는 글자)
-    //   #633F00  brandText(글자) = brand700(「등록」 단추 바탕)
     //   #2563EB  badgeSell(판매 뱃지 글자) = link(본문 링크)
-    const 겹쳐도_되는_값 = ['#111827', '#FFFFFF', '#825500', '#633F00', '#2563EB'];
+    const 겹쳐도_되는_값 = ['#111827', '#FFFFFF', '#825500', '#2563EB'];
     const 먼저_본_이름 = new Map<string, string>();
 
     for (const [name, value] of Object.entries(colors)) {

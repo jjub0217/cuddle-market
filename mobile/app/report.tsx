@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
   body: { padding: 16, gap: 8, paddingBottom: 24 },
   description: { fontSize: 14, color: colors.onSurfaceMuted, marginBottom: 4 },
   label: { fontSize: 15, fontWeight: '600', color: colors.onSurface, marginTop: 8 },
-  required: { color: '#DC2626' },
+  required: { color: colors.danger },
   reasonBox: {
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.outline,

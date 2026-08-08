@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 46,
     borderRadius: 8,
-    backgroundColor: '#DC2626',
+    backgroundColor: colors.danger,
     alignItems: 'center',
     justifyContent: 'center',
   },

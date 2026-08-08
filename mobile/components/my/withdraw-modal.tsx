@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
   },
   error: {
     fontSize: 13,
-    color: '#DC2626',
+    color: colors.danger,
   },
   actions: {
     flexDirection: 'row',
@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 46,
     borderRadius: 8,
-    backgroundColor: '#DC2626',
+    backgroundColor: colors.danger,
     alignItems: 'center',
     justifyContent: 'center',
   },

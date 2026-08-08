@@ -43,7 +43,7 @@ export function ProfileHead({ profile }: Props) {
             {/* 웹 ProfileData와 같은 배지 */}
             {profile.isBlocked ? (
               <View style={styles.blockedBadge}>
-                <ShieldAlert size={12} color="#DC2626" />
+                <ShieldAlert size={12} color={colors.danger} />
                 <Text style={styles.blockedLabel}>차단 유저</Text>
               </View>
             ) : null}
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     // 웹 bg-red-100 / text-red-600과 같은 결
     backgroundColor: colors.dangerSurface,
   },
-  blockedLabel: { fontSize: 12, fontWeight: '600', color: '#DC2626' },
+  blockedLabel: { fontSize: 12, fontWeight: '600', color: colors.danger },
   location: { fontSize: 13, color: colors.onSurfaceMuted },
   // ⚠️ **선도 이름표도 없다.** 처음엔 「가입일 ↔ 2023.04.12」에 구분선을 그었는데,
   //    그건 설정 화면처럼 값이 여럿 나열될 때 쓰는 짜임이라 한 줄만 있으면 떠 보였다.

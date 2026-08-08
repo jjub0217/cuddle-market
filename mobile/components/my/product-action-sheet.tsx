@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 
 import { BottomSheet, sheetItemStyles } from '@/components/ui/bottom-sheet';
+import { colors } from '@/constants/colors';
 
 // 카드의 ⋮ 로 여는 하단 시트.
 //
@@ -52,6 +53,6 @@ export function ProductActionSheet({ visible, actions, onClose }: Props) {
 
 const styles = StyleSheet.create({
   labelDanger: {
-    color: '#DC2626',
+    color: colors.danger,
   },
 });

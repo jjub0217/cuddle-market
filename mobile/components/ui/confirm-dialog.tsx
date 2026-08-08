@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   // 웹 BlockModal도 되돌리기 어려운 동작에 bg-danger-600을 쓴다.
-  confirmDanger: { backgroundColor: '#DC2626' },
+  confirmDanger: { backgroundColor: colors.danger },
   confirmDisabled: { opacity: 0.5 },
   confirmLabel: { fontSize: 15, fontWeight: '600', color: colors.onAction },
   pressed: { opacity: 0.7 },

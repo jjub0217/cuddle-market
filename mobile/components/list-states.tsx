@@ -176,13 +176,15 @@ const styles = StyleSheet.create({
     color: colors.onSurfaceSubtle,
     textAlign: 'center',
   },
+  // 19바퀴(#786)에 파랑에서 먹색으로 옮겼다. 앱에서 이 단추만 파랑이었고,
+  // 상세 화면의 같은 「다시 시도」는 주황이었다.
   retryBtn: {
     marginTop: 12,
     minHeight: 44,
     justifyContent: 'center',
     paddingHorizontal: 24,
     borderRadius: 12,
-    backgroundColor: colors.badgeSell,
+    backgroundColor: colors.action,
   },
   retryBtnPressed: {
     opacity: 0.85,

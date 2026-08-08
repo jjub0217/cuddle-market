@@ -72,11 +72,14 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     borderWidth: 1,
   },
-  // 고른 것은 진한 회색으로 채운다. 테두리 색은 입력칸과 같은 값이다
-  chipActive: { backgroundColor: colors.action, borderColor: colors.action },
+  // 고른 것은 브랜드 갈색으로 채운다. 테두리 색은 입력칸과 같은 값이다.
+  //
+  // 19바퀴(#786)에 먹색에서 갈색으로 옮겼다 — 필터 칩·플레이스 탭은 갈색인데
+  // 이 칩만 먹색이라, 같은 「고른 것」이 화면마다 달라 보였다.
+  chipActive: { backgroundColor: colors.selected, borderColor: colors.selected },
   chipInactive: { backgroundColor: colors.surface, borderColor: colors.outline },
   chipPressed: { opacity: 0.7 },
 
-  labelActive: { fontSize: 13, fontWeight: '700', color: colors.onAction },
+  labelActive: { fontSize: 13, fontWeight: '700', color: colors.onSelected },
   labelInactive: { fontSize: 13, fontWeight: '700', color: colors.onSurfaceMuted },
 });

@@ -15,7 +15,6 @@ import { colors } from '@/constants/colors';
 // 색은 앱이 지금 쓰는 무채색 그대로다. 웹 토큰(text-on-surface 등)에 맞추는 일은
 // #786(앱 색 토큰 체계 도입)에서 통째로 다룬다.
 const LABEL = colors.onSurface;
-const DANGER = '#DC2626';
 
 interface SectionCardProps {
   title: string;
@@ -47,7 +46,7 @@ interface SectionRowProps {
 
 export function SectionRow({ label, onPress, icon: Icon, tone = 'default' }: SectionRowProps) {
   // 아이콘도 글자와 같은 색을 쓴다 — 탈퇴는 둘 다 빨강이라야 한 덩어리로 읽힌다.
-  const color = tone === 'danger' ? DANGER : LABEL;
+  const color = tone === 'danger' ? colors.danger : LABEL;
 
   return (
     <Pressable
@@ -95,6 +94,6 @@ const styles = StyleSheet.create({
     color: LABEL,
   },
   rowLabelDanger: {
-    color: DANGER,
+    color: colors.danger,
   },
 });

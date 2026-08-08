@@ -462,21 +462,23 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.outlineVariant,
   },
+  // 19바퀴(#786)에 갈색에서 먹색으로 옮겼다 — 이 화면을 끝내는 단추라
+  // 로그인·가입·신고와 같은 자리에 있다. 갈색은 「여럿 중 고른 것」에 쓴다.
   primaryButton: {
     height: 52,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.selected,
+    backgroundColor: colors.action,
   },
   primaryLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.onSelected,
+    color: colors.onAction,
   },
   error: {
     fontSize: 13,
-    color: '#DC2626',
+    color: colors.danger,
   },
   pressed: { opacity: 0.7 },
 });

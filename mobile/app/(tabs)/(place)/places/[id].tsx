@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
   badgeEmergencyText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#DC2626',
+    color: colors.danger,
   },
   skeletonWrap: {
     flex: 1,

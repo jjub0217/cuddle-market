@@ -282,7 +282,7 @@ export function MyProductList({
             accessibilityLabel={registerLabel}
             style={({ pressed }) => [styles.registerButton, pressed && styles.registerPressed]}
           >
-            <Plus size={16} color={colors.onAction} />
+            <Plus size={16} color={colors.onSelected} />
             <Text style={styles.registerLabel}>{registerLabel}</Text>
           </Pressable>
         ) : null}
@@ -375,14 +375,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
-    // 웹 variant="primary"와 같은 브랜드 브라운. 앱 브레드크럼이 이미 쓰는 값이다.
-    backgroundColor: colors.brand700,
+    // 19바퀴(#786)에 #633F00 에서 홈 등록 단추와 같은 갈색으로 옮겼다.
+    // 같은 「등록」인데 홈은 #825500, 여기는 #633F00 이라 화면마다 달랐다.
+    backgroundColor: colors.selected,
   },
   registerPressed: { opacity: 0.7 },
   registerLabel: {
     fontSize: 13,
     fontWeight: '700',
-    color: colors.onAction,
+    color: colors.onSelected,
   },
   listContent: {
     paddingHorizontal: 16,

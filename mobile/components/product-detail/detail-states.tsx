@@ -73,11 +73,13 @@ const styles = StyleSheet.create({
     color: colors.onSurfaceMuted,
     textAlign: 'center',
   },
+  // 19바퀴(#786)에 주황에서 먹색으로 옮겼다. 목록 화면의 「다시 시도」는
+  // 파랑, 여기는 주황이라 **같은 글자의 단추가 화면마다 달랐다**.
   button: {
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingVertical: 10,
-    backgroundColor: colors.badgeRequest,
+    backgroundColor: colors.action,
   },
   buttonText: {
     fontSize: 14,
