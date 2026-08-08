@@ -308,5 +308,5 @@ const styles = StyleSheet.create({
   },
   submitPressed: { opacity: 0.8 },
   submitDisabled: { opacity: 0.4 },
-  submitLabel: { fontSize: 16, fontWeight: '600', color: colors.onAction },
+  submitLabel: { fontSize: 15, fontWeight: '600', color: colors.onAction },
 });

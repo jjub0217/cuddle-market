@@ -172,8 +172,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 12,
     borderRadius: 8,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
     borderColor: colors.outline,
   },
-  unblockLabel: { fontSize: 13, fontWeight: '600', color: colors.onSurface },
+  unblockLabel: { fontSize: 14, fontWeight: '600', color: colors.onSurface },
 });

@@ -1,6 +1,5 @@
 import { COMMUNITY_REPORT_REASON, PRODUCT_REPORT_REASON, USER_REPORT_REASON } from '@cuddle/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Check } from 'lucide-react-native';
 import { useState } from 'react';
 import {
   ActivityIndicator,
@@ -114,22 +113,28 @@ export default function ReportScreen() {
           신고 사유 <Text style={styles.required}>*</Text>
         </Text>
         <View style={styles.reasonBox}>
-          {reasons.map((reason, index) => (
-            <Pressable
-              key={reason.id}
-              onPress={() => setReasonCode(reason.id)}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: reasonCode === reason.id }}
-              style={({ pressed }) => [
-                styles.reasonRow,
-                index > 0 && styles.reasonDivider,
-                pressed && styles.pressedRow,
-              ]}
-            >
-              <Text style={styles.reasonLabel}>{reason.label}</Text>
-              {reasonCode === reason.id ? <Check size={20} color={colors.onSurface} /> : null}
-            </Pressable>
-          ))}
+          {reasons.map((reason, index) => {
+            const selected = reasonCode === reason.id;
+            return (
+              <Pressable
+                key={reason.id}
+                onPress={() => setReasonCode(reason.id)}
+                accessibilityRole="radio"
+                accessibilityState={{ selected }}
+                style={({ pressed }) => [
+                  styles.reasonRow,
+                  index > 0 && styles.reasonDivider,
+                  pressed && styles.pressedRow,
+                ]}
+              >
+                <View style={[styles.radio, selected && styles.radioSelected]}>
+                  {/* 선택 표시는 안을 꽉 채우지 않고 가운데 점으로 — 흔히 보는 라디오 모양. */}
+                  {selected ? <View style={styles.radioDot} /> : null}
+                </View>
+                <Text style={styles.reasonLabel}>{reason.label}</Text>
+              </Pressable>
+            );
+          })}
         </View>
 
         <Text style={styles.label}>신고 상세 사유 (선택)</Text>
@@ -178,14 +183,17 @@ const styles = StyleSheet.create({
   label: { fontSize: 15, fontWeight: '600', color: colors.onSurface, marginTop: 8 },
   required: { color: colors.danger },
   reasonBox: {
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
     borderColor: colors.outline,
     borderRadius: 8,
   },
+  // 라디오 동그라미가 왼쪽에 서고 이름이 그 옆에 붙는다.
+  // 탈퇴 화면(withdraw-modal.tsx)과 같은 모양이다 — 앱 안에서 「하나만 고르는 줄」이
+  // 두 모양이면 안 된다. 전에는 이름만 있고 고르면 오른쪽에 ✓ 가 붙었다.
   reasonRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 10,
     minHeight: 48,
     paddingHorizontal: 14,
   },
@@ -193,10 +201,28 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.surfaceSunken,
   },
+  radio: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 2,
+    borderColor: colors.outline,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  radioSelected: {
+    borderColor: colors.selected,
+  },
+  radioDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.selected,
+  },
   reasonLabel: { fontSize: 15, color: colors.onSurface },
   detailInput: {
     minHeight: 110,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
     borderColor: colors.outline,
     borderRadius: 8,
     padding: 12,

@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
   categoryTag: {
     alignSelf: 'flex-start',
     borderRadius: 999,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
     borderColor: colors.outline,
     paddingHorizontal: 8,
     paddingVertical: 3,

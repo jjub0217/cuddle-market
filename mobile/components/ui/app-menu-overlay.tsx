@@ -39,7 +39,8 @@ const SLIDE_MS = 300;
 // 로그아웃 확인 창(logout-modal.tsx)도 같은 값을 쓴다 — 두 창이 나란히 뜨므로
 // 색이 갈리면 어색하다.
 const BUTTON_FILL = colors.action;
-const BUTTON_BORDER = colors.outline;
+// 테두리도 브랜드 갈색이다 — 글자와 같은 색이라 단추 하나가 한 덩어리로 읽힌다.
+const BUTTON_BORDER = colors.action;
 
 interface MenuItem {
   label: string;
@@ -213,7 +214,7 @@ const styles = StyleSheet.create({
     height: 42,
     // 8은 앱의 다른 버튼·창과 같은 값이다(로그아웃 확인 창도 8).
     borderRadius: 8,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
     borderColor: BUTTON_BORDER,
     alignItems: 'center',
     justifyContent: 'center',

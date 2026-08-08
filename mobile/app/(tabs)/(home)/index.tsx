@@ -153,8 +153,8 @@ const styles = StyleSheet.create({
     opacity: 0.85,
   },
   fabLabel: {
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '600',
     color: colors.onAction,
   },
 });

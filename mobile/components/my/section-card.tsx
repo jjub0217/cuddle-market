@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
     borderRadius: 16,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
     borderColor: colors.outlineVariant,
     paddingHorizontal: 20,
     paddingVertical: 16,

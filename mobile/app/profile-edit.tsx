@@ -472,7 +472,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.action,
   },
   primaryLabel: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
     color: colors.onAction,
   },

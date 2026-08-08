@@ -381,8 +381,8 @@ const styles = StyleSheet.create({
   },
   registerPressed: { opacity: 0.7 },
   registerLabel: {
-    fontSize: 13,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '600',
     color: colors.onAction,
   },
   listContent: {
