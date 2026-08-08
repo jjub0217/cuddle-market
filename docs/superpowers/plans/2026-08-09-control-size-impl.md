@@ -541,56 +541,118 @@ git commit -m "refactor(app): 화면을 끝내는 단추를 48로 모은다 (#84
 
 ### 과제 7: 넓게 퍼진 곳을 훑는다 ⚠️
 
-이 이슈에서 가장 위험한 단계다. **`sm` 이 36→40 으로 커져 43곳이 영향받는다.**
+이 이슈에서 가장 위험한 단계다. **`sm` 이 36→40 으로 커지는 곳이 26곳이다.**
+
+⚠️ `size="sm"` 은 43곳에 있지만 **그중 17곳은 `className` 으로 높이를 덮어써서 안 바뀐다.**
+`cn` 이 `tailwind-merge` 라 나중에 준 값이 이기기 때문이다 — 예를 들어 홈의 소분류
+알약은 `px-3 py-1 text-xs` 로 덮어써서 지금 26px 이고, `sm` 을 바꿔도 그대로다.
 
 **파일**: 없음 (확인만 한다. 문제가 있으면 그 자리를 고친다)
 
-- [ ] **1단계: `sm` 을 쓰는 화면을 모은다**
+- [ ] **1단계: 실제로 바뀌는 곳을 다시 센다**
 
 ```bash
 cd /Users/osejin/Desktop/cuddle-market
-grep -rln 'size="sm"' --include="*.tsx" src | sed 's|src/||'
+python3 - <<'EOF'
+import re, subprocess, pathlib
+out = subprocess.run(['grep','-rn','size="sm"','--include=*.tsx','src'],capture_output=True,text=True).stdout
+바뀜 = []
+for line in out.strip().split('\n'):
+    path, num, _ = line.split(':', 2)
+    src = pathlib.Path(path).read_text().split('\n')
+    i = int(num) - 1
+    chunk = '\n'.join(src[max(0,i-8):i+12])
+    if not re.search(r'\b(py-[0-9.]+|h-[0-9]+)\b', chunk):
+        바뀜.append(f"{path}:{num}")
+print(f"실제로 커지는 곳 {len(바뀜)}곳")
+for x in sorted(바뀜): print("  ", x)
+EOF
 ```
 
-- [ ] **2단계: 줄이 좁은 곳부터 본다 ⚠️**
+기대: 26곳. 아래 목록과 맞는지 본다.
 
-여러 개가 가로로 늘어선 자리는 4px 이 커지면 **줄바꿈이 생길 수 있다.**
-
-```
-localhost:3000 홈          목록 위 필터 알약 줄
-localhost:3000/community   정렬·검색 줄
-localhost:3000/chatting    입력줄 옆 단추
-```
-
-폰 모드와 데스크탑 둘 다에서 본다. **줄이 넘치거나 단추가 잘리면 그 자리에 `size` 를
-낮춰 준다**(`sm` → 더 작은 값이 없으므로 `className` 으로 높이를 준다).
-
-- [ ] **3단계: 모달·시트 안을 본다**
+- [ ] **2단계: 모달을 본다 ⚠️ 가장 많다 (11곳)**
 
 ```
-상품 상세 → 신고하기        모달 안 단추
-마이 → 로그아웃            확인 창
-상품 등록 → 지역 고르기      시트 안 단추
+components/modal/BlockModal.tsx:77,84              차단하기
+components/modal/DeleteConfirmModal.tsx:85,88      삭제 확인
+components/modal/DeletePostConfirmModal.tsx:56,59  글 삭제
+components/modal/DeleteReplyModal.tsx:60,65        댓글 삭제
+components/modal/ReportModalBase.tsx:163,169       신고하기
+components/modal/WithdrawModal.tsx:142             탈퇴
 ```
 
-창이 작아 단추가 커지면 답답해 보일 수 있다.
+전부 창 안의 **「취소·확인」 짝**이다. 창이 작아 단추가 4px 커지면 답답해 보일 수 있다.
 
-- [ ] **4단계: 게이트 둘 다**
+```
+localhost:3000 에서 열어 본다
+  상품 상세 → ⋮ → 신고하기 · 차단하기
+  커뮤니티 글 → ⋮ → 삭제
+  댓글 → ⋮ → 삭제
+  마이 → 회원 탈퇴
+```
+
+폰 모드와 데스크탑 둘 다에서 본다. **답답하면 모달 안 단추만 `className` 으로 높이를
+낮춰 준다** — 앱도 창 안 단추(46)를 화면 아래 단추(48)보다 작게 두었다.
+
+- [ ] **3단계: 마이를 본다 (7곳)**
+
+```
+features/my-page/components/MyList.tsx:170,236,245,250
+features/my-page/components/MyPagePanel.tsx:234
+features/my-page/components/MyPageTitle.tsx:34
+components/profile/ProfileData.tsx:199
+```
+
+```
+localhost:3000/my-page
+  목록 안 단추들이 줄에서 넘치지 않는지
+  카드 안에서 답답해 보이지 않는지
+```
+
+- [ ] **4단계: 홈을 본다 (4곳)**
+
+```
+features/home/components/tab/ProductPetTypeTabs.tsx:52   대분류 탭 (전체·포유류·조류…)
+features/home/components/filter/DetailFilterButton.tsx:25,41   세부 필터 여는 단추
+features/home/components/filter/PriceFilter.tsx:74       가격 필터
+```
+
+⚠️ **소분류 알약과 「더보기」는 안 바뀐다** — `className` 으로 덮어써서 지금 26px 이다.
+대분류 탭은 가로 스크롤이라 줄바꿈 걱정은 없다.
+
+```
+localhost:3000
+  대분류 탭이 소분류 알약과 나란히 놓였을 때 어색하지 않은지
+  세부 필터 단추가 그 줄에서 넘치지 않는지
+```
+
+- [ ] **5단계: 나머지 넷을 본다**
+
+```
+features/chatting-page/components/ChatRooms.tsx:117      채팅방 목록
+components/product/components/ProductThumbnail.tsx:103   상품 썸네일 위 단추
+features/product-detail/components/SellerProfileCard.tsx:64   판매자 카드
+components/commons/ProfileAvatar.stories.tsx:50          스토리북 (화면 아님)
+```
+
+`ProductThumbnail` 은 **사진 위에 얹는 단추**라 커지면 사진을 더 가린다. 눈으로 본다.
+
+- [ ] **6단계: 게이트 둘 다**
 
 ```bash
 cd /Users/osejin/Desktop/cuddle-market
 pnpm gate && pnpm gate:mobile
 ```
 
-- [ ] **5단계: 고친 것이 있으면 커밋**
+- [ ] **7단계: 고친 것이 있으면 커밋**
 
 ```bash
 git add src
-git commit -m "fix(web): sm 이 커지며 줄이 넘친 자리를 고친다 (#847)"
+git commit -m "fix(web): sm 이 커지며 어색해진 자리를 고친다 (#847)"
 ```
 
-고칠 것이 없었으면 이 과제는 커밋 없이 끝난다. **확인했다는 것을 다음 과제의 커밋
-메시지나 PR 본문에 적는다.**
+고칠 것이 없었으면 이 과제는 커밋 없이 끝난다. **26곳을 훑었다는 것을 PR 본문에 적는다.**
 
 ---
 
@@ -631,7 +693,7 @@ gh pr create --base develop --title "refactor(web·app): 단추·입력칸 높�
 
 | 곳 | 왜 위험한가 | 어떻게 |
 |---|---|---|
-| **`sm` 이 43곳에서 커진다** | 홈 필터·채팅처럼 가로로 늘어선 줄에서 4px 이 커지면 **줄바꿈이 생긴다.** `LoginForm.tsx` 주석이 「28개 파일이 같이 커진다」고 경고한 그 일이다 | 과제 7에서 폰·데스크탑 둘 다로 훑는다 |
+| **`sm` 이 26곳에서 커진다** | 그중 **11곳이 모달 안 「취소·확인」** 이다. 창이 작아 4px 이 커지면 답답해진다. ⚠️ `size="sm"` 은 43곳에 있지만 17곳은 `className` 으로 높이를 덮어써서 안 바뀐다(`cn` 이 tailwind-merge 라 나중 값이 이긴다) — 홈 소분류 알약이 그렇다 | 과제 7에서 모달부터 훑는다. 답답하면 모달 안 단추만 낮춘다 |
 | **반응형 방향** | Tailwind 는 모바일 우선이라 `md:` 가 데스크탑이다. 「모바일에 적용」으로 읽으면 정반대로 만든다 | 개발자도구 폰 모드를 껐다 켜며 **모바일이 큰지** 확인한다 |
 | **게이트가 높이를 못 잡는다** | `h-11` 과 `h-12` 를 타입체크도 lint 도 구분 못 한다 | 개발자도구 Computed 탭에서 실제 height 를 잰다 |
 | **`HomeHero` 의 hover** | 평소 `#825500` 인데 hover 가 `bg-primary`(#633F00)다. 과제 5로 둘이 같아지면 **hover 가 안 보인다** | 과제 5의 3단계에서 함께 고친다 |
