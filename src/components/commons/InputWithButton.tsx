@@ -17,7 +17,7 @@ interface InputWithButtonProps {
   buttonDisabled?: boolean
   onButtonClick?: () => void
   size?: string
-  buttonSize?: 'xs' | 'sm' | 'md' | 'lg'
+  buttonSize?: 'sm' | 'md' | 'lg'
   borderColor?: string
   inputClass?: string
   /** 칸 상자의 클래스. 높이를 못 박을 때 쓴다 */

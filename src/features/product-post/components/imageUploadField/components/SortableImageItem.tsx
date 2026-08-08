@@ -23,7 +23,7 @@ export default function SortableImageItem({ url, index, onRemove }: SortableImag
     <div ref={setNodeRef} style={style} {...attributes} className="relative size-24 overflow-hidden rounded-lg md:size-36">
       <Button
         icon={X}
-        size="xs"
+        size="sm"
         className="absolute top-1 right-1 z-10 size-6 cursor-pointer rounded-full bg-gray-500 p-0.5"
         iconProps={{ color: 'white', strokeWidth: 2, size: 14 }}
         onClick={(e) => {
