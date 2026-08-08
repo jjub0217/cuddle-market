@@ -128,8 +128,9 @@ export function LoginForm() {
             비밀번호를 잊으셨나요?
           </Link>
         </div>
-        {/* py-3 md:py-2 — 모바일 폭에서만 높이를 키운다. size="sm" 자체를 고치면 홈 필터·채팅 등 28개 파일이 같이 커진다. */}
-        <Button size="sm" className="bg-primary-600 w-full cursor-pointer py-3 text-white md:py-2" type="submit">
+        {/* md 는 입력칸과 같은 40 이다(#847). 전에는 sm + py-3 md:py-2 로 높이를 손으로
+            맞췄는데, 공용 조각이 h-* 로 정해지면서 그럴 필요가 없어졌다. */}
+        <Button size="md" className="bg-primary-600 w-full cursor-pointer text-white" type="submit">
           로그인
         </Button>
       </fieldset>

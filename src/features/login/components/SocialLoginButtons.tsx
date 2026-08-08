@@ -11,12 +11,13 @@ export function SocialLoginButtons() {
 
   return (
     <div className="flex w-full flex-col gap-2">
-      {/* py-3 md:py-2 — 모바일 폭에서만 높이를 키운다. 로그인 버튼과 같은 값이라 셋의 높이가 맞는다. */}
+      {/* h-10 — 로그인 단추(md, 40)와 같은 높이다. size 는 sm 을 둔다: 아래 구글 버튼이
+          여백·글자를 브랜딩 규격에 맞춰야 해서, 셋을 같은 size 로 두고 높이만 맞춘다(#847). */}
       {/* border-transparent — 아래 구글 버튼이 테두리를 갖는다. 안 주면 이 버튼만 2px 낮아진다. */}
       <Button
         iconSrc="/images/kakao.svg"
         size="sm"
-        className="w-full cursor-pointer border border-transparent bg-[#fee500] py-3 md:py-2"
+        className="h-10 w-full cursor-pointer border border-transparent bg-[#fee500]"
         onClick={() => handleSocialLogin('kakao')}
       >
         카카오 간편 로그인
@@ -41,7 +42,7 @@ export function SocialLoginButtons() {
       <Button
         iconSrc="/images/google.svg"
         size="sm"
-        className="w-full cursor-pointer border border-[#747775] bg-white py-3 text-[#1F1F1F] md:py-2"
+        className="h-10 w-full cursor-pointer border border-[#747775] bg-white text-[#1F1F1F]"
         onClick={() => handleSocialLogin('google')}
       >
         Google 계정으로 로그인

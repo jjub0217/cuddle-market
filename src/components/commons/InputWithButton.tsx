@@ -55,7 +55,7 @@ export default function InputWithButton({
         error={error}
         checkResult={checkResult}
         className="flex-1"
-        inputClass={cn('py-2 md:py-2.5', inputClass)}
+        inputClass={cn(inputClass)}
         wrapperClassName={wrapperClassName}
         registration={registration}
         autoFocus={autoFocus}
@@ -63,7 +63,9 @@ export default function InputWithButton({
       <Button
         size={buttonSize}
         className={cn(
-          'bg-primary-100 text-primary hover:bg-primary-200 cursor-pointer font-semibold shrink-0 h-10 md:h-11 transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:hover:bg-gray-100 disabled:pointer-events-none',
+          // 옆 입력칸과 같은 높이여야 줄이 맞는다. 전에는 h-10 md:h-11 이라
+          // 입력칸(42)과 2px 이 어긋났다 — 이슈가 「제일 눈에 띈다」고 적은 자리다(#847).
+          'bg-primary-100 text-primary hover:bg-primary-200 cursor-pointer font-semibold shrink-0 h-10 transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:hover:bg-gray-100 disabled:pointer-events-none',
           buttonClassName,
         )}
         type="button"
