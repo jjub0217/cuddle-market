@@ -60,6 +60,8 @@ export const colors = {
   brandText: '#633F00', // 브랜드 글자 (웹 primary-700)
   badgeSell: '#2563EB',
   badgeSellBg: '#EFF6FF',
+  // badgeSell 과 값이 같지만 뜻이 다르다 — 뱃지가 아니라 눌러서 밖으로 나가는 글자다.
+  link: '#2563EB', // 커뮤니티 본문의 링크
   badgeRequest: '#EA580C',
   badgeRequestBg: '#FFF7ED',
 
@@ -75,4 +77,8 @@ export const colors = {
   brand200: '#ECC88E', // 댓글 작성자 표시 바탕
   brand300: '#E2A958', // 빈 목록 아이콘
   brand500: '#B06F15', // 알림 줄 바탕
+  // brandText 와 값이 같지만 이름을 나눴다 — 저쪽은 글자, 이쪽은 바탕이다.
+  // ⚠️ 이 바탕을 쓰는 곳은 「등록」 단추 하나뿐이고, 앱에서 주 단추 색이
+  //    먹색·갈색·이 색으로 셋이 된다. 통일할지는 #786 과제 7에서 정한다.
+  brand700: '#633F00', // 「등록」 단추 바탕 (my-product-list)
 } as const;

@@ -2,6 +2,8 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import type { LucideIcon } from 'lucide-react-native';
 
+import { colors } from '@/constants/colors';
+
 // 마이 목록(찜한 상품 · 판매 내역 · 구매 내역)의 빈 상태.
 // 웹 src/components/EmptyState.tsx 와 같은 결 — 점선 테두리 박스 + 원형 배경 아이콘.
 //
@@ -25,7 +27,7 @@ export function MyListEmpty({ icon: Icon, title, description }: Props) {
     <View style={styles.box}>
       <View style={styles.iconCircle}>
         {/* 32px으로 크게 그려서 Lucide 기본 굵기(2)면 둔해 보인다. */}
-        <Icon size={32} color="#E2A958" strokeWidth={1.5} />
+        <Icon size={32} color={colors.brand300} strokeWidth={1.5} />
       </View>
       <View style={styles.text}>
         <Text style={styles.title}>{title}</Text>
@@ -48,8 +50,8 @@ const styles = StyleSheet.create({
     // 웹은 2px이지만 앱에서는 1로 둔다. 화면이 좁아 2는 도드라져 보인다.
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: '#D1D5DB',
-    backgroundColor: '#FFFFFF',
+    borderColor: colors.outline,
+    backgroundColor: colors.surface,
   },
   iconCircle: {
     width: 64,
@@ -58,7 +60,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     // 웹 primary-50. 앱에서는 판매자 카드 아바타가 이미 쓰는 값이다.
-    backgroundColor: '#FAF3E6',
+    backgroundColor: colors.brandSurface,
   },
   text: {
     alignItems: 'center',
@@ -67,10 +69,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.onSurface,
   },
   description: {
     fontSize: 13,
-    color: '#6B7280',
+    color: colors.onSurfaceMuted,
   },
 });

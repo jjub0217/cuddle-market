@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useMe } from '@/hooks/use-me';
+import { colors } from '@/constants/colors';
 import { fetchComments, fetchReplies, flattenComments, type CommentItem } from '@/lib/community';
 
 import { CommentRow } from './comment-row';
@@ -71,7 +72,7 @@ export function CommentList({
   if (allParents && rows.length === 0 && onlyParentId === undefined) {
     return (
       <View style={styles.empty}>
-        <MessageSquareText size={32} color="#D1D5DB" />
+        <MessageSquareText size={32} color={colors.outline} />
         {/* 웹 CommentSection과 같은 문구다 */}
         <Text style={styles.emptyText}>첫 댓글을 남겨보세요</Text>
       </View>
@@ -103,7 +104,7 @@ export function CommentList({
 }
 
 const styles = StyleSheet.create({
-  replyError: { marginLeft: 40, marginBottom: 8, fontSize: 12, color: '#9CA3AF' },
+  replyError: { marginLeft: 40, marginBottom: 8, fontSize: 12, color: colors.onSurfaceSubtle },
   empty: { alignItems: 'center', gap: 12, paddingVertical: 24 },
-  emptyText: { fontSize: 14, color: '#9CA3AF' },
+  emptyText: { fontSize: 14, color: colors.onSurfaceSubtle },
 });

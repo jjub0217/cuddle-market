@@ -14,6 +14,7 @@ import {
 
 import { Check } from 'lucide-react-native';
 
+import { colors } from '@/constants/colors';
 import { withdraw } from '@/lib/auth/session';
 
 // 회원 탈퇴. 웹 WithdrawModal과 같은 항목(사유 · 상세사유 · 주의사항 · 동의)을 담는다.
@@ -155,7 +156,7 @@ export function WithdrawModal({ visible, onClose, onDone }: Props) {
               value={detailReason}
               onChangeText={setDetailReason}
               placeholder="탈퇴 사유를 입력해주세요."
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.onSurfaceSubtle}
               multiline
               numberOfLines={3}
               textAlignVertical="top"
@@ -169,7 +170,7 @@ export function WithdrawModal({ visible, onClose, onDone }: Props) {
             >
               {/* 체크했을 때 ✓ 가 보여야 한다. 네모만 채우면 「무엇이 켜진 건지」가 안 읽힌다 */}
               <View style={[styles.checkbox, agreed && styles.checkboxChecked]}>
-                {agreed ? <Check size={12} color="#FFFFFF" strokeWidth={3} /> : null}
+                {agreed ? <Check size={12} color={colors.onAction} strokeWidth={3} /> : null}
               </View>
               <Text style={styles.agreeLabel}>회원 탈퇴에 동의합니다.</Text>
             </Pressable>
@@ -195,7 +196,7 @@ export function WithdrawModal({ visible, onClose, onDone }: Props) {
                 ]}
               >
                 {submitting ? (
-                  <ActivityIndicator color="#FFFFFF" />
+                  <ActivityIndicator color={colors.onAction} />
                 ) : (
                   <Text style={styles.confirmLabel}>탈퇴하기</Text>
                 )}
@@ -219,7 +220,7 @@ const styles = StyleSheet.create({
   sheet: {
     width: '100%',
     maxHeight: '85%',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     // 로그아웃 모달과 같은 값. 두 창이 한 화면에서 나란히 열리므로 어긋나면 바로 보인다.
     borderRadius: 8,
   },
@@ -230,14 +231,14 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 19,
     fontWeight: '700',
-    color: '#111827',
+    color: colors.onSurface,
   },
   description: {
     fontSize: 14,
-    color: '#6B7280',
+    color: colors.onSurfaceMuted,
   },
   alertBox: {
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.surfaceMuted,
     borderRadius: 8,
     // 안내 넷을 다 펴면 모달이 화면을 넘긴다. 여기서 끊고 안에서 스크롤한다.
     // flexGrow: 0 이 없으면 ScrollView 가 남은 자리를 다 차지하려 든다.
@@ -268,18 +269,18 @@ const styles = StyleSheet.create({
   alertBullet: {
     fontSize: 13,
     lineHeight: 18,
-    color: '#6B7280',
+    color: colors.onSurfaceMuted,
   },
   alertText: {
     flex: 1,
     fontSize: 13,
     lineHeight: 18,
-    color: '#6B7280',
+    color: colors.onSurfaceMuted,
   },
   label: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.onSurface,
     marginTop: 6,
   },
   reasonList: {
@@ -294,38 +295,38 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   reasonRowSelected: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.surfaceSunken,
   },
   radio: {
     width: 18,
     height: 18,
     borderRadius: 9,
     borderWidth: 2,
-    borderColor: '#D1D5DB',
+    borderColor: colors.outline,
     alignItems: 'center',
     justifyContent: 'center',
   },
   radioSelected: {
-    borderColor: '#111827',
+    borderColor: colors.action,
   },
   radioDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#111827',
+    backgroundColor: colors.action,
   },
   reasonLabel: {
     fontSize: 15,
-    color: '#111827',
+    color: colors.onSurface,
   },
   textarea: {
     minHeight: 76,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: colors.outlineVariant,
     borderRadius: 8,
     padding: 12,
     fontSize: 14,
-    color: '#111827',
+    color: colors.onSurface,
   },
   agreeRow: {
     flexDirection: 'row',
@@ -338,18 +339,18 @@ const styles = StyleSheet.create({
     height: 18,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: '#D1D5DB',
+    borderColor: colors.outline,
     // ✓ 를 가운데에 놓는다
     alignItems: 'center',
     justifyContent: 'center',
   },
   checkboxChecked: {
-    borderColor: '#111827',
-    backgroundColor: '#111827',
+    borderColor: colors.action,
+    backgroundColor: colors.action,
   },
   agreeLabel: {
     fontSize: 14,
-    color: '#111827',
+    color: colors.onSurface,
   },
   error: {
     fontSize: 13,
@@ -365,14 +366,14 @@ const styles = StyleSheet.create({
     height: 46,
     borderRadius: 8,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#D1D5DB',
+    borderColor: colors.outline,
     alignItems: 'center',
     justifyContent: 'center',
   },
   cancelLabel: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.onSurface,
   },
   confirm: {
     flex: 1,
@@ -388,7 +389,7 @@ const styles = StyleSheet.create({
   confirmLabel: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.onDanger,
   },
   pressed: {
     opacity: 0.7,

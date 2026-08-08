@@ -2,6 +2,7 @@ import { Search, X } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
+import { colors } from '@/constants/colors';
 import { normalizeKeyword } from '@/lib/search';
 
 // 커뮤니티 목록 안에 놓는 검색칸.
@@ -65,7 +66,7 @@ export function PostSearchInput({ keyword, onSubmit }: Props) {
   return (
     <View style={styles.wrap}>
       <View style={styles.box}>
-        <Search size={18} color="#9CA3AF" strokeWidth={2} />
+        <Search size={18} color={colors.onSurfaceSubtle} strokeWidth={2} />
         <TextInput
           ref={inputRef}
           testID="post-search-input"
@@ -73,7 +74,7 @@ export function PostSearchInput({ keyword, onSubmit }: Props) {
           onChangeText={change}
           // 문구는 웹에서 가져왔다(CommunityPage.tsx:219). 새로 짓지 않는다
           placeholder="궁금한 내용을 검색해보세요"
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={colors.onSurfaceSubtle}
           style={styles.input}
           returnKeyType="search"
           onSubmitEditing={submit}
@@ -85,7 +86,7 @@ export function PostSearchInput({ keyword, onSubmit }: Props) {
             accessibilityRole="button"
             accessibilityLabel="입력 내용 지우기"
           >
-            <X size={16} color="#6B7280" />
+            <X size={16} color={colors.onSurfaceMuted} />
           </Pressable>
         ) : null}
       </View>
@@ -97,7 +98,7 @@ const styles = StyleSheet.create({
   wrap: {
     paddingHorizontal: 16,
     paddingBottom: 8,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   box: {
     flexDirection: 'row',
@@ -108,13 +109,13 @@ const styles = StyleSheet.create({
     // 웹도 둥근 칸이다(rounded-full)
     borderRadius: 999,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#D4C4B2',
-    backgroundColor: '#FFFFFF',
+    borderColor: colors.outlineBrand,
+    backgroundColor: colors.surface,
   },
   input: {
     flex: 1,
     fontSize: 14,
-    color: '#111827',
+    color: colors.onSurface,
     // 안드로이드는 TextInput 에 기본 여백이 있어 글자가 아래로 처진다
     paddingVertical: 0,
   },

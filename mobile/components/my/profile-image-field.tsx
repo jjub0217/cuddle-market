@@ -3,6 +3,7 @@ import { Camera } from 'lucide-react-native';
 import { useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { colors } from '@/constants/colors';
 import { pickImages, shrinkImage, uploadOne } from '@/lib/product-images';
 
 // 프로필 사진 한 장을 고르고 올린다.
@@ -97,13 +98,13 @@ export function ProfileImageField({ url, nickname, onChange }: Props) {
           {busy ? (
             // 올리는 동안 사진 위에 덮는다. 자리를 따로 차지하지 않아 화면이 안 흔들린다
             <View style={styles.busyCover}>
-              <ActivityIndicator color="#FFFFFF" />
+              <ActivityIndicator color={colors.onAction} />
             </View>
           ) : null}
         </View>
 
         <View style={styles.badge}>
-          <Camera size={18} color="#111827" />
+          <Camera size={18} color={colors.onSurface} />
         </View>
       </Pressable>
     </View>
@@ -128,7 +129,7 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: AVATAR / 2,
     // 웹 bg-primary-50(#faf3e6)와 같은 연한 베이지. 앱의 다른 동그라미도 이 색이다
-    backgroundColor: '#FAF3E6',
+    backgroundColor: colors.brandSurface,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -140,7 +141,7 @@ const styles = StyleSheet.create({
   initial: {
     fontSize: 32,
     fontWeight: '700',
-    color: '#825500',
+    color: colors.accent,
   },
   busyCover: {
     ...StyleSheet.absoluteFillObject,
@@ -156,7 +157,7 @@ const styles = StyleSheet.create({
     width: BADGE,
     height: BADGE,
     borderRadius: BADGE / 2,
-    backgroundColor: '#F4E3BF',
+    backgroundColor: colors.brand100,
     alignItems: 'center',
     justifyContent: 'center',
   },
