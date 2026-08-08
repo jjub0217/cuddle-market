@@ -6,6 +6,7 @@ import { Keyboard, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 import { messageStyles } from '@/components/signup/field';
 import { BottomSheet, sheetItemStyles } from '@/components/ui/bottom-sheet';
 import { FieldLabel } from '@/components/ui/field-label';
+import { colors } from '@/constants/colors';
 
 import { CITIES, PROVINCES } from '@/constants/cities';
 
@@ -82,7 +83,7 @@ export function RegionField({
       >
         <Text style={sido ? styles.value : styles.placeholder}>{sido || '시/도를 선택해주세요'}</Text>
         {/* 「눌러서 고르는 칸」이라는 표시. picker-field.tsx와 같은 아이콘이다 */}
-        <ChevronDown size={18} color="#6B7280" strokeWidth={2} />
+        <ChevronDown size={18} color={colors.onSurfaceMuted} strokeWidth={2} />
       </Pressable>
 
       <Pressable
@@ -98,7 +99,7 @@ export function RegionField({
         <Text style={gugun ? styles.value : styles.placeholder}>
           {gugun || (sido ? '시/군/구를 선택해주세요' : '먼저 시/도를 선택해주세요')}
         </Text>
-        <ChevronDown size={18} color={sido ? '#6B7280' : '#D1D5DB'} strokeWidth={2} />
+        <ChevronDown size={18} color={sido ? colors.onSurfaceMuted : colors.outline} strokeWidth={2} />
       </Pressable>
 
       {error ? <Text style={messageStyles.error}>{error}</Text> : null}
@@ -132,7 +133,7 @@ const styles = StyleSheet.create({
   select: {
     height: 48,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: colors.outline,
     borderRadius: 8,
     paddingHorizontal: 12,
     // 글자는 왼쪽, 화살표는 오른쪽 끝
@@ -140,13 +141,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 8,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   selectPressed: { opacity: 0.7 },
-  selectDisabled: { backgroundColor: '#F9FAFB' },
-  selectError: { borderColor: '#C91D1D' },
-  value: { flex: 1, fontSize: 15, color: '#111827' },
-  placeholder: { flex: 1, fontSize: 15, color: '#9CA3AF' },
+  selectDisabled: { backgroundColor: colors.surfaceMuted },
+  selectError: { borderColor: colors.danger },
+  value: { flex: 1, fontSize: 15, color: colors.onSurface },
+  placeholder: { flex: 1, fontSize: 15, color: colors.onSurfaceSubtle },
 
   // 시/도 17개 · 구/군은 최대 30개가 넘는다. 화면을 다 덮지 않게 여기서 끊는다.
   list: { maxHeight: 56 * 6 },

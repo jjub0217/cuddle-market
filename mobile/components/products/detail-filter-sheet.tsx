@@ -6,6 +6,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { PRODUCT_STATUS_OPTIONS } from '@cuddle/shared';
 
 import { BottomSheet } from '@/components/ui/bottom-sheet';
+import { colors } from '@/constants/colors';
 
 import { CITIES, PROVINCES } from '@/constants/cities';
 
@@ -279,7 +280,7 @@ function RegionBack({ sido, onPress }: RegionBackProps) {
       hitSlop={12}
       style={({ pressed }) => [styles.regionBack, pressed && styles.pressed]}
     >
-      <ChevronLeft size={18} color="#6B7280" strokeWidth={2} />
+      <ChevronLeft size={18} color={colors.onSurfaceMuted} strokeWidth={2} />
       <Text style={styles.regionBackLabel}>{sido}</Text>
     </Pressable>
   );
@@ -342,7 +343,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#111827',
+    color: colors.onSurface,
   },
   regionBack: {
     flexDirection: 'row',
@@ -354,7 +355,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     // 화살표와 같은 회색. 제목(#111827)보다 옅어야 제목을 안 밀어낸다
-    color: '#6B7280',
+    color: colors.onSurfaceMuted,
   },
   // ⚠️ 줄바꿈. 시/군/구가 최대 30개(경기도)라 한 줄로는 못 쓴다
   pillGroup: {
@@ -374,19 +375,19 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   chipActive: {
-    backgroundColor: '#825500',
-    borderColor: '#825500',
+    backgroundColor: colors.selected,
+    borderColor: colors.selected,
   },
   chipIdle: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#D4C4B2',
+    backgroundColor: colors.surface,
+    borderColor: colors.outlineBrand,
   },
   label: {
     fontSize: 13,
     fontWeight: '400',
   },
-  labelActive: { color: '#FFFFFF' },
-  labelIdle: { color: '#4B5563' },
+  labelActive: { color: colors.onSelected },
+  labelIdle: { color: colors.onSurfaceMedium },
   pressed: { opacity: 0.7 },
 
   footer: {
@@ -396,7 +397,7 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 12,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#F3F4F6',
+    borderTopColor: colors.surfaceSunken,
   },
   button: {
     height: 48,
@@ -408,21 +409,21 @@ const styles = StyleSheet.create({
   resetButton: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#D4C4B2',
-    backgroundColor: '#FFFFFF',
+    borderColor: colors.outlineBrand,
+    backgroundColor: colors.surface,
   },
   applyButton: {
     flex: 2,
-    backgroundColor: '#825500',
+    backgroundColor: colors.selected,
   },
   resetLabel: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#4B5563',
+    color: colors.onSurfaceMedium,
   },
   applyLabel: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.onSelected,
   },
 });

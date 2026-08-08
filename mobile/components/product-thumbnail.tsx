@@ -87,7 +87,7 @@ export function ProductThumbnail({ imageUrl, tradeStatus, productType, favorite 
             <Heart
               size={20}
               // 안 찜한 상태는 흰색이다. 사진 위라 회색은 밝은 사진에서 묻힌다(설계 §5).
-              color={favorite.isFavorite ? colors.favorite : colors.surface}
+              color={favorite.isFavorite ? colors.favorite : colors.onAction}
               // 찜한 상태만 속을 채운다(Lucide는 이름이 아니라 fill로 채움을 켠다).
               fill={favorite.isFavorite ? colors.favorite : 'none'}
             />

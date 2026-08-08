@@ -4,6 +4,7 @@ import type { Option } from '@cuddle/shared';
 
 import { messageStyles } from '@/components/signup/field';
 import { FieldLabel } from '@/components/ui/field-label';
+import { colors } from '@/constants/colors';
 
 // 값 하나를 **펼쳐 놓고** 고르는 칸. 웹 ProductStateFilter(variant="pill")와 같은 모양이다.
 //
@@ -72,10 +73,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   // 고른 것은 진한 회색으로 채운다. 테두리 색은 입력칸과 같은 값이다
-  chipActive: { backgroundColor: '#111827', borderColor: '#111827' },
-  chipInactive: { backgroundColor: '#FFFFFF', borderColor: '#D1D5DB' },
+  chipActive: { backgroundColor: colors.action, borderColor: colors.action },
+  chipInactive: { backgroundColor: colors.surface, borderColor: colors.outline },
   chipPressed: { opacity: 0.7 },
 
-  labelActive: { fontSize: 13, fontWeight: '700', color: '#FFFFFF' },
-  labelInactive: { fontSize: 13, fontWeight: '700', color: '#6B7280' },
+  labelActive: { fontSize: 13, fontWeight: '700', color: colors.onAction },
+  labelInactive: { fontSize: 13, fontWeight: '700', color: colors.onSurfaceMuted },
 });
