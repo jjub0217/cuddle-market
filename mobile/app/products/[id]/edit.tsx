@@ -61,7 +61,7 @@ export default function EditProductScreen() {
   //    웹 ProductPost.tsx:89-95도 같은 이유로 데이터가 올 때까지 폼을 안 그린다.
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         <Header onBack={() => router.back()} />
         <LoadingState />
       </SafeAreaView>
@@ -70,7 +70,7 @@ export default function EditProductScreen() {
 
   if (isError || !product) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         <Header onBack={() => router.back()} />
         <ErrorState onRetry={() => refetch()} title="상품을 불러오지 못했어요." />
       </SafeAreaView>
@@ -78,7 +78,7 @@ export default function EditProductScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <Header onBack={() => router.back()} />
 
       <ProductForm
