@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     height: 46,
     borderRadius: 8,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.outline,
+    borderColor: colors.outlineStrong,
     alignItems: 'center',
     justifyContent: 'center',
   },

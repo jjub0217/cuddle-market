@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   // 꽉 채웠을 때는 바로 아래 「등록하기」 단추와 거의 같아 보였다(대비 1.45:1).
   // 칩은 상태 표시라 단추보다 약해야 한다 — 색이 아니라 채움 강도로 가른다.
   chipActive: { backgroundColor: colors.selectedSurface, borderColor: colors.selected },
-  chipInactive: { backgroundColor: colors.surface, borderColor: colors.outline },
+  chipInactive: { backgroundColor: colors.surface, borderColor: colors.outlineStrong },
   chipPressed: { opacity: 0.7 },
 
   labelActive: { fontSize: 13, fontWeight: '700', color: colors.accent },

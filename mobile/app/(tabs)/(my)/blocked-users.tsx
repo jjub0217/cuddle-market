@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 8,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.outline,
+    borderColor: colors.outlineStrong,
   },
   unblockLabel: { fontSize: 13, fontWeight: '600', color: colors.onSurface },
 });

@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: colors.outline,
+    borderColor: colors.outlineStrong,
     backgroundColor: colors.surface,
   },
   addLabel: { fontSize: 12, fontWeight: '600', color: colors.onSurfaceMuted },
