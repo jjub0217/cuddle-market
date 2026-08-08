@@ -4,8 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { Home, MapPin, UsersRound, UserRound } from 'lucide-react-native';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { colors } from '@/constants/colors';
 import { useAuthStore } from '@/lib/auth/store';
 
 // ⚠️ 아래 <Tabs.Screen> 차례는 **탭바에 보이는 순서**만 정한다.
@@ -39,14 +38,14 @@ const TAB_BAR_HEIGHT = 56;
 const TAB_BAR_PADDING_TOP = 6;
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        // 고른 탭의 색. 앱의 다른 「고른 것」과 같은 브랜드 갈색이다.
+        tabBarActiveTintColor: colors.action,
         headerShown: false,
         tabBarButton: HapticTab,
         // 기본값은 10인데(bottom-tabs의 labelBeneath) 너무 작았다.
