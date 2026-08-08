@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   pillActive: {
-    backgroundColor: colors.selected,
+    backgroundColor: colors.selectedSurface,
     borderColor: colors.selected,
   },
   pillIdle: {
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '400',
   },
-  pillLabelActive: { color: colors.onSelected },
+  pillLabelActive: { color: colors.accent },
   pillLabelIdle: { color: colors.onSurfaceMedium },
 
   right: {

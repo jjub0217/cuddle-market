@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   chipActive: {
-    backgroundColor: colors.selected,
+    backgroundColor: colors.selectedSurface,
     borderColor: colors.selected,
   },
   chipIdle: {
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     fontWeight: '400',
   },
   labelActive: {
-    color: colors.onSelected,
+    color: colors.accent,
   },
   labelIdle: {
     color: colors.onSurfaceMedium,

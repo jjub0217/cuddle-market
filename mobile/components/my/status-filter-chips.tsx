@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
   },
   chipActive: {
     // 웹 card-pill의 선택 상태와 같은 값(border-[#825500] bg-[#825500]).
-    backgroundColor: colors.selected,
+    backgroundColor: colors.selectedSurface,
     borderColor: colors.selected,
   },
   chipIdle: {
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     fontWeight: '400',
   },
   labelActive: {
-    color: colors.onSelected,
+    color: colors.accent,
   },
   labelIdle: {
     // 웹 text-gray-600.

@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   chipActive: {
-    backgroundColor: colors.selected,
+    backgroundColor: colors.selectedSurface,
     borderColor: colors.selected,
   },
   chipIdle: {
@@ -386,7 +386,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '400',
   },
-  labelActive: { color: colors.onSelected },
+  labelActive: { color: colors.accent },
   labelIdle: { color: colors.onSurfaceMedium },
   pressed: { opacity: 0.7 },
 
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
   },
   applyButton: {
     flex: 2,
-    backgroundColor: colors.selected,
+    backgroundColor: colors.action,
   },
   resetLabel: {
     fontSize: 15,
@@ -424,6 +424,6 @@ const styles = StyleSheet.create({
   applyLabel: {
     fontSize: 15,
     fontWeight: '600',
-    color: colors.onSelected,
+    color: colors.onAction,
   },
 });

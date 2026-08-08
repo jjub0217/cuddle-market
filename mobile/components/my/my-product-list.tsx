@@ -282,7 +282,7 @@ export function MyProductList({
             accessibilityLabel={registerLabel}
             style={({ pressed }) => [styles.registerButton, pressed && styles.registerPressed]}
           >
-            <Plus size={16} color={colors.onSelected} />
+            <Plus size={16} color={colors.onAction} />
             <Text style={styles.registerLabel}>{registerLabel}</Text>
           </Pressable>
         ) : null}
@@ -375,15 +375,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
-    // 19바퀴(#786)에 #633F00 에서 홈 등록 단추와 같은 갈색으로 옮겼다.
-    // 같은 「등록」인데 홈은 #825500, 여기는 #633F00 이라 화면마다 달랐다.
-    backgroundColor: colors.selected,
+    // 「끝내는 단추」와 같은 색이다. 누르면 등록 화면으로 넘어가는 행동이지
+    // 「골라진 상태」가 아니라서다 — 19바퀴(#786) 실기기 확인에서 정했다.
+    backgroundColor: colors.action,
   },
   registerPressed: { opacity: 0.7 },
   registerLabel: {
     fontSize: 13,
     fontWeight: '700',
-    color: colors.onSelected,
+    color: colors.onAction,
   },
   listContent: {
     paddingHorizontal: 16,

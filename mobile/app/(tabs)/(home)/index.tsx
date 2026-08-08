@@ -88,7 +88,7 @@ export default function HomeScreen() {
             pressed && styles.fabPressed,
           ]}
         >
-          <Plus size={20} color={colors.onSelected} strokeWidth={2.5} />
+          <Plus size={20} color={colors.onAction} strokeWidth={2.5} />
           <Text style={styles.fabLabel}>상품 등록</Text>
         </Pressable>
       ) : null}
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 999,
-    backgroundColor: colors.selected,
+    backgroundColor: colors.action,
     // 목록 위에 떠 있는 것이라 그림자가 없으면 카드에 붙어 보인다
     elevation: 4,
     shadowColor: colors.black,
@@ -154,6 +154,6 @@ const styles = StyleSheet.create({
   fabLabel: {
     fontSize: 15,
     fontWeight: '700',
-    color: colors.onSelected,
+    color: colors.onAction,
   },
 });
