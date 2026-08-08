@@ -81,6 +81,6 @@ const styles = StyleSheet.create({
   chipInactive: { backgroundColor: colors.surface, borderColor: colors.outlineStrong },
   chipPressed: { opacity: 0.7 },
 
-  labelActive: { fontSize: 13, fontWeight: '700', color: colors.accent },
-  labelInactive: { fontSize: 13, fontWeight: '700', color: colors.onSurfaceMuted },
+  labelActive: { fontSize: 13, fontWeight: '600', color: colors.accent },
+  labelInactive: { fontSize: 13, fontWeight: '600', color: colors.onSurfaceMuted },
 });
