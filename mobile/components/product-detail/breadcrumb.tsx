@@ -1,6 +1,8 @@
 import { getCategoryLabel, getPetDetailLabel } from '@cuddle/shared';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { colors } from '@/constants/colors';
+
 // 사진 위 좌측의 `앵무새 › 사료/간식` 한 줄(웹 상세와 같은 위치).
 // 이번 바퀴에서는 표시만 한다. 누를 곳(홈 필터)이 아직 없다.
 
@@ -28,17 +30,17 @@ const styles = StyleSheet.create({
   },
   item: {
     fontSize: 13,
-    color: '#6B7280',
+    color: colors.onSurfaceMuted,
   },
   separator: {
     fontSize: 13,
-    color: '#9CA3AF',
+    color: colors.onSurfaceSubtle,
   },
   last: {
     fontSize: 13,
     fontWeight: '700',
     // 텍스트 강조색은 브랜드 브라운. #EA580C(3.56:1, 작은글자 실패) 대신
     // #633F00(9.37:1)으로 대비를 확보한다.
-    color: '#633F00',
+    color: colors.brandText,
   },
 });

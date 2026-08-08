@@ -1,5 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { colors } from '@/constants/colors';
+
 // 상세 화면의 로딩·없음·오류 상태. 홈의 list-states와 같은 결로 맞춘다.
 
 /** 목록 캐시가 없어 아무것도 못 그릴 때 보이는 회색 자리. */
@@ -48,7 +50,7 @@ const styles = StyleSheet.create({
   skeletonImage: {
     width: '100%',
     aspectRatio: 1,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: colors.outlineVariant,
   },
   skeletonBody: {
     padding: 16,
@@ -57,7 +59,7 @@ const styles = StyleSheet.create({
   bar: {
     height: 14,
     borderRadius: 4,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: colors.outlineVariant,
   },
   center: {
     flex: 1,
@@ -68,18 +70,18 @@ const styles = StyleSheet.create({
   },
   message: {
     fontSize: 15,
-    color: '#6B7280',
+    color: colors.onSurfaceMuted,
     textAlign: 'center',
   },
   button: {
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingVertical: 10,
-    backgroundColor: '#EA580C',
+    backgroundColor: colors.badgeRequest,
   },
   buttonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.onAction,
   },
 });

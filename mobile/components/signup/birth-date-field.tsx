@@ -1,6 +1,7 @@
 import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 
 import { FieldLabel } from '@/components/ui/field-label';
+import { colors } from '@/constants/colors';
 
 import { messageStyles } from './field';
 
@@ -38,7 +39,7 @@ export function BirthDateField({ year, month, day, error, onChange, onFocus, req
           onChangeText={(text) => onChange('year', digits(text, 4))}
           onFocus={onFocus}
           placeholder="YYYY"
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={colors.onSurfaceSubtle}
           keyboardType="number-pad"
           maxLength={4}
         />
@@ -48,7 +49,7 @@ export function BirthDateField({ year, month, day, error, onChange, onFocus, req
           onChangeText={(text) => onChange('month', digits(text, 2))}
           onFocus={onFocus}
           placeholder="MM"
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={colors.onSurfaceSubtle}
           keyboardType="number-pad"
           maxLength={2}
         />
@@ -58,7 +59,7 @@ export function BirthDateField({ year, month, day, error, onChange, onFocus, req
           onChangeText={(text) => onChange('day', digits(text, 2))}
           onFocus={onFocus}
           placeholder="DD"
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={colors.onSurfaceSubtle}
           keyboardType="number-pad"
           maxLength={2}
         />
@@ -75,15 +76,15 @@ const styles = StyleSheet.create({
   input: {
     height: 48,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: colors.outline,
     borderRadius: 8,
     paddingHorizontal: 12,
     fontSize: 15,
-    color: '#111827',
-    backgroundColor: '#FFFFFF',
+    color: colors.onSurface,
+    backgroundColor: colors.surface,
     textAlign: 'center',
   },
-  inputError: { borderColor: '#C91D1D' },
+  inputError: { borderColor: colors.danger },
   year: { flex: 2 },
   part: { flex: 1 },
 });

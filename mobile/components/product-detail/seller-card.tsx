@@ -4,6 +4,7 @@ import { useRouter, useSegments } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { colors } from '@/constants/colors';
 import { useAuthStore } from '@/lib/auth/store';
 
 // 판매자 프로필. 웹과 같은 위치(설명보다 위).
@@ -91,7 +92,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FAF3E6',
+    backgroundColor: colors.brandSurface,
   },
   avatarImage: {
     width: '100%',
@@ -100,7 +101,7 @@ const styles = StyleSheet.create({
   avatarInitial: {
     fontSize: 16,
     // 웹이 기본 텍스트색(검정)을 상속하는 것과 같은 결. 크림 배경 위 대비 넉넉.
-    color: '#111827',
+    color: colors.onSurface,
   },
   info: {
     gap: 3,
@@ -108,10 +109,10 @@ const styles = StyleSheet.create({
   nickname: {
     fontSize: 15,
     fontWeight: '500',
-    color: '#111827',
+    color: colors.onSurface,
   },
   location: {
     fontSize: 12,
-    color: '#6B7280',
+    color: colors.onSurfaceMuted,
   },
 });

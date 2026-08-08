@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Star } from 'lucide-react-native';
 
+import { colors } from '@/constants/colors';
 import type { PlaceListItem as PlaceListItemType } from '@/lib/places/types';
 
 // 플레이스 목록 한 줄. 상품 목록 카드(components/product-card.tsx)와 같은 꼴로 맞춘다 —
@@ -14,7 +15,7 @@ import type { PlaceListItem as PlaceListItemType } from '@/lib/places/types';
 
 const THUMB_SIZE = 72;
 // 웹 사이드바(src/features/map/PlaceListSidebar.tsx)의 text-yellow-400과 같은 노랑.
-const STAR_COLOR = '#FBBF24';
+const STAR_COLOR = colors.rating;
 
 interface Props {
   place: PlaceListItemType;
@@ -81,9 +82,9 @@ const styles = StyleSheet.create({
     gap: 12,
     padding: 12,
     borderRadius: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: colors.outlineVariant,
   },
   rowPressed: {
     opacity: 0.7,
@@ -94,7 +95,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     overflow: 'hidden',
     // 로드 전/실패/이미지 없음일 때 보이는 회색 자리(product-thumbnail.tsx와 같은 값).
-    backgroundColor: '#E5E7EB',
+    backgroundColor: colors.outlineVariant,
   },
   thumbImage: {
     ...StyleSheet.absoluteFillObject,
@@ -107,11 +108,11 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#111827',
+    color: colors.onSurface,
   },
   address: {
     fontSize: 13,
-    color: '#6B7280',
+    color: colors.onSurfaceMuted,
   },
   metaRow: {
     flexDirection: 'row',
@@ -126,18 +127,18 @@ const styles = StyleSheet.create({
   },
   ratingText: {
     fontSize: 12,
-    color: '#6B7280',
+    color: colors.onSurfaceMuted,
   },
   // 상품 카드의 판매요청 뱃지(주황)와 같은 값을 쓴다 — 눈에 띄어야 하는 정보라는 결이 같다.
   badge: {
     borderRadius: 999,
-    backgroundColor: '#FFF7ED',
+    backgroundColor: colors.badgeRequestBg,
     paddingHorizontal: 8,
     paddingVertical: 2,
   },
   badgeText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#EA580C',
+    color: colors.badgeRequest,
   },
 });

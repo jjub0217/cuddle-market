@@ -1,6 +1,8 @@
 import { RotateCw } from 'lucide-react-native';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
+import { colors } from '@/constants/colors';
+
 // 「현 지도에서 검색」. 지도를 손으로 옮겼을 때만 나타난다.
 //
 // 왜 자동으로 안 찾고 이 단추를 두나 — 지도를 옮기는 게 늘 「여기 찾아줘」는 아니다.
@@ -23,7 +25,7 @@ export function SearchInMapButton({ onPress }: Props) {
       accessibilityRole="button"
       style={({ pressed }) => [styles.button, pressed && styles.pressed]}
     >
-      <RotateCw size={15} color="#374151" />
+      <RotateCw size={15} color={colors.onSurfaceStrong} />
       <Text style={styles.label}>현 지도에서 검색</Text>
     </Pressable>
   );
@@ -36,11 +38,11 @@ const styles = StyleSheet.create({
     gap: 6,
     alignSelf: 'center',
     borderRadius: 999,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     paddingHorizontal: 16,
     paddingVertical: 10,
     // 지도 위에 떠 있다는 게 보여야 한다. 그림자가 없으면 지도에 묻힌다.
-    shadowColor: '#000000',
+    shadowColor: colors.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 6,
@@ -48,5 +50,5 @@ const styles = StyleSheet.create({
   },
   pressed: { opacity: 0.8 },
   // 목록 항목 이름(15/700)보다 작고 얌전하게 — 지도를 가리는 것이므로 주인공이 아니다.
-  label: { fontSize: 14, fontWeight: '600', color: '#374151' },
+  label: { fontSize: 14, fontWeight: '600', color: colors.onSurfaceStrong },
 });

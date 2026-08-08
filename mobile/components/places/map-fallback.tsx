@@ -1,6 +1,8 @@
 import { Component, type ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { colors } from '@/constants/colors';
+
 // 지도가 못 뜰 때 앱 전체가 죽지 않게 받아내는 그물.
 //
 // 왜 필요한가 — 지도는 **네이티브 부품**이라 앱을 새로 빌드해 깔아야 들어온다.
@@ -50,8 +52,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.surfaceSunken,
   },
-  title: { fontSize: 15, fontWeight: '700', color: '#374151' },
-  hint: { fontSize: 13, color: '#6B7280' },
+  title: { fontSize: 15, fontWeight: '700', color: colors.onSurfaceStrong },
+  hint: { fontSize: 13, color: colors.onSurfaceMuted },
 });

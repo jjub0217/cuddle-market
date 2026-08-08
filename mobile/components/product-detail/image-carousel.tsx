@@ -2,6 +2,7 @@ import { Image } from 'expo-image';
 import { useState } from 'react';
 import { FlatList, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
+import { colors } from '@/constants/colors';
 import { getOverlay } from '@/lib/tradeStatus';
 
 // 상세 대표 이미지. 메인 + 서브를 이어 가로로 스와이프한다.
@@ -37,7 +38,7 @@ export function ImageCarousel({ mainImageUrl, subImageUrls, tradeStatus, product
         renderItem={({ item }) =>
           failedUrls.includes(item) ? (
             // 로드 실패 시 회색 자리(홈 썸네일과 같은 처리)
-            <View style={{ width, height: width, backgroundColor: '#E5E7EB' }} />
+            <View style={{ width, height: width, backgroundColor: colors.outlineVariant }} />
           ) : (
             <Image
               source={{ uri: item }}
@@ -70,7 +71,7 @@ export function ImageCarousel({ mainImageUrl, subImageUrls, tradeStatus, product
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#E5E7EB',
+    backgroundColor: colors.outlineVariant,
   },
   scrim: {
     ...StyleSheet.absoluteFillObject,
@@ -86,7 +87,7 @@ const styles = StyleSheet.create({
   pillText: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#111827',
+    color: colors.onSurface,
   },
   dots: {
     position: 'absolute',
@@ -104,6 +105,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.5)',
   },
   dotActive: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
 });

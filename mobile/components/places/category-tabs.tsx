@@ -1,5 +1,6 @@
 import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 
+import { colors } from '@/constants/colors';
 import { CATEGORIES, type PlaceCategory } from '@/lib/places/types';
 
 // 카테고리 알약 넷(동물병원 · 카페 · 식당 · 숙소). CATEGORIES 순서를 그대로 따른다.
@@ -61,22 +62,22 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   chipActive: {
-    backgroundColor: '#825500',
-    borderColor: '#825500',
+    backgroundColor: colors.selected,
+    borderColor: colors.selected,
   },
   chipIdle: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#D4C4B2',
+    backgroundColor: colors.surface,
+    borderColor: colors.outlineBrand,
   },
   label: {
     fontSize: 14,
     fontWeight: '400',
   },
   labelActive: {
-    color: '#FFFFFF',
+    color: colors.onSelected,
   },
   labelIdle: {
-    color: '#4B5563',
+    color: colors.onSurfaceMedium,
   },
   pressed: {
     opacity: 0.7,

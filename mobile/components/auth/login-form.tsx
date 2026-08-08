@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 
+import { colors } from '@/constants/colors';
 import { InvalidCredentialsError, login } from '@/lib/auth/session';
 
 // 로그인 폼. 화면(app/login.tsx)과 분리해 둔다 —
@@ -96,7 +97,7 @@ export function LoginForm({ onSuccess }: Props) {
             if (error) setError(null);
           }}
           placeholder="example@cuddle.com"
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={colors.onSurfaceSubtle}
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
@@ -114,7 +115,7 @@ export function LoginForm({ onSuccess }: Props) {
             if (error) setError(null);
           }}
           placeholder="비밀번호"
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={colors.onSurfaceSubtle}
           secureTextEntry
           autoCapitalize="none"
           textContentType="password"
@@ -149,7 +150,7 @@ export function LoginForm({ onSuccess }: Props) {
         ]}
       >
         {submitting ? (
-          <ActivityIndicator color="#FFFFFF" />
+          <ActivityIndicator color={colors.onAction} />
         ) : (
           <Text style={styles.submitLabel}>로그인</Text>
         )}
@@ -165,7 +166,7 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#111827',
+    color: colors.onSurface,
     marginBottom: 8,
   },
   field: {
@@ -173,30 +174,30 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 13,
-    color: '#6B7280',
+    color: colors.onSurfaceMuted,
   },
   input: {
     height: 48,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: colors.outline,
     borderRadius: 8,
     paddingHorizontal: 12,
     fontSize: 15,
-    color: '#111827',
-    backgroundColor: '#FFFFFF',
+    color: colors.onSurface,
+    backgroundColor: colors.surface,
   },
   // 회원가입 화면과 같은 값 — 웹 토큰(--color-danger-500)에서 가져왔다.
   error: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#C91D1D',
+    color: colors.danger,
   },
   // 밑줄을 준다. 이 줄은 위아래가 칸과 단추라 링크임을 알릴 다른 단서가 없다
   // (관문 아래 링크 줄은 통째로 링크라 밑줄을 안 준다 — app/login.tsx).
   findPassword: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#4B5563',
+    color: colors.onSurfaceMedium,
     textDecorationLine: 'underline',
   },
   findPasswordPressed: { opacity: 0.6 },
@@ -205,7 +206,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#111827',
+    backgroundColor: colors.action,
   },
   submitPressed: {
     opacity: 0.8,
@@ -216,6 +217,6 @@ const styles = StyleSheet.create({
   submitLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.onAction,
   },
 });

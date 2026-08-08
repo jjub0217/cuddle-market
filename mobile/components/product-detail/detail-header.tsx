@@ -3,6 +3,8 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ChevronLeft, EllipsisVertical } from 'lucide-react-native';
 
+import { colors } from '@/constants/colors';
+
 // 상세 화면 헤더(뒤로가기만, 타이틀 없음 — 설계 §4).
 //
 // 왜 네이티브 스택 헤더를 안 쓰나:
@@ -36,7 +38,7 @@ export function DetailHeader({ onMorePress }: Props) {
         accessibilityLabel="뒤로 가기"
         style={({ pressed }) => (pressed ? styles.backPressed : undefined)}
       >
-        <ChevronLeft size={26} color="#111827" />
+        <ChevronLeft size={26} color={colors.onSurface} />
       </Pressable>
 
       {onMorePress ? (
@@ -47,7 +49,7 @@ export function DetailHeader({ onMorePress }: Props) {
           accessibilityLabel="더보기"
           style={({ pressed }) => (pressed ? styles.backPressed : undefined)}
         >
-          <EllipsisVertical size={24} color="#111827" />
+          <EllipsisVertical size={24} color={colors.onSurface} />
         </Pressable>
       ) : null}
     </View>
@@ -62,8 +64,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
-    backgroundColor: '#FFFFFF',
+    borderBottomColor: colors.outlineVariant,
+    backgroundColor: colors.surface,
   },
   backPressed: {
     opacity: 0.5,

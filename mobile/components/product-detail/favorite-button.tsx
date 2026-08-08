@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 
 import { Heart } from 'lucide-react-native';
+import { colors } from '@/constants/colors';
 import { useFavorite } from '@/hooks/use-favorite';
 
 // 상세의 찜 버튼. 판매자 카드 아래 본문 인라인 자리(설계 §8.5).
@@ -35,8 +36,8 @@ export function FavoriteButton({ productId, isFavorite }: Props) {
           (Feather·MaterialIcons처럼 heart / heart.fill 두 이름이 따로 있지 않다). */}
       <Heart
         size={22}
-        color={active ? '#FC8181' : '#6B7280'}
-        fill={active ? '#FC8181' : 'none'}
+        color={active ? colors.favorite : colors.onSurfaceMuted}
+        fill={active ? colors.favorite : 'none'}
       />
       <Text style={[styles.label, active && styles.labelActive]}>
         {active ? '찜한 상품' : '찜하기'}
@@ -54,19 +55,19 @@ const styles = StyleSheet.create({
     gap: 8,
     borderRadius: 8,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#D1D5DB',
-    backgroundColor: '#FFFFFF',
+    borderColor: colors.outline,
+    backgroundColor: colors.surface,
   },
   buttonActive: {
-    borderColor: '#FC8181',
+    borderColor: colors.favorite,
   },
   label: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#6B7280',
+    color: colors.onSurfaceMuted,
   },
   labelActive: {
-    color: '#FC8181',
+    color: colors.favorite,
   },
   pressed: {
     opacity: 0.7,
