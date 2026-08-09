@@ -39,6 +39,15 @@ const INITIAL_ZOOM = 13;
 //    누르는 것도 막지 않는다.
 const GRACE_MS = 3000;
 
+/**
+ * 마커 그림의 크기와 핀 끝의 자리. **웹과 같은 값이다**(NaverMap.tsx 의 MARKER_SIZE·MARKER_TIP).
+ *
+ * 36×44 인데 핀 그림 자체는 32×40 이다 — 흰 테두리가 잘리지 않게 사방에 2 를 비워 뒀다.
+ */
+const MARKER_WIDTH = 36;
+const MARKER_HEIGHT = 44;
+const MARKER_TIP_Y = 40.5;
+
 interface NaverMapModule {
   NaverMapView: ComponentType<NaverMapViewProps>;
   NaverMapMarkerOverlay: ComponentType<NaverMapMarkerOverlayProps>;
@@ -103,9 +112,20 @@ export default function PlaceMap({ places, onCameraChanged, onPressPlace }: Prop
           latitude={place.latitude}
           longitude={place.longitude}
           onTap={() => onPressPlace(place.id)}
+          // 웹과 **같은 그림**이다(src/features/map/NaverMap.tsx 의 SVG 로 구운 PNG).
+          // 전에는 image 를 안 줘서 SDK 기본 초록 마커가 나왔다 — 브랜드와 안 맞았다(#786).
+          //
+          // ⚠️ 커스텀 뷰(children)가 아니라 **이미지**를 쓴다. 라이브러리가 그걸 권한다 —
+          //    커스텀 뷰는 이미지 캐싱이 안 되고 마커 하나당 자원을 많이 먹는데,
+          //    이 화면은 마커가 100개까지 나온다(동물병원).
+          image={require('@/assets/images/map-marker.png')}
           // 크기를 안 주면 개발 빌드와 출시 빌드에서 다르게 나온다(SDK 문서 경고).
-          width={24}
-          height={32}
+          width={MARKER_WIDTH}
+          height={MARKER_HEIGHT}
+          // ⚠️ anchor 는 **0~1 비율**이다(기본값 {x:0.5, y:1}). 픽셀이 아니다.
+          //    핀 끝이 이미지 아래에서 조금 위(40.5/44)에 있다 — 사방 2 를 비워 둬서다.
+          //    기본값 y:1 로 두면 핀이 실제 위치보다 3.5px 위에 붙는다.
+          anchor={{ x: 0.5, y: MARKER_TIP_Y / MARKER_HEIGHT }}
         />
       ))}
     </NaverMapView>
