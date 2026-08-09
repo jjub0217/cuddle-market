@@ -12,9 +12,15 @@ import type { UserProfile } from '@/lib/user-profile';
 
 interface Props {
   profile: UserProfile;
+  /**
+   * 내 프로필인가. 이 화면은 **남의 프로필을 보는 자리**로 만들어졌지만, 내 상품의
+   * 판매자 카드를 눌러 들어오면 내 프로필이 뜬다 — 그때 남 기준으로 그리면 어긋난다(#869).
+   * 웹도 같은 값을 본다(ProfileData 의 isMyProfile).
+   */
+  isMine?: boolean;
 }
 
-export function ProfileHead({ profile }: Props) {
+export function ProfileHead({ profile, isMine = false }: Props) {
   const [failed, setFailed] = useState(false);
   const location = [profile.addressSido, profile.addressGugun].filter(Boolean).join(' ');
   const showImage = Boolean(profile.profileImageUrl) && !failed;
@@ -41,7 +47,7 @@ export function ProfileHead({ profile }: Props) {
           <View style={styles.nameRow}>
             <Text style={styles.nickname}>{profile.nickname}</Text>
             {/* 웹 ProfileData와 같은 배지 */}
-            {profile.isBlocked ? (
+            {!isMine && profile.isBlocked ? (
               <View style={styles.blockedBadge}>
                 <ShieldAlert size={12} color={colors.danger} />
                 <Text style={styles.blockedLabel}>차단 유저</Text>
@@ -89,7 +95,7 @@ export function ProfileHead({ profile }: Props) {
       <Text
         style={[styles.introduction, !profile.introduction?.trim() && styles.introductionEmpty]}
       >
-        {profile.introduction?.trim() || '소개글이 없습니다'}
+        {profile.introduction?.trim() || (isMine ? '소개글을 작성해주세요' : '소개글이 없습니다')}
       </Text>
     </View>
   );
