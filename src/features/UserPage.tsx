@@ -2,7 +2,7 @@
 
 import ProfileData from '@/components/profile/ProfileData'
 import Footer from '@/components/footer/Footer'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import { api } from '@/lib/api/api'
@@ -113,7 +113,16 @@ function UserPage() {
   const errorUserProductData = isSalesTab ? errorUserSellProductData : errorUserRequestProductData
   const activeTabLabel = isSalesTab ? '판매상품' : '판매요청'
 
+  // ⚠️ **내 프로필이면 마이페이지로 보낸다.** 이 화면은 남의 프로필을 보는 자리다 —
+  //    내 id 로 열면 요약 카운트도, 사이드바도, 내 글·내 댓글도 없는 반쪽이 뜬다.
+  //    그리고 「신고하기」·「차단하기」가 **나 자신을 향해** 열린다.
+  //
+  //    상품 상세·상품 목록에서는 아예 마이페이지로 보내지만(SellerProfileCard·ProductList),
+  //    주소를 직접 치면 여기로 들어올 수 있어 마지막 문을 여기서 닫는다(#869).
   const isMyProfile = user?.id === userData?.id
+  useEffect(() => {
+    if (isMyProfile) router.replace(ROUTES.MYPAGE)
+  }, [isMyProfile, router])
 
   const { mutate: unblockUser } = useMutation({
     mutationFn: () => api.delete(`/reports/blocks/users/${userData?.id}`),
@@ -177,7 +186,8 @@ function UserPage() {
             setIsReportModalOpen={setIsReportModalOpen}
             setIsBlockModalOpen={setIsBlockModalOpen}
             data={userData!}
-            isMyProfile={isMyProfile}
+            // isMyProfile 을 안 넘긴다 — 내 프로필이면 위에서 마이페이지로 보내므로
+            // 여기까지 오는 것은 **늘 남의 프로필**이다(#869).
             unblockUser={unblockUser}
             showJoinDate
           />
