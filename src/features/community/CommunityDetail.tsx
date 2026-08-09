@@ -180,7 +180,10 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
                       </>
                     ) : (
                       <button
-                        className="cursor-pointer text-xs font-medium text-gray-500 hover:underline"
+                        // ⚠️ 데스크탑에서만 바꾼다(md:). 이 조각은 폰과 데스크탑이 함께 쓰는데
+                        //    맞추기로 한 것은 **데스크탑의 상품 상세**뿐이라, 폰은 건드리지 않는다(#869).
+                        //    데스크탑 14px · 마우스 올려도 안 바뀜 — 상품 상세와 같은 값이다.
+                        className="cursor-pointer text-xs font-medium text-gray-500 hover:underline md:text-sm md:hover:no-underline"
                         type="button"
                         onClick={() => {
                           if (!user) {

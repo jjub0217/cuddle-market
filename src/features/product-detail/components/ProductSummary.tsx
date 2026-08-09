@@ -56,7 +56,9 @@ export default function ProductSummary({ data }: ProductHeaderProps) {
           <button
             type="button"
             onClick={() => setIsReportOpen(true)}
-            className="hidden cursor-pointer items-center gap-1 text-sm text-gray-400 hover:text-red-500 md:flex"
+            // 커뮤니티 글 상세의 「신고하기」와 같은 값이다 — 같은 자리·같은 역할이라 모양도 같다(#869).
+            // 마우스를 올려도 안 바뀐다. 신고는 자주 하는 일이 아니라 조용히 둔다.
+            className="hidden cursor-pointer items-center gap-1 text-sm font-medium text-gray-500 md:flex"
           >
             <span>신고하기</span>
           </button>
