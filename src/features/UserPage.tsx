@@ -34,6 +34,13 @@ function UserPage() {
   const id = params.id as string
   const queryClient = useQueryClient()
 
+  // ⚠️ **주소의 id 로 판단한다. 서버 응답을 기다리지 않는다.**
+  //    전에는 user?.id === userData?.id 라 프로필을 받아 온 뒤에야 알 수 있었고,
+  //    그래서 마이페이지로 튕기기 전에 요청 두 개가 먼저 나갔다
+  //    (/profile/{id} · /profile/{id}/products). 주소에 이미 id 가 있는데
+  //    굳이 물어본 셈이다(#869).
+  const isMyProfile = user?.id != null && String(user.id) === id
+
   const router = useRouter()
   const searchParams = useSearchParams()
   const tabParam = searchParams.get('tab') as UserPageTabId | null
@@ -61,7 +68,8 @@ function UserPage() {
       const response = await api.get(`/profile/${id}`)
       return response.data.data
     },
-    enabled: !!id,
+    // 내 프로필이면 안 부른다 — 어차피 마이페이지로 보낸다(위 useEffect)
+    enabled: !!id && !isMyProfile,
     refetchOnWindowFocus: false,
   })
 
@@ -82,7 +90,7 @@ function UserPage() {
     },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
     initialPageParam: 0,
-    enabled: !!id && isSalesTab,
+    enabled: !!id && !isMyProfile && isSalesTab,
   })
 
   const {
@@ -102,7 +110,7 @@ function UserPage() {
     },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
     initialPageParam: 0,
-    enabled: !!id && !isSalesTab,
+    enabled: !!id && !isMyProfile && !isSalesTab,
   })
 
   const userProductData = isSalesTab ? userSellProductData : userRequestProductData
@@ -113,16 +121,13 @@ function UserPage() {
   const errorUserProductData = isSalesTab ? errorUserSellProductData : errorUserRequestProductData
   const activeTabLabel = isSalesTab ? '판매상품' : '판매요청'
 
-  // ⚠️ **내 프로필이면 마이페이지로 보낸다.** 이 화면은 남의 프로필을 보는 자리다 —
-  //    내 id 로 열면 요약 카운트도, 사이드바도, 내 글·내 댓글도 없는 반쪽이 뜬다.
-  //    그리고 「신고하기」·「차단하기」가 **나 자신을 향해** 열린다.
-  //
-  //    상품 상세·상품 목록에서는 아예 마이페이지로 보내지만(SellerProfileCard·ProductList),
-  //    주소를 직접 치면 여기로 들어올 수 있어 마지막 문을 여기서 닫는다(#869).
-  const isMyProfile = user?.id === userData?.id
+  // 내 프로필이면 마이페이지로 보낸다. 이 화면은 남의 프로필을 보는 자리라,
+  // 내 id 로 열면 요약 카운트도 사이드바도 없는 반쪽이 뜨고
+  // 「신고하기」·「차단하기」가 **나 자신을 향해** 열린다(#869).
   useEffect(() => {
     if (isMyProfile) router.replace(ROUTES.MYPAGE)
   }, [isMyProfile, router])
+
 
   const { mutate: unblockUser } = useMutation({
     mutationFn: () => api.delete(`/reports/blocks/users/${userData?.id}`),
@@ -141,6 +146,10 @@ function UserPage() {
 
   const totalProducts = userProductData?.pages[0]?.total ?? 0
   const allProducts = userProductData?.pages.flatMap((page) => page.content) ?? []
+
+  // ⚠️ 내 프로필이면 **아무것도 안 그린다.** 위 useEffect 가 마이페이지로 보내는 사이,
+  //    쿼리를 꺼 둔 탓에 userData 가 없어 아래 「사용자를 찾을 수 없습니다」가 한 번 스친다.
+  if (isMyProfile) return null
 
   if ((isLoadingUserData && !userData) || (isLoadingUserProductData && !userProductData)) {
     return (
