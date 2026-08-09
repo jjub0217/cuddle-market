@@ -245,7 +245,13 @@ export default function SelectDropdown({
         ? createPortal(
             // fixed로 흐름에서 빼야 함: dialog에 portal될 때 이 wrapper가
             // flex 자식으로 잡혀 gap(예: gap-4=16px)을 추가하는 부작용 방지.
-            <div ref={optionsRef} className="fixed">
+            //
+            // ⚠️ **z-index 를 여기에도 준다.** position 이 있고 z-index 가 auto 면 이 감싸개는
+            //    「z-index 0」인 자리에 놓이고, **안쪽 목록이 아무리 큰 z 를 가져도 그 자리를
+            //    못 벗어난다.** 그래서 z-1 짜리 상품 카드가 목록을 덮었다 —
+            //    홈 세부 필터의 시/도 목록이 카드에 잘려 보였다(#869).
+            //    안쪽 목록에 z 를 99999 로 올려 봐도 그대로였고, 여기에 주자 해결됐다.
+            <div ref={optionsRef} className={cn('fixed', Z_INDEX.DROPDOWN)}>
               <SelectOptions
                 options={options}
                 selectedValue={value}

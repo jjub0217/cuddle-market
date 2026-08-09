@@ -113,7 +113,16 @@ export default function PostDetailScreen() {
 
         <Pressable
           style={({ pressed }) => [styles.author, pressed && styles.pressed]}
-          onPress={() => router.push(`/(tabs)/(community)/users/${post.authorId}`)}
+          // ⚠️ 내 글이면 마이 탭으로 보낸다. users/[id] 는 남의 프로필을 보는 자리라
+          //    내 id 로 들어가면 「내 상품 관리」도 없는 반쪽 화면이 뜬다.
+          //    상품 상세의 판매자 카드(seller-card.tsx)와 같은 규칙이다(#869).
+          //    ⚠️ 웹은 화면 안에서 한 번에 막지만(UserPage 의 리다이렉트), 앱은 그런 문이
+          //       없어 **들어오는 길마다** 막아야 한다.
+          onPress={() =>
+            me && post.authorId === me.id
+              ? router.push('/(tabs)/(my)')
+              : router.push(`/(tabs)/(community)/users/${post.authorId}`)
+          }
           accessibilityRole="button"
           accessibilityLabel={`${post.authorNickname}님의 프로필`}
         >

@@ -190,7 +190,7 @@ export default function UserProfileScreen() {
 
     return (
       <>
-        <ProfileHead profile={profile} />
+        <ProfileHead profile={profile} isMine={isMine} />
         <StatusFilterChips chips={KIND_CHIPS} activeId={kind} onChange={setKind} />
         {renderList()}
       </>

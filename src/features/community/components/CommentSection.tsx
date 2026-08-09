@@ -81,12 +81,15 @@ export function CommentSection({
   })
 
   const onSubmit = (data: ReplyRequestFormValues) => {
-    if (!data.content.trim()) return
+    // ⚠️ **로그인 확인이 빈 칸 확인보다 먼저다.** 전에는 순서가 반대라, 미로그인 사용자가
+    //    빈 칸에서 등록을 누르면 아무 일도 안 일어났다 — 왜 안 되는지 알 길이 없었다(#869).
+    //    「먼저 로그인하세요」가 「내용을 쓰세요」보다 앞선 정보다.
     if (!user) {
       setRedirectUrl(pathname + (searchParams.toString() ? `?${searchParams.toString()}` : ''))
       openLoginModal()
       return
     }
+    if (!data.content.trim()) return
     mutation.mutate({ content: data.content })
   }
 

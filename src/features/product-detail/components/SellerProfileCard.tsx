@@ -6,6 +6,7 @@ import { IMAGE_SIZES, imageLoader, toResizedWebpUrl } from '@/lib/utils/imageUrl
 import { useRouter } from 'next/navigation'
 import { useUserStore } from '@/store/userStore'
 import { useLoginModalStore } from '@/store/modalStore'
+import { ROUTES } from '@/constants/routes'
 
 interface SellerProfileCardProps {
   sellerInfo: {
@@ -29,10 +30,17 @@ export default function SellerProfileCard({ sellerInfo }: SellerProfileCardProps
       openLoginModal()
       return
     }
-    router.push(`/user-profile/${sellerId}`)
+    // ⚠️ **내 프로필이면 마이페이지로 보낸다.** /user-profile 은 남의 프로필을 보는 자리다 —
+    //    내 id 로 들어가면 요약 카운트도, 사이드바도, 내 글·내 댓글도 없는 반쪽 화면이 뜬다.
+    //    「내 프로필」은 마이페이지가 맡는다(#869).
+    router.push(sellerId === user?.id ? ROUTES.MYPAGE : `/user-profile/${sellerId}`)
   }
 
-  return sellerInfo?.sellerId !== user?.id ? (
+  // ⚠️ **내 상품이어도 그린다.** 전에는 내 것이면 카드를 통째로 안 그렸는데,
+  //    그러면 길에 따라 동작이 갈렸다 — 홈 상품 목록에서는 내 상품의 프로필도 그냥 눌렸다.
+  //    「내가 올린 상품이 남에게 어떻게 보이는지」를 확인할 수도 없었다.
+  //    누르면 마이페이지로 간다(위 goToUserPage) — 내 프로필은 거기가 맡는다(#869).
+  return (
     <div className="flex cursor-pointer items-center justify-between" onClick={() => goToUserPage(sellerInfo.sellerId)}>
       <div className="flex items-center gap-2">
         <div className="bg-primary-50 relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full">
@@ -68,5 +76,5 @@ export default function SellerProfileCard({ sellerInfo }: SellerProfileCardProps
           판매자 프로필 보기
         </Button> */}
     </div>
-  ) : null
+  )
 }

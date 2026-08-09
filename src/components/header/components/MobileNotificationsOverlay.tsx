@@ -192,7 +192,7 @@ export default function MobileNotificationsOverlay({ isOpen, onClose }: MobileNo
             <div ref={observerTargetRef} className="h-1" />
           </>
         ) : (
-          <NotificationsEmpty className="h-32" />
+          <NotificationsEmpty className="min-h-32" />
         )}
       </div>
     </div>
