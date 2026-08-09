@@ -11,7 +11,14 @@ import { cn } from '@/lib/utils/cn'
 // (「아직 등록된 상품이 없어요.」)과 말투가 이미 같아서다.
 
 interface NotificationsEmptyProps {
-  /** 부르는 쪽마다 높이가 다르다 (오버레이·드롭다운 h-32 / 페이지 h-64) */
+  /**
+   * 부르는 쪽마다 높이가 다르다 (오버레이·드롭다운 min-h-32 / 페이지 h-64).
+   *
+   * ⚠️ **h-* 가 아니라 min-h-* 로 준다.** 안의 내용이 172px 인데 h-32(128)로 못 박으면
+   *    justify-center 때문에 넘치는 44px 이 위아래로 22px 씩 삐져나가고,
+   *    위로 나간 만큼이 부모의 overflow-y-auto 에 잘린다 —
+   *    발자국 위 여백(py-6 = 24px)이 4px 만 남아 구분선에 붙어 보였다(#869 실측).
+   */
   className?: string
 }
 
