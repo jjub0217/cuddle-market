@@ -28,13 +28,18 @@ interface TabsProps {
 const VARIANT_STYLES: Record<TabsVariant, { container: string; tab: string; tabActive: string; tabInactive: string }> = {
   default: {
     container: 'flex w-fit gap-1 md:gap-2.5',
-    tab: 'flex-1 cursor-pointer rounded-full px-4 py-2 text-sm whitespace-nowrap md:text-base xl:rounded-2xl',
+    // 글자 14 는 아래 card-pill·Button 과 같은 값이다. 전에는 md:text-base 라
+    // 데스크탑에서만 16 이 되어, 같은 Tabs 인데 변형에 따라 글자가 갈렸다(#847).
+    // 높이(py-2 로 40)는 그대로 둔다 — Button 의 md 와 같은 값이라 어긋난 곳이 아니다.
+    tab: 'flex-1 cursor-pointer rounded-full px-4 py-2 text-sm whitespace-nowrap xl:rounded-2xl',
     tabActive: 'bg-primary-600 font-bold text-white',
     tabInactive: 'bg-primary-100 xl:bg-white hover:bg-primary-600 hover:text-white text-gray-900',
   },
   'card-pill': {
     container: 'flex flex-wrap items-center gap-2',
-    tab: 'cursor-pointer rounded-full border px-5 py-1.5 text-sm whitespace-nowrap transition-all max-md:px-4 max-md:py-1 max-md:font-normal',
+    // h-8 (32) — Button 의 md(40)·sm(36)보다 작다. 목록 위에 늘어서는 칩이라
+    // 단추만 한 크기면 화면을 잡아먹는다. 모바일은 한 단계 더 작다(#847).
+    tab: 'h-8 cursor-pointer rounded-full border px-5 py-1.5 text-sm whitespace-nowrap transition-all max-md:h-7 max-md:px-4 max-md:py-1 max-md:font-normal',
     tabActive: 'border-[#825500] bg-[#825500] text-white shadow-sm',
     tabInactive: 'border-[#d4c4b2] bg-white text-gray-600 hover:border-[#825500] hover:text-[#825500]',
   },

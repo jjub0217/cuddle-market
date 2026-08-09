@@ -64,9 +64,7 @@ export function PasswordField({ register, errors, control, setError, clearErrors
             id="signup-password"
             type="password"
             placeholder="비밀번호를 입력해주세요"
-            size="text-sm"
             border
-            borderColor="border-gray-400"
             maxLength={PASSWORD_MAX}
             registration={register('password', authValidationRules.password)}
           />
@@ -81,9 +79,7 @@ export function PasswordField({ register, errors, control, setError, clearErrors
           id="signup-password-confirm"
           type="password"
           placeholder="비밀번호를 다시 입력해주세요"
-          size="text-sm"
           border
-          borderColor="border-gray-400"
           error={errors.passwordConfirm}
           checkResult={checkResult}
           maxLength={PASSWORD_MAX}

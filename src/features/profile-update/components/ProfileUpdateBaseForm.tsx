@@ -356,7 +356,6 @@ export default function ProfileUpdateBaseForm({ myData, onWithdrawClick }: Profi
                       placeholder="cuddle market"
                       registration={register('nickname', profileValidationRules.nickname)}
                       buttonText="중복체크"
-                      size="text-sm"
                       buttonSize="md"
                       buttonClassName="bg-primary-200 text-sm text-white cursor-pointer font-semibold py-[10px] !h-auto"
                       inputClass="md:py-[10px]"

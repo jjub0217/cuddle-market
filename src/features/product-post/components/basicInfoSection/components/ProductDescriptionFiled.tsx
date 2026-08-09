@@ -26,7 +26,11 @@ export function ProductDescriptionFiled({
         id="product-description"
         placeholder={placeholder}
         className={cn(
-          'border-outline-variant bg-surface-container-low focus:ring-primary min-h-[14vh] w-full resize-none rounded-lg border px-4 py-3 text-sm placeholder:text-gray-400 focus:ring-2 focus:outline-none'
+          // 테두리는 입력칸(Input)과 같은 border-outline(#D1D5DB)이다.
+          // 전에는 border-outline-variant(베이지 #D4C4B2)였다 — 토큰 파일이 「입력칸 경계로
+          // 쓰지 말 것」이라 적어 둔 값인데, borderColor 속성이 아니라 클래스로 직접 준 곳이라
+          // #847 이 색을 모을 때 빠졌다.
+          'border-outline bg-surface-container-low focus:ring-primary min-h-[14vh] w-full resize-none rounded-lg border px-4 py-3 text-sm placeholder:text-gray-400 focus:ring-2 focus:outline-none'
         )}
         {...register('description', productPostValidationRules.description)}
       />

@@ -74,14 +74,14 @@ export default function BlockModal({ isOpen, onCancel, userNickname, userId }: B
         <Button
           type="button"
           onClick={handleCancel}
-          size="sm"
+          size="md"
           className="cursor-pointer rounded-lg border border-gray-300 bg-white"
         >
           취소
         </Button>
         <Button
           type="button"
-          size="sm"
+          size="md"
           onClick={onUserBlock}
           className="bg-danger-600 cursor-pointer rounded-lg text-white disabled:cursor-not-allowed disabled:opacity-50"
         >

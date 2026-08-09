@@ -314,7 +314,7 @@ export default function ChattingPage() {
                   <button
                     type="button"
                     aria-label="전송"
-                    className="bg-primary hover:bg-primary/90 flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors"
+                    className="bg-primary-600 hover:bg-primary-600/90 flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors"
                     // onClick 대신 onPointerDown + preventDefault:
                     // 모바일에서 textarea 포커스 중 버튼 탭 시 blur로 키보드가 닫히며
                     // fixed 입력창이 점프해 click이 취소되는 문제를 차단한다.

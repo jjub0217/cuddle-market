@@ -122,9 +122,7 @@ export default function ProfileUpdatePasswordForm() {
                   id="current-password"
                   type="password"
                   placeholder="현재 비밀번호를 입력하세요"
-                  size="text-sm"
                   border
-                  borderColor="border-gray-400"
                   error={errors.currentPassword}
                   registration={register('currentPassword', profileValidationRules.currentPassword)}
                 />
@@ -140,9 +138,7 @@ export default function ProfileUpdatePasswordForm() {
                   id="new-password"
                   type="password"
                   placeholder="새 비밀번호를 입력하세요"
-                  size="text-sm"
                   border
-                  borderColor="border-gray-400"
                   error={errors.newPassword}
                   registration={register('newPassword', profileValidationRules.newPassword)}
                 />
@@ -158,9 +154,7 @@ export default function ProfileUpdatePasswordForm() {
                   id="confirm-password"
                   type="password"
                   placeholder="새 비밀번호를 다시 입력하세요"
-                  size="text-sm"
                   border
-                  borderColor="border-gray-400"
                   error={errors.confirmPassword}
                   checkResult={checkResult}
                   registration={register('confirmPassword', profileValidationRules.confirmPassword(password))}

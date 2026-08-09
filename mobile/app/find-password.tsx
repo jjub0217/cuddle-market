@@ -326,7 +326,8 @@ const styles = StyleSheet.create({
   // 거꾸로가 된다. 웹은 아래 「인증코드 전송」을 숨겨서 같은 결과를 만든다 —
   // 앱은 그 단추가 칸 안(trailing)에 있어 숨기면 칸이 갑자기 달라 보여서 색으로 가른다.
   blockedButton: {
-    height: 44,
+    // 같은 화면의 submit·secondary 와 같은 48 이다. 전에는 44 라 혼자 낮았다(#847).
+    height: 48,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',

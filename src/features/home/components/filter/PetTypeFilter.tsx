@@ -77,7 +77,9 @@ export function PetTypeFilter({ activeTab, selectedDetailPet, onTabChange }: Pet
               onClick={(e) => handleSelect(e, pet.code)}
               aria-pressed={isActive}
               className={cn(
-                'cursor-pointer rounded-full border px-3 py-1 text-xs font-medium whitespace-nowrap transition-all',
+                // h-6.5 (26) — Button 의 sm(36)보다 작다. 목록 위에 여럿이 늘어서는 칩이라
+                // 단추만 한 크기면 화면을 다 잡아먹는다(#847).
+                'h-[26px] cursor-pointer rounded-full border px-3 py-1 text-xs font-medium whitespace-nowrap transition-all',
                 isActive
                   ? 'border-[#825500] bg-[#825500] text-white shadow-sm'
                   : 'border-outline-variant bg-white text-gray-600 hover:border-[#825500] hover:text-[#825500]'
@@ -92,7 +94,7 @@ export function PetTypeFilter({ activeTab, selectedDetailPet, onTabChange }: Pet
             type="button"
             size="sm"
             onClick={() => setShowAll(true)}
-            className="cursor-pointer rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600 hover:bg-gray-200 md:hidden"
+            className="h-[26px] cursor-pointer rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600 hover:bg-gray-200 md:hidden"
           >
             더보기 ({filteredPetDetails.length - INITIAL_DISPLAY_COUNT}개)
           </Button>

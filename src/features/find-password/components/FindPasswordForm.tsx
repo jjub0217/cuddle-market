@@ -52,17 +52,15 @@ function mmss(totalSeconds: number): string {
   return `${m}:${String(s).padStart(2, '0')}`
 }
 
-// 이 화면의 칸과 단추는 **높이를 48(h-12)로 못 박는다.**
+// 이 화면은 높이를 **따로 못 박지 않는다.** 공용 조각의 기본값(40)을 그대로 쓴다.
 //
-// 공용 조각이 저마다 다른 높이를 갖고 있어 한 화면에 셋이 섞여 있었다(2026-08-05 실측):
+// 전에는 여기서 h-12(48)로 덮어썼다. 공용 조각이 저마다 다른 높이여서 한 화면에
+// 여럿이 섞였기 때문이다(2026-08-05 실측):
 //   이메일 칸 46 · 인증코드 전송 40 · 인증코드 칸 46 · 재전송 44 · 이메일 변경 40 · 인증하기 40
 // 특히 나란히 붙은 인증코드 칸(46)과 재전송(44)의 2px 이 제일 눈에 띄었다.
 //
-// ⚠️ 공용 조각(Button·Input)을 고치지 않는다 — 웹 전체 화면이 함께 바뀐다.
-//    웹 전체의 높이 통일은 따로 다룬다.
-// cn 이 tailwind-merge 라서 나중에 준 h-12 가 확실히 이긴다.
-//
-// 앱도 같은 48이다(mobile 의 field.tsx · fieldStyles.button · submit).
+// #847 에서 공용 조각을 고쳐 Input 도 Button(md)도 40 이 됐으므로 덮어쓸 이유가 없어졌다.
+// 로그인·회원가입 화면도 같은 40 이다.
 
 export function FindPasswordForm() {
   // 결과에 **어느 이메일에 대한 것인지**를 함께 담는다.
@@ -319,11 +317,7 @@ export function FindPasswordForm() {
                       id="resetting-password"
                       type="password"
                       placeholder="10자 이상 입력해주세요(영문 대소문자, 숫자, 특수문자 포함)"
-                      size="text-sm"
                       border
-                      borderColor="border-gray-400"
-                    // 이 화면의 칸·단추 높이를 48로 맞춘다(아래 주석 참고)
-                    wrapperClassName="h-12"
                       error={errors.password}
                       registration={register('password', profileValidationRules.newPassword)}
                     />
@@ -336,11 +330,7 @@ export function FindPasswordForm() {
                       id="signup-password-confirm"
                       type="password"
                       placeholder="비밀번호를 다시 입력해주세요"
-                      size="text-sm"
                       border
-                      borderColor="border-gray-400"
-                    // 이 화면의 칸·단추 높이를 48로 맞춘다(아래 주석 참고)
-                    wrapperClassName="h-12"
                       error={errors.passwordConfirm}
                       checkResult={passwordConfirmResult}
                       registration={register('passwordConfirm', profileValidationRules.confirmPassword(password))}
@@ -357,7 +347,7 @@ export function FindPasswordForm() {
                 ) : null}
                 <Button
                   size="md"
-                  className="h-12 w-full cursor-pointer bg-[#22C55E] text-white"
+                  className="w-full cursor-pointer bg-[#22C55E] text-white"
                   type="button"
                   onClick={onReSettingPassword}
                 >
@@ -386,8 +376,6 @@ export function FindPasswordForm() {
                           : undefined
                     }
                     registration={register('AuthenticationCode', authValidationRules.emailCode)}
-                    wrapperClassName="h-12"
-                    buttonClassName="h-12 md:h-12"
                     buttonText="재전송"
                     onButtonClick={() => onSubmit()}
                   />
@@ -406,7 +394,7 @@ export function FindPasswordForm() {
                       되돌아가는 길을 위에, 앞으로 가는 길(인증하기)을 아래에 둔다. */}
                   <Button
                     size="md"
-                    className="h-12 w-full cursor-pointer border border-gray-400 bg-white text-gray-900"
+                    className="w-full cursor-pointer border border-gray-400 bg-white text-gray-900"
                     type="button"
                     onClick={handlePreviousStep}
                   >
@@ -414,7 +402,7 @@ export function FindPasswordForm() {
                   </Button>
                   <Button
                     size="md"
-                    className="bg-primary-600 h-12 w-full cursor-pointer text-white"
+                    className="bg-primary-600 w-full cursor-pointer text-white"
                     type="button"
                     onClick={onVerifyCode}
                   >
@@ -432,12 +420,8 @@ export function FindPasswordForm() {
                     type="email"
                     placeholder="이메일 (example@cuddle.com)"
                     backgroundColor="bg-white"
-                    size="text-sm"
                     error={errors.email}
                     border
-                    borderColor="border-gray-400"
-                    // 이 화면의 칸·단추 높이를 48로 맞춘다(아래 주석 참고)
-                    wrapperClassName="h-12"
                     // 막다른 길(소셜·없는 이메일)은 아래 박스가 말한다. 여기까지 띄우면
                     // 같은 말이 두 줄로 겹친다. 그 밖의 실패(네트워크 등)만 칸 아래에 남긴다.
                     checkResult={
@@ -476,7 +460,7 @@ export function FindPasswordForm() {
                   <>
                     <Button
                       size="md"
-                      className="bg-primary-600 h-12 w-full cursor-pointer text-sm text-white"
+                      className="bg-primary-600 w-full cursor-pointer text-sm text-white"
                       type="submit"
                     >
                       인증코드 전송
