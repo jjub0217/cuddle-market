@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors } from '@/constants/colors';
+import { useMe } from '@/hooks/use-me';
 import { useAuthStore } from '@/lib/auth/store';
 
 // 판매자 프로필. 웹과 같은 위치(설명보다 위).
@@ -27,12 +28,21 @@ export function SellerCard({ seller }: Props) {
   // 돌려주는데, 그러면 공통 원소 타입이 never라 includes()에 무엇도 넣을 수 없다.
   const segments = useSegments() as string[];
   const isAuthed = useAuthStore((state) => state.status) === 'authed';
+  const { data: me } = useMe();
   const location = [seller.addressSido, seller.addressGugun].filter(Boolean).join(' ');
   const showImage = Boolean(seller.sellerProfileImageUrl) && !failed;
 
   const open = () => {
     if (!isAuthed) {
       router.push('/login');
+      return;
+    }
+
+    // ⚠️ **내 프로필이면 마이 탭으로 보낸다.** users/[id] 는 남의 프로필을 보는 자리다 —
+    //    내 id 로 들어가면 「내 상품 관리」도 없는 반쪽 화면이 뜬다. 웹도 같은 규칙이다
+    //    (SellerProfileCard 가 내 id 면 마이페이지로 보낸다) (#869).
+    if (me && seller.sellerId === me.id) {
+      router.push('/(tabs)/(my)');
       return;
     }
 

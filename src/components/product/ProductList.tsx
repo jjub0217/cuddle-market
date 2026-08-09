@@ -6,6 +6,7 @@ import { useUserStore } from '@/store/userStore'
 import type { Product } from '@/types/product'
 import { useRouter, usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils/cn'
+import { ROUTES } from '@/constants/routes'
 
 interface ProductListProps {
   products: Product[]
@@ -15,7 +16,7 @@ interface ProductListProps {
 }
 
 export default function ProductList({ products, showMoreButton = false, sellerId, hideProductType }: ProductListProps) {
-  const { isLogin, setRedirectUrl } = useUserStore()
+  const { user, isLogin, setRedirectUrl } = useUserStore()
   const { openLoginModal } = useLoginModalStore()
   const router = useRouter()
   const pathname = usePathname()
@@ -25,7 +26,8 @@ export default function ProductList({ products, showMoreButton = false, sellerId
       openLoginModal()
       return
     }
-    router.push(`/user-profile/${sellerId}`)
+    // 내 프로필이면 마이페이지로. SellerProfileCard 와 같은 규칙이다(#869).
+    router.push(sellerId === user?.id ? ROUTES.MYPAGE : `/user-profile/${sellerId}`)
   }
   return (
     <ul
