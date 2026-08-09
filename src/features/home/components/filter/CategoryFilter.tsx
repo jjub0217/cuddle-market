@@ -41,7 +41,14 @@ export function CategoryFilter({ selectedCategory }: CategoryFilterProps) {
               size="sm"
               onClick={(e) => handleSelect(e, category.code)}
               aria-pressed={isActive}
-              className="group flex shrink-0 flex-col items-center gap-1 rounded-none bg-transparent p-0 transition-all hover:bg-transparent md:min-w-20 md:gap-0"
+              // h-auto — 이 단추는 아이콘(64) 위에 이름표(20)를 얹은 세로 배치라
+              // 높이를 **내용이 정해야 한다.**
+              //
+              // ⚠️ p-0 만으로는 안 된다. Button 의 sm 이 h-9(36)라 36 안에 84 를 넣게 되어
+              //    아이콘 아래가 잘리고 이름표가 단추 밖으로 밀려난다(#847에서 실제로 그랬다).
+              //    tailwind-merge 는 h-* 와 p-* 를 다른 무리로 봐서 p-0 이 h-9 를 못 지운다.
+              //    바로 옆 ProductPetTypeTabs 가 같은 함정을 같은 방법으로 푼다.
+              className="group flex h-auto shrink-0 flex-col items-center gap-1 rounded-none bg-transparent p-0 transition-all hover:bg-transparent md:min-w-20 md:gap-0"
             >
               <span className="bg-primary-50 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full transition-all group-hover:-translate-y-1 md:h-20 md:w-20 md:overflow-visible md:rounded-none md:bg-transparent">
                 <Image
