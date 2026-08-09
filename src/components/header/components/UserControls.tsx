@@ -78,7 +78,10 @@ export default function UserControls({
                   버튼 기준이면 종 크기가 모바일 24 / 데스크탑 20으로 갈릴 때 점만
                   엉뚱한 자리에 남는다. 종을 감싸면 두 폭에서 같은 자리가 된다.
                   값(top 1 · right 3 · 8px)은 앱 app-header.tsx와 같다. */}
-              <span className="relative inline-flex">
+              {/* ⚠️ inline-flex 가 아니라 flex 다. inline 이면 줄 상자(line box)에 앉아
+                  **아래에 글꼴 여백이 붙고**, 그만큼 종이 위로 밀린다 — 옆 채팅 아이콘과
+                  중심이 3.5px 어긋나 있었다(#869 실측). 상자 높이도 48이 아니라 43이 됐다. */}
+              <span className="relative flex">
                 <Bell size={isMobile ? 24 : 20} strokeWidth={isMobile ? 2 : 1.5} className="text-header-icon" />
                 {(unreadCountData?.unreadCount ?? 0) > 0 ? (
                   <span
