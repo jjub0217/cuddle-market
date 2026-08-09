@@ -30,7 +30,7 @@ export default function TitleField<T extends FieldValues>({
   maxLength = 50,
   id = 'title-field',
   placeholder = '제목을 입력해주세요',
-  size = 'text-sm',
+  size,
   counterClassName,
   labelClassName = 'heading-h5',
 }: TitleFieldProps<T>) {
@@ -45,7 +45,6 @@ export default function TitleField<T extends FieldValues>({
         placeholder={placeholder}
         size={size}
         border
-        borderColor="border-outline-variant"
         backgroundColor="bg-surface-container-low"
         className="flex flex-col gap-2.5"
         error={errors[fieldName] as FieldError | undefined}

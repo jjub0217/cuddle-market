@@ -20,10 +20,20 @@ export default function Input({
   placeholder,
   icon: Icon,
   border = false,
-  borderColor = 'border-gray-100',
+  // 입력칸 테두리는 여기 하나로 정한다. 전에는 이 기본값(gray-100)이 너무 옅어서
+  // 화면마다 gray-400·outline-variant 를 넘겨 덮어썼고, 그래서 색이 갈렸다(#847).
+  // 값의 뜻과 대비 판단은 tokens.colors.css 의 --color-outline 에 적었다.
+  borderColor = 'border-outline',
   backgroundColor = 'bg-white',
   value,
-  size = 'text-base',
+  // 입력칸 글자. 폭에 상관없이 14 다. 앱(15)에 가장 가까운 값이다
+  // (mobile/components/signup/field.tsx — 웹에는 15 가 없다).
+  //
+  // 화면마다 size="text-sm" 을 넘겨 이 기본값(text-base 16)을 덮고 있었다 — 열네 곳이
+  // 모두 같은 값이었다. 같은 값을 열네 번 적어 두면 언젠가 갈리므로 여기로 올린다(#847).
+  //
+  // ⚠️ 로그인 화면만 데스크탑에서 12 다. 그 까닭은 LoginForm.tsx 에 적었다.
+  size = 'text-sm',
   onChange,
   id,
   inputClass,

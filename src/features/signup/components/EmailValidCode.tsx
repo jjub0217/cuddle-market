@@ -220,9 +220,7 @@ export function EmailValidCode({
               <InputField
                 id="signup-email"
                 type="email"
-                size="text-sm"
                 border
-                borderColor="border-gray-400"
                 inputClass="py-2 md:py-2.5 bg-gray-50 text-gray-500"
                 error={errors.email}
                 checkResult={emailCheckResult}

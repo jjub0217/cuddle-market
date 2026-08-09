@@ -19,9 +19,7 @@ export function NameField({ register, errors }: NameFieldProps) {
         id="signup-name"
         type="text"
         placeholder="이름을 입력해주세요"
-        size="text-sm"
         border
-        borderColor="border-gray-400"
         className="flex flex-col gap-2.5"
         error={errors.name}
         registration={register('name', signupValidationRules.name)}

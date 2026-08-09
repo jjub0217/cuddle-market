@@ -5,6 +5,21 @@ interface BirthDateFieldProps<T extends FieldValues> {
   control: Control<T>
 }
 
+/**
+ * 년·월·일 세 칸의 클래스.
+ *
+ * 이 칸들은 공용 Input 을 안 쓴다 — 한 줄에 셋이 나란히 서고 값이 넘어갈 때 옆 칸으로
+ * 이어지는 등 다루는 것이 달라서다. 그래서 **생김새는 손으로 맞춰야 한다.**
+ * 바로 위 이름·닉네임 칸과 같은 값이어야 한 화면에서 안 튄다:
+ *   높이 h-10(40) · 테두리 border-outline(#D1D5DB) · 포커스 primary-500
+ *   글자 14 (Input 의 기본값과 같은 값이다) (#847)
+ *
+ * ⚠️ 전에는 border-gray-400 에 py-2 md:py-3 이라 38이었다. 옆 칸(40)과 2px 이 어긋났고,
+ *    공용 Input 의 색을 바꾸자 색까지 혼자 남았다.
+ */
+const BIRTH_INPUT_CLASS =
+  'focus:border-primary-500 border-outline h-10 w-full rounded-lg border bg-white px-3 text-sm placeholder:text-gray-400 focus:outline-none'
+
 const validateBirthDate = (value: string): string | true => {
   const [yearStr, monthStr, dayStr] = value.split('-')
 
@@ -79,7 +94,7 @@ export function BirthDateField<T extends FieldValues>({ control }: BirthDateFiel
                     updateDate(newValue, month, day)
                   }}
                   onBlur={handleBlur}
-                  className="focus:border-primary-500 w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none md:py-3"
+                  className={BIRTH_INPUT_CLASS}
                 />
                 <input
                   type="text"
@@ -92,7 +107,7 @@ export function BirthDateField<T extends FieldValues>({ control }: BirthDateFiel
                     updateDate(year, newValue, day)
                   }}
                   onBlur={handleBlur}
-                  className="focus:border-primary-500 w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none md:py-3"
+                  className={BIRTH_INPUT_CLASS}
                 />
                 <input
                   type="text"
@@ -105,7 +120,7 @@ export function BirthDateField<T extends FieldValues>({ control }: BirthDateFiel
                     updateDate(year, month, newValue)
                   }}
                   onBlur={handleBlur}
-                  className="focus:border-primary-500 w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none md:py-3"
+                  className={BIRTH_INPUT_CLASS}
                 />
               </div>
               {fieldState.error ? <p className="text-danger-500 text-xs font-semibold">{fieldState.error.message}</p> : null}
