@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useUserStore } from '@/store/userStore'
+import { useLoginModalStore } from '@/store/modalStore'
 import ProductMetadataList from './ProductMetadataList'
 import ProductTitle from './ProductTitle'
 import dynamic from 'next/dynamic'
@@ -34,6 +35,7 @@ interface ProductHeaderProps {
 export default function ProductSummary({ data }: ProductHeaderProps) {
   const [isReportOpen, setIsReportOpen] = useState(false)
   const { user } = useUserStore()
+  const openLoginModal = useLoginModalStore((state) => state.openLoginModal)
   // 내 상품에는 신고를 안 보인다. 판매자를 모르면 역시 안 보인다 —
   // 내 상품을 남의 것으로 오인해 신고 창을 여는 것보다 낫다(앱의 isSellerKnown과 같다).
   const canReport = data.sellerInfo?.sellerId !== undefined && user?.id !== data.sellerInfo.sellerId
@@ -55,7 +57,16 @@ export default function ProductSummary({ data }: ProductHeaderProps) {
         {canReport ? (
           <button
             type="button"
-            onClick={() => setIsReportOpen(true)}
+            // ⚠️ 로그인부터 묻는다. 안 그러면 **미로그인 사용자에게 신고 창이 그대로 열린다** —
+            //    canReport 는 user?.id !== sellerId 라 로그인 안 했을 때도 참이다(#869).
+            //    커뮤니티 글 상세의 신고하기가 원래 이렇게 하고 있었고, 여기만 빠져 있었다.
+            onClick={() => {
+              if (!user) {
+                openLoginModal()
+                return
+              }
+              setIsReportOpen(true)
+            }}
             // 커뮤니티 글 상세의 「신고하기」와 같은 값이다 — 같은 자리·같은 역할이라 모양도 같다(#869).
             // 마우스를 올려도 안 바뀐다. 신고는 자주 하는 일이 아니라 조용히 둔다.
             className="hidden cursor-pointer items-center gap-1 text-sm font-medium text-gray-500 md:flex"
