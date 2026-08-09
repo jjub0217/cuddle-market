@@ -53,10 +53,10 @@ export default function DeletePostConfirmModal({
             ) : null}
           </AnimatePresence>
           <div className="flex justify-end gap-3">
-            <Button onClick={() => dialogRef.current?.close()} size="sm" className="cursor-pointer rounded-lg border border-gray-300 bg-white">
+            <Button onClick={() => dialogRef.current?.close()} size="md" className="cursor-pointer rounded-lg border border-gray-300 bg-white">
               취소
             </Button>
-            <Button onClick={() => onConfirm(postId)} size="sm" className="bg-danger-600 cursor-pointer rounded-lg text-white">
+            <Button onClick={() => onConfirm(postId)} size="md" className="bg-danger-600 cursor-pointer rounded-lg text-white">
               삭제하기
             </Button>
           </div>

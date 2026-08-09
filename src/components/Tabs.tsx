@@ -28,7 +28,10 @@ interface TabsProps {
 const VARIANT_STYLES: Record<TabsVariant, { container: string; tab: string; tabActive: string; tabInactive: string }> = {
   default: {
     container: 'flex w-fit gap-1 md:gap-2.5',
-    tab: 'flex-1 cursor-pointer rounded-full px-4 py-2 text-sm whitespace-nowrap md:text-base xl:rounded-2xl',
+    // 글자 14 는 아래 card-pill·Button 과 같은 값이다. 전에는 md:text-base 라
+    // 데스크탑에서만 16 이 되어, 같은 Tabs 인데 변형에 따라 글자가 갈렸다(#847).
+    // 높이(py-2 로 40)는 그대로 둔다 — Button 의 md 와 같은 값이라 어긋난 곳이 아니다.
+    tab: 'flex-1 cursor-pointer rounded-full px-4 py-2 text-sm whitespace-nowrap xl:rounded-2xl',
     tabActive: 'bg-primary-600 font-bold text-white',
     tabInactive: 'bg-primary-100 xl:bg-white hover:bg-primary-600 hover:text-white text-gray-900',
   },

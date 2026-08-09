@@ -284,7 +284,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
           {hasHydrated && isLogin() ? (
             <Link
               href={`${ROUTES.COMMUNITY_POST}?tab=${activeCommunityTypeTab}`}
-              className="bg-primary hidden items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold whitespace-nowrap text-white shadow-sm transition-opacity hover:opacity-90 active:scale-95 md:flex"
+              className="bg-primary-600 hidden items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold whitespace-nowrap text-white shadow-sm transition-opacity hover:opacity-90 active:scale-95 md:flex"
             >
               <PenLine size={16} />
               <span>글쓰기</span>
@@ -365,7 +365,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
         <Link
           href={`${ROUTES.COMMUNITY_POST}?tab=${activeCommunityTypeTab}`}
           className={cn(
-            'bg-primary fixed right-4 bottom-20 flex items-center gap-2 rounded-full px-4 py-3 text-white shadow-lg transition-all hover:brightness-110 active:scale-95 md:hidden',
+            'bg-primary-600 fixed right-4 bottom-20 flex items-center gap-2 rounded-full px-4 py-3 text-white shadow-lg transition-all hover:brightness-110 active:scale-95 md:hidden',
             Z_INDEX.FLOATING_BUTTON
           )}
           aria-label="글쓰기"

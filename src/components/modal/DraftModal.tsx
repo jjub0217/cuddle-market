@@ -70,7 +70,7 @@ export default function DraftModal({
         <Button
           type="button"
           size="md"
-          className="bg-primary-600 flex flex-1 items-center justify-center rounded-lg px-4 py-2.5 text-white"
+          className="bg-primary-600 flex-1 cursor-pointer text-white"
           onClick={handleLoadDraft}
         >
           확인

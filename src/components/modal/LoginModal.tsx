@@ -52,6 +52,9 @@ export default function LoginModal() {
         <h2 id="login-modal-title" className="heading-h4">{heading}</h2>
         <p>{description}</p>
       </div>
+      {/* ⚠️ 「로그인」은 Button 이 아니라 Link 다(다른 화면으로 가는 길이라 그렇다).
+             그래서 높이(h-10)와 글자(text-sm)를 **손으로 적어 줘야** 옆 「취소」와 같아진다 —
+             Button 만 고치면 절반만 바뀐다. 전에는 py-2.5 라 44 였고 「취소」(40)와 어긋났다(#847). */}
       <div className="flex w-full gap-3">
         <Button size="md" className="flex-1 cursor-pointer border border-gray-300" onClick={() => dialogRef.current?.close()} type="button">
           취소
@@ -59,7 +62,7 @@ export default function LoginModal() {
         {isLogin ? (
           <Link
             href={ROUTES.LOGIN}
-            className="bg-primary-600 flex flex-1 items-center justify-center rounded-lg px-4 py-2.5 text-white"
+            className="bg-primary-600 flex h-10 flex-1 items-center justify-center rounded-lg px-4 text-sm text-white"
             onClick={() => {
               const search = searchParams.toString()
               setRedirectUrl(search ? `${pathname}?${search}` : pathname)

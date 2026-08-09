@@ -133,13 +133,13 @@ export default function WithdrawModal({ isOpen, onConfirm, onCancel, error, onCl
         </div>
 
         <div className="flex justify-end gap-3">
-          <Button type="button" onClick={() => dialogRef.current?.close()} size="sm" className="cursor-pointer rounded-lg border border-gray-300 bg-white">
+          <Button type="button" onClick={() => dialogRef.current?.close()} size="md" className="cursor-pointer rounded-lg border border-gray-300 bg-white">
             취소
           </Button>
           <Button
             type="submit"
             disabled={!isValid}
-            size="sm"
+            size="md"
             className="bg-danger-600 cursor-pointer rounded-lg text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
             탈퇴하기
