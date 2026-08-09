@@ -33,6 +33,14 @@ export const colors = {
   outline: '#D1D5DB', // 칩 · 입력칸 · 검색칸 · 취소 단추 · 카드
   outlineVariant: '#E5E7EB', // 구분선
 
+  // 지도 위의 장소 마커. 웹과 같은 값이다(tokens.colors.css 의 --color-map-marker).
+  //
+  // ⚠️ **이 값은 화면에서 직접 안 쓰인다.** 마커는 PNG 로 구워 두었다
+  //    (assets/images/map-marker*.png) — 라이브러리가 커스텀 뷰 대신 이미지를 권해서다.
+  //    여기 적어 두는 것은 「그 PNG 가 무슨 색인지」를 남기려는 것이다.
+  //    색을 바꾸면 PNG 도 다시 만들어야 한다. 만드는 법은 assets/images/README.md 참고.
+  mapMarker: '#6B5C4B',
+
   // ── 단추·고른 것
   //
   // 셋 다 웹 primary-600 과 같은 값이다. 뜻이 달라 이름만 나눠 두었다 —
