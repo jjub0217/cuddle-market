@@ -22,6 +22,18 @@ export function prependOlder(current: ChatMessage[], older: ChatMessage[]): Chat
   return Array.from(merged.values()).sort((a, b) => a.messageId - b.messageId);
 }
 
+/**
+ * 소켓으로 온 메시지에 `isMine` 을 채운다.
+ *
+ * ⚠️ **서버가 통로마다 다른 DTO 를 보낸다.** REST 의 `ChatMessageListItemResponse` 에는
+ * `isMine` 이 있는데, 소켓의 `ChatMessageResponse` 에는 **없다.** 그대로 그리면 내가 방금
+ * 보낸 메시지가 상대 것처럼 왼쪽에 붙는다. 웹도 `senderId` 로 직접 견줘서 피한다.
+ */
+export function withIsMine(message: ChatMessage, myId?: number): ChatMessage {
+  if (typeof message.isMine === 'boolean') return message;
+  return { ...message, isMine: message.senderId === myId };
+}
+
 /** 소켓으로 새로 온 메시지. 이미 있으면 그대로 둔다. */
 export function appendNew(current: ChatMessage[], incoming: ChatMessage): ChatMessage[] {
   if (current.some((m) => m.messageId === incoming.messageId)) return current;

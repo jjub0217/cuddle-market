@@ -1,15 +1,17 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, FlatList, KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ChatInput } from '@/components/chat/chat-input';
 import { MessageBubble } from '@/components/chat/message-bubble';
 import { ErrorState, LoadingState } from '@/components/list-states';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { colors } from '@/constants/colors';
+import { useMe } from '@/hooks/use-me';
 import { fetchChatMessages, leaveChatRoom, type ChatMessage } from '@/lib/chat/api';
-import { appendNew, groupByDay, prependOlder } from '@/lib/chat/messages';
+import { appendNew, groupByDay, prependOlder, withIsMine } from '@/lib/chat/messages';
 import { chatSocket } from '@/lib/chat/socket';
 // 화면 밖(이벤트 처리 함수 안)에서도 부를 수 있게 훅이 아닌 함수를 쓴다.
 import { showToast } from '@/lib/toast';
@@ -42,7 +44,10 @@ export default function ChatRoomScreen() {
   const [isError, setIsError] = useState(false);
   const [draft, setDraft] = useState('');
   const [connected, setConnected] = useState(false);
+  const [isLeaveOpen, setIsLeaveOpen] = useState(false);
   const listRef = useRef<FlatList<Row>>(null);
+  // 소켓으로 온 메시지에는 isMine 이 없어서 내 id 로 채워야 한다.
+  const myId = useMe().data?.id;
 
   // 소켓을 잡는다. 화면이 사라지면 놓는다 — 목록으로 돌아가는 동안은 목록이 잡고 있어서
   // 실제로 끊기지 않는다(쓰는 곳 세기).
@@ -54,14 +59,27 @@ export default function ChatRoomScreen() {
   // ⚠️ 순서가 중요하다 — 붙기 → 구독 → 조회.
   //    조회를 먼저 하면 조회가 끝나고 구독하기까지의 틈에 온 메시지를 놓친다.
   //    구독을 먼저 걸면 그 틈이 없다. 겹쳐 들어오는 것은 appendNew 가 messageId 로 거른다.
+  //
+  // ⚠️ **통로가 둘이다.** 서버가 이렇게 갈라 보낸다(ChatWebSocketController:83~98).
+  //      /topic/chat/{방번호}   일반 메시지 전부 (양쪽 다 받는다)
+  //      /user/queue/chat      개인정보로 막힌 메시지 — **보낸 사람에게만** 간다
+  //    하나만 들으면 조용히 반쪽이 된다. 20바퀴에 실제로 그랬다 —
+  //    개인 큐만 듣고 있어서 실시간 메시지가 하나도 안 왔다.
   useEffect(() => {
-    return chatSocket.subscribe('/user/queue/chat', (body) => {
-      const incoming = body as ChatMessage & { chatRoomId?: number };
-      // 이 통로로는 내가 든 모든 방의 메시지가 온다. 다른 방 것은 흘려보낸다.
-      if (incoming.chatRoomId !== undefined && incoming.chatRoomId !== chatRoomId) return;
-      setMessages((prev) => appendNew(prev, incoming));
+    const offRoom = chatSocket.subscribe(`/topic/chat/${chatRoomId}`, (body) => {
+      setMessages((prev) => appendNew(prev, withIsMine(body as ChatMessage, myId)));
     });
-  }, [chatRoomId]);
+    const offBlocked = chatSocket.subscribe('/user/queue/chat', (body) => {
+      const incoming = body as ChatMessage & { chatRoomId?: number };
+      // 이 통로로는 내가 든 모든 방의 것이 온다. 다른 방 것은 흘려보낸다.
+      if (incoming.chatRoomId !== undefined && incoming.chatRoomId !== chatRoomId) return;
+      setMessages((prev) => appendNew(prev, withIsMine(incoming, myId)));
+    });
+    return () => {
+      offRoom();
+      offBlocked();
+    };
+  }, [chatRoomId, myId]);
 
   // 서버가 보내는 오류(권한 없음 등)
   useEffect(() => {
@@ -129,22 +147,19 @@ export default function ChatRoomScreen() {
     setDraft('');
   };
 
-  const handleLeave = () => {
-    Alert.alert('채팅방 나가기', '나가면 대화 내용이 사라져요.', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '나가기',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await leaveChatRoom(chatRoomId);
-            router.back();
-          } catch {
-            showToast('채팅방을 나가지 못했어요');
-          }
-        },
-      },
-    ]);
+  // 나간 뒤에는 **뒤로 가지 않고** 채팅 목록으로 바꿔 놓는다.
+  // 뒤로 가면 들어온 곳(알림·상품 상세)으로 돌아가는데, 거기서 같은 알림을 다시 누르면
+  // 이미 없어진 방을 열게 된다.
+  const handleLeave = async () => {
+    try {
+      await leaveChatRoom(chatRoomId);
+      setIsLeaveOpen(false);
+      router.replace('/(tabs)/(chat)');
+    } catch {
+      showToast('채팅방을 나가지 못했어요');
+      // 던지지 않는다 — ConfirmDialog 가 창을 닫지 않고 다시 시도하게 둔다.
+      throw new Error('leave failed');
+    }
   };
 
   // 날짜 구분선과 말풍선을 한 줄짜리 목록으로 편다.
@@ -199,10 +214,20 @@ export default function ChatRoomScreen() {
         title="채팅"
         onPressIcon={() => router.back()}
         right={
-          <Text onPress={handleLeave} style={styles.leave}>
+          <Text onPress={() => setIsLeaveOpen(true)} style={styles.leave}>
             나가기
           </Text>
         }
+      />
+      {/* RN 기본 Alert 대신 앱의 공용 창을 쓴다 — 차단·삭제와 같은 모양이어야 한다. */}
+      <ConfirmDialog
+        visible={isLeaveOpen}
+        heading="채팅방을 나갈까요?"
+        description="나가면 이 채팅방의 대화 내용이 사라져요."
+        confirmLabel="나가기"
+        tone="danger"
+        onClose={() => setIsLeaveOpen(false)}
+        onConfirm={handleLeave}
       />
       {/* 안 붙어 있는 동안에도 지난 메시지는 보인다(REST 로 가져왔다). 보내기만 막는다. */}
       {!connected ? (

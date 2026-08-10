@@ -134,9 +134,21 @@ DELETE /rooms/{id}               방 나가기
 
 ```
 붙기   wss://cmarket-api.duckdns.org/ws-stomp      ⚠️ 웹의 SockJS 주소와 다르다
-구독   /user/queue/chat · /user/queue/chat-room-list · /user/queue/errors
 발행   /app/chat/message   { chatRoomId, content, messageType, imageUrl }
+
+구독   /topic/chat/{방번호}          일반 메시지 전부 (양쪽 다 받는다)
+       /user/queue/chat            개인정보로 막힌 메시지 — **보낸 사람에게만** 간다
+       /user/queue/chat-room-list  방 목록 갱신
+       /user/queue/errors          오류
 ```
+
+⚠️ **메시지 통로가 둘로 갈려 있다**(`ChatWebSocketController:83~98`). 처음에 개인 큐만
+듣게 만들었다가 **실시간 메시지가 하나도 안 왔다** — 오류도 안 나서 「내 것만 안 보인다」로
+보였다. 방 화면은 **둘 다** 들어야 한다.
+
+⚠️ **소켓 DTO 에는 `isMine` 이 없다.** REST 의 `ChatMessageListItemResponse` 에는 있는데
+소켓의 `ChatMessageResponse` 에는 없다. 그대로 그리면 내가 방금 보낸 메시지가 상대 것처럼
+왼쪽에 붙는다. `senderId` 와 내 id 를 견줘 채운다(웹도 그렇게 한다).
 
 ### 응답 필드
 

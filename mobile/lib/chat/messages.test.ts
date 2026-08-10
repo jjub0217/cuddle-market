@@ -1,5 +1,5 @@
 import type { ChatMessage } from './api';
-import { appendNew, groupByDay, prependOlder } from './messages';
+import { appendNew, groupByDay, prependOlder, withIsMine } from './messages';
 
 /** 시험용 메시지 하나. 필요한 것만 바꿔 쓴다. */
 function msg(over: Partial<ChatMessage> = {}): ChatMessage {
@@ -67,5 +67,26 @@ describe('groupByDay', () => {
 
   it('빈 목록은 빈 묶음이다', () => {
     expect(groupByDay([])).toEqual([]);
+  });
+});
+
+describe('withIsMine', () => {
+  // 서버가 통로마다 다른 DTO 를 보낸다. 소켓 쪽에는 isMine 이 아예 없다.
+  it('소켓 메시지에는 senderId 로 채운다', () => {
+    const fromSocket = { ...msg({ senderId: 9 }), isMine: undefined } as unknown as ChatMessage;
+
+    expect(withIsMine(fromSocket, 9).isMine).toBe(true);
+    expect(withIsMine(fromSocket, 5).isMine).toBe(false);
+  });
+
+  it('REST 가 준 isMine 은 그대로 믿는다', () => {
+    const fromRest = msg({ senderId: 9, isMine: true });
+    // 내 id 를 모르는 순간에도 서버가 판단한 값을 뒤집지 않는다.
+    expect(withIsMine(fromRest, undefined).isMine).toBe(true);
+  });
+
+  it('내 id 를 아직 모르면 내 것이 아니라고 본다', () => {
+    const fromSocket = { ...msg({ senderId: 9 }), isMine: undefined } as unknown as ChatMessage;
+    expect(withIsMine(fromSocket, undefined).isMine).toBe(false);
   });
 });
