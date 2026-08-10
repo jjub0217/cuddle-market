@@ -73,6 +73,14 @@ export default function StompLabScreen() {
       webSocketFactory: () => new WebSocket(url),
       connectHeaders: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
       reconnectDelay: 0, // 실험이라 자동 재연결을 끈다
+      // ⚠️ STOMP 프레임은 끝에 눈에 안 보이는 종료 문자(NULL)가 붙는다.
+      //    이게 빠지면 서버는 「아직 덜 왔다」고 여겨 **오류도 로그도 없이 계속 기다린다.**
+      //    맥에서 직접 재서 확인했다(2026-08-10, #871).
+      //      텍스트+NULL  → 서버 로그에 찍힘
+      //      NULL 없음    → 완전 침묵          ← 폰의 증상과 같다
+      //      바이너리+NULL → 서버 로그에 찍힘   ← 그래서 바이너리로 보낸다
+      forceBinaryWSFrames: true,
+      appendMissingNULLonIncoming: true,
       debug: (m) => { if (m.includes('>>>') || m.includes('<<<')) 적기(`  ${m.slice(0, 90)}`); },
       onConnect: (f: IFrame) => {
         set붙었나(true);
