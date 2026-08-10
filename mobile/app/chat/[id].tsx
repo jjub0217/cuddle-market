@@ -73,19 +73,19 @@ export default function ChatRoomScreen() {
   //    개인 큐만 듣고 있어서 실시간 메시지가 하나도 안 왔다.
   useEffect(() => {
     const offRoom = chatSocket.subscribe(`/topic/chat/${chatRoomId}`, (body) => {
-      setMessages((prev) => appendNew(prev, withIsMine(body as ChatMessage, myId)));
+      setMessages((prev) => appendNew(prev, body as ChatMessage));
     });
     const offBlocked = chatSocket.subscribe('/user/queue/chat', (body) => {
       const incoming = body as ChatMessage & { chatRoomId?: number };
       // 이 통로로는 내가 든 모든 방의 것이 온다. 다른 방 것은 흘려보낸다.
       if (incoming.chatRoomId !== undefined && incoming.chatRoomId !== chatRoomId) return;
-      setMessages((prev) => appendNew(prev, withIsMine(incoming, myId)));
+      setMessages((prev) => appendNew(prev, incoming));
     });
     return () => {
       offRoom();
       offBlocked();
     };
-  }, [chatRoomId, myId]);
+  }, [chatRoomId]);
 
   // 서버가 보내는 오류(권한 없음 등)
   useEffect(() => {
@@ -169,10 +169,14 @@ export default function ChatRoomScreen() {
     }
   };
 
-  // 날짜 구분선과 말풍선을 한 줄짜리 목록으로 편다.
+  // ⚠️ 내 것인지를 **그릴 때** 정한다. 들어오는 순간에 굳히면 안 된다.
+  //    소켓 메시지에는 isMine 이 없어서 내 id 로 판별해야 하는데, 그 id 는 프로필 조회가
+  //    끝나야 온다. 알림에서 채팅방으로 바로 들어오면 아직 안 왔을 수 있고, 그때 굳히면
+  //    내가 방금 보낸 글이 상대 것처럼 왼쪽에 붙은 채 그대로 남는다.
+  //    여기서 정하면 id 가 뒤늦게 와도 useMemo 가 다시 돌아 제자리를 찾는다.
   const rows: Row[] = useMemo(
     () =>
-      groupByDay(messages).flatMap((group) => [
+      groupByDay(messages.map((message) => withIsMine(message, myId))).flatMap((group) => [
         { kind: 'day' as const, key: `day-${group.key}`, label: group.label },
         ...group.messages.map((message) => ({
           kind: 'message' as const,
@@ -180,7 +184,7 @@ export default function ChatRoomScreen() {
           message,
         })),
       ]),
-    [messages]
+    [messages, myId]
   );
 
   const renderBody = () => {
