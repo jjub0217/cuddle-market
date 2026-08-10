@@ -17,9 +17,13 @@ import type { ChatMessage } from './api';
  */
 export function prependOlder(current: ChatMessage[], older: ChatMessage[]): ChatMessage[] {
   // 같은 메시지가 양쪽으로 들어오면(붙기 → 구독 → 조회) 뒤에 온 것으로 덮는다.
+  // id 가 없는 것(나가기 안내)은 거를 수도 정렬할 수도 없다 — 있던 자리에 그대로 둔다.
+  const withoutId = current.filter((message) => message.messageId == null);
   const merged = new Map<number, ChatMessage>();
-  [...older, ...current].forEach((message) => merged.set(message.messageId, message));
-  return Array.from(merged.values()).sort((a, b) => a.messageId - b.messageId);
+  [...older, ...current]
+    .filter((message) => message.messageId != null)
+    .forEach((message) => merged.set(message.messageId, message));
+  return [...Array.from(merged.values()).sort((a, b) => a.messageId - b.messageId), ...withoutId];
 }
 
 /**
@@ -34,10 +38,29 @@ export function withIsMine(message: ChatMessage, myId?: number): ChatMessage {
   return { ...message, isMine: message.senderId === myId };
 }
 
-/** 소켓으로 새로 온 메시지. 이미 있으면 그대로 둔다. */
+/**
+ * 소켓으로 새로 온 메시지. 이미 있으면 그대로 둔다.
+ *
+ * ⚠️ **`messageId` 가 없는 메시지가 온다.** 나가기 안내(SYSTEM)가 그렇다 —
+ * 서버가 그 프레임만 손으로 만들어 보내면서 id 를 안 채운다
+ * (`ChatWebSocketController.sendSystemMessage`). id 로 거르면 「id 가 없는 것」끼리
+ * 서로 같다고 판단해 **두 번째부터 조용히 버려진다.** 그래서 id 가 없으면 안 거른다.
+ */
 export function appendNew(current: ChatMessage[], incoming: ChatMessage): ChatMessage[] {
+  if (incoming.messageId == null) return [...current, incoming];
   if (current.some((m) => m.messageId === incoming.messageId)) return current;
   return [...current, incoming];
+}
+
+/**
+ * 목록에 쓸 열쇠.
+ *
+ * `messageId` 가 없는 메시지(나가기 안내 등)는 시각과 차례로 만든다.
+ * 그냥 `m-undefined` 로 두면 그런 메시지가 둘일 때 열쇠가 겹친다.
+ */
+export function messageKey(message: ChatMessage, index: number): string {
+  if (message.messageId == null) return `sys-${message.createdAt}-${index}`;
+  return `m-${message.messageId}`;
 }
 
 export interface DayGroup {

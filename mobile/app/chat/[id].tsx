@@ -16,7 +16,7 @@ import {
   leaveChatRoom,
   type ChatMessage,
 } from '@/lib/chat/api';
-import { appendNew, groupByDay, prependOlder, withIsMine } from '@/lib/chat/messages';
+import { appendNew, groupByDay, messageKey, prependOlder, withIsMine } from '@/lib/chat/messages';
 import { chatSocket } from '@/lib/chat/socket';
 // 화면 밖(이벤트 처리 함수 안)에서도 부를 수 있게 훅이 아닌 함수를 쓴다.
 import { showToast } from '@/lib/toast';
@@ -190,9 +190,9 @@ export default function ChatRoomScreen() {
     () =>
       groupByDay(messages.map((message) => withIsMine(message, myId))).flatMap((group) => [
         { kind: 'day' as const, key: `day-${group.key}`, label: group.label },
-        ...group.messages.map((message) => ({
+        ...group.messages.map((message, index) => ({
           kind: 'message' as const,
-          key: `m-${message.messageId}`,
+          key: messageKey(message, index),
           message,
         })),
       ]),

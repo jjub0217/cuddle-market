@@ -1,5 +1,5 @@
 import type { ChatMessage } from './api';
-import { appendNew, groupByDay, prependOlder, withIsMine } from './messages';
+import { appendNew, groupByDay, messageKey, prependOlder, withIsMine } from './messages';
 
 /** 시험용 메시지 하나. 필요한 것만 바꿔 쓴다. */
 function msg(over: Partial<ChatMessage> = {}): ChatMessage {
@@ -88,5 +88,39 @@ describe('withIsMine', () => {
   it('내 id 를 아직 모르면 내 것이 아니라고 본다', () => {
     const fromSocket = { ...msg({ senderId: 9 }), isMine: undefined } as unknown as ChatMessage;
     expect(withIsMine(fromSocket, undefined).isMine).toBe(false);
+  });
+});
+
+describe('id 가 없는 메시지 (나가기 안내)', () => {
+  // 서버가 나가기 안내(SYSTEM)만 손으로 만들어 보내면서 messageId 를 안 채운다.
+  // 앱이 id 로 겹침을 거르기 때문에, 안 다루면 두 번째부터 조용히 사라진다.
+  const sys = (over: Partial<ChatMessage> = {}) =>
+    ({
+      ...msg({ messageType: 'SYSTEM', content: '홍길동님이 채팅방을 나가셨습니다.' }),
+      messageId: undefined,
+      ...over,
+    }) as unknown as ChatMessage;
+
+  it('id 가 없으면 거르지 않고 그대로 붙인다', () => {
+    const after = appendNew(appendNew([], sys()), sys({ content: '김철수님이 채팅방을 나가셨습니다.' }));
+    expect(after).toHaveLength(2);
+  });
+
+  it('열쇠가 겹치지 않는다', () => {
+    const a = sys();
+    const b = sys();
+    expect(messageKey(a, 0)).not.toBe(messageKey(b, 1));
+  });
+
+  it('id 가 있으면 예전처럼 id 로 만든다', () => {
+    expect(messageKey(msg({ messageId: 7 }), 0)).toBe('m-7');
+  });
+
+  it('과거를 앞에 붙여도 안내가 안 사라진다', () => {
+    const current = [sys(), msg({ messageId: 10 })];
+    const after = prependOlder(current, [msg({ messageId: 8 })]);
+
+    expect(after).toHaveLength(3);
+    expect(after.filter((m) => m.messageType === 'SYSTEM')).toHaveLength(1);
   });
 });
