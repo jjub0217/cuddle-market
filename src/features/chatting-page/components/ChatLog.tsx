@@ -228,9 +228,15 @@ export function ChatLog({
                   {message.messageType === 'IMAGE' ? (
                     <ChatImageMessage imageUrl={message.imageUrl ?? undefined} alt={message.senderNickname} />
                   ) : (
+                    /* 한 줄에 한글 40자에서 꺾는다. 그보다 길면 줄 끝에서 다음 줄 앞으로 눈이 못 돌아온다.
+                       ⚠️ ch 는 「0」 글자 폭이라 한글 폭과 다르다 — 2026-08-10에 재서 정한 값이다.
+                       text-sm(14px) · 실제 글꼴 체인 기준: 1ch = 8.34px, 한글 1자 = 12.10px (한글이 1.45배).
+                       그래서 62ch = 517px = 한글 40자. 상한이 없던 지금은 한 줄에 69자까지 갔다.
+                       ⚠️ 62ch 에는 px-3(좌우 24px)이 포함된다 — 박스가 border-box 라서 그렇다.
+                       앱은 maxWidth: '72%' 를 쓴다(폭이 좁아 비율로 충분하다). */
                     <span
                       className={cn(
-                        'rounded-b-2xl px-3 py-2 text-sm whitespace-pre-wrap',
+                        'max-w-[62ch] rounded-b-2xl px-3 py-2 text-sm whitespace-pre-wrap',
                         isMine ? 'rounded-tl-2xl bg-[#633f00] text-white' : 'bg-surface-container-low rounded-tr-2xl'
                       )}
                     >
