@@ -2,6 +2,8 @@
 
 import { useState, useLayoutEffect, useRef } from 'react'
 import Image from 'next/image'
+// 시각·날짜 포맷터의 원본은 @cuddle/shared에 있다(앱도 같은 것을 쓴다).
+import { chatDateKey, formatChatDate, formatChatTime } from '@cuddle/shared'
 import type { Message } from '@/types'
 import { cn } from '@/lib/utils/cn'
 import { useUserStore } from '@/store/userStore'
@@ -66,29 +68,10 @@ const getIsMine = (message: Message, userId?: number): boolean => {
   return message.senderId === userId
 }
 
-const chatFormatTime = (dateString: string): string => {
-  const date = new Date(dateString.endsWith('Z') ? dateString : `${dateString}Z`)
-  const hours = date.getHours()
-  const minutes = String(date.getMinutes()).padStart(2, '0')
-  const period = hours < 12 ? '오전' : '오후'
-  const hour12 = hours % 12 || 12
-  return `${period} ${hour12}:${minutes}`
-}
-
-const chatFormatDate = (dateString: string): string => {
-  const date = new Date(dateString.endsWith('Z') ? dateString : `${dateString}Z`)
-  const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일']
-  const year = date.getFullYear()
-  const month = date.getMonth() + 1
-  const day = date.getDate()
-  const dayOfWeek = days[date.getDay()]
-  return `${year}년 ${month}월 ${day}일 ${dayOfWeek}`
-}
-
 const groupMessagesByDate = (messages: Message[]) => {
   const groups: Record<string, Message[]> = {}
   messages.forEach((message) => {
-    const dateKey = new Date(message.createdAt.endsWith('Z') ? message.createdAt : `${message.createdAt}Z`).toDateString()
+    const dateKey = chatDateKey(message.createdAt)
     if (!groups[dateKey]) {
       groups[dateKey] = []
     }
@@ -213,7 +196,7 @@ export function ChatLog({
         <div key={dateKey} className="flex flex-col gap-3">
           <div className="mt-3.5 flex justify-center">
             <span className="rounded-full bg-[#eae7e7] px-3 py-1 text-xs font-semibold text-[#756652]">
-              {chatFormatDate(messages[0].createdAt)}
+              {formatChatDate(messages[0].createdAt)}
             </span>
           </div>
           <ul className="flex flex-col">
@@ -254,7 +237,7 @@ export function ChatLog({
                       {message.content}
                     </span>
                   )}
-                  <span className={cn('shrink-0 text-xs text-gray-500')}>{chatFormatTime(message.createdAt)}</span>
+                  <span className={cn('shrink-0 text-xs text-gray-500')}>{formatChatTime(message.createdAt)}</span>
                 </li>
               )
             })}
