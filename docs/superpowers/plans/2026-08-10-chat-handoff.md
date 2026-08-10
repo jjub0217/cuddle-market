@@ -5,25 +5,46 @@
 
 ## 🔴 다음 세션이 바로 할 일
 
-**사용자에게 EC2 서버 로그를 부탁한다.** 그것 없이는 다음으로 못 간다.
+**실험은 2026-08-10 에 끝났다. 다음은 설계 합의다.** 정할 것은 「아직 정해야 할 것」에 있다.
 
-```bash
-docker ps
-docker logs --tail 100 <이름> | grep -iE "websocket|stomp|토큰"
+## ✅ 실험 결과 — 앱에서 STOMP 가 돈다
+
+| 확인하려던 것 | 답 |
+|---|---|
+| RN 위에서 `@stomp/stompjs` 가 도는가 | ✅ 된다 (**바이너리 프레임 옵션이 있어야 한다**) |
+| 서버 인증이 통과하는가 | ✅ `WebSocket 연결 성공` |
+| 구독이 되는가 | ✅ `/user/queue/errors` · `chat-room-list` · `chat` 셋 다 |
+| 백그라운드에서 연결이 유지되는가 | ✅ **1분은** 유지 · 하트비트(PING/PONG) 정상 |
+
+⚠️ 백그라운드는 **66초만 재 봤다.** 더 오래 두면 OS 가 소켓을 끊을 수 있다.
+설계에서는 **복귀 시 재연결을 넣는 쪽이 안전하다.** 구현할 때 더 길게 재 본다.
+
+### 막혔던 원인 — NULL 문자
+
+**RN 의 WebSocket 이 STOMP 프레임 끝의 NULL 문자를 흘렸다.**
+서버(Spring)는 「메시지가 아직 안 끝났다」고 보고 버퍼에 담아 둔 채 기다린다 —
+**오류도, 서버 로그도, 연결 끊김도 없다.** 그래서 밖에서는 완전한 침묵으로만 보였다.
+
+```ts
+// mobile/app/stomp-lab.tsx
+forceBinaryWSFrames: true,         // 이 한 줄이 답이었다
+appendMissingNULLonIncoming: true, // 받는 쪽 보호
 ```
 
-로그에 무엇이 나오느냐로 길이 갈린다.
+**토큰은 처음부터 멀쩡했다.** 앞 세션의 「토큰 만료」 의심은 원인이 아니었다.
 
-| 로그 | 뜻 | 그다음 |
-|---|---|---|
-| `WebSocket 연결 실패: 유효하지 않은 토큰` | 토큰이 만료됐다 | 앱에서 로그아웃 → 다시 로그인 → 실험 재시도. 그래도 같으면 토큰 형식을 본다 |
-| `WebSocket 연결 실패: Authorization 헤더 없음` | 헤더가 서버까지 안 갔다 | `connectHeaders` 가 CONNECT 프레임에 실리는지 확인. 실험 화면 로그에는 실려 있었다 |
-| 아무 로그도 없음 | 인터셉터를 안 탄다 | 더 큰 문제다. 순수 엔드포인트에 `configureClientInboundChannel` 이 걸리는지부터 본다 |
+### 어떻게 갈랐나 — 폰만 봐서는 못 가른다
 
-**로그를 받기 전에 코드를 고치지 말 것.** 앞 세션이 원인을 세 번 잘못 짚었고,
-전부 「코드만 봐서는 맞아 보이는」 것들이었다(아래 「이 사람과 일하는 법」 ①).
+맥에서 같은 서버에 **직접** 세 가지를 보내고, EC2 로그에 무엇이 찍히는지 봤다.
 
-확인이 끝나 CONNECTED 가 오면 → 구독·발행·백그라운드까지 보고 → 설계 합의 → 계획서 → 구현.
+```
+텍스트 + NULL    → 서버 로그에 찍힘 ✅
+NULL 없음        → 완전 침묵      ❌   ← 폰의 증상과 똑같다
+바이너리 + NULL  → 서버 로그에 찍힘 ✅   ← 그래서 이걸 쓴다
+```
+
+같은 방법이 필요하면 `node` 로 `ws` 를 직접 열어 프레임을 손으로 만들면 된다
+(`CONNECT\naccept-version:1.2\n\n\0`). 앞뒤 계층을 다 걷어내야 어디서 사라지는지 보인다.
 
 ## 지금 어디까지 왔나
 
@@ -34,41 +55,29 @@ docker logs --tail 100 <이름> | grep -iE "websocket|stomp|토큰"
 백엔드   ~/Desktop/cmarket_api  main  04a95bb  순수 WebSocket 엔드포인트  ← 배포 완료
 ```
 
-**지금은 「실험 중」이다. 아직 채팅을 만들기 시작하지 않았다.**
-「앱에서 STOMP 가 도는가」를 확인하는 단계이고, 그 답에 따라 설계가 갈린다.
+**연결 실험은 끝났다. 아직 채팅을 만들기 시작하지는 않았다.**
+다음은 설계 합의다.
 
-## ⚠️ 막힌 곳 — 여기부터 읽는다
+## 서버 로그 보는 법 — 도커가 아니다
 
-실기기(2026-08-10 17:03)에서 실험한 결과다.
+앞 세션이 `docker logs` 라고 적어 놨는데 **틀렸다.** EC2 에는 `java -jar` 로 떠 있고
+`docker` 명령 자체가 없다. 자세한 건 저장소 루트 `CLAUDE.md` 「백엔드 저장소」에 옮겨 적었다.
 
-```
-✅ ① 붙어볼 곳: wss://cmarket-api.duckdns.org/ws-stomp
-✅ ② 토큰: 있음 (상태: authed)
-✅    >>> CONNECT   Authorization:Bearer …
-❌    <<< CONNECTED 가 안 온다
+```bash
+tail -f -n 0 /home/ec2-user/cmarket_api/app.log
 ```
 
-**절반은 성공했다.** `>>> CONNECT` 가 찍혔다는 건 **RN 의 WebSocket 위에서
-`@stomp/stompjs` 가 돈다**는 뜻이다. 이 실험의 핵심 질문에 대한 답은 「예」다.
-`onWebSocketError`·`onWebSocketClose` 도 안 찍혔으니 **연결은 유지되고 있다.**
+⚠️ 로그 시각은 **UTC** 다. 실험 화면의 시각도 UTC라 그대로 견줄 수 있다.
 
-**막힌 것은 서버가 CONNECT 에 응답하지 않는 것이다.**
+인터셉터가 돌기만 하면 아래 셋 중 하나는 **반드시** 찍힌다
+(`StompChannelInterceptor.java` 134·140·156행). 그래서 **아무것도 안 찍히는 것 자체가 단서**다 —
+프레임이 서버의 파서까지 도달하지 못했다는 뜻이다.
 
-### 왜 조용한가
-
-서버 인터셉터가 이렇게 동작한다(`StompChannelInterceptor.handleConnect`).
-
-```java
-if (token == null || token.isBlank())        → return false   // 조용히 버림
-if (!jwtTokenProvider.validateToken(token))  → return false   // 조용히 버림
 ```
-
-`return false` 는 **메시지를 버리고 연결은 유지한다.** 지금 증상과 정확히 일치한다.
-오류는 `/user/queue/errors` 로 보내는데 아직 구독 전이라 받을 수 없다.
-
-### 다음에 할 첫 번째 일
-
-맨 위 **「🔴 다음 세션이 바로 할 일」** 을 본다 — EC2 로그로 원인을 가르는 것이다.
+WebSocket 연결 성공: email=…
+WebSocket 연결 실패: 유효하지 않은 토큰
+WebSocket 연결 실패: Authorization 헤더 없음
+```
 
 ## 실험 화면 쓰는 법
 
@@ -139,16 +148,18 @@ ChatRoomResponse              sellerNickname 만 (opponentId 조차 없다)
 알림도 「화면에 들어올 때마다 다시 조회」다(`app-header.tsx` 주석: 「SSE는 안 쓴다 — 설계 §3」).
 채팅이 **연결 계층을 처음 놓는 바퀴**다.
 
-## 실험이 끝나면
+## 실험 코드를 지울 때
+
+구현에 들어가면 통째로 지운다. **아직 지우지 않았다.**
 
 ```
-1. EC2 로그로 원인을 가른다
-2. CONNECTED 가 오면 → 구독·발행까지 확인 → 설계 합의 → 계획서 → 구현
-3. 실험 코드를 통째로 지운다
-     mobile/app/stomp-lab.tsx
-     mobile/app/(tabs)/(my)/index.tsx 의 「실험 (지울 것)」 묶음
-   @stomp/stompjs 는 남긴다 (실제 구현에서 쓴다)
+mobile/app/stomp-lab.tsx
+mobile/app/(tabs)/(my)/index.tsx 의 「실험 (지울 것)」 묶음
 ```
+
+`@stomp/stompjs` 는 남긴다 (실제 구현에서 쓴다).
+⚠️ **`forceBinaryWSFrames: true` 는 실제 구현으로 옮겨야 한다.** 이걸 빠뜨리면
+증상이 「완전한 침묵」이라 원인을 다시 하루 찾게 된다.
 
 ## 아직 정해야 할 것
 
