@@ -120,10 +120,10 @@ describe('resolveTarget', () => {
     ).toEqual({ kind: 'app', path: '/(tabs)/(my)' });
   });
 
-  it('채팅방은 앱에 화면이 없으니 웹으로', () => {
-    expect(resolveTarget(item({ relatedEntityType: 'CHAT_ROOM', relatedEntityId: 9 }))).toEqual({
-      kind: 'web',
-      path: '/chat/9',
+  it('채팅 알림은 앱 채팅방으로 간다', () => {
+    expect(resolveTarget(item({ relatedEntityType: 'CHAT_ROOM', relatedEntityId: 7 }))).toEqual({
+      kind: 'app',
+      path: '/chat/7',
     });
   });
 
