@@ -9,6 +9,7 @@ import { colors } from '@/constants/colors';
 import { showToast } from '@/lib/toast';
 import { ProductActionSheet, type SheetAction } from '@/components/my/product-action-sheet';
 import { Breadcrumb } from '@/components/product-detail/breadcrumb';
+import { ChatButton } from '@/components/product-detail/chat-button';
 import { DetailHeader } from '@/components/product-detail/detail-header';
 import {
   DetailErrorState,
@@ -199,8 +200,15 @@ export default function ProductDetailScreen() {
         {/* 밑그림 상태에서는 아직 isFavorite을 모른다. 버튼을 그리면 하트가
             빈 채로 보였다가 갑자기 채워져 깜빡인다. 실제 응답이 온 뒤에만 그린다. */}
         {isPlaceholderData ? null : (
-          <View style={styles.section}>
-            <FavoriteButton productId={data.id} isFavorite={data.isFavorite} />
+          <View style={[styles.section, styles.actions]}>
+            {!isMine ? (
+              <View style={styles.action}>
+                <ChatButton productId={data.id} />
+              </View>
+            ) : null}
+            <View style={styles.action}>
+              <FavoriteButton productId={data.id} isFavorite={data.isFavorite} />
+            </View>
           </View>
         )}
 
@@ -298,6 +306,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
   },
+  // 내 상품일 때는 찜 하나가 폭을 다 쓴다 — 지금과 같은 모양이다.
+  actions: { flexDirection: 'row', gap: 8 },
+  action: { flex: 1 },
   divider: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: colors.outlineVariant,
