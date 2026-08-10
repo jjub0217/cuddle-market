@@ -40,13 +40,20 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
 
 const styles = StyleSheet.create({
   row: {
+    // 줄은 화면 폭을 다 쓴다. 그래야 안에서 왼쪽·오른쪽으로 몰 수 있다.
+    width: '100%',
     flexDirection: 'row',
     alignItems: 'flex-end',
     gap: 4,
     paddingHorizontal: 12,
     paddingVertical: 3,
   },
-  rowMine: { flexDirection: 'row-reverse', justifyContent: 'flex-end' },
+  // ⚠️ **`row-reverse` 는 가로축의 방향을 뒤집는다.** 「시작」이 오른쪽, 「끝」이 왼쪽이다.
+  //    그래서 오른쪽에 붙이려면 `flex-end` 가 아니라 **`flex-start`** 다.
+  //    거꾸로 적으면 말풍선 안쪽 차례([시각][말풍선])는 맞는데 줄만 왼쪽에 몰려서,
+  //    「내 것으로 판별을 못 하나」로 잘못 보인다. 20바퀴에 실제로 그랬다.
+  //    (웹은 ml-auto 라 방향과 무관하게 오른쪽에 붙는다 — 그래서 웹은 멀쩡했다.)
+  rowMine: { flexDirection: 'row-reverse', justifyContent: 'flex-start' },
   rowTheirs: { justifyContent: 'flex-start' },
   bubble: {
     maxWidth: '72%',
