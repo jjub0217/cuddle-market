@@ -219,6 +219,9 @@ export const typeDefs = gql`
     isRead: Boolean!
     readAt: String
     createdAt: String!
+    # 이 알림이 묶고 있는 건수. 채팅만 값이 있고 나머지는 null 이라 Int! 가 아니다.
+    # 서버가 나중에 더한 필드라 배포가 늦으면 아예 안 올 수도 있다 — 그때도 null 로 받는다.
+    groupCount: Int
   }
 
   type NotificationConnection {

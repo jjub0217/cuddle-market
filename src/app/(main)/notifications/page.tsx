@@ -32,7 +32,7 @@ export default function NotificationsPage() {
       const data = await fetchGraphQL<{ notifications: any }>(`
         query Notifications($page: Int!, $size: Int!) {
           notifications(page: $page, size: $size) {
-            content { notificationId notificationType title content relatedEntityType relatedEntityId isRead readAt createdAt }
+            content { notificationId notificationType title content relatedEntityType relatedEntityId isRead readAt createdAt groupCount }
             page hasNext
           }
         }
