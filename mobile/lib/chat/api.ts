@@ -1,0 +1,101 @@
+import { apiFetch } from '../auth/api';
+
+// 서버 응답 DTO 를 직접 열어 옮긴 것이다.
+//   ChatRoomListItemResponse · ChatMessageListItemResponse · ChatRoomResponse
+// 추측으로 필드를 지어내지 않는다 — 9바퀴에 그래서 차단 목록이 늘 비어 있었다.
+
+export type MessageType = 'TEXT' | 'IMAGE' | 'SYSTEM';
+
+export interface ChatRoomListItem {
+  chatRoomId: number;
+  productId: number;
+  productTitle: string;
+  productPrice: number;
+  productImageUrl: string;
+  opponentId: number;
+  opponentNickname: string;
+  opponentProfileImageUrl: string | null;
+  lastMessage: string;
+  lastMessageTime: string;
+  hasUnread: boolean;
+  unreadCount: number;
+}
+
+export interface ChatMessage {
+  messageId: number;
+  senderId: number;
+  senderNickname: string;
+  messageType: MessageType;
+  content: string;
+  imageUrl: string | null;
+  /** 개인정보가 들어 있어 서버가 막은 메시지. **보낸 사람에게만 온다.** */
+  isBlocked: boolean;
+  blockReason: string | null;
+  createdAt: string;
+  isMine: boolean;
+}
+
+/** 방 목록 한 페이지. 웹과 같이 열 개씩 가져온다. */
+export async function fetchChatRooms(
+  page: number
+): Promise<{ rooms: ChatRoomListItem[]; hasNext: boolean }> {
+  const res = await apiFetch(`/chat/rooms?page=${page}&size=10`);
+  if (!res.ok) throw new Error(`채팅 목록을 불러오지 못했어요 (HTTP ${res.status})`);
+
+  const body = (await res.json()) as {
+    data?: { chatRooms?: ChatRoomListItem[]; hasNext?: boolean };
+  };
+  return {
+    rooms: body.data?.chatRooms ?? [],
+    hasNext: body.data?.hasNext ?? false,
+  };
+}
+
+/**
+ * 메시지 한 페이지. 웹과 같이 쉰 개씩 가져온다.
+ *
+ * ⚠️ 서버는 **최신부터** 가져와 그 페이지 안에서만 뒤집는다. 그래서
+ * page 0 이 가장 최근 50개고, page 1 은 그보다 **앞선** 50개다.
+ * 화면에 붙일 때 뒤가 아니라 **앞에** 붙여야 한다 — `prependOlder` 를 쓴다.
+ *
+ * ⚠️ 이 요청이 읽음 처리도 겸한다(서버가 마지막 읽은 시각을 갱신한다).
+ */
+export async function fetchChatMessages(
+  chatRoomId: number,
+  page: number
+): Promise<{ messages: ChatMessage[]; hasNext: boolean }> {
+  const res = await apiFetch(`/chat/rooms/${chatRoomId}/messages?page=${page}&size=50`);
+  if (!res.ok) throw new Error(`메시지를 불러오지 못했어요 (HTTP ${res.status})`);
+
+  const body = (await res.json()) as {
+    data?: { messages?: ChatMessage[]; hasNext?: boolean };
+  };
+  return {
+    messages: body.data?.messages ?? [],
+    hasNext: body.data?.hasNext ?? false,
+  };
+}
+
+/**
+ * 상품으로 방을 만든다. 이미 있으면 서버가 그 방을 돌려준다.
+ *
+ * ⚠️ 응답(ChatRoomResponse)에는 `opponentId` 가 없다. 상대 정보가 필요하면
+ * 방 목록에서 다시 찾아야 한다.
+ */
+export async function createChatRoom(productId: number): Promise<number> {
+  const res = await apiFetch('/chat/rooms', {
+    method: 'POST',
+    body: JSON.stringify({ productId }),
+  });
+  if (!res.ok) throw new Error(`채팅방을 만들지 못했어요 (HTTP ${res.status})`);
+
+  const body = (await res.json()) as { data?: { chatRoomId?: number } };
+  const chatRoomId = body.data?.chatRoomId;
+  if (typeof chatRoomId !== 'number') throw new Error('채팅방 번호가 오지 않았어요');
+  return chatRoomId;
+}
+
+export async function leaveChatRoom(chatRoomId: number): Promise<void> {
+  const res = await apiFetch(`/chat/rooms/${chatRoomId}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error(`채팅방을 나가지 못했어요 (HTTP ${res.status})`);
+}
