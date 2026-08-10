@@ -3,7 +3,7 @@ import React from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HapticTab } from '@/components/haptic-tab';
-import { Home, MapPin, UsersRound, UserRound } from 'lucide-react-native';
+import { Home, MapPin, MessageCircleMore, UsersRound, UserRound } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
 import { useAuthStore } from '@/lib/auth/store';
 
@@ -67,9 +67,9 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <Home size={TAB_ICON_SIZE} color={color} strokeWidth={TAB_ICON_STROKE} />,
         }}
       />
-      {/* 웹 BottomNav과 같은 순서·아이콘이다 — 홈 → 커뮤니티 → 플레이스 → (채팅) → 마이.
-          채팅이 15바퀴에 플레이스와 마이 사이로 들어오면 웹과 똑같은 다섯이 된다.
-          게스트를 막지 않는다 — 서버가 비회원 조회를 허용한다. */}
+      {/* 웹 BottomNav과 같은 순서·아이콘이다 — 홈 → 커뮤니티 → 플레이스 → 채팅 → 마이.
+          20바퀴에 채팅이 플레이스와 마이 사이로 들어와 웹과 똑같은 다섯이 됐다.
+          커뮤니티는 게스트를 막지 않는다 — 서버가 비회원 조회를 허용한다. */}
       <Tabs.Screen
         name="(community)"
         options={{
@@ -88,6 +88,26 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <MapPin size={TAB_ICON_SIZE} color={color} strokeWidth={TAB_ICON_STROKE} />
           ),
+        }}
+      />
+      {/* 웹 BottomNav 과 같은 자리·같은 아이콘이다 — 플레이스와 마이 사이. */}
+      <Tabs.Screen
+        name="(chat)"
+        options={{
+          title: '채팅',
+          tabBarIcon: ({ color }) => (
+            <MessageCircleMore size={TAB_ICON_SIZE} color={color} strokeWidth={TAB_ICON_STROKE} />
+          ),
+        }}
+        // 게스트는 탭 전환 자체를 막고 로그인 화면만 띄운다 — 마이 탭과 같은 방식이다.
+        // 화면 안에서 밀어내면 로그인 취소 → 채팅 화면 → 또 밀어냄으로 갇힌다.
+        listeners={{
+          tabPress: (event) => {
+            if (useAuthStore.getState().status === 'guest') {
+              event.preventDefault();
+              router.push('/login');
+            }
+          },
         }}
       />
       <Tabs.Screen
