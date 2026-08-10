@@ -246,6 +246,9 @@ importers:
       '@react-navigation/native':
         specifier: ^7.1.8
         version: 7.3.13(react-native@0.81.5(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/metro-config@0.85.3(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.1.17)(react@19.1.0)(supports-color@8.1.1))(react@19.1.0)
+      '@stomp/stompjs':
+        specifier: 7.3.0
+        version: 7.3.0
       '@tanstack/react-query':
         specifier: ^5.101.3
         version: 5.101.3(react@19.1.0)

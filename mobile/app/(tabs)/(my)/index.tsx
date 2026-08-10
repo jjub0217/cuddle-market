@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ChevronRight, Handbag, Headphones, Heart, LogOut, Tag, UserMinus, UserX } from 'lucide-react-native';
+import { ChevronRight, FlaskConical, Handbag, Headphones, Heart, LogOut, Tag, UserMinus, UserX } from 'lucide-react-native';
 
 import { LogoutModal } from '@/components/my/logout-modal';
 import { SectionCard, SectionRow } from '@/components/my/section-card';
@@ -137,6 +137,11 @@ export default function MyScreen() {
               아이콘이 없다. 지어내지 않고 비워 둔다. */}
           <SectionRow label="개인정보처리방침" onPress={() => Linking.openURL(PRIVACY_URL)} />
           <SectionRow label="계정 삭제 안내" onPress={() => Linking.openURL(ACCOUNT_DELETION_URL)} />
+        </SectionCard>
+
+        {/* ⚠️ 실험용이다. STOMP 가 앱에서 도는지 확인하면 이 묶음을 통째로 지운다(#871). */}
+        <SectionCard title="실험 (지울 것)">
+          <SectionRow icon={FlaskConical} label="STOMP 연결 실험" onPress={() => router.push('/stomp-lab')} />
         </SectionCard>
 
         <SectionCard title="계정">
