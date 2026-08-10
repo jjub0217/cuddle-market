@@ -6,7 +6,13 @@ jest.mock('expo-secure-store', () => ({
 }));
 
 import { useAuthStore } from '../auth/store';
-import { createChatRoom, fetchChatMessages, fetchChatRooms, leaveChatRoom } from './api';
+import {
+  ChatRoomAccessDeniedError,
+  createChatRoom,
+  fetchChatMessages,
+  fetchChatRooms,
+  leaveChatRoom,
+} from './api';
 
 const mockFetch = jest.fn();
 
@@ -107,5 +113,21 @@ describe('leaveChatRoom', () => {
     mockFetch.mockResolvedValueOnce(reply(200, {}));
     await leaveChatRoom(7);
     expect(mockFetch.mock.calls[0][1].method).toBe('DELETE');
+  });
+});
+
+describe('나간 채팅방', () => {
+  // 알림 목록에는 나간 방의 알림이 그대로 남는다. 그걸 누르면 여기로 온다.
+  // 되돌릴 수 없는 상태라 화면이 「다시 시도」 대신 다른 안내를 띄워야 해서 따로 가른다.
+  it('403 이면 ChatRoomAccessDeniedError 를 던진다', async () => {
+    mockFetch.mockResolvedValueOnce(reply(403, { message: '채팅방에 대한 접근 권한이 없습니다.' }));
+    await expect(fetchChatMessages(7, 0)).rejects.toBeInstanceOf(ChatRoomAccessDeniedError);
+  });
+
+  it('다른 오류는 보통 오류다', async () => {
+    mockFetch.mockResolvedValueOnce(reply(500));
+    const error = await fetchChatMessages(7, 0).catch((e) => e);
+    expect(error).toBeInstanceOf(Error);
+    expect(error).not.toBeInstanceOf(ChatRoomAccessDeniedError);
   });
 });

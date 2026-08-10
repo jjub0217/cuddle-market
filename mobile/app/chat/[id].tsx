@@ -10,7 +10,12 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { colors } from '@/constants/colors';
 import { useMe } from '@/hooks/use-me';
-import { fetchChatMessages, leaveChatRoom, type ChatMessage } from '@/lib/chat/api';
+import {
+  ChatRoomAccessDeniedError,
+  fetchChatMessages,
+  leaveChatRoom,
+  type ChatMessage,
+} from '@/lib/chat/api';
 import { appendNew, groupByDay, prependOlder, withIsMine } from '@/lib/chat/messages';
 import { chatSocket } from '@/lib/chat/socket';
 // 화면 밖(이벤트 처리 함수 안)에서도 부를 수 있게 훅이 아닌 함수를 쓴다.
@@ -41,7 +46,8 @@ export default function ChatRoomScreen() {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
+  /** null 이면 탈 없음. 'gone' 은 이미 나간 방이라 다시 시도해도 소용없다. */
+  const [failure, setFailure] = useState<'gone' | 'other' | null>(null);
   const [draft, setDraft] = useState('');
   const [connected, setConnected] = useState(false);
   const [isLeaveOpen, setIsLeaveOpen] = useState(false);
@@ -104,9 +110,10 @@ export default function ChatRoomScreen() {
         setHasMore(result.hasNext);
         setIsLoading(false);
       })
-      .catch(() => {
+      .catch((error) => {
         if (!alive) return;
-        setIsError(true);
+        // 알림 목록에는 나간 방의 알림이 그대로 남는다. 그걸 눌러 여기로 오면 403 이다.
+        setFailure(error instanceof ChatRoomAccessDeniedError ? 'gone' : 'other');
         setIsLoading(false);
       });
     return () => {
@@ -178,7 +185,19 @@ export default function ChatRoomScreen() {
 
   const renderBody = () => {
     if (isLoading) return <LoadingState />;
-    if (isError) {
+    // 나간 방은 되돌릴 수 없다. 「다시 시도」를 주면 영원히 같은 403 을 누르게 된다 —
+    // 그래서 여기만 목록으로 돌아가는 길을 준다.
+    if (failure === 'gone') {
+      return (
+        <ErrorState
+          onRetry={() => router.replace('/(tabs)/(chat)')}
+          title="이미 나간 채팅방이에요."
+          description="나간 채팅방은 다시 열 수 없어요. 상품에서 다시 채팅을 시작할 수 있어요."
+          actionLabel="채팅 목록으로"
+        />
+      );
+    }
+    if (failure === 'other') {
       return (
         <ErrorState
           onRetry={() => router.replace(`/chat/${chatRoomId}`)}

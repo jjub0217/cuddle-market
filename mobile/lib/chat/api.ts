@@ -52,6 +52,21 @@ export async function fetchChatRooms(
 }
 
 /**
+ * 이미 나갔거나 낄 수 없는 방(403).
+ *
+ * 화면에서 「다시 시도」 대신 「이미 나간 방」 안내를 띄우려고 따로 구분한다.
+ * 알림 목록에는 나간 방의 알림이 그대로 남아 있어서, 그걸 누르면 여기로 온다.
+ * 되돌릴 수 없는 상태라 다시 시도는 영원히 같은 403 이다.
+ * (없는 상품을 `ProductNotFoundError` 로 가르는 것과 같은 방식이다.)
+ */
+export class ChatRoomAccessDeniedError extends Error {
+  constructor() {
+    super('채팅방에 접근할 수 없습니다.');
+    this.name = 'ChatRoomAccessDeniedError';
+  }
+}
+
+/**
  * 메시지 한 페이지. 웹과 같이 쉰 개씩 가져온다.
  *
  * ⚠️ 서버는 **최신부터** 가져와 그 페이지 안에서만 뒤집는다. 그래서
@@ -65,6 +80,8 @@ export async function fetchChatMessages(
   page: number
 ): Promise<{ messages: ChatMessage[]; hasNext: boolean }> {
   const res = await apiFetch(`/chat/rooms/${chatRoomId}/messages?page=${page}&size=50`);
+  // 나간 방이면 서버가 403 을 준다(ChatServiceImpl:371 · CHAT_ROOM_ACCESS_DENIED).
+  if (res.status === 403) throw new ChatRoomAccessDeniedError();
   if (!res.ok) throw new Error(`메시지를 불러오지 못했어요 (HTTP ${res.status})`);
 
   const body = (await res.json()) as {
