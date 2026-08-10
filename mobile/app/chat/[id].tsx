@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -121,6 +121,18 @@ export default function ChatRoomScreen() {
     };
   }, [chatRoomId]);
 
+  /**
+   * 맨 아래로 민다.
+   *
+   * ⚠️ **한 번만 밀면 모자란다.** 긴 메시지는 글자 배치가 끝나기 전에 크기 변경 알림이
+   * 먼저 와서, 그때 잰 높이로 밀면 실제보다 짧다. 그리고 메시지를 보내면 입력칸이
+   * 여섯 줄에서 한 줄로 줄어 목록 높이가 또 바뀐다. 그래서 한 박자 뒤에 한 번 더 민다.
+   */
+  const scrollToBottom = useCallback(() => {
+    listRef.current?.scrollToEnd({ animated: false });
+    requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: false }));
+  }, []);
+
   const loadOlder = () => {
     if (!hasMore) return;
     const next = page + 1;
@@ -226,7 +238,11 @@ export default function ChatRoomScreen() {
         }
         onEndReached={loadOlder}
         onEndReachedThreshold={0.4}
-        onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
+        // 마지막 말풍선이 입력칸에 닿아 보이지 않게 숨통을 둔다.
+        contentContainerStyle={styles.listBody}
+        onContentSizeChange={scrollToBottom}
+        // 키보드가 오르내리면 목록 높이가 바뀐다. 그때도 맨 아래를 지킨다.
+        onLayout={scrollToBottom}
       />
     );
   };
@@ -269,6 +285,7 @@ export default function ChatRoomScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
   flex: { flex: 1 },
+  listBody: { paddingBottom: 8 },
   leave: { fontSize: 14, color: colors.onSurfaceMuted },
   banner: { alignItems: 'center', paddingVertical: 6, backgroundColor: colors.surfaceSunken },
   bannerText: { fontSize: 12, color: colors.onSurfaceMuted },
