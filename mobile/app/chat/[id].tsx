@@ -290,5 +290,20 @@ const styles = StyleSheet.create({
   banner: { alignItems: 'center', paddingVertical: 6, backgroundColor: colors.surfaceSunken },
   bannerText: { fontSize: 12, color: colors.onSurfaceMuted },
   dayWrap: { alignItems: 'center', paddingVertical: 10 },
-  day: { fontSize: 12, color: colors.onSurfaceSubtle },
+  // 날짜 구분선은 알약이다. 웹과 같은 모양이고, 앱의 시스템 안내(「~님이 나가셨습니다」)와도
+  // 같은 모양이다 — 둘 다 「시스템이 하는 말」이라 따로 놀면 안 된다.
+  //
+  // ⚠️ 색은 웹 값을 그대로 안 가져온다. 웹은 #eae7e7·#756652(따뜻한 회색)인데,
+  //    앱은 베이지 계열을 회색으로 모으기로 이미 정했다(constants/colors.ts 의 outline 주석).
+  //    모양만 맞추고 색은 앱 토큰을 쓴다.
+  day: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.onSurfaceMuted,
+    backgroundColor: colors.surfaceSunken,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    overflow: 'hidden',
+  },
 });
