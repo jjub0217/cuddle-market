@@ -33,8 +33,12 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
   const [isLeaveOpen, setIsLeaveOpen] = useState(false)
   const [isReportOpen, setIsReportOpen] = useState(false)
   const [isBlockOpen, setIsBlockOpen] = useState(false)
-  // 상대가 회원 탈퇴하면 opponentId 가 없다. 그때는 신고·차단을 안 그린다.
-  const canReportOrBlock = data.opponentId != null
+  // 상대가 회원 탈퇴하면 opponentId 가 없다(서버가 「알 수 없는 사용자」로 준다).
+  // 그러면 신고·차단도, 프로필로 가는 길도 대상이 없다.
+  //
+  // ⚠️ 「방을 나간」 것과는 다르다. 나간 상대는 opponentId 가 그대로 있고, 그때는 신고·차단이
+  //    되어야 한다 — 사기를 당하고 상대가 도망친 경우가 그렇다.
+  const hasOpponent = data.opponentId != null
   const menuRef = useRef<HTMLDivElement>(null)
   useOutsideClick(isMenuOpen, [menuRef], () => setIsMenuOpen(false))
 
@@ -82,11 +86,8 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
     // 못 박혀 있어 사기를 당해도 「채팅 부적절」로만 신고됐다. UserReportModal 은 사유 일곱과
     // 상세 설명·사진을 받는다 — UserPage 가 이미 그렇게 쓴다.
     //
-    // ⚠️ 상대가 **회원 탈퇴**하면 opponentId 가 없다(서버가 「알 수 없는 사용자」로 준다).
-    //    대상이 없으니 아예 안 그린다 — 눌리는데 반드시 실패하는 것보다 정직하다.
-    //    「방을 나간」 것과는 다르다. 나간 상대는 opponentId 가 그대로 있고 그때는 신고·차단이
-    //    되어야 한다 — 사기를 당하고 상대가 도망친 경우가 그렇다.
-    ...(canReportOrBlock
+    // 상대가 없으면 아예 안 그린다 — 눌리는데 반드시 실패하는 것보다 정직하다.
+    ...(hasOpponent
       ? [
           {
             label: '신고하기',
@@ -124,7 +125,7 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
         onCancel={() => setIsLeaveOpen(false)}
         onConfirm={handleOutChatRoom}
       />
-      {canReportOrBlock ? (
+      {hasOpponent ? (
         <>
           <UserReportModal
             isOpen={isReportOpen}
@@ -147,10 +148,20 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
               <ArrowLeft size={24} />
             </button>
           ) : null}
-          <Link href={ROUTES.USER_ID(data.opponentId)} className="flex items-center gap-2 hover:opacity-80">
-            <ProfileAvatar imageUrl={data?.opponentProfileImageUrl} nickname={data?.opponentNickname ?? ''} />
-            <p className="font-semibold">{data?.opponentNickname}</p>
-          </Link>
+          {/* 상대가 회원 탈퇴하면 opponentId 가 없다. 그때는 갈 곳이 없으니 링크를 안 건다 —
+              신고·차단을 감추는 것과 같은 뿌리다. 이름(「알 수 없는 사용자」)과 기본 프로필은
+              그대로 보여준다. 방과 대화 기록은 남아 있어야 하기 때문이다. */}
+          {hasOpponent ? (
+            <Link href={ROUTES.USER_ID(data.opponentId)} className="flex items-center gap-2 hover:opacity-80">
+              <ProfileAvatar imageUrl={data?.opponentProfileImageUrl} nickname={data?.opponentNickname ?? ''} />
+              <p className="font-semibold">{data?.opponentNickname}</p>
+            </Link>
+          ) : (
+            <div className="flex items-center gap-2">
+              <ProfileAvatar imageUrl={data?.opponentProfileImageUrl} nickname={data?.opponentNickname ?? ''} />
+              <p className="font-semibold">{data?.opponentNickname}</p>
+            </div>
+          )}
         </div>
         <div className="relative" ref={menuRef}>
           <IconButton aria-label="더보기" onClick={() => setIsMenuOpen((prev) => !prev)}>
