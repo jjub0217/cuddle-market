@@ -12,6 +12,13 @@ import { useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, EllipsisVertical } from 'lucide-react'
 import IconButton from '@/components/commons/button/IconButton'
 import { useOutsideClick } from '@/hooks/useOutsideClick'
+import { useToastStore } from '@/store/toastStore'
+import dynamic from 'next/dynamic'
+
+// 창은 열릴 때만 받아 온다 — UserPage 가 신고·차단 창을 다루는 방식과 같다.
+const LeaveChatRoomModal = dynamic(() => import('@/components/modal/LeaveChatRoomModal'))
+const UserReportModal = dynamic(() => import('@/components/modal/UserReportModal'))
+const BlockModal = dynamic(() => import('@/components/modal/BlockModal'))
 
 interface ChatRoomInfoProps {
   data: fetchChatRoom
@@ -23,25 +30,28 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
   const queryClient = useQueryClient()
   const { unsubscribeFromRoom } = chatSocketStore()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isLeaveOpen, setIsLeaveOpen] = useState(false)
+  const [isReportOpen, setIsReportOpen] = useState(false)
+  const [isBlockOpen, setIsBlockOpen] = useState(false)
+  // 상대가 회원 탈퇴하면 opponentId 가 없다. 그때는 신고·차단을 안 그린다.
+  const canReportOrBlock = data.opponentId != null
   const menuRef = useRef<HTMLDivElement>(null)
   useOutsideClick(isMenuOpen, [menuRef], () => setIsMenuOpen(false))
 
+  // 여기서 잡지 않는다 — 던지면 확인창이 받아서 「나가지 못했습니다」를 띄우고 창을 닫지 않는다.
+  // 전에는 console.error 만 해서, 실패해도 사용자에게는 아무 일도 안 일어난 것처럼 보였다.
   const handleOutChatRoom = async () => {
-    try {
-      await fetchGraphQL(
-        `
+    await fetchGraphQL(
+      `
         mutation LeaveChatRoom($chatRoomId: Int!) {
           leaveChatRoom(chatRoomId: $chatRoomId) { success }
         }
       `,
-        { chatRoomId: data.chatRoomId }
-      )
-      unsubscribeFromRoom(data.chatRoomId)
-      queryClient.invalidateQueries({ queryKey: ['chatRooms'] })
-      onLeaveRoom(data.chatRoomId)
-    } catch (error) {
-      console.error('채팅방 나가기 실패:', error)
-    }
+      { chatRoomId: data.chatRoomId }
+    )
+    unsubscribeFromRoom(data.chatRoomId)
+    queryClient.invalidateQueries({ queryKey: ['chatRooms'] })
+    onLeaveRoom(data.chatRoomId)
   }
 
   const handleTradeStatusChange = async () => {
@@ -57,60 +67,79 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
       )
       queryClient.invalidateQueries({ queryKey: ['chatRooms'] })
     } catch (error) {
+      // 전에는 console.error 만 해서, 실패해도 사용자에게는 아무 일도 안 일어난 것처럼 보였다.
       console.error('거래 상태 변경 실패:', error)
-    }
-  }
-
-  const handleReportUser = async () => {
-    setIsMenuOpen(false)
-    try {
-      await fetchGraphQL(
-        `
-        mutation ReportUser($userId: Int!, $reasonCode: String!) {
-          reportUser(userId: $userId, reasonCode: $reasonCode) { success }
-        }
-      `,
-        { userId: data.opponentId, reasonCode: 'CHAT_ABUSE' }
-      )
-      alert('신고가 접수되었습니다.')
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('이미 신고한')) {
-        alert('이미 신고한 사용자입니다.')
-      } else {
-        console.error('신고 실패:', error)
-        alert('신고에 실패했습니다. 잠시 후 다시 시도해주세요.')
-      }
-    }
-  }
-
-  const handleBlockUser = async () => {
-    setIsMenuOpen(false)
-    try {
-      await fetchGraphQL(
-        `
-        mutation BlockUser($userId: Int!) {
-          blockUser(userId: $userId) { success }
-        }
-      `,
-        { userId: data.opponentId }
-      )
-      alert('차단되었습니다.')
-      queryClient.invalidateQueries({ queryKey: ['chatRooms'] })
-    } catch (error) {
-      console.error('차단 실패:', error)
-      alert('차단에 실패했습니다. 잠시 후 다시 시도해주세요.')
+      useToastStore.getState().error({
+        title: '판매완료 처리에 실패했습니다.',
+        content: '잠시 후 다시 시도해주세요.',
+      })
     }
   }
 
   const menuItems = [
     { label: '판매완료 처리', onClick: handleTradeStatusChange },
-    { label: '신고하기', onClick: handleReportUser, className: 'text-danger-500' },
-    { label: '차단하기', onClick: handleBlockUser, className: 'text-danger-500' },
-    { label: '채팅방 나가기', onClick: handleOutChatRoom, className: 'text-danger-500' },
+    // 신고·차단은 공용 창을 쓴다. 전에는 여기서 바로 실행했고, 신고 사유가 CHAT_ABUSE 로
+    // 못 박혀 있어 사기를 당해도 「채팅 부적절」로만 신고됐다. UserReportModal 은 사유 일곱과
+    // 상세 설명·사진을 받는다 — UserPage 가 이미 그렇게 쓴다.
+    //
+    // ⚠️ 상대가 **회원 탈퇴**하면 opponentId 가 없다(서버가 「알 수 없는 사용자」로 준다).
+    //    대상이 없으니 아예 안 그린다 — 눌리는데 반드시 실패하는 것보다 정직하다.
+    //    「방을 나간」 것과는 다르다. 나간 상대는 opponentId 가 그대로 있고 그때는 신고·차단이
+    //    되어야 한다 — 사기를 당하고 상대가 도망친 경우가 그렇다.
+    ...(canReportOrBlock
+      ? [
+          {
+            label: '신고하기',
+            onClick: () => {
+              setIsMenuOpen(false)
+              setIsReportOpen(true)
+            },
+            className: 'text-danger-500',
+          },
+          {
+            label: '차단하기',
+            onClick: () => {
+              setIsMenuOpen(false)
+              setIsBlockOpen(true)
+            },
+            className: 'text-danger-500',
+          },
+        ]
+      : []),
+    // 나가기는 되돌릴 수 없다(대화가 사라지고 방을 다시 못 연다). 바로 실행하지 않고 확인창을 띄운다.
+    {
+      label: '채팅방 나가기',
+      onClick: () => {
+        setIsMenuOpen(false)
+        setIsLeaveOpen(true)
+      },
+      className: 'text-danger-500',
+    },
   ]
 
   return (
     <div className="flex flex-col gap-2.5 p-3.5">
+      <LeaveChatRoomModal
+        isOpen={isLeaveOpen}
+        onCancel={() => setIsLeaveOpen(false)}
+        onConfirm={handleOutChatRoom}
+      />
+      {canReportOrBlock ? (
+        <>
+          <UserReportModal
+            isOpen={isReportOpen}
+            userId={data.opponentId}
+            userNickname={data.opponentNickname}
+            onCancel={() => setIsReportOpen(false)}
+          />
+          <BlockModal
+            isOpen={isBlockOpen}
+            userId={data.opponentId}
+            userNickname={data.opponentNickname}
+            onCancel={() => setIsBlockOpen(false)}
+          />
+        </>
+      ) : null}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {onBack ? (
