@@ -76,6 +76,11 @@ export default function RootLayout() {
           <Stack.Screen name="search-result" />
           <Stack.Screen name="products/new" />
           <Stack.Screen name="products/[id]/edit" />
+          {/* 헤더는 화면이 직접 그린다(login과 같은 이유).
+              탭 안이 아니라 루트에 두는 이유 둘: 하단에 입력칸이 늘 열려 있어 탭바까지
+              있으면 아래가 두 겹이 되고(댓글 스레드와 같다), 들어오는 길이 셋이라
+              (채팅 탭·상품 상세·알림) 탭 안에 두면 다른 탭에서 열 때 탭이 튄다. */}
+          <Stack.Screen name="chat/[id]" />
         </Stack>
         {/* Stack 밖에 둔다 — 화면이 바뀌어도 살아남아야 한다.
             신고 화면은 성공하면 스스로 닫히는데, 화면 안에서 그리면 토스트도 같이 사라진다. */}

@@ -14,6 +14,7 @@ import {
   markAllAsRead,
   markAsRead,
   resolveTarget,
+  resolveUnreadMark,
   type NotificationItem,
 } from './notifications';
 
@@ -70,6 +71,25 @@ describe('fetchNotifications', () => {
     mockFetch.mockResolvedValue(reply(500));
     await expect(fetchNotifications(0)).rejects.toThrow();
   });
+
+  it('groupCount를 그대로 싣는다', async () => {
+    mockFetch.mockResolvedValue(
+      reply(200, { data: { content: [item({ groupCount: 3 })], hasNext: false } })
+    );
+
+    const page = await fetchNotifications(0);
+
+    expect(page.content[0].groupCount).toBe(3);
+  });
+
+  // 서버 배포가 앱보다 늦을 수 있다. 필드가 없어도 그냥 없는 대로 지나가야 한다.
+  it('groupCount가 없는 응답도 그대로 지나간다', async () => {
+    mockFetch.mockResolvedValue(reply(200, { data: { content: [item()], hasNext: false } }));
+
+    const page = await fetchNotifications(0);
+
+    expect(page.content[0].groupCount).toBeUndefined();
+  });
 });
 
 describe('fetchUnreadCount', () => {
@@ -104,6 +124,41 @@ describe('markAsRead / markAllAsRead', () => {
   });
 });
 
+describe('resolveUnreadMark', () => {
+  it('읽은 알림에는 아무것도 안 그린다', () => {
+    expect(resolveUnreadMark(item({ isRead: true, groupCount: 5 }))).toEqual({ kind: 'none' });
+  });
+
+  it('묶인 건수가 없으면 지금처럼 점이다', () => {
+    expect(resolveUnreadMark(item({ isRead: false }))).toEqual({ kind: 'dot' });
+    expect(resolveUnreadMark(item({ isRead: false, groupCount: null }))).toEqual({ kind: 'dot' });
+  });
+
+  // 「1」이라고 쓰면 오히려 시끄럽다 — 한 건은 점으로 충분하다.
+  it('한 건뿐이면 숫자가 아니라 점이다', () => {
+    expect(resolveUnreadMark(item({ isRead: false, groupCount: 1 }))).toEqual({ kind: 'dot' });
+  });
+
+  it('두 건부터 숫자를 그린다', () => {
+    expect(resolveUnreadMark(item({ isRead: false, groupCount: 3 }))).toEqual({
+      kind: 'count',
+      text: '3',
+    });
+  });
+
+  // 채팅 목록의 방 뱃지(chat-room-row.tsx)와 같은 규칙이다.
+  it('99를 넘으면 99+로 적는다', () => {
+    expect(resolveUnreadMark(item({ isRead: false, groupCount: 99 }))).toEqual({
+      kind: 'count',
+      text: '99',
+    });
+    expect(resolveUnreadMark(item({ isRead: false, groupCount: 100 }))).toEqual({
+      kind: 'count',
+      text: '99+',
+    });
+  });
+});
+
 describe('resolveTarget', () => {
   it('상품은 앱 화면으로', () => {
     expect(resolveTarget(item({ relatedEntityType: 'PRODUCT', relatedEntityId: 42 }))).toEqual({
@@ -120,10 +175,10 @@ describe('resolveTarget', () => {
     ).toEqual({ kind: 'app', path: '/(tabs)/(my)' });
   });
 
-  it('채팅방은 앱에 화면이 없으니 웹으로', () => {
-    expect(resolveTarget(item({ relatedEntityType: 'CHAT_ROOM', relatedEntityId: 9 }))).toEqual({
-      kind: 'web',
-      path: '/chat/9',
+  it('채팅 알림은 앱 채팅방으로 간다', () => {
+    expect(resolveTarget(item({ relatedEntityType: 'CHAT_ROOM', relatedEntityId: 7 }))).toEqual({
+      kind: 'app',
+      path: '/chat/7',
     });
   });
 

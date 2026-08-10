@@ -16,6 +16,7 @@ import {
 import {
   NOTIFICATION_COLORS,
   NOTIFICATION_MESSAGES,
+  resolveUnreadMark,
   type NotificationItem,
   type NotificationType,
 } from '@/lib/notifications';
@@ -61,6 +62,8 @@ export function NotificationRow({ item, onPress }: Props) {
   // 값과 그 이유는 lib/notifications.ts의 NOTIFICATION_COLORS 주석에 적어 뒀다.
   const color = NOTIFICATION_COLORS[item.notificationType];
   const Icon = NOTIFICATION_ICONS[item.notificationType];
+  // 점이냐 숫자냐 아무것도 아니냐는 lib/notifications.ts가 정한다(시험이 덮고 있다).
+  const mark = resolveUnreadMark(item);
 
   return (
     <Pressable
@@ -79,7 +82,12 @@ export function NotificationRow({ item, onPress }: Props) {
         <Text style={styles.time}>{getTimeAgo(item.createdAt)}</Text>
       </View>
 
-      {!item.isRead ? <View style={styles.dot} /> : null}
+      {mark.kind === 'dot' ? <View style={styles.dot} /> : null}
+      {mark.kind === 'count' ? (
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>{mark.text}</Text>
+        </View>
+      ) : null}
     </Pressable>
   );
 }
@@ -119,4 +127,23 @@ const styles = StyleSheet.create({
     backgroundColor: colors.brand500,
     marginTop: 6,
   },
+  // 묶인 채팅이 여럿일 때 점 대신 그린다. 모양은 채팅 목록의 방 뱃지와 같다
+  // (components/chat/chat-room-row.tsx) — 같은 뜻의 뱃지가 화면마다 다르면 안 된다.
+  // 20px짜리라 제목 줄 높이와 맞아서 점처럼 따로 내려 줄 필요가 없다.
+  //
+  // ⚠️ **바탕색을 위의 점과 같은 brand500 으로 맞추지 말 것.** 두 갈색이 달라 보여
+  //    맞추고 싶어지는데, 그러면 **안의 글자가 안 읽힌다.**
+  //      brand500 #B06F15  흰 글자 대비 4.09:1  ← 11px 글자에는 모자라다
+  //      action   #825500  흰 글자 대비 6.46:1  ← 통과
+  //    점은 속이 빈 도형이라 대비를 안 따져도 되지만 뱃지는 안에 글자가 들어간다.
+  badge: {
+    minWidth: 20,
+    height: 20,
+    paddingHorizontal: 6,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.action,
+  },
+  badgeText: { fontSize: 11, fontWeight: '700', color: colors.onAction },
 });

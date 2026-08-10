@@ -111,21 +111,36 @@ interface ErrorStateProps {
   onRetry: () => void;
   /** 화면마다 다른 한 줄. 넘기지 않으면 홈 문구를 쓴다. */
   title?: string;
+  /**
+   * 제목 아래 설명. 기본은 「다시 하면 될 수도 있다」는 안내다.
+   *
+   * ⚠️ **되돌릴 수 없는 상태에는 기본값을 쓰면 안 된다.** 나간 채팅방처럼 몇 번을 눌러도
+   * 같은 결과인 곳에서 「네트워크를 확인하고 다시 시도해 주세요」라고 하면, 일시적인
+   * 탈인 줄 알고 계속 누르게 된다.
+   */
+  description?: string;
+  /** 단추 글자. 되돌릴 수 없는 곳에서는 「~로 가기」처럼 빠져나갈 길을 적는다. */
+  actionLabel?: string;
 }
 
-/** 오류 상태: 첫 로드 실패. 전체 화면 + 다시 시도 버튼. */
-export function ErrorState({ onRetry, title = '상품을 불러오지 못했어요.' }: ErrorStateProps) {
+/** 오류 상태: 첫 로드 실패. 전체 화면 + 단추 하나. */
+export function ErrorState({
+  onRetry,
+  title = '상품을 불러오지 못했어요.',
+  description = '네트워크를 확인하고 다시 시도해 주세요.',
+  actionLabel = '다시 시도',
+}: ErrorStateProps) {
   return (
     <View style={styles.centered}>
       <IconCircle label="오류">
         <TriangleAlert size={36} strokeWidth={1.5} color={ICON_COLOR} />
       </IconCircle>
       <Text style={styles.emptyTitle}>{title}</Text>
-      <Text style={styles.emptySub}>네트워크를 확인하고 다시 시도해 주세요.</Text>
+      <Text style={styles.emptySub}>{description}</Text>
       <Pressable
         onPress={onRetry}
         style={({ pressed }) => [styles.retryBtn, pressed && styles.retryBtnPressed]}>
-        <Text style={styles.retryText}>다시 시도</Text>
+        <Text style={styles.retryText}>{actionLabel}</Text>
       </Pressable>
     </View>
   );

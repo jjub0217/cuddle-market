@@ -26,6 +26,13 @@ export interface NotificationItem {
   relatedEntityId: number | null;
   isRead: boolean;
   createdAt: string;
+  /**
+   * 이 알림이 묶고 있는 건수. 채팅만 값이 있고 나머지는 `null`이다.
+   *
+   * ⚠️ **없을 수도 있다.** 서버가 나중에 더한 필드라 배포가 앱보다 늦으면 응답에
+   * 아예 안 들어온다. 그래서 선택 필드로 뒀다 — 없으면 없는 대로 점을 그린다.
+   */
+  groupCount?: number | null;
 }
 
 /**
@@ -124,12 +131,34 @@ export async function markAllAsRead(): Promise<void> {
   await apiFetch('/notifications/read-all', { method: 'PATCH' });
 }
 
+/** 알림 줄 오른쪽에 그릴 표시. */
+export type UnreadMark = { kind: 'none' } | { kind: 'dot' } | { kind: 'count'; text: string };
+
+/**
+ * 알림 줄 오른쪽에 무엇을 그릴지 고른다.
+ *
+ * 화면 조각은 시험하기 어려워서 판단만 여기로 뺐다. 규칙은 한 줄이다 —
+ * 안 읽었으면 표시를 그리는데, 묶인 건수가 둘 이상이면 숫자, 아니면 점이다.
+ *
+ * `groupCount`가 1일 때 점을 쓰는 것은 「1」이 오히려 시끄럽기 때문이다.
+ * 99를 넘으면 `99+`로 줄이는 것은 채팅 목록의 방 뱃지와 같은 규칙이다
+ * (components/chat/chat-room-row.tsx) — 같은 앱에서 두 뱃지가 다르게 굴면 안 된다.
+ */
+export function resolveUnreadMark(item: NotificationItem): UnreadMark {
+  if (item.isRead) return { kind: 'none' };
+
+  const count = item.groupCount ?? 0;
+  if (count < 2) return { kind: 'dot' };
+
+  return { kind: 'count', text: count > 99 ? '99+' : String(count) };
+}
+
 /**
  * 알림을 눌렀을 때 갈 곳.
  *
  * kind가 'app'이면 앱 화면으로 옮기고, 'web'이면 앱 안 브라우저로 웹 주소를 연다.
- * 이제 웹으로 나가는 것은 채팅뿐이다 — 커뮤니티는 10바퀴에 앱 화면이 생겼다.
- * 채팅 화면이 생기는 14바퀴에 여기만 고치면 웹 갈래가 없어진다.
+ * 20바퀴(#871)에 채팅 화면이 생기면서 **웹으로 나가는 갈래가 없어졌다.**
+ * kind를 남겨 둔 것은 앞으로 앱에 없는 화면이 또 생길 수 있어서다.
  *
  * 규칙은 웹 src/lib/utils/getNavigationPath.ts와 같다.
  */
@@ -141,7 +170,7 @@ export function resolveTarget(
   if (relatedEntityId !== null) {
     if (relatedEntityType === 'PRODUCT')
       return { kind: 'app', path: `/products/${relatedEntityId}` };
-    if (relatedEntityType === 'CHAT_ROOM') return { kind: 'web', path: `/chat/${relatedEntityId}` };
+    if (relatedEntityType === 'CHAT_ROOM') return { kind: 'app', path: `/chat/${relatedEntityId}` };
     if (relatedEntityType === 'POST')
       return { kind: 'app', path: `/(tabs)/(community)/posts/${relatedEntityId}` };
     // 배포(2026-08-02) 전에 생긴 답글 알림은 'COMMENT' + **댓글** 번호로 남아 있다.
