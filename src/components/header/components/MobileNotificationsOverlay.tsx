@@ -49,7 +49,7 @@ export default function MobileNotificationsOverlay({ isOpen, onClose }: MobileNo
         `
         query Notifications($page: Int!, $size: Int!) {
           notifications(page: $page, size: $size) {
-            content { notificationId notificationType title content relatedEntityType relatedEntityId isRead readAt createdAt }
+            content { notificationId notificationType title content relatedEntityType relatedEntityId isRead readAt createdAt groupCount }
             page hasNext
           }
         }
