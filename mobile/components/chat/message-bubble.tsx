@@ -22,7 +22,8 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
   if (message.isBlocked) {
     return (
       <View style={styles.blockedWrap}>
-        <Text style={[styles.bubble, styles.mine]}>{message.content}</Text>
+        {/* 막힌 것도 내가 보낸 것이라 내 말풍선과 같은 모양으로 둔다. */}
+        <Text style={[styles.bubble, styles.mine, styles.mineCorner]}>{message.content}</Text>
         <Text style={styles.blockedNote}>개인정보 포함으로 상대방에게 전송되지 않았습니다.</Text>
       </View>
     );
@@ -30,7 +31,12 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
 
   return (
     <View style={[styles.row, message.isMine ? styles.rowMine : styles.rowTheirs]}>
-      <Text style={[styles.bubble, message.isMine ? styles.mine : styles.theirs]}>
+      <Text
+        style={[
+          styles.bubble,
+          message.isMine ? styles.mine : styles.theirs,
+          message.isMine ? styles.mineCorner : styles.theirsCorner,
+        ]}>
         {message.content}
       </Text>
       <Text style={styles.time}>{formatChatTime(message.createdAt)}</Text>
@@ -55,6 +61,10 @@ const styles = StyleSheet.create({
   //    (웹은 ml-auto 라 방향과 무관하게 오른쪽에 붙는다 — 그래서 웹은 멀쩡했다.)
   rowMine: { flexDirection: 'row-reverse', justifyContent: 'flex-start' },
   rowTheirs: { justifyContent: 'flex-start' },
+  // 모서리는 웹과 같다(ChatLog.tsx:248~251). **보낸 쪽을 향한 위 모서리만 각지다** —
+  // 내 것은 오른쪽 위, 상대 것은 왼쪽 위. 네 귀를 다 둥글리면 알약이 되어
+  // 어느 쪽이 보냈는지가 모양으로 안 읽힌다.
+  // 16 은 웹 rounded-2xl(1rem)과 같은 값이다.
   bubble: {
     maxWidth: '72%',
     borderRadius: 16,
@@ -62,6 +72,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     fontSize: 14,
   },
+  mineCorner: { borderTopRightRadius: 0 },
+  theirsCorner: { borderTopLeftRadius: 0 },
   // 웹 말풍선과 같은 색이다. constants/colors.ts 에 brandText 로 이미 있다(웹 primary-700).
   // 글자는 onAction(흰색) — 진한 바탕 위의 글자라 단추와 같은 짝이다.
   mine: { backgroundColor: colors.brandText, color: colors.onAction },
