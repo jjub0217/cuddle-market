@@ -101,6 +101,16 @@ ls -l /proc/$(pgrep -f cmarket-0.0.1)/fd/ | grep -i log
 
 ⚠️ **이 저장소에는 GitHub 이슈를 만들지 않는다.** 남의 저장소(`jinioh88/cmarket_api`)라 이슈판을 안 쓴다. 백엔드를 고칠 일이 생기면 **이 저장소 이슈에 같이 적는다** — #862가 그 예다(프론트 이슈인데 백엔드 커밋이 그 번호를 단다). 2026-08-07에 모르고 만들었다가 닫았고, **삭제 권한이 없어 닫는 것밖에 못 했다.**
 
+⚠️ **엔티티에 필드를 더할 때는 생성자도 같이 고친다.** 이 저장소의 엔티티는 클래스가 아니라 **생성자에 `@Builder`** 를 단다(`User`·`Product`·`ChatRoom`·`ChatMessage`·`Notification` 전부). 필드만 더하면 빌더에는 안 들어가고, **이 맥에서는 컴파일을 못 해서 EC2 배포에서야 드러난다.** 2026-08-10에 실제로 배포가 한 번 깨졌다.
+
+```java
+@Builder
+public Notification(Long userId, …, Long relatedEntityId, Integer groupCount) {
+                                                           ↑ 필드만 더하면 여기가 빈다
+```
+
+반대로 `@Getter @Builder` 가 **클래스에** 붙은 DTO(`NotificationDto`·`NotificationCreateCommand`)는 필드만 더하면 된다. **둘이 섞여 있으니 고치기 전에 `@Builder` 가 어디 붙었는지 본다.**
+
 **응답 DTO 찾는 법** — API를 붙일 때 「다른 API가 이러니 이것도 그렇겠지」로 추측하지 말고 직접 열어본다. 9바퀴에 이걸 안 해서 차단 목록이 늘 비어 있었다.
 
 ```bash
