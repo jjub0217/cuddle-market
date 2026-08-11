@@ -167,6 +167,8 @@ export const resolvers = {
         ...room,
         opponentNickname: room.otherUserNickname ?? room.opponentNickname,
         opponentProfileImageUrl: room.otherUserProfileImageUrl ?? room.opponentProfileImageUrl,
+        // 서버가 안 주는 동안(배포 전)에도 화면이 undefined 를 받지 않게 여기서 false 로 못 박는다.
+        isOpponentBlocked: room.isOpponentBlocked ?? false,
       }))
       return {
         chatRooms,

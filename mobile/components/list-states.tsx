@@ -94,15 +94,20 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <View style={styles.centered}>
+      {/* 발자국은 속을 채운다. Lucide 는 발자국이 하나뿐이라 fill 로 채움을 켠다 —
+          찜하기 하트(favorite-button.tsx)가 이미 같은 방식이다.
+          돋보기(SearchX)는 채우지 않는다. 속을 메우면 무엇인지 안 읽힌다. */}
       <IconCircle label={icon === 'search' ? '검색 결과 없음' : '발자국'}>
         {icon === 'search' ? (
           <SearchX size={36} strokeWidth={1.5} color={ICON_COLOR} />
         ) : (
-          <PawPrint size={36} strokeWidth={1.5} color={ICON_COLOR} />
+          <PawPrint size={36} strokeWidth={1.5} color={ICON_COLOR} fill={ICON_COLOR} />
         )}
       </IconCircle>
       <Text style={styles.emptyTitle}>{title}</Text>
-      <Text style={styles.emptySub}>{description}</Text>
+      {/* 빈 문자열을 주면 아래 줄을 아예 안 그린다 — 차단한 채팅방처럼 「해보세요」라고
+          권할 수 없는 자리가 있다(#877). */}
+      {description ? <Text style={styles.emptySub}>{description}</Text> : null}
     </View>
   );
 }

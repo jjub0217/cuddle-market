@@ -4,6 +4,8 @@ import { useState, useLayoutEffect, useRef } from 'react'
 import Image from 'next/image'
 // 시각·날짜 포맷터의 원본은 @cuddle/shared에 있다(앱도 같은 것을 쓴다).
 import { chatDateKey, formatChatDate, formatChatTime } from '@cuddle/shared'
+// 빈 방 안내 문구도 원본은 @cuddle/shared에 있다(앱이 같은 것을 쓴다).
+import { CHAT_EMPTY_TITLE, CHAT_EMPTY_DESCRIPTION } from '@/constants/constants'
 import type { Message } from '@/types'
 import { cn } from '@/lib/utils/cn'
 import { useUserStore } from '@/store/userStore'
@@ -25,6 +27,8 @@ interface ChatLogProps {
   onClearConnectionError?: () => void
   imageUploadError?: React.ReactNode
   onClearImageUploadError?: () => void
+  /** 내가 이 방의 상대를 차단했는가(#877). 빈 방 안내에서 「보내보세요」를 뺄 때 쓴다. */
+  isOpponentBlocked?: boolean
 }
 
 function ChatImageMessage({ imageUrl, alt }: { imageUrl?: string; alt: string }) {
@@ -92,6 +96,7 @@ export function ChatLog({
   onClearConnectionError,
   imageUploadError,
   onClearImageUploadError,
+  isOpponentBlocked = false,
 }: ChatLogProps) {
   const { user } = useUserStore()
   const groupedMessages = groupMessagesByDate(roomMessages)
@@ -164,8 +169,11 @@ export function ChatLog({
     return (
       <div className="flex h-full flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
         <div className="flex flex-col gap-1">
-          <p className="text-sm font-semibold text-[#1c1b1b] md:text-base">아직 주고받은 메시지가 없어요</p>
-          <p className="text-xs text-gray-500 md:text-sm">첫 메시지를 보내 대화를 시작해보세요</p>
+          <p className="text-sm font-semibold text-[#1c1b1b] md:text-base">{CHAT_EMPTY_TITLE}</p>
+          {/* 차단한 방에서는 안 그린다 — 보낼 수 없는 곳에서 보내라고 하면 안 된다. */}
+          {isOpponentBlocked ? null : (
+            <p className="text-xs text-gray-500 md:text-sm">{CHAT_EMPTY_DESCRIPTION}</p>
+          )}
         </div>
       </div>
     )

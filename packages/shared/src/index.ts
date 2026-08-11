@@ -1,5 +1,6 @@
 export * from './types/product'
 export * from './constants/report'
+export * from './constants/chat'
 export * from './constants/withdraw'
 export * from './constants/productOptions'
 export * from './lib/format'

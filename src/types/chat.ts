@@ -59,6 +59,8 @@ export interface fetchChatRoom {
   lastMessageTime: string
   hasUnread: boolean
   unreadCount: number
+  /** 내가 이 방의 상대를 차단했는가. 참이면 입력창을 잠근다(#877). */
+  isOpponentBlocked: boolean
 }
 
 export interface ChatRoomsResponse {
