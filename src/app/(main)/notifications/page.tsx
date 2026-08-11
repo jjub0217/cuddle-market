@@ -2,6 +2,7 @@
 
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchGraphQL } from '@/lib/api/graphql'
+import { markNotificationRead } from '@/lib/api/notifications'
 import { useUserStore } from '@/store/userStore'
 import type { NotificationItem as NotificationItemType } from '@/types/notifications'
 import NotificationItem from '@/components/header/components/notification-section/NotificationItem'
@@ -79,11 +80,7 @@ export default function NotificationsPage() {
     if (currentPath !== targetPath) {
       router.push(targetPath)
     }
-    await fetchGraphQL(`
-      mutation MarkNotificationRead($notificationId: Int!) {
-        markNotificationRead(notificationId: $notificationId) { success }
-      }
-    `, { notificationId: notification.notificationId })
+    await markNotificationRead(notification.notificationId)
     refetch()
   }
 

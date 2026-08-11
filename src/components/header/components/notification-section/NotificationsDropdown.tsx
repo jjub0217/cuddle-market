@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils/cn'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchGraphQL } from '@/lib/api/graphql'
+import { markNotificationRead } from '@/lib/api/notifications'
 import { useUserStore } from '@/store/userStore'
 import type { NotificationItem as NotificationItemType } from '@/types/notifications'
 import NotificationItem from './NotificationItem'
@@ -98,11 +99,7 @@ export default function NotificationsDropdown({ isNotificationOpen, setIsNotific
     } else {
       router.push(targetPath)
     }
-    await fetchGraphQL(`
-      mutation MarkNotificationRead($notificationId: Int!) {
-        markNotificationRead(notificationId: $notificationId) { success }
-      }
-    `, { notificationId: notification.notificationId })
+    await markNotificationRead(notification.notificationId)
     refetch()
   }
 
