@@ -206,12 +206,21 @@ export default function ChattingPage() {
     }
   }, [connect, disconnect, accessToken])
 
+  // 방을 바꿀 때만 실시간 저장분을 비운다. 그 방의 지난 메시지는 조회로 다시 받기 때문에,
+  // 안 비우면 같은 글이 두 번 보인다.
+  //
+  // ⚠️ **다시 붙을 때는 비우면 안 된다.** 예전에는 아래 효과가 붙기(isConnected)에도 걸려 있어,
+  //    끊겼다 붙을 때마다 화면에 떠 있던 실시간 메시지가 사라졌다 — 조회를 다시 하지는
+  //    않으므로 그대로 안 보이게 된다(#884).
+  useEffect(() => {
+    if (chatRoomId) clearRoomMessages(Number(chatRoomId))
+  }, [chatRoomId, clearRoomMessages])
+
   useEffect(() => {
     if (isConnected && chatRoomId) {
-      clearRoomMessages(Number(chatRoomId))
       subscribeToRoom(Number(chatRoomId))
     }
-  }, [isConnected, chatRoomId, subscribeToRoom, clearRoomMessages])
+  }, [isConnected, chatRoomId, subscribeToRoom])
 
   useEffect(() => {
     if (_hasHydrated && !user) {
@@ -307,7 +316,10 @@ export default function ChattingPage() {
                   // 낫다. 방과 지난 대화는 그대로 둔다(거래 이야기가 오갔을 수 있다).
                   <p className="text-center text-sm text-gray-500">{CHAT_BLOCKED_NOTICE}</p>
                 ) : (
-                  <div className="border-outline-variant/40 bg-surface/95 flex items-center gap-3 rounded-full border px-3 py-2">
+                  // 칸이 길어지면 아래로 자란다(#880). 그래서 단추를 아래에 붙이고,
+                  // 테두리도 rounded-full 대신 rounded-3xl 로 둔다 — 한 줄일 때는 눈에
+                  // 띄는 차이가 없고(반지름 26px 대 24px), 길어졌을 때 위아래가 불룩해지지 않는다.
+                  <div className="border-outline-variant/40 bg-surface/95 flex items-end gap-3 rounded-3xl border px-3 py-2">
                     <input
                       type="file"
                       id="chat-file-input"
