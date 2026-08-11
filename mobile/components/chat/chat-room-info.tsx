@@ -165,10 +165,10 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: colors.surfaceSunken,
   },
-  // 웹 size="md" 는 w-16(64) 정사각이다
+  // 웹 size="md" 는 w-16(64) 인데 앱은 48로 줄였다 — 폰 화면에서는 64가 대화보다 무겁다
   thumb: {
-    width: 64,
-    height: 64,
+    width: 48,
+    height: 48,
     borderRadius: 8,
     overflow: 'hidden',
     // 사진이 없거나 아직 안 왔을 때 보이는 자리. 목록의 썸네일과 같은 회색이다
