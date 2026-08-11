@@ -59,11 +59,13 @@ export function ChatRooms({
                 <li
                   key={roomData.chatRoomId}
                   className={cn(
-                    'flex cursor-pointer flex-col gap-2 border-[#eae2dc] px-4 py-3.5 md:rounded-3xl md:border',
+                    // 방 카드에 테두리를 안 두른다(#891). 고른 방은 연베이지 바탕이 알려 주고,
+                    // 안 고른 방은 그 안 상품칸이 이미 자기 테두리를 갖고 있다.
+                    'flex cursor-pointer flex-col gap-2 px-4 py-3.5 md:rounded-3xl',
                     // 보고 있는 방은 **연베이지**로 표시한다(#891). 예전에는 진한 갈색(#7c571a)이라
                     // 목록이 화면에서 가장 무거웠고, 그 위에 또 갈색 카드를 얹어 경계가 안 읽혔다.
                     // 화면에서 진한 색은 내 말풍선 하나면 된다.
-                    roomData.chatRoomId === selectedRoomId && 'border-outline-variant/40 md:bg-primary-50'
+                    roomData.chatRoomId === selectedRoomId && 'md:bg-primary-50'
                   )}
                   onClick={() => handleSelectRoom(room)}
                 >
