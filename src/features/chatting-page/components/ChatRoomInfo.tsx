@@ -8,11 +8,12 @@ import ProfileAvatar from '@/components/commons/ProfileAvatar'
 import ChatProductCard from '@/components/commons/card/ChatProductCard'
 import { fetchGraphQL } from '@/lib/api/graphql'
 import { chatSocketStore } from '@/store/chatSocketStore'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, EllipsisVertical } from 'lucide-react'
 import IconButton from '@/components/commons/button/IconButton'
 import { useOutsideClick } from '@/hooks/useOutsideClick'
 import { useToastStore } from '@/store/toastStore'
+import { useUserStore } from '@/store/userStore'
 import dynamic from 'next/dynamic'
 
 // 창은 열릴 때만 받아 온다 — UserPage 가 신고·차단 창을 다루는 방식과 같다.
@@ -40,6 +41,28 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
   //    되어야 한다 — 사기를 당하고 상대가 도망친 경우가 그렇다.
   const hasOpponent = data.opponentId != null
   const menuRef = useRef<HTMLDivElement>(null)
+
+  // 「판매완료 처리」는 **내 상품일 때만** 보여야 한다(#894). 방 정보에는 파는 사람이 없어서
+  // 상품을 따로 봐야 안다.
+  //
+  // ⚠️ 메뉴를 열 때만 부른다. 방을 열 때마다 부르면 넷 중 하나를 위해 모두가 요청을 더 낸다.
+  const { user } = useUserStore()
+  const { data: product } = useQuery({
+    queryKey: ['product', data.productId],
+    queryFn: async () => {
+      const result = await fetchGraphQL<{ product: { tradeStatus: string | null; sellerInfo: { sellerId: number } } }>(
+        `
+        query Product($id: Int!) {
+          product(id: $id) { tradeStatus sellerInfo { sellerId } }
+        }
+      `,
+        { id: data.productId }
+      )
+      return result.product
+    },
+    enabled: isMenuOpen && data.productId != null,
+  })
+  const isMyProduct = !!user && product?.sellerInfo?.sellerId === user.id
   useOutsideClick(isMenuOpen, [menuRef], () => setIsMenuOpen(false))
 
   // 여기서 잡지 않는다 — 던지면 확인창이 받아서 「나가지 못했습니다」를 띄우고 창을 닫지 않는다.
@@ -67,7 +90,10 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
           updateTradeStatus(id: $id, tradeStatus: $tradeStatus) { success }
         }
       `,
-        { id: data.productId, tradeStatus: 'SOLD_OUT' }
+        // ⚠️ **COMPLETED 다.** 서버 enum 에 SOLD_OUT 은 없다(TradeStatus.java — SELLING ·
+        //    RESERVED · COMPLETED). 전에는 없는 값을 보내서 **누르면 반드시 실패**했고,
+        //    「판매완료 처리에 실패했습니다」가 서버 탈처럼 보여 원인을 알기 어려웠다(#894).
+        { id: data.productId, tradeStatus: 'COMPLETED' }
       )
       queryClient.invalidateQueries({ queryKey: ['chatRooms'] })
     } catch (error) {
@@ -81,7 +107,10 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
   }
 
   const menuItems = [
-    { label: '판매완료 처리', onClick: handleTradeStatusChange },
+    // 내 상품이고 아직 끝나지 않은 거래일 때만. 산 사람에게 보여 봐야 서버가 막는다.
+    ...(isMyProduct && product?.tradeStatus !== 'COMPLETED'
+      ? [{ label: '판매완료 처리', onClick: handleTradeStatusChange }]
+      : []),
     // 신고·차단은 공용 창을 쓴다. 전에는 여기서 바로 실행했고, 신고 사유가 CHAT_ABUSE 로
     // 못 박혀 있어 사기를 당해도 「채팅 부적절」로만 신고됐다. UserReportModal 은 사유 일곱과
     // 상세 설명·사진을 받는다 — UserPage 가 이미 그렇게 쓴다.

@@ -1,4 +1,5 @@
 import { CHAT_BLOCKED_NOTICE, CHAT_EMPTY_DESCRIPTION, CHAT_EMPTY_TITLE } from '@cuddle/shared';
+import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
@@ -11,7 +12,11 @@ import { EmptyState, ErrorState, LoadingState } from '@/components/list-states';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { colors } from '@/constants/colors';
+import { ProductActionSheet, type SheetAction } from '@/components/my/product-action-sheet';
+import { BlockConfirm } from '@/components/report/block-confirm';
 import { useMe } from '@/hooks/use-me';
+import { updateTradeStatus } from '@/lib/product-actions';
+import { fetchProductDetail } from '@/lib/products';
 import {
   ChatRoomAccessDeniedError,
   fetchChatMessages,
@@ -69,9 +74,25 @@ export default function ChatRoomScreen() {
   // 머리말에 그릴 상대·상품(#889). 메시지 조회 응답에 얹혀 온다 — 방 단건 조회 API 가 없다.
   // 서버가 아직 안 주면 값이 다 null 이고, 그러면 ChatRoomInfo 가 아무것도 안 그린다.
   const [room, setRoom] = useState<ChatRoomSummary | null>(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isBlockOpen, setIsBlockOpen] = useState(false);
   const listRef = useRef<FlatList<Row>>(null);
   // 소켓으로 온 메시지에는 isMine 이 없어서 내 id 로 채워야 한다.
-  const myId = useMe().data?.id;
+  const me = useMe().data;
+  const myId = me?.id;
+
+  // 「판매완료 처리」는 **내 상품일 때만** 보여야 한다(#894). 그런데 방 정보에는 파는 사람이
+  // 없어서 상품을 따로 봐야 안다.
+  //
+  // ⚠️ 메뉴를 열 때만 부른다. 채팅방에 들어올 때마다 부르면, 넷 중 하나를 위해 모두가
+  //    요청을 하나씩 더 내는 셈이다.
+  const productId = room?.productId ?? null;
+  const { data: product } = useQuery({
+    queryKey: ['product', productId],
+    queryFn: () => fetchProductDetail(productId as number),
+    enabled: isSheetOpen && productId != null,
+  });
+  const isMyProduct = Boolean(product && me && product.sellerInfo.sellerId === me.id);
 
   // 소켓을 잡는다. 화면이 사라지면 놓는다 — 목록으로 돌아가는 동안은 목록이 잡고 있어서
   // 실제로 끊기지 않는다(쓰는 곳 세기).
@@ -209,6 +230,66 @@ export default function ChatRoomScreen() {
     setDraft('');
   };
 
+  // ⋮ 메뉴에 담을 것. 웹과 같은 차례·같은 문구다(ChatRoomInfo.tsx 의 menuItems).
+  //
+  // ⚠️ **상대가 탈퇴하면 신고·차단을 아예 안 그린다.** 눌리는데 반드시 실패하는 것보다 정직하다.
+  // ⚠️ **판매완료는 내 상품일 때만 그린다.** 웹은 조건 없이 그려서 산 사람에게도 보이고,
+  //    누르면 서버가 막아 실패 알림이 뜬다(#894 에서 웹도 같이 고친다).
+  const sheetActions: SheetAction[] = [
+    ...(isMyProduct && product?.tradeStatus !== 'COMPLETED'
+      ? [
+          {
+            label: '판매완료 처리',
+            onPress: async () => {
+              setIsSheetOpen(false);
+              try {
+                // ⚠️ 값은 **COMPLETED** 다. 서버 enum 에 SOLD_OUT 은 없다(TradeStatus.java).
+                //    웹은 그 없는 값을 보내고 있어 눌러도 반드시 실패한다.
+                await updateTradeStatus(productId as number, 'COMPLETED');
+                showToast('판매완료로 바꿨어요');
+              } catch {
+                showToast('판매완료 처리에 실패했어요');
+              }
+            },
+          },
+        ]
+      : []),
+    ...(room?.opponentId != null
+      ? [
+          {
+            label: '신고하기',
+            onPress: () => {
+              setIsSheetOpen(false);
+              router.push({
+                pathname: '/report',
+                params: {
+                  kind: 'user',
+                  id: String(room.opponentId),
+                  name: room.opponentNickname ?? '',
+                },
+              });
+            },
+          },
+          {
+            label: '차단하기',
+            tone: 'danger' as const,
+            onPress: () => {
+              setIsSheetOpen(false);
+              setIsBlockOpen(true);
+            },
+          },
+        ]
+      : []),
+    {
+      label: '채팅방 나가기',
+      tone: 'danger' as const,
+      onPress: () => {
+        setIsSheetOpen(false);
+        setIsLeaveOpen(true);
+      },
+    },
+  ];
+
   // 나간 뒤에는 **뒤로 가지 않고** 채팅 목록으로 바꿔 놓는다.
   // 뒤로 가면 들어온 곳(알림·상품 상세)으로 돌아가는데, 거기서 같은 알림을 다시 누르면
   // 이미 없어진 방을 열게 된다.
@@ -304,15 +385,45 @@ export default function ChatRoomScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      {/* 「나가기」를 ⋮ 안으로 옮겼다(#894). 웹도 그 자리다 — 나가기·신고·차단·판매완료가
+          한 메뉴에 모여 있어야 「이 방에서 할 수 있는 일」이 한 곳에서 보인다. */}
       <ScreenHeader
         title="채팅"
         onPressIcon={() => router.back()}
         right={
-          <Text onPress={() => setIsLeaveOpen(true)} style={styles.leave}>
-            나가기
+          <Text
+            accessibilityRole="button"
+            accessibilityLabel="더보기"
+            onPress={() => setIsSheetOpen(true)}
+            style={styles.more}
+          >
+            ⋮
           </Text>
         }
       />
+      <ProductActionSheet
+        visible={isSheetOpen}
+        onClose={() => setIsSheetOpen(false)}
+        actions={sheetActions}
+      />
+      {/* 상대가 탈퇴하면 opponentId 가 없어 차단할 대상이 없다 — 그때는 이 창을 아예 안 만든다. */}
+      {room?.opponentId != null ? (
+        <BlockConfirm
+          visible={isBlockOpen}
+          nickname={room.opponentNickname ?? '알 수 없는 사용자'}
+          userId={room.opponentId}
+          onClose={() => setIsBlockOpen(false)}
+          onDone={() => {
+            setIsBlockOpen(false);
+            showToast('차단했습니다');
+            // 차단하면 이 방의 입력칸이 잠긴다(#877). 서버가 그 값을 메시지 조회에 실어 주므로
+            // 다시 불러 화면에 반영한다.
+            fetchChatMessages(chatRoomId, 0)
+              .then((result) => setIsOpponentBlocked(result.isOpponentBlocked))
+              .catch(() => {});
+          }}
+        />
+      ) : null}
       {/* RN 기본 Alert 대신 앱의 공용 창을 쓴다 — 차단·삭제와 같은 모양이어야 한다. */}
       <ConfirmDialog
         visible={isLeaveOpen}
@@ -354,7 +465,9 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
   flex: { flex: 1 },
   listBody: { paddingBottom: 8 },
-  leave: { fontSize: 14, color: colors.onSurfaceMuted },
+  // ⋮ 는 글자다. 아이콘을 쓰면 크기가 헤더의 다른 글자와 따로 놀아서, 웹의 EllipsisVertical
+  // 과 같은 자리·같은 무게로 맞추기 어렵다. 누를 자리를 넓히려고 좌우 여백을 준다.
+  more: { fontSize: 20, lineHeight: 20, paddingHorizontal: 6, color: colors.onSurfaceMuted },
   banner: { alignItems: 'center', paddingVertical: 6, backgroundColor: colors.surfaceSunken },
   bannerText: { fontSize: 12, color: colors.onSurfaceMuted },
   // 입력칸이 있던 자리. 테두리와 바탕을 ChatInput 과 맞춰 화면이 덜컹거리지 않게 한다.
