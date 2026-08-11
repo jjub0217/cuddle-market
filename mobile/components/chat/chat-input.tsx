@@ -10,7 +10,7 @@ interface Props {
   value: string;
   onChange: (value: string) => void;
   onSubmit: () => void;
-  /** 소켓이 안 붙어 있으면 true */
+  /** 소켓이 안 붙어 있거나, 내가 상대를 차단한 방이면 true(#877) */
   disabled: boolean;
 }
 

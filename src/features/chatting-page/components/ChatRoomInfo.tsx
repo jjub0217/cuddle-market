@@ -133,11 +133,21 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
             userNickname={data.opponentNickname}
             onCancel={() => setIsReportOpen(false)}
           />
+          {/* 차단이 끝나면 방 목록을 다시 부른다 — 거기에 isOpponentBlocked 가 실려 오고,
+              그 값으로 입력창이 잠긴다(#877). BlockModal 은 ['userPage'] 만 무효화해서
+              이걸 안 하면 차단해도 화면이 그대로다.
+
+              ⚠️ BlockModal 은 성공에도 취소에도 onCancel 을 부른다(성공하면 창을 닫으려고).
+                 그래서 취소해도 한 번 더 부르게 되는데, 방 목록 한 쪽(10개)이라 싸다.
+                 창을 고치지 않는 쪽을 골랐다 — 다른 화면 셋이 같은 창을 쓴다. */}
           <BlockModal
             isOpen={isBlockOpen}
             userId={data.opponentId}
             userNickname={data.opponentNickname}
-            onCancel={() => setIsBlockOpen(false)}
+            onCancel={() => {
+              setIsBlockOpen(false)
+              queryClient.invalidateQueries({ queryKey: ['chatRooms'] })
+            }}
           />
         </>
       ) : null}

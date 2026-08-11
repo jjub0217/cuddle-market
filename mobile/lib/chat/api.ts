@@ -74,22 +74,27 @@ export class ChatRoomAccessDeniedError extends Error {
  * 화면에 붙일 때 뒤가 아니라 **앞에** 붙여야 한다 — `prependOlder` 를 쓴다.
  *
  * ⚠️ 이 요청이 읽음 처리도 겸한다(서버가 마지막 읽은 시각을 갱신한다).
+ *
+ * ⚠️ `isOpponentBlocked` 도 여기 실려 온다. 앱 채팅방은 방 정보를 안 가져오고 메시지만
+ * 조회해서, 입력창을 잠글 값을 받을 데가 여기뿐이다(#877). 웹은 방 목록에서 읽는다.
  */
 export async function fetchChatMessages(
   chatRoomId: number,
   page: number
-): Promise<{ messages: ChatMessage[]; hasNext: boolean }> {
+): Promise<{ messages: ChatMessage[]; hasNext: boolean; isOpponentBlocked: boolean }> {
   const res = await apiFetch(`/chat/rooms/${chatRoomId}/messages?page=${page}&size=50`);
   // 나간 방이면 서버가 403 을 준다(ChatServiceImpl:371 · CHAT_ROOM_ACCESS_DENIED).
   if (res.status === 403) throw new ChatRoomAccessDeniedError();
   if (!res.ok) throw new Error(`메시지를 불러오지 못했어요 (HTTP ${res.status})`);
 
   const body = (await res.json()) as {
-    data?: { messages?: ChatMessage[]; hasNext?: boolean };
+    data?: { messages?: ChatMessage[]; hasNext?: boolean; isOpponentBlocked?: boolean };
   };
   return {
     messages: body.data?.messages ?? [],
     hasNext: body.data?.hasNext ?? false,
+    // 서버가 안 주면 안 잠근다 — 못 보내게 막는 쪽으로 넘어지면 멀쩡한 방이 먹통이 된다.
+    isOpponentBlocked: body.data?.isOpponentBlocked ?? false,
   };
 }
 

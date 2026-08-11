@@ -226,6 +226,9 @@ export const PASSWORD_UPDATE_ALERT_LIST = [
 // 원본은 @cuddle/shared에 있다(앱도 같은 것을 쓴다). 웹 화면들의 import 경로를
 // 안 바꾸려고 여기서 다시 내보낸다. 값을 고칠 일이 있으면 shared에서 고친다.
 export { PRODUCT_REPORT_REASON, USER_REPORT_REASON, USER_BLOCK_ALERT_LIST } from '@cuddle/shared'
+
+// 채팅 화면 문구도 원본은 @cuddle/shared에 있다(앱이 같은 것을 쓴다).
+export { CHAT_BLOCKED_NOTICE, CHAT_EMPTY_TITLE, CHAT_EMPTY_DESCRIPTION } from '@cuddle/shared'
 export type { ReportReason } from '@cuddle/shared'
 
 // 게시글 신고 사유는 여기 있던 POST_REPORT_REASON을 지우고

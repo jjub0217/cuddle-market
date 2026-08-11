@@ -248,6 +248,8 @@ export const typeDefs = gql`
     lastMessage: String
     lastMessageTime: String
     unreadCount: Int
+    # 내가 이 방의 상대를 차단했는가. 입력창을 잠그는 데 쓴다(#877).
+    isOpponentBlocked: Boolean
   }
 
   type ChatRoomConnection {

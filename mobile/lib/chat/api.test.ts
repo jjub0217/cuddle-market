@@ -99,6 +99,22 @@ describe('fetchChatMessages', () => {
     expect(result.messages[0].messageId).toBe(1);
     expect(result.hasNext).toBe(false);
   });
+
+  // 입력창을 잠글 값이다(#877). 앱 채팅방은 방 정보를 안 가져와서 여기서만 받는다.
+  it('isOpponentBlocked 를 꺼낸다', async () => {
+    mockFetch.mockResolvedValueOnce(
+      reply(200, { data: { messages: [], hasNext: false, isOpponentBlocked: true } })
+    );
+
+    await expect(fetchChatMessages(7, 0)).resolves.toMatchObject({ isOpponentBlocked: true });
+  });
+
+  // 서버가 아직 안 주는 동안에도 멀쩡한 방이 먹통이 되면 안 된다.
+  it('isOpponentBlocked 가 없으면 false 다', async () => {
+    mockFetch.mockResolvedValueOnce(reply(200, { data: { messages: [], hasNext: false } }));
+
+    await expect(fetchChatMessages(7, 0)).resolves.toMatchObject({ isOpponentBlocked: false });
+  });
 });
 
 describe('createChatRoom', () => {

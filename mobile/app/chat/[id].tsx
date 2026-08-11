@@ -1,3 +1,4 @@
+import { CHAT_BLOCKED_NOTICE, CHAT_EMPTY_DESCRIPTION, CHAT_EMPTY_TITLE } from '@cuddle/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
@@ -5,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ChatInput } from '@/components/chat/chat-input';
 import { MessageBubble } from '@/components/chat/message-bubble';
-import { ErrorState, LoadingState } from '@/components/list-states';
+import { EmptyState, ErrorState, LoadingState } from '@/components/list-states';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { colors } from '@/constants/colors';
@@ -51,6 +52,9 @@ export default function ChatRoomScreen() {
   const [draft, setDraft] = useState('');
   const [connected, setConnected] = useState(false);
   const [isLeaveOpen, setIsLeaveOpen] = useState(false);
+  // 내가 이 방의 상대를 차단했는가(#877). 앱 채팅방에는 차단 메뉴가 없지만 상품 상세·프로필에서
+  // 차단하면 이 방이 그대로 남는다 — 안 잠그면 차단해 놓고 허공에 글을 쓰게 된다.
+  const [isOpponentBlocked, setIsOpponentBlocked] = useState(false);
   const listRef = useRef<FlatList<Row>>(null);
   // 소켓으로 온 메시지에는 isMine 이 없어서 내 id 로 채워야 한다.
   const myId = useMe().data?.id;
@@ -108,6 +112,7 @@ export default function ChatRoomScreen() {
         if (!alive) return;
         setMessages((prev) => prependOlder(prev, result.messages));
         setHasMore(result.hasNext);
+        setIsOpponentBlocked(result.isOpponentBlocked);
         setIsLoading(false);
       })
       .catch((error) => {
@@ -147,6 +152,9 @@ export default function ChatRoomScreen() {
   };
 
   const send = () => {
+    // 잠긴 방에서는 보내지 않는다. 칸도 막혀 있지만 여기서도 한 번 더 본다 —
+    // 이건 **화면의 판단이지 서버의 규칙이 아니다**(서버는 「상대 → 나」만 막는다).
+    if (isOpponentBlocked) return;
     const content = draft.trim();
     if (content.length === 0) return;
 
@@ -221,6 +229,18 @@ export default function ChatRoomScreen() {
         />
       );
     }
+    // 방만 만들어지고 아직 한 마디도 안 오간 방. 전에는 흰 화면만 보여서 「고장인가」로 보였다.
+    // 문구는 웹과 한 곳(@cuddle/shared)에서 가져온다.
+    //
+    // ⚠️ 차단한 방에서는 설명 줄을 뺀다 — 보낼 수 없는 곳에서 「보내보세요」라고 하면 안 된다.
+    if (messages.length === 0) {
+      return (
+        <EmptyState
+          title={CHAT_EMPTY_TITLE}
+          description={isOpponentBlocked ? '' : CHAT_EMPTY_DESCRIPTION}
+        />
+      );
+    }
     return (
       <FlatList
         ref={listRef}
@@ -268,15 +288,24 @@ export default function ChatRoomScreen() {
         onClose={() => setIsLeaveOpen(false)}
         onConfirm={handleLeave}
       />
-      {/* 안 붙어 있는 동안에도 지난 메시지는 보인다(REST 로 가져왔다). 보내기만 막는다. */}
-      {!connected ? (
+      {/* 안 붙어 있는 동안에도 지난 메시지는 보인다(REST 로 가져왔다). 보내기만 막는다.
+          차단한 방에서는 이 띠를 안 띄운다 — 아래에 이미 안내가 있어 두 번 말하게 된다. */}
+      {!connected && !isOpponentBlocked ? (
         <View style={styles.banner}>
           <Text style={styles.bannerText}>연결 중이에요…</Text>
         </View>
       ) : null}
       <KeyboardAvoidingView style={styles.flex} behavior="padding">
         {renderBody()}
-        <ChatInput value={draft} onChange={setDraft} onSubmit={send} disabled={!connected} />
+        {isOpponentBlocked ? (
+          // 입력칸을 통째로 치우고 그 자리에 이유를 적는다 — **웹과 같은 방식이다.**
+          // 잠긴 칸을 남겨 두면 눌러 보고 나서야 안 되는 걸 알게 된다.
+          <View style={styles.blockedBar}>
+            <Text style={styles.blockedText}>{CHAT_BLOCKED_NOTICE}</Text>
+          </View>
+        ) : (
+          <ChatInput value={draft} onChange={setDraft} onSubmit={send} disabled={!connected} />
+        )}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -289,6 +318,15 @@ const styles = StyleSheet.create({
   leave: { fontSize: 14, color: colors.onSurfaceMuted },
   banner: { alignItems: 'center', paddingVertical: 6, backgroundColor: colors.surfaceSunken },
   bannerText: { fontSize: 12, color: colors.onSurfaceMuted },
+  // 입력칸이 있던 자리. 테두리와 바탕을 ChatInput 과 맞춰 화면이 덜컹거리지 않게 한다.
+  blockedBar: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: colors.surfaceSunken,
+    backgroundColor: colors.surface,
+  },
+  blockedText: { fontSize: 13, color: colors.onSurfaceMuted, textAlign: 'center' },
   dayWrap: { alignItems: 'center', paddingVertical: 10 },
   // 날짜 구분선은 알약이다. 웹과 같은 모양이고, 앱의 시스템 안내(「~님이 나가셨습니다」)와도
   // 같은 모양이다 — 둘 다 「시스템이 하는 말」이라 따로 놀면 안 된다.

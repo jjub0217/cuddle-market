@@ -16,6 +16,7 @@ import ChatInput from './components/ChatInput'
 import { uploadImage } from '@/lib/api/products'
 import { cn } from '@/lib/utils/cn'
 import { Z_INDEX } from '@/constants/ui'
+import { CHAT_BLOCKED_NOTICE } from '@/constants/constants'
 import Spinner from '@/components/commons/spinner/Spinner'
 import imageCompression from 'browser-image-compression'
 
@@ -91,7 +92,7 @@ export default function ChattingPage() {
         `
         query ChatRooms($page: Int!, $size: Int!) {
           chatRooms(page: $page, size: $size) {
-            chatRooms { chatRoomId productId productTitle productPrice productImageUrl opponentId opponentNickname opponentProfileImageUrl lastMessage lastMessageTime unreadCount }
+            chatRooms { chatRoomId productId productTitle productPrice productImageUrl opponentId opponentNickname opponentProfileImageUrl lastMessage lastMessageTime unreadCount isOpponentBlocked }
             currentPage hasNext
           }
         }
@@ -120,6 +121,11 @@ export default function ChattingPage() {
   }, [allRooms, chatRoomId])
 
   const isChatOpen = !!chatRoomId
+  // 내가 이 방의 상대를 차단했으면 보내는 쪽을 잠근다(#877).
+  //
+  // ⚠️ 이건 **화면의 판단이지 서버의 규칙이 아니다.** 서버는 「상대 → 나」 한 방향만 막는다.
+  //    그래서 잠기기 전에 보낸 글은 실제로 가고, 조용히 사라지는 메시지가 없다.
+  const isOpponentBlocked = selectedRoom?.isOpponentBlocked ?? false
 
   const handleSelectRoom = (room: fetchChatRoom) => {
     const roomUnreadCount = chatSocketStore.getState().chatRoomUpdates[room.chatRoomId]?.unreadCount ?? room.unreadCount ?? 0
@@ -133,6 +139,7 @@ export default function ChattingPage() {
   }
 
   const handleSend = () => {
+    if (isOpponentBlocked) return
     if (chatRoomId && inputMessage.length > 0) {
       sendMessage(Number(chatRoomId), inputMessage, 'TEXT')
       setInputMessage('')
@@ -286,6 +293,7 @@ export default function ChattingPage() {
                   onClearImageUploadError={() => setImageUploadError(null)}
                   connectionError={connectionError}
                   onClearConnectionError={() => setConnectionError(null)}
+                  isOpponentBlocked={isOpponentBlocked}
                 />
               </div>
               <div
@@ -294,38 +302,44 @@ export default function ChattingPage() {
                   Z_INDEX.HEADER
                 )}
               >
-                <div className="border-outline-variant/40 bg-surface/95 flex items-center gap-3 rounded-full border px-3 py-2">
-                  <input
-                    type="file"
-                    id="chat-file-input"
-                    ref={fileInputRef}
-                    className="hidden"
-                    accept="image/*"
-                    onChange={handleImageSend}
-                  />
-                  <label
-                    htmlFor="chat-file-input"
-                    className="border-outline-variant/60 flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full border bg-white hover:bg-gray-50"
-                    aria-label="파일 첨부"
-                  >
-                    <Plus size={18} className="text-gray-500" />
-                  </label>
-                  <ChatInput value={inputMessage} onChange={setInputMessage} onSubmit={handleSend} />
-                  <button
-                    type="button"
-                    aria-label="전송"
-                    className="bg-primary-600 hover:bg-primary-600/90 flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors"
-                    // onClick 대신 onPointerDown + preventDefault:
-                    // 모바일에서 textarea 포커스 중 버튼 탭 시 blur로 키보드가 닫히며
-                    // fixed 입력창이 점프해 click이 취소되는 문제를 차단한다.
-                    onPointerDown={(e) => {
-                      e.preventDefault()
-                      handleSend()
-                    }}
-                  >
-                    <Send size={16} className="text-white" />
-                  </button>
-                </div>
+                {isOpponentBlocked ? (
+                  // 입력칸 묶음을 통째로 안 그린다 — 잠긴 칸을 보여주는 것보다 이유를 말하는 편이
+                  // 낫다. 방과 지난 대화는 그대로 둔다(거래 이야기가 오갔을 수 있다).
+                  <p className="text-center text-sm text-gray-500">{CHAT_BLOCKED_NOTICE}</p>
+                ) : (
+                  <div className="border-outline-variant/40 bg-surface/95 flex items-center gap-3 rounded-full border px-3 py-2">
+                    <input
+                      type="file"
+                      id="chat-file-input"
+                      ref={fileInputRef}
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleImageSend}
+                    />
+                    <label
+                      htmlFor="chat-file-input"
+                      className="border-outline-variant/60 flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full border bg-white hover:bg-gray-50"
+                      aria-label="파일 첨부"
+                    >
+                      <Plus size={18} className="text-gray-500" />
+                    </label>
+                    <ChatInput value={inputMessage} onChange={setInputMessage} onSubmit={handleSend} />
+                    <button
+                      type="button"
+                      aria-label="전송"
+                      className="bg-primary-600 hover:bg-primary-600/90 flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors"
+                      // onClick 대신 onPointerDown + preventDefault:
+                      // 모바일에서 textarea 포커스 중 버튼 탭 시 blur로 키보드가 닫히며
+                      // fixed 입력창이 점프해 click이 취소되는 문제를 차단한다.
+                      onPointerDown={(e) => {
+                        e.preventDefault()
+                        handleSend()
+                      }}
+                    >
+                      <Send size={16} className="text-white" />
+                    </button>
+                  </div>
+                )}
               </div>
             </>
           ) : (
