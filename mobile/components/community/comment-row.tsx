@@ -59,7 +59,9 @@ export function CommentRow({ comment, isReply = false, isMine, onMenu, onReply }
           {isMine ? <Text style={styles.mineBadge}>내 댓글</Text> : null}
         </View>
 
-        <Text style={styles.content}>
+        {/* 댓글 본문은 꾹 눌러 복사할 수 있다(#896). 닉네임·시각·「답글 달기」는 안 켠다 —
+            누르는 것이라 꾹 누름이 겹치면 탭이 씹힌다. */}
+        <Text selectable style={styles.content}>
           {mention ? <Text style={styles.mention}>{mention}</Text> : null}
           {rest}
         </Text>

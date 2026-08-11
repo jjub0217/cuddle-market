@@ -1,6 +1,6 @@
 import { Image, type ImageLoadEventData } from 'expo-image';
 import { useMemo, useState, type ReactNode } from 'react';
-import { StyleSheet, View, type ImageStyle } from 'react-native';
+import { StyleSheet, Text, View, type ImageStyle, type TextStyle } from 'react-native';
 import { Renderer, useMarkdown, type MarkedStyles } from 'react-native-marked';
 
 import { colors } from '@/constants/colors';
@@ -127,6 +127,22 @@ function PostImage({ uri, alt, style }: { uri: string; alt?: string; style?: Ima
 class PostRenderer extends Renderer {
   override image(uri: string, alt?: string, style?: ImageStyle, title?: string): ReactNode {
     return <PostImage key={this.getKey()} uri={uri} alt={alt || title} style={style} />;
+  }
+
+  // 본문을 꾹 눌러 복사할 수 있게 한다(#896).
+  //
+  // ⚠️ **여기서만 할 수 있다.** 본문의 <Text> 는 우리가 아니라 라이브러리가 만든다.
+  //    그래서 화면 쪽에서는 selectable 을 붙일 자리가 없고, 글자를 그리는 이 메서드를
+  //    덮는 수밖에 없다. image() 를 덮는 것과 같은 방식이다.
+  //
+  // ⚠️ 원래 구현은 getTextNode(text, styles) 다(Renderer.js:102). 모양이 달라지지 않게
+  //    스타일을 그대로 넘기고 selectable 만 더한다.
+  override text(text: string | ReactNode[], styles?: TextStyle): ReactNode {
+    return (
+      <Text key={this.getKey()} selectable style={styles}>
+        {text}
+      </Text>
+    );
   }
 }
 

@@ -92,7 +92,11 @@ export function ProfileHead({ profile, isMine = false }: Props) {
         공백만 있는 소개글도 「없다」로 본다 — 웹은 저장할 때 앞뒤 공백을 안 떼고 최소
         2자만 봐서 공백 두 칸도 저장된다.
       */}
+      {/* 소개글은 꾹 눌러 복사할 수 있다(#896). 닉네임·가입일은 안 켠다.
+          ⚠️ 마이의 내 소개글은 켜지 않는다 — 그쪽은 눌러서 프로필 수정으로 가는 길이라
+             꾹 누름이 겹치면 탭이 씹힌다. */}
       <Text
+        selectable
         style={[styles.introduction, !profile.introduction?.trim() && styles.introductionEmpty]}
       >
         {profile.introduction?.trim() || (isMine ? '소개글을 작성해주세요' : '소개글이 없습니다')}
