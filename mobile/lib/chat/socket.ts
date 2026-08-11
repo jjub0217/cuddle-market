@@ -28,7 +28,11 @@ interface ClientLike {
 }
 
 interface Deps {
-  makeClient: (opts: { onConnect: (frame: IFrame) => void }) => ClientLike;
+  makeClient: (opts: {
+    onConnect: (frame: IFrame) => void;
+    /** 연결이 끊겼을 때. 다시 붙는 것은 stompjs 가 알아서 한다(reconnectDelay). */
+    onDisconnect: () => void;
+  }) => ClientLike;
   releaseDelayMs: number;
 }
 
@@ -88,9 +92,22 @@ export function createChatSocket(deps: Deps): ChatSocket {
       client = deps.makeClient({
         onConnect: () => {
           connected = true;
-          // 붙기 전에 걸어 둔 것을 이제 건다.
+          // 걸어 둔 것을 **전부** 다시 건다.
+          //
+          // ⚠️ 「아직 안 걸린 것만」 걸면 다시 붙었을 때 아무것도 안 온다. 끊겼다 붙으면
+          //    예전 sub 은 **죽은 연결에 걸린 껍데기**인데 null 이 아니라 건너뛰기 때문이다.
+          //    stompjs 는 다시 붙어도 구독을 살려주지 않는다 — 우리가 다시 걸어야 한다.
+          //    보내기는 새 연결로 잘 나가서 **오류도 없이 받기만 조용히 멈춘다**(#882).
+          //
+          //    CONNECTED 프레임은 새 연결에서만 오므로, 여기서는 예전 sub 이 늘 죽어 있다.
+          //    풀 필요 없이 덮어쓰면 된다 — 서버 쪽 구독은 연결과 함께 사라졌다.
+          entries.forEach((entry) => bind(entry));
+        },
+        onDisconnect: () => {
+          connected = false;
+          // 죽은 구독은 못 쓴다. 비워 두면 다시 붙을 때 새로 건다.
           entries.forEach((entry) => {
-            if (!entry.sub) bind(entry);
+            entry.sub = null;
           });
         },
       });
@@ -149,7 +166,7 @@ export function chatSocketUrl(): string {
 
 /** 앱이 실제로 쓰는 하나. */
 export const chatSocket = createChatSocket({
-  makeClient: ({ onConnect }) =>
+  makeClient: ({ onConnect, onDisconnect }) =>
     new Client({
       // ⚠️ brokerURL 이 아니라 webSocketFactory 다. RN 전역의 WebSocket 을 쓴다.
       webSocketFactory: () => new WebSocket(chatSocketUrl()),
@@ -167,6 +184,10 @@ export const chatSocket = createChatSocket({
       forceBinaryWSFrames: true,
       appendMissingNULLonIncoming: true,
       onConnect,
+      // ⚠️ **소켓이 닫힌 것을 여기서만 알 수 있다.** 이걸 안 달면 끊겨도 connected 가
+      //    참으로 남아, 화면에 「연결 중이에요…」 띠가 안 뜨고 publish 도 참을 돌려줘
+      //    보내기 실패가 조용히 지나간다(#882).
+      onWebSocketClose: onDisconnect,
     }) as unknown as ClientLike,
   releaseDelayMs: RELEASE_DELAY_MS,
 });
