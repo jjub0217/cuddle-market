@@ -298,7 +298,9 @@ export default function ChattingPage() {
       ) : null}
       <div
         className={cn(
-          'border-outline-variant/10 bg-surface relative flex h-full flex-col border shadow-2xl md:mx-auto md:h-[calc(100vh-8rem)] md:w-full md:max-w-7xl md:flex-row md:rounded-3xl',
+          // 판은 흰색이다. 오른쪽 대화 쪽이 안에서 bg-white 로 덮고 있어서, 판이 크림이면
+          // **왼쪽 목록만 크림**으로 남아 한 판이 두 색으로 갈렸다(#891).
+          'border-outline-variant/10 bg-surface-container-lowest relative flex h-full flex-col border shadow-2xl md:mx-auto md:h-[calc(100vh-8rem)] md:w-full md:max-w-7xl md:flex-row md:rounded-3xl',
           isChatOpen ? 'flex-1 overflow-hidden md:flex-none' : ''
         )}
       >
@@ -314,13 +316,16 @@ export default function ChattingPage() {
         </div>
         <section
           className={cn(
-            'relative flex w-full flex-col overflow-hidden border-l border-gray-300 max-md:flex-1 md:flex md:w-224',
+            // 목록과 대화 사이에 선을 안 긋는다(#891). 판이 흰 한 장이라 색이 이미 갈라 주고,
+            // 선을 그으면 그 자리만 gray-300(찬 회색)이라 따뜻한 화면에서 튄다.
+            'relative flex w-full flex-col overflow-hidden max-md:flex-1 md:flex md:w-224',
             isChatOpen ? 'flex' : 'hidden'
           )}
         >
           {selectedRoom ? (
             <>
-              <div className="border-outline-variant/60 sticky top-0 shrink-0 border-b bg-white md:static md:top-16">
+              {/* 상품 정보 아래에도 선을 안 긋는다(#891) — 그 칸 자체가 연베이지라 이미 갈라진다. */}
+              <div className="sticky top-0 shrink-0 bg-white md:static md:top-16">
                 <ChatRoomInfo data={selectedRoom} onLeaveRoom={handleLeaveRoom} onBack={handleBack} />
               </div>
               <div className="min-h-0 flex-1 overflow-y-auto bg-white px-3.5 pt-0 pb-20 md:pt-3.5 md:pb-3.5">
@@ -342,7 +347,8 @@ export default function ChattingPage() {
               </div>
               <div
                 className={cn(
-                  'fixed right-0 bottom-0 left-0 border-t border-gray-300 bg-white px-3.5 py-3.5 md:relative',
+                  // 입력칸 위에도 선을 안 긋는다(#891). 입력칸 자신의 테두리가 이미 경계다.
+                  'fixed right-0 bottom-0 left-0 bg-white px-3.5 py-3.5 md:relative',
                   Z_INDEX.HEADER
                 )}
               >
