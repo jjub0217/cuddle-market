@@ -70,12 +70,30 @@ export const chatSocketStore = create<ChatSocketState>((set, get) => ({
             }))
           })
           set({ socket, isConnected: true })
+
+          // 보고 있던 방을 다시 구독한다.
+          //
+          // ⚠️ **다시 붙었을 때 이걸 안 하면 그 방만 조용히 죽는다.** 개인 큐 셋은 바로 위에서
+          //    다시 걸리지만 `/topic/chat/{방번호}` 는 여기서만 건다. 그러면 알림·목록은
+          //    갱신되는데 방에는 새 메시지가 안 들어오는 반쪽 상태가 된다(#884).
+          //    보내기는 새 연결로 잘 나가서 오류도 안 난다.
+          const roomId = get().currentRoomId
+          if (roomId !== null) get().subscribeToRoom(roomId)
         } catch {
           set({ connectionError: '채팅 서버 연결에 문제가 발생했습니다.' })
         }
       },
       onDisconnect: () => {
-        set({ isConnected: false })
+        set({ isConnected: false, subscriptions: {} })
+      },
+      // ⚠️ **줄이 뚝 끊기면 onDisconnect 는 안 온다.** 그건 DISCONNECT 를 주고받고 끊을 때만
+      //    온다. 이걸 안 달면 끊겨도 isConnected 가 참으로 남아, 다시 붙어도 화면이
+      //    「계속 붙어 있었다」고 여긴다(#884).
+      //
+      //    구독은 연결과 함께 죽었으니 unsubscribe 하지 않는다 — 죽은 것에 부르면 던진다.
+      //    비워 두면 다시 붙을 때 새로 건다.
+      onWebSocketClose: () => {
+        set({ isConnected: false, subscriptions: {} })
       },
       onStompError: (frame) => {
         set({ connectionError: frame.headers['message'] || '채팅 서버 연결에 문제가 발생했습니다.' })
