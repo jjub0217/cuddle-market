@@ -29,17 +29,21 @@ const noop = vi.fn()
 
 describe('채팅 입력칸 높이', () => {
   it('한 줄이면 잰 높이를 그대로 쓴다', () => {
+    // 36 = 글자 한 줄 20px + 위아래 여백 8px×2. 단추(size-9)와 같은 키라서 나란히 선다(#890).
     measuredHeight = 36
     render(<ChatInput value="안녕하세요" onChange={noop} onSubmit={noop} />)
 
     expect(screen.getByPlaceholderText('메시지를 입력하세요')).toHaveStyle({ height: '36px' })
   })
 
-  it('길어지면 120px 에서 멈춘다', () => {
-    // 앱과 같은 값이다(mobile 의 maxHeight: 120). 여기를 넘으면 칸 안에서 스크롤한다.
+  it('길어지면 136px 에서 멈춘다', () => {
+    // 136 = 여섯 줄(20px×6) + 위아래 여백(8px×2). 여기를 넘으면 칸 안에서 스크롤한다.
+    //
+    // ⚠️ 예전에는 120이었다. scrollHeight 는 여백까지 재므로, 세로 정렬을 맞추려고 여백을
+    //    준 뒤로 120은 다섯 줄밖에 안 된다(#890). 지키려던 것은 숫자가 아니라 **여섯 줄**이다.
     measuredHeight = 400
     render(<ChatInput value={'긴 글\n'.repeat(30)} onChange={noop} onSubmit={noop} />)
 
-    expect(screen.getByPlaceholderText('메시지를 입력하세요')).toHaveStyle({ height: '120px' })
+    expect(screen.getByPlaceholderText('메시지를 입력하세요')).toHaveStyle({ height: '136px' })
   })
 })

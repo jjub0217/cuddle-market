@@ -203,7 +203,8 @@ export function ChatLog({
       {Object.entries(groupedMessages).map(([dateKey, messages]) => (
         <div key={dateKey} className="flex flex-col gap-3">
           <div className="mt-3.5 flex justify-center">
-            <span className="rounded-full bg-[#eae7e7] px-3 py-1 text-xs font-semibold text-[#756652]">
+            {/* 날짜 알약. 예전에는 찬 회색(#eae7e7)이라 따뜻한 베이지 화면에서 혼자 튀었다(#891). */}
+            <span className="bg-chip-surface text-on-surface-muted rounded-full px-3 py-1 text-xs font-semibold">
               {formatChatDate(messages[0].createdAt)}
             </span>
           </div>
@@ -245,7 +246,8 @@ export function ChatLog({
                     <span
                       className={cn(
                         'max-w-[62ch] rounded-b-2xl px-3 py-2 text-sm whitespace-pre-wrap',
-                        isMine ? 'rounded-tl-2xl bg-[#633f00] text-white' : 'bg-surface-container-low rounded-tr-2xl'
+                        // primary-700 은 #633f00 — 색은 그대로고 토큰으로만 바꿨다(#891).
+                        isMine ? 'bg-primary-700 rounded-tl-2xl text-white' : 'bg-surface-container-low rounded-tr-2xl'
                       )}
                     >
                       {message.content}
