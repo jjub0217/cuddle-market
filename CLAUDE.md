@@ -51,6 +51,8 @@ git diff --name-only develop...HEAD -- 'src/**/*.ts*' 'packages/**/*.ts' | tr '\
 - **`pnpm lint`는 이제 게이트다** (#788에서 오류 10건을 다 없앴다). 오류가 하나라도 생기면 `pnpm gate`가 막힌다.
 - 경고는 36건에서 **더 늘지 못하게 막아 뒀다**(`lint:strict`의 `--max-warnings 36`). 경고를 줄이면 그 숫자도 같이 낮춘다. 예전에 26,271건까지 불어난 적이 있어 되돌아가지 않게 잠가 둔 것이다.
 
+⚠️ **웹 파일에 `npx prettier --write` 를 돌리지 마라.** 저장된 코드가 프리티어 설정과 조금 달라서, 고친 곳 말고 **관계없는 줄까지 다시 접힌다.** 2026-08-11 에 diff 가 세 배로 불어나 되돌렸다. 들여쓰기는 손으로 맞춘다.
+
 **러너가 셋이다.** 어디에 시험을 쓸지는 그 코드가 사는 곳으로 정한다.
 
 ```
@@ -133,6 +135,12 @@ find ~/Desktop/cmarket_api -name "*Response.java" | grep -i <이름>
 grep -nE "private |public class" <그 파일>
 ```
 
+**보내는 값도 직접 열어본다.** 응답 DTO 못지않게 **서버 enum** 이 자주 어긋난다. 2026-08-11 에 웹 채팅방의 「판매완료 처리」가 `SOLD_OUT` 을 보내고 있었는데 서버 값은 `SELLING · RESERVED · COMPLETED` 뿐이어서, **누르면 반드시 실패하는데도 아무도 몰랐다** — 실패 알림이 서버 탈처럼 보였기 때문이다. GraphQL 스키마가 `String!` 이라 타입체크도 안 걸린다.
+
+```bash
+find ~/Desktop/cmarket_api -name "*.java" | xargs grep -ln "enum <이름>"
+```
+
 ## 마이그레이션 가이드
 
 자세한 가이드는 `docs/migration-guide.md` 참고
@@ -144,6 +152,21 @@ grep -nE "private |public class" <그 파일>
 - `/daily-scrum` - DAILY SCRUM 노션 페이지 생성 (기본)
 - `/context-sync` - Notion + GitHub 병렬 수집 → 싱크 문서 + Daily Scrum 페이지 생성 (고급)
 - `/schedule` - Schedule List 일정 등록
+
+## 이슈·PR 템플릿
+
+**템플릿은 기억으로 쓰지 말고 파일을 열어 그대로 따른다.**
+
+```
+.github/PULL_REQUEST_TEMPLATE.md            📌 개요 / 🔧 작업 내용 / 📎 관련 이슈 / 📸 스크린샷 / 💬 리뷰어 참고 사항
+.github/ISSUE_TEMPLATE/bug_report.md        제목 [BUG] · 🐞 버그 설명 / ✅ 재현 방법 / 🎯 예상 동작 / 🖥 환경 정보
+.github/ISSUE_TEMPLATE/feature_request.md   제목 feat: · ✨ 제안 개요 / 🛠 작업 내용 / 📌 참고 자료
+.github/ISSUE_TEMPLATE/refactor-issue.md    제목 refactor: · ♻️ 리팩토링 대상 / 📌 개선 이유 / 🛠 기대 결과
+```
+
+⚠️ **관련 이슈는 목록 항목(`- Close #번호`)으로 적는다.** 그냥 문단으로 적으면 GitHub 가 **이슈 제목을 안 펼치고 번호만** 보여준다. 2026-08-11 에 PR 다섯을 그렇게 올려 다시 고쳤다.
+
+⚠️ **기능 이슈 제목은 `[FEAT]` 가 아니라 `feat:` 다.** 버그의 `[BUG]` 를 보고 지어내기 쉽다 — 같은 날 이슈 셋을 그렇게 잘못 썼다.
 
 ## 머지 워크플로우
 
