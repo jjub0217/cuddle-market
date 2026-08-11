@@ -298,7 +298,9 @@ export default function ChattingPage() {
       ) : null}
       <div
         className={cn(
-          'border-outline-variant/10 bg-surface relative flex h-full flex-col border shadow-2xl md:mx-auto md:h-[calc(100vh-8rem)] md:w-full md:max-w-7xl md:flex-row md:rounded-3xl',
+          // 판은 흰색이다. 오른쪽 대화 쪽이 안에서 bg-white 로 덮고 있어서, 판이 크림이면
+          // **왼쪽 목록만 크림**으로 남아 한 판이 두 색으로 갈렸다(#891).
+          'border-outline-variant/10 bg-surface-container-lowest relative flex h-full flex-col border shadow-2xl md:mx-auto md:h-[calc(100vh-8rem)] md:w-full md:max-w-7xl md:flex-row md:rounded-3xl',
           isChatOpen ? 'flex-1 overflow-hidden md:flex-none' : ''
         )}
       >
