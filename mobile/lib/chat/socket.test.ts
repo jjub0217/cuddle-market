@@ -46,6 +46,7 @@ function make() {
   const socket = createChatSocket({
     makeClient: (opts: any) => {
       client.onConnect = opts.onConnect;
+      client.onDisconnect = opts.onDisconnect;
       return client;
     },
     // 끊기를 늦추는 시간. 시험에서는 0으로 둬서 바로 끊기게 한다.
@@ -56,13 +57,24 @@ function make() {
     client.connected = true;
     client.onConnect({ headers: {} });
   };
+  /**
+   * 연결이 끊긴 것으로 친다.
+   *
+   * 실제로도 그렇듯 **걸려 있던 구독은 연결과 함께 사라진다.** 서버 쪽 구독이
+   * 남아 있는 것처럼 흉내 내면 다시 붙었을 때의 탈을 못 잡는다.
+   */
+  const disconnect = () => {
+    client.connected = false;
+    client.handlers = [];
+    client.onDisconnect();
+  };
   /** 서버가 그 목적지로 메시지를 보낸 것으로 친다. */
   const deliver = (destination: string, payload: unknown) => {
     client.handlers
       .filter((h: any) => h.destination === destination)
       .forEach((h: any) => h.cb({ body: JSON.stringify(payload) }));
   };
-  return { client, socket, connect, deliver };
+  return { client, socket, connect, disconnect, deliver };
 }
 
 describe('쓰는 화면 세기', () => {
@@ -114,6 +126,65 @@ describe('구독', () => {
     connect();
     socket.subscribe('/user/queue/chat', jest.fn());
     expect(client.subscribe).toHaveBeenCalledTimes(1);
+  });
+});
+
+// 끊겼다 다시 붙는 일은 늘 있다 — 지하철·비행기모드·화면을 오래 열어 둘 때.
+// 그때 구독이 안 살아나면 **보내기는 되는데 받기만 조용히 멈춘다**(#882).
+describe('끊겼다 다시 붙기', () => {
+  it('다시 붙으면 걸어 둔 구독을 다시 건다', () => {
+    const { socket, connect, disconnect, deliver } = make();
+    socket.acquire();
+    connect();
+
+    const cb = jest.fn();
+    socket.subscribe('/topic/chat/16', cb);
+
+    disconnect();
+    connect();
+    deliver('/topic/chat/16', { messageId: 1 });
+
+    expect(cb).toHaveBeenCalledWith({ messageId: 1 });
+  });
+
+  it('다시 붙어도 푼 구독은 안 살아난다', () => {
+    const { socket, connect, disconnect, deliver } = make();
+    socket.acquire();
+    connect();
+
+    const cb = jest.fn();
+    const off = socket.subscribe('/topic/chat/16', cb);
+    off();
+
+    disconnect();
+    connect();
+    deliver('/topic/chat/16', { messageId: 2 });
+
+    expect(cb).not.toHaveBeenCalled();
+  });
+
+  it('끊기면 안 붙은 것으로 본다', () => {
+    const { socket, connect, disconnect } = make();
+    socket.acquire();
+    connect();
+    expect(socket.isConnected()).toBe(true);
+
+    disconnect();
+
+    // 화면이 이 값으로 「연결 중이에요…」 띠를 띄우고 보내기를 막는다.
+    expect(socket.isConnected()).toBe(false);
+  });
+
+  it('끊긴 동안에는 보내지 않고 false 를 준다', () => {
+    const { client, socket, connect, disconnect } = make();
+    socket.acquire();
+    connect();
+    client.publish.mockClear();
+
+    disconnect();
+
+    expect(socket.publish('/app/chat/message', { a: 1 })).toBe(false);
+    expect(client.publish).not.toHaveBeenCalled();
   });
 });
 
