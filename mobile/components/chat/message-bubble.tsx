@@ -1,11 +1,40 @@
 import { formatChatTime } from '@cuddle/shared';
+import { Image } from 'expo-image';
+import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { colors } from '@/constants/colors';
 import type { ChatMessage } from '@/lib/chat/api';
 
-// 말풍선 하나. 세 갈래다 — 안내(SYSTEM) · 막힌 내 메시지 · 보통.
+// 말풍선 하나. 네 갈래다 — 안내(SYSTEM) · 막힌 내 메시지 · 사진(IMAGE) · 보통.
 // 웹 ChatLog.tsx 의 갈래와 같다.
+//
+// ⚠️ **사진을 안 그리면 빈 말풍선이 뜬다.** 사진 메시지는 content 가 비어 있고 imageUrl 에만
+//    값이 있다. 앱에서 보낼 길이 없던 동안에도 **웹에서 보낸 사진은 이미 오고 있었다**(#900).
+
+/** 사진 말풍선. 못 불러오면 자리만 남긴다 — 웹도 자리표시자를 둔다(ChatLog 의 ChatImageMessage). */
+function ImageMessage({ uri, mine }: { uri: string | null; mine: boolean }) {
+  const [failed, setFailed] = useState(false);
+
+  return (
+    <View style={[styles.photo, mine ? styles.photoMine : styles.photoTheirs]}>
+      {uri && !failed ? (
+        <Image
+          source={{ uri }}
+          style={styles.photoImage}
+          contentFit="cover"
+          // 읽어 주는 이름이 없으면 화면 낭독기가 「그림」이라고만 읽는다.
+          accessibilityLabel={mine ? '내가 보낸 사진' : '받은 사진'}
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <View style={styles.photoFallback}>
+          <Text style={styles.photoFallbackText}>사진을 불러오지 못했어요</Text>
+        </View>
+      )}
+    </View>
+  );
+}
 
 export function MessageBubble({ message }: { message: ChatMessage }) {
   if (message.messageType === 'SYSTEM') {
@@ -31,6 +60,16 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
     );
   }
 
+  // 사진은 말풍선 대신 그림을 그린다. content 는 비어 있다.
+  if (message.messageType === 'IMAGE') {
+    return (
+      <View style={[styles.row, message.isMine ? styles.rowMine : styles.rowTheirs]}>
+        <ImageMessage uri={message.imageUrl} mine={message.isMine} />
+        <Text style={styles.time}>{formatChatTime(message.createdAt)}</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.row, message.isMine ? styles.rowMine : styles.rowTheirs]}>
       {/* 꾹 눌러 복사할 수 있다(#896). 계좌번호·주소처럼 옮겨 적을 것이 오간다.
@@ -50,6 +89,20 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
 }
 
 const styles = StyleSheet.create({
+  // 웹은 w-48(192) · md 에서 w-72 인데, 폰에는 큰 화면이 없어 한 값으로 둔다.
+  // 정사각이다 — 세로로 긴 사진이 대화를 통째로 밀어내지 않게(웹도 aspect-square).
+  photo: { width: 192, height: 192, borderRadius: 12, overflow: 'hidden' },
+  // 말풍선과 같은 쪽 모서리만 각지게 — 글자 말풍선과 나란히 놓았을 때 결이 맞는다
+  photoMine: { borderTopRightRadius: 4 },
+  photoTheirs: { borderTopLeftRadius: 4 },
+  photoImage: { width: '100%', height: '100%' },
+  photoFallback: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surfaceSunken,
+  },
+  photoFallbackText: { fontSize: 12, color: colors.onSurfaceMuted },
   row: {
     // 줄은 화면 폭을 다 쓴다. 그래야 안에서 왼쪽·오른쪽으로 몰 수 있다.
     width: '100%',

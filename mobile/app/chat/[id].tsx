@@ -16,6 +16,7 @@ import { ProductActionSheet, type SheetAction } from '@/components/my/product-ac
 import { BlockConfirm } from '@/components/report/block-confirm';
 import { useMe } from '@/hooks/use-me';
 import { updateTradeStatus } from '@/lib/product-actions';
+import { MAX_IMAGES, pickImages, shrinkImage, uploadOne } from '@/lib/product-images';
 import { fetchProductDetail } from '@/lib/products';
 import {
   ChatRoomAccessDeniedError,
@@ -76,6 +77,7 @@ export default function ChatRoomScreen() {
   const [room, setRoom] = useState<ChatRoomSummary | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isBlockOpen, setIsBlockOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const listRef = useRef<FlatList<Row>>(null);
   // 소켓으로 온 메시지에는 isMine 이 없어서 내 id 로 채워야 한다.
   const me = useMe().data;
@@ -299,6 +301,41 @@ export default function ChatRoomScreen() {
     },
   ];
 
+  // 사진 보내기(#900). 고르기·줄이기·올리기는 상품 등록이 쓰던 것을 그대로 쓴다.
+  //
+  // ⚠️ **한 장씩 보낸다.** 여러 장을 골라도 올라간 순서대로 하나씩 나간다 — 사진 하나가
+  //    말풍선 하나다. 웹도 그렇다.
+  // ⚠️ 폰 사진은 3~8MB라 줄이지 않으면 서버가 거절한다(한 장 5MB). shrinkImage 가 800px·webp 로
+  //    줄이고, 덤으로 아이폰 HEIC 도 서버 허용 형식으로 바뀐다.
+  const handlePickImage = async () => {
+    const picked = await pickImages(MAX_IMAGES);
+    if (picked.length === 0) return;
+
+    setIsUploading(true);
+    try {
+      for (const image of picked) {
+        const shrunk = await shrinkImage(image.uri);
+        const url = await uploadOne(shrunk);
+        const ok = chatSocket.publish('/app/chat/message', {
+          chatRoomId,
+          content: '',
+          messageType: 'IMAGE',
+          imageUrl: url,
+        });
+        if (!ok) {
+          // 웹 문구 그대로다.
+          showToast('메시지를 전송할 수 없습니다. 채팅 서버에 연결되어 있지 않습니다.');
+          break;
+        }
+      }
+    } catch {
+      // 웹 문구 그대로다("이미지 업로드에 실패했습니다. 잠시 후 다시 시도해주세요").
+      showToast('이미지 업로드에 실패했어요. 잠시 후 다시 시도해주세요');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   // 나간 뒤에는 **뒤로 가지 않고** 채팅 목록으로 바꿔 놓는다.
   // 뒤로 가면 들어온 곳(알림·상품 상세)으로 돌아가는데, 거기서 같은 알림을 다시 누르면
   // 이미 없어진 방을 열게 된다.
@@ -467,7 +504,14 @@ export default function ChatRoomScreen() {
             <Text style={styles.blockedText}>{CHAT_BLOCKED_NOTICE}</Text>
           </View>
         ) : (
-          <ChatInput value={draft} onChange={setDraft} onSubmit={send} disabled={!connected} />
+          <ChatInput
+            value={draft}
+            onChange={setDraft}
+            onSubmit={send}
+            disabled={!connected}
+            onPickImage={handlePickImage}
+            uploading={isUploading}
+          />
         )}
       </KeyboardAvoidingView>
     </SafeAreaView>
