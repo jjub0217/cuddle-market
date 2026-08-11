@@ -52,6 +52,26 @@ export async function fetchChatRooms(
 }
 
 /**
+ * 채팅방 머리말에 그릴 것 — **상대**와 **무슨 상품** 이야기인가(#889).
+ *
+ * ⚠️ **일곱 값이 다 없을 수 있다.** 서버가 아직 안 실어 보내는 동안에도 화면이 멀쩡해야 해서
+ * 전부 `| null` 로 둔다. 방 목록(`ChatRoomListItem`)에는 같은 이름의 값이 **안 비는 것으로**
+ * 들어 있는데, 여기서는 그 타입을 그대로 쓰면 안 된다 — 「있는 것처럼 보이는」 타입이 된다.
+ *
+ * ⚠️ **상대가 회원 탈퇴하면 `opponentId` 가 없다.** 닉네임은 「알 수 없는 사용자」로 온다.
+ * 그때는 프로필로 가는 길을 안 만든다 — 웹도 그렇다(`ChatRoomInfo.tsx:154`).
+ */
+export interface ChatRoomSummary {
+  opponentId: number | null;
+  opponentNickname: string | null;
+  opponentProfileImageUrl: string | null;
+  productId: number | null;
+  productTitle: string | null;
+  productPrice: number | null;
+  productImageUrl: string | null;
+}
+
+/**
  * 이미 나갔거나 낄 수 없는 방(403).
  *
  * 화면에서 「다시 시도」 대신 「이미 나간 방」 안내를 띄우려고 따로 구분한다.
@@ -77,24 +97,49 @@ export class ChatRoomAccessDeniedError extends Error {
  *
  * ⚠️ `isOpponentBlocked` 도 여기 실려 온다. 앱 채팅방은 방 정보를 안 가져오고 메시지만
  * 조회해서, 입력창을 잠글 값을 받을 데가 여기뿐이다(#877). 웹은 방 목록에서 읽는다.
+ *
+ * ⚠️ 상대·상품(`room`)도 같은 이유로 여기 얹혀 온다(#889). **방 단건 조회 API 가 없고**,
+ * 방 목록은 열 개씩 나뉘어 있어 알림으로 바로 들어온 방은 첫 쪽에 없을 수 있다.
+ * 서버가 아직 안 줄 때는 값이 다 `null` 이고, 그러면 화면이 머리말을 안 그린다.
  */
 export async function fetchChatMessages(
   chatRoomId: number,
   page: number
-): Promise<{ messages: ChatMessage[]; hasNext: boolean; isOpponentBlocked: boolean }> {
+): Promise<{
+  messages: ChatMessage[];
+  hasNext: boolean;
+  isOpponentBlocked: boolean;
+  room: ChatRoomSummary;
+}> {
   const res = await apiFetch(`/chat/rooms/${chatRoomId}/messages?page=${page}&size=50`);
   // 나간 방이면 서버가 403 을 준다(ChatServiceImpl:371 · CHAT_ROOM_ACCESS_DENIED).
   if (res.status === 403) throw new ChatRoomAccessDeniedError();
   if (!res.ok) throw new Error(`메시지를 불러오지 못했어요 (HTTP ${res.status})`);
 
   const body = (await res.json()) as {
-    data?: { messages?: ChatMessage[]; hasNext?: boolean; isOpponentBlocked?: boolean };
+    data?: {
+      messages?: ChatMessage[];
+      hasNext?: boolean;
+      isOpponentBlocked?: boolean;
+    } & Partial<ChatRoomSummary>;
   };
+  const data = body.data;
   return {
-    messages: body.data?.messages ?? [],
-    hasNext: body.data?.hasNext ?? false,
+    messages: data?.messages ?? [],
+    hasNext: data?.hasNext ?? false,
     // 서버가 안 주면 안 잠근다 — 못 보내게 막는 쪽으로 넘어지면 멀쩡한 방이 먹통이 된다.
-    isOpponentBlocked: body.data?.isOpponentBlocked ?? false,
+    isOpponentBlocked: data?.isOpponentBlocked ?? false,
+    // 서버가 안 주면 다 null 이다. 여기서 던지면 **메시지까지 못 보게 된다** —
+    // 머리말은 곁들이는 것이지 방을 여는 조건이 아니다.
+    room: {
+      opponentId: data?.opponentId ?? null,
+      opponentNickname: data?.opponentNickname ?? null,
+      opponentProfileImageUrl: data?.opponentProfileImageUrl ?? null,
+      productId: data?.productId ?? null,
+      productTitle: data?.productTitle ?? null,
+      productPrice: data?.productPrice ?? null,
+      productImageUrl: data?.productImageUrl ?? null,
+    },
   };
 }
 

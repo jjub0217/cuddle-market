@@ -116,6 +116,83 @@ describe('fetchChatMessages', () => {
 
     await expect(fetchChatMessages(7, 0)).resolves.toMatchObject({ isOpponentBlocked: false });
   });
+
+  // 머리말에 그릴 상대·상품(#889). 방 단건 조회 API 가 없어 여기 얹혀 온다.
+  it('상대·상품을 꺼낸다', async () => {
+    mockFetch.mockResolvedValueOnce(
+      reply(200, {
+        data: {
+          messages: [],
+          hasNext: false,
+          opponentId: 9,
+          opponentNickname: '홍길동',
+          opponentProfileImageUrl: 'https://cdn/me.webp',
+          productId: 3,
+          productTitle: '개구리 사료',
+          productPrice: 12000,
+          productImageUrl: 'https://cdn/x.webp',
+        },
+      })
+    );
+
+    const result = await fetchChatMessages(7, 0);
+
+    expect(result.room).toEqual({
+      opponentId: 9,
+      opponentNickname: '홍길동',
+      opponentProfileImageUrl: 'https://cdn/me.webp',
+      productId: 3,
+      productTitle: '개구리 사료',
+      productPrice: 12000,
+      productImageUrl: 'https://cdn/x.webp',
+    });
+  });
+
+  // ⚠️ **서버가 아직 안 얹어 준다.** 그동안에도 메시지는 그대로 보여야 한다 —
+  //    머리말은 곁들이는 것이지 방을 여는 조건이 아니다.
+  it('상대·상품이 없으면 다 null 이고 메시지는 그대로 온다', async () => {
+    mockFetch.mockResolvedValueOnce(
+      reply(200, {
+        data: {
+          messages: [{ messageId: 1, content: '안녕하세요' }],
+          hasNext: false,
+        },
+      })
+    );
+
+    const result = await fetchChatMessages(7, 0);
+
+    expect(result.messages).toHaveLength(1);
+    expect(result.room).toEqual({
+      opponentId: null,
+      opponentNickname: null,
+      opponentProfileImageUrl: null,
+      productId: null,
+      productTitle: null,
+      productPrice: null,
+      productImageUrl: null,
+    });
+  });
+
+  // 탈퇴한 상대. 서버가 id 를 안 주고 닉네임만 「알 수 없는 사용자」로 준다 —
+  // 화면은 이 값으로 프로필 링크를 뗀다.
+  it('탈퇴한 상대는 opponentId 가 null 이고 닉네임은 남는다', async () => {
+    mockFetch.mockResolvedValueOnce(
+      reply(200, {
+        data: {
+          messages: [],
+          hasNext: false,
+          opponentNickname: '알 수 없는 사용자',
+          productId: 3,
+        },
+      })
+    );
+
+    const result = await fetchChatMessages(7, 0);
+
+    expect(result.room.opponentId).toBeNull();
+    expect(result.room.opponentNickname).toBe('알 수 없는 사용자');
+  });
 });
 
 // 「나는 이 방을 보고 있다」를 다시 알리는 요청(#886). 서버 표시가 5분에 만료되는데
