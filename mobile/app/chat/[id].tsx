@@ -1,6 +1,6 @@
 import { CHAT_BLOCKED_NOTICE, CHAT_EMPTY_DESCRIPTION, CHAT_EMPTY_TITLE } from '@cuddle/shared';
 import { useQuery } from '@tanstack/react-query';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -257,6 +257,15 @@ export default function ChatRoomScreen() {
     ...(room?.opponentId != null
       ? [
           {
+            // 닉네임이 헤더 제목으로 올라가면서 눌러서 프로필로 가는 길이 사라졌다.
+            // 그 길을 여기서 되살린다(#898).
+            label: '프로필 보기',
+            onPress: () => {
+              setIsSheetOpen(false);
+              router.push(`/(tabs)/(home)/users/${room.opponentId}` as Href);
+            },
+          },
+          {
             label: '신고하기',
             onPress: () => {
               setIsSheetOpen(false);
@@ -387,8 +396,12 @@ export default function ChatRoomScreen() {
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       {/* 「나가기」를 ⋮ 안으로 옮겼다(#894). 웹도 그 자리다 — 나가기·신고·차단·판매완료가
           한 메뉴에 모여 있어야 「이 방에서 할 수 있는 일」이 한 곳에서 보인다. */}
+      {/* 제목은 **상대 닉네임**이다(#898). 「채팅」은 이미 아는 사람에게 아무것도 안 알려주고,
+          그 자리를 쓰면 상대 줄이 통째로 빠져 대화가 그만큼 길어진다.
+          값이 아직 안 왔을 때만 「채팅」으로 둔다 — 빈 헤더보다 낫다. */}
       <ScreenHeader
-        title="채팅"
+        title={room?.opponentNickname ?? '채팅'}
+        align="left"
         onPressIcon={() => router.back()}
         right={
           <Text

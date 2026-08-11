@@ -7,8 +7,8 @@ import { ChatRoomInfo } from './chat-room-info';
 
 // 채팅방 머리말(#889). 여기서 지키는 것은 셋이다.
 //   1. 서버가 값을 안 줘도 안 깨진다
-//   2. 탈퇴한 상대에게는 프로필로 가는 길을 안 만든다
-//   3. 상품을 누르면 **그룹까지 적힌** 주소로 민다 (안 적으면 뒤로가기가 어긋난다)
+//   2. 상품을 누르면 **그룹까지 적힌** 주소로 민다 (안 적으면 뒤로가기가 어긋난다)
+//   3. 상대는 여기서 안 그린다 — 닉네임은 헤더로 갔다(#898)
 //
 // ⚠️ @testing-library/react-native 14의 render·fireEvent는 기다려야 한다.
 //    안 기다리면 fireEvent는 오류 없이 옛 값을 준다 — 조용히 틀린 것을 통과시킨다(mobile/AGENTS.md).
@@ -51,10 +51,9 @@ beforeEach(() => {
   push.mockReset();
 });
 
-it('상대와 상품이 보인다', async () => {
+it('상품이 보인다', async () => {
   await render(<ChatRoomInfo room={방()} />);
 
-  expect(screen.getByText('홍길동')).toBeTruthy();
   expect(screen.getByText('개구리 사료')).toBeTruthy();
   // 웹 ChatProductCard 와 같은 표기다 — 「12,000원」
   expect(screen.getByText('12,000원')).toBeTruthy();
@@ -69,23 +68,13 @@ it('상품을 누르면 홈 스택의 상품 상세로 간다', async () => {
   expect(push).toHaveBeenCalledWith('/(tabs)/(home)/products/3');
 });
 
-it('상대를 누르면 그 사람 프로필로 간다', async () => {
+// 닉네임은 헤더 제목으로 올라갔다(#898). 여기에 또 그리면 같은 이름이 두 겹으로 보이고
+// 대화가 그만큼 짧아진다. 프로필로 가는 길은 ⋮ 의 「프로필 보기」가 맡는다.
+it('상대 이름은 여기서 안 그린다', async () => {
   await render(<ChatRoomInfo room={방()} />);
 
-  await fireEvent.press(screen.getByLabelText('홍길동 프로필 보기'));
-
-  expect(push).toHaveBeenCalledWith('/(tabs)/(home)/users/9');
-});
-
-// 탈퇴는 소프트 삭제라 방과 대화가 그대로 남는다. 이름은 보여주되 갈 곳이 없다 —
-// 웹도 그렇게 한다(ChatRoomInfo.tsx:154).
-it('탈퇴한 상대는 이름만 보이고 프로필로 가는 길이 없다', async () => {
-  await render(
-    <ChatRoomInfo room={방({ opponentId: null, opponentNickname: '알 수 없는 사용자' })} />
-  );
-
-  expect(screen.getByText('알 수 없는 사용자')).toBeTruthy();
-  expect(screen.queryByLabelText('알 수 없는 사용자 프로필 보기')).toBeNull();
+  expect(screen.queryByText('홍길동')).toBeNull();
+  expect(screen.queryByLabelText('홍길동 프로필 보기')).toBeNull();
 });
 
 // ⚠️ **서버가 아직 안 얹어 준다.** 그때 오류를 던지거나 빈 띠를 남기면 안 된다.
@@ -95,18 +84,17 @@ it('서버가 아무것도 안 주면 머리말을 안 그린다', async () => {
   expect(screen.toJSON()).toBeNull();
 });
 
-it('상품만 오면 상품칸만 그린다', async () => {
-  await render(<ChatRoomInfo room={방({ opponentId: null, opponentNickname: null })} />);
+// 상대가 탈퇴해도 상품 이야기는 그대로다 — 방과 대화가 남기 때문이다.
+it('상대가 탈퇴해도 상품칸은 그린다', async () => {
+  await render(<ChatRoomInfo room={방({ opponentId: null, opponentNickname: '알 수 없는 사용자' })} />);
 
   expect(screen.getByText('개구리 사료')).toBeTruthy();
-  expect(screen.queryByText('홍길동')).toBeNull();
 });
 
-it('상품이 없으면 상품칸을 안 그린다', async () => {
+it('상품이 없으면 아무것도 안 그린다', async () => {
   await render(<ChatRoomInfo room={방({ productId: null, productTitle: null })} />);
 
-  expect(screen.getByText('홍길동')).toBeTruthy();
-  expect(screen.queryByLabelText('상품 상세 보기')).toBeNull();
+  expect(screen.toJSON()).toBeNull();
 });
 
 // 값이 반쪽만 와도 화면이 서면 안 된다.
