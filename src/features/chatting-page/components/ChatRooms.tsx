@@ -112,7 +112,13 @@ export function ChatRooms({
                       </div>
                       <div
                         className={cn(
-                          'bg-surface-container-low flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-[#ebe5e0] p-2.5',
+                          // 테두리는 토큰의 옅은 쪽을 쓴다(#901). 손으로 적은 #ebe5e0 은 토큰에 없는
+                          // 값이었고, 이 화면만 색 체계 밖에 두면 다음에 색을 손볼 때 여기만 빠진다.
+                          //
+                          // ⚠️ 선을 아예 없애지는 않는다. 이 칸의 바탕(surface-container-low)은 흰 판
+                          //    위에서 1.10:1 밖에 안 돼, 선이 없으면 칸이 있는지 없는지 흐릿해진다.
+                          //    고른 방에서는 칸이 흰색이 되므로 그쪽은 진한 쪽(outline-variant)을 쓴다.
+                          'bg-surface-container-low border-outline-variant/40 flex w-full items-center gap-3 overflow-hidden rounded-2xl border p-2.5',
                           // 고른 방 안의 상품카드는 **흰색**이다(#891). 예전에는 진한 카키(#96793f)라
                           // 갈색 방 위의 갈색 카드였다 — 색상이 같고 밝기만 다르면 경계가 안 읽힌다(#786).
                           // 이 자리에서 알려야 할 것은 「어느 방을 보고 있는가」이지 「무슨 상품인가」가 아니다.
