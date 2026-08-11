@@ -15,6 +15,7 @@ import {
   ChatRoomAccessDeniedError,
   fetchChatMessages,
   leaveChatRoom,
+  pingChatRoomRead,
   type ChatMessage,
 } from '@/lib/chat/api';
 import { appendNew, groupByDay, messageKey, prependOlder, withIsMine } from '@/lib/chat/messages';
@@ -33,6 +34,14 @@ import { showToast } from '@/lib/toast';
 
 /** 붙었는지 지켜보는 간격. 소켓이 상태를 알려주지 않아 물어본다. */
 const STATUS_POLL_MS = 500;
+
+/**
+ * 방을 보고 있는 동안 「여기 있다」를 다시 알리는 간격(#886).
+ *
+ * 서버 쪽 표시는 **5분**에 만료된다. 그보다 짧게 두지 않으면 만료와 갱신 사이에 틈이 생겨,
+ * 그 틈에 온 메시지가 「안 읽음」으로 세어진다. 웹과 같은 값이다.
+ */
+const READ_PING_MS = 4 * 60 * 1000;
 
 type Row =
   | { kind: 'day'; key: string; label: string }
@@ -103,6 +112,26 @@ export default function ChatRoomScreen() {
     const timer = setInterval(() => setConnected(chatSocket.isConnected()), STATUS_POLL_MS);
     return () => clearInterval(timer);
   }, []);
+
+  // 방을 보고 있는 동안 서버에 「여기 있다」를 되풀이해 알린다(#886).
+  //
+  // ⚠️ 이걸 안 하면 **읽고 있는 방에 안 읽음 수가 쌓이고 알림까지 온다.** 서버는 이 표시를
+  //    첫 조회 때만 세우고 5분 뒤 지우는데, 갱신하는 곳이 없었다.
+  useEffect(() => {
+    const timer = setInterval(() => {
+      void pingChatRoomRead(chatRoomId).catch(() => {
+        // 알리기에 실패해도 화면은 그대로 둔다 — 다음 차례에 다시 알린다.
+      });
+    }, READ_PING_MS);
+    return () => clearInterval(timer);
+  }, [chatRoomId]);
+
+  // 보고 있는 방에 새 메시지가 들어오면 바로 읽음으로 만든다.
+  // 만료 직후의 틈에 온 것은 이미 안 읽음으로 세어졌을 수 있어, 이 요청이 0으로 되돌린다.
+  useEffect(() => {
+    if (messages.length === 0) return;
+    void pingChatRoomRead(chatRoomId).catch(() => {});
+  }, [chatRoomId, messages.length]);
 
   // 첫 조회. **이 요청이 읽음 처리도 겸한다**(서버가 마지막 읽은 시각을 갱신한다).
   useEffect(() => {
