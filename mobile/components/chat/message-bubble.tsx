@@ -23,7 +23,9 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
     return (
       <View style={styles.blockedWrap}>
         {/* 막힌 것도 내가 보낸 것이라 내 말풍선과 같은 모양으로 둔다. */}
-        <Text style={[styles.bubble, styles.mine, styles.mineCorner]}>{message.content}</Text>
+        <Text selectable style={[styles.bubble, styles.mine, styles.mineCorner]}>
+          {message.content}
+        </Text>
         <Text style={styles.blockedNote}>개인정보 포함으로 상대방에게 전송되지 않았습니다.</Text>
       </View>
     );
@@ -31,7 +33,10 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
 
   return (
     <View style={[styles.row, message.isMine ? styles.rowMine : styles.rowTheirs]}>
+      {/* 꾹 눌러 복사할 수 있다(#896). 계좌번호·주소처럼 옮겨 적을 것이 오간다.
+          시각과 시스템 안내는 안 켠다 — 복사할 값이 아니고, 꾹 누를 때 방해만 된다. */}
       <Text
+        selectable
         style={[
           styles.bubble,
           message.isMine ? styles.mine : styles.theirs,

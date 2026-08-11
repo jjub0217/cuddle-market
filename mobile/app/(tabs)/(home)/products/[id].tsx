@@ -218,7 +218,11 @@ export default function ProductDetailScreen() {
           {isPlaceholderData ? (
             <View style={[styles.bar, { width: '70%' }]} />
           ) : (
-            <Text style={styles.description}>{data.description}</Text>
+            // 상품 설명은 꾹 눌러 복사할 수 있다(#896). 판매자가 적어 둔 치수·성분·
+            // 거래 조건을 옮겨 적을 일이 많다.
+            <Text selectable style={styles.description}>
+              {data.description}
+            </Text>
           )}
         </View>
 
