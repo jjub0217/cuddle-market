@@ -12,6 +12,7 @@ import {
   fetchChatMessages,
   fetchChatRooms,
   leaveChatRoom,
+  pingChatRoomRead,
 } from './api';
 
 const mockFetch = jest.fn();
@@ -114,6 +115,19 @@ describe('fetchChatMessages', () => {
     mockFetch.mockResolvedValueOnce(reply(200, { data: { messages: [], hasNext: false } }));
 
     await expect(fetchChatMessages(7, 0)).resolves.toMatchObject({ isOpponentBlocked: false });
+  });
+});
+
+// 「나는 이 방을 보고 있다」를 다시 알리는 요청(#886). 서버 표시가 5분에 만료되는데
+// 갱신하는 곳이 없어서, 읽고 있는 방에 안 읽음 수가 쌓이고 알림까지 왔다.
+describe('pingChatRoomRead', () => {
+  it('첫 페이지를 한 개만 달라고 한다', async () => {
+    mockFetch.mockResolvedValueOnce(reply(200, { data: { messages: [], hasNext: false } }));
+
+    await pingChatRoomRead(7);
+
+    // size 를 크게 부르면 알리려고 부른 요청이 메시지 쉰 개를 실어 온다.
+    expect(mockFetch.mock.calls[0][0]).toContain('/chat/rooms/7/messages?page=0&size=1');
   });
 });
 

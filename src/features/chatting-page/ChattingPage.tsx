@@ -14,6 +14,7 @@ import { chatSocketStore } from '@/store/chatSocketStore'
 import { ChatLog } from '@/features/chatting-page/components/ChatLog'
 import ChatInput from './components/ChatInput'
 import { uploadImage } from '@/lib/api/products'
+import { pingChatRoomRead } from '@/lib/api/chatting'
 import { cn } from '@/lib/utils/cn'
 import { Z_INDEX } from '@/constants/ui'
 import { CHAT_BLOCKED_NOTICE } from '@/constants/constants'
@@ -21,6 +22,15 @@ import Spinner from '@/components/commons/spinner/Spinner'
 import imageCompression from 'browser-image-compression'
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:8080/ws-stomp'
+
+/**
+ * 방을 보고 있는 동안 「여기 있다」를 다시 알리는 간격(#886).
+ *
+ * 서버 쪽 표시는 **5분**에 만료된다(`ChatSessionServiceImpl`의 `SESSION_TTL_MINUTES`).
+ * 그보다 짧게 두지 않으면 만료와 갱신 사이에 틈이 생겨, 그 틈에 온 메시지가
+ * 「안 읽음」으로 세어진다.
+ */
+const READ_PING_MS = 4 * 60 * 1000
 
 export default function ChattingPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -221,6 +231,31 @@ export default function ChattingPage() {
       subscribeToRoom(Number(chatRoomId))
     }
   }, [isConnected, chatRoomId, subscribeToRoom])
+
+  // 방을 보고 있는 동안 서버에 「여기 있다」를 되풀이해 알린다(#886).
+  //
+  // ⚠️ 이걸 안 하면 **읽고 있는 방에 「안 읽음 1」이 붙는다.** 서버는 이 표시를 첫 페이지를
+  //    조회할 때만 세우고 5분 뒤 지우는데, 갱신하는 곳이 없었다. 표시가 사라진 뒤에 온
+  //    메시지는 「방에 없는 사람」에게 온 것으로 처리돼 안 읽은 수가 오르고 알림까지 생긴다.
+  //    말풍선은 그대로 들어오므로 「보고 있는데 안 읽음」이라는 앞뒤 안 맞는 상태가 된다.
+  useEffect(() => {
+    if (!chatRoomId) return
+    const timer = setInterval(() => {
+      void pingChatRoomRead(Number(chatRoomId))
+    }, READ_PING_MS)
+    return () => clearInterval(timer)
+  }, [chatRoomId])
+
+  // 보고 있는 방에 새 메시지가 들어오면 바로 읽음으로 만든다.
+  //
+  // 갱신 간격보다 짧은 틈(만료 직후)에 온 것은 이미 안 읽음으로 세어졌을 수 있다.
+  // 화면 뱃지는 그 자리에서 지우고, 서버 쪽 수는 이 요청이 0으로 되돌린다.
+  const realtimeCount = realtimeMessages[Number(chatRoomId)]?.length ?? 0
+  useEffect(() => {
+    if (!chatRoomId || realtimeCount === 0) return
+    clearUnreadCount(Number(chatRoomId))
+    void pingChatRoomRead(Number(chatRoomId))
+  }, [chatRoomId, realtimeCount, clearUnreadCount])
 
   useEffect(() => {
     if (_hasHydrated && !user) {
