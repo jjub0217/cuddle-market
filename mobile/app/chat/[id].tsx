@@ -5,6 +5,7 @@ import { FlatList, KeyboardAvoidingView, StyleSheet, Text, View } from 'react-na
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ChatInput } from '@/components/chat/chat-input';
+import { ChatRoomInfo } from '@/components/chat/chat-room-info';
 import { MessageBubble } from '@/components/chat/message-bubble';
 import { EmptyState, ErrorState, LoadingState } from '@/components/list-states';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -17,6 +18,7 @@ import {
   leaveChatRoom,
   pingChatRoomRead,
   type ChatMessage,
+  type ChatRoomSummary,
 } from '@/lib/chat/api';
 import { appendNew, groupByDay, messageKey, prependOlder, withIsMine } from '@/lib/chat/messages';
 import { chatSocket } from '@/lib/chat/socket';
@@ -64,6 +66,9 @@ export default function ChatRoomScreen() {
   // 내가 이 방의 상대를 차단했는가(#877). 앱 채팅방에는 차단 메뉴가 없지만 상품 상세·프로필에서
   // 차단하면 이 방이 그대로 남는다 — 안 잠그면 차단해 놓고 허공에 글을 쓰게 된다.
   const [isOpponentBlocked, setIsOpponentBlocked] = useState(false);
+  // 머리말에 그릴 상대·상품(#889). 메시지 조회 응답에 얹혀 온다 — 방 단건 조회 API 가 없다.
+  // 서버가 아직 안 주면 값이 다 null 이고, 그러면 ChatRoomInfo 가 아무것도 안 그린다.
+  const [room, setRoom] = useState<ChatRoomSummary | null>(null);
   const listRef = useRef<FlatList<Row>>(null);
   // 소켓으로 온 메시지에는 isMine 이 없어서 내 id 로 채워야 한다.
   const myId = useMe().data?.id;
@@ -142,6 +147,7 @@ export default function ChatRoomScreen() {
         setMessages((prev) => prependOlder(prev, result.messages));
         setHasMore(result.hasNext);
         setIsOpponentBlocked(result.isOpponentBlocked);
+        setRoom(result.room);
         setIsLoading(false);
       })
       .catch((error) => {
@@ -317,6 +323,10 @@ export default function ChatRoomScreen() {
         onClose={() => setIsLeaveOpen(false)}
         onConfirm={handleLeave}
       />
+      {/* 누구와 무슨 상품 이야기인지(#889). 목록이 아니라 **머리말 바로 아래**에 붙박이로 둔다 —
+          웹도 같은 자리다(ChattingPage.tsx 의 sticky top-0). 조회가 실패하면 room 이 없어
+          아무것도 안 그려지고, 그 자리는 아래의 오류 안내가 채운다. */}
+      {room ? <ChatRoomInfo room={room} /> : null}
       {/* 안 붙어 있는 동안에도 지난 메시지는 보인다(REST 로 가져왔다). 보내기만 막는다.
           차단한 방에서는 이 띠를 안 띄운다 — 아래에 이미 안내가 있어 두 번 말하게 된다. */}
       {!connected && !isOpponentBlocked ? (
