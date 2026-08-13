@@ -1,7 +1,9 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import React from 'react';
+import type { PinchGesture } from 'react-native-gesture-handler';
+import { fireGestureHandler, getByGestureTestId } from 'react-native-gesture-handler/jest-utils';
 
-import { PAGER_TEST_ID, PhotoViewer } from './photo-viewer';
+import { PAGER_TEST_ID, PINCH_TEST_ID, PhotoViewer } from './photo-viewer';
 
 // 앱 사진 확대창(#904).
 //
@@ -54,4 +56,43 @@ it('한 장이면 번호를 안 보여준다', async () => {
   await render(<PhotoViewer images={[IMAGES[0]]} visible onClose={jest.fn()} />);
 
   expect(screen.queryByText('1 / 1')).toBeNull();
+});
+
+// ⚠️ **배율 자체는 여기서 못 본다.** 배율은 손가락 쪽(UI 쓰레드)의 값이라
+//    자바스크립트 쪽에서 읽히지 않는다. 대신 **결과**를 본다 —
+//    「넓히면 좌우 넘기기가 꺼지는가」. 진짜 배율과 부드러움은 실기기로 본다.
+function 넓힌다(배율: number) {
+  fireGestureHandler<PinchGesture>(getByGestureTestId(PINCH_TEST_ID), [
+    { scale: 1 },
+    { scale: 배율 },
+    // 5 = 손을 뗀 상태(END)
+    { state: 5, scale: 배율 },
+  ]);
+}
+
+it('처음에는 좌우로 넘길 수 있다', async () => {
+  await render(<PhotoViewer images={IMAGES} visible onClose={jest.fn()} />);
+
+  expect(screen.getByTestId(PAGER_TEST_ID).props.scrollEnabled).toBe(true);
+});
+
+it('넓히면 좌우 넘기기가 꺼진다', async () => {
+  await render(<PhotoViewer images={IMAGES} visible onClose={jest.fn()} />);
+
+  넓힌다(2);
+
+  await waitFor(() => {
+    expect(screen.getByTestId(PAGER_TEST_ID).props.scrollEnabled).toBe(false);
+  });
+});
+
+it('다시 줄이면 좌우 넘기기가 켜진다', async () => {
+  await render(<PhotoViewer images={IMAGES} visible onClose={jest.fn()} />);
+
+  넓힌다(2);
+  넓힌다(1);
+
+  await waitFor(() => {
+    expect(screen.getByTestId(PAGER_TEST_ID).props.scrollEnabled).toBe(true);
+  });
 });
