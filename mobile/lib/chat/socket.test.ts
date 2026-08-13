@@ -4,7 +4,44 @@ jest.mock('expo-secure-store', () => ({
   deleteItemAsync: jest.fn(),
 }));
 
-import { createChatSocket } from './socket';
+/**
+ * 진짜 `Client` 대신 **넘긴 설정을 받아 적는** 껍데기를 쓴다.
+ *
+ * 앱이 쓰는 `chatSocket` 하나(파일 맨 아래)의 설정 — 연결 한계·beforeConnect —
+ * 는 이렇게 하지 않으면 시험이 아예 못 본다. `deps.makeClient` 를 갈아 끼우는
+ * 다른 시험들은 이 흉내를 안 거치므로 영향이 없다.
+ *
+ * ⚠️ 팩토리는 바깥 변수를 못 본다(jest 가 import 보다 먼저 올린다). 그래서 배열을
+ *    팩토리 **안**에 두고 `__configs` 로 내보내 읽는다.
+ */
+jest.mock('@stomp/stompjs', () => {
+  const configs: any[] = [];
+  return {
+    __configs: configs,
+    Client: class {
+      constructor(conf: any) {
+        configs.push(conf);
+      }
+      activate() {}
+      deactivate() {}
+      subscribe() {
+        return { unsubscribe() {} };
+      }
+      publish() {}
+    },
+  };
+});
+
+import * as stompjs from '@stomp/stompjs';
+
+import {
+  AUTH_RESTORE_WAIT_MS,
+  CONNECTION_TIMEOUT_MS,
+  chatConnectHeaders,
+  chatSocket,
+  createChatSocket,
+} from './socket';
+import { useAuthStore } from '../auth/store';
 
 /**
  * @stomp/stompjs 의 Client 흉내. 붙기·끊기를 우리가 손으로 시킨다.
@@ -277,5 +314,140 @@ describe('보내기', () => {
       destination: '/app/chat/message',
       body: JSON.stringify({ a: 1 }),
     });
+  });
+});
+
+/**
+ * 앱을 다시 불러오면 채팅이 영영 안 붙던 것(#917).
+ *
+ * 토큰을 기기에서 읽는 동안(`restoring`) CONNECT 가 나가면 **서버가 아무 응답도
+ * 안 준다.** 소켓은 열린 채라 다시 붙지도 않아 거기서 갇혔다.
+ *
+ * ⚠️ **시험이 못 덮는 것** — 진짜 소켓·서버의 침묵·`connectionTimeout` 이 실제로
+ *    소켓을 닫고 다시 붙는지는 stompjs 와 서버 안에서 벌어지는 일이라 여기서 못 본다.
+ *    **실기기로 봐야 한다**: ①앱을 껐다 켜고 바로 채팅 탭 → 메시지가 오는가
+ *    ②비행기모드로 끊었다 풀기 → 다시 붙는가.
+ */
+describe('붙기 전에 토큰을 기다린다 (#917)', () => {
+  /** 마이크로태스크를 흘려 「지금까지 정해진 것」만 남긴다. */
+  const flush = async () => {
+    for (let i = 0; i < 5; i += 1) await Promise.resolve();
+  };
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    useAuthStore.setState({ status: 'restoring', accessToken: null, refreshToken: null });
+    // 기다리다 한계를 넘기면 경고를 남긴다. 시험 출력이 지저분해지지 않게 막는다.
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+  });
+
+  it('토큰을 읽는 중이면 헤더를 안 내주고 기다린다 — CONNECT 가 안 나간다', async () => {
+    const settled: unknown[] = [];
+    void chatConnectHeaders().then((headers) => settled.push(headers));
+
+    await flush();
+
+    // stompjs 는 beforeConnect 를 **기다렸다가** 소켓을 연다. 아직 안 끝났으니
+    // 소켓도 안 열리고 CONNECT 도 안 나간다.
+    expect(settled).toHaveLength(0);
+  });
+
+  it('토큰이 생기면 그때 Authorization 을 달고 붙는다', async () => {
+    const promise = chatConnectHeaders();
+    await flush();
+
+    useAuthStore.getState().setSession({ accessToken: 'tok-1', refreshToken: 'ref-1' });
+
+    await expect(promise).resolves.toEqual({ Authorization: 'Bearer tok-1' });
+  });
+
+  it('게스트로 확정되면 기다리지 않는다', async () => {
+    useAuthStore.setState({ status: 'guest', accessToken: null, refreshToken: null });
+
+    const settled: unknown[] = [];
+    void chatConnectHeaders().then((headers) => settled.push(headers));
+    await flush();
+
+    // 시간을 하나도 안 흘려보냈는데 이미 정해졌다 — 기다린 적이 없다는 뜻이다.
+    expect(settled).toEqual([{}]);
+  });
+
+  it('기다리는 중에 게스트로 확정되면 바로 그만 기다린다', async () => {
+    const promise = chatConnectHeaders();
+    await flush();
+
+    useAuthStore.getState().clearSession();
+
+    await expect(promise).resolves.toEqual({});
+  });
+
+  it('한계를 넘기면 포기하지 않고 그냥 붙는다', async () => {
+    const settled: unknown[] = [];
+    void chatConnectHeaders().then((headers) => settled.push(headers));
+    await flush();
+    expect(settled).toHaveLength(0);
+
+    jest.advanceTimersByTime(AUTH_RESTORE_WAIT_MS);
+    await flush();
+
+    // 여기서 멈춰 버리면 다시 켜 줄 사람이 없다. 붙고 나서 응답이 없으면
+    // connectionTimeout 이 끊고 다시 시도하며, 그때 토큰을 새로 읽는다.
+    expect(settled).toEqual([{}]);
+  });
+
+  it('이미 로그인돼 있으면 기다리지 않고 바로 헤더를 준다', async () => {
+    useAuthStore.setState({ status: 'authed', accessToken: 'tok-2', refreshToken: 'ref-2' });
+
+    const settled: unknown[] = [];
+    void chatConnectHeaders().then((headers) => settled.push(headers));
+    await flush();
+
+    expect(settled).toEqual([{ Authorization: 'Bearer tok-2' }]);
+  });
+});
+
+/** 앱이 실제로 쓰는 클라이언트에 그 설정이 정말 붙었는가. */
+describe('앱이 쓰는 클라이언트 설정', () => {
+  let config: any;
+
+  beforeAll(() => {
+    // 클라이언트는 처음 잡을 때 만들어진다. 만들어진 설정을 받아 적어 둔다.
+    jest.useFakeTimers();
+    chatSocket.acquire();
+    config = (stompjs as any).__configs[0];
+    chatSocket.release();
+    jest.advanceTimersByTime(5000); // 늦춰 둔 끊기를 흘려보낸다
+    jest.useRealTimers();
+  });
+
+  it('응답이 없을 때 스스로 끊게 연결 한계를 둔다', () => {
+    // 이게 0(기본값)이면 CONNECT 응답을 영원히 기다린다 — #917 의 갇힘.
+    expect(config.connectionTimeout).toBe(CONNECTION_TIMEOUT_MS);
+  });
+
+  it('beforeConnect 가 토큰을 기다렸다가 헤더를 채운다', async () => {
+    useAuthStore.setState({ status: 'restoring', accessToken: null, refreshToken: null });
+
+    const client: any = {};
+    const done = config.beforeConnect(client);
+    for (let i = 0; i < 5; i += 1) await Promise.resolve();
+    expect(client.connectHeaders).toBeUndefined();
+
+    useAuthStore.getState().setSession({ accessToken: 'tok-3', refreshToken: 'ref-3' });
+    await done;
+
+    expect(client.connectHeaders).toEqual({ Authorization: 'Bearer tok-3' });
+  });
+
+  it('프레임을 통째로 찍는 debug 는 안 단다', () => {
+    // 하트비트까지 10초마다 쏟아져 진단이 오히려 막힌다. 오류 로그만 남긴다.
+    expect(config.debug).toBeUndefined();
+    expect(typeof config.onStompError).toBe('function');
+    expect(typeof config.onWebSocketError).toBe('function');
   });
 });
