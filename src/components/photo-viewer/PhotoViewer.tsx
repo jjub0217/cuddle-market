@@ -188,7 +188,11 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
     const dialog = dialogRef.current
     if (!dialog || !isOpen) return
     const handleWheel = (event: WheelEvent) => {
-      if (event.ctrlKey) {
+      // ⚠️ 맥에서 「확대」는 두 갈래로 들어온다.
+      //      두 손가락 벌리기      ctrl 이 눌린 휠   (브라우저가 그렇게 바꿔 보낸다)
+      //      ⌘ + 두 손가락 쓸기    ⌘(meta) 가 눌린 휠
+      //    ctrl 만 받았더니 ⌘ 로 하는 사람에게는 아무 일도 안 일어났다(2026-08-13).
+      if (event.ctrlKey || event.metaKey) {
         // 사진 위가 아니면 브라우저에 맡긴다.
         if (!(event.target instanceof HTMLImageElement)) return
         event.preventDefault()

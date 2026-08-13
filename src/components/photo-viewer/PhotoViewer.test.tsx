@@ -181,6 +181,16 @@ describe('확대 제스처 가로채기', () => {
     expect(screen.getByAltText('캣타워 - 1')).toHaveAttribute('data-zoomed', 'false')
   })
 
+  // ⚠️ 맥에서 「확대」는 두 갈래로 온다 — 두 손가락 벌리기는 ctrl, ⌘+쓸기는 meta.
+  //    ctrl 만 받았더니 ⌘ 로 하는 사람에게는 아무 일도 안 일어났다.
+  it('⌘ 를 누른 채 벌려도 크게 본다', () => {
+    render(<PhotoViewer images={IMAGES} isOpen onClose={vi.fn()} alt="캣타워" />)
+
+    fireEvent.wheel(screen.getByAltText('캣타워 - 1'), { metaKey: true, deltaY: -100 })
+
+    expect(screen.getByAltText('캣타워 - 1')).toHaveAttribute('data-zoomed', 'true')
+  })
+
   // 번개장터도 이렇게 한다(2026-08-13 확인). 검은 자리는 브라우저 확대에 맡겨야
   // 「페이지째 키워서 보고 싶다」는 길이 남는다.
   it('검은 자리에서 벌리는 것은 브라우저에 맡긴다', () => {
