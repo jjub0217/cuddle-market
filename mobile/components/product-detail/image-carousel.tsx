@@ -1,7 +1,8 @@
 import { Image } from 'expo-image';
 import { useState } from 'react';
-import { FlatList, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
+import { PhotoViewer } from '@/components/photo-viewer/photo-viewer';
 import { colors } from '@/constants/colors';
 import { getOverlay } from '@/lib/tradeStatus';
 
@@ -20,6 +21,8 @@ export function ImageCarousel({ mainImageUrl, subImageUrls, tradeStatus, product
   const { width } = useWindowDimensions();
   const [index, setIndex] = useState(0);
   const [failedUrls, setFailedUrls] = useState<string[]>([]);
+  // 확대창. 누른 사진에서 시작한다.
+  const [viewerIndex, setViewerIndex] = useState<number | null>(null);
 
   const images = [mainImageUrl, ...subImageUrls].filter(Boolean);
   const overlay = getOverlay(tradeStatus, productType);
@@ -35,17 +38,20 @@ export function ImageCarousel({ mainImageUrl, subImageUrls, tradeStatus, product
         onMomentumScrollEnd={(e) =>
           setIndex(Math.round(e.nativeEvent.contentOffset.x / width))
         }
-        renderItem={({ item }) =>
+        renderItem={({ item, index: i }) =>
           failedUrls.includes(item) ? (
-            // 로드 실패 시 회색 자리(홈 썸네일과 같은 처리)
+            // 로드 실패 시 회색 자리(홈 썸네일과 같은 처리).
+            // ⚠️ 여기는 누를 수 없게 그대로 둔다 — 띄울 사진이 없다.
             <View style={{ width, height: width, backgroundColor: colors.outlineVariant }} />
           ) : (
-            <Image
-              source={{ uri: item }}
-              style={{ width, height: width }}
-              contentFit="cover"
-              onError={() => setFailedUrls((prev) => [...prev, item])}
-            />
+            <Pressable testID={`detail-photo-${i}`} onPress={() => setViewerIndex(i)}>
+              <Image
+                source={{ uri: item }}
+                style={{ width, height: width }}
+                contentFit="cover"
+                onError={() => setFailedUrls((prev) => [...prev, item])}
+              />
+            </Pressable>
           )
         }
       />
@@ -65,6 +71,13 @@ export function ImageCarousel({ mainImageUrl, subImageUrls, tradeStatus, product
           ))}
         </View>
       )}
+
+      <PhotoViewer
+        images={images}
+        startIndex={viewerIndex ?? 0}
+        visible={viewerIndex !== null}
+        onClose={() => setViewerIndex(null)}
+      />
     </View>
   );
 }
