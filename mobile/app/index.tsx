@@ -2,12 +2,12 @@ import { Redirect } from 'expo-router';
 
 // 앱을 켜거나 다시 불러왔을 때 **홈** 탭으로 보낸다.
 //
-// ⚠️ 이 파일이 없으면 커뮤니티가 먼저 열린다.
+// ⚠️ 이 파일이 없으면 **채팅 탭**이 먼저 열린다.
 //    expo-router 는 `/` 에 맞는 **첫 index.tsx** 를 찾는데, 괄호로 감싼 폴더는
-//    URL 에 안 들어가서 넷이 다 `/` 에 해당한다. 그래서 알파벳순으로
-//    (community)/index.tsx 가 걸린다.
+//    URL 에 안 들어가서 다섯이 다 `/` 에 해당한다. 그래서 알파벳순으로 걸린다.
 //
-//      app/(tabs)/(community)/index.tsx   ← c 가 가장 앞이라 이게 열렸다
+//      app/(tabs)/(chat)/index.tsx        ← c-h-a 가 가장 앞이라 이게 열린다
+//      app/(tabs)/(community)/index.tsx   ← 채팅 탭이 생기기 전에는 이게 열렸다(c-o-m)
 //      app/(tabs)/(home)/index.tsx
 //      app/(tabs)/(my)/index.tsx
 //      app/(tabs)/(place)/index.tsx
@@ -15,6 +15,15 @@ import { Redirect } from 'expo-router';
 //    (tabs)/_layout.tsx 의 <Tabs.Screen> 차례는 **탭바에 보이는 순서**만 정하고,
 //    unstable_settings 의 initialRouteName 은 **딥링크로 들어왔을 때 스택 아래에
 //    무엇을 깔지**를 정한다 — 둘 다 첫 화면을 정하지 못한다.
+//
+// ⚠️ **이 장치는 주소가 `/` 로 시작할 때만 작동한다.** 그래서 두 앱이 다르게 움직인다
+//    (2026-08-13 실기기 확인).
+//
+//      Expo Go     리로드하면 처음 주소(/)로 돌아간다 → 여기를 거쳐 홈으로 간다
+//      개발 빌드    보던 주소를 들고 다시 켠다 → 여기를 안 거친다 → 마지막 탭이 열린다
+//
+//    개발 빌드에서 「리로드했더니 채팅 탭이 열린다」는 **고장이 아니다.** 진짜 사용자는
+//    리로드를 안 하고, 앱을 껐다 켤 때 마지막 탭으로 가는 것은 흔한 동작이라 그대로 뒀다.
 export default function Index() {
   return <Redirect href="/(tabs)/(home)" />;
 }
