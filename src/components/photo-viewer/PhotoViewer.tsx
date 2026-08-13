@@ -66,7 +66,8 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
   // 사진마다·창 크기마다 달라서 재는 수밖에 없다.
   //
   // ⚠️ 키워도(transform) 이 값은 안 바뀐다 — transform 은 배치를 안 건드리기 때문이다.
-  //    그게 오히려 낫다. 키웠다고 단추가 화면 밖으로 날아가면 안 된다.
+  //    그래서 단추를 붙일 때는 여기에 **배율을 곱해** 쓴다. 안 곱했더니 사진만 커지고
+  //    화살표는 제자리에 남아 화면 한가운데 둘이 몰렸다(2026-08-13에 스크린샷으로 확인).
   const imgRef = useRef<HTMLImageElement>(null)
   const [photoBox, setPhotoBox] = useState<{ width: number; height: number } | null>(null)
 
@@ -273,7 +274,18 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
               */}
               <div
                 className="pointer-events-none absolute top-1/2 left-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 items-center justify-between px-2"
-                style={photoBox ? { width: photoBox.width, height: photoBox.height } : { width: '100%', height: '100%' }}
+                style={
+                  photoBox
+                    ? {
+                        // 키운 만큼 같이 커진다. 화면을 넘치면 화면 끝에서 멈춘다
+                        // (그때는 화면 가장자리가 곧 보이는 사진의 가장자리다).
+                        width: photoBox.width * scale,
+                        height: photoBox.height * scale,
+                        maxWidth: '100%',
+                        maxHeight: '100%',
+                      }
+                    : { width: '100%', height: '100%' }
+                }
               >
                 <button
                   type="button"
