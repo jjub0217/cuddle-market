@@ -62,6 +62,24 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
 
   const clampScale = (value: number) => Math.min(Math.max(value, MIN_SCALE), MAX_SCALE)
 
+  // 사진이 화면에 **실제로 그려진 크기**. 넘기는 단추를 사진 안쪽에 붙이는 데 쓴다.
+  // 사진마다·창 크기마다 달라서 재는 수밖에 없다.
+  //
+  // ⚠️ 키워도(transform) 이 값은 안 바뀐다 — transform 은 배치를 안 건드리기 때문이다.
+  //    그게 오히려 낫다. 키웠다고 단추가 화면 밖으로 날아가면 안 된다.
+  const imgRef = useRef<HTMLImageElement>(null)
+  const [photoBox, setPhotoBox] = useState<{ width: number; height: number } | null>(null)
+
+  useEffect(() => {
+    const img = imgRef.current
+    if (!img || !isOpen) return
+    const 재기 = () => setPhotoBox({ width: img.clientWidth, height: img.clientHeight })
+    재기()
+    const 지켜보기 = new ResizeObserver(재기)
+    지켜보기.observe(img)
+    return () => 지켜보기.disconnect()
+  }, [isOpen, index])
+
   // 끌어서 움직이기. 키운 상태에서만 쓴다 — 맞춤일 때는 넘칠 것이 없다.
   const dragRef = useRef<{ x: number; y: number; offsetX: number; offsetY: number } | null>(null)
 
@@ -223,6 +241,7 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
+              ref={imgRef}
               src={toResizedWebpUrl(images[index], 800)}
               alt={`${alt} - ${index + 1}`}
               data-zoomed={zoomed}
@@ -244,23 +263,36 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
 
           {hasMultiple ? (
             <>
-              <button
-                type="button"
-                aria-label="이전 이미지"
-                onClick={() => go(-1)}
-                className="absolute top-1/2 left-2 z-20 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center text-white transition-opacity hover:opacity-80"
+              {/*
+                넘기는 단추는 **사진 테두리 안쪽**에 붙인다. 화면 끝에 두면 사진에서 눈이
+                멀어져 있는 줄도 모른다(2026-08-13에 그렇게 느낀다는 이야기를 들었다).
+
+                사진의 그려진 크기는 사진마다·창 크기마다 달라서 고정값으로는 못 맞춘다.
+                재서(photoBox) 그 크기의 상자를 사진 위에 겹쳐 놓고 그 안의 양 끝에 붙인다.
+                ⚠️ 아직 못 쟀으면(첫 그림·시험) 예전처럼 화면 양 끝에 둔다 — 없는 것보다 낫다.
+              */}
+              <div
+                className="pointer-events-none absolute top-1/2 left-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 items-center justify-between px-2"
+                style={photoBox ? { width: photoBox.width, height: photoBox.height } : { width: '100%', height: '100%' }}
               >
-                <ChevronLeft size={44} strokeWidth={1.5} />
-              </button>
-              <button
-                type="button"
-                aria-label="다음 이미지"
-                onClick={() => go(1)}
-                className="absolute top-1/2 right-2 z-20 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center text-white transition-opacity hover:opacity-80"
-              >
-                <ChevronRight size={44} strokeWidth={1.5} />
-              </button>
-              <p className={cn('absolute bottom-4 left-1/2 -translate-x-1/2 text-sm text-white')}>
+                <button
+                  type="button"
+                  aria-label="이전 이미지"
+                  onClick={() => go(-1)}
+                  className="pointer-events-auto flex h-12 w-12 cursor-pointer items-center justify-center text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)] transition-opacity hover:opacity-80"
+                >
+                  <ChevronLeft size={44} strokeWidth={1.5} />
+                </button>
+                <button
+                  type="button"
+                  aria-label="다음 이미지"
+                  onClick={() => go(1)}
+                  className="pointer-events-auto flex h-12 w-12 cursor-pointer items-center justify-center text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)] transition-opacity hover:opacity-80"
+                >
+                  <ChevronRight size={44} strokeWidth={1.5} />
+                </button>
+              </div>
+              <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-sm text-white">
                 {index + 1} / {images.length}
               </p>
             </>
