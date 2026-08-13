@@ -190,3 +190,34 @@ describe('확대 제스처 가로채기', () => {
     expect(screen.getByAltText('캣타워 - 1')).toHaveAttribute('data-zoomed', 'false')
   })
 })
+
+// 두 상태의 크기 순서. 2026-08-13 에 여기서 뒤집혔다 —
+// 화면 맞춤이 원본보다 크게 키우도록 바뀌었는데 「크게」는 원본 크기 그대로여서,
+// **크게 하려고 벌렸더니 사진이 작아졌다.**
+describe('크게 보기가 화면 맞춤보다 크다', () => {
+  /** jsdom 은 사진을 진짜로 안 읽는다(naturalWidth 가 0). 잰 값을 심어 주고 load 를 쏜다 */
+  function 사진크기를심는다(img: HTMLElement, width: number, height: number) {
+    Object.defineProperty(img, 'naturalWidth', { value: width, configurable: true })
+    Object.defineProperty(img, 'naturalHeight', { value: height, configurable: true })
+    fireEvent.load(img)
+  }
+
+  it('화면 맞춤은 원본의 두 배를 상한으로 둔다', () => {
+    render(<PhotoViewer images={IMAGES} isOpen onClose={vi.fn()} alt="캣타워" />)
+    const 사진 = screen.getByAltText('캣타워 - 1')
+    사진크기를심는다(사진, 600, 800)
+
+    expect(사진.style.maxWidth).toBe('1200px')
+    expect(사진.style.maxHeight).toBe('1600px')
+  })
+
+  it('크게 하면 원본의 두 배로 못 박는다 (맞춤보다 작아지면 안 된다)', () => {
+    render(<PhotoViewer images={IMAGES} isOpen onClose={vi.fn()} alt="캣타워" />)
+    const 사진 = screen.getByAltText('캣타워 - 1')
+    사진크기를심는다(사진, 600, 800)
+
+    fireEvent.click(사진)
+
+    expect(screen.getByAltText('캣타워 - 1').style.width).toBe('1200px')
+  })
+})

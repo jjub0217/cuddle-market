@@ -31,8 +31,15 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [index, setIndex] = useState(startIndex)
 
-  // 실제 크기(1:1)로 보기. 세로로 긴 사진은 화면에 맞추면 **원본보다 작아진다** —
-  // 800×1715 짜리가 높이 900 화면에서 폭 420 이 된다. 그래서 눌러서 원본 크기로 보게 한다.
+  // 두 가지 크기로 본다.
+  //
+  //   화면 맞춤   사진 전체가 다 보이게. 작으면 키우고 크면 줄인다 (아래 FIT_MAX_SCALE)
+  //   크게        원본의 두 배. 화면을 넘치므로 끌어서 움직여 본다
+  //
+  // ⚠️ 「크게」를 원본 크기(1:1)로 뒀더니 **누르면 오히려 작아졌다**(2026-08-13).
+  //    화면 맞춤이 이미 원본보다 크게 키우기 때문이다 — 600×800 사진이 높이 1000 화면에서
+  //    1.26배가 된다. 두 상태의 크기 순서가 뒤집히지 않게, 「크게」는 맞춤의 상한과
+  //    같은 값(원본의 두 배)으로 못 박는다.
   const [zoomed, setZoomed] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -165,10 +172,17 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
     setIndex((prev) => (prev + step + images.length) % images.length)
   }
 
-  /** 화면 맞춤일 때 얼마나 키울지의 상한. 잰 크기의 두 배까지만 — 그 위는 뭉개짐이 눈에 띈다 */
-  const FIT_MAX_SCALE = 2
-  const fitLimit = natural
-    ? { maxWidth: natural.width * FIT_MAX_SCALE, maxHeight: natural.height * FIT_MAX_SCALE }
+  /**
+   * 원본의 몇 배까지 키울지. 그 위는 뭉개짐이 눈에 띈다.
+   * 화면 맞춤의 상한이자 「크게」의 크기다 — 둘이 같은 값이라야 순서가 안 뒤집힌다.
+   */
+  const MAX_SCALE = 2
+  const sizeStyle = natural
+    ? zoomed
+      ? // 크게 — 원본의 두 배로 못 박는다. 화면을 넘치면 끌어서 본다
+        { width: natural.width * MAX_SCALE, height: 'auto' as const, maxWidth: 'none' as const }
+      : // 화면 맞춤 — 화면을 채우되 두 배를 넘지 않는다
+        { maxWidth: natural.width * MAX_SCALE, maxHeight: natural.height * MAX_SCALE }
     : undefined
 
   return (
@@ -219,11 +233,11 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
               }}
               // 화면 맞춤은 h-full·w-full 로 **채운다**. max-h-full 만 주면 원본보다
               // 크게는 안 커져서 작은 사진이 큰 모니터에 조그맣게 뜬다.
-              // 대신 style 의 상한(잰 크기의 두 배)이 지나친 확대를 막는다.
-              style={zoomed ? undefined : fitLimit}
+              // 크기의 상한·「크게」의 크기는 style 이 정한다(위 sizeStyle).
+              style={sizeStyle}
               className={cn(
                 'm-auto select-none',
-                zoomed ? 'max-w-none cursor-zoom-out' : 'h-full w-full cursor-zoom-in object-contain'
+                zoomed ? 'cursor-zoom-out' : 'h-full w-full cursor-zoom-in object-contain'
               )}
             />
           </div>
