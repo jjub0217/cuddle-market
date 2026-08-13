@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Pagination, Navigation } from 'swiper/modules'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import PhotoViewer from '@/components/photo-viewer/PhotoViewer'
 import { getImageSrcSet, IMAGE_SIZES, toResizedWebpUrl, PLACEHOLDER_IMAGES } from '@/lib/utils/imageUrl'
 import { cn } from '@/lib/utils/cn'
 import 'swiper/css'
@@ -29,9 +30,11 @@ interface SlideProps {
   imageUrl: string
   title: string
   index: number
+  /** 없으면 눌러도 아무 일이 안 일어난다 — 사진이 하나도 없어 자리표시자만 그릴 때다 */
+  onOpen?: (index: number) => void
 }
 
-function Slide({ imageUrl, title, index }: SlideProps) {
+function Slide({ imageUrl, title, index, onOpen }: SlideProps) {
   const [imgErrorStep, setImgErrorStep] = useState(0) // 0: CDN, 1: 원본, 2: placeholder
 
   const getSrc = () => {
@@ -64,7 +67,8 @@ function Slide({ imageUrl, title, index }: SlideProps) {
       alt={`${title} - ${index + 1}`}
       fetchPriority={index === 0 ? 'high' : 'auto'}
       loading={index === 0 ? 'eager' : 'lazy'}
-      className="absolute inset-0 h-full w-full object-cover"
+      onClick={onOpen ? () => onOpen(index) : undefined}
+      className={cn('absolute inset-0 h-full w-full object-cover', onOpen && 'cursor-zoom-in')}
       onError={() => {
         if (imgErrorStep < 2) {
           setImgErrorStep((prev) => prev + 1)
@@ -95,6 +99,13 @@ export default function MainImage({ mainImageUrl, subImageUrls, title, tradeStat
   const [prevEl, setPrevEl] = useState<HTMLButtonElement | null>(null)
   const [nextEl, setNextEl] = useState<HTMLButtonElement | null>(null)
 
+  // 확대창. 누른 사진에서 시작한다.
+  //
+  // ⚠️ Swiper 가 눌림을 가려 준다 — 끌고 나서 손을 떼면 click 이 생기지 않는다
+  //    (preventClicks 가 기본으로 켜져 있다). 그래서 「옆으로 넘기려다 확대창이 뜨는」
+  //    일은 생기지 않는다. 실기기에서 한 번 확인할 것.
+  const [viewerIndex, setViewerIndex] = useState<number | null>(null)
+
   const getDisplayTradeStatus = () => {
     if (productTypeName === '판매요청') {
       if (tradeStatus === '판매완료') return '요청완료'
@@ -123,7 +134,12 @@ export default function MainImage({ mainImageUrl, subImageUrls, title, tradeStat
         >
           {slides.map((imageUrl, index) => (
             <SwiperSlide key={`${imageUrl}-${index}`} className="relative">
-              <Slide imageUrl={imageUrl} title={title} index={index} />
+              <Slide
+                imageUrl={imageUrl}
+                title={title}
+                index={index}
+                onOpen={images.length > 0 ? setViewerIndex : undefined}
+              />
             </SwiperSlide>
           ))}
         </Swiper>
@@ -159,6 +175,16 @@ export default function MainImage({ mainImageUrl, subImageUrls, title, tradeStat
           </span>
         </div>
       ) : null}
+
+      {/* 확대창은 화면을 덮으므로 상태 배지 아래(마지막)에 둔다.
+          자리표시자가 아니라 **진짜 사진들**(images)을 넘긴다 */}
+      <PhotoViewer
+        images={images}
+        startIndex={viewerIndex ?? 0}
+        isOpen={viewerIndex !== null}
+        onClose={() => setViewerIndex(null)}
+        alt={title}
+      />
     </div>
   )
 }

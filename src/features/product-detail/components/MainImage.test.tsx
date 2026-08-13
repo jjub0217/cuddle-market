@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { render, screen } from '@/test/render'
+import { fireEvent, render, screen } from '@/test/render'
 
 import MainImage from './MainImage'
 
@@ -86,5 +86,47 @@ describe('거래상태 배지', () => {
 
     expect(screen.queryByText('예약중')).not.toBeInTheDocument()
     expect(screen.queryByText('판매완료')).not.toBeInTheDocument()
+  })
+})
+
+describe('사진 확대창', () => {
+  // ⚠️ Swiper 는 loop 를 쓰면 같은 사진을 여러 벌 그린다. 첫 번째 것을 누른다.
+  it('사진을 누르면 확대창이 열린다', () => {
+    render(
+      <MainImage
+        mainImageUrl={IMAGES[0]}
+        subImageUrls={IMAGES.slice(1)}
+        title="캣타워"
+        tradeStatus={null}
+        productTypeName="판매상품"
+      />
+    )
+
+    fireEvent.click(screen.getAllByAltText('캣타워 - 1')[0])
+
+    expect(screen.getByRole('button', { name: '닫기' })).toBeInTheDocument()
+  })
+
+  it('처음에는 확대창이 닫혀 있다', () => {
+    render(
+      <MainImage
+        mainImageUrl={IMAGES[0]}
+        subImageUrls={IMAGES.slice(1)}
+        title="캣타워"
+        tradeStatus={null}
+        productTypeName="판매상품"
+      />
+    )
+
+    expect(screen.queryByRole('button', { name: '닫기' })).not.toBeInTheDocument()
+  })
+
+  // 사진이 하나도 없으면 slides 에 든 것은 자리표시자다. 띄울 것이 없으니 안 연다.
+  it('사진이 하나도 없으면 눌러도 안 열린다', () => {
+    render(<MainImage mainImageUrl={null} subImageUrls={[]} title="캣타워" tradeStatus={null} productTypeName="판매상품" />)
+
+    fireEvent.click(screen.getAllByAltText('캣타워 - 1')[0])
+
+    expect(screen.queryByRole('button', { name: '닫기' })).not.toBeInTheDocument()
   })
 })
