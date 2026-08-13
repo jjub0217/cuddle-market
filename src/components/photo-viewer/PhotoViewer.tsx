@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 
 import { cn } from '@/lib/utils/cn'
@@ -62,24 +62,48 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
 
   const clampScale = (value: number) => Math.min(Math.max(value, MIN_SCALE), MAX_SCALE)
 
-  // 사진이 화면에 **실제로 그려진 크기**. 넘기는 단추를 사진 안쪽에 붙이는 데 쓴다.
-  // 사진마다·창 크기마다 달라서 재는 수밖에 없다.
+  // 사진 틀. **확대해도 이 틀은 안 변한다** — 틀 안에서 사진만 커지고 넘치면 잘린다.
+  // 번개장터도 이렇게 한다(2026-08-13에 스크린샷으로 확인). 그래서 넘기는 화살표·번호가
+  // 늘 같은 자리에 있어 화면이 출렁이지 않는다.
   //
-  // ⚠️ 키워도(transform) 이 값은 안 바뀐다 — transform 은 배치를 안 건드리기 때문이다.
-  //    그래서 단추를 붙일 때는 여기에 **배율을 곱해** 쓴다. 안 곱했더니 사진만 커지고
-  //    화살표는 제자리에 남아 화면 한가운데 둘이 몰렸다(2026-08-13에 스크린샷으로 확인).
-  const imgRef = useRef<HTMLImageElement>(null)
-  const [photoBox, setPhotoBox] = useState<{ width: number; height: number } | null>(null)
+  // 틀 크기를 알려면 **화면 크기와 사진 알갱이 크기** 둘 다 필요하다.
+  //   틀 = 사진을 화면 안에 다 넣는 크기 (단, 원본보다 크게는 안 키운다)
+  const stageRef = useRef<HTMLDivElement>(null)
+  const [stage, setStage] = useState<{ width: number; height: number } | null>(null)
+  const [natural, setNatural] = useState<{ width: number; height: number } | null>(null)
 
   useEffect(() => {
-    const img = imgRef.current
-    if (!img || !isOpen) return
-    const 재기 = () => setPhotoBox({ width: img.clientWidth, height: img.clientHeight })
+    const stageEl = stageRef.current
+    if (!stageEl || !isOpen) return
+    const 재기 = () => setStage({ width: stageEl.clientWidth, height: stageEl.clientHeight })
     재기()
     const 지켜보기 = new ResizeObserver(재기)
-    지켜보기.observe(img)
+    지켜보기.observe(stageEl)
     return () => 지켜보기.disconnect()
-  }, [isOpen, index])
+  }, [isOpen])
+
+  const frame =
+    stage && natural
+      ? (() => {
+          // 원본보다 크게는 안 키운다 — 없는 알갱이는 만들어지지 않는다.
+          const 맞춤배율 = Math.min(1, stage.width / natural.width, stage.height / natural.height)
+          return { width: natural.width * 맞춤배율, height: natural.height * 맞춤배율 }
+        })()
+      : null
+
+  /** 끌어서 갈 수 있는 한계. 틀 밖으로는 못 민다 — 밀어 봐야 빈자리만 보인다 */
+  const panLimit = frame
+    ? { x: (frame.width * (scale - 1)) / 2, y: (frame.height * (scale - 1)) / 2 }
+    : { x: 0, y: 0 }
+  // 휠 처리기(useEffect)가 이걸 부르므로 한계가 바뀔 때만 새로 만든다.
+  // 매번 새로 만들면 처리기를 매 렌더마다 다시 달게 된다.
+  const clampOffset = useCallback(
+    (x: number, y: number) => ({
+      x: Math.min(Math.max(x, -panLimit.x), panLimit.x),
+      y: Math.min(Math.max(y, -panLimit.y), panLimit.y),
+    }),
+    [panLimit.x, panLimit.y]
+  )
 
   // 끌어서 움직이기. 키운 상태에서만 쓴다 — 맞춤일 때는 넘칠 것이 없다.
   const dragRef = useRef<{ x: number; y: number; offsetX: number; offsetY: number } | null>(null)
@@ -109,7 +133,7 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
       if (!movedRef.current) event.currentTarget.setPointerCapture?.(event.pointerId)
       movedRef.current = true
     }
-    setOffset({ x: start.offsetX + dx, y: start.offsetY + dy })
+    setOffset(clampOffset(start.offsetX + dx, start.offsetY + dy))
   }
 
   const handlePointerUp = () => {
@@ -175,13 +199,13 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
       // 키운 상태에서 두 손가락으로 쓸면 사진을 움직인다. 맞춤일 때는 건드리지 않는다.
       if (scale <= MIN_SCALE) return
       event.preventDefault()
-      setOffset((prev) => ({ x: prev.x - event.deltaX, y: prev.y - event.deltaY }))
+      setOffset((prev) => clampOffset(prev.x - event.deltaX, prev.y - event.deltaY))
     }
     dialog.addEventListener('wheel', handleWheel, { passive: false })
     return () => dialog.removeEventListener('wheel', handleWheel)
     // 배율이 바뀔 때마다 처리기를 다시 단다. 「지금 배율」을 봐야 쓸기와 확대를 가를 수 있고,
     // 붙였다 떼는 일은 값싸다. (ref 에 넣어 두는 방법은 린트가 막는다 — 렌더 중 ref 쓰기)
-  }, [isOpen, scale])
+  }, [isOpen, scale, clampOffset])
 
   // ESC. 리액트의 onCancel 대신 요소에 직접 단다 —
   // cancel 은 위로 올라가지 않는(bubbles: false) 사건이라 직접 다는 쪽이 확실하다.
@@ -229,6 +253,7 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
 
           {/* 검은 자리 = 닫기. 사진은 아래에서 눌림을 멈춰 세운다 */}
           <div
+            ref={stageRef}
             data-testid="photo-viewer-backdrop"
             onClick={() => {
               if (isClickAfterDrag()) return
@@ -238,76 +263,70 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerUp}
-            className="flex flex-1 items-center justify-center overflow-hidden"
+            className="relative flex flex-1 items-center justify-center overflow-hidden"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              ref={imgRef}
-              src={toResizedWebpUrl(images[index], 800)}
-              alt={`${alt} - ${index + 1}`}
-              data-zoomed={zoomed}
-              draggable={false}
-              onClick={(event) => {
-                event.stopPropagation()
-                if (isClickAfterDrag()) return
-                // 누르면 2배 한 번에(앱 더블탭과 같다). 손가락으로는 사이 값도 고를 수 있다.
-                setScale((prev) => (prev > MIN_SCALE ? MIN_SCALE : CLICK_SCALE))
-              }}
-              // 키웠을 때만 style 이 붙는다(위 sizeStyle). 맞춤은 클래스에 맡긴다.
-              style={sizeStyle}
-              className={cn(
-                'm-auto max-h-full max-w-full select-none object-contain',
-                zoomed ? 'cursor-zoom-out' : 'cursor-zoom-in'
-              )}
-            />
+            {/* 사진 틀 — 크기가 고정이다. 안에서 사진만 커지고 넘치면 잘린다.
+                아직 크기를 못 쟀으면(첫 그림·시험) 틀 없이 사진만 그린다. */}
+            <div
+              data-testid="photo-viewer-frame"
+              className="relative overflow-hidden"
+              style={frame ? { width: frame.width, height: frame.height } : undefined}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={toResizedWebpUrl(images[index], 800)}
+                alt={`${alt} - ${index + 1}`}
+                data-zoomed={zoomed}
+                draggable={false}
+                onLoad={(event) => {
+                  const img = event.currentTarget
+                  setNatural({ width: img.naturalWidth, height: img.naturalHeight })
+                }}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  if (isClickAfterDrag()) return
+                  // 누르면 2배 한 번에(앱 더블탭과 같다). 손가락으로는 사이 값도 고를 수 있다.
+                  setScale((prev) => (prev > MIN_SCALE ? MIN_SCALE : CLICK_SCALE))
+                }}
+                style={sizeStyle}
+                className={cn(
+                  'block select-none object-contain',
+                  frame ? 'h-full w-full' : 'max-h-full max-w-full',
+                  zoomed ? 'cursor-zoom-out' : 'cursor-zoom-in'
+                )}
+              />
+
+              {hasMultiple ? (
+                <>
+                  {/*
+                    넘기는 단추는 **틀 안쪽 양 끝**에 붙인다. 틀이 안 변하니 확대해도
+                    자리가 그대로다 — 화면 끝에 두면 사진에서 눈이 멀어져 있는 줄도 모른다.
+                  */}
+                  <button
+                    type="button"
+                    aria-label="이전 이미지"
+                    onClick={() => go(-1)}
+                    className="absolute top-1/2 left-2 z-20 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)] transition-opacity hover:opacity-80"
+                  >
+                    <ChevronLeft size={44} strokeWidth={1.5} />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="다음 이미지"
+                    onClick={() => go(1)}
+                    className="absolute top-1/2 right-2 z-20 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)] transition-opacity hover:opacity-80"
+                  >
+                    <ChevronRight size={44} strokeWidth={1.5} />
+                  </button>
+                </>
+              ) : null}
+            </div>
           </div>
 
           {hasMultiple ? (
-            <>
-              {/*
-                넘기는 단추는 **사진 테두리 안쪽**에 붙인다. 화면 끝에 두면 사진에서 눈이
-                멀어져 있는 줄도 모른다(2026-08-13에 그렇게 느낀다는 이야기를 들었다).
-
-                사진의 그려진 크기는 사진마다·창 크기마다 달라서 고정값으로는 못 맞춘다.
-                재서(photoBox) 그 크기의 상자를 사진 위에 겹쳐 놓고 그 안의 양 끝에 붙인다.
-                ⚠️ 아직 못 쟀으면(첫 그림·시험) 예전처럼 화면 양 끝에 둔다 — 없는 것보다 낫다.
-              */}
-              <div
-                className="pointer-events-none absolute top-1/2 left-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 items-center justify-between px-2"
-                style={
-                  photoBox
-                    ? {
-                        // 키운 만큼 같이 커진다. 화면을 넘치면 화면 끝에서 멈춘다
-                        // (그때는 화면 가장자리가 곧 보이는 사진의 가장자리다).
-                        width: photoBox.width * scale,
-                        height: photoBox.height * scale,
-                        maxWidth: '100%',
-                        maxHeight: '100%',
-                      }
-                    : { width: '100%', height: '100%' }
-                }
-              >
-                <button
-                  type="button"
-                  aria-label="이전 이미지"
-                  onClick={() => go(-1)}
-                  className="pointer-events-auto flex h-12 w-12 cursor-pointer items-center justify-center text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)] transition-opacity hover:opacity-80"
-                >
-                  <ChevronLeft size={44} strokeWidth={1.5} />
-                </button>
-                <button
-                  type="button"
-                  aria-label="다음 이미지"
-                  onClick={() => go(1)}
-                  className="pointer-events-auto flex h-12 w-12 cursor-pointer items-center justify-center text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)] transition-opacity hover:opacity-80"
-                >
-                  <ChevronRight size={44} strokeWidth={1.5} />
-                </button>
-              </div>
-              <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-sm text-white">
-                {index + 1} / {images.length}
-              </p>
-            </>
+            <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-sm text-white">
+              {index + 1} / {images.length}
+            </p>
           ) : null}
         </div>
       ) : null}
