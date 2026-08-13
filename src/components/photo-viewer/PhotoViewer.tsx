@@ -33,22 +33,17 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
 
   // 두 가지 크기로 본다.
   //
-  //   화면 맞춤   사진 전체가 다 보이게. 작으면 키우고 크면 줄인다 (아래 FIT_MAX_SCALE)
+  //   화면 맞춤   사진 전체가 다 보이게. **원본보다 크게는 안 키운다** — 화면보다 크면 줄일 뿐이다
   //   크게        원본의 두 배. 화면을 넘치므로 끌어서 움직여 본다
   //
-  // ⚠️ 「크게」를 원본 크기(1:1)로 뒀더니 **누르면 오히려 작아졌다**(2026-08-13).
-  //    화면 맞춤이 이미 원본보다 크게 키우기 때문이다 — 600×800 사진이 높이 1000 화면에서
-  //    1.26배가 된다. 두 상태의 크기 순서가 뒤집히지 않게, 「크게」는 맞춤의 상한과
-  //    같은 값(원본의 두 배)으로 못 박는다.
+  // ⚠️ 한때 맞춤도 화면을 채우도록(최대 두 배) 키웠는데, **위아래 검은 자리가 넉넉한 쪽이
+  //    보기 낫다**는 판단으로 되돌렸다(2026-08-13, 눈으로 견주고 정했다).
+  //    그때 「크게」가 원본 크기(1:1)였던 탓에 **벌릴수록 사진이 작아지는** 일이 있었다 —
+  //    지금은 「크게」가 두 배라 맞춤(≤1배)보다 늘 크다. 이 순서를 깨지 말 것.
   const [zoomed, setZoomed] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  // 사진의 진짜 알갱이 크기. **화면에 맞춰 키울 때 어디까지 키울지**를 여기서 정한다.
-  //
-  // ⚠️ max-h-full·max-w-full 만 주면 **상한만 정해져 원본보다 크게는 안 된다.**
-  //    600×800 사진이 높이 1000 넘는 모니터에서 600×800 그대로 떠서 가운데 조그맣게
-  //    보였다(2026-08-13에 확인). 그래서 h-full·w-full 로 채우되, 여기서 잰 크기의
-  //    두 배를 상한으로 건다 — 그보다 키우면 뭉개짐이 눈에 띈다.
+  // 사진의 진짜 알갱이 크기. 「크게」가 얼마만 한지 정하는 데 쓴다(원본의 두 배).
   const [natural, setNatural] = useState<{ width: number; height: number } | null>(null)
 
   // 끌어서 움직이기. 실제 크기일 때만 쓴다 — 화면 맞춤일 때는 넘칠 것이 없다.
@@ -176,18 +171,14 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
     setIndex((prev) => (prev + step + images.length) % images.length)
   }
 
-  /**
-   * 원본의 몇 배까지 키울지. 그 위는 뭉개짐이 눈에 띈다.
-   * 화면 맞춤의 상한이자 「크게」의 크기다 — 둘이 같은 값이라야 순서가 안 뒤집힌다.
-   */
-  const MAX_SCALE = 2
-  const sizeStyle = natural
-    ? zoomed
+  /** 「크게」의 크기. 원본의 두 배 — 그 위는 뭉개짐이 눈에 띈다 */
+  const ZOOM_SCALE = 2
+  const sizeStyle =
+    zoomed && natural
       ? // 크게 — 원본의 두 배로 못 박는다. 화면을 넘치면 끌어서 본다
-        { width: natural.width * MAX_SCALE, height: 'auto' as const, maxWidth: 'none' as const }
-      : // 화면 맞춤 — 화면을 채우되 두 배를 넘지 않는다
-        { maxWidth: natural.width * MAX_SCALE, maxHeight: natural.height * MAX_SCALE }
-    : undefined
+        { width: natural.width * ZOOM_SCALE, height: 'auto' as const, maxWidth: 'none' as const }
+      : // 화면 맞춤 — 크기를 못 박지 않는다. max-h-full·max-w-full 이 「넘치면 줄이기」만 한다
+        undefined
 
   return (
     <dialog
@@ -235,13 +226,11 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
                 if (isClickAfterDrag()) return
                 setZoomed((prev) => !prev)
               }}
-              // 화면 맞춤은 h-full·w-full 로 **채운다**. max-h-full 만 주면 원본보다
-              // 크게는 안 커져서 작은 사진이 큰 모니터에 조그맣게 뜬다.
-              // 크기의 상한·「크게」의 크기는 style 이 정한다(위 sizeStyle).
+              // 「크게」의 크기만 style 이 정한다(위 sizeStyle). 화면 맞춤은 클래스에 맡긴다.
               style={sizeStyle}
               className={cn(
                 'm-auto select-none',
-                zoomed ? 'cursor-zoom-out' : 'h-full w-full cursor-zoom-in object-contain'
+                zoomed ? 'cursor-zoom-out' : 'max-h-full max-w-full cursor-zoom-in object-contain'
               )}
             />
           </div>

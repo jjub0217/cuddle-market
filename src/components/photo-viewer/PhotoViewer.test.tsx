@@ -211,13 +211,15 @@ describe('크게 보기가 화면 맞춤보다 크다', () => {
     fireEvent.load(img)
   }
 
-  it('화면 맞춤은 원본의 두 배를 상한으로 둔다', () => {
+  // ⚠️ jsdom 에는 배치가 없어 「실제로 몇 픽셀로 그려졌나」는 못 본다.
+  //    크기를 못 박지 않는다는 것까지만 지킨다 — 못 박으면 원본보다 키우게 된다.
+  it('화면 맞춤은 크기를 못 박지 않는다 (원본보다 크게 안 키운다)', () => {
     render(<PhotoViewer images={IMAGES} isOpen onClose={vi.fn()} alt="캣타워" />)
     const 사진 = screen.getByAltText('캣타워 - 1')
     사진크기를심는다(사진, 600, 800)
 
-    expect(사진.style.maxWidth).toBe('1200px')
-    expect(사진.style.maxHeight).toBe('1600px')
+    expect(사진.style.width).toBe('')
+    expect(사진.style.maxWidth).toBe('')
   })
 
   it('크게 하면 원본의 두 배로 못 박는다 (맞춤보다 작아지면 안 된다)', () => {
