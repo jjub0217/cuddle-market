@@ -1,8 +1,9 @@
 import { Image, type ImageLoadEventData } from 'expo-image';
 import { useMemo, useState, type ReactNode } from 'react';
-import { StyleSheet, Text, View, type ImageStyle, type TextStyle } from 'react-native';
+import { Pressable, StyleSheet, Text, View, type ImageStyle, type TextStyle } from 'react-native';
 import { Renderer, useMarkdown, type MarkedStyles } from 'react-native-marked';
 
+import { PhotoViewer } from '@/components/photo-viewer/photo-viewer';
 import { colors } from '@/constants/colors';
 
 // 게시글 본문. 서버가 마크다운으로 준다.
@@ -105,6 +106,7 @@ const MARKDOWN_STYLES: MarkedStyles = {
  */
 function PostImage({ uri, alt, style }: { uri: string; alt?: string; style?: ImageStyle }) {
   const [ratio, setRatio] = useState<number | null>(null);
+  const [viewerOpen, setViewerOpen] = useState(false);
 
   const handleLoad = (event: ImageLoadEventData) => {
     const { width, height } = event.source;
@@ -112,14 +114,29 @@ function PostImage({ uri, alt, style }: { uri: string; alt?: string; style?: Ima
   };
 
   return (
-    <Image
-      source={{ uri }}
-      style={[styles.image, { aspectRatio: ratio ?? FALLBACK_RATIO }, style]}
-      contentFit="cover"
-      accessibilityLabel={alt}
-      onLoad={handleLoad}
-      testID="post-body-image"
-    />
+    <>
+      {/* ⚠️ 사진마다 이름이 같다(post-photo). 그리개(PostRenderer.image)가 몇 번째
+          사진인지 알려 주지 않아서다 — this.getKey() 는 리액트 key 로만 쓰이고
+          조각 안에서는 못 본다. 시험은 getAllByTestId('post-photo')[0] 으로 집는다. */}
+      <Pressable
+        testID="post-photo"
+        accessibilityRole="button"
+        onPress={() => setViewerOpen(true)}
+      >
+        <Image
+          source={{ uri }}
+          style={[styles.image, { aspectRatio: ratio ?? FALLBACK_RATIO }, style]}
+          contentFit="cover"
+          accessibilityLabel={alt}
+          onLoad={handleLoad}
+          testID="post-body-image"
+        />
+      </Pressable>
+
+      {/* 본문 사진은 한 장씩 따로 그려진다 — 그리개가 이웃 사진을 안 알려 줘서
+          확대창도 누른 그 한 장만 받는다(웹 MdPreview 도 마찬가지다). */}
+      <PhotoViewer images={[uri]} visible={viewerOpen} onClose={() => setViewerOpen(false)} />
+    </>
   );
 }
 
