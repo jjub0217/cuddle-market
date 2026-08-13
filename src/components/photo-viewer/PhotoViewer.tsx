@@ -127,12 +127,14 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
     }
   }, [isOpen])
 
-  // 확대 제스처를 가로챈다.
+  // 확대 제스처를 **사진 위에서만** 가로챈다.
   //
   // 트랙패드로 벌리는 것과 ⌘(Ctrl)+휠은 브라우저에 **ctrl 이 눌린 휠**로 똑같이 온다.
-  // 그냥 두면 브라우저가 **화면 전체를 키워** X 단추·화살표·번호가 화면 밖으로 밀려난다
-  // (2026-08-13에 스크린샷으로 확인했다). 사진 보는 창에서 확대했는데 닫을 단추를
-  // 잃는 것은 앞뒤가 안 맞는다. 그래서 우리가 받아 **사진만** 키운다.
+  // 그냥 두면 브라우저가 화면 전체를 키워 X 단추·화살표·번호가 화면 밖으로 밀려난다.
+  //
+  // ⚠️ **검은 자리는 일부러 안 가로챈다.** 번개장터도 그렇게 한다(2026-08-13 확인) —
+  //    사진 위에서 벌리면 사진만 커지고, 검은 자리에서 벌리면 브라우저 확대가 그대로 된다.
+  //    처음에는 창 전체를 가로챘는데, 그러면 「페이지를 키워서 보고 싶다」는 길이 아예 막힌다.
   //
   // ⚠️ 리액트의 onWheel 로는 못 막는다 — 리액트가 휠을 passive 로 달아서
   //    preventDefault 가 무시된다. 요소에 직접, passive: false 로 달아야 한다.
@@ -141,8 +143,10 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
     if (!dialog || !isOpen) return
     const handleWheel = (event: WheelEvent) => {
       if (!event.ctrlKey) return
+      // 사진 위가 아니면 브라우저에 맡긴다.
+      if (!(event.target instanceof HTMLImageElement)) return
       event.preventDefault()
-      // 벌리면(위로) 실제 크기, 오므리면 화면 맞춤.
+      // 벌리면(위로) 크게, 오므리면 화면 맞춤.
       setZoomed(event.deltaY < 0)
     }
     dialog.addEventListener('wheel', handleWheel, { passive: false })
