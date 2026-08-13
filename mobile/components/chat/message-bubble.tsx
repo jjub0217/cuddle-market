@@ -1,8 +1,9 @@
 import { formatChatTime } from '@cuddle/shared';
 import { Image } from 'expo-image';
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { PhotoViewer } from '@/components/photo-viewer/photo-viewer';
 import { colors } from '@/constants/colors';
 import type { ChatMessage } from '@/lib/chat/api';
 
@@ -15,19 +16,32 @@ import type { ChatMessage } from '@/lib/chat/api';
 /** 사진 말풍선. 못 불러오면 자리만 남긴다 — 웹도 자리표시자를 둔다(ChatLog 의 ChatImageMessage). */
 function ImageMessage({ uri, mine }: { uri: string | null; mine: boolean }) {
   const [failed, setFailed] = useState(false);
+  // 확대창(#904). 말풍선 안 사진은 정사각으로 **잘려** 있어서, 누르면 잘린 곳까지 다 보인다.
+  const [viewerOpen, setViewerOpen] = useState(false);
 
   return (
     <View style={[styles.photo, mine ? styles.photoMine : styles.photoTheirs]}>
       {uri && !failed ? (
-        <Image
-          source={{ uri }}
-          style={styles.photoImage}
-          contentFit="cover"
-          // 읽어 주는 이름이 없으면 화면 낭독기가 「그림」이라고만 읽는다.
-          accessibilityLabel={mine ? '내가 보낸 사진' : '받은 사진'}
-          onError={() => setFailed(true)}
-        />
+        <>
+          <Pressable
+            testID="chat-photo"
+            accessibilityRole="button"
+            onPress={() => setViewerOpen(true)}
+            style={styles.photoImage}>
+            <Image
+              source={{ uri }}
+              style={styles.photoImage}
+              contentFit="cover"
+              // 읽어 주는 이름이 없으면 화면 낭독기가 「그림」이라고만 읽는다.
+              accessibilityLabel={mine ? '내가 보낸 사진' : '받은 사진'}
+              onError={() => setFailed(true)}
+            />
+          </Pressable>
+          {/* 채팅 사진은 한 장씩 오므로 누른 것만 띄운다(상품 상세처럼 여러 장이 아니다). */}
+          <PhotoViewer images={[uri]} visible={viewerOpen} onClose={() => setViewerOpen(false)} />
+        </>
       ) : (
+        // 못 불러온 자리 — 띄울 사진이 없으니 누를 수도 없다. 기존 그대로 둔다.
         <View style={styles.photoFallback}>
           <Text style={styles.photoFallbackText}>사진을 불러오지 못했어요</Text>
         </View>
