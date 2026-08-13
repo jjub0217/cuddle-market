@@ -491,16 +491,16 @@ function Wrapper({ children }: { children: React.ReactNode }) {
 it('제목·본문·사진 칸이 있다', async () => {
   await render(<CommunityPostScreen />, { wrapper: Wrapper });
 
-  expect(screen.getByPlaceholderText('제목을 입력해주세요')).toBeTruthy();
-  expect(screen.getByPlaceholderText('내용을 입력해주세요')).toBeTruthy();
+  expect(screen.getByPlaceholderText('제목을 입력해 주세요')).toBeTruthy();
+  expect(screen.getByPlaceholderText('내용을 입력하세요')).toBeTruthy();
   expect(screen.getByText('사진 (0/5)')).toBeTruthy();
 });
 
 it('제목이 짧으면 등록을 못 누른다', async () => {
   await render(<CommunityPostScreen />, { wrapper: Wrapper });
 
-  await fireEvent.changeText(screen.getByPlaceholderText('제목을 입력해주세요'), 'ㄱ');
-  await fireEvent.changeText(screen.getByPlaceholderText('내용을 입력해주세요'), '내용입니다');
+  await fireEvent.changeText(screen.getByPlaceholderText('제목을 입력해 주세요'), 'ㄱ');
+  await fireEvent.changeText(screen.getByPlaceholderText('내용을 입력하세요'), '내용입니다');
 
   expect(screen.getByRole('button', { name: '등록' }).props.accessibilityState.disabled).toBe(true);
 });
@@ -508,18 +508,20 @@ it('제목이 짧으면 등록을 못 누른다', async () => {
 it('제목과 본문이 다 차면 등록을 누를 수 있다', async () => {
   await render(<CommunityPostScreen />, { wrapper: Wrapper });
 
-  await fireEvent.changeText(screen.getByPlaceholderText('제목을 입력해주세요'), '캣타워 질문');
-  await fireEvent.changeText(screen.getByPlaceholderText('내용을 입력해주세요'), '상태가 궁금해요');
+  await fireEvent.changeText(screen.getByPlaceholderText('제목을 입력해 주세요'), '캣타워 질문');
+  await fireEvent.changeText(screen.getByPlaceholderText('내용을 입력하세요'), '상태가 궁금해요');
 
   expect(screen.getByRole('button', { name: '등록' }).props.accessibilityState.disabled).toBe(false);
 });
 
-it('남은 글자 수를 보여준다', async () => {
+// 웹과 같은 모양(n/1000자)을 쓰되 **사진 몫까지 더한 값**을 보여준다.
+// 서버가 세는 것과 같은 숫자라야 「999자인데 왜 안 되지」가 안 생긴다.
+it('쓴 글자 수를 웹과 같은 모양으로 보여준다', async () => {
   await render(<CommunityPostScreen />, { wrapper: Wrapper });
 
-  await fireEvent.changeText(screen.getByPlaceholderText('내용을 입력해주세요'), '12345');
+  await fireEvent.changeText(screen.getByPlaceholderText('내용을 입력하세요'), '12345');
 
-  expect(screen.getByText('995자 남음')).toBeTruthy();
+  expect(screen.getByText('5/1000자')).toBeTruthy();
 });
 ```
 
@@ -550,6 +552,8 @@ export default function CommunityPostScreen() {
   const [오류, set오류] = useState<string | null>(null);
 
   const 올라간주소들 = slots.map((s) => s.url).filter((u): u is string => u !== null);
+  // 웹과 같은 모양(n/1000자)으로 보여주되 **사진 몫까지 더한** 값이다 — 서버가 세는 것과 같다
+  const 쓴글자 = MAX_CONTENT_LENGTH - remainingBodyLength(body, 올라간주소들);
   const 남은글자 = remainingBodyLength(body, 올라간주소들);
   // ⚠️ 아직 안 올라간 사진이 있으면 막는다. 안 막으면 본문에 ![](null) 이 들어간다.
   const 올리는중 = slots.some((s) => s.url === null && !s.failed);
@@ -597,8 +601,8 @@ export default function CommunityPostScreen() {
       <KeyboardAvoidingView style={styles.flex} behavior="padding">
         <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
           {/* 게시판 고르기 — 목록과 같은 칩을 쓴다 */}
-          {/* 제목 칸 — maxLength={MAX_TITLE_LENGTH} · placeholder 는 웹을 따른다 */}
-          {/* 본문 칸 — multiline · 아래에 「{남은글자}자 남음」 */}
+          {/* 제목 칸 — placeholder="제목을 입력해 주세요" · maxLength={MAX_TITLE_LENGTH} · 아래에 「n/50」 */}
+          {/* 본문 칸 — placeholder="내용을 입력하세요" · multiline · 아래에 「{쓴글자}/1000자」 */}
           <PostImageField slots={slots} onChange={setSlots} />
           {오류 ? <Text style={styles.error}>{오류}</Text> : null}
         </ScrollView>
