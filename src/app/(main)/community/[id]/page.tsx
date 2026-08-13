@@ -1,6 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import { fetchCommunityDetail } from '@/lib/api/server/community'
-import { toUrlName } from '@/lib/utils/toUrlName'
+import { communityDetailPath } from '@/lib/utils/detailPath'
 
 interface CommunityRedirectPageProps {
   params: Promise<{ id: string }>
@@ -14,5 +14,5 @@ export default async function CommunityRedirectPage({ params }: CommunityRedirec
     notFound()
   }
 
-  redirect(`/community/${id}/${toUrlName(post.title)}`)
+  redirect(communityDetailPath(id, post.title))
 }
