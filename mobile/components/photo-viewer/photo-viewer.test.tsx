@@ -46,16 +46,27 @@ it('뒤로가기로 닫힌다고 알린다', async () => {
   expect(닫힘).toHaveBeenCalledTimes(1);
 });
 
-it('여러 장이면 몇 번째인지 보여준다', async () => {
-  await render(<PhotoViewer images={IMAGES} startIndex={1} visible onClose={jest.fn()} />);
+// 폰에는 좌우 화살표를 둘 자리가 없어 **점**이 그 몫을 한다(웹은 화살표).
+it('여러 장이면 사진 수만큼 점이 있다', async () => {
+  await render(<PhotoViewer images={IMAGES} visible onClose={jest.fn()} />);
 
-  expect(screen.getByText('2 / 2')).toBeTruthy();
+  expect(screen.getByTestId('photo-viewer-dot-0')).toBeTruthy();
+  expect(screen.getByTestId('photo-viewer-dot-1')).toBeTruthy();
 });
 
-it('한 장이면 번호를 안 보여준다', async () => {
+it('한 장이면 점이 없다', async () => {
   await render(<PhotoViewer images={[IMAGES[0]]} visible onClose={jest.fn()} />);
 
-  expect(screen.queryByText('1 / 1')).toBeNull();
+  expect(screen.queryByTestId('photo-viewer-dot-0')).toBeNull();
+});
+
+// ⚠️ **점을 눌러 진짜로 넘어가는지는 여기서 못 본다** — jest 에는 스크롤이 없다.
+//    실기기로 봐야 한다. 여기서는 「지금 보는 사진을 점이 제대로 가리키는가」까지 지킨다.
+it('지금 보는 사진의 점이 눌린 상태로 보인다', async () => {
+  await render(<PhotoViewer images={IMAGES} startIndex={1} visible onClose={jest.fn()} />);
+
+  expect(screen.getByTestId('photo-viewer-dot-1').props.accessibilityState.selected).toBe(true);
+  expect(screen.getByTestId('photo-viewer-dot-0').props.accessibilityState.selected).toBe(false);
 });
 
 // ⚠️ **배율 자체는 여기서 못 본다.** 배율은 손가락 쪽(UI 쓰레드)의 값이라

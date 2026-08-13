@@ -1,12 +1,11 @@
 import { Image } from 'expo-image';
 import { X } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   FlatList,
   Modal,
   Pressable,
   StyleSheet,
-  Text,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -36,6 +35,8 @@ export const PINCH_TEST_ID = 'photo-viewer-pinch';
 const MAX_SCALE = 3;
 /** 두 번 톡톡 쳤을 때의 배율 */
 const DOUBLE_TAP_SCALE = 2;
+/** X 단추·점 표시가 사라졌다 나타나는 데 걸리는 시간 */
+const UI_FADE_MS = 180;
 
 interface ZoomablePhotoProps {
   uri: string;
@@ -49,9 +50,11 @@ interface ZoomablePhotoProps {
 //
 // ⚠️ 끌기는 **넓힌 상태에서만** 듣는다. 1배일 때 끌면 좌우 넘기기가 해야 할 일이다.
 //
-// ⚠️ **틀이 고정이다** — 넓혀도 사진 틀은 안 커지고, 넘치는 부분은 잘린다.
-//    웹과 같게 맞춘 것이다(웹 PhotoViewer.tsx). 틀이 안 흔들려야 화면이 출렁이지 않는다.
-//    틀 크기는 사진 비율을 화면 안에 맞춰 구한다.
+// ⚠️ **웹과 일부러 다르다.** 웹은 틀을 고정하고 그 안에서만 키우는데, 앱은 넓히면
+//    **화면 전체를 채운다.** 폰은 화면이 좁아서 틀 안에만 키우면 답답하고, 사진을 볼 때는
+//    X 단추·점 표시 같은 것이 오히려 방해가 된다(그래서 넓히면 그것들도 사라진다).
+//    데스크탑은 화면이 넓어 틀이 고정이라도 답답하지 않고, 오히려 단추가 제자리에 있는
+//    편이 낫다.
 function ZoomablePhoto({ uri, width, height, onZoomChange }: ZoomablePhotoProps) {
   const scale = useSharedValue(1);
   const savedScale = useSharedValue(1);
@@ -59,6 +62,8 @@ function ZoomablePhoto({ uri, width, height, onZoomChange }: ZoomablePhotoProps)
   const y = useSharedValue(0);
   const savedX = useSharedValue(0);
   const savedY = useSharedValue(0);
+  /** 화면 쪽에 「넓힘」을 마지막으로 알린 값. 바뀔 때만 알리려고 둔다 */
+  const 넓힘알림 = useSharedValue(0);
 
   // 사진 알갱이 크기를 알아야 틀을 잡는다. 읽기 전에는 화면 크기를 쓴다.
   //
@@ -73,17 +78,29 @@ function ZoomablePhoto({ uri, width, height, onZoomChange }: ZoomablePhotoProps)
 
   // ⚠️ 제스처 안(손가락 쪽 스레드)에서는 **숫자만** 꺼내 쓴다. 거기서 바깥 함수를 부르면
   //    「UI 스레드에서 일반 함수를 불렀다」로 죽는다. 그래서 미리 숫자로 담아 둔다.
+  //
+  // 끌 수 있는 거리는 **화면 밖으로 숨은 만큼**이다. 사진이 화면보다 작으면 0 —
+  // 끌 데가 없다. (틀 기준으로 재면 화면에 다 보이는데도 끌리는 이상한 일이 생긴다.)
   const frameWidth = frame.width;
   const frameHeight = frame.height;
+  const screenWidth = width;
+  const screenHeight = height;
 
   const pinch = Gesture.Pinch()
     // 시험에서 이 제스처를 집어 흔들어 보려고 붙인 이름이다(photo-viewer.test.tsx).
     .withTestId(PINCH_TEST_ID)
     .onUpdate((event) => {
       scale.value = Math.min(Math.max(savedScale.value * event.scale, 1), MAX_SCALE);
+      // 손을 떼기 전에 알린다 — 넓히는 **동안** X 단추·점 표시가 사라져야 자연스럽다.
+      // 바뀔 때 한 번만 건넨다(매 프레임 건네면 화면 쪽이 밀린다).
+      const 지금넓힘 = scale.value > 1 ? 1 : 0;
+      if (지금넓힘 !== 넓힘알림.value) {
+        넓힘알림.value = 지금넓힘;
+        runOnJS(onZoomChange)(지금넓힘 === 1);
+      }
       // 줄이는 동안 사진이 틀 밖으로 삐져나오지 않게 같이 당긴다.
-      const 끝X = (frameWidth * (scale.value - 1)) / 2;
-      const 끝Y = (frameHeight * (scale.value - 1)) / 2;
+      const 끝X = Math.max(0, (frameWidth * scale.value - screenWidth) / 2);
+      const 끝Y = Math.max(0, (frameHeight * scale.value - screenHeight) / 2);
       x.value = Math.min(Math.max(x.value, -끝X), 끝X);
       y.value = Math.min(Math.max(y.value, -끝Y), 끝Y);
     })
@@ -105,8 +122,8 @@ function ZoomablePhoto({ uri, width, height, onZoomChange }: ZoomablePhotoProps)
   const pan = Gesture.Pan()
     .onUpdate((event) => {
       if (scale.value <= 1) return;
-      const 끝X = (frameWidth * (scale.value - 1)) / 2;
-      const 끝Y = (frameHeight * (scale.value - 1)) / 2;
+      const 끝X = Math.max(0, (frameWidth * scale.value - screenWidth) / 2);
+      const 끝Y = Math.max(0, (frameHeight * scale.value - screenHeight) / 2);
       x.value = Math.min(Math.max(savedX.value + event.translationX, -끝X), 끝X);
       y.value = Math.min(Math.max(savedY.value + event.translationY, -끝Y), 끝Y);
     })
@@ -140,21 +157,19 @@ function ZoomablePhoto({ uri, width, height, onZoomChange }: ZoomablePhotoProps)
 
   return (
     <View style={[styles.page, { width, height }]}>
-      {/* 틀 — 크기가 고정이다. 안에서 사진만 커지고 넘치면 잘린다 */}
-      <View style={[styles.frame, { width: frame.width, height: frame.height }]}>
-        <GestureDetector gesture={gesture}>
-          <Animated.View style={[{ width: frame.width, height: frame.height }, style]}>
-            <Image
-              source={{ uri }}
-              style={{ width: frame.width, height: frame.height }}
-              contentFit="contain"
-              onLoad={(event) =>
-                setNatural({ width: event.source.width, height: event.source.height })
-              }
-            />
-          </Animated.View>
-        </GestureDetector>
-      </View>
+      <GestureDetector gesture={gesture}>
+        {/* 자르지 않는다 — 넓히면 화면 전체로 퍼진다 */}
+        <Animated.View style={[{ width: frame.width, height: frame.height }, style]}>
+          <Image
+            source={{ uri }}
+            style={{ width: frame.width, height: frame.height }}
+            contentFit="contain"
+            onLoad={(event) =>
+              setNatural({ width: event.source.width, height: event.source.height })
+            }
+          />
+        </Animated.View>
+      </GestureDetector>
     </View>
   );
 }
@@ -170,6 +185,15 @@ export function PhotoViewer({ images, startIndex = 0, visible, onClose }: PhotoV
   const { width, height } = useWindowDimensions();
   const [index, setIndex] = useState(startIndex);
   const [zoomed, setZoomed] = useState(false);
+  const pagerRef = useRef<FlatList<string>>(null);
+
+  // 넓히면 X 단추와 점 표시를 **스르륵 감춘다.** 사진을 볼 때 방해가 되기 때문이다.
+  // 줄이면 다시 스르륵 나타난다.
+  const uiOpacity = useSharedValue(1);
+  useEffect(() => {
+    uiOpacity.value = withTiming(zoomed ? 0 : 1, { duration: UI_FADE_MS });
+  }, [zoomed, uiOpacity]);
+  const uiStyle = useAnimatedStyle(() => ({ opacity: uiOpacity.value }));
 
   // 열 때마다 누른 사진에서 시작한다.
   useEffect(() => {
@@ -190,6 +214,7 @@ export function PhotoViewer({ images, startIndex = 0, visible, onClose }: PhotoV
       <GestureHandlerRootView style={styles.root}>
         <View style={styles.backdrop}>
           <FlatList
+            ref={pagerRef}
             testID={PAGER_TEST_ID}
             data={images}
             horizontal
@@ -207,23 +232,43 @@ export function PhotoViewer({ images, startIndex = 0, visible, onClose }: PhotoV
             )}
           />
 
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="닫기"
-            onPress={onClose}
-            style={styles.close}
-            hitSlop={12}
+          {/* 넓히면 사라지는 것들. 사라진 동안은 눌리지도 않아야 한다 */}
+          <Animated.View
+            style={[styles.ui, uiStyle]}
+            pointerEvents={zoomed ? 'none' : 'box-none'}
           >
-            <X size={28} color={colors.surface} />
-          </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="닫기"
+              onPress={onClose}
+              style={styles.close}
+              hitSlop={12}
+            >
+              <X size={28} color={colors.surface} />
+            </Pressable>
 
-          {images.length > 1 ? (
-            <View style={styles.counter} pointerEvents="none">
-              <Text style={styles.counterText}>
-                {index + 1} / {images.length}
-              </Text>
-            </View>
-          ) : null}
+            {/* 점 하나가 사진 한 장이다. 누르면 그 사진으로 간다 —
+                폰에는 좌우 화살표를 둘 자리가 없어 점이 그 몫을 한다.
+                모양은 상품 상세의 점 표시와 같다(product-detail/image-carousel.tsx). */}
+            {images.length > 1 ? (
+              <View style={styles.dots}>
+                {images.map((uri, i) => (
+                  <Pressable
+                    key={`${uri}-dot-${i}`}
+                    testID={`photo-viewer-dot-${i}`}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${i + 1}번째 사진`}
+                    // 지금 보는 사진이 어느 것인지 낭독기에도 알린다. 시험도 이걸 본다
+                    accessibilityState={{ selected: i === index }}
+                    hitSlop={10}
+                    onPress={() => pagerRef.current?.scrollToIndex({ index: i, animated: true })}
+                  >
+                    <View style={[styles.dot, i === index && styles.dotActive]} />
+                  </Pressable>
+                ))}
+              </View>
+            ) : null}
+          </Animated.View>
         </View>
       </GestureHandlerRootView>
     </Modal>
@@ -234,10 +279,20 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   // 한 장이 차지하는 자리(화면 한 장). 그 안에 틀을 가운데 놓는다
   page: { alignItems: 'center', justifyContent: 'center' },
-  // 틀 — 넘치는 부분을 잘라 낸다. 이게 있어야 넓혀도 사진이 화면으로 퍼지지 않는다
-  frame: { overflow: 'hidden' },
   backdrop: { flex: 1, backgroundColor: colors.black },
+  // 사라졌다 나타나는 것들을 한 겹으로 묶는다. 자리를 안 먹게 화면 전체에 깔고,
+  // box-none 이라 이 겹 자체는 터치를 안 먹는다(안의 단추만 먹는다).
+  ui: { ...StyleSheet.absoluteFillObject },
   close: { position: 'absolute', top: 44, right: 12, padding: 8 },
-  counter: { position: 'absolute', bottom: 32, left: 0, right: 0, alignItems: 'center' },
-  counterText: { color: colors.surface, fontSize: 14 },
+  dots: {
+    position: 'absolute',
+    bottom: 32,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: 'rgba(255, 255, 255, 0.5)' },
+  dotActive: { backgroundColor: colors.surface },
 });
