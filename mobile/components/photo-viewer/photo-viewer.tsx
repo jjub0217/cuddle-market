@@ -48,6 +48,10 @@ interface ZoomablePhotoProps {
 // 사진 한 장. 넓히고(핀치) · 두 번 쳐서 키우고(더블탭) · 끌어서 움직인다(팬).
 //
 // ⚠️ 끌기는 **넓힌 상태에서만** 듣는다. 1배일 때 끌면 좌우 넘기기가 해야 할 일이다.
+//
+// ⚠️ **틀이 고정이다** — 넓혀도 사진 틀은 안 커지고, 넘치는 부분은 잘린다.
+//    웹과 같게 맞춘 것이다(웹 PhotoViewer.tsx). 틀이 안 흔들려야 화면이 출렁이지 않는다.
+//    틀 크기는 사진 비율을 화면 안에 맞춰 구한다.
 function ZoomablePhoto({ uri, width, height, onZoomChange }: ZoomablePhotoProps) {
   const scale = useSharedValue(1);
   const savedScale = useSharedValue(1);
@@ -56,11 +60,32 @@ function ZoomablePhoto({ uri, width, height, onZoomChange }: ZoomablePhotoProps)
   const savedX = useSharedValue(0);
   const savedY = useSharedValue(0);
 
+  // 사진 알갱이 크기를 알아야 틀을 잡는다. 읽기 전에는 화면 크기를 쓴다.
+  //
+  // ⚠️ **웹과 일부러 다른 곳이 하나 있다.** 웹은 「원본보다 크게는 안 키운다」인데
+  //    여기서는 화면에 맞춰 키운다. 폰에서는 800px 사진이 화면 폭(기기 픽셀로 1000 넘음)
+  //    보다 작아서, 안 키우면 손바닥만 하게 뜬다. 같은 규칙이 매체마다 다른 결과를 낸다.
+  const [natural, setNatural] = useState<{ width: number; height: number } | null>(null);
+  const 맞춤배율 = natural ? Math.min(width / natural.width, height / natural.height) : 1;
+  const frame = natural
+    ? { width: natural.width * 맞춤배율, height: natural.height * 맞춤배율 }
+    : { width, height };
+
+  // ⚠️ 제스처 안(손가락 쪽 스레드)에서는 **숫자만** 꺼내 쓴다. 거기서 바깥 함수를 부르면
+  //    「UI 스레드에서 일반 함수를 불렀다」로 죽는다. 그래서 미리 숫자로 담아 둔다.
+  const frameWidth = frame.width;
+  const frameHeight = frame.height;
+
   const pinch = Gesture.Pinch()
     // 시험에서 이 제스처를 집어 흔들어 보려고 붙인 이름이다(photo-viewer.test.tsx).
     .withTestId(PINCH_TEST_ID)
     .onUpdate((event) => {
       scale.value = Math.min(Math.max(savedScale.value * event.scale, 1), MAX_SCALE);
+      // 줄이는 동안 사진이 틀 밖으로 삐져나오지 않게 같이 당긴다.
+      const 끝X = (frameWidth * (scale.value - 1)) / 2;
+      const 끝Y = (frameHeight * (scale.value - 1)) / 2;
+      x.value = Math.min(Math.max(x.value, -끝X), 끝X);
+      y.value = Math.min(Math.max(y.value, -끝Y), 끝Y);
     })
     .onEnd(() => {
       savedScale.value = scale.value;
@@ -70,6 +95,9 @@ function ZoomablePhoto({ uri, width, height, onZoomChange }: ZoomablePhotoProps)
         y.value = withTiming(0);
         savedX.value = 0;
         savedY.value = 0;
+      } else {
+        savedX.value = x.value;
+        savedY.value = y.value;
       }
       runOnJS(onZoomChange)(scale.value > 1);
     });
@@ -77,8 +105,10 @@ function ZoomablePhoto({ uri, width, height, onZoomChange }: ZoomablePhotoProps)
   const pan = Gesture.Pan()
     .onUpdate((event) => {
       if (scale.value <= 1) return;
-      x.value = savedX.value + event.translationX;
-      y.value = savedY.value + event.translationY;
+      const 끝X = (frameWidth * (scale.value - 1)) / 2;
+      const 끝Y = (frameHeight * (scale.value - 1)) / 2;
+      x.value = Math.min(Math.max(savedX.value + event.translationX, -끝X), 끝X);
+      y.value = Math.min(Math.max(savedY.value + event.translationY, -끝Y), 끝Y);
     })
     .onEnd(() => {
       savedX.value = x.value;
@@ -109,11 +139,23 @@ function ZoomablePhoto({ uri, width, height, onZoomChange }: ZoomablePhotoProps)
   }));
 
   return (
-    <GestureDetector gesture={gesture}>
-      <Animated.View style={[{ width, height }, style]}>
-        <Image source={{ uri }} style={{ width, height }} contentFit="contain" />
-      </Animated.View>
-    </GestureDetector>
+    <View style={[styles.page, { width, height }]}>
+      {/* 틀 — 크기가 고정이다. 안에서 사진만 커지고 넘치면 잘린다 */}
+      <View style={[styles.frame, { width: frame.width, height: frame.height }]}>
+        <GestureDetector gesture={gesture}>
+          <Animated.View style={[{ width: frame.width, height: frame.height }, style]}>
+            <Image
+              source={{ uri }}
+              style={{ width: frame.width, height: frame.height }}
+              contentFit="contain"
+              onLoad={(event) =>
+                setNatural({ width: event.source.width, height: event.source.height })
+              }
+            />
+          </Animated.View>
+        </GestureDetector>
+      </View>
+    </View>
   );
 }
 
@@ -190,6 +232,10 @@ export function PhotoViewer({ images, startIndex = 0, visible, onClose }: PhotoV
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  // 한 장이 차지하는 자리(화면 한 장). 그 안에 틀을 가운데 놓는다
+  page: { alignItems: 'center', justifyContent: 'center' },
+  // 틀 — 넘치는 부분을 잘라 낸다. 이게 있어야 넓혀도 사진이 화면으로 퍼지지 않는다
+  frame: { overflow: 'hidden' },
   backdrop: { flex: 1, backgroundColor: colors.black },
   close: { position: 'absolute', top: 44, right: 12, padding: 8 },
   counter: { position: 'absolute', bottom: 32, left: 0, right: 0, alignItems: 'center' },
