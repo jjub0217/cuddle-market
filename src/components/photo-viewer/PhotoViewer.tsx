@@ -31,6 +31,54 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [index, setIndex] = useState(startIndex)
 
+  // 실제 크기(1:1)로 보기. 세로로 긴 사진은 화면에 맞추면 **원본보다 작아진다** —
+  // 800×1715 짜리가 높이 900 화면에서 폭 420 이 된다. 그래서 눌러서 원본 크기로 보게 한다.
+  const [zoomed, setZoomed] = useState(false)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  // 끌어서 움직이기. 실제 크기일 때만 쓴다 — 화면 맞춤일 때는 넘칠 것이 없다.
+  // 「스크롤 자리를 손가락 움직인 만큼 반대로 민다」가 전부다.
+  //
+  // ⚠️ jsdom 에는 배치도 스크롤도 없어 이 부분은 시험으로 못 덮는다. 브라우저에서 눈으로 본다.
+  const dragRef = useRef<{ x: number; y: number; left: number; top: number } | null>(null)
+
+  // ⚠️ 끌고 나서 손을 떼면 **click 이 뒤따라 온다**(표준 동작이다). 그냥 두면 사진을
+  //    움직인 것만으로 확대가 풀리거나 창이 닫힌다. 「움직였다」를 기억해 두고
+  //    그 다음 click 한 번을 흘린다.
+  const movedRef = useRef(false)
+
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    const box = scrollRef.current
+    if (!zoomed || !box) return
+    dragRef.current = { x: event.clientX, y: event.clientY, left: box.scrollLeft, top: box.scrollTop }
+    movedRef.current = false
+    // jsdom 에는 없는 기능이다. 없으면 그냥 넘어간다(시험이 죽지 않게).
+    event.currentTarget.setPointerCapture?.(event.pointerId)
+  }
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const start = dragRef.current
+    const box = scrollRef.current
+    if (!start || !box) return
+    const dx = event.clientX - start.x
+    const dy = event.clientY - start.y
+    // 손가락은 가만히 있어도 몇 점씩 흔들린다. 그 정도는 「누른 것」으로 본다.
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) movedRef.current = true
+    box.scrollLeft = start.left - dx
+    box.scrollTop = start.top - dy
+  }
+
+  const handlePointerUp = () => {
+    dragRef.current = null
+  }
+
+  /** 끌고 난 직후의 click 인가. 맞으면 흘리고 기억을 지운다 */
+  const isClickAfterDrag = () => {
+    if (!movedRef.current) return false
+    movedRef.current = false
+    return true
+  }
+
   // 열 때마다 누른 사진에서 시작한다.
   //
   // ⚠️ useEffect 로 하면 react-hooks/set-state-in-effect 가 막는다(lint 오류 = 게이트 막힘).
@@ -42,7 +90,10 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
   if (prevOpen !== isOpen || prevStartIndex !== startIndex) {
     setPrevOpen(isOpen)
     setPrevStartIndex(startIndex)
-    if (isOpen) setIndex(startIndex)
+    if (isOpen) {
+      setIndex(startIndex)
+      setZoomed(false)
+    }
   }
 
   useEffect(() => {
@@ -69,7 +120,11 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
   }, [onClose])
 
   const hasMultiple = images.length > 1
-  const go = (step: number) => setIndex((prev) => (prev + step + images.length) % images.length)
+  // 넘기면 화면 맞춤으로 되돌린다 — 확대한 채로 넘어가면 다음 사진의 한 귀퉁이만 보인다.
+  const go = (step: number) => {
+    setZoomed(false)
+    setIndex((prev) => (prev + step + images.length) % images.length)
+  }
 
   return (
     <dialog
@@ -90,16 +145,33 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
 
           {/* 검은 자리 = 닫기. 사진은 아래에서 눌림을 멈춰 세운다 */}
           <div
+            ref={scrollRef}
             data-testid="photo-viewer-backdrop"
-            onClick={onClose}
-            className="flex flex-1 items-center justify-center overflow-hidden"
+            onClick={() => {
+              if (isClickAfterDrag()) return
+              onClose()
+            }}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            className={cn('flex flex-1 items-center justify-center', zoomed ? 'overflow-auto' : 'overflow-hidden')}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={toResizedWebpUrl(images[index], 800)}
               alt={`${alt} - ${index + 1}`}
-              onClick={(event) => event.stopPropagation()}
-              className="max-h-full max-w-full object-contain"
+              data-zoomed={zoomed}
+              draggable={false}
+              onClick={(event) => {
+                event.stopPropagation()
+                if (isClickAfterDrag()) return
+                setZoomed((prev) => !prev)
+              }}
+              className={cn(
+                'm-auto select-none',
+                zoomed ? 'max-w-none cursor-zoom-out' : 'max-h-full max-w-full cursor-zoom-in object-contain'
+              )}
             />
           </div>
 

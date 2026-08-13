@@ -94,3 +94,37 @@ describe('여러 장 넘기기', () => {
     expect(screen.getByText('2 / 3')).toBeInTheDocument()
   })
 })
+
+describe('실제 크기로 보기', () => {
+  it('처음에는 화면 맞춤이다', () => {
+    render(<PhotoViewer images={IMAGES} isOpen onClose={vi.fn()} alt="캣타워" />)
+
+    expect(screen.getByAltText('캣타워 - 1')).toHaveAttribute('data-zoomed', 'false')
+  })
+
+  it('사진을 누르면 실제 크기가 된다', () => {
+    render(<PhotoViewer images={IMAGES} isOpen onClose={vi.fn()} alt="캣타워" />)
+
+    fireEvent.click(screen.getByAltText('캣타워 - 1'))
+
+    expect(screen.getByAltText('캣타워 - 1')).toHaveAttribute('data-zoomed', 'true')
+  })
+
+  it('한 번 더 누르면 화면 맞춤으로 돌아온다', () => {
+    render(<PhotoViewer images={IMAGES} isOpen onClose={vi.fn()} alt="캣타워" />)
+
+    fireEvent.click(screen.getByAltText('캣타워 - 1'))
+    fireEvent.click(screen.getByAltText('캣타워 - 1'))
+
+    expect(screen.getByAltText('캣타워 - 1')).toHaveAttribute('data-zoomed', 'false')
+  })
+
+  it('다음 사진으로 넘어가면 화면 맞춤으로 돌아온다', () => {
+    render(<PhotoViewer images={IMAGES} isOpen onClose={vi.fn()} alt="캣타워" />)
+
+    fireEvent.click(screen.getByAltText('캣타워 - 1'))
+    fireEvent.click(screen.getByRole('button', { name: '다음 이미지' }))
+
+    expect(screen.getByAltText('캣타워 - 2')).toHaveAttribute('data-zoomed', 'false')
+  })
+})
