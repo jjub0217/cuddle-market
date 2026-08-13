@@ -49,11 +49,11 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     const box = scrollRef.current
-    if (!zoomed || !box) return
+    // ⚠️ 손가락(터치)은 **브라우저가 알아서 밀어 준다**(overflow-auto). 우리가 또 밀면
+    //    둘이 겨뤄서 모바일 웹에서 미끄러지듯 튄다. 마우스일 때만 우리가 민다.
+    if (!zoomed || !box || event.pointerType === 'touch') return
     dragRef.current = { x: event.clientX, y: event.clientY, left: box.scrollLeft, top: box.scrollTop }
     movedRef.current = false
-    // jsdom 에는 없는 기능이다. 없으면 그냥 넘어간다(시험이 죽지 않게).
-    event.currentTarget.setPointerCapture?.(event.pointerId)
   }
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -62,8 +62,15 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
     if (!start || !box) return
     const dx = event.clientX - start.x
     const dy = event.clientY - start.y
-    // 손가락은 가만히 있어도 몇 점씩 흔들린다. 그 정도는 「누른 것」으로 본다.
-    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) movedRef.current = true
+    // 손은 가만히 있어도 몇 점씩 흔들린다. 그 정도는 「누른 것」으로 본다.
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+      // ⚠️ 붙잡기는 **움직이기 시작한 뒤에** 건다. 누르자마자 걸면 뒤따라오는 click 이
+      //    사진이 아니라 **붙잡은 쪽(검은 자리)** 으로 가서, 확대를 끄려고 누른 것이
+      //    창을 닫아 버린다. 2026-08-13 에 실제로 그랬다.
+      //    ⚠️ jsdom 에는 붙잡기가 없어 **시험으로 못 잡는다** — 브라우저에서만 드러난다.
+      if (!movedRef.current) event.currentTarget.setPointerCapture?.(event.pointerId)
+      movedRef.current = true
+    }
     box.scrollLeft = start.left - dx
     box.scrollTop = start.top - dy
   }

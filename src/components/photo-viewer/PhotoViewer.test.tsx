@@ -128,3 +128,35 @@ describe('실제 크기로 보기', () => {
     expect(screen.getByAltText('캣타워 - 2')).toHaveAttribute('data-zoomed', 'false')
   })
 })
+
+// 끌기와 누르기를 가르는 장치. 2026-08-13 에 여기서 버그가 났다 —
+// 누르자마자 붙잡으면(setPointerCapture) 뒤따라오는 click 이 사진이 아니라
+// 붙잡은 쪽(검은 자리)으로 가서, **확대를 끄려던 누름이 창을 닫았다.**
+//
+// ⚠️ jsdom 에는 붙잡기가 없다. 그래서 여기서 보는 것은 「언제 붙잡는가」뿐이고,
+//    「그래서 click 이 어디로 가는가」는 **브라우저에서만** 드러난다.
+describe('끌기와 누르기 가르기', () => {
+  it('움직이지 않고 누르면 붙잡지 않는다', () => {
+    const 붙잡기 = vi.fn()
+    HTMLElement.prototype.setPointerCapture = 붙잡기
+
+    render(<PhotoViewer images={IMAGES} isOpen onClose={vi.fn()} alt="캣타워" />)
+    fireEvent.click(screen.getByAltText('캣타워 - 1')) // 실제 크기로
+    fireEvent.pointerDown(screen.getByTestId('photo-viewer-backdrop'), { clientX: 10, clientY: 10 })
+
+    expect(붙잡기).not.toHaveBeenCalled()
+  })
+
+  it('움직이기 시작하면 그때 붙잡는다', () => {
+    const 붙잡기 = vi.fn()
+    HTMLElement.prototype.setPointerCapture = 붙잡기
+
+    render(<PhotoViewer images={IMAGES} isOpen onClose={vi.fn()} alt="캣타워" />)
+    fireEvent.click(screen.getByAltText('캣타워 - 1'))
+    const 바탕 = screen.getByTestId('photo-viewer-backdrop')
+    fireEvent.pointerDown(바탕, { clientX: 10, clientY: 10 })
+    fireEvent.pointerMove(바탕, { clientX: 40, clientY: 10 })
+
+    expect(붙잡기).toHaveBeenCalled()
+  })
+})
