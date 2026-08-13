@@ -31,26 +31,32 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [index, setIndex] = useState(startIndex)
 
-  // 두 가지 크기로 본다.
+  // 배율. **1 = 화면 맞춤**(사진 전체가 다 보이는 크기)이고, 거기서 최대 두 배까지 키운다.
   //
-  //   화면 맞춤   사진 전체가 다 보이게. **원본보다 크게는 안 키운다** — 화면보다 크면 줄일 뿐이다
-  //   크게        원본의 두 배. 화면을 넘치므로 끌어서 움직여 본다
+  //   화면 맞춤(1배)   원본보다 크게는 안 키운다 — 화면보다 클 때만 줄인다
+  //   최대(2배)        맞춤의 두 배. 맞춤이 원본을 안 넘으므로 **원본의 두 배가 상한**이다
   //
-  // ⚠️ 한때 맞춤도 화면을 채우도록(최대 두 배) 키웠는데, **위아래 검은 자리가 넉넉한 쪽이
-  //    보기 낫다**는 판단으로 되돌렸다(2026-08-13, 눈으로 견주고 정했다).
-  //    그때 「크게」가 원본 크기(1:1)였던 탓에 **벌릴수록 사진이 작아지는** 일이 있었다 —
-  //    지금은 「크게」가 두 배라 맞춤(≤1배)보다 늘 크다. 이 순서를 깨지 말 것.
-  const [zoomed, setZoomed] = useState(false)
-  const scrollRef = useRef<HTMLDivElement>(null)
+  // ⚠️ 처음에는 두 값(맞춤·2배)만 오갔는데 **손가락을 안 따라와 「퉁」 튀었다.**
+  //    벌리는 만큼 사이 값이 나오게 바꿨다(2026-08-13, 번개장터도 그렇다).
+  //
+  // ⚠️ 크기를 **transform 으로** 준다. 폭을 직접 늘리면 화면에 맞는 크기를 매번 재야 하고
+  //    창 크기가 바뀔 때마다 다시 재야 한다. transform 은 「지금 보이는 크기의 몇 배」라
+  //    잴 것이 없다.
+  const MIN_SCALE = 1
+  const MAX_SCALE = 2
+  const [scale, setScale] = useState(MIN_SCALE)
+  // 밀어 둔 자리. 키운 뒤 화면 밖으로 나간 데를 보려고 움직인 만큼이다.
+  const [offset, setOffset] = useState({ x: 0, y: 0 })
 
-  // 사진의 진짜 알갱이 크기. 「크게」가 얼마만 한지 정하는 데 쓴다(원본의 두 배).
-  const [natural, setNatural] = useState<{ width: number; height: number } | null>(null)
+  // 맞춤으로 돌아오면 밀어 둔 자리도 제자리로. (렌더 도중에 맞춘다 — useFavorite.ts 와 같은 방식)
+  if (scale === MIN_SCALE && (offset.x !== 0 || offset.y !== 0)) {
+    setOffset({ x: 0, y: 0 })
+  }
 
-  // 끌어서 움직이기. 실제 크기일 때만 쓴다 — 화면 맞춤일 때는 넘칠 것이 없다.
-  // 「스크롤 자리를 손가락 움직인 만큼 반대로 민다」가 전부다.
-  //
-  // ⚠️ jsdom 에는 배치도 스크롤도 없어 이 부분은 시험으로 못 덮는다. 브라우저에서 눈으로 본다.
-  const dragRef = useRef<{ x: number; y: number; left: number; top: number } | null>(null)
+  const clampScale = (value: number) => Math.min(Math.max(value, MIN_SCALE), MAX_SCALE)
+
+  // 끌어서 움직이기. 키운 상태에서만 쓴다 — 맞춤일 때는 넘칠 것이 없다.
+  const dragRef = useRef<{ x: number; y: number; offsetX: number; offsetY: number } | null>(null)
 
   // ⚠️ 끌고 나서 손을 떼면 **click 이 뒤따라 온다**(표준 동작이다). 그냥 두면 사진을
   //    움직인 것만으로 확대가 풀리거나 창이 닫힌다. 「움직였다」를 기억해 두고
@@ -58,18 +64,14 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
   const movedRef = useRef(false)
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    const box = scrollRef.current
-    // ⚠️ 손가락(터치)은 **브라우저가 알아서 밀어 준다**(overflow-auto). 우리가 또 밀면
-    //    둘이 겨뤄서 모바일 웹에서 미끄러지듯 튄다. 마우스일 때만 우리가 민다.
-    if (!zoomed || !box || event.pointerType === 'touch') return
-    dragRef.current = { x: event.clientX, y: event.clientY, left: box.scrollLeft, top: box.scrollTop }
+    if (scale <= MIN_SCALE) return
+    dragRef.current = { x: event.clientX, y: event.clientY, offsetX: offset.x, offsetY: offset.y }
     movedRef.current = false
   }
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
     const start = dragRef.current
-    const box = scrollRef.current
-    if (!start || !box) return
+    if (!start) return
     const dx = event.clientX - start.x
     const dy = event.clientY - start.y
     // 손은 가만히 있어도 몇 점씩 흔들린다. 그 정도는 「누른 것」으로 본다.
@@ -81,8 +83,7 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
       if (!movedRef.current) event.currentTarget.setPointerCapture?.(event.pointerId)
       movedRef.current = true
     }
-    box.scrollLeft = start.left - dx
-    box.scrollTop = start.top - dy
+    setOffset({ x: start.offsetX + dx, y: start.offsetY + dy })
   }
 
   const handlePointerUp = () => {
@@ -109,7 +110,7 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
     setPrevStartIndex(startIndex)
     if (isOpen) {
       setIndex(startIndex)
-      setZoomed(false)
+      setScale(MIN_SCALE)
     }
   }
 
@@ -137,16 +138,24 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
     const dialog = dialogRef.current
     if (!dialog || !isOpen) return
     const handleWheel = (event: WheelEvent) => {
-      if (!event.ctrlKey) return
-      // 사진 위가 아니면 브라우저에 맡긴다.
-      if (!(event.target instanceof HTMLImageElement)) return
+      if (event.ctrlKey) {
+        // 사진 위가 아니면 브라우저에 맡긴다.
+        if (!(event.target instanceof HTMLImageElement)) return
+        event.preventDefault()
+        // 벌린 만큼 곱해서 키운다. 더하기가 아니라 곱하기라야 어느 배율에서든 같은 속도로 느껴진다.
+        setScale((prev) => clampScale(prev * Math.exp(-event.deltaY / 100)))
+        return
+      }
+      // 키운 상태에서 두 손가락으로 쓸면 사진을 움직인다. 맞춤일 때는 건드리지 않는다.
+      if (scale <= MIN_SCALE) return
       event.preventDefault()
-      // 벌리면(위로) 크게, 오므리면 화면 맞춤.
-      setZoomed(event.deltaY < 0)
+      setOffset((prev) => ({ x: prev.x - event.deltaX, y: prev.y - event.deltaY }))
     }
     dialog.addEventListener('wheel', handleWheel, { passive: false })
     return () => dialog.removeEventListener('wheel', handleWheel)
-  }, [isOpen])
+    // 배율이 바뀔 때마다 처리기를 다시 단다. 「지금 배율」을 봐야 쓸기와 확대를 가를 수 있고,
+    // 붙였다 떼는 일은 값싸다. (ref 에 넣어 두는 방법은 린트가 막는다 — 렌더 중 ref 쓰기)
+  }, [isOpen, scale])
 
   // ESC. 리액트의 onCancel 대신 요소에 직접 단다 —
   // cancel 은 위로 올라가지 않는(bubbles: false) 사건이라 직접 다는 쪽이 확실하다.
@@ -163,22 +172,17 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
   }, [onClose])
 
   const hasMultiple = images.length > 1
-  // 넘기면 화면 맞춤으로 되돌린다 — 확대한 채로 넘어가면 다음 사진의 한 귀퉁이만 보인다.
-  // 사진마다 알갱이 크기가 다르므로 잰 값도 지운다.
+  // 넘기면 화면 맞춤으로 되돌린다 — 키운 채로 넘어가면 다음 사진의 한 귀퉁이만 보인다.
   const go = (step: number) => {
-    setZoomed(false)
-    setNatural(null)
+    setScale(MIN_SCALE)
     setIndex((prev) => (prev + step + images.length) % images.length)
   }
 
-  /** 「크게」의 크기. 원본의 두 배 — 그 위는 뭉개짐이 눈에 띈다 */
-  const ZOOM_SCALE = 2
-  const sizeStyle =
-    zoomed && natural
-      ? // 크게 — 원본의 두 배로 못 박는다. 화면을 넘치면 끌어서 본다
-        { width: natural.width * ZOOM_SCALE, height: 'auto' as const, maxWidth: 'none' as const }
-      : // 화면 맞춤 — 크기를 못 박지 않는다. max-h-full·max-w-full 이 「넘치면 줄이기」만 한다
-        undefined
+  const zoomed = scale > MIN_SCALE
+  // 맞춤일 때는 아예 안 건다 — 안 걸어야 브라우저가 사진을 있는 그대로 그린다.
+  const sizeStyle = zoomed
+    ? { transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`, touchAction: 'none' as const }
+    : undefined
 
   return (
     <dialog
@@ -199,7 +203,6 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
 
           {/* 검은 자리 = 닫기. 사진은 아래에서 눌림을 멈춰 세운다 */}
           <div
-            ref={scrollRef}
             data-testid="photo-viewer-backdrop"
             onClick={() => {
               if (isClickAfterDrag()) return
@@ -209,7 +212,7 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerUp}
-            className={cn('flex flex-1 items-center justify-center', zoomed ? 'overflow-auto' : 'overflow-hidden')}
+            className="flex flex-1 items-center justify-center overflow-hidden"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -217,20 +220,17 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
               alt={`${alt} - ${index + 1}`}
               data-zoomed={zoomed}
               draggable={false}
-              onLoad={(event) => {
-                const img = event.currentTarget
-                setNatural({ width: img.naturalWidth, height: img.naturalHeight })
-              }}
               onClick={(event) => {
                 event.stopPropagation()
                 if (isClickAfterDrag()) return
-                setZoomed((prev) => !prev)
+                // 눌러서 여는 것은 한 번에 최대까지. 손가락으로는 사이 값도 고를 수 있다.
+                setScale((prev) => (prev > MIN_SCALE ? MIN_SCALE : MAX_SCALE))
               }}
-              // 「크게」의 크기만 style 이 정한다(위 sizeStyle). 화면 맞춤은 클래스에 맡긴다.
+              // 키웠을 때만 style 이 붙는다(위 sizeStyle). 맞춤은 클래스에 맡긴다.
               style={sizeStyle}
               className={cn(
-                'm-auto select-none',
-                zoomed ? 'cursor-zoom-out' : 'max-h-full max-w-full cursor-zoom-in object-contain'
+                'm-auto max-h-full max-w-full select-none object-contain',
+                zoomed ? 'cursor-zoom-out' : 'cursor-zoom-in'
               )}
             />
           </div>

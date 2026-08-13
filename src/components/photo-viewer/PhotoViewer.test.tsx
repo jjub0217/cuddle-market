@@ -200,35 +200,55 @@ describe('확대 제스처 가로채기', () => {
   })
 })
 
-// 두 상태의 크기 순서. 2026-08-13 에 여기서 뒤집혔다 —
-// 화면 맞춤이 원본보다 크게 키우도록 바뀌었는데 「크게」는 원본 크기 그대로여서,
-// **크게 하려고 벌렸더니 사진이 작아졌다.**
-describe('크게 보기가 화면 맞춤보다 크다', () => {
-  /** jsdom 은 사진을 진짜로 안 읽는다(naturalWidth 가 0). 잰 값을 심어 주고 load 를 쏜다 */
-  function 사진크기를심는다(img: HTMLElement, width: number, height: number) {
-    Object.defineProperty(img, 'naturalWidth', { value: width, configurable: true })
-    Object.defineProperty(img, 'naturalHeight', { value: height, configurable: true })
-    fireEvent.load(img)
-  }
-
-  // ⚠️ jsdom 에는 배치가 없어 「실제로 몇 픽셀로 그려졌나」는 못 본다.
-  //    크기를 못 박지 않는다는 것까지만 지킨다 — 못 박으면 원본보다 키우게 된다.
-  it('화면 맞춤은 크기를 못 박지 않는다 (원본보다 크게 안 키운다)', () => {
+// 배율. 1 = 화면 맞춤이고 거기서 두 배까지 키운다.
+//
+// ⚠️ jsdom 에는 배치가 없어 「실제로 몇 픽셀로 그려졌나」는 못 본다.
+//    여기서 지키는 것은 **배율 숫자**까지다.
+describe('배율', () => {
+  it('화면 맞춤일 때는 크기를 안 건드린다', () => {
     render(<PhotoViewer images={IMAGES} isOpen onClose={vi.fn()} alt="캣타워" />)
-    const 사진 = screen.getByAltText('캣타워 - 1')
-    사진크기를심는다(사진, 600, 800)
 
-    expect(사진.style.width).toBe('')
-    expect(사진.style.maxWidth).toBe('')
+    expect(screen.getByAltText('캣타워 - 1').style.transform).toBe('')
   })
 
-  it('크게 하면 원본의 두 배로 못 박는다 (맞춤보다 작아지면 안 된다)', () => {
+  it('누르면 한 번에 최대(두 배)까지 간다', () => {
     render(<PhotoViewer images={IMAGES} isOpen onClose={vi.fn()} alt="캣타워" />)
-    const 사진 = screen.getByAltText('캣타워 - 1')
-    사진크기를심는다(사진, 600, 800)
 
-    fireEvent.click(사진)
+    fireEvent.click(screen.getByAltText('캣타워 - 1'))
 
-    expect(screen.getByAltText('캣타워 - 1').style.width).toBe('1200px')
+    expect(screen.getByAltText('캣타워 - 1').style.transform).toContain('scale(2)')
+  })
+
+  // 손가락을 따라와야 한다. 예전에는 두 값(1배·2배)만 오가서 **「퉁」 튀었다.**
+  it('조금 벌리면 사이 값이 나온다 (두 단계로 튀지 않는다)', () => {
+    render(<PhotoViewer images={IMAGES} isOpen onClose={vi.fn()} alt="캣타워" />)
+
+    fireEvent.wheel(screen.getByAltText('캣타워 - 1'), { ctrlKey: true, deltaY: -10 })
+
+    const 배율 = Number(screen.getByAltText('캣타워 - 1').style.transform.match(/scale\(([\d.]+)\)/)?.[1])
+    expect(배율).toBeGreaterThan(1)
+    expect(배율).toBeLessThan(1.2)
+  })
+
+  it('아무리 벌려도 두 배를 넘지 않는다 (그 위는 뭉갠다)', () => {
+    render(<PhotoViewer images={IMAGES} isOpen onClose={vi.fn()} alt="캣타워" />)
+    const 사진 = () => screen.getByAltText('캣타워 - 1')
+
+    for (let i = 0; i < 20; i += 1) {
+      fireEvent.wheel(사진(), { ctrlKey: true, deltaY: -50 })
+    }
+
+    expect(사진().style.transform).toContain('scale(2)')
+  })
+
+  it('아무리 오므려도 화면 맞춤 아래로는 안 간다', () => {
+    render(<PhotoViewer images={IMAGES} isOpen onClose={vi.fn()} alt="캣타워" />)
+    const 사진 = () => screen.getByAltText('캣타워 - 1')
+
+    for (let i = 0; i < 20; i += 1) {
+      fireEvent.wheel(사진(), { ctrlKey: true, deltaY: 50 })
+    }
+
+    expect(사진().style.transform).toBe('')
   })
 })
