@@ -47,7 +47,6 @@ export const imageLoader = ({ src }: { src: string }) => src
 export const IMAGE_SIZES = {
   productThumbnail: '(max-width: 1024px) 160px, 400px',
   mainImage: '100vw',
-  subImages: '(max-width: 1024px) 25vw, 200px',
   smallThumbnail: '128px',
   tinyThumbnail: '64px',
 } as const
