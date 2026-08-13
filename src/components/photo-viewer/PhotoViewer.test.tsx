@@ -264,3 +264,27 @@ describe('배율', () => {
     expect(사진().style.transform).toBe('')
   })
 })
+
+// 뒤로가기로 확대창만 닫는다. 안 그러면 상품 상세에서 나가 버려 보던 자리를 잃는다.
+//
+// ⚠️ 여기서 지키는 것은 「뒤로가기 신호가 오면 닫는가」까지다. **기록이 몇 칸 쌓였는지는
+//    시험이 못 본다** — 진짜 브라우저로 확인했다(2026-08-13, 상세에 그대로 남는 것 확인).
+describe('뒤로가기', () => {
+  it('뒤로가기 신호가 오면 닫힌다고 알린다', () => {
+    const 닫힘 = vi.fn()
+    render(<PhotoViewer images={IMAGES} isOpen onClose={닫힘} alt="캣타워" />)
+
+    window.dispatchEvent(new PopStateEvent('popstate'))
+
+    expect(닫힘).toHaveBeenCalledOnce()
+  })
+
+  it('닫혀 있을 때의 뒤로가기는 건드리지 않는다', () => {
+    const 닫힘 = vi.fn()
+    render(<PhotoViewer images={IMAGES} isOpen={false} onClose={닫힘} alt="캣타워" />)
+
+    window.dispatchEvent(new PopStateEvent('popstate'))
+
+    expect(닫힘).not.toHaveBeenCalled()
+  })
+})

@@ -211,6 +211,44 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
     // 붙였다 떼는 일은 값싸다. (ref 에 넣어 두는 방법은 린트가 막는다 — 렌더 중 ref 쓰기)
   }, [isOpen, scale, clampOffset])
 
+  // 뒤로가기로 확대창만 닫는다.
+  //
+  // 그냥 두면 확대창은 브라우저 기록에 안 남아서, 뒤로가기가 **상품 상세에서 나가** 버린다.
+  // 사진 보다가 한 번에 목록으로 튕겨 나가면 보던 자리를 잃는다. 앱은 이미 그렇지 않다
+  // (뒤로가기 = 확대창만 닫힘). 매체마다 다르게 움직이면 안 된다.
+  //
+  // 열 때 기록을 한 칸 넣어 두고, 뒤로가기가 그 칸을 지우면 창을 닫는다.
+  // ⚠️ 단추·ESC 로 닫을 때는 **넣어 둔 칸을 우리가 도로 빼야 한다.** 안 빼면 창을 닫은 뒤에도
+  //    뒤로가기 한 번이 헛돈다(아무 일도 안 일어나는 뒤로가기).
+  // ⚠️ **`onClose` 를 의존성에 넣으면 안 된다.** 쓰는 쪽이 `onClose={() => …}` 처럼 그 자리에서
+  //    만들어 넘기면 렌더마다 새 함수가 되고, 그러면 이 효과가 매번 다시 돌면서
+  //    **기록을 넣었다 뺐다** 한다. 실제로 뒤로가기 한 번에 홈까지 밀려났다(2026-08-13).
+  //    최신 `onClose` 는 상자에 담아 두고 여기서는 꺼내 쓴다.
+  const onCloseRef = useRef(onClose)
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
+
+  const pushedRef = useRef(false)
+  useEffect(() => {
+    if (!isOpen) return
+    window.history.pushState({ photoViewer: true }, '')
+    pushedRef.current = true
+    const handlePopState = () => {
+      // 브라우저가 이미 그 칸을 지웠다 — 우리가 또 뺄 필요가 없다.
+      pushedRef.current = false
+      onCloseRef.current()
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => {
+      window.removeEventListener('popstate', handlePopState)
+      if (pushedRef.current) {
+        pushedRef.current = false
+        window.history.back()
+      }
+    }
+  }, [isOpen])
+
   // ESC. 리액트의 onCancel 대신 요소에 직접 단다 —
   // cancel 은 위로 올라가지 않는(bubbles: false) 사건이라 직접 다는 쪽이 확실하다.
   // preventDefault 로 브라우저가 혼자 닫는 것을 막는다. 여는 쪽(isOpen)만 문을 쥐게 둔다.
