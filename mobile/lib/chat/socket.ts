@@ -18,6 +18,29 @@ import { useAuthStore } from '../auth/store';
 /** 방에서 목록으로 돌아갈 때 0이 스치는 것을 넘기는 시간. */
 const RELEASE_DELAY_MS = 3000;
 
+/**
+ * 토큰을 기기에서 읽어 오는 것(`status === 'restoring'`)을 기다리는 한계.
+ *
+ * 왜 3초인가 — SecureStore 에서 키 둘을 읽는 일이라 보통 몇 밀리초면 끝난다.
+ * 3초는 느린 기기의 첫 실행까지 넉넉히 덮으면서, 잘못됐을 때 사용자가 하염없이
+ * 기다리지는 않는 값이다. ⚠️ **영원히 기다리면 안 된다** — 복원이 어떤 이유로든
+ * 안 끝나면 채팅이 통째로 멈춘다.
+ */
+export const AUTH_RESTORE_WAIT_MS = 3000;
+
+/**
+ * CONNECT 를 보내고 CONNECTED 를 기다리는 한계.
+ *
+ * 왜 필요한가 — 서버는 인증을 못 하면 **아무 응답도 안 준다.** 소켓은 「열린」
+ * 상태라 끊긴 게 아니니 `reconnectDelay` 도 안 걸린다. 이게 없으면 영원히 갇힌다(#917).
+ *
+ * 왜 10초인가 — heart-beat 가 10초라 정상 연결이면 그 안에 CONNECTED 가 온다(실제로는
+ * 1초 안쪽). heart-beat 보다 짧게 잡으면 느린 망에서 멀쩡한 연결을 끊게 되고, 길게
+ * 잡으면 갇힌 시간이 그만큼 늘어난다. 끊긴 뒤 `reconnectDelay` 5초를 더해 **최대
+ * 15초마다 한 번씩 다시 시도**하게 된다.
+ */
+export const CONNECTION_TIMEOUT_MS = 10000;
+
 interface ClientLike {
   active: boolean;
   connected: boolean;
@@ -159,6 +182,67 @@ export function createChatSocket(deps: Deps): ChatSocket {
   };
 }
 
+/**
+ * 로그인 상태가 정해질 때까지 기다린다.
+ *
+ * `restoring` 은 「기기에서 토큰을 읽는 중」이다. 이때 붙으면 **Authorization 이 없는
+ * CONNECT** 가 나가고, 서버는 인증을 못 해 아무 응답도 안 준다(#917).
+ *
+ * ⚠️ `guest` 로 정해졌으면 기다리지 않는다 — 나중에 토큰이 생길 리가 없다.
+ * ⚠️ 한계를 넘기면 **그냥 진행한다.** 아래 `chatConnectHeaders` 주석 참고.
+ */
+export function waitForAuthSettled(timeoutMs = AUTH_RESTORE_WAIT_MS): Promise<void> {
+  if (useAuthStore.getState().status !== 'restoring') return Promise.resolve();
+
+  return new Promise((resolve) => {
+    let done = false;
+    let unsubscribe: (() => void) | null = null;
+
+    const finish = () => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      unsubscribe?.();
+      resolve();
+    };
+
+    const timer = setTimeout(() => {
+      console.warn(`[chat] 토큰 복원을 ${timeoutMs}ms 기다렸지만 안 끝났다. 그대로 붙는다`);
+      finish();
+    }, timeoutMs);
+
+    unsubscribe = useAuthStore.subscribe((state) => {
+      if (state.status === 'restoring') return;
+      finish();
+    });
+  });
+}
+
+/**
+ * CONNECT 에 실을 헤더. **붙을 때마다** 새로 만든다.
+ *
+ * 만들 때 한 번 박아 두면, 로그인 전에 만들어진 클라이언트가 빈 토큰을 계속 쓴다.
+ *
+ * ⚠️ **한계를 넘겼을 때 「포기」가 아니라 「그냥 진행」을 고른 이유.**
+ * 포기하려면 `client.deactivate()` 를 불러야 하는데(stompjs 는 `beforeConnect` 뒤에
+ * `active` 를 다시 보고 안 붙는다), 우리 `acquire()` 는 `client` 가 이미 있으면 바로
+ * 돌아가서 **다시 켜 줄 사람이 없다.** 그러면 화면을 껐다 켜기 전에는 채팅이 영영
+ * 안 붙는다. 반대로 그냥 진행하면 위 `CONNECTION_TIMEOUT_MS` 가 소켓을 닫고
+ * `reconnectDelay` 로 다시 붙으며, **그때 이 함수가 다시 불려 새 토큰을 읽는다** —
+ * 늦게 로그인해도 저절로 낫는다.
+ */
+export async function chatConnectHeaders(): Promise<Record<string, string>> {
+  await waitForAuthSettled();
+
+  const token = useAuthStore.getState().accessToken;
+  if (!token) {
+    // ⚠️ 토큰 값은 절대 안 찍는다. 있는지 없는지만 남긴다.
+    console.warn('[chat] 토큰이 없는 채로 붙는다. 서버가 응답을 안 하면 연결 한계에서 다시 시도한다');
+    return {};
+  }
+  return { Authorization: `Bearer ${token}` };
+}
+
 /** API 주소에서 WebSocket 주소를 만든다. `https://…/api` → `wss://…/ws-stomp` */
 export function chatSocketUrl(): string {
   return apiBaseUrl().replace(/^http/, 'ws').replace(/\/api\/?$/, '') + '/ws-stomp';
@@ -170,14 +254,20 @@ export const chatSocket = createChatSocket({
     new Client({
       // ⚠️ brokerURL 이 아니라 webSocketFactory 다. RN 전역의 WebSocket 을 쓴다.
       webSocketFactory: () => new WebSocket(chatSocketUrl()),
-      // 토큰은 **붙을 때마다** 새로 읽는다. 만들 때 한 번 박아 두면, 로그인 전에
-      // 만들어진 클라이언트가 빈 토큰을 계속 쓴다.
+      // 토큰은 **붙을 때마다** 새로 읽는다.
       // stompjs 는 이 함수를 `this.beforeConnect(this)` 로 부른다 — 인자가 클라이언트다.
-      beforeConnect: (client) => {
-        const token = useAuthStore.getState().accessToken;
-        client.connectHeaders = token ? { Authorization: `Bearer ${token}` } : {};
+      //
+      // ⚠️ **Promise 를 돌려주면 stompjs 가 기다렸다가 소켓을 연다**(`_connect` 가
+      //    `await this.beforeConnect(this)` 한다). 토큰을 아직 읽는 중이면 여기서
+      //    기다려, 헤더 없는 CONNECT 가 나가는 것을 막는다(#917).
+      beforeConnect: async (client) => {
+        client.connectHeaders = await chatConnectHeaders();
       },
       reconnectDelay: 5000,
+      // ⚠️ 안전망. 서버가 CONNECT 에 응답을 안 하면 소켓은 「열린」 채라 끊긴 게
+      //    아니어서 reconnectDelay 가 안 걸린다 — 이게 없으면 영원히 기다린다(#917).
+      //    한계를 넘기면 stompjs 가 소켓을 스스로 닫고 다시 붙는다.
+      connectionTimeout: CONNECTION_TIMEOUT_MS,
       // ⚠️ 이 두 줄을 빼면 서버가 오류도 로그도 없이 침묵한다.
       //    RN 의 WebSocket 이 STOMP 프레임 끝의 NULL 문자를 흘리기 때문이다.
       //    20바퀴에 이걸 못 찾아 하루를 썼다 — mobile/AGENTS.md 함정 표 참고.
@@ -188,6 +278,14 @@ export const chatSocket = createChatSocket({
       //    참으로 남아, 화면에 「연결 중이에요…」 띠가 안 뜨고 publish 도 참을 돌려줘
       //    보내기 실패가 조용히 지나간다(#882).
       onWebSocketClose: onDisconnect,
+      // 왜 남기나 — 이 둘이 없으면 **로그가 하나도 없어 진단이 막힌다.** #917 에서
+      // 「왜 안 붙는가」를 알아내는 데 이게 없어 임시 로그를 넣어야 했다.
+      // ⚠️ 프레임 전체를 찍는 `debug` 는 안 단다 — 하트비트까지 10초마다 쏟아진다.
+      // ⚠️ 토큰 값은 절대 안 찍는다.
+      onStompError: (frame) =>
+        console.warn('[chat] STOMP 오류:', frame.headers?.message, '|', frame.body),
+      onWebSocketError: (event) =>
+        console.warn('[chat] 소켓 오류:', (event as { message?: string })?.message ?? String(event)),
     }) as unknown as ClientLike,
   releaseDelayMs: RELEASE_DELAY_MS,
 });
