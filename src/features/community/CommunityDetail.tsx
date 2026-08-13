@@ -200,7 +200,7 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
                 </div>
               </div>
               {/* <h1 className="text-lg leading-snug font-bold">{data.title}</h1> */}
-              <MdPreview value={data.content} className="p-0" />
+              <MdPreview value={data.content} className="p-0" enablePhotoViewer />
             </div>
 
             {/* 댓글은 폭 상관없이 상세 안에 전부 펼친다.

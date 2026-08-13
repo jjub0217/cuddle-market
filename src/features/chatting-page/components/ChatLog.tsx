@@ -12,6 +12,7 @@ import { useUserStore } from '@/store/userStore'
 import { IMAGE_SIZES, imageLoader, toResizedWebpUrl, PLACEHOLDER_IMAGES } from '@/lib/utils/imageUrl'
 import { AnimatePresence } from 'framer-motion'
 import InlineNotification from '@/components/commons/InlineNotification'
+import PhotoViewer from '@/components/photo-viewer/PhotoViewer'
 import Spinner from '@/components/commons/spinner/Spinner'
 import { MessageCircleMore } from 'lucide-react'
 
@@ -34,6 +35,9 @@ interface ChatLogProps {
 function ChatImageMessage({ imageUrl, alt }: { imageUrl?: string; alt: string }) {
   const [imgError, setImgError] = useState(false)
   const [usePlaceholder, setUsePlaceholder] = useState(false)
+  // 확대창(#904). 채팅 사진은 한 장씩 오가므로 **누른 것 한 장만** 넘긴다 —
+  // 방 안의 사진을 다 모아 넘기면 넘김 화살표가 생겨 상품 상세처럼 보인다.
+  const [viewerOpen, setViewerOpen] = useState(false)
 
   const handleImageError = () => {
     if (!imgError && imageUrl) {
@@ -49,6 +53,10 @@ function ChatImageMessage({ imageUrl, alt }: { imageUrl?: string; alt: string })
     return toResizedWebpUrl(imageUrl, 400)
   }
 
+  // ⚠️ **못 불러온 사진에는 확대창을 열지 않는다.** 자리표시자만 남은 자리라 띄울 것이 없다.
+  //    (주소 자체가 없거나, 원본까지 실패해 자리표시자로 내려앉은 경우)
+  const canZoom = Boolean(imageUrl) && !usePlaceholder
+
   return (
     <div className="relative aspect-square w-48 shrink-0 overflow-hidden rounded-lg md:w-72">
       <Image
@@ -57,10 +65,16 @@ function ChatImageMessage({ imageUrl, alt }: { imageUrl?: string; alt: string })
         sizes={IMAGE_SIZES.smallThumbnail}
         alt={alt}
         fill
-        className="object-cover"
+        className={cn('object-cover', canZoom && 'cursor-zoom-in')}
         onError={handleImageError}
+        onClick={canZoom ? () => setViewerOpen(true) : undefined}
         unoptimized={imgError || usePlaceholder || !imageUrl}
       />
+      {/* 확대창은 이 상자가 overflow-hidden 이어도 안 잘린다 — <dialog> 는 브라우저가 맨 위 층에 올린다.
+          말풍선에는 400px 로 줄인 것을 쓰지만 확대창에는 **원본 주소**를 넘긴다(줄이기는 확대창이 한다). */}
+      {imageUrl ? (
+        <PhotoViewer images={[imageUrl]} isOpen={viewerOpen} onClose={() => setViewerOpen(false)} alt={alt} />
+      ) : null}
     </div>
   )
 }
