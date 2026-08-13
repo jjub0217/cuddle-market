@@ -31,10 +31,10 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [index, setIndex] = useState(startIndex)
 
-  // 배율. **1 = 화면 맞춤**(사진 전체가 다 보이는 크기)이고, 거기서 최대 두 배까지 키운다.
+  // 배율. **1 = 화면 맞춤**(사진 전체가 다 보이는 크기)이고, 거기서 최대 세 배까지 키운다.
   //
   //   화면 맞춤(1배)   원본보다 크게는 안 키운다 — 화면보다 클 때만 줄인다
-  //   최대(2배)        맞춤의 두 배. 맞춤이 원본을 안 넘으므로 **원본의 두 배가 상한**이다
+  //   최대(3배)        맞춤의 세 배. 맞춤이 원본을 안 넘으므로 **원본의 세 배가 상한**이다
   //
   // ⚠️ 처음에는 두 값(맞춤·2배)만 오갔는데 **손가락을 안 따라와 「퉁」 튀었다.**
   //    벌리는 만큼 사이 값이 나오게 바꿨다(2026-08-13, 번개장터도 그렇다).
@@ -42,8 +42,15 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
   // ⚠️ 크기를 **transform 으로** 준다. 폭을 직접 늘리면 화면에 맞는 크기를 매번 재야 하고
   //    창 크기가 바뀔 때마다 다시 재야 한다. transform 은 「지금 보이는 크기의 몇 배」라
   //    잴 것이 없다.
+  // ⚠️ **앱과 같은 값을 쓴다**(mobile/components/photo-viewer/photo-viewer.tsx).
+  //    앱은 더블탭 2배 · 핀치 최대 3배다. 웹은 클릭 2배 · 휠 최대 3배로 짝을 맞춘다.
+  //    번개장터는 5배까지 되지만 **그쪽은 원본이 크다** — 우리는 올릴 때 800px 로 줄이고
+  //    있어서 5배로 키우면 알갱이가 네모 덩어리로 보인다. 더 키우려면 올리는 크기부터
+  //    키워야 한다(별도 이슈).
   const MIN_SCALE = 1
-  const MAX_SCALE = 2
+  const MAX_SCALE = 3
+  /** 눌렀을 때 가는 배율. 앱의 더블탭과 같다 */
+  const CLICK_SCALE = 2
   const [scale, setScale] = useState(MIN_SCALE)
   // 밀어 둔 자리. 키운 뒤 화면 밖으로 나간 데를 보려고 움직인 만큼이다.
   const [offset, setOffset] = useState({ x: 0, y: 0 })
@@ -223,8 +230,8 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
               onClick={(event) => {
                 event.stopPropagation()
                 if (isClickAfterDrag()) return
-                // 눌러서 여는 것은 한 번에 최대까지. 손가락으로는 사이 값도 고를 수 있다.
-                setScale((prev) => (prev > MIN_SCALE ? MIN_SCALE : MAX_SCALE))
+                // 누르면 2배 한 번에(앱 더블탭과 같다). 손가락으로는 사이 값도 고를 수 있다.
+                setScale((prev) => (prev > MIN_SCALE ? MIN_SCALE : CLICK_SCALE))
               }}
               // 키웠을 때만 style 이 붙는다(위 sizeStyle). 맞춤은 클래스에 맡긴다.
               style={sizeStyle}

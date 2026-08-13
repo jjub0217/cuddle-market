@@ -95,14 +95,14 @@ describe('여러 장 넘기기', () => {
   })
 })
 
-describe('실제 크기로 보기', () => {
+describe('크게 보기', () => {
   it('처음에는 화면 맞춤이다', () => {
     render(<PhotoViewer images={IMAGES} isOpen onClose={vi.fn()} alt="캣타워" />)
 
     expect(screen.getByAltText('캣타워 - 1')).toHaveAttribute('data-zoomed', 'false')
   })
 
-  it('사진을 누르면 실제 크기가 된다', () => {
+  it('사진을 누르면 크게 본다', () => {
     render(<PhotoViewer images={IMAGES} isOpen onClose={vi.fn()} alt="캣타워" />)
 
     fireEvent.click(screen.getByAltText('캣타워 - 1'))
@@ -141,7 +141,7 @@ describe('끌기와 누르기 가르기', () => {
     HTMLElement.prototype.setPointerCapture = 붙잡기
 
     render(<PhotoViewer images={IMAGES} isOpen onClose={vi.fn()} alt="캣타워" />)
-    fireEvent.click(screen.getByAltText('캣타워 - 1')) // 실제 크기로
+    fireEvent.click(screen.getByAltText('캣타워 - 1')) // 크게
     fireEvent.pointerDown(screen.getByTestId('photo-viewer-backdrop'), { clientX: 10, clientY: 10 })
 
     expect(붙잡기).not.toHaveBeenCalled()
@@ -200,7 +200,7 @@ describe('확대 제스처 가로채기', () => {
   })
 })
 
-// 배율. 1 = 화면 맞춤이고 거기서 두 배까지 키운다.
+// 배율. 1 = 화면 맞춤이고 거기서 세 배까지 키운다.
 //
 // ⚠️ jsdom 에는 배치가 없어 「실제로 몇 픽셀로 그려졌나」는 못 본다.
 //    여기서 지키는 것은 **배율 숫자**까지다.
@@ -211,7 +211,8 @@ describe('배율', () => {
     expect(screen.getByAltText('캣타워 - 1').style.transform).toBe('')
   })
 
-  it('누르면 한 번에 최대(두 배)까지 간다', () => {
+  // 앱의 더블탭과 같은 값이다(mobile 의 DOUBLE_TAP_SCALE).
+  it('누르면 2배로 간다', () => {
     render(<PhotoViewer images={IMAGES} isOpen onClose={vi.fn()} alt="캣타워" />)
 
     fireEvent.click(screen.getByAltText('캣타워 - 1'))
@@ -230,7 +231,8 @@ describe('배율', () => {
     expect(배율).toBeLessThan(1.2)
   })
 
-  it('아무리 벌려도 두 배를 넘지 않는다 (그 위는 뭉갠다)', () => {
+  // 앱의 핀치 상한과 같은 값이다(mobile 의 MAX_SCALE).
+  it('아무리 벌려도 세 배를 넘지 않는다 (그 위는 뭉갠다)', () => {
     render(<PhotoViewer images={IMAGES} isOpen onClose={vi.fn()} alt="캣타워" />)
     const 사진 = () => screen.getByAltText('캣타워 - 1')
 
@@ -238,7 +240,7 @@ describe('배율', () => {
       fireEvent.wheel(사진(), { ctrlKey: true, deltaY: -50 })
     }
 
-    expect(사진().style.transform).toContain('scale(2)')
+    expect(사진().style.transform).toContain('scale(3)')
   })
 
   it('아무리 오므려도 화면 맞춤 아래로는 안 간다', () => {
