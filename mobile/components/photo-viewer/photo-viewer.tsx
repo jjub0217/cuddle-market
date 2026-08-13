@@ -16,6 +16,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors } from '@/constants/colors';
 
@@ -37,6 +38,8 @@ const MAX_SCALE = 3;
 const DOUBLE_TAP_SCALE = 2;
 /** X 단추·점 표시가 사라졌다 나타나는 데 걸리는 시간 */
 const UI_FADE_MS = 180;
+/** 점 표시를 화면 바닥(기기 바 위)에서 얼마나 띄울지 */
+const DOTS_GAP = 24;
 
 interface ZoomablePhotoProps {
   uri: string;
@@ -183,6 +186,9 @@ interface PhotoViewerProps {
 
 export function PhotoViewer({ images, startIndex = 0, visible, onClose }: PhotoViewerProps) {
   const { width, height } = useWindowDimensions();
+  // ⚠️ 이 창은 **루트에 뜬다** — 아래 탭바가 없어서 기기 바를 자기가 비켜야 한다.
+  //    안 비키면 점 표시가 3버튼 바(48 안팎) 아래로 들어가 안 보인다(mobile/AGENTS.md).
+  const insets = useSafeAreaInsets();
   const [index, setIndex] = useState(startIndex);
   const [zoomed, setZoomed] = useState(false);
   const pagerRef = useRef<FlatList<string>>(null);
@@ -251,7 +257,7 @@ export function PhotoViewer({ images, startIndex = 0, visible, onClose }: PhotoV
                 폰에는 좌우 화살표를 둘 자리가 없어 점이 그 몫을 한다.
                 모양은 상품 상세의 점 표시와 같다(product-detail/image-carousel.tsx). */}
             {images.length > 1 ? (
-              <View style={styles.dots}>
+              <View style={[styles.dots, { bottom: insets.bottom + DOTS_GAP }]}>
                 {images.map((uri, i) => (
                   <Pressable
                     key={`${uri}-dot-${i}`}
@@ -286,7 +292,6 @@ const styles = StyleSheet.create({
   close: { position: 'absolute', top: 44, right: 12, padding: 8 },
   dots: {
     position: 'absolute',
-    bottom: 32,
     left: 0,
     right: 0,
     flexDirection: 'row',

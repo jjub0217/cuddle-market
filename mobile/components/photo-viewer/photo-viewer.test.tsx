@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import React from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import type { PinchGesture } from 'react-native-gesture-handler';
 import { fireGestureHandler, getByGestureTestId } from 'react-native-gesture-handler/jest-utils';
 
@@ -15,21 +16,31 @@ import { PAGER_TEST_ID, PINCH_TEST_ID, PhotoViewer } from './photo-viewer';
 
 const IMAGES = ['https://cdn/a.webp', 'https://cdn/b.webp'];
 
+
+// 안전영역(기기 바) 값을 쓰는 조각이라 감싸 줘야 한다 — bottom-sheet.test.tsx 와 같은 방식.
+const METRICS = {
+  frame: { x: 0, y: 0, width: 390, height: 844 },
+  insets: { top: 47, left: 0, right: 0, bottom: 34 },
+};
+function Wrapper({ children }: { children: React.ReactNode }) {
+  return <SafeAreaProvider initialMetrics={METRICS}>{children}</SafeAreaProvider>;
+}
+
 it('안 보일 때는 사진을 안 그린다', async () => {
-  await render(<PhotoViewer images={IMAGES} visible={false} onClose={jest.fn()} />);
+  await render(<PhotoViewer images={IMAGES} visible={false} onClose={jest.fn()} />, { wrapper: Wrapper });
 
   expect(screen.queryByTestId(PAGER_TEST_ID)).toBeNull();
 });
 
 it('보이면 사진을 그린다', async () => {
-  await render(<PhotoViewer images={IMAGES} visible onClose={jest.fn()} />);
+  await render(<PhotoViewer images={IMAGES} visible onClose={jest.fn()} />, { wrapper: Wrapper });
 
   expect(screen.getByTestId(PAGER_TEST_ID)).toBeTruthy();
 });
 
 it('닫기 단추를 누르면 닫힌다고 알린다', async () => {
   const 닫힘 = jest.fn();
-  await render(<PhotoViewer images={IMAGES} visible onClose={닫힘} />);
+  await render(<PhotoViewer images={IMAGES} visible onClose={닫힘} />, { wrapper: Wrapper });
 
   await fireEvent.press(screen.getByLabelText('닫기'));
 
@@ -38,7 +49,7 @@ it('닫기 단추를 누르면 닫힌다고 알린다', async () => {
 
 it('뒤로가기로 닫힌다고 알린다', async () => {
   const 닫힘 = jest.fn();
-  await render(<PhotoViewer images={IMAGES} visible onClose={닫힘} />);
+  await render(<PhotoViewer images={IMAGES} visible onClose={닫힘} />, { wrapper: Wrapper });
 
   // 안드로이드 뒤로가기는 Modal 에 requestClose 로 들어온다.
   await fireEvent(screen.getByTestId('photo-viewer-modal'), 'requestClose');
@@ -48,14 +59,14 @@ it('뒤로가기로 닫힌다고 알린다', async () => {
 
 // 폰에는 좌우 화살표를 둘 자리가 없어 **점**이 그 몫을 한다(웹은 화살표).
 it('여러 장이면 사진 수만큼 점이 있다', async () => {
-  await render(<PhotoViewer images={IMAGES} visible onClose={jest.fn()} />);
+  await render(<PhotoViewer images={IMAGES} visible onClose={jest.fn()} />, { wrapper: Wrapper });
 
   expect(screen.getByTestId('photo-viewer-dot-0')).toBeTruthy();
   expect(screen.getByTestId('photo-viewer-dot-1')).toBeTruthy();
 });
 
 it('한 장이면 점이 없다', async () => {
-  await render(<PhotoViewer images={[IMAGES[0]]} visible onClose={jest.fn()} />);
+  await render(<PhotoViewer images={[IMAGES[0]]} visible onClose={jest.fn()} />, { wrapper: Wrapper });
 
   expect(screen.queryByTestId('photo-viewer-dot-0')).toBeNull();
 });
@@ -63,7 +74,7 @@ it('한 장이면 점이 없다', async () => {
 // ⚠️ **점을 눌러 진짜로 넘어가는지는 여기서 못 본다** — jest 에는 스크롤이 없다.
 //    실기기로 봐야 한다. 여기서는 「지금 보는 사진을 점이 제대로 가리키는가」까지 지킨다.
 it('지금 보는 사진의 점이 눌린 상태로 보인다', async () => {
-  await render(<PhotoViewer images={IMAGES} startIndex={1} visible onClose={jest.fn()} />);
+  await render(<PhotoViewer images={IMAGES} startIndex={1} visible onClose={jest.fn()} />, { wrapper: Wrapper });
 
   expect(screen.getByTestId('photo-viewer-dot-1').props.accessibilityState.selected).toBe(true);
   expect(screen.getByTestId('photo-viewer-dot-0').props.accessibilityState.selected).toBe(false);
@@ -82,13 +93,13 @@ function 넓힌다(배율: number) {
 }
 
 it('처음에는 좌우로 넘길 수 있다', async () => {
-  await render(<PhotoViewer images={IMAGES} visible onClose={jest.fn()} />);
+  await render(<PhotoViewer images={IMAGES} visible onClose={jest.fn()} />, { wrapper: Wrapper });
 
   expect(screen.getByTestId(PAGER_TEST_ID).props.scrollEnabled).toBe(true);
 });
 
 it('넓히면 좌우 넘기기가 꺼진다', async () => {
-  await render(<PhotoViewer images={IMAGES} visible onClose={jest.fn()} />);
+  await render(<PhotoViewer images={IMAGES} visible onClose={jest.fn()} />, { wrapper: Wrapper });
 
   넓힌다(2);
 
@@ -98,7 +109,7 @@ it('넓히면 좌우 넘기기가 꺼진다', async () => {
 });
 
 it('다시 줄이면 좌우 넘기기가 켜진다', async () => {
-  await render(<PhotoViewer images={IMAGES} visible onClose={jest.fn()} />);
+  await render(<PhotoViewer images={IMAGES} visible onClose={jest.fn()} />, { wrapper: Wrapper });
 
   넓힌다(2);
   넓힌다(1);
