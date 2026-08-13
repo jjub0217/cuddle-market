@@ -1,6 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import { fetchProductDetail } from '@/lib/api/server/products'
-import { toUrlName } from '@/lib/utils/toUrlName'
+import { productDetailPath } from '@/lib/utils/detailPath'
 
 interface ProductRedirectPageProps {
   params: Promise<{ id: string }>
@@ -14,5 +14,5 @@ export default async function ProductRedirectPage({ params }: ProductRedirectPag
     notFound()
   }
 
-  redirect(`/products/${id}/${toUrlName(product.title)}`)
+  redirect(productDetailPath(id, product.title))
 }
