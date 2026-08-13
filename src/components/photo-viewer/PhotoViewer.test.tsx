@@ -160,3 +160,33 @@ describe('끌기와 누르기 가르기', () => {
     expect(붙잡기).toHaveBeenCalled()
   })
 })
+
+// 확대 제스처(트랙패드로 벌리기 · ⌘+휠)는 브라우저에 **ctrl 이 눌린 휠**로 온다.
+// 가로채지 않으면 브라우저가 화면 전체를 키워 X 단추·화살표·번호가 화면 밖으로 밀려난다.
+describe('확대 제스처 가로채기', () => {
+  it('ctrl 을 누른 채 벌리면 실제 크기가 된다', () => {
+    render(<PhotoViewer images={IMAGES} isOpen onClose={vi.fn()} alt="캣타워" />)
+
+    fireEvent.wheel(screen.getByTestId('photo-viewer'), { ctrlKey: true, deltaY: -100 })
+
+    expect(screen.getByAltText('캣타워 - 1')).toHaveAttribute('data-zoomed', 'true')
+  })
+
+  it('ctrl 을 누른 채 오므리면 화면 맞춤으로 돌아온다', () => {
+    render(<PhotoViewer images={IMAGES} isOpen onClose={vi.fn()} alt="캣타워" />)
+    const 창 = screen.getByTestId('photo-viewer')
+
+    fireEvent.wheel(창, { ctrlKey: true, deltaY: -100 })
+    fireEvent.wheel(창, { ctrlKey: true, deltaY: 100 })
+
+    expect(screen.getByAltText('캣타워 - 1')).toHaveAttribute('data-zoomed', 'false')
+  })
+
+  it('그냥 휠은 건드리지 않는다 (페이지 스크롤을 뺏으면 안 된다)', () => {
+    render(<PhotoViewer images={IMAGES} isOpen onClose={vi.fn()} alt="캣타워" />)
+
+    fireEvent.wheel(screen.getByTestId('photo-viewer'), { ctrlKey: false, deltaY: -100 })
+
+    expect(screen.getByAltText('캣타워 - 1')).toHaveAttribute('data-zoomed', 'false')
+  })
+})

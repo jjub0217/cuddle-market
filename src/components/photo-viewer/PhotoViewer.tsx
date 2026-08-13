@@ -36,6 +36,14 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
   const [zoomed, setZoomed] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
 
+  // 사진의 진짜 알갱이 크기. **화면에 맞춰 키울 때 어디까지 키울지**를 여기서 정한다.
+  //
+  // ⚠️ max-h-full·max-w-full 만 주면 **상한만 정해져 원본보다 크게는 안 된다.**
+  //    600×800 사진이 높이 1000 넘는 모니터에서 600×800 그대로 떠서 가운데 조그맣게
+  //    보였다(2026-08-13에 확인). 그래서 h-full·w-full 로 채우되, 여기서 잰 크기의
+  //    두 배를 상한으로 건다 — 그보다 키우면 뭉개짐이 눈에 띈다.
+  const [natural, setNatural] = useState<{ width: number; height: number } | null>(null)
+
   // 끌어서 움직이기. 실제 크기일 때만 쓴다 — 화면 맞춤일 때는 넘칠 것이 없다.
   // 「스크롤 자리를 손가락 움직인 만큼 반대로 민다」가 전부다.
   //
@@ -112,6 +120,28 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
     }
   }, [isOpen])
 
+  // 확대 제스처를 가로챈다.
+  //
+  // 트랙패드로 벌리는 것과 ⌘(Ctrl)+휠은 브라우저에 **ctrl 이 눌린 휠**로 똑같이 온다.
+  // 그냥 두면 브라우저가 **화면 전체를 키워** X 단추·화살표·번호가 화면 밖으로 밀려난다
+  // (2026-08-13에 스크린샷으로 확인했다). 사진 보는 창에서 확대했는데 닫을 단추를
+  // 잃는 것은 앞뒤가 안 맞는다. 그래서 우리가 받아 **사진만** 키운다.
+  //
+  // ⚠️ 리액트의 onWheel 로는 못 막는다 — 리액트가 휠을 passive 로 달아서
+  //    preventDefault 가 무시된다. 요소에 직접, passive: false 로 달아야 한다.
+  useEffect(() => {
+    const dialog = dialogRef.current
+    if (!dialog || !isOpen) return
+    const handleWheel = (event: WheelEvent) => {
+      if (!event.ctrlKey) return
+      event.preventDefault()
+      // 벌리면(위로) 실제 크기, 오므리면 화면 맞춤.
+      setZoomed(event.deltaY < 0)
+    }
+    dialog.addEventListener('wheel', handleWheel, { passive: false })
+    return () => dialog.removeEventListener('wheel', handleWheel)
+  }, [isOpen])
+
   // ESC. 리액트의 onCancel 대신 요소에 직접 단다 —
   // cancel 은 위로 올라가지 않는(bubbles: false) 사건이라 직접 다는 쪽이 확실하다.
   // preventDefault 로 브라우저가 혼자 닫는 것을 막는다. 여는 쪽(isOpen)만 문을 쥐게 둔다.
@@ -128,10 +158,18 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
 
   const hasMultiple = images.length > 1
   // 넘기면 화면 맞춤으로 되돌린다 — 확대한 채로 넘어가면 다음 사진의 한 귀퉁이만 보인다.
+  // 사진마다 알갱이 크기가 다르므로 잰 값도 지운다.
   const go = (step: number) => {
     setZoomed(false)
+    setNatural(null)
     setIndex((prev) => (prev + step + images.length) % images.length)
   }
+
+  /** 화면 맞춤일 때 얼마나 키울지의 상한. 잰 크기의 두 배까지만 — 그 위는 뭉개짐이 눈에 띈다 */
+  const FIT_MAX_SCALE = 2
+  const fitLimit = natural
+    ? { maxWidth: natural.width * FIT_MAX_SCALE, maxHeight: natural.height * FIT_MAX_SCALE }
+    : undefined
 
   return (
     <dialog
@@ -170,14 +208,22 @@ export default function PhotoViewer({ images, startIndex = 0, isOpen, onClose, a
               alt={`${alt} - ${index + 1}`}
               data-zoomed={zoomed}
               draggable={false}
+              onLoad={(event) => {
+                const img = event.currentTarget
+                setNatural({ width: img.naturalWidth, height: img.naturalHeight })
+              }}
               onClick={(event) => {
                 event.stopPropagation()
                 if (isClickAfterDrag()) return
                 setZoomed((prev) => !prev)
               }}
+              // 화면 맞춤은 h-full·w-full 로 **채운다**. max-h-full 만 주면 원본보다
+              // 크게는 안 커져서 작은 사진이 큰 모니터에 조그맣게 뜬다.
+              // 대신 style 의 상한(잰 크기의 두 배)이 지나친 확대를 막는다.
+              style={zoomed ? undefined : fitLimit}
               className={cn(
                 'm-auto select-none',
-                zoomed ? 'max-w-none cursor-zoom-out' : 'max-h-full max-w-full cursor-zoom-in object-contain'
+                zoomed ? 'max-w-none cursor-zoom-out' : 'h-full w-full cursor-zoom-in object-contain'
               )}
             />
           </div>
