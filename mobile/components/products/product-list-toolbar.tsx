@@ -1,10 +1,33 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable as GesturePressable } from 'react-native-gesture-handler';
 
 import { ChevronDown, SlidersHorizontal } from 'lucide-react-native';
 
 import { BottomSheet, sheetItemStyles } from '@/components/ui/bottom-sheet';
 import { colors } from '@/constants/colors';
+
+// ⚠️ **이 줄의 단추는 gesture-handler 누름판을 쓴다. RN 것으로 되돌리지 마라**(#935).
+//
+// 이 줄은 목록에 **붙는다**(product-list-view.tsx 의 renderSectionHeader).
+// 붙는 줄은 원래 자리를 위에 그대로 둔 채 화면에 보이게 아래로 밀어서 그리는데,
+// RN 의 누름판은 손을 뗄 때 「아직 단추 안인가」를 **원래 자리**로 재고 손가락은
+// **보이는 자리**에 있다. 그래서 「밖으로 나갔다」로 보고 onPress 를 버린다.
+//
+//   onPressIn (누를 때)   뜬다      → 눌린 표시는 잠깐 보인다
+//   onPress   (뗄 때)     버려진다   → 「아무 일도 안 일어난다」
+//
+// 리액트 네이티브 0.79.2 부터 생긴 회귀다(facebook/react-native#51763).
+// 고치는 PR(#57052)은 아직 안 머지됐고, 앱은 Expo SDK 54라 RN 0.81.5 에 묶여 있어
+// 올려서 피할 수도 없다. gesture-handler 는 네이티브 제스처로 판정해서 이 재기를 안 한다.
+//
+// ⚠️ **시트 안(정렬 목록)은 RN 누름판 그대로 둔다.** 시트는 Modal 인데, 안드로이드에서
+//    Modal 안은 별도 창이라 앱 바깥의 GestureHandlerRootView 가 안 닿는다. 정렬 시트는
+//    끌어 닫기를 안 써서 그 안에 GestureHandlerRootView 도 없다 —
+//    거기까지 바꾸면 **오류 없이 조용히 안 눌린다**(bottom-sheet.tsx 맨 위 설명).
+//    그리고 시트는 붙는 줄이 아니라 애초에 이 고장과 무관하다.
+//
+// ⚠️ **jest 로는 못 잡는다.** 자리가 어긋나는 것은 진짜 화면에서만 생긴다.
 
 // 상품 목록 **바로 위에 고정되는** 줄.
 //
@@ -84,7 +107,7 @@ export function ProductListToolbar({
           const code = tab.code === ALL_CODE ? null : tab.code;
           const active = productType === code;
           return (
-            <Pressable
+            <GesturePressable
               key={tab.id}
               testID={`product-type-${tab.code}`}
               onPress={() => onChangeProductType(code)}
@@ -99,13 +122,13 @@ export function ProductListToolbar({
               <Text style={[styles.pillLabel, active ? styles.pillLabelActive : styles.pillLabelIdle]}>
                 {tab.label}
               </Text>
-            </Pressable>
+            </GesturePressable>
           );
         })}
       </ScrollView>
 
       <View style={styles.right}>
-        <Pressable
+        <GesturePressable
           testID="open-detail-filter"
           onPress={onPressFilter}
           accessibilityRole="button"
@@ -113,9 +136,9 @@ export function ProductListToolbar({
           style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
         >
           <SlidersHorizontal size={18} color={colors.onSurfaceMedium} strokeWidth={2} />
-        </Pressable>
+        </GesturePressable>
 
-        <Pressable
+        <GesturePressable
           testID="open-sort"
           onPress={() => setSortOpen(true)}
           accessibilityRole="button"
@@ -126,7 +149,7 @@ export function ProductListToolbar({
           {/* 지금 고른 정렬은 늘 눈에 보여야 한다 — 열어 보지 않고도 알 수 있게 */}
           <Text style={styles.sortLabel}>{selectedSort.label}</Text>
           <ChevronDown size={16} color={colors.onSurfaceMedium} strokeWidth={2} />
-        </Pressable>
+        </GesturePressable>
       </View>
 
       {/* 고르는 목록은 앱의 다른 시트(고르는 칸·마이페이지)와 같은 껍데기를 쓴다 */}
