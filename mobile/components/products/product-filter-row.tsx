@@ -1,13 +1,6 @@
 import { Image } from 'expo-image';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  type LayoutChangeEvent,
-} from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
   runOnJS,
@@ -23,6 +16,7 @@ import {
   type Option,
 } from '@cuddle/shared';
 
+import { UnderlineTabs } from '@/components/ui/underline-tabs';
 import { colors } from '@/constants/colors';
 
 // 상품 목록 위에 얹는 필터 세 줄 (반려동물 대분류 · 소분류 · 카테고리).
@@ -83,12 +77,6 @@ const DETAIL_ROW_HEIGHT = 46;
  */
 const COLLAPSE_MS = 400;
 
-/** 탭 아래 바가 옆 탭으로 미끄러지는 시간. place-sheet(240)와 같은 값이다. */
-const TAB_SLIDE_MS = 240;
-
-/** 탭 아래 바의 두께. `styles.tab`이 같은 값으로 자리를 비워 둔다 — 둘을 함께 고쳐야 한다. */
-const TAB_BAR_HEIGHT = 3;
-
 // ⚠️ require는 정적이어야 한다 — `require('...' + code)`는 RN에서 안 된다(번들에 안 담긴다).
 //    그래서 코드마다 한 줄씩 적는다. 그림은 웹 public/images/category에서 그대로 옮겼고
 //    코드 ↔ 파일 짝은 웹 constants.ts의 CATEGORY_ICON_IMAGES와 같다.
@@ -143,7 +131,14 @@ export function ProductPetTypeTabs({
 
   return (
     <View testID="product-pet-type-tabs" style={styles.sheet}>
-      <PetTypeTabRow selected={petType} options={PET_TYPE_OPTIONS} onChange={handleChangePetType} />
+      <UnderlineTabs
+        selected={petType}
+        options={PET_TYPE_OPTIONS}
+        onChange={handleChangePetType}
+        allLabel="전체"
+        // ⚠️ 앞머리를 바꾸면 이 화면의 시험이 한꺼번에 빨개진다. 표식이 곧 약속이다.
+        testIDPrefix="pet-type-tab"
+      />
     </View>
   );
 }
@@ -188,150 +183,6 @@ export function ProductFilterRow({
       />
       <CategoryIconGrid selected={category} onChange={onChangeCategory} />
     </View>
-  );
-}
-
-interface PetTypeTabRowProps {
-  selected: string | null;
-  options: readonly Option[];
-  onChange: (next: string | null) => void;
-}
-
-/** 탭 하나가 어디에 얼마만 한 너비로 놓였는지. `onLayout`으로 재서 채운다. */
-interface TabLayout {
-  x: number;
-  width: number;
-}
-
-/**
- * 대분류 줄. 알약이 아니라 **글자 탭**이다 — 고른 것 아래에만 바가 그어진다.
- *
- * 줄 전체 아래에 옅은 경계선을 하나 더 그어 「여기까지가 탭 줄」임을 보인다.
- * 그 선이 없으면 바가 무엇에 붙은 표시인지 안 읽힌다.
- *
- * ⚠️ **바는 탭마다 하나씩이 아니라 줄 전체에 하나뿐이다.**
- *    탭마다 자기 `borderBottom`을 켜고 끄면 즉시 갈아 끼워져 「툭툭 끊긴다」로 느껴진다
- *    (2026-08-06 실기기). 컬리 앱처럼 바 하나가 옆으로 **미끄러져** 가야 한다.
- *    그래서 탭의 자리(x·너비)를 재 두고, 그 자리로 바를 옮긴다.
- */
-function PetTypeTabRow({ selected, options, onChange }: PetTypeTabRowProps) {
-  const scrollRef = useRef<ScrollView>(null);
-  const [layouts, setLayouts] = useState<Record<string, TabLayout>>({});
-  /** 눈에 보이는 줄의 너비. 고른 탭을 가운데로 데려올 때 쓴다. */
-  const [viewportWidth, setViewportWidth] = useState(0);
-
-  const activeKey = selected ?? ALL_OPTION_KEY;
-  const activeLayout = layouts[activeKey];
-
-  const barX = useSharedValue(0);
-  const barWidth = useSharedValue(0);
-  /** 처음 한 번은 미끄러지지 않고 제자리에 놓는다 — 화면에 들어오자마자 바가 기어가면 어색하다. */
-  const placed = useRef(false);
-
-  const 자리를잰다 = (key: string) => (event: LayoutChangeEvent) => {
-    const { x, width } = event.nativeEvent.layout;
-    setLayouts((prev) => {
-      const before = prev[key];
-      // 같은 값이면 그대로 둔다 — 새 객체를 만들면 아래 useEffect가 괜히 다시 돈다.
-      if (before && before.x === x && before.width === width) return prev;
-      return { ...prev, [key]: { x, width } };
-    });
-  };
-
-  useEffect(() => {
-    if (!activeLayout) return;
-    if (!placed.current) {
-      placed.current = true;
-      barX.value = activeLayout.x;
-      barWidth.value = activeLayout.width;
-      return;
-    }
-    // 너비도 함께 움직인다 — 탭마다 글자 길이가 달라 자리만 옮기면 폭이 튄다.
-    const 곡선 = { duration: TAB_SLIDE_MS, easing: Easing.out(Easing.cubic) };
-    barX.value = withTiming(activeLayout.x, 곡선);
-    barWidth.value = withTiming(activeLayout.width, 곡선);
-  }, [activeLayout, barX, barWidth]);
-
-  // ⚠️ 「탭이 옆으로 이동되는 느낌」의 절반은 이것이다 — 고른 탭이 화면 밖이면 데려온다.
-  //    아니면 오른쪽 끝 탭을 눌렀을 때 바가 안 보이는 데로 가 버린다.
-  useEffect(() => {
-    if (!activeLayout || viewportWidth === 0) return;
-    const 가운데 = activeLayout.x + activeLayout.width / 2 - viewportWidth / 2;
-    // 음수로 가면 왼쪽 끝이다. 오른쪽 끝을 넘는 값은 ScrollView가 알아서 잡아 준다.
-    scrollRef.current?.scrollTo({ x: Math.max(0, 가운데), animated: true });
-  }, [activeLayout, viewportWidth]);
-
-  const barStyle = useAnimatedStyle(() => ({
-    width: barWidth.value,
-    transform: [{ translateX: barX.value }],
-  }));
-
-  return (
-    <ScrollView
-      ref={scrollRef}
-      testID="pet-type-tab-row"
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      // 경계선은 contentContainerStyle이 아니라 style에 준다 — 내용이 짧아도 화면 끝까지 그어져야 한다.
-      style={styles.tabScroll}
-      contentContainerStyle={styles.tabRowPadding}
-      onLayout={(event) => setViewportWidth(event.nativeEvent.layout.width)}
-    >
-      {/*
-        ⚠️ 여백 없는 안쪽 상자로 한 겹 더 감싼다. 바는 여기에 절대 자리로 놓이고, 탭의 x도
-           여기를 기준으로 재진다 — 둘의 기준점이 같아야 바가 탭에 정확히 붙는다.
-           (여백을 이 상자에 주면 「절대 자리 0」이 어디냐가 여백만큼 어긋난다)
-      */}
-      <View style={styles.tabRow}>
-        <Tab
-          tabKey={ALL_OPTION_KEY}
-          label="전체"
-          active={selected === null}
-          onPress={() => onChange(null)}
-          onLayout={자리를잰다(ALL_OPTION_KEY)}
-        />
-        {options.map((option) => (
-          <Tab
-            key={option.code}
-            tabKey={option.code}
-            label={option.label}
-            active={option.code === selected}
-            // ⚠️ 알약과 달리 다시 눌러도 안 푼다. 되돌릴 자리(「전체」 탭)가 맨 앞에 있다.
-            onPress={() => onChange(option.code)}
-            onLayout={자리를잰다(option.code)}
-          />
-        ))}
-        {/* 줄에 하나뿐인 바. 재기 전에는 너비가 0이라 안 보인다. */}
-        <Animated.View testID="pet-type-tab-bar" style={[styles.tabBar, barStyle]} />
-      </View>
-    </ScrollView>
-  );
-}
-
-interface TabProps {
-  tabKey: string;
-  label: string;
-  active: boolean;
-  onPress: () => void;
-  onLayout: (event: LayoutChangeEvent) => void;
-}
-
-function Tab({ tabKey, label, active, onPress, onLayout }: TabProps) {
-  return (
-    <Pressable
-      // 시험에서 글자 대신 이 표식으로 누른다 — 글자를 누르면 누름이 단추까지 안 올라갈 때가 있다.
-      testID={`pet-type-tab-${tabKey}`}
-      onPress={onPress}
-      onLayout={onLayout}
-      accessibilityRole="button"
-      // ⚠️ 바가 하나로 바뀌어도 이건 탭마다 남겨 둔다 — 읽어 주는 기능과 시험이 여기를 본다.
-      accessibilityState={{ selected: active }}
-      style={({ pressed }) => [styles.tab, pressed && styles.pressed]}
-    >
-      <Text style={[styles.tabLabel, active ? styles.tabLabelActive : styles.tabLabelIdle]}>
-        {label}
-      </Text>
-    </Pressable>
   );
 }
 
@@ -522,53 +373,6 @@ const styles = StyleSheet.create({
    */
   sheet: {
     backgroundColor: colors.surface,
-  },
-
-  // ── 대분류 탭 줄 ────────────────────────────────────────────────
-  tabScroll: {
-    backgroundColor: colors.surface,
-    // 탭 줄임을 보이는 옅은 밑줄. 고른 탭의 바(#825500)는 이 위에 겹쳐 그어진다.
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.outlineVariant,
-  },
-  /** 바깥 여백은 여기에만 준다 — 안쪽 상자를 여백 없이 두어야 바의 기준점이 탭과 같아진다. */
-  tabRowPadding: {
-    paddingHorizontal: 16,
-    // 오른쪽 끝 여백. 딱 맞게 끝나면 뒤에 탭이 더 있는 걸 모른다 — 잘린 게 보여야 한다
-    paddingRight: 32,
-  },
-  tabRow: {
-    flexDirection: 'row',
-    // 바가 이 상자를 기준으로 절대 자리에 놓인다.
-    position: 'relative',
-  },
-  tab: {
-    paddingHorizontal: 12,
-    paddingTop: 12,
-    paddingBottom: 10,
-    alignItems: 'center',
-    // 바가 앉을 자리를 모든 탭이 똑같이 비워 둔다. 안 비우면 바가 글자를 덮는다.
-    marginBottom: TAB_BAR_HEIGHT,
-  },
-  /** 줄에 하나뿐인 바. 재기 전에는 너비 0이라 안 보인다. */
-  tabBar: {
-    position: 'absolute',
-    left: 0,
-    bottom: 0,
-    height: TAB_BAR_HEIGHT,
-    // 글자(accent)와 같은 색으로 둔다 — 얇은 선이라 연한 색이면 안 보인다
-    backgroundColor: colors.accent,
-  },
-  tabLabel: {
-    fontSize: 15,
-  },
-  tabLabelActive: {
-    color: colors.accent,
-    fontWeight: '700',
-  },
-  tabLabelIdle: {
-    color: colors.onSurfaceMedium,
-    fontWeight: '400',
   },
 
   // ── 소분류 알약 줄 ──────────────────────────────────────────────
