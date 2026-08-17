@@ -28,6 +28,32 @@ export function buildContent(body: string, imageUrls: string[]): string {
   return 글 ? `${글}\n\n${사진들}` : 사진들;
 }
 
+/** 본문에서 사진을 찾는 규칙. 대체 글자가 있든 없든 주소만 꺼낸다 */
+const IMAGE_LINE = /!\[[^\]]*\]\(([^)]+)\)/g;
+
+/**
+ * 본문에서 사진을 꺼내 나눈다. `buildContent` 의 반대다.
+ *
+ * 왜 필요한가 — **서버가 사진을 따로 안 준다.** 상세 응답의 `imageUrls` 는 늘 비어 있고
+ * (실제 응답으로 확인했다) 사진은 본문 마크다운 안에만 있다. 수정 화면이 사진 칸을
+ * 채우려면 여기서 꺼내야 한다.
+ *
+ * ⚠️ **중간에 있던 사진은 끝으로 밀린다.** 웹에서 「글1 [사진] 글2」로 쓴 글을 앱에서
+ *    고치면 「글1 글2」 + 사진이 된다. 앱에는 마크다운 편집기가 없어 「글 중간」을
+ *    표현할 길이 없다 — 의도한 대가다(설계 문서 참고). 앱에서 쓴 글은 사진이 원래
+ *    끝에 있어 안 걸린다.
+ */
+export function splitContent(content: string): { body: string; imageUrls: string[] } {
+  const imageUrls = [...content.matchAll(IMAGE_LINE)].map((m) => m[1]);
+  const body = content
+    .replace(IMAGE_LINE, '')
+    // 사진을 걷어낸 자리에 남는 빈 줄을 정리한다. 세 줄 이상은 두 줄로 줄이고 앞뒤를 턴다.
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+
+  return { body, imageUrls };
+}
+
 /**
  * 앞으로 더 쓸 수 있는 글자 수.
  *
@@ -60,5 +86,40 @@ export async function createPost(input: {
     // (community.ts 의 createComment 와 같은 방식).
     const message = await readMessage(res);
     throw new Error(message ?? `글 등록에 실패했어요 (HTTP ${res.status})`);
+  }
+}
+
+/**
+ * 글 고치기. 보내는 규칙은 `createPost` 와 같다 — 사진은 본문에 넣고 imageUrls 는 비운다.
+ *
+ * ⚠️ PATCH 다. 서버가 PatchMapping 이다(CommunityController.java:159).
+ */
+export async function updatePost(
+  postId: number,
+  input: { title: string; body: string; imageUrls: string[]; boardType: BoardType }
+): Promise<void> {
+  const res = await apiFetch(`/community/posts/${postId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      title: input.title.trim(),
+      content: buildContent(input.body, input.imageUrls),
+      imageUrls: [],
+      boardType: input.boardType,
+    }),
+  });
+
+  if (!res.ok) {
+    const message = await readMessage(res);
+    throw new Error(message ?? `글 수정에 실패했어요 (HTTP ${res.status})`);
+  }
+}
+
+/** 글 지우기. 되돌릴 수 없다 — 부르는 쪽이 확인창을 거쳐야 한다 */
+export async function deletePost(postId: number): Promise<void> {
+  const res = await apiFetch(`/community/posts/${postId}`, { method: 'DELETE' });
+
+  if (!res.ok) {
+    const message = await readMessage(res);
+    throw new Error(message ?? `글 삭제에 실패했어요 (HTTP ${res.status})`);
   }
 }

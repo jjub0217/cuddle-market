@@ -173,6 +173,34 @@ describe('fetchPostDetail', () => {
     expect(post.imageUrls).toEqual(['https://cdn/a.webp']);
   });
 
+  // ⚠️ **이 줄이 없으면 수정 화면이 글을 다른 게시판으로 옮긴다.** 매핑에서 boardType 을
+  //    빠뜨리면 수정 모드의 칩이 늘 「질문」으로 시작하고, 저장할 때 그대로 서버로 간다 —
+  //    화면에는 오류가 안 뜬다(#924). 여기서 못 박아 둔다.
+  it('상세 응답의 boardType을 그대로 담는다', async () => {
+    apiFetch.mockResolvedValue(
+      okJson({
+        data: {
+          id: 36,
+          authorId: 42,
+          authorNickname: '협주',
+          authorProfileImageUrl: null,
+          title: '강아지 사료',
+          content: '수의사 추천으로 바꿨는데…',
+          imageUrls: [],
+          boardType: 'INFO',
+          viewCount: 12,
+          commentCount: 7,
+          createdAt: '2026-04-01T10:00:00',
+          updatedAt: '2026-04-01T10:00:00',
+        },
+      })
+    );
+
+    const post = await fetchPostDetail(36);
+
+    expect(post.boardType).toBe('INFO');
+  });
+
   it('imageUrls가 없으면 빈 배열이다', async () => {
     apiFetch.mockResolvedValue(okJson({ data: { id: 1, title: 'x', content: 'y' } }));
 

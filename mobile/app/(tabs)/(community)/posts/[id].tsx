@@ -20,13 +20,15 @@ import { CommentMenuSheet } from '@/components/community/comment-menu-sheet';
 import { PostBody } from '@/components/community/post-body';
 import { ErrorState, LoadingState } from '@/components/list-states';
 import { ProductActionSheet, type SheetAction } from '@/components/my/product-action-sheet';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { colors } from '@/constants/colors';
 import { useMe } from '@/hooks/use-me';
 import { useAuthStore } from '@/lib/auth/store';
 import { createComment, fetchPostDetail, type CommentItem } from '@/lib/community';
+import { deletePost } from '@/lib/community-post';
 import { showToast } from '@/lib/toast';
 
-// 게시글 상세. 글 읽기 + 댓글 읽기·쓰기 — 글 고치기·지우기는 아직 없다.
+// 게시글 상세. 글 읽기 + 댓글 읽기·쓰기 + 내 글 고치기·지우기.
 //
 // 맨 아래 칸은 **글에 새 댓글**을 단다. 답글은 여기서 안 단다 —
 // 부모 댓글의 「답글 달기」를 누르면 스레드 화면(app/comment-thread.tsx)으로 옮겨 간다.
@@ -43,6 +45,8 @@ export default function PostDetailScreen() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   /** ⋮ 를 연 댓글. 시트와 삭제 확인 창이 같이 쓴다 */
   const [menuTarget, setMenuTarget] = useState<CommentItem | null>(null);
+  /** 글 삭제 확인 창을 열었는가 */
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
 
@@ -58,21 +62,73 @@ export default function PostDetailScreen() {
 
   const isMine = Boolean(me && post && me.id === post.authorId);
 
-  /** 헤더 ⋮ 는 신고 하나뿐이다. 차단은 프로필 쪽에 있고, 글 지우기는 아직 없다 */
-  const sheetActions: SheetAction[] = post
-    ? [
-        {
-          label: '게시글 신고하기',
-          onPress: () => {
-            setIsSheetOpen(false);
-            router.push({
-              pathname: '/report',
-              params: { kind: 'post', id: String(postId), name: post.title },
-            });
+  /**
+   * 헤더 ⋮ 는 내 글이냐로 갈린다 — 내 글이면 고치기·지우기, 남의 글이면 신고.
+   * (차단은 여기 없다. 프로필 쪽에 있다)
+   *
+   * ⚠️ 내 글에 신고를 두면 안 된다 — 나를 나에게 신고하는 자리가 된다.
+   *    댓글 ⋮ 와 같은 갈래다(lib/comment-menu.ts).
+   */
+  const sheetActions: SheetAction[] = !post
+    ? []
+    : isMine
+      ? [
+          {
+            label: '게시글 수정',
+            onPress: () => {
+              setIsSheetOpen(false);
+              // 수정 화면은 따로 없다. 글쓰기 화면이 postId 를 받으면 수정 모드가 된다.
+              router.push({
+                pathname: '/community-post',
+                params: { postId: String(postId) },
+              });
+            },
           },
-        },
-      ]
-    : [];
+          {
+            label: '게시글 삭제',
+            tone: 'danger',
+            onPress: () => {
+              // 시트를 먼저 닫는다. 확인 창과 겹쳐 뜨지 않게(댓글 ⋮ 와 같은 순서).
+              setIsSheetOpen(false);
+              setIsDeleteOpen(true);
+            },
+          },
+        ]
+      : [
+          {
+            label: '게시글 신고하기',
+            onPress: () => {
+              setIsSheetOpen(false);
+              router.push({
+                pathname: '/report',
+                params: { kind: 'post', id: String(postId), name: post.title },
+              });
+            },
+          },
+        ];
+
+  /** 글 지우기. 지운 뒤에는 목록을 무르게 하고 왔던 곳으로 돌아간다 */
+  const handleDeletePost = async () => {
+    try {
+      await deletePost(postId);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : '게시글 삭제에 실패했습니다.');
+      // ⚠️ **창을 닫지 않고 그냥 돌아간다.** 닫히면 다시 시도할 길이 없다.
+      //    ConfirmDialog 는 스스로 안 닫는다 — 아래 setIsDeleteOpen(false) 를 지나쳐야 열려 있다.
+      //
+      //    채팅방 나가기(app/chat/[id].tsx 의 handleLeave)는 여기서 throw 를 쓰는데,
+      //    그러면 아무도 안 받는 거절이 되어 시험이 그것을 실패로 집는다. 창이 열려 있는
+      //    것은 어차피 「안 닫는 것」이 만드는 결과라 던질 이유가 없다.
+      return;
+    }
+
+    setIsDeleteOpen(false);
+    // ⚠️ 안 무르게 하면 캐시에 든 옛 목록에 지운 글이 그대로 남는다(#922 와 같은 일).
+    await queryClient.invalidateQueries({ queryKey: ['communityPosts'] });
+    // 댓글 삭제와 같은 말투다(comment-menu-sheet.tsx 의 「댓글을 삭제했습니다」).
+    showToast('게시글을 삭제했습니다');
+    router.back();
+  };
 
   /** 글에 새 댓글. 등록됐으면 true — false면 칸이 쓴 글을 안 지운다 */
   const handleCreateComment = async (content: string): Promise<boolean> => {
@@ -186,8 +242,9 @@ export default function PostDetailScreen() {
           <ChevronLeft size={26} color={colors.onSurface} />
         </Pressable>
 
-        {/* 내 글에는 ⋮ 를 안 그린다 — 나를 신고할 이유가 없다 */}
-        {post && !isMine ? (
+        {/* 내 글에도 ⋮ 를 그린다. 안에 든 것이 갈릴 뿐이다(위 sheetActions).
+            예전에는 내 글에 아예 안 그렸다 — 할 수 있는 일이 신고뿐이었기 때문이다 */}
+        {post ? (
           <Pressable
             onPress={() => setIsSheetOpen(true)}
             hitSlop={12}
@@ -234,6 +291,20 @@ export default function PostDetailScreen() {
         postId={postId}
         target={menuTarget}
         onClose={() => setMenuTarget(null)}
+      />
+
+      <ConfirmDialog
+        visible={isDeleteOpen}
+        // 문구는 웹 DeletePostConfirmModal 그대로다(47줄 제목·설명 · 59줄 단추).
+        // 단추가 「삭제」가 아니라 「삭제하기」인 것도 웹과 같은 값이다 —
+        // 앱의 댓글 삭제 확인 창도 「삭제하기」다(comment-menu-sheet.tsx).
+        heading="게시글 삭제"
+        description="정말로 이 게시글을 삭제하시겠습니까?"
+        confirmLabel="삭제하기"
+        // 되돌릴 수 없는 일에만 쓴다.
+        tone="danger"
+        onClose={() => setIsDeleteOpen(false)}
+        onConfirm={handleDeletePost}
       />
     </SafeAreaView>
   );
