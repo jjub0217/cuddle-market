@@ -1,7 +1,7 @@
 import type { Product } from '@cuddle/shared';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
-import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Pressable, SectionList, StyleSheet, View } from 'react-native';
 
 import { EmptyState, ErrorState, ListFooter, LoadingState } from '@/components/list-states';
@@ -84,14 +84,39 @@ export const ProductListView = forwardRef<ProductListViewRef, Props>(function Pr
   //    푼 소분류가 되살아난다.
   const patch = (next: Partial<ProductFilters>) => setFilters((prev) => ({ ...prev, ...next }));
 
+  // 목록이 안 그려져 있을 수도 있다(빈 화면·오류일 때). 그때는 올릴 것이 없다.
+  // scrollToLocation은 첫 상품 기준이라 위쪽 필터 줄이 가려진다 — 스크롤 자체를 0으로 보낸다.
+  const 맨위로 = useCallback(() => {
+    listRef.current?.getScrollResponder()?.scrollTo({ y: 0, animated: true });
+  }, []);
+
   useImperativeHandle(ref, () => ({
     reset: () => {
       setFilters(EMPTY_FILTERS);
-      // 목록이 안 그려져 있을 수도 있다(빈 화면·오류일 때). 그때는 올릴 것이 없다.
-      // scrollToLocation은 첫 상품 기준이라 위쪽 필터 줄이 가려진다 — 스크롤 자체를 0으로 보낸다.
-      listRef.current?.getScrollResponder()?.scrollTo({ y: 0, animated: true });
+      맨위로();
     },
   }));
+
+  // **조건을 바꾸면 맨 위로 올린다**(#937).
+  //
+  // 한참 내려간 자리에서 알약이나 필터를 바꾸면 내용만 갈리고 **스크롤은 내려가 있던 자리
+  // 그대로**다. 새 조건의 첫 상품이 화면 위에 있는데 사용자는 한참 아래를 보고 있게 된다.
+  //
+  // 조건을 **글자 하나로 접어서** 견준다. 덩어리를 그대로 놓으면 값이 같아도 새 객체라 매번
+  // 다시 돌고, 하나씩 늘어놓으면 조건이 늘 때 빠뜨린다. 질의 열쇠와 같은 것을 본다.
+  const 조건열쇠 = JSON.stringify({ keyword, ...filters });
+  // ⚠️ **첫 그림에서는 올리지 않는다.** 막 그려질 때도 「바뀌었다」로 보면 쓸데없이 스크롤을
+  //    건드린다. 지난 조건을 **처음부터 지금 값으로** 채워 두면 첫 비교가 저절로 같아진다.
+  //    (같은 함정을 `hooks/use-refetch-on-focus.ts` 의 「첫 초점은 건너뛴다」에서 이미 겪었다.)
+  const 지난조건 = useRef(조건열쇠);
+
+  useEffect(() => {
+    if (지난조건.current === 조건열쇠) return;
+    지난조건.current = 조건열쇠;
+    // reset() 은 자기도 올리므로 여기까지 오면 두 번 올라간다. 둘 다 같은 자리(y=0)로 가서
+    // 눈에는 한 번으로 보인다 — 대신 조건이 이미 비어 있을 때도 reset() 이 올려 준다.
+    맨위로();
+  }, [조건열쇠, 맨위로]);
 
   const {
     data,

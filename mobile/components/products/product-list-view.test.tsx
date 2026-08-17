@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react-native';
 import { createRef } from 'react';
 import type { ReactNode } from 'react';
+import { SectionList } from 'react-native';
 import { getAnimatedStyle } from 'react-native-reanimated';
 import { SafeAreaProvider, type Metrics } from 'react-native-safe-area-context';
 
@@ -382,6 +383,80 @@ it('reset() 하면 필터가 풀리고 조건 없이 다시 받는다', async ()
 
   await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
   expect(fetchProducts).toHaveBeenCalledWith({ page: 0, sortBy: 'createdAt' });
+});
+
+// ----- 조건을 바꾸면 맨 위로 올라가는가 (#937) -----
+//
+// ⚠️ **「몇 픽셀에 있나」는 여기서 못 잰다.** jest 에는 배치도 스크롤도 없다.
+//    그래서 「스크롤이 실제로 올라갔나」 대신 **「올리는 길이 불렸나」**를 잡는다 —
+//    `getScrollResponder()?.scrollTo({ y: 0 })` 가 그 길이다.
+
+/** 목록이 올려 달라고 부르는 곳을 가로챈다. 시험 환경에는 진짜 스크롤 그릇이 없다. */
+function 올린곳지켜보기() {
+  const scrollTo = jest.fn();
+  jest
+    .spyOn(SectionList.prototype, 'getScrollResponder')
+    .mockReturnValue({ scrollTo } as unknown as ReturnType<
+      SectionList<unknown>['getScrollResponder']
+    >);
+  return scrollTo;
+}
+
+afterEach(() => {
+  jest.restoreAllMocks();
+});
+
+it('첫 그림에서는 맨 위로 올리지 않는다', async () => {
+  // ⚠️ 막 그려질 때도 「조건이 바뀌었다」로 보면 쓸데없이 스크롤을 건드린다.
+  //    (`use-refetch-on-focus.ts` 의 「첫 초점은 건너뛴다」와 같은 함정이다.)
+  const scrollTo = 올린곳지켜보기();
+  fetchProducts.mockResolvedValue(한페이지([상품(1, '강아지 사료')]));
+
+  await render(<ProductListView />, { wrapper: 감싸기 });
+  await waitFor(() => expect(screen.getByText('강아지 사료')).toBeTruthy());
+
+  expect(scrollTo).not.toHaveBeenCalled();
+});
+
+it('알약을 고르면 맨 위로 올린다', async () => {
+  const scrollTo = 올린곳지켜보기();
+  fetchProducts.mockResolvedValue(한페이지([상품(1)]));
+
+  await render(<ProductListView />, { wrapper: 감싸기 });
+  await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
+
+  await fireEvent.press(screen.getByTestId('pet-type-tab-MAMMAL'));
+
+  await waitFor(() => expect(scrollTo).toHaveBeenCalledWith({ y: 0, animated: true }));
+});
+
+it('정렬을 바꿔도 맨 위로 올린다', async () => {
+  // 알약뿐 아니라 툴바에서 오는 조건도 같은 길을 타야 한다.
+  const scrollTo = 올린곳지켜보기();
+  fetchProducts.mockResolvedValue(한페이지([상품(1)]));
+
+  await render(<ProductListView />, { wrapper: 감싸기 });
+  await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
+
+  await fireEvent.press(screen.getByTestId('open-sort'));
+  await waitFor(() => expect(screen.getByTestId('sort-orderedLowPriced')).toBeTruthy());
+  await fireEvent.press(screen.getByTestId('sort-orderedLowPriced'));
+
+  await waitFor(() => expect(scrollTo).toHaveBeenCalledWith({ y: 0, animated: true }));
+});
+
+it('검색어가 바뀌면 맨 위로 올린다', async () => {
+  // 검색어는 조각 **밖**에서 온다. 필터 덩어리에 없다고 빠뜨리면 결과 화면에서만 안 올라간다.
+  const scrollTo = 올린곳지켜보기();
+  fetchProducts.mockResolvedValue(한페이지([상품(1)]));
+
+  const { rerender } = await render(<ProductListView keyword="사료" />, { wrapper: 감싸기 });
+  await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
+  expect(scrollTo).not.toHaveBeenCalled();
+
+  await rerender(<ProductListView keyword="장난감" />);
+
+  await waitFor(() => expect(scrollTo).toHaveBeenCalledWith({ y: 0, animated: true }));
 });
 
 // 상품을 보고 돌아오면 그 상품의 조회수가 달라져 있다. 목록은 탭 화면이라 다시 안 만들어져서
