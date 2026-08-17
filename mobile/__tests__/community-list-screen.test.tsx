@@ -254,3 +254,38 @@ it('상세를 보고 돌아오면 목록을 다시 부른다', async () => {
 
   await waitFor(() => expect(fetchPosts).toHaveBeenCalledTimes(2));
 });
+
+// ----- 게시판 고르는 줄 (#944 과제 2) -----
+//
+// 알약에서 **밑줄이 미끄러지는 탭**으로 바꿨다. 홈의 대분류 줄과 같은 조각을 쓴다 —
+// 같은 자리에 있는 같은 성격의 줄이 화면마다 다른 모양이면 한 앱으로 안 보인다(설계 §②).
+//
+// ⚠️ 옛 시험들이 글자로 찾는 것(`getByRole('button', { name: '정보 공유' })`)은 **그대로 둔다.**
+//    탭도 같은 역할·같은 글자라 그 시험들이 안 깨진다. 그게 「모양만 바뀌었다」의 증거다.
+
+it('게시판을 밑줄 탭으로 그린다', async () => {
+  await render(<CommunityListScreen />, { wrapper: 감싸기 });
+  await 목록이나오면();
+
+  expect(screen.getByTestId('board-tab-row')).toBeTruthy();
+  expect(screen.getByTestId('board-tab-QUESTION')).toBeTruthy();
+  expect(screen.getByTestId('board-tab-INFO')).toBeTruthy();
+});
+
+it('게시판에는 「전체」 탭이 없다', async () => {
+  // 질문이거나 정보 공유거나 둘 중 하나다 — 「조건 없음」이 없다.
+  // 그래서 UnderlineTabs 에 allLabel 을 안 준다(홈에는 준다).
+  await render(<CommunityListScreen />, { wrapper: 감싸기 });
+  await 목록이나오면();
+
+  expect(screen.queryByTestId('board-tab-ALL')).toBeNull();
+});
+
+it('탭을 누르면 그 게시판으로 다시 부른다', async () => {
+  await render(<CommunityListScreen />, { wrapper: 감싸기 });
+  await 목록이나오면();
+
+  await fireEvent.press(screen.getByTestId('board-tab-INFO'));
+
+  await waitFor(() => expect(마지막조건()).toMatchObject({ boardType: 'INFO' }));
+});
