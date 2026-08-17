@@ -9,7 +9,7 @@ import { CommunitySortRow } from '@/components/community/community-sort-row';
 import { PostCard } from '@/components/community/post-card';
 import { PostSearchInput } from '@/components/community/post-search-input';
 import { EmptyState, ErrorState, ListFooter, LoadingState } from '@/components/list-states';
-import { StatusFilterChips, type FilterChip } from '@/components/my/status-filter-chips';
+import { UnderlineTabs, type UnderlineTabOption } from '@/components/ui/underline-tabs';
 import { AppHeader } from '@/components/ui/app-header';
 import { colors } from '@/constants/colors';
 import { useRefetchOnFocus } from '@/hooks/use-refetch-on-focus';
@@ -38,12 +38,18 @@ import { fetchPosts, type BoardType, type PostListItem } from '@/lib/community';
  * 질문/정보 두 갈래.
  * 글자는 웹 COMMUNITY_TAB(constants.ts)에서 그대로 가져왔다 — 같은 화면을 웹과 앱이
  * 다르게 부르면 안 된다.
- * 마이 목록·판매자 프로필과 같은 칩 조각을 쓴다 — 앱 안에서 「목록 위에서 고르는 줄」이
- * 두 모양이면 안 된다.
+ *
+ * ⚠️ **알약이 아니라 홈과 같은 밑줄 탭을 쓴다**(#944 과제 2). 같은 자리에 있는 같은 성격의
+ *    줄(위에서 갈래를 고르고 아래 목록을 본다)이 화면마다 다른 모양이면 한 앱으로 안 보인다.
+ *    알약 조각(StatusFilterChips)은 그대로 살아 있다 — 마이 목록·판매자 프로필·글쓰기
+ *    화면이 계속 쓴다. 거긴 **상태를 걸러내거나 양식에서 값을 고르는 것**이라 성격이 다르다.
+ *
+ * ⚠️ **「전체」가 없다.** 질문이거나 정보 공유거나 둘 중 하나다 — 그래서 `allLabel` 을
+ *    안 준다. 홈(상품 대분류)에는 「전체」가 있다.
  */
-const BOARD_CHIPS: FilterChip<BoardType>[] = [
-  { id: 'QUESTION', label: '질문 있어요' },
-  { id: 'INFO', label: '정보 공유' },
+const BOARD_TABS: readonly UnderlineTabOption[] = [
+  { code: 'QUESTION', label: '질문 있어요' },
+  { code: 'INFO', label: '정보 공유' },
 ];
 
 export default function CommunityListScreen() {
@@ -160,7 +166,15 @@ export default function CommunityListScreen() {
       {/* AppHeader는 left를 받는다. 문자열이면 제목으로 그린다(홈은 로고 이미지를 넘긴다) */}
       <AppHeader left="커뮤니티" />
       {/* 여기 둘은 목록 **밖**이라 늘 보인다 — 빈 화면·오류일 때도 조건을 되돌릴 수 있다 */}
-      <StatusFilterChips chips={BOARD_CHIPS} activeId={boardType} onChange={changeBoardType} />
+      <UnderlineTabs
+        selected={boardType}
+        options={BOARD_TABS}
+        // 「전체」가 없어 null 이 올 일이 없다. 타입을 좁히는 자리다.
+        onChange={(next) => {
+          if (next) changeBoardType(next as BoardType);
+        }}
+        testIDPrefix="board-tab"
+      />
       <PostSearchInput keyword={keyword} onSubmit={setKeyword} />
       {renderList()}
 
