@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -50,6 +51,7 @@ const BOARD_CHIPS: FilterChip<BoardType>[] = [
 ];
 
 export default function CommunityPostScreen() {
+  const queryClient = useQueryClient();
   const router = useRouter();
   // 목록에서 보던 게시판을 그대로 물려받는다. 정보 공유를 보다 글을 쓰는데 질문으로
   // 시작하면 고르는 손이 한 번 더 든다.
@@ -98,7 +100,14 @@ export default function CommunityPostScreen() {
     setError(null);
     try {
       await createPost({ title, body, imageUrls: uploadedUrls, boardType });
-      // 목록으로 돌아간다. 목록이 다시 조회하며 방금 쓴 글을 보여준다.
+
+      // ⚠️ **무르게 하지 않으면 목록에 방금 쓴 글이 안 보인다.** 돌아가도 캐시에 든
+      //    옛 결과를 그대로 보여줘서 「등록이 안 됐나」로 읽힌다(#922).
+      //    목록의 queryKey 는 ['communityPosts', boardType, keyword, sortBy] 인데,
+      //    **앞자리만 주면** 게시판·검색어·정렬이 달라도 다 걸린다.
+      //    앱의 관례다 — 댓글도 그렇게 한다(comment-thread.tsx:88).
+      await queryClient.invalidateQueries({ queryKey: ['communityPosts'] });
+
       router.back();
     } catch (e) {
       // 서버 문구를 그대로 살린다 — 차단·권한 같은 것을 사용자가 구별해야 한다.

@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -61,7 +62,14 @@ const METRICS = {
   insets: { top: 47, left: 0, right: 0, bottom: 34 },
 };
 function 감싸기({ children }: { children: ReactNode }) {
-  return <SafeAreaProvider initialMetrics={METRICS}>{children}</SafeAreaProvider>;
+  // ⚠️ QueryClientProvider 도 필요하다 — 등록 뒤 목록을 무르게 하려고 useQueryClient 를 쓴다(#922).
+  //    시험마다 새 client 를 만든다. 나눠 쓰면 앞 시험이 담아 둔 값이 다음 시험에 남는다.
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return (
+    <QueryClientProvider client={client}>
+      <SafeAreaProvider initialMetrics={METRICS}>{children}</SafeAreaProvider>
+    </QueryClientProvider>
+  );
 }
 
 const 제목칸 = () => screen.getByPlaceholderText('제목을 입력해 주세요');
@@ -186,4 +194,25 @@ it('올라간 사진 주소를 함께 보낸다', async () => {
       expect.objectContaining({ imageUrls: ['https://cdn/a.webp'] })
     )
   );
+});
+
+// 등록하고 목록으로 돌아오면 방금 쓴 글이 보여야 한다(#922).
+//
+// ⚠️ 무르게 하지 않으면 캐시에 든 옛 목록이 그대로 보여 「등록이 안 됐나」로 읽힌다.
+//    실제로 그랬다 — 앱을 다시 불러와야 새 글이 보였다.
+//
+// ⚠️ **목록이 진짜로 다시 조회하는지는 여기서 못 본다**(목록 화면이 없다).
+//    「무르게 하라고 시켰는가」까지만 지킨다. 나머지는 실기기로 봐야 한다.
+it('등록하면 목록을 무르게 한다', async () => {
+  const 무르게 = jest.spyOn(QueryClient.prototype, 'invalidateQueries');
+
+  await render(<CommunityPostScreen />, { wrapper: 감싸기 });
+  await fireEvent.changeText(제목칸(), '캣타워 질문');
+  await fireEvent.changeText(본문칸(), '상태가 궁금해요');
+  await fireEvent.press(등록단추());
+
+  await waitFor(() => {
+    expect(무르게).toHaveBeenCalledWith({ queryKey: ['communityPosts'] });
+  });
+  무르게.mockRestore();
 });
