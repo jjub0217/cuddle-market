@@ -1,14 +1,14 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useRouter } from 'expo-router';
-import { Plus } from 'lucide-react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Plus, Search } from 'lucide-react-native';
 import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CommunitySortRow } from '@/components/community/community-sort-row';
 import { PostCard } from '@/components/community/post-card';
-import { PostSearchInput } from '@/components/community/post-search-input';
 import { EmptyState, ErrorState, ListFooter, LoadingState } from '@/components/list-states';
+import { SearchBarHeader } from '@/components/products/search-bar-header';
 import { UnderlineTabs, type UnderlineTabOption } from '@/components/ui/underline-tabs';
 import { AppHeader } from '@/components/ui/app-header';
 import { colors } from '@/constants/colors';
@@ -61,7 +61,13 @@ export default function CommunityListScreen() {
   const isLoggedIn = useAuthStore((state) => state.status) === 'authed';
 
   const [boardType, setBoardType] = useState<BoardType>('QUESTION');
-  const [keyword, setKeyword] = useState('');
+  /**
+   * 검색어는 **화면 상태가 아니라 주소(params)로 든다**(#944 과제 5).
+   *
+   * ⚠️ 검색 화면(app/community-search.tsx)이 목록으로 돌려보낼 때 주소에 실어 주기
+   *    때문이다. `useState` 로 두면 그 값을 받을 길이 없다.
+   */
+  const { keyword = '' } = useLocalSearchParams<{ keyword?: string }>();
   const [sortBy, setSortBy] = useState('latest');
 
   /**
@@ -73,7 +79,8 @@ export default function CommunityListScreen() {
    */
   const changeBoardType = (next: BoardType) => {
     setBoardType(next);
-    setKeyword('');
+    // 검색어는 주소에 있으니 주소를 비운다.
+    router.setParams({ keyword: '' });
     setSortBy('latest');
   };
 
@@ -160,8 +167,35 @@ export default function CommunityListScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* AppHeader는 left를 받는다. 문자열이면 제목으로 그린다(홈은 로고 이미지를 넘긴다) */}
-      <AppHeader left="커뮤니티" />
+      {/* ⚠️ 검색 중에는 헤더**만** 검색 줄로 바뀐다. 아래 탭·정렬 줄과 하단 탭바는 그대로다.
+          상품은 결과를 별도 화면(/search-result)에 그려 탭바가 사라지는데, 커뮤니티는
+          「보다가 찾는」 흐름이라 탭 안에 머무는 게 맞다(설계 §③). */}
+      {keyword ? (
+        <SearchBarHeader
+          initialKeyword={keyword}
+          // 뒤로 = **검색 풀기**. 화면을 닫는 게 아니라 조건만 없앤다.
+          onBack={() => router.setParams({ keyword: '' })}
+          // 화면을 새로 밀지 않고 이 화면의 검색어만 바꾼다(상품 결과 화면과 같은 방식).
+          onSubmit={(next) => router.setParams({ keyword: next })}
+        />
+      ) : (
+        // AppHeader는 left를 받는다. 문자열이면 제목으로 그린다(홈은 로고 이미지를 넘긴다).
+        // 돋보기는 오른쪽 줄 맨 앞에 온다 — 홈과 같은 자리다.
+        <AppHeader
+          left="커뮤니티"
+          right={
+            <Pressable
+              onPress={() => router.push('/community-search')}
+              hitSlop={12}
+              accessibilityRole="button"
+              accessibilityLabel="검색"
+              style={({ pressed }) => (pressed ? styles.iconPressed : undefined)}
+            >
+              <Search size={24} color={colors.onSurface} />
+            </Pressable>
+          }
+        />
+      )}
       {/* 여기 둘은 목록 **밖**이라 늘 보인다 — 빈 화면·오류일 때도 조건을 되돌릴 수 있다 */}
       <UnderlineTabs
         selected={boardType}
@@ -172,7 +206,6 @@ export default function CommunityListScreen() {
         }}
         testIDPrefix="board-tab"
       />
-      <PostSearchInput keyword={keyword} onSubmit={setKeyword} />
       {/* ⚠️ 정렬 줄도 목록 **밖**이다(#944 과제 3). 예전에는 목록의 헤더라 스크롤하면
           사라지고 **목록이 비면 아예 안 보였다** — 그때 조건을 되돌릴 길이 없어진다.
 
@@ -233,6 +266,8 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
   list: { paddingHorizontal: 16 },
   pressed: { opacity: 0.6 },
+  // 헤더 돋보기. 홈의 같은 단추와 같은 값이다(app/(tabs)/(home)/index.tsx).
+  iconPressed: { opacity: 0.5 },
   // bottom 은 FAB_CLEARANCE 로 그리는 자리에서 정한다.
   fab: {
     position: 'absolute',
