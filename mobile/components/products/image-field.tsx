@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Keyboard, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Camera, RotateCcw, X } from 'lucide-react-native';
 
@@ -63,6 +63,10 @@ export function ImageField({ slots, onChange, error }: Props) {
 
   const handlePick = async () => {
     if (busy) return;
+
+    // 사진첩을 열기 전에 키보드를 내린다. 안 내리면 사진을 고르고 돌아왔을 때
+    // 앞 칸에 남아 있던 초점 때문에 키보드가 다시 올라와 사진 칸을 덮는다.
+    Keyboard.dismiss();
 
     const picked = await pickImages(MAX_IMAGES - slots.length);
     if (picked.length === 0) return;
