@@ -289,3 +289,32 @@ it('탭을 누르면 그 게시판으로 다시 부른다', async () => {
 
   await waitFor(() => expect(마지막조건()).toMatchObject({ boardType: 'INFO' }));
 });
+
+// ----- 정렬 줄의 자리 (#944 과제 3) -----
+//
+// 목록의 헤더(ListHeaderComponent)에서 **목록 밖 형제**로 옮겼다.
+//
+// ⚠️ **붙는 줄(sticky)로 만들지 않았다.** 정렬 줄은 목록 안에서 맨 처음이라 붙여 두는 것과
+//    목록 밖에 두는 것이 **눈에는 똑같은데**, 붙는 줄로 만들면 #935 에서 잡은 고장
+//    (붙은 줄 안 누름판의 onPress 가 버려지는 RN 회귀)을 복제하게 된다(설계 §④).
+//
+// 목록 밖으로 나오면 **덤이 하나 있다** — 목록이 비거나 오류일 때도 정렬 줄이 남는다.
+// 예전에는 그때 통째로 사라져 조건을 되돌릴 길이 화면에서 없어졌다.
+
+it('목록이 비어도 정렬 줄이 남는다', async () => {
+  fetchPosts.mockResolvedValue(한페이지([]));
+
+  await render(<CommunityListScreen />, { wrapper: 감싸기 });
+  await waitFor(() => expect(fetchPosts).toHaveBeenCalled());
+
+  expect(screen.getByTestId('community-sort-latest')).toBeTruthy();
+});
+
+it('오류일 때도 정렬 줄이 남는다', async () => {
+  fetchPosts.mockRejectedValue(new Error('그물이 끊겼어요'));
+
+  await render(<CommunityListScreen />, { wrapper: 감싸기 });
+
+  await waitFor(() => expect(screen.getByText('다시 시도')).toBeTruthy());
+  expect(screen.getByTestId('community-sort-latest')).toBeTruthy();
+});

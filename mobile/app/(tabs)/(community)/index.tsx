@@ -21,15 +21,16 @@ import { fetchPosts, type BoardType, type PostListItem } from '@/lib/community';
 // ## 무엇이 붙어 있고 무엇이 사라지는가
 //
 // ```
-// [질문 있어요][정보 공유]      ↑ 고정 (목록 밖)
-// [🔍 궁금한 내용을 검색…]       ↓
+// [질문 있어요][정보 공유]      ↑
+// [🔍 궁금한 내용을 검색…]       │ 셋 다 목록 **밖**이라 늘 보인다
+// 최신순 | 조회 순 | 댓글 순     ↓
 // ────────────────────────
-// 최신순 | 조회 순 | 댓글 순     ← 스크롤되어 사라진다 (ListHeaderComponent)
-// 게시글…
+// 게시글…                      ← 여기서부터 스크롤된다
 // ```
 //
-// **오가는 축은 고정한다** — 질문 ↔ 정보는 계속 오가고, 검색칸은 지금 무엇을 찾는 중인지
-// 보여야 한다. 정렬은 한 번 정하면 잘 안 바꾸므로 같이 스크롤된다(#857 설계 §3).
+// **되돌릴 길은 늘 보여야 한다** — 목록이 비거나 오류일 때도 게시판·검색어·정렬을 바꿀 수
+// 있어야 한다. 예전에는 정렬 줄만 목록의 헤더라, 목록이 비면 **그 줄이 통째로 사라졌다**
+// (#944 과제 3에서 밖으로 옮겼다).
 //
 // ⚠️ **`SectionList` 를 안 쓴다.** 붙일 줄이 없다. 상품 목록은 정렬 툴바를 붙이느라
 //    바꿔야 했지만(안드로이드는 sticky 가 기본으로 꺼져 있다) 여기는 그럴 일이 없다.
@@ -139,10 +140,6 @@ export default function CommunityListScreen() {
           styles.list,
           { paddingBottom: isLoggedIn ? FAB_CLEARANCE + FAB_HEIGHT + 12 : 12 },
         ]}
-        // 정렬 줄은 목록과 함께 스크롤되어 사라진다(설계 §3).
-        // ⚠️ 목록이 비면 이 헤더도 안 그려진다 — 그때는 고를 것도 없으니 괜찮다.
-        //    되돌릴 길(칩 줄·검색칸)은 목록 **밖**에 있어 늘 보인다.
-        ListHeaderComponent={<CommunitySortRow sortBy={sortBy} onChange={setSortBy} />}
         renderItem={({ item }) => (
           <Pressable
             onPress={() => router.push(`/(tabs)/(community)/posts/${item.id}`)}
@@ -176,6 +173,13 @@ export default function CommunityListScreen() {
         testIDPrefix="board-tab"
       />
       <PostSearchInput keyword={keyword} onSubmit={setKeyword} />
+      {/* ⚠️ 정렬 줄도 목록 **밖**이다(#944 과제 3). 예전에는 목록의 헤더라 스크롤하면
+          사라지고 **목록이 비면 아예 안 보였다** — 그때 조건을 되돌릴 길이 없어진다.
+
+          ⚠️ **붙는 줄(sticky)로 만들지 않았다.** 정렬 줄은 목록 안에서 맨 처음이라 붙여 두는
+             것과 목록 밖에 두는 것이 **눈에는 똑같은데**, 붙는 줄로 만들면 #935 에서 잡은
+             고장(붙은 줄 안 누름판의 onPress 가 버려지는 RN 회귀)을 복제하게 된다. */}
+      <CommunitySortRow sortBy={sortBy} onChange={setSortBy} />
       {renderList()}
 
       {/* 웹 모바일과 같은 자리(오른쪽 아래)·같은 문구다(CommunityPage.tsx:374).
