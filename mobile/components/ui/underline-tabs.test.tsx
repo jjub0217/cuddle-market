@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
 
 import { UnderlineTabs } from '@/components/ui/underline-tabs';
 
@@ -96,4 +97,22 @@ it('고른 탭에 골랐다는 표시가 붙는다', async () => {
   expect(screen.getByTestId('board-tab-QUESTION').props.accessibilityState).toMatchObject({
     selected: false,
   });
+});
+
+it('고른 탭과 안 고른 탭의 줄 높이가 같다', async () => {
+  // ⚠️ **고른 탭만 글자가 한 단계 크다.** 색(accent)이 안 고른 탭의 회색보다 오히려 흐려서
+  //    「지금 여기」가 약했기 때문이다. 그런데 줄 높이를 안 맞추면 글자 상자가 같이 커져
+  //    **탭을 오갈 때 줄이 위아래로 들썩인다.**
+  //
+  //    jsdom 은 배치를 모르지만 **값이 같은지**는 여기서 지킬 수 있다.
+  await render(
+    <UnderlineTabs selected="QUESTION" options={게시판} onChange={() => {}} testIDPrefix="board-tab" />
+  );
+
+  const 고른것 = StyleSheet.flatten(screen.getByText('질문 있어요').props.style);
+  const 안고른것 = StyleSheet.flatten(screen.getByText('정보 공유').props.style);
+
+  expect(고른것.lineHeight).toBe(안고른것.lineHeight);
+  // 크기는 일부러 다르다 — 그 차이를 줄 높이가 흡수한다
+  expect(고른것.fontSize).toBeGreaterThan(안고른것.fontSize);
 });
