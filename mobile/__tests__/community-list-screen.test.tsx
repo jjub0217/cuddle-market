@@ -34,7 +34,7 @@ const mock초점 = { 돌아온다: () => {} };
  * 검색 화면이 목록으로 돌려보낼 때 주소에 실어 주기 때문이다.
  * 시험은 여기에 검색어를 넣어 「검색 중」 상태를 만든다.
  */
-const mock주소값: { keyword?: string } = {};
+const mock주소값: { keyword?: string | string[] } = {};
 
 /**
  * 주소를 바꾸는 길. 화면이 검색을 걸거나 풀 때 부른다.
@@ -382,4 +382,16 @@ it('검색 중에는 헤더가 검색 줄로 바뀌고 탭·정렬 줄은 그대
   // 그런데 아래 두 줄은 그대로 있다
   expect(screen.getByTestId('board-tab-row')).toBeTruthy();
   expect(screen.getByTestId('community-sort-latest')).toBeTruthy();
+});
+
+it('주소에 검색어가 여러 번 실려 와도 첫 값만 쓴다', async () => {
+  // ⚠️ **주소값은 배열로 올 수 있다.** 같은 열쇠가 여러 번 실리면(`?keyword=a&keyword=b`)
+  //    문자열이 아니라 string[] 이 온다. 우리 코드가 넣는 값은 늘 하나지만
+  //    **딥링크로는 누구나 그런 주소를 만들 수 있다** — 그대로 쓰면 검색칸에 배열이
+  //    들어가 깨진다.
+  mock주소값.keyword = ['사료', '간식'];
+
+  await render(<CommunityListScreen />, { wrapper: 감싸기 });
+
+  await waitFor(() => expect(마지막조건()).toMatchObject({ keyword: '사료' }));
 });

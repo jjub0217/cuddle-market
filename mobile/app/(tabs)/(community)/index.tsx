@@ -66,8 +66,14 @@ export default function CommunityListScreen() {
    *
    * ⚠️ 검색 화면(app/community-search.tsx)이 목록으로 돌려보낼 때 주소에 실어 주기
    *    때문이다. `useState` 로 두면 그 값을 받을 길이 없다.
+   *
+   * ⚠️ **주소값은 배열로 올 수 있다.** 같은 열쇠가 여러 번 실리면(`?keyword=a&keyword=b`)
+   *    문자열이 아니라 `string[]` 이 온다. 우리 코드가 넣는 값은 늘 하나지만
+   *    **딥링크로는 누구나 그런 주소를 만들 수 있다** — 그대로 쓰면 검색칸에 배열이
+   *    들어가 깨진다. 타입 단언으로 덮지 말고 첫 값만 집는다.
    */
-  const { keyword = '' } = useLocalSearchParams<{ keyword?: string }>();
+  const { keyword: 주소검색어 } = useLocalSearchParams<{ keyword?: string | string[] }>();
+  const keyword = Array.isArray(주소검색어) ? (주소검색어[0] ?? '') : (주소검색어 ?? '');
   const [sortBy, setSortBy] = useState('latest');
 
   /**
