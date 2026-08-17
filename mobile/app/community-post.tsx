@@ -1,4 +1,4 @@
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -18,13 +18,15 @@ import { messageStyles } from '@/components/signup/field';
 import { StatusFilterChips, type FilterChip } from '@/components/my/status-filter-chips';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { colors } from '@/constants/colors';
-import type { BoardType } from '@/lib/community';
+import { fetchPostDetail, type BoardType } from '@/lib/community';
 import {
   createPost,
   MAX_CONTENT_LENGTH,
   MAX_TITLE_LENGTH,
   MIN_LENGTH,
   remainingBodyLength,
+  splitContent,
+  updatePost,
 } from '@/lib/community-post';
 import type { UploadSlot } from '@/lib/product-images';
 
@@ -36,7 +38,10 @@ import type { UploadSlot } from '@/lib/product-images';
 //
 // 문구는 웹 글쓰기(CommunityPostForm.tsx)에서 그대로 가져왔다 —
 // 「제목을 입력해 주세요」·「내용을 입력하세요」·「n/50」·「n/1000자」·「등록」.
-// 헤더 이름도 웹 모바일 서브헤더(MobileBackHeader)와 같은 「게시글 작성」이다.
+// 헤더 이름도 웹 모바일 서브헤더(MobileBackHeader)와 같은 「게시글 작성」·「게시글 수정」이다.
+//
+// ⚠️ **글 고치기도 이 화면이 한다**(`/community-post?postId=39`). 새 화면을 만들지 않았다 —
+//    칸·한계·검사가 글쓰기와 똑같아서, 나누면 같은 규칙을 두 곳에서 지켜야 한다.
 
 /**
  * 질문/정보 두 갈래. 목록 화면(`(tabs)/(community)/index.tsx` 의 `BOARD_CHIPS`)과
@@ -55,7 +60,13 @@ export default function CommunityPostScreen() {
   const router = useRouter();
   // 목록에서 보던 게시판을 그대로 물려받는다. 정보 공유를 보다 글을 쓰는데 질문으로
   // 시작하면 고르는 손이 한 번 더 든다.
-  const params = useLocalSearchParams<{ boardType?: string }>();
+  //
+  // postId 가 오면 **수정 모드**다. 화면을 따로 만들지 않았다 — 칸도 한계도 검사도
+  // 글쓰기와 똑같아서, 나누면 같은 규칙을 두 곳에서 지켜야 한다.
+  const params = useLocalSearchParams<{ boardType?: string; postId?: string }>();
+  const postId = params.postId ? Number(params.postId) : null;
+  const isEdit = postId !== null;
+
   const [boardType, setBoardType] = useState<BoardType>(
     params.boardType === 'INFO' ? 'INFO' : 'QUESTION'
   );
@@ -64,6 +75,31 @@ export default function CommunityPostScreen() {
   const [slots, setSlots] = useState<UploadSlot[]>([]);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // 수정 모드면 원래 글을 받아 온다. 상세 화면과 같은 queryKey 라 이미 본 글이면 바로 뜬다.
+  const { data: original } = useQuery({
+    queryKey: ['communityPost', postId],
+    queryFn: () => fetchPostDetail(postId!),
+    enabled: isEdit,
+  });
+
+  // 받아 온 글을 칸에 붓는다.
+  //
+  // ⚠️ **한 번만** 붓는다. 매번 부으면 사용자가 고쳐 놓은 것이 되돌아간다.
+  // ⚠️ **렌더 도중에 맞춘다.** useEffect 로 하면 react-hooks/set-state-in-effect 가 막는다 —
+  //    「받아 온 것이 달라졌으면 그때 맞춘다」가 이 저장소의 방식이다.
+  const [filled, setFilled] = useState(false);
+  if (original && !filled) {
+    setFilled(true);
+    setTitle(original.title);
+    setBoardType(original.boardType);
+    // ⭐ 서버가 사진을 따로 안 준다(imageUrls 는 늘 비어 있다). 본문에서 꺼내 나눠 담는다.
+    const { body: 글, imageUrls: 사진들 } = splitContent(original.content);
+    setBody(글);
+    // ⚠️ localUri 에 **서버 주소**를 넣는다. 원래는 「폰 안의 주소」를 담는 자리지만,
+    //    이미 올라간 사진은 그것이 곧 미리보기 주소다. url 도 채워야 「올리는 중」에 안 걸린다.
+    setSlots(사진들.map((url, i) => ({ key: `orig-${i}`, localUri: url, url, failed: false })));
+  }
 
   // 폰 안의 주소는 서버가 못 읽는다. 올라간 것만 본문에 붙는다.
   const uploadedUrls = slots.map((slot) => slot.url).filter((url): url is string => url !== null);
@@ -99,7 +135,13 @@ export default function CommunityPostScreen() {
     setSending(true);
     setError(null);
     try {
-      await createPost({ title, body, imageUrls: uploadedUrls, boardType });
+      if (isEdit) {
+        await updatePost(postId, { title, body, imageUrls: uploadedUrls, boardType });
+        // 상세도 무르게 한다. 안 하면 돌아간 자리에 **고치기 전 글**이 그대로 보인다.
+        await queryClient.invalidateQueries({ queryKey: ['communityPost', postId] });
+      } else {
+        await createPost({ title, body, imageUrls: uploadedUrls, boardType });
+      }
 
       // ⚠️ **무르게 하지 않으면 목록에 방금 쓴 글이 안 보인다.** 돌아가도 캐시에 든
       //    옛 결과를 그대로 보여줘서 「등록이 안 됐나」로 읽힌다(#922).
@@ -112,7 +154,9 @@ export default function CommunityPostScreen() {
     } catch (e) {
       // 서버 문구를 그대로 살린다 — 차단·권한 같은 것을 사용자가 구별해야 한다.
       // 화면은 안 닫는다. 적어 둔 글이 남아 있어야 다시 낼 수 있다.
-      setError(e instanceof Error ? e.message : '글 등록에 실패했어요');
+      setError(
+        e instanceof Error ? e.message : isEdit ? '글 수정에 실패했어요' : '글 등록에 실패했어요'
+      );
     } finally {
       setSending(false);
     }
@@ -122,7 +166,7 @@ export default function CommunityPostScreen() {
     // ⚠️ 루트 화면이라 아래도 자기가 비켜야 한다. 탭 화면과 다르다(mobile/AGENTS.md)
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <ScreenHeader
-        title="게시글 작성"
+        title={isEdit ? '게시글 수정' : '게시글 작성'}
         onPressIcon={() => router.back()}
         right={
           <Pressable

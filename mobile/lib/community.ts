@@ -44,6 +44,13 @@ export interface PostDetail {
    * 본문을 그리면서 이것까지 따로 그리면 같은 사진이 두 번 나온다.
    */
   imageUrls: string[];
+  /**
+   * 어느 게시판에 쓴 글인가. 서버가 준다(`PostDetailResponse.java:26`).
+   *
+   * ⚠️ **수정 화면이 이것을 써야 한다.** 안 채우면 「정보 공유」 글을 고칠 때 칩이
+   *    질문으로 되돌아간 채 저장되어 **글이 조용히 다른 게시판으로 옮겨간다**(#924).
+   */
+  boardType: BoardType;
   viewCount: number;
   commentCount: number;
   createdAt: string;
@@ -125,7 +132,10 @@ export async function fetchPostDetail(postId: number): Promise<PostDetail> {
   const res = await apiFetch(`/community/posts/${postId}`);
   if (!res.ok) throw new Error(`글을 불러오지 못했어요 (HTTP ${res.status})`);
 
-  const body = (await res.json()) as { data: Partial<PostDetail> & { id: number } };
+  // id 와 boardType 은 **늘 온다**(`PostDetailResponse.java`). 나머지만 없을 수 있다고 본다.
+  const body = (await res.json()) as {
+    data: Partial<PostDetail> & { id: number; boardType: BoardType };
+  };
   const data = body.data;
 
   return {
@@ -136,6 +146,9 @@ export async function fetchPostDetail(postId: number): Promise<PostDetail> {
     title: data.title ?? '',
     content: data.content ?? '',
     imageUrls: data.imageUrls ?? [],
+    // ⚠️ **기본값을 안 둔다.** 서버가 늘 주는 값이라 필요 없고, 기본값을 두면 안 줄 때
+    //    조용히 「질문」이 되어 수정 저장이 글을 다른 게시판으로 옮긴다. 차라리 드러나야 한다.
+    boardType: data.boardType,
     viewCount: data.viewCount ?? 0,
     commentCount: data.commentCount ?? 0,
     createdAt: data.createdAt ?? '',
