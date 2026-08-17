@@ -12,6 +12,7 @@ import { EmptyState, ErrorState, ListFooter, LoadingState } from '@/components/l
 import { StatusFilterChips, type FilterChip } from '@/components/my/status-filter-chips';
 import { AppHeader } from '@/components/ui/app-header';
 import { colors } from '@/constants/colors';
+import { useRefetchOnFocus } from '@/hooks/use-refetch-on-focus';
 import { useAuthStore } from '@/lib/auth/store';
 import { fetchPosts, type BoardType, type PostListItem } from '@/lib/community';
 
@@ -86,6 +87,10 @@ export default function CommunityListScreen() {
     initialPageParam: 0,
     getNextPageParam: (last, all) => (last.hasNext ? all.length : undefined),
   });
+
+  // 글을 읽고 돌아오면 그 글의 조회수가 달라져 있다. 목록은 다시 안 만들어지므로
+  // 우리가 불러 줘야 한다(#932).
+  useRefetchOnFocus(refetch);
 
   const posts: PostListItem[] = pages?.pages.flatMap((page) => page.content) ?? [];
 
