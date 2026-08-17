@@ -33,11 +33,15 @@ export default function CommunitySearchScreen() {
       <SearchBarHeader
         autoFocus
         onBack={close}
-        // ⚠️ push 가 아니라 **replace** 다. 목록으로 돌아간 뒤 뒤로 가면 이 빈 검색 화면이
-        //    아니라 원래 보던 자리로 가야 한다. 검색어를 고치고 싶으면 목록 헤더의
-        //    검색 줄에서 바로 고친다.
+        // ⚠️ **`replace` 가 아니라 `dismissTo` 다.** 목록 화면은 이미 스택 아래에 있다 —
+        //    `replace` 는 그걸 두고 **새 화면을 만들어** 두 화면이 각자 검색 줄을 그리며
+        //    교차한다. 실기기에서 **검색 줄이 둘 겹쳐 보이며 덜커덕거렸다**(#944 과제 5).
+        //    `dismissTo` 는 그 href 에 닿을 때까지 화면을 **걷어내서** 원래 목록을 드러낸다.
+        //
+        //    뒤로 갔을 때 이 빈 검색 화면이 아니라 원래 보던 자리로 가는 것도 그대로다.
+        //    검색어를 고치고 싶으면 목록 헤더의 검색 줄에서 바로 고친다.
         onSubmit={(keyword) =>
-          router.replace({ pathname: '/(tabs)/(community)', params: { keyword } })
+          router.dismissTo({ pathname: '/(tabs)/(community)', params: { keyword } })
         }
       />
     </SafeAreaView>
