@@ -127,48 +127,58 @@ export function UnderlineTabs({ selected, options, onChange, allLabel, testIDPre
   }));
 
   return (
-    <ScrollView
-      ref={scrollRef}
-      testID={`${testIDPrefix}-row`}
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      // 경계선은 contentContainerStyle이 아니라 style에 준다 — 내용이 짧아도 화면 끝까지 그어져야 한다.
-      style={styles.tabScroll}
-      contentContainerStyle={styles.tabRowPadding}
-      onLayout={(event) => setViewportWidth(event.nativeEvent.layout.width)}
-    >
-      {/*
-        ⚠️ 여백 없는 안쪽 상자로 한 겹 더 감싼다. 바는 여기에 절대 자리로 놓이고, 탭의 x도
-           여기를 기준으로 재진다 — 둘의 기준점이 같아야 바가 탭에 정확히 붙는다.
-           (여백을 이 상자에 주면 「절대 자리 0」이 어디냐가 여백만큼 어긋난다)
-      */}
-      <View style={styles.tabRow}>
-        {allLabel ? (
-          <Tab
-            tabKey={ALL_OPTION_KEY}
-            label={allLabel}
-            active={selected === null}
-            onPress={() => onChange(null)}
-            onLayout={자리를잰다(ALL_OPTION_KEY)}
-            testIDPrefix={testIDPrefix}
-          />
-        ) : null}
-        {options.map((option) => (
-          <Tab
-            key={option.code}
-            tabKey={option.code}
-            label={option.label}
-            active={option.code === selected}
-            // ⚠️ 알약과 달리 다시 눌러도 안 푼다. 되돌릴 자리(「전체」 탭)가 맨 앞에 있다.
-            onPress={() => onChange(option.code)}
-            onLayout={자리를잰다(option.code)}
-            testIDPrefix={testIDPrefix}
-          />
-        ))}
-        {/* 줄에 하나뿐인 바. 재기 전에는 너비가 0이라 안 보인다. */}
-        <Animated.View testID={`${testIDPrefix}-bar`} style={[styles.tabBar, barStyle]} />
-      </View>
-    </ScrollView>
+    // ⚠️ **여백 없는 View 로 한 겹 감싼다. 빼지 마라.**
+    //    안 감싸면 안쪽 ScrollView 의 `flexGrow: 1`(RN 기본값 `baseHorizontal`)이 살아나,
+    //    세로로 세운 화면에서 이 줄이 목록과 남은 자리를 나눠 갖는다.
+    //    그러면 **글자 아래가 잘린다** — 커뮤니티에 붙이자마자 실기기에서 그랬다(#944 과제 2).
+    //    View 는 기본이 `flexGrow: 0` 이라 내용만큼만 차지한다.
+    //
+    //    ⚠️ 이 겹을 **쓰는 쪽에 맡기지 않는 이유**: 홈에서 이미 한 번 겪고 주석까지
+    //       남겼는데도 커뮤니티에서 또 밟았다. 기억해야 하는 규칙은 또 밟힌다.
+    <View>
+      <ScrollView
+        ref={scrollRef}
+        testID={`${testIDPrefix}-row`}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        // 경계선은 contentContainerStyle이 아니라 style에 준다 — 내용이 짧아도 화면 끝까지 그어져야 한다.
+        style={styles.tabScroll}
+        contentContainerStyle={styles.tabRowPadding}
+        onLayout={(event) => setViewportWidth(event.nativeEvent.layout.width)}
+      >
+        {/*
+          ⚠️ 여백 없는 안쪽 상자로 한 겹 더 감싼다. 바는 여기에 절대 자리로 놓이고, 탭의 x도
+             여기를 기준으로 재진다 — 둘의 기준점이 같아야 바가 탭에 정확히 붙는다.
+             (여백을 이 상자에 주면 「절대 자리 0」이 어디냐가 여백만큼 어긋난다)
+        */}
+        <View style={styles.tabRow}>
+          {allLabel ? (
+            <Tab
+              tabKey={ALL_OPTION_KEY}
+              label={allLabel}
+              active={selected === null}
+              onPress={() => onChange(null)}
+              onLayout={자리를잰다(ALL_OPTION_KEY)}
+              testIDPrefix={testIDPrefix}
+            />
+          ) : null}
+          {options.map((option) => (
+            <Tab
+              key={option.code}
+              tabKey={option.code}
+              label={option.label}
+              active={option.code === selected}
+              // ⚠️ 알약과 달리 다시 눌러도 안 푼다. 되돌릴 자리(「전체」 탭)가 맨 앞에 있다.
+              onPress={() => onChange(option.code)}
+              onLayout={자리를잰다(option.code)}
+              testIDPrefix={testIDPrefix}
+            />
+          ))}
+          {/* 줄에 하나뿐인 바. 재기 전에는 너비가 0이라 안 보인다. */}
+          <Animated.View testID={`${testIDPrefix}-bar`} style={[styles.tabBar, barStyle]} />
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 

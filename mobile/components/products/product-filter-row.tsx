@@ -110,9 +110,9 @@ interface PetTypeTabsProps {
  * ⚠️ **자기 흰 배경을 가져야 한다.** 목록 밖으로 나오면 뒤에 홈 배경(#F9FAFB)이 깔린다 —
  *    예전에는 세 줄을 통째로 덮던 바깥 상자가 대신 덮어 줘서 안 보였을 뿐이다.
  *
- * ⚠️ 여백 없는 `View`로 한 겹 감싼다. 안 감싸면 안쪽 `ScrollView`의 `flexGrow: 1`
- *    (RN 기본값 `baseHorizontal`)이 살아나, 세로로 세운 화면에서 이 줄이 목록과
- *    남은 자리를 나눠 갖는다. `View`는 기본이 `flexGrow: 0`이라 내용만큼만 차지한다.
+ * ⚠️ 여기서 `View`로 감싸는 것은 이제 **흰 배경과 표식** 때문이다. 「안쪽 ScrollView의
+ *    flexGrow가 살아나 자리를 나눠 갖는다」는 함정은 `UnderlineTabs` 안으로 들어갔다 —
+ *    쓰는 쪽이 기억해야 하는 규칙은 또 밟히기 때문이다(#944 과제 2에서 커뮤니티가 밟았다).
  */
 export function ProductPetTypeTabs({
   petType,
