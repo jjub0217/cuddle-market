@@ -71,6 +71,11 @@ interface Props {
 
 export function UnderlineTabs({ selected, options, onChange, allLabel, testIDPrefix }: Props) {
   const scrollRef = useRef<ScrollView>(null);
+  // ⚠️ **탭이 도중에 바뀌는 쓰임이 생기면 여기를 먼저 보라.** 사라진 탭의 자리가 이 표에
+  //    그대로 남는다. 지금은 쓰는 두 곳이 다 **고정 목록**(PET_TYPE_OPTIONS · BOARD_TABS)
+  //    이라 남아도 아무 일이 없어서 그냥 둔다.
+  //    치우려고 `useEffect(() => setLayouts({}), [options])` 를 붙일 때는 조심할 것 —
+  //    `options` 배열의 신원이 렌더마다 바뀌면 **자리를 매번 지워 바가 튄다.**
   const [layouts, setLayouts] = useState<Record<string, TabLayout>>({});
   /** 눈에 보이는 줄의 너비. 고른 탭을 가운데로 데려올 때 쓴다. */
   const [viewportWidth, setViewportWidth] = useState(0);
