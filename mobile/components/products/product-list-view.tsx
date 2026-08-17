@@ -16,6 +16,7 @@ import {
 } from '@/components/products/product-filter-row';
 import { ProductListToolbar } from '@/components/products/product-list-toolbar';
 import { useFavorite } from '@/hooks/use-favorite';
+import { useRefetchOnFocus } from '@/hooks/use-refetch-on-focus';
 import { fetchProducts } from '@/lib/products';
 import { EMPTY_FILTERS, toParams, type ProductFilters } from '@/lib/products/filters';
 
@@ -110,6 +111,10 @@ export const ProductListView = forwardRef<ProductListViewRef, Props>(function Pr
     // 다음 페이지 번호 = 지금까지 받은 페이지 수(0-base). hasNext=false면 종료.
     getNextPageParam: (last, all) => (last.hasNext ? all.length : undefined),
   });
+
+  // 상품을 보고 돌아오면 그 상품의 조회수가 달라져 있다. 목록은 다시 안 만들어지므로
+  // 우리가 불러 줘야 한다(#932).
+  useRefetchOnFocus(refetch);
 
   // 여러 페이지의 content를 하나의 Product[]로 이어붙임.
   const products: Product[] = data?.pages.flatMap((page) => page.content) ?? [];

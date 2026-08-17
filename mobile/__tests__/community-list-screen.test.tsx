@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
 
 import CommunityListScreen from '@/app/(tabs)/(community)/index';
@@ -19,6 +19,32 @@ import CommunityListScreen from '@/app/(tabs)/(community)/index';
 jest.mock('@/lib/community', () => ({
   ...jest.requireActual('@/lib/community'),
   fetchPosts: jest.fn(),
+}));
+
+/**
+ * 초점을 시험에서 직접 준다.
+ *
+ * ⚠️ 이름이 **`mock` 으로 시작해야 한다.** 아니면 babel-plugin-jest-hoist 가
+ *    `jest.mock` 안에서 밖의 변수를 못 읽게 막아 **파일이 아예 안 돈다.**
+ */
+const mock초점 = { 돌아온다: () => {} };
+
+jest.mock('expo-router', () => ({
+  useRouter: () => ({ push: jest.fn() }),
+  // 진짜는 화면에 초점이 올 때마다 부른다. 시험에서는 **그려지면 첫 초점**으로 보고,
+  // 「상세에 갔다 돌아왔다」는 `mock초점.돌아온다()` 로 준다.
+  //
+  // ⚠️ 이 안에서는 위쪽 import 를 못 쓴다(jest 가 이 함수를 import 보다 먼저 올린다).
+  //    react 는 여기서 다시 부른다.
+  useFocusEffect: (callback: () => void) => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { useEffect } = require('react') as typeof import('react');
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useEffect(() => {
+      mock초점.돌아온다 = callback;
+      callback();
+    }, [callback]);
+  },
 }));
 
 const { fetchPosts } = jest.requireMock('@/lib/community') as { fetchPosts: jest.Mock };
@@ -210,4 +236,21 @@ it('오류일 때도 칩 줄과 검색칸은 보인다', async () => {
   await waitFor(() => expect(screen.getByText('다시 시도')).toBeTruthy());
   expect(screen.getByRole('button', { name: '정보 공유' })).toBeTruthy();
   expect(screen.getByTestId(SEARCH_INPUT)).toBeTruthy();
+});
+
+// 글을 읽고 돌아오면 그 글의 조회수가 달라져 있다. 목록은 탭 화면이라 다시 안 만들어져서
+// 우리가 안 부르면 **옛 숫자가 그대로 남는다**(#932).
+it('상세를 보고 돌아오면 목록을 다시 부른다', async () => {
+  await render(<CommunityListScreen />, { wrapper: 감싸기 });
+  await 목록이나오면();
+
+  // 첫 초점에서는 안 부른다 — 질의가 이미 한 번 불렀다. 여기서 부르면 앱을 열 때마다
+  // 요청이 두 번 나간다.
+  expect(fetchPosts).toHaveBeenCalledTimes(1);
+
+  await act(async () => {
+    mock초점.돌아온다();
+  });
+
+  await waitFor(() => expect(fetchPosts).toHaveBeenCalledTimes(2));
 });

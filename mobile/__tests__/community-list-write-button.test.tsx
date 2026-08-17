@@ -23,7 +23,19 @@ jest.mock('@/lib/community', () => ({
 
 // ⚠️ 이름이 `mock` 으로 시작해야 한다. 아니면 jest 가 「밖의 변수를 봤다」며 막는다.
 const mockPush = jest.fn();
-jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
+jest.mock('expo-router', () => ({
+  useRouter: () => ({ push: mockPush }),
+  // 목록이 초점을 볼 때 다시 부른다(#932). 여기서는 단추만 보는 시험이라 첫 초점만 준다 —
+  // 「돌아왔을 때 다시 부르는가」는 community-list-screen.test.tsx 가 지킨다.
+  //
+  // ⚠️ 이 안에서는 위쪽 import 를 못 쓴다(jest 가 이 함수를 import 보다 먼저 올린다).
+  useFocusEffect: (callback: () => void) => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { useEffect } = require('react') as typeof import('react');
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useEffect(callback, [callback]);
+  },
+}));
 
 const { fetchPosts } = jest.requireMock('@/lib/community') as { fetchPosts: jest.Mock };
 
