@@ -77,17 +77,21 @@ export default function CommunityListScreen() {
   const [sortBy, setSortBy] = useState('latest');
 
   /**
-   * 탭을 바꾸면 **검색어와 정렬을 푼다.**
+   * 탭을 바꿔도 **검색어와 정렬은 남긴다**(#949).
    *
-   * 웹이 그렇다 — 탭 전환만 다른 파라미터를 안 이어붙인다
-   * (`CommunityPage.tsx` 의 `handleTabChange` 가 `?tab=` 하나만 쓴다).
-   * 질문 ↔ 정보는 다른 갈래라 조건을 들고 갈 이유가 없다.
+   * ⚠️ **예전에는 반대였다.** 탭을 바꾸면 둘 다 풀렸다 — 웹이 그렇게 하고 있었고
+   *    「질문 ↔ 정보는 다른 갈래라 조건을 들고 갈 이유가 없다」가 근거였다.
+   *    그런데 **「질문에 없으면 정보 공유엔 있나?」는 아주 흔한 행동**이고,
+   *    앱은 검색어가 헤더에 늘 보이게 되면서(#944) 그게 조용히 사라지는 것이 더 어색해졌다.
+   *
+   *      검색어   「무엇을 찾는 중인가」   게시판이 바뀌어도 찾는 것은 그대로다
+   *      정렬     「어떻게 늘어놓을까」    게시판이 바뀌어도 취향은 그대로다
+   *      게시판   「어디를 볼까」         ← 이것만 바뀐다
+   *
+   *    웹도 같이 고쳤다(CommunityPage.tsx 의 handleTabChange). 한쪽만 고치면 갈린다.
    */
   const changeBoardType = (next: BoardType) => {
     setBoardType(next);
-    // 검색어는 주소에 있으니 주소를 비운다.
-    router.setParams({ keyword: '' });
-    setSortBy('latest');
   };
 
   const {
