@@ -19,7 +19,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
       <Header />
       <main
         className={cn(
-          'w-full flex-1 bg-white transition-[padding-top] duration-300 xl:pb-0',
+          'w-full flex-1 bg-white transition-[padding-top] duration-300 lg:pb-0',
           noBottomPadding ? 'pb-0' : 'pb-14'
         )}
         style={{ paddingTop: 'var(--header-height, 72px)' }}
