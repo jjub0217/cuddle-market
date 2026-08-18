@@ -66,10 +66,10 @@ export default function UserControls({
   })
 
   return (
-    <div className="flex items-center gap-2 xl:gap-4">
+    <div className="flex items-center gap-2 lg:gap-4">
       {hasHydrated && isLogin() ? (
         <div className="flex items-center gap-1">
-          <Link href={ROUTES.CHAT} className="ml-1 hidden xl:block" aria-label="채팅">
+          <Link href={ROUTES.CHAT} className="ml-1 hidden lg:block" aria-label="채팅">
             <MessageCircle className="text-header-icon" strokeWidth={1.5} size={20} />
           </Link>
           <div className="relative" onClick={handleBellToggle}>

@@ -75,17 +75,27 @@ const getScrollPastSnapshot = () => window.scrollY > SOLID_BG_SCROLL_THRESHOLD
 const getScrollServerSnapshot = () => false
 
 export default function Header() {
-  const isXl = useMediaQuery('(min-width: 1280px)')
+  // ⚠️ **「여기부터 데스크탑」은 lg(1024)다**(#961). 헤더만 1280 으로 남아 있었다.
+  //    그래서 1024~1280 에서 **모바일 헤더 + 데스크탑 본문**이 한 화면에 섞였다 —
+  //    사용자가 1261px 과 1282px 을 견줘서 잡아냈다.
+  //    필터 배치·소분류·하단 탭바가 이미 1024 를 쓴다(#959). 여기도 같은 값이어야 한다.
+  //
+  // ⚠️ 히어로의 「검색하러 가기」도 같은 값을 본다(HomeHero.tsx 의 DESKTOP_BREAKPOINT).
+  //    한쪽만 바꾸면 **데스크탑 검색칸이 보이는데 모바일 검색창이 열린다.**
+  //
+  // ⚠️ 이것은 자바스크립트로 재는 값이라 첫 그림이 한 번 모바일로 나왔다 바뀐다(#614 집안).
+  //    CSS 로 옮기는 것은 별도로 다룬다 — 여기서는 숫자만 맞춘다.
+  const isDesktop = useMediaQuery('(min-width: 1024px)')
   const [isSideOpen, setIsSideOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const pathname = usePathname()
 
   // 가시성 계산
-  const hideHeaderMobile = !isXl && HIDE_HEADER_MOBILE_PATTERNS.some((pattern) => pattern.test(pathname))
+  const hideHeaderMobile = !isDesktop && HIDE_HEADER_MOBILE_PATTERNS.some((pattern) => pattern.test(pathname))
   const showHeader = !hideHeaderMobile
   const hideSearchBarMobile =
-    !isXl &&
+    !isDesktop &&
     (HIDE_SEARCHBAR_MOBILE_PATHS.includes(pathname) || HIDE_SEARCHBAR_MOBILE_PATTERNS.some((pattern) => pattern.test(pathname)))
   const hideSearchBarAlways =
     HIDE_SEARCHBAR_ALWAYS_PATHS.includes(pathname) || HIDE_SEARCHBAR_ALWAYS_PATTERNS.some((pattern) => pattern.test(pathname))
@@ -154,12 +164,12 @@ export default function Header() {
           Z_INDEX.HEADER
         )}
       >
-        <div className="flex w-full flex-col px-4 xl:block xl:max-w-7xl xl:gap-3 xl:px-3.5">
-          <div className="flex h-12 items-center gap-4 xl:gap-8">
+        <div className="flex w-full flex-col px-4 lg:block lg:max-w-7xl lg:gap-3 lg:px-3.5">
+          <div className="flex h-12 items-center gap-4 lg:gap-8">
             {/* 왼쪽: 로고 + 데스크탑 메뉴 */}
-            <div className="flex shrink-0 items-center gap-8 xl:gap-12">
+            <div className="flex shrink-0 items-center gap-8 lg:gap-12">
               <Logo />
-              {isXl && !isMinimalHeader ? (
+              {isDesktop && !isMinimalHeader ? (
                 <nav className="flex items-center gap-8" aria-label="주 메뉴">
                   <Link
                     href={ROUTES.HOME}
@@ -192,8 +202,8 @@ export default function Header() {
               ) : null}
             </div>
 
-            {/* 가운데: 검색바 (xl+에서 중앙 배치). 검색바가 숨겨진 경우엔 spacer로 우측 컨트롤을 끝으로 push */}
-            {!hideSearchBar && isXl ? (
+            {/* 가운데: 검색바 (lg+에서 중앙 배치). 검색바가 숨겨진 경우엔 spacer로 우측 컨트롤을 끝으로 push */}
+            {!hideSearchBar && isDesktop ? (
               <div className="mx-auto max-w-130 flex-1">
                 <Suspense>
                   <SearchBar
@@ -210,8 +220,8 @@ export default function Header() {
 
             {/* 오른쪽: 검색 토글(모바일) + 사용자 컨트롤 — 미니멀 헤더에서는 숨김 */}
             {!isMinimalHeader ? (
-              <div className="flex shrink-0 items-center gap-1 xl:gap-4">
-                {!hideSearchBar && !isXl ? (
+              <div className="flex shrink-0 items-center gap-1 lg:gap-4">
+                {!hideSearchBar && !isDesktop ? (
                   <IconButton aria-label="검색" onClick={() => setIsSearchOpen((prev) => !prev)}>
                     <Search className="text-header-icon" />
                   </IconButton>
