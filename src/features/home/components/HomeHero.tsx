@@ -17,23 +17,32 @@ function focusHeaderSearch() {
   }, MOBILE_ACCORDION_OPEN_DELAY_MS)
 }
 
+/**
+ * ⚠️ **「여기부터 데스크탑」 기준은 lg(1024)다**(#961). 예전에는 md(768)였는데,
+ *    768~1279 에서 **글자 칸이 오른쪽 48%(`md:pl-[52%]`) 뿐인데 글자는 커져서**
+ *    (`md:text-3xl`) 「우리 동네 반려인들과 함께하는」이 한 글자 넘치고, 넘친 줄이
+ *    **강아지 그림 위로 내려앉았다**(아이패드 세로 820px 에서 확인).
+ *
+ *    #959 에서 다른 다섯 곳을 lg 로 맞출 때 여기만 빠져 있었다 —
+ *    「여기부터 데스크탑」을 묻는 곳은 **다 같은 값**을 써야 한다.
+ */
 export default function HomeHero() {
   return (
-    <section aria-label="히어로" className="bg-hero-surface relative h-100 w-full md:h-100">
+    <section aria-label="히어로" className="bg-hero-surface relative h-100 w-full">
       <div className="relative mx-auto h-full xl:max-w-7xl xl:px-3.5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           alt="반려동물과 함께하는 따뜻한 마켓"
           src="/images/hero.webp"
-          className="pointer-events-none absolute bottom-0 left-4 z-10 h-48 w-auto translate-y-[30%] md:h-90 md:translate-y-[29.5%] xl:left-3.5"
+          className="pointer-events-none absolute bottom-0 left-4 z-10 h-48 w-auto translate-y-[30%] lg:h-90 lg:translate-y-[29.5%] xl:left-3.5"
         />
-        <div className="text-primary absolute top-[15%] z-20 flex h-full w-full flex-col px-4 pt-8 md:justify-center md:pt-0 md:pl-[52%] xl:pl-[40%]">
-          <h1 className="text-xl leading-tight font-bold md:text-3xl xl:text-4xl">
+        <div className="text-primary absolute top-[15%] z-20 flex h-full w-full flex-col px-4 pt-8 lg:justify-center lg:pt-0 lg:pl-[52%] xl:pl-[40%]">
+          <h1 className="text-xl leading-tight font-bold lg:text-3xl xl:text-4xl">
             우리 동네 반려인들과 함께하는
             <br />
             가장 따뜻한 중고 마켓
           </h1>
-          <p className="mt-3 text-xs leading-relaxed md:text-sm xl:text-base">
+          <p className="mt-3 text-xs leading-relaxed lg:text-sm xl:text-base">
             내 주변 이웃과 함께하는 Cuddle Market에서
             <br />
             믿을 수 있는 중고 거래를 시작해보세요.

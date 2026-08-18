@@ -207,10 +207,22 @@ function Home() {
     return <HomeLoadingState />
   }
 
+  /**
+   * ⚠️ **검색 중에는 히어로를 안 그린다**(#961).
+   *
+   * 웹은 검색 결과 페이지가 따로 없고 **홈에 `?keyword=` 를 붙인 것**이라, 검색해도
+   * 커다란 그림띠가 그대로 나와 **결과가 한 화면 아래로 밀렸다.** 찾을 게 정해져 있어
+   * 들어온 사람에게 광고 그림을 먼저 보일 이유가 없다.
+   *
+   * 필터 묶음(#954)과 달리 **폭을 안 가린다** — 넓은 화면에서도 히어로는 한 화면을
+   * 통째로 먹기 때문이다. 앱도 검색 결과에 비주얼 영역이 없다.
+   */
+  const 검색중이다 = Boolean(filterParams.keyword)
+
   if (error && !isLoading) {
     return (
       <>
-        <HomeHero />
+        {검색중이다 ? null : <HomeHero />}
         <div className="flex min-h-100 items-center justify-center bg-white">
           <div className="flex flex-col items-center gap-4">
             <p>상품을 불러올 수 없습니다</p>
@@ -225,7 +237,7 @@ function Home() {
 
   return (
     <>
-      <HomeHero />
+      {검색중이다 ? null : <HomeHero />}
       <div className="bg-white">
         <div className="mx-auto max-w-[1280px] px-4 pt-12 pb-24 md:px-8 md:pt-18">
           <h1 className="sr-only">커들마켓</h1>
