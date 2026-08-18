@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { Plus, Search } from 'lucide-react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -94,6 +94,28 @@ export default function CommunityListScreen() {
     setBoardType(next);
   };
 
+  /**
+   * 커뮤니티 탭을 **다시** 누르면 처음 상태로 되돌린다 — 조건을 다 풀고 맨 위로(#952).
+   *
+   * 홈이 이미 그렇게 한다. 「탭을 다시 누르는 건 **「처음으로」라는 신호**」이고, 거의 모든
+   * 앱이 그렇다. 커뮤니티만 없어서 검색어·정렬·게시판이 걸린 채 **풀 길이 없었다.**
+   *
+   * ⚠️ **다른 탭에서 커뮤니티로 올 때는 안 되돌린다.** 탭은 「서랍」이라 열어 두면 그대로
+   *    있는 편이 자연스럽다. **이미 커뮤니티에 있는데 또 누르는 것**만 신호다.
+   */
+  const navigation = useNavigation();
+  useEffect(() => {
+    const tabs = navigation.getParent();
+    if (!tabs) return;
+    // @ts-expect-error tabPress 는 탭 네비게이터에만 있어 타입에 안 잡힌다
+    return tabs.addListener('tabPress', () => {
+      if (!navigation.isFocused()) return;
+      setBoardType('QUESTION');
+      setSortBy('latest');
+      router.setParams({ keyword: '' });
+    });
+  }, [navigation, router]);
+
   const {
     data: pages,
     isLoading,
@@ -185,6 +207,10 @@ export default function CommunityListScreen() {
           initialKeyword={keyword}
           // 뒤로 = **검색 풀기**. 화면을 닫는 게 아니라 조건만 없앤다.
           onBack={() => router.setParams({ keyword: '' })}
+          // ⚠️ **✕ 도 검색을 푼다**(#952). 안 붙이면 칸 안 글자만 지워져서, 헤더는 비었는데
+          //    아래 목록은 옛 결과 그대로다 — 「지웠는데 그대로」로 보인다.
+          //    상품 결과 화면은 안 붙인다. 거긴 검색을 풀면 보여줄 것이 없다.
+          onClear={() => router.setParams({ keyword: '' })}
           // 화면을 새로 밀지 않고 이 화면의 검색어만 바꾼다(상품 결과 화면과 같은 방식).
           onSubmit={(next) => router.setParams({ keyword: next })}
         />

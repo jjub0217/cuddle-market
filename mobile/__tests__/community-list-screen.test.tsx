@@ -48,9 +48,24 @@ const mock주소바꾸기 = jest.fn((next: { keyword?: string }) => {
 
 const mock화면이동 = jest.fn();
 
+/**
+ * 하단 탭바에서 **커뮤니티 탭을 다시 누른** 것. 홈이 쓰는 것과 같은 신호다(#952).
+ * 진짜는 탭 네비게이터가 알려 주는데 시험에는 네비게이터가 없어, 여기 붙잡아 두고 직접 쏜다.
+ */
+const mock탭누름 = { 다시누른다: () => {} };
+
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mock화면이동, setParams: mock주소바꾸기, replace: jest.fn() }),
   useLocalSearchParams: () => mock주소값,
+  useNavigation: () => ({
+    getParent: () => ({
+      addListener: (name: string, callback: () => void) => {
+        if (name === 'tabPress') mock탭누름.다시누른다 = callback;
+        return () => {};
+      },
+    }),
+    isFocused: () => true,
+  }),
   // 진짜는 화면에 초점이 올 때마다 부른다. 시험에서는 **그려지면 첫 초점**으로 보고,
   // 「상세에 갔다 돌아왔다」는 `mock초점.돌아온다()` 로 준다.
   //
@@ -398,4 +413,47 @@ it('주소에 검색어가 여러 번 실려 와도 첫 값만 쓴다', async ()
   await render(<CommunityListScreen />, { wrapper: 감싸기 });
 
   await waitFor(() => expect(마지막조건()).toMatchObject({ keyword: '사료' }));
+});
+
+// ----- 조건을 푸는 길 (#952) -----
+//
+// 걸어 둔 조건(검색어·정렬·게시판)을 **되돌릴 길**이 있어야 한다.
+
+it('검색 줄의 ✕ 를 누르면 검색이 풀린다', async () => {
+  // ⚠️ 예전에는 **칸 안 글자만 지우고 밖으로 안 알렸다** — 헤더는 비었는데 아래 목록은
+  //    여전히 옛 검색 결과라 「지웠는데 그대로」로 보였다.
+  //    옛 커뮤니티 검색칸에도 같은 규칙이 적혀 있었는데, 검색이 헤더로 옮겨 오며 놓쳤다.
+  검색중으로('사료');
+
+  await render(<CommunityListScreen />, { wrapper: 감싸기 });
+  await 목록이나오면();
+
+  await fireEvent.press(screen.getByLabelText('입력 내용 지우기'));
+
+  expect(mock주소바꾸기).toHaveBeenCalledWith({ keyword: '' });
+});
+
+it('커뮤니티 탭을 다시 누르면 처음 상태로 돌아간다', async () => {
+  // ⚠️ 홈이 이미 그렇게 한다 — 「탭을 다시 누르는 건 **「처음으로」라는 신호**」.
+  //    커뮤니티만 없어서 검색어·정렬·게시판이 걸린 채 풀 길이 없었다.
+  검색중으로('사료');
+
+  await render(<CommunityListScreen />, { wrapper: 감싸기 });
+  await 목록이나오면();
+  await fireEvent.press(screen.getByTestId('community-sort-views'));
+  await fireEvent.press(screen.getByRole('button', { name: '정보 공유' }));
+  await waitFor(() => expect(마지막조건()).toMatchObject({ boardType: 'INFO', sortBy: 'views' }));
+
+  await act(async () => {
+    mock탭누름.다시누른다();
+  });
+
+  await waitFor(() =>
+    expect(마지막조건()).toEqual({
+      boardType: 'QUESTION',
+      page: 0,
+      keyword: '',
+      sortBy: 'latest',
+    })
+  );
 });
