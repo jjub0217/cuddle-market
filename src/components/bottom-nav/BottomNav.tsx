@@ -7,7 +7,6 @@ import { cn } from '@/lib/utils/cn'
 import { ROUTES } from '@/constants/routes'
 import { isBottomNavHidden } from './isBottomNavHidden'
 import { Z_INDEX } from '@/constants/ui'
-import { useMediaQuery } from '@/hooks/useMediaQuery'
 
 const NAV_ITEMS = [
   { href: ROUTES.HOME, label: '홈', icon: Home, match: (p: string) => p === '/' || p.startsWith('/market') },
@@ -19,9 +18,6 @@ const NAV_ITEMS = [
 
 export default function BottomNav() {
   const pathname = usePathname()
-  const isXl = useMediaQuery('(min-width: 1280px)')
-
-  if (isXl) return null
 
   // 규칙은 isBottomNavHidden 한 곳에 있다 — (main)/layout도 같은 답을 써서
   // 탭바 높이만큼 아래를 비켜 줄지 정한다.
@@ -32,7 +28,15 @@ export default function BottomNav() {
   return (
     <nav
       className={cn(
-        'fixed right-0 bottom-0 left-0 border-t border-gray-200 bg-white pb-[env(safe-area-inset-bottom)]',
+        // ⚠️ **넓은 화면에서 숨기는 일을 CSS 에 맡긴다. 자바스크립트로 되돌리지 마라**(#614).
+        //    예전에는 `useMediaQuery('(min-width: 1280px)')` 로 재서 `return null` 했는데,
+        //    **서버에는 window 가 없어 늘 「좁다」로 답한다.** 그래서 서버가 **탭바를 그린
+        //    HTML** 을 보내고, 데스크탑에서는 하이드레이션이 끝나야 사라졌다 —
+        //    **새로고침할 때마다 없어야 할 것이 잠깐 보였다**(맥 크롬에서 확인).
+        //    CSS 로 숨기면 첫 그림부터 맞다.
+        //
+        //    아래 여백도 이미 CSS 가 맞춘다 — (main)/layout.tsx 의 `pb-14 xl:pb-0`.
+        'fixed right-0 bottom-0 left-0 border-t border-gray-200 bg-white pb-[env(safe-area-inset-bottom)] xl:hidden',
         Z_INDEX.HEADER
       )}
       aria-label="하단 메뉴"
