@@ -24,7 +24,10 @@ jest.mock('@/lib/community', () => ({
 // ⚠️ 이름이 `mock` 으로 시작해야 한다. 아니면 jest 가 「밖의 변수를 봤다」며 막는다.
 const mockPush = jest.fn();
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: () => ({ push: mockPush, setParams: jest.fn() }),
+  // 목록은 검색어를 **주소로** 든다(#944 과제 5). 여기서는 단추만 보는 시험이라
+  // 늘 「검색 안 하는 중」으로 둔다 — 검색어가 있으면 헤더가 검색 줄로 바뀐다.
+  useLocalSearchParams: () => ({}),
   // 목록이 초점을 볼 때 다시 부른다(#932). 여기서는 단추만 보는 시험이라 첫 초점만 준다 —
   // 「돌아왔을 때 다시 부르는가」는 community-list-screen.test.tsx 가 지킨다.
   //

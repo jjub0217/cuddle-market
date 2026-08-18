@@ -74,6 +74,15 @@ export default function RootLayout() {
               가야 해서, 검색 화면이 결과로 갈 때 replace 를 쓴다(app/search.tsx). */}
           <Stack.Screen name="search" />
           <Stack.Screen name="search-result" />
+          {/* 커뮤니티 검색은 **미끄러지지 않게 한다**(#944 과제 5).
+              커뮤니티는 결과를 별도 화면이 아니라 **목록 화면 그대로**에 그리는데,
+              그 목록 화면도 검색 중에는 헤더가 검색 줄이다. 그래서 미끄러지는 동안
+              **검색 줄이 둘 나란히 보여 덜커덕거린다**(실기기에서 잡았다).
+
+              ⚠️ 두 화면의 검색 줄이 **같은 자리**라, 애니메이션을 끄면 줄은 제자리에
+                 남은 것처럼 보이고 아래(탭·정렬·목록)만 바뀐다 — 사람이 기대하는 모습이다.
+                 상품 검색(위 둘)은 결과가 **다른 화면**이라 미끄러지는 편이 맞다. */}
+          <Stack.Screen name="community-search" options={{ animation: 'none' }} />
           <Stack.Screen name="products/new" />
           <Stack.Screen name="products/[id]/edit" />
           {/* 헤더는 화면이 직접 그린다(login과 같은 이유).

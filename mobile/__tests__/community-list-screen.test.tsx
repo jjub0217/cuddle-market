@@ -29,8 +29,28 @@ jest.mock('@/lib/community', () => ({
  */
 const mock초점 = { 돌아온다: () => {} };
 
+/**
+ * 화면 주소에 실린 값. **검색어는 화면 상태가 아니라 주소로 든다**(#944 과제 5) —
+ * 검색 화면이 목록으로 돌려보낼 때 주소에 실어 주기 때문이다.
+ * 시험은 여기에 검색어를 넣어 「검색 중」 상태를 만든다.
+ */
+const mock주소값: { keyword?: string | string[] } = {};
+
+/**
+ * 주소를 바꾸는 길. 화면이 검색을 걸거나 풀 때 부른다.
+ *
+ * ⚠️ **부르면 실제로 주소값도 바꾼다.** 그래야 그다음 렌더에서 화면이 새 값을 읽는다 —
+ *    부른 것만 세고 값을 안 바꾸면 「탭을 바꾸면 검색어가 풀린다」를 증명할 수 없다.
+ */
+const mock주소바꾸기 = jest.fn((next: { keyword?: string }) => {
+  Object.assign(mock주소값, next);
+});
+
+const mock화면이동 = jest.fn();
+
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ push: jest.fn() }),
+  useRouter: () => ({ push: mock화면이동, setParams: mock주소바꾸기, replace: jest.fn() }),
+  useLocalSearchParams: () => mock주소값,
   // 진짜는 화면에 초점이 올 때마다 부른다. 시험에서는 **그려지면 첫 초점**으로 보고,
   // 「상세에 갔다 돌아왔다」는 `mock초점.돌아온다()` 로 준다.
   //
@@ -73,12 +93,15 @@ function 감싸기({ children }: { children: ReactNode }) {
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 }
 
-const SEARCH_INPUT = 'post-search-input';
-
-/** 검색칸에 치고 확인 키를 누른다. */
-async function 검색한다(글자: string) {
-  await fireEvent.changeText(screen.getByTestId(SEARCH_INPUT), 글자);
-  await fireEvent(screen.getByTestId(SEARCH_INPUT), 'submitEditing');
+/**
+ * 「검색 중」 상태로 시작한다.
+ *
+ * ⚠️ **그리기 전에 불러야 한다.** 검색어는 주소에 실려 오는데, 이미 그려진 뒤에 값을
+ *    바꿔도 화면이 다시 그려지지 않는다. 예전에는 화면 안 검색칸에 글자를 쳤지만
+ *    그 칸은 헤더 돋보기 → 검색 화면으로 옮겨 갔다(#944 과제 5).
+ */
+function 검색중으로(글자: string) {
+  mock주소값.keyword = 글자;
 }
 
 /** 마지막으로 서버에 넘긴 조건. */
@@ -99,6 +122,9 @@ async function 목록이나오면() {
 beforeEach(() => {
   fetchPosts.mockReset();
   fetchPosts.mockResolvedValue(한페이지([{ id: 1, title: '강아지 사료 추천' }]));
+  delete mock주소값.keyword;
+  mock주소바꾸기.mockClear();
+  mock화면이동.mockClear();
 });
 
 it('처음에는 질문 게시판을 조건 없이 부른다', async () => {
@@ -113,24 +139,25 @@ it('처음에는 질문 게시판을 조건 없이 부른다', async () => {
   });
 });
 
-it('검색어를 치면 그 조건으로 다시 부른다', async () => {
-  await render(<CommunityListScreen />, { wrapper: 감싸기 });
-  await waitFor(() => expect(fetchPosts).toHaveBeenCalled());
+it('주소에 검색어가 있으면 그 조건으로 부른다', async () => {
+  // 검색 화면이 목록으로 돌려보내며 주소에 검색어를 싣는다(app/community-search.tsx).
+  검색중으로('사료');
 
-  await 검색한다('사료');
+  await render(<CommunityListScreen />, { wrapper: 감싸기 });
 
   await waitFor(() => expect(마지막조건()).toMatchObject({ keyword: '사료', page: 0 }));
 });
 
-it('검색어를 지우면 조건 없이 다시 부른다', async () => {
+it('검색 줄에서 뒤로 누르면 검색이 풀린다', async () => {
+  // 화면을 닫는 게 아니라 **조건만** 없앤다 — 목록은 그 자리에 그대로 있다.
+  검색중으로('사료');
+
   await render(<CommunityListScreen />, { wrapper: 감싸기 });
-  await waitFor(() => expect(fetchPosts).toHaveBeenCalled());
-  await 검색한다('사료');
-  await waitFor(() => expect(마지막조건()).toMatchObject({ keyword: '사료' }));
+  await 목록이나오면();
 
-  await fireEvent.press(screen.getByLabelText('입력 내용 지우기'));
+  await fireEvent.press(screen.getByLabelText('뒤로'));
 
-  await waitFor(() => expect(마지막조건()).toMatchObject({ keyword: '' }));
+  expect(mock주소바꾸기).toHaveBeenCalledWith({ keyword: '' });
 });
 
 it('정렬을 고르면 그 값으로 다시 부른다', async () => {
@@ -143,10 +170,9 @@ it('정렬을 고르면 그 값으로 다시 부른다', async () => {
 });
 
 it('정렬만 바꿀 때는 검색어가 남는다', async () => {
+  검색중으로('사료');
+
   await render(<CommunityListScreen />, { wrapper: 감싸기 });
-  await waitFor(() => expect(fetchPosts).toHaveBeenCalled());
-  await 검색한다('사료');
-  await waitFor(() => expect(마지막조건()).toMatchObject({ keyword: '사료' }));
   await 목록이나오면();
 
   await fireEvent.press(screen.getByTestId('community-sort-comments'));
@@ -159,10 +185,9 @@ it('정렬만 바꿀 때는 검색어가 남는다', async () => {
 it('탭을 바꾸면 **검색어·정렬이 풀린다**', async () => {
   // ⚠️ 웹이 그렇다 — 탭 전환만 다른 파라미터를 안 이어붙인다(설계 §4).
   //    질문 ↔ 정보는 다른 갈래라 조건을 들고 갈 이유가 없다.
-  await render(<CommunityListScreen />, { wrapper: 감싸기 });
-  await 목록이나오면();
+  검색중으로('사료');
 
-  await 검색한다('사료');
+  await render(<CommunityListScreen />, { wrapper: 감싸기 });
   await 목록이나오면();
   await fireEvent.press(screen.getByTestId('community-sort-views'));
   await waitFor(() => expect(마지막조건()).toMatchObject({ keyword: '사료', sortBy: 'views' }));
@@ -179,15 +204,17 @@ it('탭을 바꾸면 **검색어·정렬이 풀린다**', async () => {
   );
 });
 
-it('탭을 바꾸면 검색칸도 비워진다', async () => {
-  // 칸에 옛 글자가 남으면 「지웠는데 그대로」로 보인다.
+it('탭을 바꾸면 헤더가 평소 모습으로 돌아온다', async () => {
+  // 검색이 풀리면 검색 줄도 사라져야 한다. 옛 검색어가 남아 있으면
+  // 「지웠는데 그대로」로 보인다.
+  검색중으로('사료');
+
   await render(<CommunityListScreen />, { wrapper: 감싸기 });
-  await waitFor(() => expect(fetchPosts).toHaveBeenCalled());
-  await 검색한다('사료');
+  await 목록이나오면();
 
   await fireEvent.press(screen.getByRole('button', { name: '정보 공유' }));
 
-  await waitFor(() => expect(screen.getByTestId(SEARCH_INPUT).props.value).toBe(''));
+  await waitFor(() => expect(screen.getByText('커뮤니티')).toBeTruthy());
 });
 
 // ----- 빈 화면 -----
@@ -196,11 +223,10 @@ it('탭을 바꾸면 검색칸도 비워진다', async () => {
 //    그대로 뜬다. 검색 결과가 없는데 그 문구는 어색해서 앱에서 갈랐다.
 
 it('검색해서 0건이면 검색 문구를 쓴다', async () => {
-  await render(<CommunityListScreen />, { wrapper: 감싸기 });
-  await waitFor(() => expect(fetchPosts).toHaveBeenCalled());
+  검색중으로('없는말');
   fetchPosts.mockResolvedValue(한페이지([]));
 
-  await 검색한다('없는말');
+  await render(<CommunityListScreen />, { wrapper: 감싸기 });
 
   await waitFor(() => expect(screen.getByText('검색 결과가 없습니다')).toBeTruthy());
   expect(screen.getByText('다른 검색어로 찾아보세요')).toBeTruthy();
@@ -217,7 +243,7 @@ it('조건 없이 0건이면 원래 문구를 쓴다', async () => {
   expect(screen.queryByText('검색 결과가 없습니다')).toBeNull();
 });
 
-it('목록이 비어도 칩 줄과 검색칸은 보인다', async () => {
+it('목록이 비어도 탭 줄과 돋보기는 보인다', async () => {
   // ⚠️ 둘은 목록 **밖**이라 늘 보여야 한다. 안 보이면 조건을 되돌릴 길이 없어진다.
   fetchPosts.mockResolvedValue(한페이지([]));
 
@@ -225,17 +251,17 @@ it('목록이 비어도 칩 줄과 검색칸은 보인다', async () => {
   await waitFor(() => expect(fetchPosts).toHaveBeenCalled());
 
   expect(screen.getByRole('button', { name: '정보 공유' })).toBeTruthy();
-  expect(screen.getByTestId(SEARCH_INPUT)).toBeTruthy();
+  expect(screen.getByLabelText('검색')).toBeTruthy();
 });
 
-it('오류일 때도 칩 줄과 검색칸은 보인다', async () => {
+it('오류일 때도 탭 줄과 돋보기는 보인다', async () => {
   fetchPosts.mockRejectedValue(new Error('그물이 끊겼어요'));
 
   await render(<CommunityListScreen />, { wrapper: 감싸기 });
 
   await waitFor(() => expect(screen.getByText('다시 시도')).toBeTruthy());
   expect(screen.getByRole('button', { name: '정보 공유' })).toBeTruthy();
-  expect(screen.getByTestId(SEARCH_INPUT)).toBeTruthy();
+  expect(screen.getByLabelText('검색')).toBeTruthy();
 });
 
 // 글을 읽고 돌아오면 그 글의 조회수가 달라져 있다. 목록은 탭 화면이라 다시 안 만들어져서
@@ -317,4 +343,55 @@ it('오류일 때도 정렬 줄이 남는다', async () => {
 
   await waitFor(() => expect(screen.getByText('다시 시도')).toBeTruthy());
   expect(screen.getByTestId('community-sort-latest')).toBeTruthy();
+});
+
+// ----- 헤더와 검색 (#944 과제 4·5) -----
+//
+// 검색이 **목록 위 칸에서 헤더 돋보기 → 검색 화면**으로 옮겨 갔다.
+// 검색 결과는 별도 화면이 아니라 **이 목록 화면 그대로**에 그린다 — 상품의 결과 화면은
+// 탭 밖이라 하단 탭바가 사라지는데, 커뮤니티는 「보다가 찾는」 흐름이고 검색 중에도
+// 게시판 탭이 보여야 하기 때문이다(설계 §③).
+
+it('평소에는 제목과 돋보기가 있는 헤더다', async () => {
+  await render(<CommunityListScreen />, { wrapper: 감싸기 });
+  await 목록이나오면();
+
+  expect(screen.getByText('커뮤니티')).toBeTruthy();
+  expect(screen.getByLabelText('검색')).toBeTruthy();
+});
+
+it('돋보기를 누르면 검색 화면으로 간다', async () => {
+  await render(<CommunityListScreen />, { wrapper: 감싸기 });
+  await 목록이나오면();
+
+  await fireEvent.press(screen.getByLabelText('검색'));
+
+  expect(mock화면이동).toHaveBeenCalledWith('/community-search');
+});
+
+it('검색 중에는 헤더가 검색 줄로 바뀌고 탭·정렬 줄은 그대로다', async () => {
+  // ⚠️ **여기가 상품과 다른 점이다.** 상품은 결과를 별도 화면에 그려 탭바가 사라진다.
+  //    커뮤니티는 목록 화면 그대로라 게시판 탭도 정렬 줄도 계속 보여야 한다.
+  검색중으로('사료');
+
+  await render(<CommunityListScreen />, { wrapper: 감싸기 });
+  await 목록이나오면();
+
+  // 평소 헤더의 제목은 사라진다
+  expect(screen.queryByText('커뮤니티')).toBeNull();
+  // 그런데 아래 두 줄은 그대로 있다
+  expect(screen.getByTestId('board-tab-row')).toBeTruthy();
+  expect(screen.getByTestId('community-sort-latest')).toBeTruthy();
+});
+
+it('주소에 검색어가 여러 번 실려 와도 첫 값만 쓴다', async () => {
+  // ⚠️ **주소값은 배열로 올 수 있다.** 같은 열쇠가 여러 번 실리면(`?keyword=a&keyword=b`)
+  //    문자열이 아니라 string[] 이 온다. 우리 코드가 넣는 값은 늘 하나지만
+  //    **딥링크로는 누구나 그런 주소를 만들 수 있다** — 그대로 쓰면 검색칸에 배열이
+  //    들어가 깨진다.
+  mock주소값.keyword = ['사료', '간식'];
+
+  await render(<CommunityListScreen />, { wrapper: 감싸기 });
+
+  await waitFor(() => expect(마지막조건()).toMatchObject({ keyword: '사료' }));
 });

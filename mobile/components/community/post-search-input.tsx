@@ -5,6 +5,14 @@ import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { colors } from '@/constants/colors';
 import { normalizeKeyword } from '@/lib/search';
 
+// ⚠️ **지금은 아무도 안 쓴다.** 커뮤니티 검색이 목록 위 칸에서 **헤더 돋보기 → 검색 화면**
+//    (app/community-search.tsx)으로 옮겨 가면서 쓰는 곳이 없어졌다(#944 과제 5).
+//    안 지운 이유는 「안 쓰게 된 파일은 모아서 나중에 한 번에 치운다」로 정했기 때문이다 —
+//    지금 지우면 이 작업의 diff 에 「기능 바꾸기」와 「파일 치우기」가 섞인다.
+//    치울 목록: docs/superpowers/specs/2026-08-17-app-community-list-layout-design.md
+//
+// 아래는 쓰이던 때의 설명이다.
+//
 // 커뮤니티 목록 안에 놓는 검색칸.
 //
 // **웹과 같은 자리다** — 웹도 커뮤니티는 목록에 검색창을 얹는다(`CommunityPage.tsx:214`).
