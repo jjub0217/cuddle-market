@@ -30,9 +30,25 @@ interface Props {
   /** 확인 키를 눌렀을 때. **다듬어진**(앞뒤 공백 없는) 검색어가 온다 */
   onSubmit: (keyword: string) => void;
   onBack: () => void;
+  /**
+   * ✕ 를 눌렀을 때. **안 주면 칸 안 글자만 지운다**(#952).
+   *
+   * ⚠️ **✕ 의 뜻은 이 조각이 정하지 않는다. 서 있는 자리마다 다르기 때문이다.**
+   *
+   *   커뮤니티 목록   검색을 **푼다** → 전체 목록으로 돌아간다. 갈 데가 있다
+   *   상품 결과 화면   글자만 지운다 → 그 화면은 **검색 결과 전용**이라 검색어가 없으면
+   *                  보여줄 것이 없다. 여기서 풀면 갈 데가 없다
+   */
+  onClear?: () => void;
 }
 
-export function SearchBarHeader({ initialKeyword = '', autoFocus, onSubmit, onBack }: Props) {
+export function SearchBarHeader({
+  initialKeyword = '',
+  autoFocus,
+  onSubmit,
+  onBack,
+  onClear,
+}: Props) {
   const inputRef = useRef<TextInput>(null);
   const [keyword, setKeyword] = useState(initialKeyword);
 
@@ -72,6 +88,11 @@ export function SearchBarHeader({ initialKeyword = '', autoFocus, onSubmit, onBa
           <Pressable
             onPress={() => {
               setKeyword('');
+              // 쓰는 쪽이 ✕ 에 뜻을 붙였으면 알린다(#952). 안 붙였으면 글자만 지운다.
+              if (onClear) {
+                onClear();
+                return;
+              }
               inputRef.current?.focus();
             }}
             hitSlop={8}
