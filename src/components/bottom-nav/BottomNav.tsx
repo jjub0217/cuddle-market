@@ -35,8 +35,9 @@ export default function BottomNav() {
         //    **새로고침할 때마다 없어야 할 것이 잠깐 보였다**(맥 크롬에서 확인).
         //    CSS 로 숨기면 첫 그림부터 맞다.
         //
-        //    아래 여백도 이미 CSS 가 맞춘다 — (main)/layout.tsx 의 `pb-14 xl:pb-0`.
-        'fixed right-0 bottom-0 left-0 border-t border-gray-200 bg-white pb-[env(safe-area-inset-bottom)] xl:hidden',
+        //    아래 여백도 이미 CSS 가 맞춘다 — (main)/layout.tsx 의 `pb-14 lg:pb-0`.
+        //    ⚠️ **둘은 같은 값이어야 한다.** 다르면 탭바가 없는데 아래가 비거나 그 반대가 된다.
+        'fixed right-0 bottom-0 left-0 border-t border-gray-200 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden',
         Z_INDEX.HEADER
       )}
       aria-label="하단 메뉴"

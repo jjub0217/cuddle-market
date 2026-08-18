@@ -23,11 +23,11 @@ const ALL_ITEM = { code: null, name: '전체' } as const
 export function PetTypeFilter({ activeTab, selectedDetailPet, onTabChange }: PetTypeFilterProps) {
   const { searchParams, pathname, push } = useFilterNavigation()
   const [showAll, setShowAll] = useState(false)
-  // ⚠️ **기준을 1279px 로 올렸다**(#956). 767 이었을 때는 980px 안팎(폰의 「데스크톱 사이트」
+  // ⚠️ **기준은 1023px 다**(#956 · #959). 767 이었을 때는 980px 안팎(폰의 「데스크톱 사이트」
   //    모드)에서 「모바일이 아니다」로 보고 소분류 알약을 **네 줄까지 다 펼쳤다.**
-  //    하단 탭바는 같은 폭을 「모바일」로 본다(BottomNav.tsx 의 min-width: 1280px) —
+  //    하단 탭바도 같은 폭을 「모바일」로 본다(BottomNav.tsx 의 lg:hidden) —
   //    **같은 물음에 두 조각이 다른 숫자로 답하면** 한 화면에 두 얼굴이 섞인다.
-  const isMobile = useMediaQuery('(max-width: 1279px)')
+  const isMobile = useMediaQuery('(max-width: 1023px)')
 
   // null 입력 → 필터 클리어, 같은 code 재클릭 → 토글로 클리어, 다른 code → set
   const handleSelect = (e: React.MouseEvent, code: string | null) => {
@@ -98,9 +98,9 @@ export function PetTypeFilter({ activeTab, selectedDetailPet, onTabChange }: Pet
             type="button"
             size="sm"
             onClick={() => setShowAll(true)}
-            // ⚠️ 접는 기준도 xl(1280)로 올렸다(#956). md 였을 때는 980px 안팎에서 이 단추가
+            // ⚠️ 접는 기준도 lg(1024)다(#956 · #959). md 였을 때는 980px 안팎에서 이 단추가
             //    숨겨져 **소분류 알약이 네 줄까지 펼쳐졌다.** 하단 탭바와 같은 기준을 쓴다.
-            className="h-[26px] cursor-pointer rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600 hover:bg-gray-200 xl:hidden"
+            className="h-[26px] cursor-pointer rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600 hover:bg-gray-200 lg:hidden"
           >
             더보기 ({filteredPetDetails.length - INITIAL_DISPLAY_COUNT}개)
           </Button>
