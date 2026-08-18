@@ -56,7 +56,14 @@ export const DetailFilter = memo(function DetailFilterSection({
             필터 초기화
           </Button>
 
-          <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between md:gap-10">
+          {/* ⚠️ **세 묶음을 가로로 붙이는 기준을 xl(1280)로 올렸다**(#956).
+              md(768)이었는데, 980px 안팎(폰의 「데스크톱 사이트」 모드)에서 셋이 한 줄에
+              들어가면 **지역 묶음이 남는 자리만 갖는다.** 그러면 고르는 칸이 아주 좁아지고,
+              한글은 아무 데서나 줄바꿈이라 **「시/도 선택」이 한 글자씩 세로로 쪼개졌다.**
+
+              하단 탭바가 xl 미만을 「모바일」로 보므로(BottomNav.tsx) 기준을 거기 맞춘다 —
+              조각마다 기준이 다르면 **모바일 탭바 + 데스크탑 필터 배치**가 한 화면에 섞인다. */}
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between xl:gap-10">
             <ProductStateFilter
               variant="card-chip"
               useUrlSync
