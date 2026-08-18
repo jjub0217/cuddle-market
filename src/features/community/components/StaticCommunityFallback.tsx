@@ -3,6 +3,8 @@ import type { CommunityItem } from '@/types'
 import { getTimeAgo } from '@cuddle/shared'
 import { ROUTES } from '@/constants/routes'
 import { CommunityPostThumbnail } from './CommunityPostThumbnail'
+import { PAGE_CONTAINER } from '@/constants/ui'
+import { cn } from '@/lib/utils/cn'
 
 /**
  * Suspense fallback용 서버 컴포넌트
@@ -24,7 +26,7 @@ interface StaticCommunityFallbackProps {
 export default function StaticCommunityFallback({ posts }: StaticCommunityFallbackProps) {
   return (
     <div className="relative min-h-screen bg-[#F3F4F6] pt-0 md:pt-5">
-      <div className="pb-4xl mx-auto max-w-7xl px-0 md:px-4">
+      <div className={cn(PAGE_CONTAINER, 'pb-4xl')}>
         <div className="flex w-full flex-col">
           {/* 필터 영역 플레이스홀더 */}
           <FilterPlaceholder />

@@ -1,5 +1,7 @@
 import HomeSkeleton from './product-section/HomeSkeleton'
 import HomeHero from './HomeHero'
+import { PAGE_CONTAINER } from '@/constants/ui'
+import { cn } from '@/lib/utils/cn'
 
 /**
  * Home 이 하이드레이션을 기다리는 동안 보여주는 스켈레톤.
@@ -31,7 +33,7 @@ export default function HomeLoadingState() {
     <>
       <HomeHero />
       <div className="bg-white">
-        <div className="mx-auto max-w-[1280px] px-4 pt-12 pb-24 md:px-8 md:pt-18">
+        <div className={cn(PAGE_CONTAINER, 'pt-12 pb-24 md:pt-18')}>
           <h1 className="sr-only">커들마켓</h1>
           <div className="flex flex-col gap-6">
             {/* 상품 필터 — 헤딩 + PetTypeFilter + CategoryFilter */}

@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils/cn'
 import Badge from '@/components/commons/badge/Badge'
 import Link from 'next/link'
 import { ROUTES } from '@/constants/routes'
+import { PAGE_CONTAINER } from '@/constants/ui'
 
 /**
  * Suspense fallback용 서버 컴포넌트
@@ -33,7 +34,7 @@ interface StaticHomeFallbackProps {
 export default function StaticHomeFallback({ products, totalElements }: StaticHomeFallbackProps) {
   return (
     <div className="pb-4xl pt-6">
-      <div className="px-lg mx-auto max-w-7xl">
+      <div className={PAGE_CONTAINER}>
         <div className="flex flex-col gap-12">
           {/* 필터 영역 플레이스홀더 (Home의 PetTypeFilter + CategoryFilter + DetailFilter 자리) */}
           <div className="flex flex-col gap-7">

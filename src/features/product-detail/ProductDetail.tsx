@@ -18,6 +18,8 @@ import { getTradeStatus } from '@/lib/utils/getTradeStatus'
 import { getPetTypeName } from '@/lib/utils/getPetTypeName'
 import { getCategory } from '@/lib/utils/getCategory'
 import Breadcrumb from '@/components/commons/breadcrumb/Breadcrumb'
+import { PAGE_CONTAINER } from '@/constants/ui'
+import { cn } from '@/lib/utils/cn'
 
 interface ProductDetailProps {
   initialData: ProductDetailItem
@@ -44,7 +46,7 @@ function ProductDetail({ initialData }: ProductDetailProps) {
 
   return (
     <>
-      <div className="px-lg pb-4xl mx-auto max-w-7xl pt-5 md:pt-8">
+      <div className={cn(PAGE_CONTAINER, 'pb-4xl pt-5 md:pt-8')}>
         <div className="flex flex-col gap-20">
           <div className="flex flex-col gap-4">
             <Breadcrumb

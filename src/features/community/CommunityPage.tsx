@@ -13,7 +13,7 @@ import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import { getTimeAgo } from '@cuddle/shared'
 import { useUserStore } from '@/store/userStore'
 import { cn } from '@/lib/utils/cn'
-import { Z_INDEX } from '@/constants/ui'
+import { PAGE_CONTAINER, Z_INDEX } from '@/constants/ui'
 import EmptyState from '@/components/EmptyState'
 import Spinner from '@/components/commons/spinner/Spinner'
 import type { CommunityItem } from '@/types'
@@ -229,7 +229,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
   return (
     <div className="min-h-screen bg-white">
       <h1 className="sr-only">커뮤니티 페이지</h1>
-      <main className="mx-auto w-full max-w-7xl px-4 py-5 md:py-8">
+      <main className={cn(PAGE_CONTAINER, 'py-5 md:py-8')}>
         {/* Header */}
         <section className="mb-4">
           {/* <h2 className="mb-6 text-lg font-bold tracking-tight text-primary">질문/정보</h2> */}

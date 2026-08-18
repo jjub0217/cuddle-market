@@ -19,6 +19,7 @@ import { AnimatePresence } from 'framer-motion'
 import InlineNotification from '@/components/commons/InlineNotification'
 import { useUserStore } from '@/store/userStore'
 import dynamic from 'next/dynamic'
+import { PAGE_CONTAINER } from '@/constants/ui'
 const DraftModal = dynamic(() => import('@/components/modal/DraftModal'))
 
 export interface CommunityPostFormValues {
@@ -213,7 +214,7 @@ export default function CommunityPostForm() {
         />
       </div>
       <div className="min-h-screen pt-5">
-        <div className="px-lg md:pb-4xl mx-auto max-w-7xl">
+        <div className={cn(PAGE_CONTAINER, 'md:pb-4xl')}>
           <AnimatePresence>
             {postError ? (
               <InlineNotification type="error" onClose={() => setPostError(null)}>
