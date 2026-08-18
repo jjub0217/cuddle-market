@@ -57,8 +57,22 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
     setSearchInput(currentKeyword)
   }
 
+  /**
+   * 게시판 탭을 바꾼다. **검색어·정렬은 그대로 들고 간다**(#949).
+   *
+   * ⚠️ 예전에는 `?tab=` 하나만 써서 주소를 통째로 갈아치웠다. 그러면 검색어와 정렬이
+   *    **딸려 나가는 게 아니라 그냥 날아갔다.** 바로 아래 handleSortChange 는 있던 값을
+   *    물려받는데 탭만 안 그래서, 같은 파일 안에서 두 방식이 달랐다.
+   *
+   *    「질문에 없으면 정보 공유엔 있나?」는 아주 흔한 행동이다. 바뀌는 것은
+   *    「어디를 볼까」 하나뿐이고, 「무엇을 찾는 중인가」와 「어떻게 늘어놓을까」는 그대로다.
+   *    앱도 같이 고쳤다(mobile 의 changeBoardType).
+   */
   const handleTabChange = (tabId: string) => {
-    router.replace(`?tab=${tabId}`)
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('tab', tabId)
+    // 아래 handleSortChange 와 같은 상대 주소 방식이다.
+    router.replace(`?${params.toString()}`)
   }
 
   const handleSortChange = (sortId: string) => {

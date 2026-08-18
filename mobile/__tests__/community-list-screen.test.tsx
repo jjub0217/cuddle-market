@@ -182,9 +182,12 @@ it('정렬만 바꿀 때는 검색어가 남는다', async () => {
   );
 });
 
-it('탭을 바꾸면 **검색어·정렬이 풀린다**', async () => {
-  // ⚠️ 웹이 그렇다 — 탭 전환만 다른 파라미터를 안 이어붙인다(설계 §4).
-  //    질문 ↔ 정보는 다른 갈래라 조건을 들고 갈 이유가 없다.
+it('탭을 바꿔도 **검색어·정렬이 남는다**', async () => {
+  // ⚠️ **예전에는 반대였다**(#949 에서 뒤집었다). 탭을 바꾸면 검색어·정렬이 풀렸다.
+  //    「질문 ↔ 정보는 다른 갈래라 조건을 들고 갈 이유가 없다」가 근거였는데,
+  //    **「질문에 없으면 정보 공유엔 있나?」가 아주 흔한 행동**이다.
+  //    검색어는 「무엇을 찾는 중인가」, 정렬은 「어떻게 늘어놓을까」 — 게시판이 바뀌어도
+  //    그대로다. 바뀌는 것은 「어디를 볼까」 하나뿐이다.
   검색중으로('사료');
 
   await render(<CommunityListScreen />, { wrapper: 감싸기 });
@@ -198,15 +201,15 @@ it('탭을 바꾸면 **검색어·정렬이 풀린다**', async () => {
     expect(마지막조건()).toEqual({
       boardType: 'INFO',
       page: 0,
-      keyword: '',
-      sortBy: 'latest',
+      keyword: '사료',
+      sortBy: 'views',
     })
   );
 });
 
-it('탭을 바꾸면 헤더가 평소 모습으로 돌아온다', async () => {
-  // 검색이 풀리면 검색 줄도 사라져야 한다. 옛 검색어가 남아 있으면
-  // 「지웠는데 그대로」로 보인다.
+it('탭을 바꿔도 헤더는 검색 줄로 남는다', async () => {
+  // 검색어가 남으니 검색 줄도 남아야 한다. 여기서 평소 헤더로 돌아가면
+  // **검색 중인데 검색어가 어디에도 안 보이는** 상태가 된다.
   검색중으로('사료');
 
   await render(<CommunityListScreen />, { wrapper: 감싸기 });
@@ -214,7 +217,8 @@ it('탭을 바꾸면 헤더가 평소 모습으로 돌아온다', async () => {
 
   await fireEvent.press(screen.getByRole('button', { name: '정보 공유' }));
 
-  await waitFor(() => expect(screen.getByText('커뮤니티')).toBeTruthy());
+  await waitFor(() => expect(마지막조건()).toMatchObject({ boardType: 'INFO' }));
+  expect(screen.queryByText('커뮤니티')).toBeNull();
 });
 
 // ----- 빈 화면 -----
