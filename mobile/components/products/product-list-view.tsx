@@ -160,6 +160,24 @@ export const ProductListView = forwardRef<ProductListViewRef, Props>(function Pr
   const 조건이걸렸다 = Boolean(keyword) || Object.values(좁히는조건).some((v) => v !== null);
 
   // 목록 밖에 서는 줄. 그래서 `ListHeaderComponent`가 아니라 `SectionList`의 형제로 그린다.
+  /**
+   * **검색 결과에서는 「무엇을」 좁히는 줄을 안 그린다**(#954).
+   *
+   * 홈은 둘러보는 화면이라 필터가 앞에 있는 게 맞다. 검색 결과는 **찾을 게 정해져 있어
+   * 들어온** 화면이라 다르다 — 대분류 탭과 카테고리 격자가 첫 화면의 40%를 먹어서
+   * **결과가 한참 아래에서 시작했다.**
+   *
+   *   빼는 것   카테고리 격자   「무엇을」 — 검색어와 겹친다. 자리를 제일 많이 먹는다
+   *            대분류 탭      「어떤 동물의」
+   *            소분류 알약     대분류를 골라야 나오는 줄이라 같이 사라진다
+   *
+   *   남기는 것  상품종류 알약 · ⚙ 세부 필터 · 정렬 — 검색어와 안 겹치는 축이다
+   *
+   * ⚠️ 동물로 좁히고 싶으면 ⚙(세부 필터)로 들어가거나 뒤로 가서 홈에서 고른다.
+   *    그 대신 **결과가 바로 보인다.**
+   */
+  const 검색결과다 = Boolean(keyword);
+
   const 대분류탭 = (
     <ProductPetTypeTabs
       petType={filters.petType}
@@ -219,7 +237,7 @@ export const ProductListView = forwardRef<ProductListViewRef, Props>(function Pr
 
   return (
     <>
-      {대분류탭}
+      {검색결과다 ? null : 대분류탭}
       <SectionList
         ref={listRef}
         testID="product-list"
@@ -231,7 +249,7 @@ export const ProductListView = forwardRef<ProductListViewRef, Props>(function Pr
             <ProductRow product={item} />
           </View>
         )}
-        ListHeaderComponent={필터줄}
+        ListHeaderComponent={검색결과다 ? null : 필터줄}
         renderSectionHeader={() => 툴바}
         // ⚠️ 안드로이드는 기본이 false다. 안 주면 툴바가 같이 스크롤되어 사라진다
         stickySectionHeadersEnabled

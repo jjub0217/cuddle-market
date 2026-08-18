@@ -231,20 +231,31 @@ function Home() {
           <h1 className="sr-only">커들마켓</h1>
           <div className="flex flex-col gap-6">
             {/* Pet category & filters section */}
-            <section aria-label="상품 필터" className="flex flex-col gap-3" data-nosnippet>
-              <div className="flex flex-col gap-1">
-                <h2 className="flex flex-wrap items-center gap-2 text-sm font-medium text-gray-900">
-                  우리 아이 맞춤 검색
-                  <span className="text-xs font-normal text-[#825500]/70">어떤 아이와 함께하시나요?</span>
-                </h2>
-              </div>
-              <PetTypeFilter
-                activeTab={activePetTypeTab}
-                onTabChange={handlePetTypeTabChange}
-                selectedDetailPet={selectedDetailPet}
-              />
-              <CategoryFilter selectedCategory={selectedCategory} />
-            </section>
+            {/* ⚠️ **검색 결과에서는 이 줄을 안 그린다**(#954).
+                홈은 둘러보는 화면이라 필터가 앞에 있는 게 맞지만, 검색 결과는 **찾을 게
+                정해져 있어 들어온** 화면이다. 이 저장소는 검색 결과가 따로 있지 않고
+                홈에 `?keyword=` 를 붙인 것이라(SearchBar.tsx), 여기서 갈라 준다.
+
+                  빼는 것   대분류·소분류·카테고리 — 「무엇을」. 검색어와 겹치고 자리를 제일 많이 먹는다
+                  남기는 것  세부 필터 · 상품종류 · 정렬 — 검색어와 안 겹치는 축
+
+                앱도 같이 고쳤다(mobile 의 ProductListView). 한쪽만 고치면 갈린다. */}
+            {filterParams.keyword ? null : (
+              <section aria-label="상품 필터" className="flex flex-col gap-3" data-nosnippet>
+                <div className="flex flex-col gap-1">
+                  <h2 className="flex flex-wrap items-center gap-2 text-sm font-medium text-gray-900">
+                    우리 아이 맞춤 검색
+                    <span className="text-xs font-normal text-[#825500]/70">어떤 아이와 함께하시나요?</span>
+                  </h2>
+                </div>
+                <PetTypeFilter
+                  activeTab={activePetTypeTab}
+                  onTabChange={handlePetTypeTabChange}
+                  selectedDetailPet={selectedDetailPet}
+                />
+                <CategoryFilter selectedCategory={selectedCategory} />
+              </section>
+            )}
 
             {/* Detail filter section */}
             <section aria-label="세부 필터" data-nosnippet>

@@ -477,3 +477,33 @@ it('상세를 보고 돌아오면 목록을 다시 부른다', async () => {
 
   await waitFor(() => expect(fetchProducts).toHaveBeenCalledTimes(2));
 });
+
+// ----- 검색 결과에서는 필터를 줄인다 (#954) -----
+//
+// 홈은 **둘러보는** 화면이라 필터가 앞에 있는 게 맞지만, 검색 결과는 **찾을 게 정해져
+// 있어 들어온** 화면이다. 대분류·카테고리 격자가 첫 화면의 40%를 먹어 결과가 한참
+// 아래에서 시작했다.
+//
+// 남기는 것: 상품종류 알약 · ⚙ 세부 필터 · 정렬. 검색어와 안 겹치는 축이다.
+
+it('검색 결과에서는 대분류 탭과 필터 줄을 안 그린다', async () => {
+  fetchProducts.mockResolvedValue(한페이지([상품(1)]));
+
+  await render(<ProductListView keyword="사료" />, { wrapper: 감싸기 });
+  await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
+
+  expect(screen.queryByTestId('product-pet-type-tabs')).toBeNull();
+  expect(screen.queryByTestId('product-filter-row')).toBeNull();
+});
+
+it('검색 결과에도 상품종류 알약과 정렬은 남는다', async () => {
+  // 검색어와 안 겹치는 축이라 남긴다 — 「사료 중 판매요청만」·「저가순」은 여전히 쓸모 있다.
+  fetchProducts.mockResolvedValue(한페이지([상품(1)]));
+
+  await render(<ProductListView keyword="사료" />, { wrapper: 감싸기 });
+  await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
+
+  expect(screen.getByText('판매요청')).toBeTruthy();
+  expect(screen.getByText('최신순')).toBeTruthy();
+  expect(screen.getByTestId('open-detail-filter')).toBeTruthy();
+});
