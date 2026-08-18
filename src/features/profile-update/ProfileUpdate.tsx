@@ -12,6 +12,8 @@ import { useRouter, usePathname } from 'next/navigation'
 import WithdrawModal, { type WithDrawFormValues } from '@/components/modal/WithdrawModal'
 import Spinner from '@/components/commons/spinner/Spinner'
 import { ROUTES } from '@/constants/routes'
+import { PAGE_CONTAINER_MD } from '@/constants/ui'
+import { cn } from '@/lib/utils/cn'
 
 function ProfileUpdate() {
   const router = useRouter()
@@ -112,7 +114,7 @@ function ProfileUpdate() {
     <>
       <div className="pb-4xl bg-[#F3F4F6] pt-0 md:pt-8">
         <h1 className="sr-only">프로필 수정</h1>
-        <div className="mx-auto flex max-w-7xl flex-col gap-0 md:flex-row md:gap-8 md:p-0">
+        <div className={cn(PAGE_CONTAINER_MD, 'flex flex-col gap-0 md:flex-row md:gap-8')}>
           {/* ⚠️ 가입일을 여기서 뺐다. 이 화면은 **고치러 오는** 화면이라 가입일이 답할
               질문 자체가 없다. 값어치가 있는 자리는 남의 프로필이다 — 「3년 된 사람」과
               「어제 가입한 사람」은 거래를 결정할 때 다르게 읽힌다(UserPage.tsx 로 옮겼다).

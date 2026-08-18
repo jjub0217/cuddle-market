@@ -15,6 +15,7 @@ import InlineNotification from '@/components/commons/InlineNotification'
 import PhotoViewer from '@/components/photo-viewer/PhotoViewer'
 import Spinner from '@/components/commons/spinner/Spinner'
 import { MessageCircleMore } from 'lucide-react'
+import { PAGE_CONTAINER } from '@/constants/ui'
 
 interface ChatLogProps {
   isLoadingMessages: boolean
@@ -156,7 +157,7 @@ export function ChatLog({
 
   if (isLoadingMessages && !roomMessages) {
     return (
-      <div className="px-lg py-md tablet:py-xl mx-auto max-w-7xl">
+      <div className={cn(PAGE_CONTAINER, 'py-md tablet:py-xl')}>
         <div className="flex items-center justify-center py-20">
           <Spinner size="md" label="상품 로딩 중" />
         </div>

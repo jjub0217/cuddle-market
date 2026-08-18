@@ -16,10 +16,11 @@ import { useFilterNavigation } from '@/hooks/useFilterNavigation'
 import { Plus } from 'lucide-react'
 import Button from '@/components/commons/button/Button'
 import { useUserStore } from '@/store/userStore'
-import { Z_INDEX } from '@/constants/ui'
+import { PAGE_CONTAINER, Z_INDEX } from '@/constants/ui'
 import HomeSkeleton from './components/product-section/HomeSkeleton'
 import Spinner from '@/components/commons/spinner/Spinner'
 import { productListQueryKey, extractProductSearchParams } from '@/lib/queries/productQueryKeys'
+import { cn } from '@/lib/utils/cn'
 
 function Home() {
   const { isLogin } = useUserStore()
@@ -239,7 +240,7 @@ function Home() {
     <>
       {검색중이다 ? null : <HomeHero />}
       <div className="bg-white">
-        <div className="mx-auto max-w-[1280px] px-4 pt-12 pb-24 md:px-8 md:pt-18">
+        <div className={cn(PAGE_CONTAINER, 'pt-12 pb-24 md:pt-18')}>
           <h1 className="sr-only">커들마켓</h1>
           <div className="flex flex-col gap-6">
             {/* Pet category & filters section */}

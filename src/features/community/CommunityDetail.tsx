@@ -24,6 +24,8 @@ import { useUserStore } from '@/store/userStore'
 import { useLoginModalStore } from '@/store/modalStore'
 import { toUrlName } from '@/lib/utils/toUrlName'
 import Spinner from '@/components/commons/spinner/Spinner'
+import { PAGE_CONTAINER } from '@/constants/ui'
+import { cn } from '@/lib/utils/cn'
 
 interface CommunityDetailProps {
   initialPostData?: CommunityDetailItem
@@ -117,7 +119,7 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
           (app/(main)/layout.tsx의 pb-14). 여기 pb-16을 더하면 두 겹이 되어
           입력칸 아래에 빈 공간이 남는다. */}
       <div className="min-h-screen bg-white pt-5 md:pt-8">
-        <div className="px-lg md:pb-4xl mx-auto max-w-7xl pb-0">
+        <div className={cn(PAGE_CONTAINER, 'pb-0 md:pb-4xl')}>
           <div className="flex flex-col justify-center gap-1 md:gap-3.5">
             <button
               type="button"

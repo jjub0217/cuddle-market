@@ -1,6 +1,6 @@
 'use client'
 
-import { Z_INDEX } from '@/constants/ui'
+import { PAGE_CONTAINER, Z_INDEX } from '@/constants/ui'
 import { cn } from '@/lib/utils/cn'
 import Logo from '../Logo'
 import Link from 'next/link'
@@ -164,7 +164,9 @@ export default function Header() {
           Z_INDEX.HEADER
         )}
       >
-        <div className="flex w-full flex-col px-4 lg:block lg:max-w-7xl lg:gap-3 lg:px-3.5">
+        {/* 좌우 여백·최대폭은 본문과 **같은 값**을 써야 로고와 본문이 한 줄로 선다(#963).
+            예전에는 여기만 lg:px-3.5(14px)이라 1024 부터 어긋났다. */}
+        <div className={cn(PAGE_CONTAINER, 'flex flex-col lg:block lg:gap-3')}>
           <div className="flex h-12 items-center gap-4 lg:gap-8">
             {/* 왼쪽: 로고 + 데스크탑 메뉴 */}
             <div className="flex shrink-0 items-center gap-8 lg:gap-12">

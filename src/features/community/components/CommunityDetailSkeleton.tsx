@@ -1,7 +1,8 @@
+import { PAGE_CONTAINER } from '@/constants/ui'
 export default function CommunityDetailSkeleton() {
   return (
     <div className="min-h-screen bg-[#F3F4F6] pt-5">
-      <div className="mx-auto max-w-7xl px-3.5">
+      <div className={PAGE_CONTAINER}>
         <div className="animate-pulse rounded-lg border border-gray-400 bg-white px-6 py-5 shadow-xl">
           <div className="h-6 w-20 rounded-full bg-gray-200" />
           <div className="mt-4 flex items-center gap-3.5">

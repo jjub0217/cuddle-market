@@ -20,6 +20,8 @@ import { AnimatePresence } from 'framer-motion'
 import InlineNotification from '@/components/commons/InlineNotification'
 import Spinner from '@/components/commons/spinner/Spinner'
 import { ROUTES } from '@/constants/routes'
+import { PAGE_CONTAINER_MD } from '@/constants/ui'
+import { cn } from '@/lib/utils/cn'
 
 const USER_PAGE_TABS = [
   { id: 'tab-sales', label: '판매상품', code: 'SELL' },
@@ -175,7 +177,7 @@ function UserPage() {
   return (
     <>
       <div className="md:pb-4xl relative pt-0 md:pt-8">
-        <div className="mx-auto max-w-7xl">
+        <div className={PAGE_CONTAINER_MD}>
           <AnimatePresence>
             {unblockError ? (
               <div className="absolute top-4 left-1/2 z-50 -translate-x-1/2 md:pt-8">
@@ -186,7 +188,7 @@ function UserPage() {
             ) : null}
           </AnimatePresence>
         </div>
-        <div className="mx-auto flex min-h-screen max-w-7xl flex-col md:min-h-0 md:flex-row md:gap-8 md:p-0">
+        <div className={cn(PAGE_CONTAINER_MD, 'flex min-h-screen flex-col md:min-h-0 md:flex-row md:gap-8')}>
           {/* ⚠️ showJoinDate — 가입일은 중고거래에서 **신뢰 신호**다. 「3년 된 사람」과
               「어제 가입한 사람」은 거래를 결정할 때 다르게 읽힌다. 예전에는 거꾸로
               프로필 수정 화면에만 있었다(ProfileUpdate.tsx 에서 뺐다) */}

@@ -55,31 +55,31 @@ function focusHeaderSearch() {
  *    h-72 로 작았는데, 「1024 이상은 한 얼굴」이라고 정해 놓고 **1261px 과 1282px 이
  *    다르게 보였다.**
  *
- *      1024 에서 잰 값 —  그림 14..488 · 글자 526 부터 · 남는 칸 482px
+ *      1024 에서 잰 값 —  그림 16..490 · 글자 528 부터 · 남는 칸 480px
  *                        h1 의 제일 긴 줄이 30px 일 때 357px 이라 줄바꿈 없이 들어간다
  */
 export default function HomeHero() {
   return (
     // 띠 높이는 그림 높이를 따라간다 — 그림보다 훨씬 높으면 위가 빈다(위 주석).
     <section aria-label="히어로" className="bg-hero-surface relative h-100 w-full sm:h-72 md:h-76 lg:h-100">
-      <div className="relative mx-auto h-full lg:max-w-7xl lg:px-3.5">
+      <div className="relative mx-auto h-full lg:max-w-7xl lg:px-4">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           alt="반려동물과 함께하는 따뜻한 마켓"
           src="/images/hero.webp"
-          className="pointer-events-none absolute bottom-0 left-4 z-10 h-48 w-auto translate-y-[30%] md:h-60 md:translate-y-[29%] lg:left-3.5 lg:h-90 lg:translate-y-[29.5%]"
+          className="pointer-events-none absolute bottom-0 left-4 z-10 h-48 w-auto translate-y-[30%] md:h-60 md:translate-y-[29%] lg:h-90 lg:translate-y-[29.5%]"
         />
         {/* 띄우는 값 = 그림 왼쪽 + 그림 폭 + 38.
               640~   16 + 253 + 38 = 307
               768~   16 + 316 + 38 = 370
-              1024~  14 + 474 + 38 = 526 → 이 칸이 여백 안쪽 14 에서 시작하므로 512 를 적는다
+              1024~  16 + 474 + 38 = 528 → 이 칸이 여백 안쪽 16 에서 시작하므로 512 를 적는다
 
-            ⚠️ **폭에서 컨테이너 여백(lg:px-3.5 좌우 14+14=28)을 빼야 한다.** 이 칸은 `left` 를
+            ⚠️ **폭에서 컨테이너 여백(lg:px-4 좌우 16+16=32)을 빼야 한다.** 이 칸은 `left` 를
                안 줘서 **여백 안쪽 14px 에서 시작**하는데, `w-full` 은 여백을 모르고 컨테이너
                폭을 통째로 받는다. 그러면 오른쪽으로 14px 삐져나가 **1024~1280 에서 페이지가
                가로로 밀린다**(실측 scrollWidth 1038 vs 1024). 글자는 왼쪽 정렬이라 칸이
                28px 좁아져도 보이는 변화는 없다. */}
-        <div className="text-primary absolute top-[15%] z-20 flex h-full w-full flex-col px-4 pt-8 sm:top-[10%] sm:justify-center sm:pt-0 sm:pl-[307px] md:pl-[370px] lg:top-[15%] lg:w-[calc(100%-1.75rem)] lg:pl-[512px]">
+        <div className="text-primary absolute top-[15%] z-20 flex h-full w-full flex-col px-4 pt-8 sm:top-[10%] sm:justify-center sm:pt-0 sm:pl-[307px] md:pl-[370px] lg:top-[15%] lg:w-[calc(100%-2rem)] lg:pl-[512px]">
           <h1 className="text-xl leading-tight font-bold md:text-2xl lg:text-3xl">
             우리 동네 반려인들과 함께하는
             <br />

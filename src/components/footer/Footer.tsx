@@ -1,11 +1,13 @@
 import Logo from '../Logo'
 import { ROUTES } from '@/constants/routes'
 import Link from 'next/link'
+import { PAGE_CONTAINER } from '@/constants/ui'
+import { cn } from '@/lib/utils/cn'
 
 export default function Footer() {
   return (
     <footer className="hidden border-border bg-light border-t md:block">
-      <div className="px-lg mx-auto max-w-7xl py-12">
+      <div className={cn(PAGE_CONTAINER, 'py-12')}>
         <div className="flex flex-wrap justify-baseline gap-x-10 gap-y-5 md:justify-between md:gap-0">
           <div className="flex flex-col gap-2">
             <Logo logoClassname="h-12" />

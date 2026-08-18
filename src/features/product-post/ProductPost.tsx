@@ -12,6 +12,8 @@ import type { ProductDetailItem } from '@/types'
 import { useUserStore } from '@/store/userStore'
 import MobileBackHeader from '@/components/header/MobileBackHeader'
 import Spinner from '@/components/commons/spinner/Spinner'
+import { PAGE_CONTAINER } from '@/constants/ui'
+import { cn } from '@/lib/utils/cn'
 
 function ProductPost() {
   const router = useRouter()
@@ -110,7 +112,7 @@ function ProductPost() {
         />
       </div>
       <div className="pt-5">
-        <div className="px-lg pb-4xl mx-auto max-w-7xl">
+        <div className={cn(PAGE_CONTAINER, 'pb-4xl')}>
           <div className="gap-2xl flex w-full flex-col">
             {!isEditMode ? (
               <Tabs
