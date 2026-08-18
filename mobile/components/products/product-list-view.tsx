@@ -175,6 +175,10 @@ export const ProductListView = forwardRef<ProductListViewRef, Props>(function Pr
    *
    * ⚠️ 동물로 좁히고 싶으면 ⚙(세부 필터)로 들어가거나 뒤로 가서 홈에서 고른다.
    *    그 대신 **결과가 바로 보인다.**
+   *
+   * ⚠️ **규칙은 하나다 — 화면이 좁으면 감추고 넓으면 보인다.** 앱은 늘 좁으니 늘 감춘다.
+   *    웹은 좁을 때만 감춘다(Home.tsx 의 `hidden md:block`) — 데스크탑은 자리가 넉넉해
+   *    다 보여도 답답하지 않다.
    */
   const 검색결과다 = Boolean(keyword);
 

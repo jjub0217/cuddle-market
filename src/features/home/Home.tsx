@@ -231,16 +231,19 @@ function Home() {
           <h1 className="sr-only">커들마켓</h1>
           <div className="flex flex-col gap-6">
             {/* Pet category & filters section */}
-            {/* ⚠️ **검색 결과에서는 이 줄을 안 그린다**(#954).
+            {/* ⚠️ **검색 중에는 좁은 화면에서만 이 줄을 감춘다**(#954).
+
+                규칙은 하나다 — **화면이 좁으면 감추고 넓으면 보인다.**
+                  앱    늘 좁다        → 검색 중이면 늘 감춘다
+                  웹    좁을 때만 감춘다 (폰으로 보는 웹). 데스크탑은 자리가 넉넉해 다 보인다
+
                 홈은 둘러보는 화면이라 필터가 앞에 있는 게 맞지만, 검색 결과는 **찾을 게
-                정해져 있어 들어온** 화면이다. 이 저장소는 검색 결과가 따로 있지 않고
-                홈에 `?keyword=` 를 붙인 것이라(SearchBar.tsx), 여기서 갈라 준다.
+                정해져 있어 들어온** 화면이다. 좁은 화면에서는 이 줄이 첫 화면의 40%를 먹어
+                **결과가 한참 아래에서 시작한다.** 넓으면 그 문제가 없다.
 
-                  빼는 것   대분류·소분류·카테고리 — 「무엇을」. 검색어와 겹치고 자리를 제일 많이 먹는다
-                  남기는 것  세부 필터 · 상품종류 · 정렬 — 검색어와 안 겹치는 축
-
-                앱도 같이 고쳤다(mobile 의 ProductListView). 한쪽만 고치면 갈린다. */}
-            {filterParams.keyword ? null : (
+                ⚠️ 이 저장소는 검색 결과 페이지가 따로 없다 — 홈에 `?keyword=` 를 붙인
+                   것이다(SearchBar.tsx). 그래서 여기서 갈라 준다. */}
+            <div className={filterParams.keyword ? 'hidden md:block' : undefined}>
               <section aria-label="상품 필터" className="flex flex-col gap-3" data-nosnippet>
                 <div className="flex flex-col gap-1">
                   <h2 className="flex flex-wrap items-center gap-2 text-sm font-medium text-gray-900">
@@ -255,7 +258,7 @@ function Home() {
                 />
                 <CategoryFilter selectedCategory={selectedCategory} />
               </section>
-            )}
+            </div>
 
             {/* Detail filter section */}
             <section aria-label="세부 필터" data-nosnippet>
