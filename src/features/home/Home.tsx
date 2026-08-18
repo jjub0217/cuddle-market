@@ -235,7 +235,11 @@ function Home() {
 
                 규칙은 하나다 — **화면이 좁으면 감추고 넓으면 보인다.**
                   앱    늘 좁다        → 검색 중이면 늘 감춘다
-                  웹    좁을 때만 감춘다 (폰으로 보는 웹). 데스크탑은 자리가 넉넉해 다 보인다
+                  웹    xl(1280) 미만이면 감춘다. 넓으면 자리가 넉넉해 다 보인다
+
+                ⚠️ **1280 은 하단 탭바가 「여기부터 데스크탑」이라고 보는 값이다**(#956).
+                   여기만 md(768)로 두면 1100px 안팎에서 **세로로 쌓인 모바일 배치인데
+                   필터는 다 보이는** 최악이 된다 — 결과가 더 아래로 밀린다.
 
                 홈은 둘러보는 화면이라 필터가 앞에 있는 게 맞지만, 검색 결과는 **찾을 게
                 정해져 있어 들어온** 화면이다. 좁은 화면에서는 이 줄이 첫 화면의 40%를 먹어
@@ -243,7 +247,7 @@ function Home() {
 
                 ⚠️ 이 저장소는 검색 결과 페이지가 따로 없다 — 홈에 `?keyword=` 를 붙인
                    것이다(SearchBar.tsx). 그래서 여기서 갈라 준다. */}
-            <div className={filterParams.keyword ? 'hidden md:block' : undefined}>
+            <div className={filterParams.keyword ? 'hidden xl:block' : undefined}>
               <section aria-label="상품 필터" className="flex flex-col gap-3" data-nosnippet>
                 <div className="flex flex-col gap-1">
                   <h2 className="flex flex-wrap items-center gap-2 text-sm font-medium text-gray-900">
