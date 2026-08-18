@@ -52,7 +52,9 @@ export default function MobileSearchOverlay({ isOpen, onClose }: MobileSearchOve
   return (
     <div
       className={cn(
-        'fixed inset-0 bg-white transition-transform duration-300 ease-out xl:hidden',
+        // 「여기부터 데스크탑」은 lg(1024)다 — 헤더와 같은 값이어야 한다(#961).
+        // 1280 으로 두면 1024~1280 에서 **데스크탑 검색칸이 있는데 이 창도 뜰 수 있다.**
+        'fixed inset-0 bg-white transition-transform duration-300 ease-out lg:hidden',
         Z_INDEX.MODAL,
         isOpen ? 'translate-x-0' : 'translate-x-full'
       )}

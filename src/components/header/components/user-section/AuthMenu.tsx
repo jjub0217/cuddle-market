@@ -14,8 +14,11 @@ interface AuthMenuProps {
 }
 
 export default function AuthMenu({ setIsSideOpen, hideMenuButton = false }: AuthMenuProps) {
-  const isXl = useMediaQuery('(min-width: 1280px)')
-  return isXl ? (
+  // 「여기부터 데스크탑」 — Header.tsx 와 **같은 값**이어야 한다(#961).
+  // 여기만 1280 으로 남으면 1024~1280 에서 데스크탑 헤더인데 로그인 자리에만
+  // 햄버거 단추가 남는다.
+  const isDesktop = useMediaQuery('(min-width: 1024px)')
+  return isDesktop ? (
     <div className="flex items-center">
       <Link href={ROUTES.LOGIN} className="text-sm font-bold text-primary/70 transition-colors hover:text-primary">
         로그인 / 회원가입
