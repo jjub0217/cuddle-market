@@ -202,7 +202,7 @@ function UserPage() {
             unblockUser={unblockUser}
             showJoinDate
           />
-          <section className="flex w-full flex-col gap-1 p-5 md:gap-6 md:p-0" aria-labelledby="user-product-heading">
+          <section className="flex w-full flex-col gap-1 px-4 py-5 md:gap-6 md:p-0" aria-labelledby="user-product-heading">
             <h4 id="user-product-heading" className="sr-only">
               {userData?.nickname}님의 {activeTabLabel}
             </h4>

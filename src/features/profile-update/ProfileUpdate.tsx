@@ -120,7 +120,7 @@ function ProfileUpdate() {
               「어제 가입한 사람」은 거래를 결정할 때 다르게 읽힌다(UserPage.tsx 로 옮겼다).
               게다가 이 옆 칸은 데스크탑에만 그려져서, 여기 두면 모바일에서는 영영 못 본다 */}
           {isMd ? <ProfileData data={myData!} isMyProfile /> : null}
-          <div className="flex w-full flex-col gap-8 p-5 md:p-0">
+          <div className="flex w-full flex-col gap-8 px-4 py-5 md:p-0">
             <ProfileUpdateBaseForm myData={myData!} onWithdrawClick={() => setIsWithdrawModalOpen(true)} />
             {!isSocialLogin ? <ProfileUpdatePasswordForm /> : null}
           </div>
