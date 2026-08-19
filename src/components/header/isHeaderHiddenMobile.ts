@@ -13,12 +13,19 @@ import { ROUTES } from '@/constants/routes'
 //
 //    이제 둘 다 **경로만 보고** 정한다(경로는 서버도 안다). 폭은 CSS(`lg:`)가 가른다.
 
-const HIDE_PATHS: string[] = [ROUTES.NOTIFICATIONS, ROUTES.LOGIN, ROUTES.SIGNUP, ROUTES.COMMUNITY_POST, ROUTES.PRODUCT_POST]
+const HIDE_PATHS: string[] = [
+  ROUTES.NOTIFICATIONS,
+  ROUTES.LOGIN,
+  ROUTES.SIGNUP,
+  ROUTES.COMMUNITY_POST,
+  ROUTES.PRODUCT_POST,
+  ROUTES.CHAT, // 채팅 목록. 채팅방(/chat/{id})은 아래 패턴이 맡는다
+]
 
 const HIDE_PATTERNS = [
   /^\/community\/\d+\/edit$/, // 커뮤니티 수정
   /^\/products\/\d+\/edit$/, // 상품 수정
-  /^\/chat(\/\d+)?$/, // 채팅 목록·채팅방
+  /^\/chat\/\d+$/, // 채팅방
 ]
 
 export function isHeaderHiddenMobile(pathname: string): boolean {
