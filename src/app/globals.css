@@ -12,6 +12,15 @@
 /* 유틸리티 - Tailwind 이후에 로드하여 우선순위 확보 */
 @import '../styles/utilities/typography.css';
 
+/* 헤더 높이 — 지도가 화면 높이를 계산할 때 쓴다(MapContainer.tsx).
+   ⚠️ **예전에는 Header 의 useEffect 가 넣었다**(#614). 그래서 첫 그림에는 값이 없었고
+      `var(--header-height, 72px)` 의 기본값 72 로 그려졌다가 뒤늦게 바뀌었다.
+      지금은 여기서 못 박는다 — 첫 그림부터 같은 값이다.
+   ⚠️ 헤더의 실제 높이(py-3 + h-12 = 72)와 **같아야 한다.** */
+:root {
+  --header-height: 72px;
+}
+
 /* 기본 폰트 설정 - layer 외부에서 최종 적용 */
 html {
   font-family:
