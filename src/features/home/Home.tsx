@@ -9,6 +9,7 @@ import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import { PRODUCT_TYPE_TABS, PET_TYPE_TABS, type ProductTypeTabId, SORT_TYPE, type PetTypeTabId } from '@/constants/constants'
 import { PetTypeFilter } from './components/filter/PetTypeFilter'
 import { CategoryFilter } from './components/filter/CategoryFilter'
+import { MobileFilterSidebar, type DetailFilterValue } from './components/filter/MobileFilterSidebar'
 import HomeHero from './components/HomeHero'
 import HomeLoadingState from './components/HomeLoadingState'
 import Link from 'next/link'
@@ -192,6 +193,31 @@ function Home() {
     threshold: 0.5,
   })
 
+  // 좁은 화면의 세부 필터 서랍 — 검색 중에만 연다(아래 주석 참고).
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
+
+  /**
+   * 서랍의 「적용」 — 상태·가격·지역 셋을 **한 번에** 주소에 싣는다.
+   *
+   * ⚠️ 하나씩 즉시 반영하지 않는 이유는 서랍 쪽 주석에 적었다(앱과 같은 방식).
+   *    여기서는 **한 번만 push** 하는 것이 중요하다 — 셋을 따로 밀면 그 사이 목록이
+   *    세 번 다시 그려진다.
+   */
+  const applyMobileFilter = useCallback(
+    (next: DetailFilterValue) => {
+      const params = new URLSearchParams(searchParams.toString())
+      const set = (key: string, value: string | null) => (value ? params.set(key, value) : params.delete(key))
+      set('productStatuses', next.productStatus)
+      set('minPrice', next.price ? String(next.price.min) : null)
+      set('maxPrice', next.price?.max != null ? String(next.price.max) : null)
+      set('addressSido', next.sido)
+      set('addressGugun', next.gugun)
+      push(`${pathname}?${params.toString()}`)
+      setIsMobileFilterOpen(false)
+    },
+    [searchParams, pathname, push]
+  )
+
   const filterReset = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation()
@@ -240,34 +266,43 @@ function Home() {
     <>
       {검색중이다 ? null : <HomeHero />}
       <div className="bg-white">
-        <div className={cn(PAGE_CONTAINER, 'pt-12 pb-24 md:pt-18')}>
+        {/* ⚠️ **검색 중에는 위를 더 비운다.** 홈의 `main` 위 여백은 0이다 — 히어로가 헤더
+            뒤까지 차오르기 때문인데, 검색 중에는 히어로를 안 그린다(#962). 그대로 두면
+            **헤더(72px)가 상단 탭을 덮는다.** 헤더 높이 72 + 숨통 16 = 88(pt-22).
+            md 부터는 원래 값(72)이 이미 헤더 높이와 같아 그대로 둔다. */}
+        <div className={cn(PAGE_CONTAINER, 'pb-24 md:pt-18', 검색중이다 ? 'pt-22' : 'pt-12')}>
           <h1 className="sr-only">커들마켓</h1>
           <div className="flex flex-col gap-6">
             {/* Pet category & filters section */}
-            {/* ⚠️ **검색 중에는 좁은 화면에서만 이 줄을 감춘다**(#954).
+            {/* ⚠️ **검색 중이면 이 줄의 「모습」이 달라진다.**
 
-                규칙은 하나다 — **화면이 좁으면 감추고 넓으면 보인다.**
-                  앱    늘 좁다        → 검색 중이면 늘 감춘다
-                  웹    lg(1024) 미만이면 감춘다. 넓으면 자리가 넉넉해 다 보인다
+                  제목(「우리 아이 맞춤 검색 / 어떤 아이와 함께하시나요?」)
+                     검색 중에는 **어느 폭에서나 감춘다.** 그 문구는 **둘러보러 온 사람**에게
+                     거는 말이라, 찾을 것을 정해 놓고 들어온 화면에서는 자리만 먹는다.
 
-                ⚠️ **1024 는 이 앱이 「여기부터 데스크탑」이라고 보는 값이다**(#959).
-                   배치·소분류·하단 탭바가 다 같은 값을 쓴다 — 하나만 다르면 한 화면에
-                   **모바일 얼굴과 데스크탑 얼굴이 섞인다.**
+                  탭·소분류·카테고리
+                     md(768) 부터 보인다. 그 아래는 감춘다 — 좁은 화면에서 이 줄이 첫 화면의
+                     40%를 먹어 **결과가 한참 아래에서 시작하기** 때문이다(#954).
 
-                홈은 둘러보는 화면이라 필터가 앞에 있는 게 맞지만, 검색 결과는 **찾을 게
-                정해져 있어 들어온** 화면이다. 좁은 화면에서는 이 줄이 첫 화면의 40%를 먹어
-                **결과가 한참 아래에서 시작한다.** 넓으면 그 문제가 없다.
+                ⚠️ **여기만 md(768)를 쓴다.** 이 저장소의 다른 곳은 「여기부터 데스크탑」을
+                   lg(1024)로 묻는다(#959). 여기는 그 물음이 아니라 **「필터를 놓을 자리가
+                   나오는가」**를 묻는 것이라 값이 다르다. 태블릿에서는 자리가 난다.
+
+                ⚠️ **모바일 폭은 아직 정하지 않았다.** 앱의 검색 결과 화면과 견줘 보고 정한다.
+                   지금은 예전 그대로 감춘다.
 
                 ⚠️ 이 저장소는 검색 결과 페이지가 따로 없다 — 홈에 `?keyword=` 를 붙인
                    것이다(SearchBar.tsx). 그래서 여기서 갈라 준다. */}
-            <div className={filterParams.keyword ? 'hidden lg:block' : undefined}>
+            <div className={검색중이다 ? 'hidden md:block' : undefined}>
               <section aria-label="상품 필터" className="flex flex-col gap-3" data-nosnippet>
-                <div className="flex flex-col gap-1">
-                  <h2 className="flex flex-wrap items-center gap-2 text-sm font-medium text-gray-900">
-                    우리 아이 맞춤 검색
-                    <span className="text-xs font-normal text-[#825500]/70">어떤 아이와 함께하시나요?</span>
-                  </h2>
-                </div>
+                {검색중이다 ? null : (
+                  <div className="flex flex-col gap-1">
+                    <h2 className="flex flex-wrap items-center gap-2 text-sm font-medium text-gray-900">
+                      우리 아이 맞춤 검색
+                      <span className="text-xs font-normal text-[#825500]/70">어떤 아이와 함께하시나요?</span>
+                    </h2>
+                  </div>
+                )}
                 <PetTypeFilter
                   activeTab={activePetTypeTab}
                   onTabChange={handlePetTypeTabChange}
@@ -277,8 +312,11 @@ function Home() {
               </section>
             </div>
 
-            {/* Detail filter section */}
-            <section aria-label="세부 필터" data-nosnippet>
+            {/* Detail filter section
+                ⚠️ **검색 중 좁은 화면에서는 이 줄을 감추고 서랍으로 옮긴다.**
+                   펼쳐진 채로 두면 높이가 329px 이라 결과가 한참 아래에서 시작한다(실측).
+                   md 부터는 그대로 펼친다 — 자리가 나기 때문이다. */}
+            <section aria-label="세부 필터" data-nosnippet className={검색중이다 ? 'hidden md:block' : undefined}>
               <DetailFilter
                 isOpen={isDetailFilterOpen}
                 onToggle={handleDetailFilterToggle}
@@ -300,12 +338,41 @@ function Home() {
                   activeTab={activeProductTypeTab}
                   selectedSort={selectedSort}
                   onTabChange={handleProductTypeTabChange}
+                  // ⚠️ 서랍 단추는 **검색 중일 때만** 준다. 홈에서는 세부 필터가 펼쳐진 채로
+                  //    있는 게 낫다 — 둘러보러 온 화면이라서다(#954 와 같은 논리).
+                  onOpenMobileFilter={검색중이다 ? () => setIsMobileFilterOpen(true) : undefined}
+                  compactMobileToolbar={검색중이다}
                 />
               )}
             </section>
           </div>
           {/* 무한 스크롤 감지용 요소 */}
           <div ref={targetRef} className="h-10" aria-hidden="true" />
+
+          {/* 세부 필터 서랍 — 좁은 화면에서 검색 중일 때만 쓴다.
+              ⚠️ 늘 그려 두고 CSS 로 밀어 두는 것이 아니라 **검색 중일 때만 그린다.**
+                 서랍은 화면 전체를 덮는 `fixed` 요소라, 안 쓸 때 DOM 에 남겨 두면
+                 뒤 그늘이 눌림을 가로챌 위험이 있다. */}
+          {검색중이다 ? (
+            <MobileFilterSidebar
+              isOpen={isMobileFilterOpen}
+              onClose={() => setIsMobileFilterOpen(false)}
+              value={{
+                productStatus: selectedProductStatus,
+                price: selectedProductPrice,
+                sido: searchParams.get('addressSido'),
+                gugun: searchParams.get('addressGugun'),
+              }}
+              onApply={applyMobileFilter}
+              onReset={() => {
+                const params = new URLSearchParams(searchParams.toString())
+                ;['productStatuses', 'minPrice', 'maxPrice', 'addressSido', 'addressGugun'].forEach((key) =>
+                  params.delete(key)
+                )
+                push(`${pathname}?${params.toString()}`)
+              }}
+            />
+          ) : null}
 
           {isFetchingNextPage ? (
             <div className="flex items-center justify-center py-8" aria-live="polite">
