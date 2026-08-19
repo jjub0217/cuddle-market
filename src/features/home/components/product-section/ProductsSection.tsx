@@ -6,9 +6,10 @@ import Tabs from '@/components/Tabs'
 import { PRODUCT_TYPE_TABS, SORT_TYPE, type ProductTypeTabId } from '@/constants/constants'
 import type { Product } from '@/types/product'
 import { useFilterNavigation } from '@/hooks/useFilterNavigation'
-import { SearchX } from 'lucide-react'
+import { SearchX, SlidersHorizontal } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import Button from '@/components/commons/button/Button'
+import { SortDropdown } from './SortDropdown'
 
 interface ProductListHeaderProps {
   totalElements: number
@@ -28,6 +29,16 @@ interface ProductsSectionProps {
   activeTab: ProductTypeTabId
   selectedSort?: string
   onTabChange?: (tabId: string) => void
+  /** 좁은 화면에서 세부 필터 서랍을 연다. 없으면 그 단추를 안 그린다 */
+  onOpenMobileFilter?: () => void
+  /**
+   * 좁은 화면에서 툴바를 **접는다** — 정렬을 드롭다운으로, 세부 필터를 서랍 단추로.
+   *
+   * ⚠️ **검색 결과에서만 켠다.** 홈은 둘러보러 온 화면이라 정렬 넷이 그대로 보이는 게 낫다.
+   *    같은 폭에서 홈과 검색이 다른 얼굴을 갖는 셈인데, 이 저장소는 이미 그렇게 갈라 놓았다
+   *    (#954 — 검색 중에는 필터 묶음을 감춘다).
+   */
+  compactMobileToolbar?: boolean
 }
 
 export function ProductsSection({
@@ -36,6 +47,8 @@ export function ProductsSection({
   activeTab,
   selectedSort = '최신순',
   onTabChange,
+  onOpenMobileFilter,
+  compactMobileToolbar = false,
 }: ProductsSectionProps) {
   const { searchParams, pathname, push } = useFilterNavigation()
   const [onlyOnSale, setOnlyOnSale] = useState(false)
@@ -97,8 +110,29 @@ export function ProductsSection({
 
           <div className="bg-outline-variant/60 hidden h-4 w-px md:block" />
 
-          {/* 정렬 인라인 옵션 리스트 */}
-          <div className="flex items-center gap-2">
+          {/* 좁은 화면: [⚙ 필터] [최신순 ▾] — 앱의 목록 툴바와 같은 모양이다
+              (mobile/components/products/product-list-toolbar.tsx).
+              ⚠️ 넓은 화면(md~)에서는 아래 「정렬 인라인 옵션 리스트」가 대신 나온다.
+                 좁은 화면에서 넷을 늘어놓으면 「판매중」 토글과 부딪혀 두 줄로 접혔다. */}
+          {/* ⚠️ 값(크기·간격·색)은 앱 툴바에서 그대로 가져왔다 —
+                 mobile/components/products/product-list-toolbar.tsx 의 iconButton · sortTrigger · right.
+                 **앱에는 테두리도 배경도 없다.** 아이콘 하나와 글자뿐이다. */}
+          <div className={cn('items-center gap-1 md:hidden', compactMobileToolbar ? 'flex' : 'hidden')}>
+            {onOpenMobileFilter ? (
+              <button
+                type="button"
+                aria-label="세부 필터"
+                onClick={onOpenMobileFilter}
+                className="flex size-8 cursor-pointer items-center justify-center"
+              >
+                <SlidersHorizontal size={18} strokeWidth={2} className="text-gray-600" aria-hidden="true" />
+              </button>
+            ) : null}
+            <SortDropdown selectedSort={selectedSort} onSortChange={handleSortChange} />
+          </div>
+
+          {/* 정렬 인라인 옵션 리스트 — 접은 툴바일 때만 md 부터 나온다 */}
+          <div className={cn('items-center gap-2 md:flex', compactMobileToolbar ? 'hidden' : 'flex')}>
             {SORT_TYPE.map((sort, idx) => {
               const isActive = selectedSort === sort.label
               return (

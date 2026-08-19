@@ -30,6 +30,10 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   //      그 밖        72
   //
   // ⚠️ pt-18 = 4.5rem = 72px 이다. 헤더 높이(py-3 + h-12 = 72)와 **같은 값이어야 한다.**
+  // ⚠️ **홈은 0이다** — 히어로가 헤더 뒤까지 차오르기 때문이다.
+  //    검색 중에는 히어로를 안 그리므로(#962) 그만큼을 **홈 안에서** 채운다(Home.tsx).
+  //    여기서 `useSearchParams()` 로 검색 여부를 보면 **이 레이아웃을 쓰는 모든 화면이
+  //    서버에서 안 그려져** /auth/login 의 정적 빌드가 깨진다(실제로 한 번 깨뜨렸다).
   const isHome = pathname === ROUTES.HOME
   const headerHiddenMobile = isHeaderHiddenMobile(pathname)
   const paddingTopClass = isHome ? 'pt-0' : headerHiddenMobile ? 'pt-0 lg:pt-18' : 'pt-18'
