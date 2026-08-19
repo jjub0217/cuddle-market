@@ -438,7 +438,7 @@ function MyPage() {
       <div className="pb-4xl bg-gray-100/30 pt-0 md:bg-transparent md:pt-8">
         <h1 className="sr-only">마이페이지</h1>
         <div className={cn(PAGE_CONTAINER_MD, 'flex flex-col gap-3.5 md:flex-row md:gap-8')}>
-          <div className="flex flex-col gap-2 p-2 md:p-0">
+          <div className="flex flex-col gap-2 px-4 py-2 md:p-0">
             {/* 모바일: 압축 프로필 카드 (클릭 시 풀스크린 진입) */}
             <button
               type="button"
@@ -635,7 +635,7 @@ function MyPage() {
             </AnimatePresence>
             {(effectiveNav === 'nav-sales' || effectiveNav === 'nav-purchases') &&
             (activeMyPageTab === 'tab-sales' || activeMyPageTab === 'tab-purchases') ? (
-              <div className="px-5 md:px-0">
+              <div className="px-4 md:px-0">
                 <Tabs
                   tabs={tradeStatusTabs}
                   activeTab={activeTradeStatus}

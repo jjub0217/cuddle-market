@@ -179,10 +179,19 @@ export default function ProfileData({
     e.target.value = ''
   }
 
+  // ⚠️ **좁은 화면에서는 좌우 16px 이다**(#965). 헤더 로고도 16 이라 글자가 한 줄로 선다.
+  //    예전에는 20 이라 4px 어긋났다. 값은 `PAGE_CONTAINER`(px-4)와 같은 16px 이다.
+  //
+  // ⚠️ **띠 자체는 화면 끝까지 차야 한다.** 좁은 화면에서 이 상자는 배경이 흰 띠이고
+  //    아래에 구분선(border-b)이 그어진다. 바깥 상자에 여백을 주면 띠와 선이 양옆에서
+  //    잘린다 — 그래서 **안쪽 여백만** 옮겼다.
+  //
+  // ⚠️ `md:px-5` 는 데스크탑 카드 안쪽 여백이라 20 그대로 둔다. 거기는 「로고와 한 줄」이
+  //    아니라 「카드 안쪽 숨통」이라 질문이 다르다.
   return (
     <aside
       aria-label="프로필"
-      className="md:bg-surface/95 border-outline-variant/40 flex h-fit flex-col border-b bg-white px-5 py-5 md:max-w-72 md:min-w-72 md:rounded-xl md:border md:border-b"
+      className="md:bg-surface/95 border-outline-variant/40 flex h-fit flex-col border-b bg-white px-4 py-5 md:max-w-72 md:min-w-72 md:rounded-xl md:border md:border-b md:px-5"
     >
       <AnimatePresence>
         {imageUpdateError ? (
