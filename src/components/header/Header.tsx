@@ -6,7 +6,6 @@ import Logo from '../Logo'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ROUTES } from '@/constants/routes'
-import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { isHeaderHiddenMobile } from '@/components/header/isHeaderHiddenMobile'
 import { Suspense, useEffect, useState, useSyncExternalStore } from 'react'
 import IconButton from '@/components/commons/button/IconButton'
@@ -73,7 +72,6 @@ export default function Header() {
   //
   // ⚠️ 이것은 자바스크립트로 재는 값이라 첫 그림이 한 번 모바일로 나왔다 바뀐다(#614 집안).
   //    CSS 로 옮기는 것은 별도로 다룬다 — 여기서는 숫자만 맞춘다.
-  const isDesktop = useMediaQuery('(min-width: 1024px)')
   const [isSideOpen, setIsSideOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
@@ -86,12 +84,14 @@ export default function Header() {
   //    헤더가 통째로 없다가 나중에 나타났다(위에 흰 자리가 잠깐 보였다).
   //    이제 경로만 보고 `hidden lg:flex` 를 붙인다 — 경로는 서버도 안다.
   const hideHeaderMobile = isHeaderHiddenMobile(pathname)
-  const hideSearchBarMobile =
-    !isDesktop &&
-    (HIDE_SEARCHBAR_MOBILE_PATHS.includes(pathname) || HIDE_SEARCHBAR_MOBILE_PATTERNS.some((pattern) => pattern.test(pathname)))
   const hideSearchBarAlways =
     HIDE_SEARCHBAR_ALWAYS_PATHS.includes(pathname) || HIDE_SEARCHBAR_ALWAYS_PATTERNS.some((pattern) => pattern.test(pathname))
-  const hideSearchBar = hideSearchBarMobile || hideSearchBarAlways
+  const hideSearchBarMobileOnly =
+    HIDE_SEARCHBAR_MOBILE_PATHS.includes(pathname) || HIDE_SEARCHBAR_MOBILE_PATTERNS.some((pattern) => pattern.test(pathname))
+  // 데스크탑 검색칸 / 모바일 검색 아이콘을 각각 그릴지. **폭이 아니라 경로만 본다** —
+  // 폭은 CSS 가 가린다(`hidden lg:block` · `lg:hidden`).
+  const showDesktopSearch = !hideSearchBarAlways
+  const showMobileSearch = !hideSearchBarAlways && !hideSearchBarMobileOnly
   const hideMenuButton = HIDE_MENU_BUTTON_PATHS.includes(pathname)
   const isMinimalHeader = MINIMAL_HEADER_PATHS.includes(pathname)
 
@@ -136,8 +136,8 @@ export default function Header() {
             {/* 왼쪽: 로고 + 데스크탑 메뉴 */}
             <div className="flex shrink-0 items-center gap-8 lg:gap-12">
               <Logo />
-              {isDesktop && !isMinimalHeader ? (
-                <nav className="flex items-center gap-8" aria-label="주 메뉴">
+              {!isMinimalHeader ? (
+                <nav className="hidden items-center gap-8 lg:flex" aria-label="주 메뉴">
                   <Link
                     href={ROUTES.HOME}
                     className={cn(
@@ -169,13 +169,28 @@ export default function Header() {
               ) : null}
             </div>
 
-            {/* 가운데: 검색바 (lg+에서 중앙 배치). 검색바가 숨겨진 경우엔 spacer로 우측 컨트롤을 끝으로 push */}
-            {!hideSearchBar && isDesktop ? (
-              <div className="mx-auto max-w-130 flex-1">
-                <Suspense>
+            {/* 가운데: 검색칸(lg+ 중앙 배치). 없을 때는 spacer 로 오른쪽 컨트롤을 끝으로 민다.
+                ⚠️ **좁은 화면에서도 DOM 에는 둔다**(#614). 예전에는 `isDesktop` 으로 갈라 그려서
+                   서버가 늘 모바일로 보냈고, **데스크탑 첫 그림이 모바일 헤더였다.** */}
+            {showDesktopSearch ? (
+              <div className="flex-1 lg:mx-auto lg:max-w-130">
+                {/* ⚠️ **빈 fallback 을 두면 안 된다**(#614). SearchBar 는 `useSearchParams` 를 써서
+                    이 아래가 **서버에서 안 그려진다.** 그래서 데스크탑 첫 그림에 검색칸 자리가
+                    통째로 비었다가 뒤늦게 채워졌다. 같은 크기의 빈 칸을 미리 깔아 둔다. */}
+                <Suspense
+                  fallback={
+                    <div
+                      aria-hidden="true"
+                      className={cn(
+                        'hidden h-10 rounded-full bg-white lg:block',
+                        showSolid ? 'border border-[#bfa890]/40' : 'border-0'
+                      )}
+                    />
+                  }
+                >
                   <SearchBar
                     id="search-desktop"
-                    className="h-10"
+                    className="hidden h-10 lg:flex"
                     inputClass="text-sm py-0 bg-white"
                     wrapperClassName={cn('rounded-full bg-white', showSolid ? 'border border-[#bfa890]/40' : 'border-0')}
                   />
@@ -188,8 +203,8 @@ export default function Header() {
             {/* 오른쪽: 검색 토글(모바일) + 사용자 컨트롤 — 미니멀 헤더에서는 숨김 */}
             {!isMinimalHeader ? (
               <div className="flex shrink-0 items-center gap-1 lg:gap-4">
-                {!hideSearchBar && !isDesktop ? (
-                  <IconButton aria-label="검색" onClick={() => setIsSearchOpen((prev) => !prev)}>
+                {showMobileSearch ? (
+                  <IconButton aria-label="검색" className="lg:hidden" onClick={() => setIsSearchOpen((prev) => !prev)}>
                     <Search className="text-header-icon" />
                   </IconButton>
                 ) : null}
@@ -205,9 +220,7 @@ export default function Header() {
 
         </div>
       </header>
-      {!hideSearchBar ? (
-        <MobileSearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
-      ) : null}
+      {showMobileSearch ? <MobileSearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} /> : null}
       <MobileNavigation isOpen={isSideOpen} onClose={() => setIsSideOpen(false)} />
       {/* ⚠️ 전체화면 오버레이는 반드시 </header> 밖에 둔다.
           헤더에는 backdrop-blur-sm(기준 상자를 만든다)과 z-30(쌓임 맥락을 만든다)이

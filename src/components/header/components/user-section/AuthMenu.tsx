@@ -3,7 +3,6 @@
 import React from 'react'
 import Link from 'next/link'
 import { ROUTES } from '@/constants/routes'
-import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { Menu } from 'lucide-react'
 import IconButton from '@/components/commons/button/IconButton'
 
@@ -14,19 +13,21 @@ interface AuthMenuProps {
 }
 
 export default function AuthMenu({ setIsSideOpen, hideMenuButton = false }: AuthMenuProps) {
-  // 「여기부터 데스크탑」 — Header.tsx 와 **같은 값**이어야 한다(#961).
-  // 여기만 1280 으로 남으면 1024~1280 에서 데스크탑 헤더인데 로그인 자리에만
-  // 햄버거 단추가 남는다.
-  const isDesktop = useMediaQuery('(min-width: 1024px)')
-  return isDesktop ? (
-    <div className="flex items-center">
-      <Link href={ROUTES.LOGIN} className="text-sm font-bold text-primary/70 transition-colors hover:text-primary">
-        로그인 / 회원가입
-      </Link>
-    </div>
-  ) : hideMenuButton ? null : (
-    <IconButton aria-label="메뉴" onClick={() => setIsSideOpen((prev) => !prev)}>
-      <Menu className="text-header-icon" />
-    </IconButton>
+  // ⚠️ **폭으로 갈라 그리지 않는다**(#614). 예전에는 `useMediaQuery` 로 재서 한쪽만 그렸는데,
+  //    서버는 폭을 모르니 늘 햄버거를 보냈고 **데스크탑 첫 그림에 햄버거가 잠깐 보였다.**
+  //    둘 다 그려 두고 CSS 로 가린다 — 기준은 lg(1024), 헤더의 다른 조각과 같은 값이다(#961).
+  return (
+    <>
+      <div className="hidden items-center lg:flex">
+        <Link href={ROUTES.LOGIN} className="text-sm font-bold text-primary/70 transition-colors hover:text-primary">
+          로그인 / 회원가입
+        </Link>
+      </div>
+      {hideMenuButton ? null : (
+        <IconButton aria-label="메뉴" className="lg:hidden" onClick={() => setIsSideOpen((prev) => !prev)}>
+          <Menu className="text-header-icon" />
+        </IconButton>
+      )}
+    </>
   )
 }
