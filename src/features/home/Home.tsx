@@ -341,6 +341,7 @@ function Home() {
                   // ⚠️ 서랍 단추는 **검색 중일 때만** 준다. 홈에서는 세부 필터가 펼쳐진 채로
                   //    있는 게 낫다 — 둘러보러 온 화면이라서다(#954 와 같은 논리).
                   onOpenMobileFilter={검색중이다 ? () => setIsMobileFilterOpen(true) : undefined}
+                  hasDetailFilter={hasDetailFilter}
                   compactMobileToolbar={검색중이다}
                 />
               )}
