@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ROUTES } from '@/constants/routes'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
+import { isHeaderHiddenMobile } from '@/components/header/isHeaderHiddenMobile'
 import { Suspense, useEffect, useState, useSyncExternalStore } from 'react'
 import IconButton from '@/components/commons/button/IconButton'
 import SearchBar from '@/components/header/components/SearchBar'
@@ -20,19 +21,6 @@ import MobileNotificationsOverlay from '@/components/header/components/MobileNot
 const COMMUNITY_DETAIL = /^\/community\/\d+(\/[^/]+)?$/
 const COMMUNITY_EDIT = /^\/community\/\d+\/edit$/
 const PRODUCT_EDIT = /^\/products\/\d+\/edit$/
-
-// Header 숨김 패턴 (모바일에서만 숨김)
-const CHAT_ROOM = /^\/chat(\/\d+)?$/
-const HIDE_HEADER_MOBILE_PATTERNS = [
-  COMMUNITY_EDIT,
-  PRODUCT_EDIT,
-  CHAT_ROOM,
-  new RegExp(`^${ROUTES.COMMUNITY_POST}$`),
-  new RegExp(`^${ROUTES.PRODUCT_POST}$`),
-  new RegExp(`^${ROUTES.NOTIFICATIONS}$`),
-  new RegExp(`^${ROUTES.LOGIN}$`),
-  new RegExp(`^${ROUTES.SIGNUP}$`),
-]
 
 // SearchBar 숨김 경로 - 모바일만 (정적 경로)
 const HIDE_SEARCHBAR_MOBILE_PATHS: string[] = [ROUTES.MYPAGE]
@@ -59,7 +47,7 @@ const MINIMAL_HEADER_PATHS: string[] = [ROUTES.LOGIN, ROUTES.SIGNUP, ROUTES.FIND
 const HIDE_SEARCHBAR_MOBILE_PATTERNS = [/^\/user-profile\/\d+$/]
 
 // SearchBar 숨김 패턴 - 항상 (동적 경로)
-const HIDE_SEARCHBAR_ALWAYS_PATTERNS = [COMMUNITY_DETAIL, COMMUNITY_EDIT, /^\/products\/\d+\/edit$/, /^\/chat\/\d+$/]
+const HIDE_SEARCHBAR_ALWAYS_PATTERNS = [COMMUNITY_DETAIL, COMMUNITY_EDIT, PRODUCT_EDIT, /^\/chat\/\d+$/]
 
 // 홈 페이지에서 hero를 헤더 뒤로 깔기 위한 스크롤 임계값 (px)
 // 80px 정도 스크롤하면 솔리드 배경으로 전환 — 헤더 자신의 높이만큼
@@ -92,8 +80,12 @@ export default function Header() {
   const pathname = usePathname()
 
   // 가시성 계산
-  const hideHeaderMobile = !isDesktop && HIDE_HEADER_MOBILE_PATTERNS.some((pattern) => pattern.test(pathname))
-  const showHeader = !hideHeaderMobile
+  //
+  // ⚠️ **헤더를 감추는 것은 CSS 가 한다**(#614). 예전에는 `!isDesktop && …` 로 재서
+  //    `return null` 했는데, **서버는 화면 폭을 모른다.** 그래서 데스크탑에서도 첫 그림에는
+  //    헤더가 통째로 없다가 나중에 나타났다(위에 흰 자리가 잠깐 보였다).
+  //    이제 경로만 보고 `hidden lg:flex` 를 붙인다 — 경로는 서버도 안다.
+  const hideHeaderMobile = isHeaderHiddenMobile(pathname)
   const hideSearchBarMobile =
     !isDesktop &&
     (HIDE_SEARCHBAR_MOBILE_PATHS.includes(pathname) || HIDE_SEARCHBAR_MOBILE_PATTERNS.some((pattern) => pattern.test(pathname)))
@@ -121,40 +113,13 @@ export default function Header() {
     return () => window.removeEventListener('cuddle:open-search', openMobileSearch)
   }, [])
 
-  // 헤더 높이를 CSS 변수로 설정
-  // 홈 페이지에서는 0으로 설정해 hero가 헤더 뒤까지 차오르도록 함
-  useEffect(() => {
-    if (!showHeader) {
-      document.documentElement.style.setProperty('--header-height', '0px')
-      return () => {
-        document.documentElement.style.removeProperty('--header-height')
-      }
-    }
-
-    const baseHeight = 72
-
-    let nextHeight: number
-    if (isHome) {
-      // 홈: hero가 헤더 영역까지 차지하도록 padding-top 0
-      nextHeight = 0
-    } else {
-      nextHeight = baseHeight
-    }
-
-    document.documentElement.style.setProperty('--header-height', `${nextHeight}px`)
-
-    return () => {
-      document.documentElement.style.removeProperty('--header-height')
-    }
-  }, [showHeader, isHome])
-
-  if (!showHeader) return null
-
   return (
     <>
       <header
         className={cn(
-          'fixed top-0 flex w-full items-center justify-center py-3 transition-colors duration-300',
+          'fixed top-0 w-full items-center justify-center py-3 transition-colors duration-300',
+          // 좁은 화면에서 감추는 경로 — 자바스크립트가 아니라 CSS 로 가린다(위 주석)
+          hideHeaderMobile ? 'hidden lg:flex' : 'flex',
           // 홈 페이지 상단: 투명 (hero 위에 떠있음). 그 외: 솔리드 (cream bg + 보더)
           showSolid
             ? 'border-outline-variant/40 bg-surface/95 border-b backdrop-blur-sm'

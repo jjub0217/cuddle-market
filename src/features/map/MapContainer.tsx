@@ -89,7 +89,10 @@ export default function MapContainer() {
         onLoad={() => setMapReady(true)}
       />
 
-      <div className="flex h-[calc(100vh-var(--header-height,72px)-56px)] flex-col xl:h-[calc(100vh-var(--header-height,72px))]">
+      {/* ⚠️ **하단 탭바를 빼는 기준은 lg(1024)다** — 탭바(BottomNav 의 `lg:hidden`)와
+          **늘 같은 값**이어야 한다(#959). 여기만 xl(1280) 이라 1024~1279 에서
+          **탭바는 없는데 그 높이(56px)만큼 지도 아래가 비어 있었다**(실측). */}
+      <div className="flex h-[calc(100vh-var(--header-height,72px)-56px)] flex-col lg:h-[calc(100vh-var(--header-height,72px))]">
         <CategoryTabs />
 
         <div className="flex flex-1 overflow-hidden">
