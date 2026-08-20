@@ -49,7 +49,14 @@ export default function MobilePlaceListOverlay({ isOpen, onClose }: MobilePlaceL
       className={cn(
         // ⚠️ 화면을 다 덮지 않고 **아래 절반**만 차지한다. 위쪽 지도가 보여야
         //    「어디를 보고 있는지」가 남는다(사용자 시안).
-        'fixed inset-x-0 bottom-0 flex h-1/2 flex-col rounded-t-2xl bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.15)] transition-transform duration-300 ease-out md:hidden',
+        //
+        // ⚠️ **하단 탭바 위에서 멈춘다.** 예전에는 `bottom-0` 이라 탭바(높이 57)를 덮어
+        //    목록을 열면 다른 탭으로 갈 길이 사라졌다(실측).
+        //    ⚠️ 값은 탭바와 **같은 규칙**이어야 한다 — BottomNav 는 `h-14`(56) 에
+        //       **위 테두리 1px** 과 기기 아래 안전영역(env(safe-area-inset-bottom))이 더해져
+        //       실제로는 57 + 안전영역이다(실측). 셋을 그대로 더한다.
+        'fixed inset-x-0 flex h-1/2 flex-col rounded-t-2xl bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.15)] transition-transform duration-300 ease-out md:hidden',
+        'bottom-[calc(3.5rem+1px+env(safe-area-inset-bottom))]',
         Z_INDEX.MODAL,
         isOpen ? 'translate-y-0' : 'translate-y-full'
       )}
