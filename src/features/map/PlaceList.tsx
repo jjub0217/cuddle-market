@@ -6,6 +6,7 @@ import { CATEGORIES } from '@/constants/map'
 import { getPlaceDetail } from '@/lib/api/places'
 import { FiStar } from 'react-icons/fi'
 import Spinner from '@/components/commons/spinner/Spinner'
+import { useToast } from '@/hooks/useToast'
 
 // 장소 목록의 **알맹이** — 로딩·빈 화면·줄들.
 //
@@ -93,6 +94,7 @@ export function PlaceList({ onSelect }: PlaceListProps) {
   const mapCenter = useMapStore((s) => s.mapCenter)
   const isLoading = useMapStore((s) => s.isLoading)
   const setSelectedPlace = useMapStore((s) => s.setSelectedPlace)
+  const { error } = useToast()
 
   const categoryLabel = getCategoryLabel(selectedCategory)
 
@@ -102,7 +104,13 @@ export function PlaceList({ onSelect }: PlaceListProps) {
       setSelectedPlace(detail)
       onSelect?.()
     } catch {
-      // 상세 조회 실패
+      // ⚠️ **조용히 삼키면 「눌러도 아무 일이 없다」로 보인다.** 예전에는 빈 catch 였다.
+      //    특히 좁은 화면에서는 목록도 그대로 남아 있어 눌린 줄도 모른다(키미 리뷰 지적).
+      //    ⚠️ 목록은 **닫지 않는다** — 실패했으니 고른 것을 취소하고 그 자리에 남는 게 맞다.
+      error({
+        title: '장소 정보를 불러오지 못했습니다.',
+        content: '잠시 후 다시 시도해주세요.',
+      })
     }
   }
 
