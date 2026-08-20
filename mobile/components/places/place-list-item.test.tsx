@@ -3,7 +3,7 @@ import React from 'react';
 
 import type { PlaceListItem as PlaceListItemType } from '@/lib/places/types';
 
-import { PlaceListItem } from './place-list-item';
+import { PlaceListItem, THUMB_IMAGE_TEST_ID, THUMB_TEST_ID } from './place-list-item';
 
 // ⚠️ @testing-library/react-native 14의 render·fireEvent는 기다려야 한다.
 //    안 기다리면 fireEvent는 오류 없이 옛 값을 준다 — 조용히 틀린 것을 통과시킨다(mobile/AGENTS.md).
@@ -69,6 +69,34 @@ it('병원이 아니면(detail이 null) 「24시」 표시가 안 보인다', as
   await render(<PlaceListItem place={place} onPress={NOOP} />);
 
   expect(screen.queryByText('24시')).toBeNull();
+});
+
+// #978 — 사진이 없으면 회색 빈 상자를 남기지 않는다. 이 화면의 장소는 정부 공개 API 에서
+// 와서 사진이 거의 없어(22줄 중 0줄), 자리를 남기면 뜻 없는 네모만 늘어선다.
+it('사진이 없으면 사진 자리가 아예 안 그려진다', async () => {
+  await render(<PlaceListItem place={HOSPITAL_24H} onPress={NOOP} />);
+
+  expect(screen.queryByTestId(THUMB_TEST_ID)).toBeNull();
+});
+
+it('사진이 있으면 사진 자리가 그려진다', async () => {
+  const place: PlaceListItemType = { ...HOSPITAL_24H, imageUrl: 'https://cdn.example/1.webp' };
+  await render(<PlaceListItem place={place} onPress={NOOP} />);
+
+  expect(screen.getByTestId(THUMB_TEST_ID)).toBeTruthy();
+});
+
+it('사진 로드에 실패하면 자리가 사라진다', async () => {
+  const place: PlaceListItemType = { ...HOSPITAL_24H, imageUrl: 'https://cdn.example/깨진.webp' };
+  await render(<PlaceListItem place={place} onPress={NOOP} />);
+
+  // ⚠️ expo-image 의 onError 는 event.nativeEvent 를 꺼내 쓴다(ExpoImage.tsx 의
+  //    withDeprecatedNativeEvent). 빈 손으로 쏘면 시험이 «Cannot convert undefined...» 로 죽는다.
+  await fireEvent(screen.getByTestId(THUMB_IMAGE_TEST_ID), 'error', {
+    nativeEvent: { error: '못 받았다' },
+  });
+
+  expect(screen.queryByTestId(THUMB_TEST_ID)).toBeNull();
 });
 
 it('누르면 onPress가 그 장소의 id로 불린다', async () => {
