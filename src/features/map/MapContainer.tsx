@@ -131,23 +131,16 @@ export default function MapContainer() {
               </div>
             )}
 
-            {/* ⚠️ 좁은 화면에만 둔다. 데스크탑에는 왼쪽에 붙박이 목록이 이미 있다(#976).
-
-                ⚠️ **자리를 셋으로 나눠 쓴다.** 처음에 가운데(`left-1/2`)에 두었다가
-                   「현 지도에서 검색」과 **정확히 겹쳤다** — 그쪽도 가운데·bottom-16 이다.
-
-                     왼쪽    목록 보기            ← 여기
-                     가운데   현 지도에서 검색      SearchInMapButton
-                     오른쪽   내 위치             MyLocationButton
-
-                ⚠️ 높이도 그 둘과 **같은 규칙**이어야 한다. 장소를 고르면 아래에서 상세
-                   카드가 올라오므로 셋 다 그만큼 비켜선다(`bottom-48`). */}
+            {/* 좁은 화면의 「목록 보기」 — 지도 **아래 띠**로 둔다(#976).
+                ⚠️ 처음에는 가운데 떠 있는 단추였는데 「현 지도에서 검색」과 **정확히 겹쳤다**
+                   (둘 다 `left-1/2 · bottom-16`). 띠로 내리면 그 둘은 띠 위에 떠 있게 되어
+                   자리를 다투지 않는다.
+                ⚠️ 데스크탑에는 왼쪽에 붙박이 목록이 이미 있어 안 그린다. */}
             <button
               type="button"
               onClick={() => setListOpen(true)}
               className={cn(
-                'absolute left-4 cursor-pointer rounded-full bg-white px-4 py-2.5 text-sm font-medium text-gray-800 shadow-md md:hidden',
-                selectedPlace ? 'bottom-48' : 'bottom-16',
+                'absolute inset-x-0 bottom-0 flex h-11 cursor-pointer items-center justify-center border-t border-gray-200 bg-white text-sm font-medium text-gray-800 md:hidden',
                 Z_INDEX.BUTTON
               )}
             >

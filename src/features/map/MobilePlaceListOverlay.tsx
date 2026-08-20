@@ -47,7 +47,9 @@ export default function MobilePlaceListOverlay({ isOpen, onClose }: MobilePlaceL
       aria-label={`${categoryLabel} 목록`}
       aria-hidden={!isOpen}
       className={cn(
-        'fixed inset-0 flex flex-col bg-white transition-transform duration-300 ease-out md:hidden',
+        // ⚠️ 화면을 다 덮지 않고 **아래 절반**만 차지한다. 위쪽 지도가 보여야
+        //    「어디를 보고 있는지」가 남는다(사용자 시안).
+        'fixed inset-x-0 bottom-0 flex h-1/2 flex-col rounded-t-2xl bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.15)] transition-transform duration-300 ease-out md:hidden',
         Z_INDEX.MODAL,
         isOpen ? 'translate-y-0' : 'translate-y-full'
       )}
