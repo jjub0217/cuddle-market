@@ -3,6 +3,7 @@
 import { useMapStore } from '@/store/mapStore'
 // import { ANIMAL_TYPE_LABELS } from '@/constants/map'  // TODO: 특수동물 진료 데이터 추가 시 활성화
 import { FiPhone, FiMapPin, FiStar, FiX } from 'react-icons/fi'
+import { hasPlaceRating } from '@cuddle/shared'
 
 export default function PlaceDetailSidebar() {
   const selectedPlace = useMapStore((s) => s.selectedPlace)
@@ -84,7 +85,7 @@ export default function PlaceDetailSidebar() {
 
         </div>
 
-        {selectedPlace.reviewSummary && (
+        {hasPlaceRating(selectedPlace.reviewSummary) && (
           <div className="flex items-center gap-2 border-t border-gray-100 pt-4">
             <FiStar className="h-4 w-4 text-yellow-400" />
             <span className="font-medium">

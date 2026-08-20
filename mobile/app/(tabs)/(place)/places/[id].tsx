@@ -1,3 +1,4 @@
+import { hasPlaceRating } from '@cuddle/shared';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Clock, MapPin, Phone, Star } from 'lucide-react-native';
@@ -13,8 +14,10 @@ import { usePlaceDetail } from '@/lib/places/use-place-detail';
 // 상품 상세(app/(tabs)/(home)/products/[id].tsx)와 같은 결로 짠다 — 헤더는 늘 보이고
 // 로딩·오류·본문만 갈아 끼운다. 지도는 이 화면 몫이 아니다(다른 사람이 만든다 — import 안 함).
 //
-// ⚠️ null인 항목(전화·영업시간·별점)은 빈 줄로 남기지 않고 아예 안 그린다.
+// ⚠️ 값이 없는 항목(전화·영업시간·별점)은 빈 줄로 남기지 않고 아예 안 그린다.
 //    서버가 그 값들을 자주 비워 보낸다(types.ts 주석).
+//    별점만 판별이 다르다 — reviewSummary 는 후기가 없어도 null 이 아니라 0 으로 채워 온다.
+//    그래서 hasPlaceRating(@cuddle/shared)으로 「후기가 있는가」를 묻는다(#982).
 
 /** 목록 조각(place-list-item.tsx)의 별 색과 같은 값. 새로 짓지 않는다. */
 const STAR_COLOR = colors.rating;
@@ -77,7 +80,7 @@ export default function PlaceDetailScreen() {
             <Text style={styles.categoryTagText}>{categoryLabel(place.category)}</Text>
           </View>
 
-          {place.reviewSummary ? (
+          {hasPlaceRating(place.reviewSummary) ? (
             <View style={styles.row}>
               <Star size={14} color={STAR_COLOR} fill={STAR_COLOR} />
               <Text style={styles.infoText}>

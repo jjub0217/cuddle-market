@@ -44,6 +44,18 @@ it('후기 요약이 null이면 별점이 안 보인다', async () => {
   expect(screen.queryByText(/\(\d+\)/)).toBeNull();
 });
 
+// #982 — 서버는 후기가 없어도 reviewSummary 를 null 이 아니라 0 으로 채워 보낸다.
+// 이것을 못 거르면 목록 전체에 뜻 없는 「0.0」이 뜬다(운영 실측: 서울 병원 100곳이 전부 0).
+it('후기가 0개면 별점이 안 보인다', async () => {
+  const place: PlaceListItemType = {
+    ...HOSPITAL_24H,
+    reviewSummary: { reviewCount: 0, averageRating: 0 },
+  };
+  await render(<PlaceListItem place={place} onPress={NOOP} />);
+
+  expect(screen.queryByText('0.0 (0)')).toBeNull();
+});
+
 it('24시 병원이면 「24시」 표시가 보인다', async () => {
   await render(<PlaceListItem place={HOSPITAL_24H} onPress={NOOP} />);
 

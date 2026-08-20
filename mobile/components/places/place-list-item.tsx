@@ -1,3 +1,4 @@
+import { hasPlaceRating } from '@cuddle/shared';
 import { Image } from 'expo-image';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -64,7 +65,7 @@ export function PlaceListItem({ place, onPress }: Props) {
 
         {/* 별점(있을 때만)과 24시 뱃지(병원 + 실측 true일 때만)를 한 줄에. */}
         <View style={styles.metaRow}>
-          {place.reviewSummary ? (
+          {hasPlaceRating(place.reviewSummary) ? (
             <View style={styles.rating}>
               <Star size={12} color={STAR_COLOR} fill={STAR_COLOR} />
               <Text style={styles.ratingText}>
