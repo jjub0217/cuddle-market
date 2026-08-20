@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useContext, useImperativeHandle, type ReactNode } from 'react';
+import { forwardRef, useCallback, useImperativeHandle, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -8,7 +8,6 @@ import {
   View,
 } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -74,20 +73,6 @@ export const PlaceSheet = forwardRef<PlaceSheetRef, Props>(function PlaceSheet(
   ref
 ) {
   const { height: screenHeight } = useWindowDimensions();
-  /**
-   * 목록 끝이 **하단 탭바에 가리지 않게** 비켜 줄 높이(#979).
-   *
-   * 시트는 `bottom: 0` 이고 높이는 화면의 0.7 이라, 목록의 마지막 줄이 탭바 뒤로 들어갔다.
-   * 아래 여백이 24 뿐이어서 탭바(56 + 안전영역)를 못 비켰다.
-   *
-   * ⚠️ **`useBottomTabBarHeight()` 를 쓰면 안 된다.** 그 훅은 탭 밖에서 **오류를 던진다** —
-   *    이 시트만 따로 그리는 시험(place-sheet.test.tsx)이 그 자리에서 죽었다.
-   *    맥락을 직접 읽고, 없으면 실측값으로 물러선다.
-   *
-   * ⚠️ 물러서는 값 56 은 `app/(tabs)/_layout.tsx` 의 `TAB_BAR_HEIGHT` 다.
-   *    **거기를 바꾸면 여기도 바꾼다**(toast-host.tsx 도 같은 약속을 쓴다).
-   */
-  const tabBarHeight = useContext(BottomTabBarHeightContext) ?? 56;
   const expandedHeight = Math.round(screenHeight * EXPANDED_RATIO);
   /** 접혔을 때 아래로 내려가 있는 거리. 0이면 완전히 펼쳐진 상태다. */
   const hiddenAmount = expandedHeight - COLLAPSED;
@@ -166,7 +151,7 @@ export const PlaceSheet = forwardRef<PlaceSheetRef, Props>(function PlaceSheet(
             data={places}
             keyExtractor={(item) => String(item.id)}
             renderItem={renderItem}
-            contentContainerStyle={[styles.list, { paddingBottom: styles.list.paddingBottom + tabBarHeight }]}
+            contentContainerStyle={styles.list}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           />
