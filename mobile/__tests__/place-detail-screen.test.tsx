@@ -84,6 +84,23 @@ beforeEach(() => {
   mock상세.error = null;
 });
 
+// #988 — RN 의 <Text> 는 기본이 선택 불가라 꾹 눌러도 복사가 안 된다.
+// 웹은 HTML 이라 저절로 되기 때문에 앱만 「고장」으로 보인다(#896 과 같은 종류).
+// 주소는 다른 지도 앱에 붙여 넣어 길을 찾는 값이라 복사 수요가 가장 크다.
+it('읽는 값(이름·주소·전화·영업시간)은 꾹 눌러 고를 수 있다', async () => {
+  mock상세.place = {
+    ...병원,
+    phone: '02-123-4567',
+    operatingHours: '평일 09:00 - 18:00',
+  };
+  await 화면을그린다();
+
+  expect(screen.getByText('멍냥 동물병원').props.selectable).toBe(true);
+  expect(screen.getByText('서울시 강남구 역삼동 123').props.selectable).toBe(true);
+  expect(screen.getByText('02-123-4567').props.selectable).toBe(true);
+  expect(screen.getByText('평일 09:00 - 18:00').props.selectable).toBe(true);
+});
+
 it('사진이 없으면 기본 그림을 그린다', async () => {
   await 화면을그린다();
 
