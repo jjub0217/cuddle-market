@@ -7,10 +7,13 @@ import MyLocationButton from './MyLocationButton'
 import SearchInMapButton from './SearchInMapButton'
 import NaverMap from './NaverMap'
 import PlaceListSidebar from './PlaceListSidebar'
+import MobilePlaceListOverlay from './MobilePlaceListOverlay'
 import PlaceDetailSidebar from './PlaceDetailSidebar'
 import PlaceDetailSlideCard from './PlaceDetailSlideCard'
 import { useMapStore, getFilterParams } from '@/store/mapStore'
 import { getPlaces } from '@/lib/api/places'
+import { Z_INDEX } from '@/constants/ui'
+import { cn } from '@/lib/utils/cn'
 import Spinner from '@/components/commons/spinner/Spinner'
 
 export default function MapContainer() {
@@ -23,6 +26,8 @@ export default function MapContainer() {
   const [mapReady, setMapReady] = useState(
     () => typeof window !== 'undefined' && Boolean(window.naver?.maps)
   )
+  // 좁은 화면의 장소 목록(#976). 데스크탑에는 붙박이 목록이 있어 이 상태를 안 쓴다.
+  const [listOpen, setListOpen] = useState(false)
   const clientId = process.env.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID
   const abortRef = useRef<AbortController | null>(null)
 
@@ -125,9 +130,22 @@ export default function MapContainer() {
               </div>
             )}
 
+            {/* ⚠️ 좁은 화면에만 둔다. 데스크탑에는 왼쪽에 붙박이 목록이 이미 있다(#976). */}
+            <button
+              type="button"
+              onClick={() => setListOpen(true)}
+              className={cn(
+                'absolute bottom-16 left-1/2 -translate-x-1/2 cursor-pointer rounded-full bg-white px-4 py-2.5 text-sm font-medium text-gray-800 shadow-md md:hidden',
+                Z_INDEX.BUTTON
+              )}
+            >
+              목록 보기
+            </button>
+
             <SearchInMapButton onSearch={() => { fetchPlaces(); setNeedsSearch(false) }} />
             <MyLocationButton />
             <PlaceDetailSlideCard />
+            <MobilePlaceListOverlay isOpen={listOpen} onClose={() => setListOpen(false)} />
           </div>
         </div>
       </div>
