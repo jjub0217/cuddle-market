@@ -1,6 +1,7 @@
 import { hasPlaceRating } from '@cuddle/shared';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from 'react';
 import { Clock, MapPin, Phone, Star } from 'lucide-react-native';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -24,6 +25,13 @@ const STAR_COLOR = colors.rating;
 /** 주소·전화·영업시간 아이콘. comment-row.tsx의 EllipsisVertical과 같은 회색. */
 const MUTED_ICON = colors.onSurfaceSubtle;
 
+// 사진이 없을 때 메우는 기본 그림. 웹의 public/images/placeholder-800.webp 를 그대로 옮겨 왔다
+// (상품 목록이 쓰던 것과 같은 그림이라 브랜드 결이 맞는다). 새로 짓지 않는다.
+//
+// ⚠️ 목록(place-list-item.tsx)은 반대로 **자리를 아예 없앤다**(#978). 거기는 72×72 가 22줄
+//    반복돼 같은 그림이 줄줄이 늘어서기 때문이다. 여기는 390×390 이 한 번뿐이라 메우는 쪽이 낫다.
+const PLACEHOLDER = require('@/assets/images/place-placeholder.webp');
+
 function categoryLabel(category: PlaceCategory): string {
   return CATEGORIES.find((item) => item.key === category)?.label ?? category;
 }
@@ -34,6 +42,8 @@ export default function PlaceDetailScreen() {
   const placeId = Number(id);
 
   const { place, loading, error } = usePlaceDetail(placeId);
+  // 사진 주소가 있어도 못 받아 올 수 있다. 그때도 기본 그림으로 메운다.
+  const [imageFailed, setImageFailed] = useState(false);
 
   const renderBody = () => {
     if (loading) {
@@ -64,13 +74,14 @@ export default function PlaceDetailScreen() {
     return (
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         <View style={styles.image}>
-          {place.imageUrl ? (
-            <Image
-              source={{ uri: place.imageUrl }}
-              style={styles.imageFill}
-              contentFit="cover"
-            />
-          ) : null}
+          <Image
+            // 표식을 상수로 빼서 export 하지 않는다 — expo-router 는 app/ 안의 것을 화면으로 본다.
+            testID="place-detail-image"
+            source={place.imageUrl && !imageFailed ? { uri: place.imageUrl } : PLACEHOLDER}
+            style={styles.imageFill}
+            contentFit="cover"
+            onError={() => setImageFailed(true)}
+          />
         </View>
 
         <View style={styles.section}>
@@ -150,7 +161,8 @@ const styles = StyleSheet.create({
   content: {
     paddingBottom: 32,
   },
-  // 로드 전/이미지 없음일 때의 회색 자리 — place-list-item.tsx의 thumb과 같은 색.
+  // 그림을 받는 동안 잠깐 보이는 회색 자리 — place-list-item.tsx의 thumb과 같은 색.
+  // 사진이 없어도 기본 그림이 덮으므로 회색이 그대로 남지는 않는다.
   image: {
     width: '100%',
     aspectRatio: 1,
