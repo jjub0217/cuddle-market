@@ -7,6 +7,7 @@ import { getPlaceDetail } from '@/lib/api/places'
 import { FiStar } from 'react-icons/fi'
 import Spinner from '@/components/commons/spinner/Spinner'
 import { useToast } from '@/hooks/useToast'
+import { hasPlaceRating } from '@cuddle/shared'
 
 // 장소 목록의 **알맹이** — 로딩·빈 화면·줄들.
 //
@@ -176,7 +177,7 @@ export function PlaceList({ onSelect }: PlaceListProps) {
                       </p>
                     )}
 
-                    {place.reviewSummary && place.reviewSummary.averageRating > 0 && (
+                    {hasPlaceRating(place.reviewSummary) && (
                       <div className="mt-1 flex items-center gap-1">
                         <FiStar className="h-3 w-3 text-yellow-400" />
                         <span className="text-xs text-gray-500">

@@ -3,6 +3,7 @@
 import { useMapStore } from '@/store/mapStore'
 import { FiPhone, FiClock, FiMapPin, FiStar, FiX } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
+import { hasPlaceRating } from '@cuddle/shared'
 
 export default function PlaceDetailSlideCard() {
   const selectedPlace = useMapStore((s) => s.selectedPlace)
@@ -77,7 +78,7 @@ export default function PlaceDetailSlideCard() {
               )}
             </div>
 
-            {selectedPlace.reviewSummary && (
+            {hasPlaceRating(selectedPlace.reviewSummary) && (
               <div className="mt-3 flex items-center gap-1.5">
                 <FiStar className="h-3.5 w-3.5 text-yellow-400" />
                 <span className="text-sm font-medium">
