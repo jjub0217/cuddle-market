@@ -32,7 +32,6 @@ export default function MapContainer() {
   const abortRef = useRef<AbortController | null>(null)
 
   const selectedCategory = useMapStore((s) => s.selectedCategory)
-  const selectedPlace = useMapStore((s) => s.selectedPlace)
   const activeFilters = useMapStore((s) => s.activeFilters)
   const mapBounds = useMapStore((s) => s.mapBounds)
   const isLoading = useMapStore((s) => s.isLoading)
