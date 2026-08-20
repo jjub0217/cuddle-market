@@ -93,8 +93,10 @@ export default function PlaceListSidebar() {
     }
   }
 
+  // ⚠️ **폭은 여기서 정하지 않는다.** 부모(MapContainer 의 왼쪽 열)가 `md:w-[320px]` 로
+  //    잡는다 — 두 곳에 적어 두면 한쪽만 고쳤을 때 어긋난다(키미 리뷰 지적).
   return (
-    <div className="hidden min-h-0 w-[320px] flex-1 shrink-0 overflow-y-auto border-r border-gray-200 bg-white md:block">
+    <div className="hidden min-h-0 flex-1 shrink-0 overflow-y-auto border-r border-gray-200 bg-white md:block">
       {/* ⚠️ **「24시」·「응급」 알약을 감춰 두었다**(#969 후속). 지우지 않고 감춘 것은
           **나중에 다시 쓸 수 있어서**다.
 
