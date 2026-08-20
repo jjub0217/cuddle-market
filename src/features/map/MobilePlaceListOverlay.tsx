@@ -58,7 +58,10 @@ export default function MobilePlaceListOverlay({ isOpen, onClose }: MobilePlaceL
         'fixed inset-x-0 flex h-1/2 flex-col rounded-t-2xl bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.15)] transition-transform duration-300 ease-out md:hidden',
         'bottom-[calc(3.5rem+1px+env(safe-area-inset-bottom))]',
         Z_INDEX.MODAL,
-        isOpen ? 'translate-y-0' : 'translate-y-full'
+        // ⚠️ **닫을 때는 자기 높이 + 바닥에서 띄운 만큼**을 내려야 한다.
+        //    `translate-y-full` 은 자기 높이(50%)만큼만 내리는데, 이 패널은 탭바 위에
+        //    57px 떠 있어서 **그 57px 이 남아 머리글이 탭바를 덮고 있었다**(실측).
+        isOpen ? 'translate-y-0' : 'translate-y-[calc(100%+3.5rem+1px+env(safe-area-inset-bottom))]'
       )}
     >
       <header className="flex h-14 shrink-0 items-center justify-between border-b border-gray-200 px-4">
