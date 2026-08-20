@@ -57,7 +57,10 @@ const styles = StyleSheet.create({
   chip: {
     height: 34,
     justifyContent: 'center',
-    paddingHorizontal: 16,
+    // ⚠️ **웹과 같은 값이어야 한다** — src/features/map/CategoryTabs.tsx 의 `px-3`.
+    //    줄 바깥 여백(row.paddingHorizontal = 16)은 그대로 둔다. 그건 화면 가장자리와의
+    //    간격이라 다른 질문이다.
+    paddingHorizontal: 12,
     borderRadius: 999,
     borderWidth: 1,
   },
