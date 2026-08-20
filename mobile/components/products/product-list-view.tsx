@@ -208,6 +208,8 @@ export const ProductListView = forwardRef<ProductListViewRef, Props>(function Pr
       onChangeProductType={(next) => patch({ productType: next })}
       onChangeSort={(next) => patch({ sortBy: next })}
       onPressFilter={() => setSheetOpen(true)}
+      // 시트가 담는 넷 중 하나라도 있으면 걸린 것이다 — 시트의 DetailFilterValue 와 같은 묶음
+      hasDetailFilter={Boolean(filters.productStatus || filters.price || filters.sido || filters.gugun)}
     />
   );
 

@@ -75,6 +75,14 @@ interface Props {
   onChangeSort: (next: string) => void;
   /** `⚙`를 눌렀다고 알리기만 한다. 세부 필터 시트는 쓰는 쪽이 연다 */
   onPressFilter: () => void;
+  /**
+   * 세부 필터(상태·가격·지역)가 하나라도 걸려 있는가.
+   *
+   * ⚠️ 걸려 있으면 `⚙`에 **점**을 찍는다. 세부 필터는 시트 안으로 숨어서,
+   *    열어 보기 전에는 걸렸는지 알 수 없기 때문이다(#970).
+   *    웹 모바일도 같은 자리에 같은 점을 찍는다 — 두 쪽이 달라 보이면 안 된다.
+   */
+  hasDetailFilter?: boolean;
 }
 
 export function ProductListToolbar({
@@ -83,6 +91,7 @@ export function ProductListToolbar({
   onChangeProductType,
   onChangeSort,
   onPressFilter,
+  hasDetailFilter = false,
 }: Props) {
   const [sortOpen, setSortOpen] = useState(false);
 
@@ -132,10 +141,12 @@ export function ProductListToolbar({
           testID="open-detail-filter"
           onPress={onPressFilter}
           accessibilityRole="button"
-          accessibilityLabel="세부 필터"
+          accessibilityLabel={hasDetailFilter ? '세부 필터, 적용됨' : '세부 필터'}
           style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
         >
           <SlidersHorizontal size={18} color={colors.onSurfaceMedium} strokeWidth={2} />
+          {/* 걸려 있음을 알리는 점. 아이콘 오른쪽 위에 붙는다 */}
+          {hasDetailFilter ? <View style={styles.filterDot} /> : null}
         </GesturePressable>
 
         <GesturePressable
@@ -243,6 +254,17 @@ const styles = StyleSheet.create({
     height: 32,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  // 점은 아이콘(18)의 오른쪽 위 모서리에 걸친다. 단추(32) 기준이 아니라
+  // **아이콘 기준**이라야 웹과 같은 자리에 보인다.
+  filterDot: {
+    position: 'absolute',
+    top: 6,
+    right: 5,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.selected,
   },
   sortTrigger: {
     flexDirection: 'row',

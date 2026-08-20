@@ -32,6 +32,15 @@ interface ProductsSectionProps {
   /** 좁은 화면에서 세부 필터 서랍을 연다. 없으면 그 단추를 안 그린다 */
   onOpenMobileFilter?: () => void
   /**
+   * 세부 필터(상태·가격·지역)가 하나라도 걸려 있는가.
+   *
+   * ⚠️ 걸려 있으면 `⚙`에 **점**을 찍는다. 서랍 안으로 숨어서 열어 보기 전에는
+   *    걸렸는지 알 수 없기 때문이다(#970). **앱도 같은 자리에 같은 점을 찍는다**
+   *    (mobile/components/products/product-list-toolbar.tsx 의 filterDot).
+   *    데스크탑에는 안 찍는다 — 거기는 세부 필터가 펼쳐져 있어 값이 그대로 보인다.
+   */
+  hasDetailFilter?: boolean
+  /**
    * 좁은 화면에서 툴바를 **접는다** — 정렬을 드롭다운으로, 세부 필터를 서랍 단추로.
    *
    * ⚠️ **검색 결과에서만 켠다.** 홈은 둘러보러 온 화면이라 정렬 넷이 그대로 보이는 게 낫다.
@@ -48,6 +57,7 @@ export function ProductsSection({
   selectedSort = '최신순',
   onTabChange,
   onOpenMobileFilter,
+  hasDetailFilter = false,
   compactMobileToolbar = false,
 }: ProductsSectionProps) {
   const { searchParams, pathname, push } = useFilterNavigation()
@@ -121,11 +131,15 @@ export function ProductsSection({
             {onOpenMobileFilter ? (
               <button
                 type="button"
-                aria-label="세부 필터"
+                aria-label={hasDetailFilter ? '세부 필터, 적용됨' : '세부 필터'}
                 onClick={onOpenMobileFilter}
-                className="flex size-8 cursor-pointer items-center justify-center"
+                className="relative flex size-8 cursor-pointer items-center justify-center"
               >
                 <SlidersHorizontal size={18} strokeWidth={2} className="text-gray-600" aria-hidden="true" />
+                {/* 걸려 있음을 알리는 점 — 앱과 같은 값이다(아이콘 오른쪽 위 · 6px · #825500) */}
+                {hasDetailFilter ? (
+                  <span className="absolute top-1.5 right-[5px] size-1.5 rounded-full bg-[#825500]" aria-hidden="true" />
+                ) : null}
               </button>
             ) : null}
             <SortDropdown selectedSort={selectedSort} onSortChange={handleSortChange} />
