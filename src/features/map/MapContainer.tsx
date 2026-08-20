@@ -7,10 +7,13 @@ import MyLocationButton from './MyLocationButton'
 import SearchInMapButton from './SearchInMapButton'
 import NaverMap from './NaverMap'
 import PlaceListSidebar from './PlaceListSidebar'
+import MobilePlaceListOverlay from './MobilePlaceListOverlay'
 import PlaceDetailSidebar from './PlaceDetailSidebar'
 import PlaceDetailSlideCard from './PlaceDetailSlideCard'
 import { useMapStore, getFilterParams } from '@/store/mapStore'
 import { getPlaces } from '@/lib/api/places'
+import { Z_INDEX } from '@/constants/ui'
+import { cn } from '@/lib/utils/cn'
 import Spinner from '@/components/commons/spinner/Spinner'
 
 export default function MapContainer() {
@@ -23,6 +26,8 @@ export default function MapContainer() {
   const [mapReady, setMapReady] = useState(
     () => typeof window !== 'undefined' && Boolean(window.naver?.maps)
   )
+  // 좁은 화면의 장소 목록(#976). 데스크탑에는 붙박이 목록이 있어 이 상태를 안 쓴다.
+  const [listOpen, setListOpen] = useState(false)
   const clientId = process.env.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID
   const abortRef = useRef<AbortController | null>(null)
 
@@ -105,7 +110,12 @@ export default function MapContainer() {
             <PlaceListSidebar />
           </div>
           <PlaceDetailSidebar />
-          <div className="relative flex-1">
+          {/* ⚠️ 좁은 화면에서는 아래를 「목록 보기」 띠(h-11 = 44) 만큼 비워 둔다(#976).
+              지도 요소가 `h-full` 이라 이 여백만큼 짧아지고, **네이버가 붙이는 제공자
+              표시(© NAVER · 로고)도 함께 올라와** 띠에 안 가린다.
+              ⚠️ 그 표시는 지도 약관상 보여야 하는 것이라 **뒤로 숨기면 안 된다.**
+              ⚠️ 띠와 떠 있는 단추들은 절대배치라 이 여백에 안 밀린다(패딩 상자 기준). */}
+          <div className="relative flex-1 pb-11 md:pb-0">
             {isLoading && (
               <div className="absolute left-1/2 top-16 z-10 -translate-x-1/2 rounded-full bg-white px-4 py-2 shadow-md">
                 <span className="text-xs text-gray-500">불러오는 중...</span>
@@ -125,9 +135,29 @@ export default function MapContainer() {
               </div>
             )}
 
+            {/* 좁은 화면의 「목록 보기」 — 지도 **아래 띠**로 둔다(#976).
+                ⚠️ 처음에는 가운데 떠 있는 단추였는데 「현 지도에서 검색」과 **정확히 겹쳤다**
+                   (둘 다 `left-1/2 · bottom-16`). 띠로 내리면 그 둘은 띠 위에 떠 있게 되어
+                   자리를 다투지 않는다.
+                ⚠️ 데스크탑에는 왼쪽에 붙박이 목록이 이미 있어 안 그린다. */}
+            <button
+              type="button"
+              onClick={() => setListOpen(true)}
+              className={cn(
+                // ⚠️ 위 모서리를 **목록과 같은 값(16px)**으로 둥글린다. 이 띠는 사실상
+                //    **닫힌 목록**이라, 열었을 때와 모양이 다르면 다른 판처럼 보인다.
+                //    앱 시트도 borderTopLeftRadius 16 이다(place-sheet.tsx).
+                'absolute inset-x-0 bottom-0 flex h-11 cursor-pointer items-center justify-center rounded-t-2xl border-t border-gray-200 bg-white text-sm font-medium text-gray-800 md:hidden',
+                Z_INDEX.BUTTON
+              )}
+            >
+              목록 보기
+            </button>
+
             <SearchInMapButton onSearch={() => { fetchPlaces(); setNeedsSearch(false) }} />
             <MyLocationButton />
             <PlaceDetailSlideCard />
+            <MobilePlaceListOverlay isOpen={listOpen} onClose={() => setListOpen(false)} />
           </div>
         </div>
       </div>
