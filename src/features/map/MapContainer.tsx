@@ -139,7 +139,10 @@ export default function MapContainer() {
               type="button"
               onClick={() => setListOpen(true)}
               className={cn(
-                'absolute inset-x-0 bottom-0 flex h-11 cursor-pointer items-center justify-center border-t border-gray-200 bg-white text-sm font-medium text-gray-800 md:hidden',
+                // ⚠️ 위 모서리를 **목록과 같은 값(16px)**으로 둥글린다. 이 띠는 사실상
+                //    **닫힌 목록**이라, 열었을 때와 모양이 다르면 다른 판처럼 보인다.
+                //    앱 시트도 borderTopLeftRadius 16 이다(place-sheet.tsx).
+                'absolute inset-x-0 bottom-0 flex h-11 cursor-pointer items-center justify-center rounded-t-2xl border-t border-gray-200 bg-white text-sm font-medium text-gray-800 md:hidden',
                 Z_INDEX.BUTTON
               )}
             >
