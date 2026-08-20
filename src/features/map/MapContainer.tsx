@@ -110,7 +110,12 @@ export default function MapContainer() {
             <PlaceListSidebar />
           </div>
           <PlaceDetailSidebar />
-          <div className="relative flex-1">
+          {/* ⚠️ 좁은 화면에서는 아래를 「목록 보기」 띠(h-11 = 44) 만큼 비워 둔다(#976).
+              지도 요소가 `h-full` 이라 이 여백만큼 짧아지고, **네이버가 붙이는 제공자
+              표시(© NAVER · 로고)도 함께 올라와** 띠에 안 가린다.
+              ⚠️ 그 표시는 지도 약관상 보여야 하는 것이라 **뒤로 숨기면 안 된다.**
+              ⚠️ 띠와 떠 있는 단추들은 절대배치라 이 여백에 안 밀린다(패딩 상자 기준). */}
+          <div className="relative flex-1 pb-11 md:pb-0">
             {isLoading && (
               <div className="absolute left-1/2 top-16 z-10 -translate-x-1/2 rounded-full bg-white px-4 py-2 shadow-md">
                 <span className="text-xs text-gray-500">불러오는 중...</span>
