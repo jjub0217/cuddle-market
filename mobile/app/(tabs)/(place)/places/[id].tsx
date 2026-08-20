@@ -1,9 +1,9 @@
 import { hasPlaceRating } from '@cuddle/shared';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Clock, MapPin, Phone, Star } from 'lucide-react-native';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
@@ -14,6 +14,11 @@ import { usePlaceDetail } from '@/lib/places/use-place-detail';
 // 플레이스(반려동물 시설) 상세. 읽기 전용.
 // 상품 상세(app/(tabs)/(home)/products/[id].tsx)와 같은 결로 짠다 — 헤더는 늘 보이고
 // 로딩·오류·본문만 갈아 끼운다. 지도는 이 화면 몫이 아니다(다른 사람이 만든다 — import 안 함).
+//
+// ⚠️ 읽는 값(이름·주소·전화·영업시간)에는 selectable 을 단다 — RN 의 <Text> 는 기본이
+//    선택 불가라 꾹 눌러도 복사가 안 된다(#896·#988). 주소는 다른 지도 앱에 붙여 넣는 값이라
+//    복사 수요가 크다. 별점 숫자에는 안 단다. 목록 행(place-list-item.tsx)에도 안 단다 —
+//    Pressable 안이라 꾹 누르면 탭이 씹힌다(mobile/AGENTS.md).
 //
 // ⚠️ 값이 없는 항목(전화·영업시간·별점)은 빈 줄로 남기지 않고 아예 안 그린다.
 //    서버가 그 값들을 자주 비워 보낸다(types.ts 주석).
@@ -45,6 +50,23 @@ export default function PlaceDetailScreen() {
   // 사진 주소가 있어도 못 받아 올 수 있다. 그때도 기본 그림으로 메운다.
   const [imageFailed, setImageFailed] = useState(false);
 
+  // 고른 글자를 푸는 열쇠(#989). 이 값이 바뀌면 selectable 글자들이 **다시 그려지고**,
+  // 그 김에 안드로이드의 선택도 함께 풀린다.
+  //
+  // ⚠️ 안드로이드의 글자 선택은 **그 글자가 초점을 잃을 때** 풀리는데, RN 화면의 다른 요소
+  //    (View·이미지)는 초점을 안 가져간다. 그래서 빈 곳을 눌러도 선택이 그대로 남는다.
+  //    RN 이슈판에서 쓰는 우회법이 이 「다시 그리기」다. 우리 실수가 아니라 RN 의 동작이다.
+  const [선택열쇠, set선택열쇠] = useState(0);
+  const 선택풀기 = () => set선택열쇠((n) => n + 1);
+
+  // ⚠️ 사진 값을 붙잡아 둔다. 그냥 두면 **다시 그릴 때마다 새 객체**가 되어 expo-image 가
+  //    「사진이 바뀌었다」로 보고 390px 그림을 다시 그린다 — 선택을 풀 때마다 그 값을 치르면
+  //    「푸는 게 느리다」로 느껴진다.
+  const 사진 = useMemo(
+    () => (place?.imageUrl && !imageFailed ? { uri: place.imageUrl } : PLACEHOLDER),
+    [place?.imageUrl, imageFailed]
+  );
+
   const renderBody = () => {
     if (loading) {
       // 회색 자리표시(스켈레톤). product-detail의 DetailSkeleton과 같은 값을 쓴다.
@@ -73,11 +95,23 @@ export default function PlaceDetailScreen() {
 
     return (
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+        {/* 빈 곳을 누르면 고른 글자를 푼다(#989). **배경에 깐다** — 글자를 감싸면
+            누름을 가로채 꾹 누르기가 죽는다(실기기에서 확인했다).
+            accessible={false} 라야 화면이 단추 하나로 안 읽힌다. */}
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          // ⚠️ onPress 가 아니라 **onPressIn** 이다. onPress 는 손을 뗀 뒤에 불려서
+          //    「눌렀는데 한 박자 늦게 풀린다」로 느껴진다(실기기에서 확인했다).
+          //    손이 닿는 즉시 푼다. 훑기 시작할 때도 풀리는데 그게 보통 앱의 결이다.
+          onPressIn={선택풀기}
+          accessible={false}
+          testID="place-detail-backdrop"
+        />
         <View style={styles.image}>
           <Image
             // 표식을 상수로 빼서 export 하지 않는다 — expo-router 는 app/ 안의 것을 화면으로 본다.
             testID="place-detail-image"
-            source={place.imageUrl && !imageFailed ? { uri: place.imageUrl } : PLACEHOLDER}
+            source={사진}
             style={styles.imageFill}
             contentFit="cover"
             onError={() => setImageFailed(true)}
@@ -85,7 +119,9 @@ export default function PlaceDetailScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.name}>{place.name}</Text>
+          <Text key={`name-${선택열쇠}`} selectable style={styles.name}>
+            {place.name}
+          </Text>
 
           <View style={styles.categoryTag}>
             <Text style={styles.categoryTagText}>{categoryLabel(place.category)}</Text>
@@ -102,20 +138,26 @@ export default function PlaceDetailScreen() {
 
           <View style={styles.row}>
             <MapPin size={14} color={MUTED_ICON} />
-            <Text style={styles.infoText}>{place.address}</Text>
+            <Text key={`address-${선택열쇠}`} selectable style={styles.infoText}>
+              {place.address}
+            </Text>
           </View>
 
           {place.phone ? (
             <View style={styles.row}>
               <Phone size={14} color={MUTED_ICON} />
-              <Text style={styles.infoText}>{place.phone}</Text>
+              <Text key={`phone-${선택열쇠}`} selectable style={styles.infoText}>
+                {place.phone}
+              </Text>
             </View>
           ) : null}
 
           {place.operatingHours ? (
             <View style={styles.row}>
               <Clock size={14} color={MUTED_ICON} />
-              <Text style={styles.infoText}>{place.operatingHours}</Text>
+              <Text key={`hours-${선택열쇠}`} selectable style={styles.infoText}>
+                {place.operatingHours}
+              </Text>
             </View>
           ) : null}
 
@@ -160,6 +202,8 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingBottom: 32,
+    // 내용이 짧아도 배경(선택 풀기)이 화면 아래까지 깔리게 한다.
+    flexGrow: 1,
   },
   // 그림을 받는 동안 잠깐 보이는 회색 자리 — place-list-item.tsx의 thumb과 같은 색.
   // 사진이 없어도 기본 그림이 덮으므로 회색이 그대로 남지는 않는다.
