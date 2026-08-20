@@ -27,7 +27,6 @@ interface MobilePlaceListOverlayProps {
 
 export default function MobilePlaceListOverlay({ isOpen, onClose }: MobilePlaceListOverlayProps) {
   const selectedCategory = useMapStore((s) => s.selectedCategory)
-  const markers = useMapStore((s) => s.markers)
   const categoryLabel = CATEGORIES.find((c) => c.key === selectedCategory)?.label ?? selectedCategory
 
   // ESC 로 닫기
@@ -65,10 +64,9 @@ export default function MobilePlaceListOverlay({ isOpen, onClose }: MobilePlaceL
       )}
     >
       <header className="flex h-14 shrink-0 items-center justify-between border-b border-gray-200 px-4">
-        <h2 className="text-base font-bold text-gray-900">
-          {categoryLabel}
-          <span className="ml-1.5 text-sm font-normal text-gray-500">{markers.length}</span>
-        </h2>
+        {/* ⚠️ **개수를 안 적는다.** 데스크탑 목록에도 앱 시트에도 개수가 없다 — 여기만
+            적으면 셋이 갈린다. 게다가 장소를 받기 전 첫 순간에는 0 이 잠깐 보인다. */}
+        <h2 className="text-base font-bold text-gray-900">{categoryLabel}</h2>
         <button type="button" aria-label="목록 닫기" onClick={onClose} className="cursor-pointer p-1">
           <X size={20} className="text-gray-600" />
         </button>
