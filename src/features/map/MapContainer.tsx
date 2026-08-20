@@ -93,10 +93,17 @@ export default function MapContainer() {
           **늘 같은 값**이어야 한다(#959). 여기만 xl(1280) 이라 1024~1279 에서
           **탭바는 없는데 그 높이(56px)만큼 지도 아래가 비어 있었다**(실측). */}
       <div className="flex h-[calc(100vh-var(--header-height,72px)-56px)] flex-col lg:h-[calc(100vh-var(--header-height,72px))]">
-        <CategoryTabs />
-
-        <div className="flex flex-1 overflow-hidden">
-          <PlaceListSidebar />
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden md:flex-row">
+          {/* 왼쪽 열 — 카테고리 알약과 장소 목록을 **한 덩어리**로 묶는다(#969).
+              ⚠️ 예전에는 알약 줄이 이 열 **밖**에 있어 화면 전체 폭(1440px 에서 1440)을
+                 가로질렀다. 목록은 320 인데 알약만 혼자 길어서 어디에 딸린 줄인지
+                 알기 어려웠다.
+              ⚠️ **좁은 화면에서는 지금 모습 그대로다.** 목록이 감춰져 있어(md:block)
+                 이 열은 알약 줄 하나가 되고, 바깥이 세로 배치라 지도 위에 얹힌다. */}
+          <div className="flex shrink-0 flex-col md:h-full md:w-[320px]">
+            <CategoryTabs />
+            <PlaceListSidebar />
+          </div>
           <PlaceDetailSidebar />
           <div className="relative flex-1">
             {isLoading && (

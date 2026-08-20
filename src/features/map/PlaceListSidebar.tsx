@@ -94,7 +94,7 @@ export default function PlaceListSidebar() {
   }
 
   return (
-    <div className="hidden w-[320px] shrink-0 overflow-y-auto border-r border-gray-200 bg-white md:block">
+    <div className="hidden min-h-0 w-[320px] flex-1 shrink-0 overflow-y-auto border-r border-gray-200 bg-white md:block">
       {selectedCategory === 'HOSPITAL' && (
         <div className="sticky top-0 z-10 flex gap-2 border-b border-gray-100 bg-white px-4 py-3">
           {HOSPITAL_FILTERS.map(({ key, label }) => (
