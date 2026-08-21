@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ChevronLeft, X } from 'lucide-react'
 import { CONDITION_ITEMS, PRICE_TYPE, type PriceRange } from '@/constants/constants'
 import { CITIES, PROVINCES } from '@/constants/cities'
 import { Z_INDEX } from '@/constants/ui'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { cn } from '@/lib/utils/cn'
 import Button from '@/components/commons/button/Button'
 
@@ -54,7 +55,17 @@ export function MobileFilterSidebar({ isOpen, onClose, value, onApply, onReset }
   const [draft, setDraft] = useState<DetailFilterValue>(value)
   // 시/도를 고르면 시/군/구 목록으로 넘어간다. 「뒤로」를 누르면 다시 시/도로.
   const [showProvinces, setShowProvinces] = useState(true)
-  const closeButtonRef = useRef<HTMLButtonElement>(null)
+
+  // 초점 가둠(#981) — 열면 안으로 넣고, 탭을 서랍 안에서 돌리고, 닫으면 열기 전 자리로 되돌린다.
+  //
+  // ⚠️ **예전에 여기서 직접 닫기 단추로 초점을 옮겼는데, 그 효과를 지웠다.** 훅도 열 때 초점을
+  //    넣어서 둘이 겹치고, 어느 쪽이 이길지가 **효과를 적은 순서**에 달리게 된다 — 줄만 옮겨도
+  //    조용히 뒤집히는 코드다. 훅 하나에 맡긴다.
+  //    ⚠️ 결과는 예전과 **같다.** 훅은 서랍 안 첫 요소에 초점을 주는데 그게 「필터 닫기」 단추다
+  //       (머리글의 h2 는 초점을 못 받는다). 게다가 닫을 때 열기 전 자리로 되돌리는 것은
+  //       예전 효과가 안 하던 일이다.
+  //    ⚠️ 그래서 서랍에 tabIndex 를 주지 않는다 — 주면 훅이 서랍 자신에게 초점을 준다(훅 주석).
+  const 서랍 = useFocusTrap<HTMLElement>(isOpen)
 
   // 열 때마다 바깥 값으로 되돌린다 — 닫으면서 버린 초안이 남아 있으면 안 된다.
   //
@@ -70,12 +81,6 @@ export function MobileFilterSidebar({ isOpen, onClose, value, onApply, onReset }
       setShowProvinces(true)
     }
   }
-
-  // 열리면 닫기 단추로 초점을 옮긴다 — 화면낭독기가 서랍 안으로 들어오게.
-  // (이쪽은 setState 가 없어 효과로 두어도 된다)
-  useEffect(() => {
-    if (isOpen) closeButtonRef.current?.focus()
-  }, [isOpen])
 
   // ESC 로 닫기
   useEffect(() => {
@@ -102,6 +107,7 @@ export function MobileFilterSidebar({ isOpen, onClose, value, onApply, onReset }
         )}
       />
       <aside
+        ref={서랍}
         role="dialog"
         aria-modal="true"
         aria-label="세부 필터"
@@ -117,7 +123,7 @@ export function MobileFilterSidebar({ isOpen, onClose, value, onApply, onReset }
       >
         <header className="flex h-14 shrink-0 items-center justify-between border-b border-gray-200 px-4">
           <h2 className="text-base font-bold text-gray-900">필터</h2>
-          <button ref={closeButtonRef} type="button" aria-label="필터 닫기" onClick={onClose} className="cursor-pointer p-1">
+          <button type="button" aria-label="필터 닫기" onClick={onClose} className="cursor-pointer p-1">
             <X size={20} className="text-gray-600" />
           </button>
         </header>

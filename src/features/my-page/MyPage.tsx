@@ -29,6 +29,7 @@ import InlineNotification from '@/components/commons/InlineNotification'
 import Spinner from '@/components/commons/spinner/Spinner'
 import Button from '@/components/commons/button/Button'
 import { cn } from '@/lib/utils/cn'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { PAGE_CONTAINER_MD, Z_INDEX } from '@/constants/ui'
 import { ArrowLeft, Tag, Handbag, ChevronRight, Heart, MessageSquareText, UserX, Headphones, LogOut, UserMinus } from 'lucide-react'
@@ -77,6 +78,16 @@ function MyPage() {
 
   /** 패널을 우리가 열어서 들어왔는지. 닫을 때 뒤로 갈 데가 있는지 가른다 */
   const openedHereRef = useRef(false)
+
+  // 두 전체화면 패널에 초점을 가둔다(#981).
+  //
+  // ⚠️ **`isMobile` 로 한 번 더 거른다.** 이 패널들은 닫혀 있어도 DOM 에 남고
+  //    (`translate-x-full` 로 옆으로 밀어 둔다) 넓은 화면에서는 `md:hidden` 으로 감춘다.
+  //    그런데 패널이 열렸는지는 **주소(`?panel=`)** 로 정해진다 — 넓은 화면에서 그 주소로
+  //    들어오면 「열림」인데 화면에는 없다. 그때 가두면 **안 보이는 상자에 초점이 갇혀**
+  //    탭이 통째로 먹통이 된다. 그래서 좁은 화면에서만 가둔다(`md:hidden` 과 같은 경계).
+  const profileFullViewRef = useFocusTrap<HTMLDivElement>(isMobile && isProfileFullViewOpen)
+  const mobilePanelRef = useFocusTrap<HTMLDivElement>(isMobile && mobilePanelTab !== null)
 
   const openPanel = (next: MyPagePanelId) => {
     openedHereRef.current = true
@@ -690,6 +701,7 @@ function MyPage() {
           Z_INDEX.MODAL,
           isProfileFullViewOpen ? 'translate-x-0' : 'translate-x-full'
         )}
+        ref={profileFullViewRef}
         role="dialog"
         aria-label="프로필 자세히"
         aria-hidden={!isProfileFullViewOpen}
@@ -727,6 +739,7 @@ function MyPage() {
           Z_INDEX.MODAL,
           mobilePanelTab ? 'translate-x-0' : 'translate-x-full'
         )}
+        ref={mobilePanelRef}
         role="dialog"
         aria-modal="true"
         aria-label={mobilePanelTitle || '마이페이지 상세'}

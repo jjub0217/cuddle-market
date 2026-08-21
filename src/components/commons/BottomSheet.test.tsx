@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { useState } from 'react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -132,8 +133,58 @@ describe('포커스', () => {
   it('열면 첫 항목으로 포커스가 간다', () => {
     render(<Harness />)
 
-    // 첫 요소는 덮개(닫기)이므로 그쪽이 잡힌다 — 키보드로 바로 닫거나 Tab 한 번에 항목으로 간다
+    // 가두는 상자는 시트 판(role="dialog")이라 그 안의 첫 항목이 잡힌다.
+    // 덮개(닫기)는 판 밖이라 여기서 잡히지 않는다 — ESC나 덮개 누르기로 닫는다.
     expect(document.activeElement).not.toBe(document.body)
+    expect(screen.getByText('수정하기').closest('button')).toHaveFocus()
+  })
+
+  it('탭이 시트 밖으로 안 나간다 (#981)', async () => {
+    const user = userEvent.setup()
+    render(<Harness />)
+
+    const 수정 = screen.getByText('수정하기').closest('button')
+    const 삭제 = screen.getByText('삭제').closest('button')
+
+    await user.tab()
+    expect(삭제).toHaveFocus()
+
+    // 마지막에서 한 번 더 누르면 덮개로 새지 않고 첫 항목으로 돈다
+    await user.tab()
+    expect(수정).toHaveFocus()
+
+    // 시프트탭도 마찬가지로 안에서 돈다
+    await user.tab({ shift: true })
+    expect(삭제).toHaveFocus()
+  })
+
+  it('닫으면 열기 전 자리로 포커스를 되돌린다 (#981)', async () => {
+    const user = userEvent.setup()
+
+    function TriggerHarness() {
+      const [열림, 열기] = useState(false)
+      return (
+        <>
+          <button type="button" onClick={() => 열기(true)}>
+            메뉴 열기
+          </button>
+          <BottomSheet isOpen={열림} onClose={() => 열기(false)} label="상품 메뉴">
+            <BottomSheetItem onClick={vi.fn()}>수정하기</BottomSheetItem>
+          </BottomSheet>
+        </>
+      )
+    }
+
+    render(<TriggerHarness />)
+    const 여는단추 = screen.getByRole('button', { name: '메뉴 열기' })
+
+    await user.click(여는단추)
+    expect(screen.getByText('수정하기').closest('button')).toHaveFocus()
+
+    await user.keyboard('{Escape}')
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(여는단추).toHaveFocus()
   })
 })
 
@@ -167,5 +218,38 @@ describe('항목', () => {
     const item = screen.getByText('수정하기').closest('button')
     expect(item).toHaveClass('text-center')
     expect(item).toHaveClass('justify-center')
+  })
+})
+
+// #981 — 열려 있는 동안 초점이 시트 안에 갇히는가.
+//
+// ⚠️ 실기기 확인에서 **가둠이 안 된다**고 나와서, 왜 그런지 여기서 재현한다.
+describe('초점 가둠 (#981)', () => {
+  it('열면 시트 안 첫 항목으로 초점이 들어간다', async () => {
+    render(
+      <BottomSheet isOpen onClose={() => {}} label="상태 바꾸기">
+        <BottomSheetItem onClick={() => {}}>판매중</BottomSheetItem>
+        <BottomSheetItem onClick={() => {}}>예약중</BottomSheetItem>
+        <BottomSheetItem onClick={() => {}}>판매완료</BottomSheetItem>
+      </BottomSheet>
+    )
+
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: '판매중' }))
+  })
+
+  it('마지막 항목에서 탭을 누르면 첫 항목으로 돌아온다', async () => {
+    const user = userEvent.setup()
+    render(
+      <BottomSheet isOpen onClose={() => {}} label="상태 바꾸기">
+        <BottomSheetItem onClick={() => {}}>판매중</BottomSheetItem>
+        <BottomSheetItem onClick={() => {}}>예약중</BottomSheetItem>
+        <BottomSheetItem onClick={() => {}}>판매완료</BottomSheetItem>
+      </BottomSheet>
+    )
+
+    screen.getByRole('button', { name: '판매완료' }).focus()
+    await user.tab()
+
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: '판매중' }))
   })
 })

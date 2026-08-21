@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useRef, useSyncExternalStore } from 'react'
+import { useEffect, useSyncExternalStore } from 'react'
 import { createPortal } from 'react-dom'
 
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { cn } from '@/lib/utils/cn'
 import { Z_INDEX } from '@/constants/ui'
 
@@ -31,8 +32,15 @@ interface BottomSheetProps {
 const ANIMATION_MS = 200
 
 export function BottomSheet({ isOpen, onClose, children, label }: BottomSheetProps) {
-  const sheetRef = useRef<HTMLDivElement>(null)
-  const restoreFocusRef = useRef<HTMLElement | null>(null)
+  // 초점 넣기·가두기·되돌리기는 훅이 다 한다(#981).
+  //
+  // ⚠️ 가두는 상자는 **덮개까지 감싼 바깥이 아니라 시트 판**이다.
+  //    `aria-modal="true"` 를 붙여 둔 곳이 시트 판이므로, 낭독기에 「여기만 쓴다」고
+  //    알린 경계와 초점이 도는 경계를 같게 맞춘다. 그래서 덮개의 「닫기」 단추는
+  //    탭으로 못 닿는다 — 대신 ESC 와 덮개 누르기로 닫는다(원래 그렇게 만든 시트다).
+  //    바깥까지 감싸면 열자마자 초점이 「닫기」에 앉아, 항목부터 고르게 하려던
+  //    아래 원래 뜻(첫 항목으로 옮기기)이 뒤집힌다.
+  const sheetRef = useFocusTrap<HTMLDivElement>(isOpen)
 
   // 서버에서는 document가 없다. 붙은 뒤에만 portal한다.
   //
@@ -45,11 +53,10 @@ export function BottomSheet({ isOpen, onClose, children, label }: BottomSheetPro
     () => false
   )
 
-  // ESC로 닫기 + 뒤 화면 스크롤 잠그기 + 포커스 옮기고 되돌리기
+  // ESC로 닫기 + 뒤 화면 스크롤 잠그기
+  // (포커스 옮기기·가두기·되돌리기는 위 useFocusTrap이 맡는다)
   useEffect(() => {
     if (!isOpen) return
-
-    restoreFocusRef.current = document.activeElement as HTMLElement | null
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
@@ -60,14 +67,9 @@ export function BottomSheet({ isOpen, onClose, children, label }: BottomSheetPro
     const prevOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
 
-    // 첫 항목으로 포커스를 옮긴다. 키보드·낭독기 사용자가 바로 고를 수 있게.
-    sheetRef.current?.querySelector<HTMLElement>('button, [href], [tabindex]')?.focus()
-
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
       document.body.style.overflow = prevOverflow
-      // 열기 전에 보던 자리로 포커스를 돌려준다
-      restoreFocusRef.current?.focus()
     }
   }, [isOpen, onClose])
 
