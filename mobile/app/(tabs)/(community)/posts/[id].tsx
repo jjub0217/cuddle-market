@@ -4,14 +4,7 @@ import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft, EllipsisVertical } from 'lucide-react-native';
 import { useRef, useState } from 'react';
-import {
-  KeyboardAvoidingView,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CommentInput } from '@/components/community/comment-input';
@@ -23,6 +16,7 @@ import { ProductActionSheet, type SheetAction } from '@/components/my/product-ac
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { colors } from '@/constants/colors';
 import { useMe } from '@/hooks/use-me';
+import { useSelectionClear } from '@/hooks/use-selection-clear';
 import { useAuthStore } from '@/lib/auth/store';
 import { createComment, fetchPostDetail, type CommentItem } from '@/lib/community';
 import { deletePost } from '@/lib/community-post';
@@ -49,6 +43,16 @@ export default function PostDetailScreen() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
+
+  // 빈 곳을 짧게 눌렀다 떼면 고른 글자가 풀린다(#991·#993).
+  // 규칙은 hooks/use-selection-clear.ts 한 곳에 모아 뒀다 — 화면마다 따로 짜면 또 갈린다.
+  // 키보드 내리기도 훅이 같이 한다(댓글 칸이 있는 화면이라 그게 기대 동작이다).
+  //
+  // ⚠️ 누름을 **잡지 않고 구경만** 한다. 글자를 <Pressable> 로 감싸거나 부모 View 에
+  //    onStartShouldSetResponder 를 달면 **꾹 누르기가 통째로 죽는다**(실기기에서 두 번 겪었다).
+  //    배경에 Pressable 을 까는 방법도 「그 위에 아무 뷰도 없는 자리」에서만 먹어서 거의 안 풀렸다 —
+  //    글·사진·댓글이 화면을 거의 다 덮고 있다. 그래서 배경을 걷어 냈다.
+  const { 열쇠, 누름구경 } = useSelectionClear();
 
   const {
     data: post,
@@ -165,38 +169,57 @@ export default function PostDetailScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.title}>{post.title}</Text>
+        {/* 제목은 꾹 눌러 복사할 수 있다(#993). 글쓴이 줄은 **누르면 프로필로 가는
+            Pressable 안**이라 안 단다 — 꾹 누르면 탭이 씹힌다(mobile/AGENTS.md).
 
-        <Pressable
-          style={({ pressed }) => [styles.author, pressed && styles.pressed]}
-          // ⚠️ 내 글이면 마이 탭으로 보낸다. users/[id] 는 남의 프로필을 보는 자리라
-          //    내 id 로 들어가면 「내 상품 관리」도 없는 반쪽 화면이 뜬다.
-          //    상품 상세의 판매자 카드(seller-card.tsx)와 같은 규칙이다(#869).
-          //    ⚠️ 웹은 화면 안에서 한 번에 막지만(UserPage 의 리다이렉트), 앱은 그런 문이
-          //       없어 **들어오는 길마다** 막아야 한다.
-          onPress={() =>
-            me && post.authorId === me.id
-              ? router.push('/(tabs)/(my)')
-              : router.push(`/(tabs)/(community)/users/${post.authorId}`)
-          }
-          accessibilityRole="button"
-          accessibilityLabel={`${post.authorNickname}님의 프로필`}
-        >
-          {post.authorProfileImageUrl ? (
-            <Image source={{ uri: post.authorProfileImageUrl }} style={styles.avatar} />
-          ) : (
-            <View style={[styles.avatar, styles.avatarFallback]}>
-              <Text style={styles.avatarLetter}>{post.authorNickname.slice(0, 1)}</Text>
-            </View>
-          )}
+            key 가 바뀌면 이 글자가 다시 그려지고, 그 김에 안드로이드의 선택이 풀린다. */}
+        <Text key={`title-${열쇠}`} selectable style={styles.title}>
+          {post.title}
+        </Text>
+
+        {/* ⚠️ 프로필로 가는 길은 **사진과 닉네임까지**다. 시간·조회수는 뺀다 —
+            그 자리는 「이 글에 대한 사실」이지 「이 사람」이 아니라, 누르면 프로필로 가는 게
+            뜻밖이다. 웹은 아예 안 눌린다(CommunityDetail.tsx 는 그냥 div 다). */}
+        <View style={styles.author}>
+          <Pressable
+            style={({ pressed }) => [styles.authorLink, pressed && styles.pressed]}
+            // ⚠️ 내 글이면 마이 탭으로 보낸다. users/[id] 는 남의 프로필을 보는 자리라
+            //    내 id 로 들어가면 「내 상품 관리」도 없는 반쪽 화면이 뜬다.
+            //    상품 상세의 판매자 카드(seller-card.tsx)와 같은 규칙이다(#869).
+            //    ⚠️ 웹은 화면 안에서 한 번에 막지만(UserPage 의 리다이렉트), 앱은 그런 문이
+            //       없어 **들어오는 길마다** 막아야 한다.
+            onPress={() =>
+              me && post.authorId === me.id
+                ? router.push('/(tabs)/(my)')
+                : router.push(`/(tabs)/(community)/users/${post.authorId}`)
+            }
+            accessibilityRole="button"
+            accessibilityLabel={`${post.authorNickname}님의 프로필`}
+          >
+            {post.authorProfileImageUrl ? (
+              <Image source={{ uri: post.authorProfileImageUrl }} style={styles.avatar} />
+            ) : (
+              <View style={[styles.avatar, styles.avatarFallback]}>
+                <Text style={styles.avatarLetter}>{post.authorNickname.slice(0, 1)}</Text>
+              </View>
+            )}
+            <Text style={styles.meta}>{post.authorNickname}</Text>
+          </Pressable>
+
           <Text style={styles.meta}>
-            {post.authorNickname} · {getTimeAgo(post.createdAt)} · 조회 {post.viewCount}
+            {` · ${getTimeAgo(post.createdAt)} · 조회 ${post.viewCount}`}
           </Text>
-        </Pressable>
+        </View>
 
         <View style={styles.divider} />
 
         {/* 이미지는 본문 안에 있다. imageUrls를 또 그리면 두 번 나온다 */}
+        {/* ⚠️ 여기에는 key={열쇠} 를 **안 건다.** 본문(post-body.tsx)의 사진은 잰 가로세로 비를
+            자기 상태로 들고 있어서(PostImage 의 useState ratio) 갈아 끼우면 4:3(FALLBACK_RATIO)
+            으로 되돌아가 화면이 튄다. useMarkdown 도 글을 통째로 다시 판다. 빈 곳은 자주 눌리는
+            자리라 그 값을 매번 치를 수 없다. 본문 글자의 선택은 다른 글자를 눌러 옮겨 가면 풀린다.
+            댓글(CommentList)도 같은 까닭으로 안 건다 — useQuery 라 갈아 끼울 때마다 다시 받아 온다
+            (앱의 QueryClient 는 기본값이라 staleTime 이 0 이다 — app/_layout.tsx). */}
         <PostBody content={post.content} />
 
         {/* 댓글은 상세 안에 전부 펼친다. 「댓글 N ›」 줄만 두면 대화가 있는지조차
@@ -229,8 +252,15 @@ export default function PostDetailScreen() {
     );
   };
 
+  // 맨 바깥에서 누름을 **잡지 않고 구경만** 한다 — onTouchStart/End 는 responder 를
+  // 안 가져가서 꾹 누르기를 안 죽인다. 화면 어디서 시작된 누름이든 여기로 올라온다.
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView
+      style={styles.container}
+      edges={['top']}
+      testID="post-detail-screen"
+      {...누름구경}
+    >
       <View style={styles.header}>
         <Pressable
           onPress={() => router.back()}
@@ -330,7 +360,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 16,
   },
-  author: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 16 },
+  author: { flexDirection: 'row', alignItems: 'center', padding: 16 },
+  // 사진 + 닉네임만 누를 수 있다. 시간·조회수는 이 밖에 있다.
+  authorLink: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   avatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.surfaceSunken },
   avatarFallback: { alignItems: 'center', justifyContent: 'center' },
   avatarLetter: { fontSize: 14, color: colors.onSurfaceMuted },

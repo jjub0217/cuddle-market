@@ -79,3 +79,60 @@ it('가입일이 없으면 줄 자체를 안 그린다', async () => {
 
   expect(screen.queryByText(/가입/)).toBeNull();
 });
+
+// ----- 꾹 눌러 복사 (#992) -----
+//
+// RN 의 <Text> 는 **기본이 선택 불가**라 꾹 눌러도 복사가 안 된다. 웹의 HTML 글자는
+// 기본이 선택 가능이라 웹만 저절로 된다 — 그래서 앱만 「고장」으로 보인다(#896 과 같은 종류).
+
+it('닉네임은 꾹 눌러 고를 수 있다', async () => {
+  // 채팅·신고에서 상대를 가리킬 때 옮겨 적는 값이다.
+  await render(<ProfileHead profile={프로필()} />);
+
+  expect(screen.getByText('유리').props.selectable).toBe(true);
+});
+
+it('소개글도 꾹 눌러 고를 수 있다', async () => {
+  await render(<ProfileHead profile={프로필({ introduction: '강아지 둘 키웁니다' })} />);
+
+  expect(screen.getByText('강아지 둘 키웁니다').props.selectable).toBe(true);
+});
+
+it('지역·가입일·차단 뱃지에는 안 단다', async () => {
+  // 옮겨 적을 값이 아니다. 아무 데나 달면 훑으려다 선택이 걸린다(mobile/AGENTS.md).
+  await render(<ProfileHead profile={프로필({ isBlocked: true })} />);
+
+  expect(screen.getByText('서울특별시 은평구').props.selectable).toBeFalsy();
+  expect(screen.getByText('2023.04.12 가입').props.selectable).toBeFalsy();
+  expect(screen.getByText('차단 유저').props.selectable).toBeFalsy();
+});
+
+// ----- 고른 글자 풀기 (#992) -----
+//
+// 빈 곳을 눌렀을 때 선택을 푸는 일은 화면(users/[id].tsx)의 useSelectionClear 가 한다.
+// 이 조각은 그 **열쇠만 받아** `selectable` 글자 둘에 건다.
+//
+// ⚠️ 예전에는 이 조각이 배경 <Pressable> 을 직접 깔았다(testID="profile-head-backdrop").
+//    배경은 「그 위에 아무 뷰도 없는 자리」에서만 누름을 받아 **거의 안 먹었다** — 지웠다.
+//    ⚠️ 실제로 안드로이드의 선택이 풀리는지는 **실기기로만** 볼 수 있다(mobile/AGENTS.md).
+//       여기서 지킬 수 있는 것은 「열쇠가 바뀌어도 글자가 그대로 보이고 selectable 이다」까지다.
+
+it('배경 Pressable 을 깔지 않는다', async () => {
+  await render(<ProfileHead profile={프로필()} />);
+
+  expect(screen.queryByTestId('profile-head-backdrop')).toBeNull();
+});
+
+it('열쇠가 바뀌어도 닉네임·소개글은 그대로 보이고 고를 수 있다', async () => {
+  // ⚠️ rerender 도 await 해야 한다. 안 하면 오류 없이 **옛 값**을 준다(mobile/AGENTS.md).
+  const { rerender } = await render(
+    <ProfileHead profile={프로필({ introduction: '강아지 둘 키웁니다' })} 선택열쇠={0} />
+  );
+
+  await rerender(
+    <ProfileHead profile={프로필({ introduction: '강아지 둘 키웁니다' })} 선택열쇠={1} />
+  );
+
+  expect(screen.getByText('유리').props.selectable).toBe(true);
+  expect(screen.getByText('강아지 둘 키웁니다').props.selectable).toBe(true);
+});

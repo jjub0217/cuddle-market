@@ -1,7 +1,7 @@
 import { formatJoinDate } from '@cuddle/shared';
 import { Image } from 'expo-image';
 import { ShieldAlert } from 'lucide-react-native';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { colors } from '@/constants/colors';
@@ -18,12 +18,27 @@ interface Props {
    * 웹도 같은 값을 본다(ProfileData 의 isMyProfile).
    */
   isMine?: boolean;
+  /**
+   * 고른 글자를 푸는 열쇠(#992). 화면(users/[id].tsx)의 useSelectionClear 가 준다.
+   * 값이 바뀌면 아래 `selectable` 글자 **둘만** 다시 그려져 안드로이드의 선택이 풀린다.
+   *
+   * ⚠️ **조각째 `key` 를 주면 안 된다.** 이 조각에는 프로필 사진이 있어서 통째로 다시
+   *    붙이면 사진까지 다시 받는다. 그래서 열쇠를 prop 으로 받아 글자에만 건다.
+   */
+  선택열쇠?: number;
 }
 
-export function ProfileHead({ profile, isMine = false }: Props) {
+export function ProfileHead({ profile, isMine = false, 선택열쇠 = 0 }: Props) {
   const [failed, setFailed] = useState(false);
   const location = [profile.addressSido, profile.addressGugun].filter(Boolean).join(' ');
   const showImage = Boolean(profile.profileImageUrl) && !failed;
+  // ⚠️ 사진 값을 붙잡아 둔다. 그 자리에서 `{ uri: … }` 를 만들면 **다시 그릴 때마다 새 객체**가
+  //    되어 expo-image 가 「사진이 바뀌었다」로 보고 다시 받는다 — 선택을 풀 때마다 그 값을
+  //    치르면 「푸는 게 느리다」로 느껴진다(mobile/AGENTS.md).
+  const 사진 = useMemo(
+    () => ({ uri: profile.profileImageUrl as string }),
+    [profile.profileImageUrl]
+  );
   // 웹과 **같은 함수**를 쓴다. 웹 ProfileData 안에 갇혀 있던 것을 packages/shared 로 옮겼다
   const 가입일 = formatJoinDate(profile.createdAt);
 
@@ -33,7 +48,7 @@ export function ProfileHead({ profile, isMine = false }: Props) {
         <View style={styles.avatar}>
           {showImage ? (
             <Image
-              source={{ uri: profile.profileImageUrl as string }}
+              source={사진}
               style={styles.avatarImage}
               contentFit="cover"
               onError={() => setFailed(true)}
@@ -45,7 +60,12 @@ export function ProfileHead({ profile, isMine = false }: Props) {
 
         <View style={styles.info}>
           <View style={styles.nameRow}>
-            <Text style={styles.nickname}>{profile.nickname}</Text>
+            {/* 닉네임은 꾹 눌러 복사할 수 있다(#992). 채팅·신고에서 상대를 가리킬 때
+                옮겨 적는 값이라 복사 수요가 있다.
+                ⚠️ 지역·가입일·「차단 유저」 뱃지에는 안 단다 — 옮겨 적을 값이 아니다. */}
+            <Text key={`nickname-${선택열쇠}`} selectable style={styles.nickname}>
+              {profile.nickname}
+            </Text>
             {/* 웹 ProfileData와 같은 배지 */}
             {!isMine && profile.isBlocked ? (
               <View style={styles.blockedBadge}>
@@ -96,6 +116,7 @@ export function ProfileHead({ profile, isMine = false }: Props) {
           ⚠️ 마이의 내 소개글은 켜지 않는다 — 그쪽은 눌러서 프로필 수정으로 가는 길이라
              꾹 누름이 겹치면 탭이 씹힌다. */}
       <Text
+        key={`introduction-${선택열쇠}`}
         selectable
         style={[styles.introduction, !profile.introduction?.trim() && styles.introductionEmpty]}
       >

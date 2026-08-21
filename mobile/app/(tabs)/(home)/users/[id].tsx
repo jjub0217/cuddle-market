@@ -14,6 +14,7 @@ import { StatusFilterChips, type FilterChip } from '@/components/my/status-filte
 import { ProfileHead } from '@/components/user-profile/profile-head';
 import { colors } from '@/constants/colors';
 import { useMe } from '@/hooks/use-me';
+import { useSelectionClear } from '@/hooks/use-selection-clear';
 import { unblockUser } from '@/lib/reports';
 import { showToast } from '@/lib/toast';
 import { fetchUserProducts, fetchUserProfile, type ProductKind } from '@/lib/user-profile';
@@ -60,6 +61,13 @@ export default function UserProfileScreen() {
       : '(home)';
 
   const { data: me } = useMe();
+
+  /**
+   * 화면 어디를 눌러도 고른 글자가 풀리게 한다(#992). 규칙은 훅 한 곳에 모아 뒀다 —
+   * 누름을 **잡지 않고 구경만** 하는 까닭도 거기 적혀 있다(hooks/use-selection-clear.ts).
+   */
+  const { 열쇠, 누름구경 } = useSelectionClear();
+
   const [kind, setKind] = useState<ProductKind>('sell');
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isBlockOpen, setIsBlockOpen] = useState(false);
@@ -189,16 +197,20 @@ export default function UserProfileScreen() {
     }
 
     return (
-      <>
-        <ProfileHead profile={profile} isMine={isMine} />
+      <View style={styles.body}>
+        {/* ⚠️ 열쇠를 **조각째** 주지 않는다(`key={열쇠}` 금지). 이 조각에는 프로필 사진이
+            있어서 통째로 다시 붙이면 사진을 다시 받는다. 안에서 글자 둘에만 건다. */}
+        <ProfileHead profile={profile} isMine={isMine} 선택열쇠={열쇠} />
         <StatusFilterChips chips={KIND_CHIPS} activeId={kind} onChange={setKind} />
         {renderList()}
-      </>
+      </View>
     );
   };
 
+  // 바깥에 {...누름구경} 을 편다. onTouchStart/End 뿐이라 responder 를 안 가져간다 — 꾹 누르기가 산다.
+  // ⚠️ 여기를 <Pressable> 로 바꾸거나 onStartShouldSetResponder 를 달면 꾹 누르기가 죽는다.
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={['top']} {...누름구경}>
       <View style={styles.header}>
         <Pressable
           onPress={() => router.back()}
@@ -261,6 +273,8 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.outlineVariant,
   },
   pressed: { opacity: 0.5 },
+  // 헤더 아래 전부.
+  body: { flex: 1 },
   list: { paddingHorizontal: 16, paddingTop: 12, gap: 12 },
   cardPressed: { opacity: 0.7 },
 });
