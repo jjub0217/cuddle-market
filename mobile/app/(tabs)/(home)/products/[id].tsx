@@ -23,6 +23,7 @@ import { SellerCard } from '@/components/product-detail/seller-card';
 import { BlockConfirm } from '@/components/report/block-confirm';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useMe } from '@/hooks/use-me';
+import { useSelectionClear } from '@/hooks/use-selection-clear';
 import { buildOwnerActions } from '@/lib/product-menu';
 import { tabGroupOf } from '@/lib/product-routes';
 import { deleteProduct, fetchProductDetail, ProductNotFoundError } from '@/lib/products';
@@ -86,6 +87,15 @@ export default function ProductDetailScreen() {
   });
 
   const { data: me } = useMe();
+
+  // 빈 곳을 짧게 눌렀다 떼면 고른 글자가 풀린다(#991·#992).
+  // 규칙은 hooks/use-selection-clear.ts 한 곳에 모아 뒀다 — 화면마다 따로 짜면 또 갈린다.
+  //
+  // ⚠️ 누름을 **잡지 않고 구경만** 한다. 글자를 <Pressable> 로 감싸거나 부모 View 에
+  //    onStartShouldSetResponder 를 달면 **꾹 누르기가 통째로 죽는다**(실기기에서 두 번 겪었다).
+  //    배경에 Pressable 을 까는 방법도 「그 위에 아무 뷰도 없는 자리」에서만 먹어서 거의 안 풀렸다.
+  const { 열쇠, 누름구경 } = useSelectionClear();
+
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isBlockOpen, setIsBlockOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -186,7 +196,9 @@ export default function ProductDetailScreen() {
         />
 
         <View style={styles.section}>
-          <ProductSummary product={data} />
+          {/* 열쇠가 바뀌면 안의 selectable 글자(제목·가격)가 다시 그려져 선택이 풀린다.
+              조각째 다시 그려도 값이 싸다 — 사진이 없는 글자 조각이다. */}
+          <ProductSummary key={`summary-${열쇠}`} product={data} />
         </View>
 
         <View style={styles.divider} />
@@ -220,7 +232,7 @@ export default function ProductDetailScreen() {
           ) : (
             // 상품 설명은 꾹 눌러 복사할 수 있다(#896). 판매자가 적어 둔 치수·성분·
             // 거래 조건을 옮겨 적을 일이 많다.
-            <Text selectable style={styles.description}>
+            <Text key={`description-${열쇠}`} selectable style={styles.description}>
               {data.description}
             </Text>
           )}
@@ -235,8 +247,14 @@ export default function ProductDetailScreen() {
     );
   };
 
+  // 누름 구경(누름구경)은 **맨 바깥**에 단다 — 화면 어디서 시작된 누름이든 여기로 올라온다.
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView
+      style={styles.container}
+      edges={['top']}
+      testID="product-detail-root"
+      {...누름구경}
+    >
       <DetailHeader
         onMorePress={canReport || canManage ? () => setIsSheetOpen(true) : undefined}
       />
