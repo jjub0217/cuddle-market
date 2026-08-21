@@ -61,6 +61,14 @@ export default function MobileNavigation({ isOpen, onClose }: MobileNavigationPr
         )}
         data-open={isOpen}
         ref={sideNavRef}
+        // 닫혀 있는 동안 탭 순서에서 통째로 뺀다(#999).
+        // 이 창은 닫혀도 DOM 에 남아 화면 밖(`translate-x-full`)으로 밀려 있을 뿐이라,
+        // 안의 링크·단추가 **안 보이는데 탭으로 잡히고 엔터가 먹었다**.
+        // `aria-hidden` 은 화면낭독기에서만 감출 뿐 초점은 못 막아서 둘 다 필요하다.
+        // ⚠️ `visibility: hidden` 으로 막지 말 것 — 초점은 막지만 여닫는 애니메이션이 끊긴다.
+        //    `inert` 는 보이는 데 영향이 없어 슬라이드가 그대로다.
+        inert={!isOpen}
+        aria-hidden={!isOpen}
       >
         <div className="flex flex-col gap-5 border-b border-gray-200 pb-5">
           <div className="flex items-center justify-between">

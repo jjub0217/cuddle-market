@@ -695,6 +695,13 @@ function MyPage() {
         onClearError={() => setDeleteError(null)}
       />
       {/* 모바일 ProfileData 풀스크린 — 우→좌 슬라이드 */}
+      {/* ⚠️ **닫혀 있는 동안 탭 순서에서 뺀다**(#999). 닫혀도 DOM 에 남아(오른쪽으로 밀어 둘 뿐)
+          안의 「닫기」·프로필 단추가 탭 순서에 있었다 — 초점 테두리는 안 보이는데 엔터는 눌렸다.
+          `aria-hidden` 은 화면낭독기에서만 감추고 **초점은 못 막으니** 둘 다 둔다.
+          ⚠️ 여기는 초점 가둠(위 `useFocusTrap`)과 달리 **`isMobile` 로 거르지 않는다.**
+             가둠은 초점을 **옮기는** 일이라 넓은 폭에서 잘못 걸면 탭이 먹통이 되지만,
+             `inert` 는 **자기 자손만** 막는다 — 본문은 이 상자 밖(형제)이라 영향이 없다.
+             게다가 넓은 폭에서는 `md:hidden` 으로 display:none 이라 어차피 초점이 안 간다. */}
       <div
         className={cn(
           'fixed inset-0 overflow-y-auto bg-gray-100/30 transition-transform duration-300 ease-out md:hidden',
@@ -705,6 +712,7 @@ function MyPage() {
         role="dialog"
         aria-label="프로필 자세히"
         aria-hidden={!isProfileFullViewOpen}
+        inert={!isProfileFullViewOpen}
       >
         <div className="sticky top-0 z-10 flex h-16 items-center gap-3 border-b border-gray-200 bg-white px-2">
           <button type="button" onClick={closeMobileOverlay} aria-label="닫기" className="cursor-pointer">
@@ -733,6 +741,7 @@ function MyPage() {
         </div>
       </div>
       {/* 모바일 마이페이지 메뉴 → 풀스크린 패널 (우→좌 슬라이드) */}
+      {/* ⚠️ `inert` 를 두는 까닭은 위 프로필 패널과 같다(#999). 여기도 `isMobile` 로 안 거른다. */}
       <div
         className={cn(
           'fixed inset-0 overflow-y-auto bg-white transition-transform duration-300 ease-out md:hidden',
@@ -744,6 +753,7 @@ function MyPage() {
         aria-modal="true"
         aria-label={mobilePanelTitle || '마이페이지 상세'}
         aria-hidden={!mobilePanelTab}
+        inert={!mobilePanelTab}
       >
         <div className="sticky top-0 flex h-16 items-center gap-3 border-b border-gray-200 bg-white px-4">
           <button type="button" onClick={closeMobileOverlay} aria-label="닫기" className="cursor-pointer">
@@ -763,8 +773,16 @@ function MyPage() {
               />
             </div>
           ) : null}
+          {/* ⚠️ **여백은 여기 바깥이 아니라 패널 조각이 스스로 준다.** 바깥에 주면 두 번 쌓여 32 가 된다(#1001).
+                 `MyPagePanel`  스스로 `px-4` 를 갖고 있다 → 그대로 둔다
+                 `MyActivityPanel`  아무 여백이 없어 카드가 화면 끝에 붙었다 → 여기서 `px-4` 로 감싼다
+              `px-4`(16) 를 쓰는 까닭: 위 머리글·알약 자리와 같은 값이고, `PAGE_CONTAINER` 의 `px-4` 와도 같다(#963).
+              `PAGE_CONTAINER_MD` 를 쓰지 않는 것은 그것이 **768 부터만** 여백을 주기 때문이다 — 여기는 좁은 폭 전용이다.
+              데스크탑 쪽 `MyActivityPanel`(위 `md:flex` 자리)은 건드리지 않는다. 이 상자는 `md:hidden` 이다. */}
           {mobilePanelTab === 'activity' ? (
-            <MyActivityPanel />
+            <div className="px-4">
+              <MyActivityPanel />
+            </div>
           ) : mobilePanelTab ? (
             <MyPagePanel
               activeTabCode={mobilePanelTabCode}

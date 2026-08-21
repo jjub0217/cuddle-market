@@ -158,6 +158,10 @@ export default function MyPagePanel({
       : undefined
   const titleDescription = tradeStatusLabel ?? config?.description ?? ''
 
+  // ⚠️ 좁은 폭의 좌우 여백 `px-4`(16) 는 **이 조각이 스스로 갖는다.** 지우지 말 것(#1001).
+  //    좁은 폭에서는 이 조각이 모바일 패널 안에 통째로 들어가는데, 그 바깥 상자에는 여백이 없다.
+  //    값 16 은 모바일 패널의 알약 자리(`p-4`)·머리글(`px-4`)과 같고 `PAGE_CONTAINER` 의 `px-4` 와도 같다(#963).
+  //    **바깥에서 또 주면 32 가 된다** — 부르는 쪽은 여백을 더하지 않는다.
   return (
     <div
       role="tabpanel"

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ROUTES } from '@/constants/routes'
 import { Menu } from 'lucide-react'
 import IconButton from '@/components/commons/button/IconButton'
+import { HEADER_ICON_BUTTON_SIZE } from '@/components/header/headerIconButtonSize'
 
 interface AuthMenuProps {
   isSideOpen: boolean
@@ -24,7 +25,12 @@ export default function AuthMenu({ setIsSideOpen, hideMenuButton = false }: Auth
         </Link>
       </div>
       {hideMenuButton ? null : (
-        <IconButton aria-label="메뉴" className="lg:hidden" onClick={() => setIsSideOpen((prev) => !prev)}>
+        <IconButton
+          aria-label="메뉴"
+          size={HEADER_ICON_BUTTON_SIZE}
+          className="lg:hidden"
+          onClick={() => setIsSideOpen((prev) => !prev)}
+        >
           <Menu className="text-header-icon" />
         </IconButton>
       )}

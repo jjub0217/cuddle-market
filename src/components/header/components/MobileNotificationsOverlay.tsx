@@ -149,6 +149,10 @@ export default function MobileNotificationsOverlay({ isOpen, onClose }: MobileNo
       aria-modal="true"
       aria-label="알림"
       aria-hidden={!isOpen}
+      // 닫혀 있는 동안 탭 순서에서 통째로 뺀다(#999).
+      // 바로 위 `aria-hidden` 은 화면낭독기에서만 감출 뿐 **초점은 못 막는다** — 둘 다 필요하다.
+      // ⚠️ `visibility: hidden` 으로 막지 말 것 — 여닫는 애니메이션이 끊긴다.
+      inert={!isOpen}
     >
       <div className="flex h-16 items-center justify-between border-b border-gray-200 px-2 pr-4">
         <div className="flex items-center gap-2">

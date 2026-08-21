@@ -83,3 +83,22 @@ describe('MobileSearchOverlay 초점 가둠', () => {
     expect(document.activeElement).toBe(열기단추)
   })
 })
+
+// 닫혀 있는 동안 탭 순서에서 빠지는가(#999).
+//
+// ⚠️ **jsdom 은 `inert` 를 흉내 내지 못한다.** 초점이 진짜로 막히는지는 브라우저 몫이라
+//    여기서 지킬 수 있는 것은 **속성이 붙었는가**까지다.
+//    (실제로 탭이 안 잡히는지는 사람이 좁은 폭 브라우저에서 확인해야 한다)
+describe('MobileSearchOverlay 닫힘 inert', () => {
+  it('닫혀 있으면 inert 가 붙고, 열면 떨어진다', async () => {
+    const 사용자 = 사용자만들기()
+    const { container } = render(<TestScreen />)
+
+    // 닫혀 있을 때는 role 로 못 찾는다(aria-hidden 이 붙어 있다) — 속성으로 집는다
+    const 상자 = container.querySelector('[aria-label="검색"]')!
+    expect(상자.hasAttribute('inert')).toBe(true)
+
+    await 사용자.click(screen.getByRole('button', { name: '검색 열기' }))
+    expect(상자.hasAttribute('inert')).toBe(false)
+  })
+})
