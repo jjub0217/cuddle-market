@@ -17,7 +17,12 @@ import { useMe } from '@/hooks/use-me';
 import { useSelectionClear } from '@/hooks/use-selection-clear';
 import { unblockUser } from '@/lib/reports';
 import { showToast } from '@/lib/toast';
-import { fetchUserProducts, fetchUserProfile, type ProductKind } from '@/lib/user-profile';
+import {
+  fetchUserProducts,
+  fetchUserProfile,
+  UserNotFoundError,
+  type ProductKind,
+} from '@/lib/user-profile';
 
 // 판매자 프로필. 상품 상세의 판매자 카드를 눌러 들어온다.
 //
@@ -75,11 +80,13 @@ export default function UserProfileScreen() {
   const {
     data: profile,
     isLoading: profileLoading,
-    isError: profileError,
+    error: profileError,
     refetch: refetchProfile,
   } = useQuery({
     queryKey: ['userProfile', userId],
     queryFn: () => fetchUserProfile(userId),
+    // 탈퇴한 사람(404)은 다시 물어봐도 소용없다. 상품 상세도 같은 방식이다.
+    retry: (count, err) => !(err instanceof UserNotFoundError) && count < 2,
   });
 
   const {
@@ -192,6 +199,23 @@ export default function UserProfileScreen() {
 
   const renderBody = () => {
     if (profileLoading) return <LoadingState />;
+    /**
+     * 탈퇴한 사람이면 서버가 404를 준다(설명은 lib/user-profile.ts 의 UserNotFoundError).
+     *
+     * ⚠️ **「다시 시도」를 주면 안 된다.** 몇 번을 눌러도 404다 — 되돌릴 수 없는 자리라
+     *    빠져나갈 길(돌아가기)만 준다. 나간 채팅방(#877)과 같은 결이다.
+     */
+    if (profileError instanceof UserNotFoundError) {
+      return (
+        <ErrorState
+          onRetry={() => router.back()}
+          title="탈퇴한 사용자예요."
+          description="회원 탈퇴한 사용자라 프로필을 볼 수 없어요."
+          actionLabel="돌아가기"
+        />
+      );
+    }
+    // 네트워크·서버 탈은 다시 하면 될 수도 있다 — 「다시 시도」를 그대로 둔다.
     if (profileError || !profile) {
       return <ErrorState onRetry={() => refetchProfile()} title="프로필을 불러오지 못했어요." />;
     }
