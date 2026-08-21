@@ -9,6 +9,7 @@ import { fetchGraphQL } from '@/lib/api/graphql'
 import { markNotificationRead } from '@/lib/api/notifications'
 import { useUserStore } from '@/store/userStore'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { NotificationItem as NotificationItemType } from '@/types/notifications'
 import NotificationItem from './notification-section/NotificationItem'
 import { useRouter, usePathname } from 'next/navigation'
@@ -28,9 +29,18 @@ interface MobileNotificationsOverlayProps {
  * - 좌측에서 우측으로 슬라이드 인 (`-translate-x-full` → `translate-x-0`)
  * - 닫기 버튼/ESC로 닫힘
  * - 열렸을 때 body 스크롤 잠금
+ * - 열려 있는 동안 초점을 이 상자 안에 가둔다(#981)
  * - 데스크탑(`xl`)에서는 항상 숨김 (그쪽은 `NotificationsDropdown` 사용)
  */
 export default function MobileNotificationsOverlay({ isOpen, onClose }: MobileNotificationsOverlayProps) {
+  // 초점 가둠(#981).
+  //
+  // 상자에 `tabIndex` 를 주지 않아 훅이 **안쪽 첫 요소**에 초점을 준다.
+  // DOM 순서상 첫 요소는 닫기(X) 단추다 — 목록이 비어 있어도, 아직 불러오는 중이어도
+  // 머리줄의 닫기·「모두 읽음」 두 단추는 항상 그려지므로
+  // 「안에 초점 줄 것이 하나도 없는」 경우는 생기지 않는다.
+  const overlayRef = useFocusTrap<HTMLDivElement>(isOpen)
+
   const queryClient = useQueryClient()
   const user = useUserStore((state) => state.user)
   const router = useRouter()
@@ -128,6 +138,7 @@ export default function MobileNotificationsOverlay({ isOpen, onClose }: MobileNo
 
   return (
     <div
+      ref={overlayRef}
       className={cn(
         // 「여기부터 데스크탑」은 lg(1024)다 — 헤더와 같은 값이어야 한다(#961).
         'fixed inset-0 bg-white transition-transform duration-300 ease-out lg:hidden',

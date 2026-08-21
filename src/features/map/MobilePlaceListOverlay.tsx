@@ -5,6 +5,7 @@ import { X } from 'lucide-react'
 import { CATEGORIES } from '@/constants/map'
 import { Z_INDEX } from '@/constants/ui'
 import { useMapStore } from '@/store/mapStore'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { cn } from '@/lib/utils/cn'
 import { PlaceList } from './PlaceList'
 
@@ -29,6 +30,13 @@ export default function MobilePlaceListOverlay({ isOpen, onClose }: MobilePlaceL
   const selectedCategory = useMapStore((s) => s.selectedCategory)
   const categoryLabel = CATEGORIES.find((c) => c.key === selectedCategory)?.label ?? selectedCategory
 
+  // 초점 가둠(#981) — 열면 안으로 넣고, 탭을 상자 안에서 돌리고, 닫으면 열기 전 자리로 되돌린다.
+  //
+  // ⚠️ **상자에 tabIndex 를 주지 않는다.** 주면 훅이 상자 자신에게 초점을 주는데(훅 주석),
+  //    여기서는 안의 첫 요소인 **「목록 닫기」 단추**로 들어가는 편이 낫다 —
+  //    엔터 한 번으로 바로 닫을 수 있고, 세부 필터 서랍과도 같은 자리다.
+  const 상자 = useFocusTrap<HTMLDivElement>(isOpen)
+
   // ESC 로 닫기
   useEffect(() => {
     if (!isOpen) return
@@ -41,6 +49,7 @@ export default function MobilePlaceListOverlay({ isOpen, onClose }: MobilePlaceL
 
   return (
     <div
+      ref={상자}
       role="dialog"
       aria-modal="true"
       aria-label={`${categoryLabel} 목록`}
