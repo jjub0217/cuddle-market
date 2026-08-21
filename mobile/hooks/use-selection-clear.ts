@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 // 앱 어디를 눌러도 **고른 글자가 풀리게** 한다(#992). 화면마다 따로 만들면 또 갈리므로
 // 규칙을 여기 한 곳에 모은다.
@@ -67,16 +67,18 @@ export function useSelectionClear(): SelectionClear {
   const [열쇠, set열쇠] = useState(0);
   const 누른때 = useRef(0);
 
-  return {
-    열쇠,
-    누름구경: {
-      onTouchStart: () => {
-        누른때.current = Date.now();
-      },
-      onTouchEnd: () => {
-        if (!탭인가(누른때.current, Date.now())) return;
-        set열쇠((n) => n + 1);
-      },
-    },
-  };
+  const onTouchStart = useCallback(() => {
+    누른때.current = Date.now();
+  }, []);
+
+  const onTouchEnd = useCallback(() => {
+    if (!탭인가(누른때.current, Date.now())) return;
+    set열쇠((n) => n + 1);
+  }, []);
+
+  // 손잡이 묶음을 붙잡아 둔다. 지금 받는 쪽(SafeAreaView)은 다시 그릴 값이 없어 티가
+  // 안 나지만, 이 훅은 화면마다 쓸 것이라 새 참조를 매번 만들지 않게 해 둔다.
+  const 누름구경 = useMemo(() => ({ onTouchStart, onTouchEnd }), [onTouchStart, onTouchEnd]);
+
+  return { 열쇠, 누름구경 };
 }
