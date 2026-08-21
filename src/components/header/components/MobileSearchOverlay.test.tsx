@@ -17,7 +17,10 @@ import MobileSearchOverlay from './MobileSearchOverlay'
 //    가짜 시계(vi.useFakeTimers)를 써 봤더니 **세 시험이 모두 5초를 다 쓰고 죽었다** —
 //    RTL 의 act 와 userEvent 가 진짜 시계를 기다린다. 그래서 진짜 시계로 돈다.
 //    시험 하나가 300ms 안에 끝나므로 그 자동 포커스는 여기까지 오지 않는다
-//    (아래 각 시험이 몇 ms 걸리는지는 `npx vitest run` 출력으로 확인했다).
+//    (아래 각 시험이 몇 ms 걸리는지는 `npx vitest run` 출력으로 확인했다 — 2026-08-21 에 셋이 149ms).
+//
+//    ⚠️ **이것은 시간에 기댄다.** 언젠가 이 시험들이 300ms 를 넘게 느려지면 자동 포커스가
+//       끼어들어 조용히 흔들릴 수 있다. 「가끔 실패한다」가 나오면 여기부터 보라.
 
 vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
