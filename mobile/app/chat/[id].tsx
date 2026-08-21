@@ -15,6 +15,7 @@ import { colors } from '@/constants/colors';
 import { ProductActionSheet, type SheetAction } from '@/components/my/product-action-sheet';
 import { BlockConfirm } from '@/components/report/block-confirm';
 import { useMe } from '@/hooks/use-me';
+import { useSelectionClear } from '@/hooks/use-selection-clear';
 import { updateTradeStatus } from '@/lib/product-actions';
 import { MAX_IMAGES, pickImages, shrinkImage, uploadOne } from '@/lib/product-images';
 import { fetchProductDetail } from '@/lib/products';
@@ -82,6 +83,9 @@ export default function ChatRoomScreen() {
   // 소켓으로 온 메시지에는 isMine 이 없어서 내 id 로 채워야 한다.
   const me = useMe().data;
   const myId = me?.id;
+  // 고른 글자를 푸는 규칙은 훅 하나에 모여 있다(hooks/use-selection-clear.ts).
+  // 말풍선은 selectable 인데(#896), 빈 곳을 눌러도 선택이 안 풀렸다(#994).
+  const { 열쇠, 누름구경 } = useSelectionClear();
 
   // 「판매완료 처리」는 **내 상품일 때만** 보여야 한다(#894). 그런데 방 정보에는 파는 사람이
   // 없어서 상품을 따로 봐야 안다.
@@ -409,13 +413,27 @@ export default function ChatRoomScreen() {
         style={styles.flex}
         data={rows}
         keyExtractor={(row) => row.key}
+        // ⚠️ 열쇠가 바뀌면 목록도 다시 그려야 한다. FlatList 는 PureComponent 라
+        //    바깥 상태만 바뀌면 못 알아챈다 — 그걸 알려주는 값이 extraData 다.
+        extraData={열쇠}
         renderItem={({ item }) =>
           item.kind === 'day' ? (
             <View style={styles.dayWrap}>
               <Text style={styles.day}>{item.label}</Text>
             </View>
           ) : (
-            <MessageBubble message={item.message} />
+            <MessageBubble
+              // 열쇠가 바뀌면 말풍선을 갈아 끼워 고른 글자를 푼다. 말풍선 조각
+              // (components/chat/message-bubble.tsx)은 이 화면 몫이 아니라, 조각을 안 고치고
+              // 할 수 있는 자리가 여기뿐이다.
+              //
+              // ⚠️ **사진 말풍선에는 안 건다.** 사진 조각은 「못 불러왔다」와 「확대창이 열렸다」를
+              //    자기 상태로 들고 있어서, 갈아 끼우면 **보고 있던 확대창이 닫힌다.**
+              //    사진 말풍선에는 selectable 글자도 없어 풀 것이 애초에 없다.
+              //    게시글 상세도 같은 까닭으로 본문·댓글에는 안 건다(posts/[id].tsx:217).
+              key={item.message.messageType === 'IMAGE' ? undefined : `${item.key}-${열쇠}`}
+              message={item.message}
+            />
           )
         }
         onEndReached={loadOlder}
@@ -429,8 +447,15 @@ export default function ChatRoomScreen() {
     );
   };
 
+  // 누름 구경(누름구경)은 **맨 바깥**에 단다 — 화면 어디서 시작된 누름이든 여기로 올라온다.
+  // onTouchStart/onTouchEnd 뿐이라 responder 를 안 가져간다(꾹 누르기가 산다).
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <SafeAreaView
+      testID="chat-room-screen"
+      style={styles.container}
+      edges={['top', 'bottom']}
+      {...누름구경}
+    >
       {/* 「나가기」를 ⋮ 안으로 옮겼다(#894). 웹도 그 자리다 — 나가기·신고·차단·판매완료가
           한 메뉴에 모여 있어야 「이 방에서 할 수 있는 일」이 한 곳에서 보인다. */}
       {/* 제목은 **상대 닉네임**이다(#898). 「채팅」은 이미 아는 사람에게 아무것도 안 알려주고,

@@ -5,7 +5,7 @@ jest.mock('expo-secure-store', () => ({
 }));
 
 import { useAuthStore } from './auth/store';
-import { fetchUserProducts, fetchUserProfile } from './user-profile';
+import { fetchUserProducts, fetchUserProfile, UserNotFoundError } from './user-profile';
 
 const mockFetch = jest.fn();
 
@@ -63,6 +63,23 @@ describe('fetchUserProfile', () => {
   it('실패하면 던진다', async () => {
     mockFetch.mockResolvedValue(reply(500));
     await expect(fetchUserProfile(7)).rejects.toThrow();
+  });
+
+  // 서버가 탈퇴한 사람을 걸러 404를 준다(ProfileServiceImpl.java:117).
+  // 화면이 「탈퇴한 사용자예요」를 그리려면 이 404만 따로 알아볼 수 있어야 한다.
+  it('404면 UserNotFoundError를 던진다 — 탈퇴한 사용자다', async () => {
+    mockFetch.mockResolvedValue(reply(404));
+
+    await expect(fetchUserProfile(7)).rejects.toBeInstanceOf(UserNotFoundError);
+  });
+
+  it('404가 아닌 실패는 UserNotFoundError가 아니다', async () => {
+    // 500(서버 탈)·401(로그인 필요)까지 「탈퇴」로 말하면 안 된다.
+    mockFetch.mockResolvedValue(reply(500));
+    await expect(fetchUserProfile(7)).rejects.not.toBeInstanceOf(UserNotFoundError);
+
+    mockFetch.mockResolvedValue(reply(401));
+    await expect(fetchUserProfile(7)).rejects.not.toBeInstanceOf(UserNotFoundError);
   });
 });
 
