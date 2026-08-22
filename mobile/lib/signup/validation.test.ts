@@ -88,8 +88,22 @@ describe('validateName / validateNickname', () => {
 
 describe('validateBirthDate', () => {
   // 오늘을 고정한다. 안 그러면 만 14세 경계 테스트가 내년에 깨진다.
+  //
+  // ⚠️ **시간대를 붙이지 마라.** `'2026-07-31T00:00:00+09:00'` 은 「한국시간 7/31 자정」이라는
+  //    **순간**인데, `validateBirthDate` 는 그 순간을 **기기의 지역 날짜**로 읽는다
+  //    (`getFullYear`·`getMonth`·`getDate`). 그래서 UTC 기계에서는 같은 순간이 **7월 30일**이라
+  //    「생일이 아직 안 왔다」가 되어 이 시험만 떨어진다.
+  //
+  //      TZ=Asia/Seoul   지역 날짜 7/31 → 생일 지남 → null      ✅
+  //      TZ=UTC          지역 날짜 7/30 → 생일 안 지남 → 문구   ❌
+  //
+  //    **개발자 맥이 한국시간이라 여태 안 드러났고, CI(UTC)를 붙인 첫 PR 에서 잡혔다**
+  //    (#1017 · 2026-08-22).
+  //
+  //    시간대를 안 붙이면 **지역 시간으로** 해석되어 어느 기계에서나 「오늘은 7월 31일」이 된다.
+  //    앱은 사용자 기기의 지역 시간으로 나이를 세므로 그것이 이 시험의 진짜 뜻이다.
   beforeAll(() => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-07-31T00:00:00+09:00'));
+    jest.useFakeTimers().setSystemTime(new Date('2026-07-31T00:00:00'));
   });
   afterAll(() => {
     jest.useRealTimers();
