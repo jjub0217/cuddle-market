@@ -15,6 +15,7 @@ export async function fetchProducts(params: ProductSearchParams, page: number = 
     if (params.petDetailType) urlParams.append('petDetailType', params.petDetailType)
     if (params.productType) urlParams.append('productType', params.productType)
     if (params.productStatuses) urlParams.append('productStatuses', params.productStatuses)
+    if (params.tradeStatuses) urlParams.append('tradeStatuses', params.tradeStatuses)
     if (params.minPrice) urlParams.append('minPrice', params.minPrice)
     if (params.maxPrice) urlParams.append('maxPrice', params.maxPrice)
     if (params.addressSido) urlParams.append('addressSido', params.addressSido)

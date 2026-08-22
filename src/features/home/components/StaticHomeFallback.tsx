@@ -49,7 +49,7 @@ export default function StaticHomeFallback({ products, totalElements }: StaticHo
             {/* 실제 상품 데이터 렌더링 */}
             <section className="flex flex-col gap-5">
               <div className="flex items-center justify-between">
-                <p className="text-text-secondary">{`총 ${totalElements}개의 상품`}</p>
+                <p className="text-text-secondary">{`상품 ${totalElements}개`}</p>
                 <div className="w-36">
                   <div className="bg-primary-50 rounded px-3 py-2 text-gray-900 text-sm">최신순</div>
                 </div>

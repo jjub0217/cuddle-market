@@ -64,8 +64,16 @@ function 상품(id: number, title = `상품 ${id}`) {
   };
 }
 
-function 한페이지(items: ReturnType<typeof 상품>[], hasNext = false) {
-  return { content: items, hasNext, page: 0, size: 20, total: items.length };
+function 한페이지(items: ReturnType<typeof 상품>[], hasNext = false, totalElements?: number) {
+  return {
+    content: items,
+    hasNext,
+    page: 0,
+    size: 20,
+    total: items.length,
+    // 건수 줄이 읽는 값(#1010). 안 주면 아예 안 그려진다 — 아래 시험이 그걸 지킨다
+    ...(totalElements === undefined ? {} : { totalElements }),
+  };
 }
 
 // 세부 필터 시트가 쓰는 BottomSheet가 useSafeAreaInsets를 부른다. 시험에서는 재는 사람이
@@ -328,6 +336,65 @@ it('세부 필터 시트에서 적용하면 그 조건이 실린다', async () =
       expect.objectContaining({ productStatuses: 'USED', minPrice: 10000, maxPrice: 50000 })
     )
   );
+});
+
+// ----- 판매중 토글이 서버까지 가는가 (#1009) -----
+
+it('판매중을 켜면 tradeStatuses 가 실리고, 끄면 사라진다', async () => {
+  // ⚠️ 시트와 달리 **누르면 바로** 다시 받아야 한다 — [적용] 같은 단추가 없다.
+  fetchProducts.mockResolvedValue(한페이지([상품(1)]));
+
+  await render(<ProductListView />, { wrapper: 감싸기 });
+  await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
+  fetchProducts.mockClear();
+
+  await fireEvent.press(screen.getByTestId('toggle-only-on-sale'));
+
+  await waitFor(() =>
+    expect(fetchProducts).toHaveBeenCalledWith(
+      // page 0 부터 다시 받아야 한다 — 이어 받으면 뒤섞인다
+      expect.objectContaining({ page: 0, tradeStatuses: 'SELLING' })
+    )
+  );
+  fetchProducts.mockClear();
+
+  // 다시 누르면 조건 자체가 빠진다
+  await fireEvent.press(screen.getByTestId('toggle-only-on-sale'));
+
+  await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
+  expect(fetchProducts.mock.calls.at(-1)?.[0]).not.toHaveProperty('tradeStatuses');
+});
+
+// ----- 몇 건인지 (#1010) -----
+//
+// 대분류를 바꾸면 목록이 확 줄어드는데(전체 61 → 조류 4) 몇 건인지 안 알려주면
+// 「고장인가?」로 보인다. 문구는 웹 ProductListHeader 그대로다.
+
+it('서버가 센 건수를 목록 위에 보여준다', async () => {
+  fetchProducts.mockResolvedValue(한페이지([상품(1)], false, 61));
+
+  await render(<ProductListView />, { wrapper: 감싸기 });
+
+  await waitFor(() => expect(screen.getByText('상품 61개')).toBeTruthy());
+});
+
+it('검색 결과에서도 같은 자리에 건수가 나온다', async () => {
+  // 홈과 검색이 같은 조각을 쓴다 — 한쪽에만 나오면 안 된다
+  fetchProducts.mockResolvedValue(한페이지([상품(1)], false, 4));
+
+  await render(<ProductListView keyword="사료" />, { wrapper: 감싸기 });
+
+  await waitFor(() => expect(screen.getByText('상품 4개')).toBeTruthy());
+});
+
+it('아직 못 받았으면 건수를 안 그린다', async () => {
+  // 「상품 0개」가 스쳤다가 숫자가 바뀌면 그게 더 헷갈린다
+  fetchProducts.mockRejectedValue(new Error('그물이 끊겼어요'));
+
+  await render(<ProductListView />, { wrapper: 감싸기 });
+
+  await waitFor(() => expect(screen.getByText('다시 시도')).toBeTruthy());
+  expect(screen.queryByTestId('product-total-count')).toBeNull();
 });
 
 // ----- 소분류 줄이 목록 화면 **안에서도** 움직이는가 -----

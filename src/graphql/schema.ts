@@ -327,6 +327,7 @@ export const typeDefs = gql`
       keyword: String
       productType: String
       productStatuses: String
+      tradeStatuses: String
       minPrice: Int
       maxPrice: Int
       addressSido: String

@@ -13,6 +13,7 @@ describe('EMPTY_FILTERS', () => {
       category: null,
       productType: null,
       productStatus: null,
+      tradeStatus: null,
       price: null,
       sido: null,
       gugun: null,
@@ -65,6 +66,16 @@ describe('toParams — 빈 값은 뺀다', () => {
 
     expect(params.productType).toBe('SELL')
     expect(params.productStatuses).toBe('USED')
+  })
+
+  it('판매중 토글은 tradeStatuses 로 간다', () => {
+    // ⚠️ 서버는 SELLING 을 물으면 거래 상태가 NULL 인 판매요청도 함께 준다.
+    //    그래서 앱은 값 하나만 보내고 더 거르지 않는다.
+    expect(toParams(filters({ tradeStatus: 'SELLING' }), 0).tradeStatuses).toBe('SELLING')
+  })
+
+  it('판매중 토글이 꺼져 있으면 키 자체가 없다', () => {
+    expect(toParams(EMPTY_FILTERS, 0)).not.toHaveProperty('tradeStatuses')
   })
 
   it('지역 둘을 싣는다', () => {

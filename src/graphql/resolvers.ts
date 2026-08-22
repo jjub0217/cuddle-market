@@ -123,7 +123,7 @@ export const resolvers = {
       _parent: unknown,
       args: {
         page: number; size: number; keyword?: string; productType?: string;
-        productStatuses?: string; minPrice?: number; maxPrice?: number;
+        productStatuses?: string; tradeStatuses?: string; minPrice?: number; maxPrice?: number;
         addressSido?: string; addressGugun?: string; categories?: string;
         petType?: string; petDetailType?: string; sortBy?: string; sortOrder?: string
       },
@@ -133,6 +133,9 @@ export const resolvers = {
       if (args.keyword) params.append('keyword', args.keyword)
       if (args.productType) params.append('productType', args.productType)
       if (args.productStatuses) params.append('productStatuses', args.productStatuses)
+      // ⚠️ `SELLING` 을 물으면 거래 상태가 없는(NULL) 판매요청 상품도 함께 온다 — 서버가 그렇게 판다.
+      //    그래서 웹에서 다시 거를 필요가 없다(#1009).
+      if (args.tradeStatuses) params.append('tradeStatuses', args.tradeStatuses)
       if (args.minPrice != null) params.append('minPrice', String(args.minPrice))
       if (args.maxPrice != null) params.append('maxPrice', String(args.maxPrice))
       if (args.addressSido) params.append('addressSido', args.addressSido)

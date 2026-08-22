@@ -103,7 +103,7 @@ function Home() {
   }, [sortBy, sortOrder])
 
   const hasDetailFilter = searchParams.has('productStatuses') || searchParams.has('minPrice') || searchParams.has('addressSido')
-  const [isDetailFilterOpen, setIsDetailFilterOpen] = useState(true)
+  const [isDetailFilterOpen, setIsDetailFilterOpen] = useState(false)
   const [prevSearchParams, setPrevSearchParams] = useState(searchParams)
 
   if (searchParams !== prevSearchParams) {
@@ -130,7 +130,13 @@ function Home() {
 
   // URL 파라미터 기반 쿼리 키 (서버 HydrationBoundary와 동일한 키)
   const filterParams = useMemo(() => extractProductSearchParams(searchParams), [searchParams])
-  const queryKey = useMemo(() => productListQueryKey(filterParams), [filterParams])
+  // ⚠️ **열쇠에 「누가 보는가」를 넣는다.** 까닭은 `productListQueryKey` 주석에 있다 —
+  //    한 줄로 말하면 서버가 차단한 사람 상품을 빼 주는데 SSR 은 그걸 모른다.
+  //    로그인이 확인되는 순간 열쇠가 `anon` → `me` 로 바뀌어 **반드시 다시 받는다.**
+  const queryKey = useMemo(
+    () => productListQueryKey(filterParams, isLoggedIn ? 'me' : 'anon'),
+    [filterParams, isLoggedIn]
+  )
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error, refetch } = useInfiniteQuery({
     queryKey,
@@ -138,8 +144,8 @@ function Home() {
     queryFn: async ({ pageParam = 0 }) => {
       const data = await fetchGraphQL<{ products: any }>(
         `
-        query Products($page: Int!, $size: Int!, $productType: String, $productStatuses: String, $minPrice: Int, $maxPrice: Int, $addressSido: String, $addressGugun: String, $categories: String, $petType: String, $petDetailType: String, $keyword: String, $sortBy: String, $sortOrder: String) {
-          products(page: $page, size: $size, productType: $productType, productStatuses: $productStatuses, minPrice: $minPrice, maxPrice: $maxPrice, addressSido: $addressSido, addressGugun: $addressGugun, categories: $categories, petType: $petType, petDetailType: $petDetailType, keyword: $keyword, sortBy: $sortBy, sortOrder: $sortOrder) {
+        query Products($page: Int!, $size: Int!, $productType: String, $productStatuses: String, $tradeStatuses: String, $minPrice: Int, $maxPrice: Int, $addressSido: String, $addressGugun: String, $categories: String, $petType: String, $petDetailType: String, $keyword: String, $sortBy: String, $sortOrder: String) {
+          products(page: $page, size: $size, productType: $productType, productStatuses: $productStatuses, tradeStatuses: $tradeStatuses, minPrice: $minPrice, maxPrice: $maxPrice, addressSido: $addressSido, addressGugun: $addressGugun, categories: $categories, petType: $petType, petDetailType: $petDetailType, keyword: $keyword, sortBy: $sortBy, sortOrder: $sortOrder) {
             content { id title price mainImageUrl petDetailType productStatus productType tradeStatus createdAt viewCount favoriteCount isFavorite addressSido addressGugun }
             page totalPages totalElements hasNext
           }
@@ -150,6 +156,7 @@ function Home() {
           size: 20,
           productType: filterParams.productType || undefined,
           productStatuses: filterParams.productStatuses || undefined,
+          tradeStatuses: filterParams.tradeStatuses || undefined,
           minPrice: filterParams.minPrice ? Number(filterParams.minPrice) : undefined,
           maxPrice: filterParams.maxPrice ? Number(filterParams.maxPrice) : undefined,
           addressSido: filterParams.addressSido || undefined,

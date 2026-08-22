@@ -39,6 +39,13 @@ export interface ProductListParams {
   productType?: string
   /** 상품 상태 코드. 이것도 서버는 목록을 받지만 하나만 보낸다 */
   productStatuses?: string
+  /**
+   * 거래 상태 코드(SELLING·RESERVED·COMPLETED). 「판매중」 토글이 SELLING 을 보낸다.
+   *
+   * ⚠️ **SELLING 을 물으면 거래 상태가 NULL 인 것(판매요청)도 함께 온다.**
+   *    서버가 그렇게 만들어져 있다(`ProductRepositoryCustomImpl:100-106`).
+   */
+  tradeStatuses?: string
   /** 가격 구간 아래 끝 */
   minPrice?: number
   /** 가격 구간 위 끝. 「10만원 이상」처럼 끝이 없으면 안 보낸다 */
@@ -69,6 +76,7 @@ export async function fetchProducts({
   categories,
   productType,
   productStatuses,
+  tradeStatuses,
   minPrice,
   maxPrice,
   addressSido,
@@ -87,6 +95,7 @@ export async function fetchProducts({
   if (categories) query.set('categories', categories)
   if (productType) query.set('productType', productType)
   if (productStatuses) query.set('productStatuses', productStatuses)
+  if (tradeStatuses) query.set('tradeStatuses', tradeStatuses)
   if (addressSido) query.set('addressSido', addressSido)
   if (addressGugun) query.set('addressGugun', addressGugun)
   if (sortBy) query.set('sortBy', sortBy)

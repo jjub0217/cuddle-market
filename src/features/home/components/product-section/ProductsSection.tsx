@@ -1,6 +1,5 @@
 'use client'
 
-import { useState, useMemo } from 'react'
 import ProductList from '@/components/product/ProductList'
 import Tabs from '@/components/Tabs'
 import { PRODUCT_TYPE_TABS, SORT_TYPE, type ProductTypeTabId } from '@/constants/constants'
@@ -16,9 +15,11 @@ interface ProductListHeaderProps {
 }
 
 function ProductListHeader({ totalElements }: ProductListHeaderProps) {
+  // ⚠️ 크기를 「판매중」 토글 글자와 **같게** 맞춘다(둘 다 `text-sm`). 좁은 폭에서 바로 위아래에
+  //    놓이는 두 글자라 크기가 다르면 층이 어긋나 보인다.
   return (
-    <p className="text-xs text-gray-500 md:text-sm" aria-live="polite">
-      {`전체 ${totalElements}개`}
+    <p className="text-sm text-gray-500" aria-live="polite">
+      {`상품 ${totalElements}개`}
     </p>
   )
 }
@@ -61,7 +62,29 @@ export function ProductsSection({
   compactMobileToolbar = false,
 }: ProductsSectionProps) {
   const { searchParams, pathname, push } = useFilterNavigation()
-  const [onlyOnSale, setOnlyOnSale] = useState(false)
+
+  /**
+   * 「판매중」 토글 — **주소에 싣는다**(#1009).
+   *
+   * ⚠️ 조각 안 상태로 두면 목록 질의의 열쇠(productListQueryKey)가 안 바뀌어
+   *    **다시 안 받아온다.** 열쇠는 주소에서만 만들어지고 SSR 프리페치도 같은 열쇠를 쓴다.
+   *    그래서 받아온 20개 중에서 화면이 남기는 꼴이 되어 뒤 페이지의 판매중 상품이 안 보였다.
+   *    이 저장소는 이미 필터를 전부 주소에 넣어 왔다(#319) — 같은 방법을 쓴다.
+   *
+   * ⚠️ 꺼짐이면 값을 「전체」 같은 것으로 두지 않고 **파라미터를 아예 뺀다**(「전체는 빈 값」).
+   *    `SELLING` 을 물으면 거래 상태가 없는 판매요청 상품도 서버가 함께 준다.
+   */
+  const onlyOnSale = searchParams.get('tradeStatuses') === 'SELLING'
+
+  const handleOnlyOnSaleChange = (checked: boolean) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (checked) {
+      params.set('tradeStatuses', 'SELLING')
+    } else {
+      params.delete('tradeStatuses')
+    }
+    push(`${pathname}?${params.toString()}`)
+  }
 
   const activeTabCode = PRODUCT_TYPE_TABS.find((tab) => tab.id === activeTab)?.code
 
@@ -86,15 +109,10 @@ export function ProductsSection({
     push(`${pathname}?${params.toString()}`)
   }
 
-  const visibleProducts = useMemo(() => {
-    if (!onlyOnSale) return products
-    return products.filter((product) => product.tradeStatus === 'SELLING' || product.tradeStatus === null)
-  }, [products, onlyOnSale])
-
   return (
-    <section role="tabpanel" id={`panel-${activeTabCode}`} aria-labelledby={activeTab} className="flex flex-col gap-4 md:gap-2">
+    <section role="tabpanel" id={`panel-${activeTabCode}`} aria-labelledby={activeTab} className="flex flex-col gap-2">
       {/* 탭 + 토글 + 정렬 */}
-      <div className="border-outline-variant flex flex-col justify-between gap-7 border-b pb-2 md:flex-row md:items-center md:gap-4 md:pt-15">
+      <div className="border-outline-variant flex flex-col justify-between gap-3 border-b pb-2 md:flex-row md:items-center md:gap-4 md:pt-15">
         <Tabs
           tabs={PRODUCT_TYPE_TABS}
           activeTab={activeTab}
@@ -109,7 +127,7 @@ export function ProductsSection({
               <input
                 type="checkbox"
                 checked={onlyOnSale}
-                onChange={(e) => setOnlyOnSale(e.target.checked)}
+                onChange={(e) => handleOnlyOnSaleChange(e.target.checked)}
                 className="peer sr-only"
               />
               <span className="block h-4 w-7 rounded-full bg-gray-200 transition-colors peer-checked:bg-primary-600"></span>
@@ -171,10 +189,10 @@ export function ProductsSection({
         </div>
       </div>
 
-      {/* <ProductListHeader totalElements={onlyOnSale ? visibleProducts.length : totalElements} /> */}
+      <ProductListHeader totalElements={totalElements} />
 
-      {visibleProducts.length > 0 ? (
-        <ProductList products={visibleProducts} />
+      {products.length > 0 ? (
+        <ProductList products={products} />
       ) : (
         <div className="flex flex-col items-center justify-center gap-4 rounded-3xl border-2 border-dashed border-gray-200 bg-white px-7 py-16">
           <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#fff5e0]">
