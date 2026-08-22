@@ -94,7 +94,7 @@ export default function MobileSearchOverlay({ isOpen, onClose }: MobileSearchOve
               id="search-mobile"
               className="h-10"
               inputClass="py-1 text-[15px] bg-white"
-              wrapperClassName="rounded-full bg-white border border-[#d4c4b2]"
+              wrapperClassName="rounded-full bg-white border border-outline-variant"
               onSearch={onClose}
             />
           </Suspense>

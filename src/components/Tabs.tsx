@@ -41,7 +41,7 @@ const VARIANT_STYLES: Record<TabsVariant, { container: string; tab: string; tabA
     // 단추만 한 크기면 화면을 잡아먹는다. 모바일은 한 단계 더 작다(#847).
     tab: 'h-8 cursor-pointer rounded-full border px-5 py-1.5 text-sm whitespace-nowrap transition-all max-md:h-7 max-md:px-4 max-md:py-1 max-md:font-normal',
     tabActive: 'border-primary-600 bg-primary-600 text-white shadow-sm',
-    tabInactive: 'border-[#d4c4b2] bg-white text-gray-600 hover:border-primary-600 hover:text-primary-600',
+    tabInactive: 'border-outline-variant bg-white text-gray-600 hover:border-primary-600 hover:text-primary-600',
   },
 }
 
