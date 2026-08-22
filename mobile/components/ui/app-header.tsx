@@ -122,7 +122,7 @@ export function HeaderLogo({ onPress }: { onPress?: () => void }) {
   );
 
   // 누를 일이 없으면 그냥 그림이다. 홈만 누를 거리를 준다 —
-  // 웹도 로고를 누르면 홈(맨 주소)으로 간다(Header.tsx:165).
+  // 웹도 로고를 누르면 홈(맨 주소)으로 간다 — `Logo.tsx` 가 로고를 `ROUTES.HOME` 링크로 감싼다.
   if (!onPress) return logo;
 
   return (

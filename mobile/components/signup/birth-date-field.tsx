@@ -5,7 +5,8 @@ import { colors } from '@/constants/colors';
 
 import { messageStyles } from './field';
 
-// 생년월일. 웹과 같이 YYYY / MM / DD 세 칸으로 받는다(BirthDateField.tsx:74,87,100).
+// 생년월일. 웹과 같이 YYYY / MM / DD 세 칸으로 받는다 —
+// 웹 `BirthDateField.tsx` 도 placeholder 가 "YYYY" · "MM" · "DD" 인 칸 셋이다.
 // 날짜 선택기를 쓰면 폰에서는 더 편하지만 새 의존성이 늘고 웹과 모양이 갈린다.
 //
 // 가입 화면과 「추가 정보 입력」 화면이 같이 쓴다. 그래서 폼 훅에 묶지 않고 값만 주고받는다

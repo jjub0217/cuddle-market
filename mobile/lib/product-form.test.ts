@@ -9,7 +9,7 @@ import {
   type ProductFormValues,
 } from './product-form';
 
-// 문구는 웹 productPostValidationRules(src/features/signup/validationRules.ts:80-)에서
+// 문구는 웹 `validationRules.ts` 의 `productPostValidationRules` 에서
 // 그대로 가져왔다. 같은 화면이 웹과 앱에서 다른 말을 하면 안 된다.
 //
 // ⚠️ 「상품명은 2~ 50자」의 띄어쓰기가 이상해 보여도 웹 그대로다. 고치지 마라 —

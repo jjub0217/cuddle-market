@@ -7,9 +7,10 @@ import { useAuthStore } from '@/lib/auth/store';
 
 // 커뮤니티 목록에 떠 있는 「글쓰기」 단추.
 //
-// 웹 모바일과 같은 자리(오른쪽 아래)·같은 문구다(CommunityPage.tsx:374).
+// 웹 모바일과 같은 자리(오른쪽 아래)·같은 문구(「글쓰기」)다(`CommunityPage.tsx` 의 Mobile FAB).
 //
-// ⚠️ **게스트에게는 아예 안 그린다.** 웹도 `isLogin()` 일 때만 그리고(CommunityPage.tsx:365),
+// ⚠️ **게스트에게는 아예 안 그린다.** 웹도 `hasHydrated && isLogin()` 일 때만 그리고
+//    (`CommunityPage.tsx` 의 Mobile FAB),
 //    홈 탭의 「상품 등록」도 같다. 누르고 나서 로그인하라는 말을 듣는 것보다 아예 안 보이는
 //    편이 낫고, 같은 모양의 뜬 단추가 화면마다 다르게 굴면 앱이 어긋나 보인다.
 //

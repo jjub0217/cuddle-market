@@ -133,7 +133,8 @@ const styles = StyleSheet.create({
   //    (웹은 ml-auto 라 방향과 무관하게 오른쪽에 붙는다 — 그래서 웹은 멀쩡했다.)
   rowMine: { flexDirection: 'row-reverse', justifyContent: 'flex-start' },
   rowTheirs: { justifyContent: 'flex-start' },
-  // 모서리는 웹과 같다(ChatLog.tsx:248~251). **보낸 쪽을 향한 위 모서리만 각지다** —
+  // 모서리는 웹과 같다 — `ChatLog.tsx` 의 말풍선이 `rounded-tl-2xl`(내 것) ·
+  // `rounded-tr-2xl`(상대 것)만 준다. **보낸 쪽을 향한 위 모서리만 각지다** —
   // 내 것은 오른쪽 위, 상대 것은 왼쪽 위. 네 귀를 다 둥글리면 알약이 되어
   // 어느 쪽이 보냈는지가 모양으로 안 읽힌다.
   // 16 은 웹 rounded-2xl(1rem)과 같은 값이다.

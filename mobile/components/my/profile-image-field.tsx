@@ -14,7 +14,7 @@ import { pickImages, shrinkImage, uploadOne } from '@/lib/product-images';
 //    대신 **일하는 함수는 그대로 쓴다**(`lib/product-images.ts`).
 //
 // 사진이 없으면 **닉네임 첫 글자**를 그린다. 웹·앱이 이미 그렇게 한다
-// (`ProfileAvatar.tsx:42` · `user-profile/profile-head.tsx:32`).
+// (`ProfileAvatar.tsx` · `user-profile/profile-head.tsx` — 둘 다 `nickname.charAt(0).toUpperCase()`).
 //
 // 오른쪽 아래 **카메라 표시도 웹에서 가져왔다**(`ProfileUpdateBaseForm.tsx` 의 사진 자리).
 // 처음엔 아래에 「사진 바꾸기」 글자를 뒀는데, 웹에 있는 것을 근거 없이 안 가져온 것이었다.

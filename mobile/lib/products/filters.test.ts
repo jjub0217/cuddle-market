@@ -119,7 +119,7 @@ describe('toParams — 가격은 min/max 로 갈라진다', () => {
 
 describe('toParams — 정렬은 둘로 나뉜다', () => {
   // 웹 SORT_TYPE 의 id 와 서버가 받는 sortBy+sortOrder 가 다르다.
-  // 근거: src/features/home/components/product-section/ProductsSection.tsx:50-62
+  // 근거: 웹 `ProductsSection.tsx` 의 `handleSortChange`
 
   it('최신순은 sortBy 만', () => {
     const params = toParams(filters({ sortBy: 'createdAt' }), 0)

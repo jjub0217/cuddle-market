@@ -80,7 +80,8 @@ const styles = StyleSheet.create({
   button: {
     height: 48, // 이메일 로그인 단추와 같은 높이 — 셋이 나란히 서면 높이가 맞아야 한다
     borderRadius: 8,
-    // 로고와 글자를 가운데에 나란히. 웹도 아이콘이 글자 왼쪽에 붙는다(Button.tsx:29)
+    // 로고와 글자를 가운데에 나란히. 웹도 아이콘이 글자 왼쪽에 붙는다 —
+    // `Button.tsx` 가 `iconSrc` 그림을 `children` 앞에 그린다
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

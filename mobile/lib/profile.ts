@@ -20,7 +20,7 @@ export interface MyProfile {
    * 어떻게 가입했나. `LOCAL`(이메일) · `KAKAO` · `GOOGLE` …
    *
    * ⚠️ **비밀번호를 바꾸는 자리를 그릴지 가른다.** 소셜 계정에는 비밀번호가 없다.
-   *    웹도 같은 기준이다(`ProfileUpdate.tsx:41`).
+   *    웹도 같은 기준이다(`ProfileUpdate.tsx` 의 `isSocialLogin` — `provider !== 'LOCAL'`).
    */
   provider: string | null;
   /** 소개글 */

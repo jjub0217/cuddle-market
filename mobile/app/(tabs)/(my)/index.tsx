@@ -75,7 +75,8 @@ export default function MyScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         {/*
           계정 카드를 누르면 프로필 수정으로 간다. **웹도 여기가 유일한 길이다**
-          (`ProfileData.tsx:382` — 카드 안의 「프로필 수정」 단추).
+          (`ProfileData.tsx` 의 「프로필 수정」 `Link` — `isMyProfile && !isProfileEditPage`
+           일 때만 카드 안에 그린다).
           웹은 단추지만 앱은 오른쪽에 `〉` 를 붙인다 — 아래 줄들(판매 내역·찜한 상품 …)이
           다 그 모양이라, 같은 방식이어야 「누르면 들어간다」가 앱 안에서 한 모양이 된다.
         */}
@@ -104,10 +105,12 @@ export default function MyScreen() {
             {location ? <Text style={styles.location}>{location}</Text> : null}
             {/*
               ⚠️ **내 소개글은 없어도 자리를 보여준다.** 웹도 그렇다
-                 (`ProfileData.tsx:342` — `introduction || isMyProfile`).
+                 (`ProfileData.tsx` 의 소개글 줄 —
+                  `introduction || (isMyProfile ? '소개글을 작성해주세요' : '소개글이 없습니다')`).
                  남의 프로필에서는 「작성해주세요」가 누구더러 쓰라는 건지 알 수 없어
-                 아예 안 그리지만(`user-profile/profile-head.tsx:54`), 내 프로필에서는
-                 그게 **쓰러 가는 길**이 된다 — 눌러서 프로필 수정으로 간다.
+                 「소개글이 없습니다」로 바꿔 달지만(`user-profile/profile-head.tsx` 의
+                 소개글 `Text` — `isMine ? '소개글을 작성해주세요' : '소개글이 없습니다'`),
+                 내 프로필에서는 그게 **쓰러 가는 길**이 된다 — 눌러서 프로필 수정으로 간다.
 
               공백만 있는 소개글도 「없다」로 본다.
             */}
@@ -118,7 +121,8 @@ export default function MyScreen() {
               {me?.introduction?.trim() || '소개글을 작성해주세요'}
             </Text>
           </View>
-          {/* 아래 줄들과 같은 화살표다(components/my/section-card.tsx:59) */}
+          {/* 아래 줄들과 같은 화살표다 — `components/my/section-card.tsx` 의
+              `ChevronRight size={22}` */}
           <ChevronRight size={22} color={colors.onSurfaceSubtle} />
         </Pressable>
 

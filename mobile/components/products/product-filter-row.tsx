@@ -310,7 +310,8 @@ interface CategoryIconGridProps {
  *
  * ⚠️ **여기엔 「전체」가 없다.** 아무것도 안 고른 상태가 곧 전체이고, 되돌릴 때는
  *    고른 것을 다시 누르면 풀린다. 웹도 그렇다 —
- *    `CategoryFilter.tsx:17-26`이 여덟 개만 그리고 재클릭으로 해제한다.
+ *    `CategoryFilter.tsx` 의 `handleSelect` 가 같은 것을 다시 누르면 해제하고,
+ *    그리는 것은 `PRODUCT_CATEGORIES` 여덟 개뿐이다.
  *    (앞줄 탭·알약은 글자라 「전체」가 자연스럽지만, 그림 줄에 「전체」 그림을 지어낼 이유는 없다)
  */
 function CategoryIconGrid({ selected, onChange }: CategoryIconGridProps) {

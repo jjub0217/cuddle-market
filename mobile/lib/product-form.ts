@@ -3,8 +3,8 @@
 // 화면에서 떼어 순수 함수로 둔 이유: 규칙이 흩어지면 등록과 수정이 서로 다르게 막는다.
 // 서버가 전체 교체를 요구해 두 화면이 같은 값을 보내므로, 막는 규칙도 하나여야 한다.
 //
-// 문구는 웹 productPostValidationRules에서 그대로 가져왔다
-// (src/features/signup/validationRules.ts:80-).
+// 문구는 웹 `validationRules.ts` 의 `productPostValidationRules` 에서
+// 그대로 가져왔다.
 // ⚠️ 「2~ 50」의 이상한 띄어쓰기도 웹 그대로다. 여기만 고치면 웹과 달라진다.
 
 /**

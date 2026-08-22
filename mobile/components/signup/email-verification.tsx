@@ -50,7 +50,7 @@ export function EmailVerification({ form, onFocus }: Props) {
         style={locked ? styles.locked : undefined}
         // 아직 안 보냈을 때만. 보내고 나면 아래 줄(「이 주소로 코드를 보냈어요」)이
         // 그 자리를 대신한다 — 둘 다 두면 「보내드려요」와 「보냈어요」가 나란히 남는다.
-        // 웹도 단계마다 한 줄만 보여준다(EmailValidCode.tsx:203-207).
+        // 웹도 단계마다 한 줄만 보여준다 — `EmailValidCode.tsx` 의 `emailHelperText`.
         hint={locked ? undefined : '사용 가능 여부를 확인한 뒤 인증코드를 보내드려요.'}
         trailing={
           verified ? null : (

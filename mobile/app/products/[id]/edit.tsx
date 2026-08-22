@@ -38,14 +38,15 @@ export default function EditProductScreen() {
     try {
       await updateProduct(productId, payload);
       // 상세와 판매 내역이 새 값을 받게 한다.
-      // 키는 실제로 쓰는 값 그대로다 — 상세는 (home)/products/[id].tsx:73,
-      // 판매 내역은 my-products.tsx의 ['my', 'products'].
+      // 키는 실제로 쓰는 값 그대로다 — 상세는 `(home)/products/[id].tsx` 의 `useQuery`
+      // (`['product', productId]`), 판매 내역은 `my-products.tsx` 의 `['my', 'products']`.
       queryClient.invalidateQueries({ queryKey: ['product', productId] });
       queryClient.invalidateQueries({ queryKey: ['my', 'products'] });
 
       // 목록이 아니라 **상세로** 보낸다. 수정은 전체 교체라 「가격만 바꿨는데 사진·설명이
       // 날아가지 않았나」를 눈으로 확인할 자리가 필요하다 — 목록에는 가격·제목만 보인다.
-      // 웹도 수정 뒤 상세로 간다(ProductPostForm.tsx:101).
+      // 웹도 수정 뒤 상세로 간다 — `ProductPostForm.tsx` 의 수정 갈래가
+      // `router.push(`/products/${id}`)` 를 부른다.
       //
       // dismissTo인 이유: 상세 → 수정으로 왔으면 **그 상세로 되돌아가** 상세가 두 겹 쌓이지
       // 않고, 판매 내역 → 수정으로 왔으면 수정 화면을 상세로 갈아끼운다(뒤로 = 판매 내역).
@@ -58,7 +59,8 @@ export default function EditProductScreen() {
   // ⚠️ 값이 도착하기 전에는 폼을 안 그린다.
   //    initialValues는 처음 그릴 때 한 번만 읽히므로(ProductForm의 useState 초깃값),
   //    빈 값으로 먼저 그리면 나중에 값이 와도 칸이 안 채워진다.
-  //    웹 ProductPost.tsx:89-95도 같은 이유로 데이터가 올 때까지 폼을 안 그린다.
+  //    웹 `ProductPost.tsx` 의 `if (isEditMode && !productData)` 스피너 가드도
+  //    같은 이유로 데이터가 올 때까지 폼을 안 그린다.
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container} edges={['top', 'bottom']}>

@@ -58,7 +58,7 @@ export const EMPTY_FILTERS: ProductFilters = {
  *
  * ⚠️ **웹의 id 와 서버가 받는 값이 다르다.** 웹은 저가/고가를 각각 다른 id 로 두지만,
  *    서버는 `sortBy=price` 에 `sortOrder` 를 붙여 방향을 정한다.
- *    근거: 웹 `ProductsSection.tsx:50-62` (handleSortChange).
+ *    근거: 웹 `ProductsSection.tsx` 의 `handleSortChange`.
  */
 const SORT_PARAMS: Readonly<Record<string, { sortBy: string; sortOrder: string }>> = {
   orderedLowPriced: { sortBy: 'price', sortOrder: 'asc' },
