@@ -43,7 +43,7 @@ describe('changePassword', () => {
 
   it('확인용 비밀번호도 **서버로 보낸다**', async () => {
     // ⚠️ 앱에서만 맞춰보고 빼면 400 이 난다. 비밀번호 재설정에서 이미 겪은 함정이다
-    //    (`lib/find-password/api.ts:97-99` — PasswordChangeRequest 도 셋 다 @NotBlank).
+    //    (`find-password/api.ts` 의 `resetPassword` — PasswordChangeRequest 도 셋 다 @NotBlank).
     mockFetch.mockResolvedValue({ ok: true, json: async () => ({}) });
 
     await changePassword(입력);

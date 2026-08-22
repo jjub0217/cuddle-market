@@ -42,7 +42,7 @@ beforeEach(() => {
 });
 
 it('계정 카드를 누르면 프로필 수정으로 갈 수 있다', async () => {
-  // 웹도 여기가 유일한 길이다(ProfileData.tsx:382).
+  // 웹도 여기가 유일한 길이다(`ProfileData.tsx` 의 `ROUTES.PROFILE_UPDATE` 링크).
   await render(<MyScreen />, { wrapper: 감싸기 });
 
   expect(screen.getByTestId('profile-card')).toBeTruthy();
@@ -58,8 +58,8 @@ it('소개글이 있으면 보여준다', async () => {
 
 it('소개글이 없으면 **쓰러 가는 안내**를 보여준다', async () => {
   // ⚠️ 내 프로필에서는 빈 자리가 곧 「쓰러 가는 길」이다. 웹도 그렇다
-  //    (ProfileData.tsx:342 — `introduction || isMyProfile`).
-  //    남의 프로필에서는 반대로 아예 안 그린다(user-profile/profile-head.tsx:54) —
+  //    (`ProfileData.tsx` — `introduction || (isMyProfile ? '소개글을 작성해주세요' : '소개글이 없습니다')`).
+  //    남의 프로필에서는 대신 「소개글이 없습니다」를 그린다(`profile-head.tsx` 의 `introduction` 줄) —
   //    「작성해주세요」가 누구더러 쓰라는 건지 알 수 없기 때문이다.
   await render(<MyScreen />, { wrapper: 감싸기 });
 

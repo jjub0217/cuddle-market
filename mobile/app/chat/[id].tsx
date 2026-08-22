@@ -430,7 +430,8 @@ export default function ChatRoomScreen() {
               // ⚠️ **사진 말풍선에는 안 건다.** 사진 조각은 「못 불러왔다」와 「확대창이 열렸다」를
               //    자기 상태로 들고 있어서, 갈아 끼우면 **보고 있던 확대창이 닫힌다.**
               //    사진 말풍선에는 selectable 글자도 없어 풀 것이 애초에 없다.
-              //    게시글 상세도 같은 까닭으로 본문·댓글에는 안 건다(posts/[id].tsx:217).
+              //    게시글 상세도 같은 까닭으로 본문·댓글에는 안 건다
+              //    (`posts/[id].tsx` 의 `PostBody`·`CommentList` — 거기에는 `key={열쇠}` 를 안 건다).
               key={item.message.messageType === 'IMAGE' ? undefined : `${item.key}-${열쇠}`}
               message={item.message}
             />

@@ -27,7 +27,8 @@ beforeEach(() => {
 });
 
 it('사진이 없으면 닉네임 첫 글자를 그린다', async () => {
-  // 웹·앱이 이미 그렇게 한다(ProfileAvatar.tsx:42 · profile-head.tsx:32).
+  // 웹·앱이 이미 그렇게 한다 — 둘 다 `nickname.charAt(0).toUpperCase()` 다
+  // (`ProfileAvatar.tsx` · `user-profile/profile-head.tsx`).
   // 대표 그림으로 바꾸지 않는다 — 그러면 소셜 가입자가 다 똑같아 보인다(설계 §6).
   await render(<ProfileImageField url={null} nickname="협주" onChange={jest.fn()} />);
 

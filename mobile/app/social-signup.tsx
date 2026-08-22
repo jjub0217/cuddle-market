@@ -63,7 +63,8 @@ export default function SocialSignupScreen() {
   const [submitting, setSubmitting] = useState(false);
 
   // 안드로이드 하드웨어 뒤로가기를 삼킨다. true를 돌려주면 화면이 안 닫힌다.
-  // (app/signup.tsx:62-67과 같은 방식. 거기는 2단계→1단계로 돌아가지만 여기는 늘 막는다)
+  // (`app/signup.tsx` 의 `useFocusEffect`+`BackHandler` 와 같은 방식.
+  //  거기는 `goBack` 으로 2단계→1단계로 돌아가지만 여기는 늘 막는다)
   useFocusEffect(
     useCallback(() => {
       const sub = BackHandler.addEventListener('hardwareBackPress', () => true);
@@ -78,7 +79,8 @@ export default function SocialSignupScreen() {
   }>({ profileImageUrl: null, introduction: null });
 
   // 닉네임 첫 값은 서버가 소셜 계정에서 받아 만들어 둔 것으로 채운다.
-  // 웹도 같다(SocialSignUpForm.tsx:50 defaultValues.nickname = user?.nickname).
+  // 웹도 같다 — `SocialSignUpForm.tsx` 의 `useForm` 에서
+  // `defaultValues.nickname = user?.nickname || ''`.
   useEffect(() => {
     let alive = true;
 
@@ -111,7 +113,7 @@ export default function SocialSignupScreen() {
     setNicknameError(undefined);
     setFormError(null);
     // 고치면 확인이 무효가 된다. 안 그러면 확인한 적 없는 닉네임으로 저장된다
-    // (use-signup-form.ts:74와 같은 이유).
+    // (`use-signup-form.ts` 의 `setValue` 와 같은 이유).
     setNicknameChecked(false);
   };
 
@@ -166,7 +168,7 @@ export default function SocialSignupScreen() {
         introduction: keep.introduction,
       });
       // 뒤로 갈 곳이 없는 화면이라 replace로 갈아탄다. '/'는 홈과 마이 양쪽을
-      // 가리켜 어디로 갈지 정해지지 않는다(login.tsx:34와 같은 이유).
+      // 가리켜 어디로 갈지 정해지지 않는다(`login.tsx` 의 `close` 와 같은 이유).
       router.replace('/(tabs)/(home)');
     } catch (err) {
       if (err instanceof TypeError) {
@@ -198,7 +200,8 @@ export default function SocialSignupScreen() {
           keyboardShouldPersistTaps="handled"
           automaticallyAdjustKeyboardInsets
         >
-          {/* 문구는 웹 그대로다(SocialSignup.tsx:8 TitleSection) */}
+          {/* 문구는 웹 그대로다 — `SocialSignup.tsx` 의 `TitleSection`:
+              "추가 정보 입력" · "서비스 이용을 위해 아래 정보가 필요합니다" */}
           <Text style={styles.heading}>추가 정보 입력</Text>
           <Text style={styles.desc}>서비스 이용을 위해 아래 정보가 필요합니다</Text>
 
@@ -275,7 +278,7 @@ export default function SocialSignupScreen() {
                 {submitting ? (
                   <ActivityIndicator color={colors.onAction} />
                 ) : (
-                  // 웹 SocialSignUpForm.tsx:142의 단추 문구 그대로다
+                  // 웹 `SocialSignUpForm.tsx` 의 제출 단추 문구 그대로다 — "회원가입"
                   <Text style={styles.submitLabel}>회원가입</Text>
                 )}
               </Pressable>

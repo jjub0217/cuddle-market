@@ -15,7 +15,8 @@ import { normalizeKeyword } from '@/lib/search';
 //
 // 커뮤니티 목록 안에 놓는 검색칸.
 //
-// **웹과 같은 자리다** — 웹도 커뮤니티는 목록에 검색창을 얹는다(`CommunityPage.tsx:214`).
+// **웹과 같은 자리다** — 웹도 커뮤니티는 목록에 검색창을 얹는다
+// (`CommunityPage.tsx` 의 「Search (단독 행)」 구역 — 탭 줄 바로 아래다).
 // 상품은 헤더 돋보기 → 별도 화면인데, 그건 「찾을 게 정해져 있어 들어오는」 흐름이라서다.
 // 커뮤니티는 목록을 보다가 찾게 되므로 보던 자리에 칸이 있는 게 맞다(설계 §2).
 //
@@ -80,7 +81,7 @@ export function PostSearchInput({ keyword, onSubmit }: Props) {
           testID="post-search-input"
           value={text}
           onChangeText={change}
-          // 문구는 웹에서 가져왔다(CommunityPage.tsx:219). 새로 짓지 않는다
+          // 문구는 웹 `CommunityPage.tsx` 검색칸에서 가져왔다. 새로 짓지 않는다
           placeholder="궁금한 내용을 검색해보세요"
           placeholderTextColor={colors.onSurfaceSubtle}
           style={styles.input}

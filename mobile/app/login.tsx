@@ -73,7 +73,8 @@ export default function LoginScreen() {
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
         >
-          {/* 로고를 가운데에. 웹 로그인도 제목 위에 로고를 가운데로 둔다(Login.tsx:19). */}
+          {/* 로고를 가운데에. 웹 로그인도 제목 위에 로고를 가운데로 둔다 —
+              `Login.tsx` 의 `Logo`(`items-center` 묶음 안, `TitleSection` 위). */}
           <View style={styles.logoBox}>
             <Image
               source={require('@/assets/images/logo.png')}

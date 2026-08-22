@@ -55,8 +55,8 @@ export function LoadingState() {
 // 발자국은 버리지 않았다. lucide 의 PawPrint 로 바꿨을 뿐이다 — 같은 그림인데
 // 색과 크기를 정할 수 있다. 반려동물 서비스다운 그림이라 지킬 값어치가 있다.
 //
-// 원 안에 넣는 모양은 웹과 같다
-// (src/features/home/components/product-section/ProductsSection.tsx:131).
+// 원 안에 넣는 모양은 웹과 같다 — 웹 `ProductsSection.tsx` 의 빈 목록 자리도
+// SearchX 아이콘을 연한 동그라미로 감싼다.
 
 /** 브랜드 갈색. 웹 primary-700 과 같은 값이다. */
 const ICON_COLOR = colors.accent;

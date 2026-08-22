@@ -9,7 +9,8 @@ import { PostSearchInput } from './post-search-input';
 const INPUT = 'post-search-input';
 
 it('웹과 같은 안내 글자를 쓴다', async () => {
-  // 문구를 새로 짓지 않는다. 웹 CommunityPage.tsx:219 에서 가져왔다.
+  // 문구를 새로 짓지 않는다. 웹 `CommunityPage.tsx` 검색칸의 placeholder 를 그대로 썼다 —
+  // "궁금한 내용을 검색해보세요".
   await render(<PostSearchInput keyword="" onSubmit={jest.fn()} />);
 
   expect(screen.getByPlaceholderText('궁금한 내용을 검색해보세요')).toBeTruthy();

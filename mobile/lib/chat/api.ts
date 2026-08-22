@@ -59,7 +59,8 @@ export async function fetchChatRooms(
  * 들어 있는데, 여기서는 그 타입을 그대로 쓰면 안 된다 — 「있는 것처럼 보이는」 타입이 된다.
  *
  * ⚠️ **상대가 회원 탈퇴하면 `opponentId` 가 없다.** 닉네임은 「알 수 없는 사용자」로 온다.
- * 그때는 프로필로 가는 길을 안 만든다 — 웹도 그렇다(`ChatRoomInfo.tsx:154`).
+ * 그때는 프로필로 가는 길을 안 만든다 — 웹도 그렇다
+ * (`ChatRoomInfo.tsx` 의 `hasOpponent` 가 프로필 링크를 가른다).
  */
 export interface ChatRoomSummary {
   opponentId: number | null;

@@ -251,12 +251,13 @@ export default function CommunityListScreen() {
       <CommunitySortRow sortBy={sortBy} onChange={setSortBy} />
       {renderList()}
 
-      {/* 웹 모바일과 같은 자리(오른쪽 아래)·같은 문구다(CommunityPage.tsx:374).
+      {/* 웹 모바일과 같은 자리(오른쪽 아래)·같은 문구다 — `CommunityPage.tsx` 의
+          「Mobile FAB」 `Link`(`fixed right-4 bottom-20`, 문구 "글쓰기").
           모양은 홈 탭의 「상품 등록」에서 그대로 가져왔다 — 같은 뜬 단추가 화면마다
           다르게 생기면 안 된다.
 
-          ⚠️ **게스트에게는 아예 안 그린다.** 웹도 `isLogin()` 일 때만 그리고
-             (CommunityPage.tsx:365), 홈도 그렇다. 누르고 나서 로그인하라는 말을 듣는
+          ⚠️ **게스트에게는 아예 안 그린다.** 웹의 그 FAB 도 `hasHydrated && isLogin()`
+             일 때만 그리고, 홈도 그렇다. 누르고 나서 로그인하라는 말을 듣는
              것보다 안 보이는 편이 낫다. */}
       {isLoggedIn ? (
         <Pressable

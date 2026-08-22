@@ -147,7 +147,8 @@ export default function CommunityPostScreen() {
       //    옛 결과를 그대로 보여줘서 「등록이 안 됐나」로 읽힌다(#922).
       //    목록의 queryKey 는 ['communityPosts', boardType, keyword, sortBy] 인데,
       //    **앞자리만 주면** 게시판·검색어·정렬이 달라도 다 걸린다.
-      //    앱의 관례다 — 댓글도 그렇게 한다(comment-thread.tsx:88).
+      //    앱의 관례다 — 댓글도 그렇게 한다(`comment-thread.tsx` 의 댓글 등록 뒤
+      //    `invalidateQueries({ queryKey: ['replies'] })`).
       await queryClient.invalidateQueries({ queryKey: ['communityPosts'] });
 
       router.back();

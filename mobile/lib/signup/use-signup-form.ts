@@ -252,7 +252,7 @@ export function useSignupForm() {
         addressGugun: values.addressGugun,
       });
 
-      // 웹과 같이 가입 직후 로그인해 세션을 만든다(SignUpForm.tsx:111-116).
+      // 웹과 같이 가입 직후 로그인해 세션을 만든다(`SignUpForm.tsx` 의 `onSubmit`).
       await login(email, values.password);
       return true;
     } catch (err) {

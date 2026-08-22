@@ -148,7 +148,7 @@ export const ProductListView = forwardRef<ProductListViewRef, Props>(function Pr
   // 조건에 맞는 **전체** 건수. 지금 화면에 그린 개수가 아니라 서버가 센 값이다.
   //
   // 첫 페이지에서 읽는다 — 페이지마다 같은 값이 온다. 웹도 같은 자리를 본다
-  // (src/features/home/Home.tsx:232 `data?.pages?.[0]?.totalElements`).
+  // (`src/features/home/Home.tsx` 의 `totalElements` = `data?.pages?.[0]?.totalElements`).
   //
   // ⚠️ **아직 못 받았으면 undefined 로 둔다.** 0 으로 채우면 첫 조회·오류일 때
   //    「상품 0개」가 보인다 — 그게 진짜 0건인지 아직 못 받은 건지 구별이 안 된다.
@@ -157,7 +157,7 @@ export const ProductListView = forwardRef<ProductListViewRef, Props>(function Pr
   // 목록이 비었을 때 뭐라고 할지.
   //
   // ⚠️ **문구를 새로 짓지 않는다. 웹에 이미 있다.**
-  //    src/features/home/components/product-section/ProductsSection.tsx:136
+  //    src/features/home/components/product-section/ProductsSection.tsx 의 빈 목록 자리
   //      「검색 결과가 없습니다 / 다른 필터 조건으로 검색해보세요」
   //    웹은 **검색과 필터를 안 나눈다** — 목록이 비면 이 하나로 끝낸다. 여기도 그렇게 한다.
   //

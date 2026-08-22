@@ -49,7 +49,8 @@ export default function HomeScreen() {
           같은 자리에 로고와 알림 벨이 함께 들어간다.
 
           돋보기는 오른쪽 줄 맨 앞에 온다. 모바일 웹도 좁은 화면에서는 돋보기만 두고
-          누르면 덮개를 띄운다(Header.tsx:214). 검색창을 늘 띄우지 않는 이유는
+          누르면 덮개를 띄운다(`Header.tsx` 의 `showMobileSearch` 돋보기 `IconButton` →
+          `setIsSearchOpen` → `MobileSearchOverlay`). 검색창을 늘 띄우지 않는 이유는
           알약 두 줄만으로도 세로가 빠듯하기 때문이다(설계 §3). */}
       <AppHeader
         left={<HeaderLogo onPress={() => listRef.current?.reset()} />}

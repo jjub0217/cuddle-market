@@ -157,7 +157,8 @@ it('소개글을 비우면 null 로 보낸다', async () => {
 
 // ----- 닉네임 중복체크 -----
 //
-// ⚠️ **단추는 늘 보인다**(웹 ProfileUpdateBaseForm.tsx:313-327 과 같다). 고쳤을 때만
+// ⚠️ **단추는 늘 보인다**(웹 `ProfileUpdateBaseForm.tsx` 의 「중복체크」 단추 ·
+//    `handleNicknameCheck` 와 같다). 고쳤을 때만
 //    띄우면 「닉네임은 고칠 수 있는 값」이라는 것 자체가 안 보인다.
 //
 // ⚠️ **확인은 고쳤을 때만 요구한다.** 가입은 늘 새 닉네임이지만, 이 화면은 사진만
@@ -216,7 +217,7 @@ it('이미 쓰는 닉네임이면 알려준다', async () => {
 });
 
 it('확인한 뒤 또 고치면 확인이 **풀린다**', async () => {
-  // 안 풀면 「확인한 적 없는 닉네임」으로 저장된다(social-signup.tsx:113과 같은 이유)
+  // 안 풀면 「확인한 적 없는 닉네임」으로 저장된다(`social-signup.tsx` 의 `changeNickname` 과 같은 이유)
   await render(<ProfileEditScreen />, { wrapper: 감싸기 });
 
   await fireEvent.changeText(screen.getByDisplayValue('협주'), '주현');
@@ -313,7 +314,7 @@ it('서버가 안 준 값은 자리를 안 만든다', async () => {
 
 it('소개글 밑에 글자수를 센다', async () => {
   // ⚠️ 200자에서 **조용히 안 써진다**(maxLength). 폰에서는 「키보드가 먹통인가」로 읽힌다.
-  //    웹은 늘 세어 보여줬다(ProfileUpdateBaseForm.tsx:360)
+  //    웹은 늘 세어 보여줬다(`ProfileUpdateBaseForm.tsx` 의 `titleLength` — 「{titleLength}/200자」)
   await render(<ProfileEditScreen />, { wrapper: 감싸기 });
 
   expect(screen.getByText('5/200자')).toBeTruthy();
@@ -333,7 +334,8 @@ it('바뀐 값이 없으면 서버를 안 부르고 알려준다', async () => {
 
   await fireEvent.press(screen.getByTestId('profile-save'));
 
-  // 문구는 웹 그대로다(ProfileUpdateBaseForm.tsx:156-163)
+  // 문구는 웹 그대로다(`ProfileUpdateBaseForm.tsx` 의 `isUnchanged` —
+  // 「변경사항이 없습니다. / 수정할 내용을 입력해주세요.」)
   expect(showToast).toHaveBeenCalledWith('변경사항이 없습니다. 수정할 내용을 입력해주세요.');
   expect(updateMe).not.toHaveBeenCalled();
 });
@@ -368,7 +370,8 @@ it('빈 소개글을 그대로 두면 바뀐 값이 없다', async () => {
 
 // ----- 소셜 계정 -----
 //
-// ⚠️ 소셜 계정에는 비밀번호가 없다. 웹과 같은 기준으로 가른다(ProfileUpdate.tsx:41).
+// ⚠️ 소셜 계정에는 비밀번호가 없다. 웹과 같은 기준으로 가른다
+//    (`ProfileUpdate.tsx` 의 `isSocialLogin` — `provider !== 'LOCAL'`).
 
 it('소셜 계정이면 비밀번호 묶음이 **안 보인다**', async () => {
   useMe.mockReturnValue({ data: 내정보('KAKAO'), isLoading: false });

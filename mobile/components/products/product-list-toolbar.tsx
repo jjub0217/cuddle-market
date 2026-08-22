@@ -208,7 +208,7 @@ export function ProductListToolbar({
           <View style={[styles.track, onlyOnSale ? styles.trackOn : styles.trackOff]}>
             <View style={[styles.knob, onlyOnSale && styles.knobOn]} />
           </View>
-          {/* ⚠️ 문구는 웹에서 그대로 옮겼다 — ProductsSection.tsx:118 의 「판매중」 */}
+          {/* ⚠️ 문구는 웹에서 그대로 옮겼다 — `ProductsSection.tsx` 의 토글 글자 「판매중」 */}
           <Text style={styles.toggleLabel}>판매중</Text>
         </GesturePressable>
 
@@ -221,7 +221,7 @@ export function ProductListToolbar({
             // 숫자만 바뀌는 자리라 눈이 안 간다. 소리로는 읽어 준다(웹의 aria-live 와 같은 뜻)
             accessibilityLiveRegion="polite"
           >
-            {/* ⚠️ 문구는 웹 ProductListHeader 그대로다 — ProductsSection.tsx:20.
+            {/* ⚠️ 문구는 웹 `ProductsSection.tsx` 의 `ProductListHeader` 그대로다 — 「상품 N개」.
                 「전체 N개」가 아니다 — 판매중을 켜면 서버가 걸러서 55개만 주는데
                 그때 「전체 55개」는 거짓말이 된다(전체는 61개다) */}
             {`상품 ${totalElements}개`}
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.onSurfaceMedium,
   },
-  // ── 「판매중」 토글. 값은 웹(ProductsSection.tsx:107-119)에서 옮겼다.
+  // ── 「판매중」 토글. 값은 웹 `ProductsSection.tsx` 의 「판매중」 토글에서 옮겼다.
   //    웹은 h-4 w-7(16×28) 알약에 12px 손잡이가 12px 만큼 움직인다.
   toggleRow: {
     flexDirection: 'row',

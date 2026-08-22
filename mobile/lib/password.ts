@@ -28,7 +28,7 @@ export interface ChangePasswordInput {
   /**
    * ⚠️ **서버로 보내야 한다.** 앱에서만 맞춰보고 빼면 400 이 난다 —
    *    `PasswordChangeRequest.java` 가 셋 다 필수다. 비밀번호 재설정에서 이미 겪었다
-   *    (`lib/find-password/api.ts:97-99`).
+   *    (`find-password/api.ts` 의 `resetPassword`).
    */
   confirmPassword: string;
 }

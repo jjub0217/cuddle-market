@@ -8,13 +8,14 @@ import { colors } from '@/constants/colors';
 // 정렬 중인지도 늘 보인다. 상품 목록은 넷이라 시트로 접었는데(product-list-toolbar),
 // 여기는 그럴 만큼 많지 않다(설계 §2).
 //
-// 모양은 웹과 같다 — 나란히 놓고 사이에 옅은 세로 선(`CommunityPage.tsx:229`).
+// 모양은 웹과 같다 — 나란히 놓고 사이에 옅은 세로 선
+// (`CommunityPage.tsx` 의 `COMMUNITY_SORT_TYPE` 를 그리는 줄).
 //
 // ⚠️ **고른 것을 다시 눌러도 안 풀린다.** 정렬은 「지금 여기」를 가리키는 표시라,
 //    눌렀는데 아무 데도 안 가면 어색하다. 켜고 끄는 알약과 다른 점이다.
 
 /**
- * 웹 `COMMUNITY_SORT_TYPE`(`src/constants/constants.ts:171`)을 그대로 옮겼다 —
+ * 웹 `COMMUNITY_SORT_TYPE`(`src/constants/constants.ts`)을 그대로 옮겼다 —
  * 웹에서 바뀌면 여기도 바꾼다. 문구를 새로 짓지 않는다.
  *
  * ⚠️ 서버에는 `oldest`(오래된 순)도 있고 진짜로 돈다

@@ -64,7 +64,7 @@ it('판매중 토글이 보인다 (웹과 같은 문구)', async () => {
   const { props } = makeProps();
   await render(<ProductListToolbar {...props} />);
 
-  // 문구는 웹 ProductsSection.tsx:118 의 「판매중」이다
+  // 문구는 웹 `ProductsSection.tsx` 의 토글 글자 「판매중」이다
   expect(screen.getByText('판매중')).toBeTruthy();
   expect(screen.getByTestId('toggle-only-on-sale')).toBeTruthy();
 });
@@ -104,7 +104,7 @@ it('건수를 받으면 웹과 같은 문구로 보여준다', async () => {
   const { props } = makeProps({ totalElements: 61 });
   await render(<ProductListToolbar {...props} />);
 
-  // 문구는 웹 ProductListHeader(ProductsSection.tsx:20) 그대로다.
+  // 문구는 웹 `ProductsSection.tsx` 의 `ProductListHeader` 그대로다 — 「상품 N개」.
   // ⚠️ 「전체 N개」가 아니다 — 판매중을 켜면 걸러진 수가 오므로 「전체」는 거짓말이 된다
   expect(screen.getByText('상품 61개')).toBeTruthy();
   expect(screen.queryByText(/^전체 /)).toBeNull();

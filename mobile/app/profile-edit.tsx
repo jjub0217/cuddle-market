@@ -28,22 +28,26 @@ import { showToast } from '@/lib/toast';
 
 // 프로필 수정.
 //
-// **웹과 같은 한 화면이다**(`ProfileUpdate.tsx:118-120`) — 기본 정보 폼과 비밀번호 폼이
+// **웹과 같은 한 화면이다**(`ProfileUpdate.tsx` 가 `ProfileUpdateBaseForm` 과
+// `ProfileUpdatePasswordForm` 을 한 세로 묶음에 나란히 그린다) — 기본 정보 폼과 비밀번호 폼이
 // 각자 제목과 저장 단추를 갖고 세로로 쌓인다. 제목도 웹에서 가져왔다.
 //
 // ⚠️ **비밀번호 묶음은 `provider` 가 `LOCAL` 일 때만 그린다.** 소셜 계정에는 비밀번호가 없다.
-//    웹도 같은 기준이다(`ProfileUpdate.tsx:41`).
+//    웹도 같은 기준이다 — `ProfileUpdate.tsx` 의 `isSocialLogin`
+//    (`provider !== 'LOCAL'` 이면 `ProfileUpdatePasswordForm` 을 안 그린다).
 //
 // ⚠️ **저장할 때 여섯 개를 다 보낸다.** 서버가 전체 교체라 안 보낸 값은 지워진다
 //    (`lib/profile.ts` 의 `UpdateMeInput` 설명). 이 화면에서 안 고치는 생년월일도 실어 보낸다.
 //
-// ⚠️ **중복체크 단추는 늘 보인다**(웹 `ProfileUpdateBaseForm.tsx:313-327`과 같다).
+// ⚠️ **중복체크 단추는 늘 보인다**(웹 `ProfileUpdateBaseForm.tsx` 의 닉네임
+//    `InputWithButton` 도 `buttonText="중복체크"` 를 늘 달고 있다).
 //    고쳤을 때만 띄우면 「닉네임은 고칠 수 있는 값」이라는 것 자체가 안 보인다.
 //    **확인을 요구하는 것만** 고쳤을 때로 가른다 — 사진만 바꾸러 온 사람에게
 //    안 고친 닉네임의 중복체크를 시킬 이유가 없다.
 //
 // ⚠️ **저장 단추를 회색으로 죽이지 않는다.** 회색 단추는 왜 안 눌리는지 말해줄 자리가 없다.
-//    늘 같은 모양으로 두고, 눌렀을 때 막힌 이유를 말해준다. 웹도 그렇다(같은 파일 383-389).
+//    늘 같은 모양으로 두고, 눌렀을 때 막힌 이유를 말해준다. 웹도 그렇다 —
+//    같은 파일의 「프로필 수정」 제출 `Button` 에 `disabled` 가 없다.
 
 export default function ProfileEditScreen() {
   const router = useRouter();
@@ -91,7 +95,7 @@ export default function ProfileEditScreen() {
     setNickname(value);
     setNicknameError(undefined);
     // 고치면 확인이 무효가 된다. 안 그러면 확인한 적 없는 닉네임으로 저장된다
-    // (social-signup.tsx:113과 같은 이유).
+    // (`social-signup.tsx` 의 `changeNickname` 과 같은 이유).
     setNicknameChecked(false);
   };
 
@@ -138,7 +142,8 @@ export default function ProfileEditScreen() {
       return;
     }
     if (바뀐값없음) {
-      // 문구는 웹 그대로다(ProfileUpdateBaseForm.tsx:156-163)
+      // 문구는 웹 그대로다 — "변경사항이 없습니다. 수정할 내용을 입력해주세요."
+      // (`ProfileUpdateBaseForm.tsx` 의 `isUnchanged` → `setUpdateWarning`)
       showToast('변경사항이 없습니다. 수정할 내용을 입력해주세요.');
       return;
     }
@@ -261,7 +266,8 @@ export default function ProfileEditScreen() {
             numberOfLines={4}
             maxLength={200}
             // ⚠️ 200자에서 **조용히 안 써진다.** 폰에서는 「키보드가 먹통인가」로 읽힌다.
-            //    웹도 늘 세어 보여줬다(ProfileUpdateBaseForm.tsx:360)
+            //    웹도 늘 세어 보여줬다 — `ProfileUpdateBaseForm.tsx` 의 자기소개 칸 아래
+            //    "{titleLength}/200자"
             hint={`${introduction.length}/200자`}
           />
 
@@ -420,7 +426,8 @@ const styles = StyleSheet.create({
     gap: 16,
     paddingBottom: 40,
   },
-  // 제목은 웹에서 가져왔다 — ProfileUpdateBaseForm.tsx:217 · ProfileUpdatePasswordForm.tsx:110
+  // 제목은 웹에서 가져왔다 — "기본 정보"(`ProfileUpdateBaseForm.tsx` 의 `h2`) ·
+  // "비밀번호 변경"(`ProfileUpdatePasswordForm.tsx` 의 `h2`)
   sectionTitle: {
     fontSize: 17,
     fontWeight: '700',
