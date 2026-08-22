@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { Z_INDEX } from '@/constants/ui'
 import MobilePlaceListOverlay from './MobilePlaceListOverlay'
+import NaverMap from './NaverMap'
 
 // 목록 오버레이가 **초점을 가두는지**만 본다(#981). 훅 자체는 useFocusTrap.test.tsx 가 덮는다.
 //
@@ -119,5 +120,28 @@ describe('MobilePlaceListOverlay 쌓임 순서', () => {
     render(<MobilePlaceListOverlay isOpen={false} onClose={() => {}} />)
 
     expect(층수(screen.getByRole('dialog', { hidden: true }).className)).toBeLessThanOrEqual(탭바층)
+  })
+})
+
+// 지도가 **자기 층을 상자 안에 가두는지**(#1003).
+//
+// 위 「쌓임 순서」와 **짝이다.** 목록을 z-30 으로 낮춘 것(#998)은 지도 칸이 SDK 의 층을
+// 가둬 줄 때만 안전하다. 네이버 지도 SDK 는 저작권 표시(`div.map_copyright`)를
+// **z-index:100** 짜리 칸에 담는데, 지도 상자가 쌓임 맥락을 안 만들면 그 100 이 바깥으로
+// 나와 목록(30) 위에 그려진다. 2026-08-22 에 실제 크롬에서 재어 확인했고, 목록을 연
+// 화면에 「© NAVER Corp.」 가 그대로 비쳤다.
+//
+// ⚠️ **jsdom 에는 지도 SDK 도 배치도 없다.** 진짜 저작권 요소가 안 만들어지니
+//    「정말 안 보이는가」는 여기서 못 본다. 지킬 수 있는 것은 **지도 상자가 쌓임 맥락을
+//    만드는 클래스를 달고 있는가**까지다. 눈으로는 좁은 폭(<768)에서 목록을 열어
+//    흰 판에 「© NAVER Corp.」·네이버 로고가 안 비치는지 봐야 한다.
+// ⚠️ **저작권을 감추는 시험이 아니다.** 지도 약관상 그 표시는 보여야 한다 —
+//    목록이 덮을 뿐이고, 닫으면 다시 보인다.
+describe('NaverMap 쌓임 맥락', () => {
+  it('지도 상자가 SDK 의 층을 가둔다 — isolate 가 붙는다', () => {
+    const { container } = render(<NaverMap />)
+
+    const 지도상자 = container.querySelector('[data-naver-map]')
+    expect(지도상자).toHaveClass('isolate')
   })
 })

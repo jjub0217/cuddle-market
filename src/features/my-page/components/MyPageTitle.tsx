@@ -3,18 +3,16 @@
 import Button from '@/components/commons/button/Button'
 import { Plus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { cn } from '@/lib/utils/cn'
 
 interface MyPageTitleProps {
   heading: string
   count?: number
   description: string
   buttonLabel?: string
-  buttonClassname?: string
   navigateTo?: string
 }
 
-export default function MyPageTitle({ heading, count, description, buttonLabel, navigateTo, buttonClassname }: MyPageTitleProps) {
+export default function MyPageTitle({ heading, count, description, buttonLabel, navigateTo }: MyPageTitleProps) {
   const router = useRouter()
   const goToProductPost = () => {
     if (navigateTo) {
@@ -34,7 +32,9 @@ export default function MyPageTitle({ heading, count, description, buttonLabel, 
           size="sm"
           icon={Plus}
           variant="primary"
-          className={cn('h-fit cursor-pointer font-bold', buttonClassname)}
+          // 높이를 여기서 다시 정하지 않는다. size="sm" 이 h-9(36) 를 못 박아 둔다(buttonClass.ts).
+          // 전에는 h-fit 을 얹어 그것을 덮었고, 그러면 글자 줄높이 20 만 남아 단추가 납작했다(#1000).
+          className="cursor-pointer font-bold"
           onClick={goToProductPost}
           type="button"
         >
