@@ -1,0 +1,8 @@
+# 커밋 메시지가 규칙에 맞는지 본다 (commitlint.config.ts).
+#
+# ⚠️ 이 훅은 **설정과 패키지가 있는데도 2026-08-22 까지 한 번도 안 돌았다.**
+#    husky 가 안 깔려 있어서다. 규칙만 적어 두고 아무도 안 지키던 상태였다.
+#
+# 급할 때 건너뛰려면:  git commit --no-verify
+# 다만 CI(.github/workflows/gate.yml)가 PR 에서 다시 본다.
+pnpm exec commitlint --edit "$1"
