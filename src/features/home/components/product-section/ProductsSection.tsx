@@ -15,8 +15,10 @@ interface ProductListHeaderProps {
 }
 
 function ProductListHeader({ totalElements }: ProductListHeaderProps) {
+  // ⚠️ 크기를 「판매중」 토글 글자와 **같게** 맞춘다(둘 다 `text-sm`). 좁은 폭에서 바로 위아래에
+  //    놓이는 두 글자라 크기가 다르면 층이 어긋나 보인다.
   return (
-    <p className="text-xs text-gray-500 md:text-sm" aria-live="polite">
+    <p className="text-sm text-gray-500" aria-live="polite">
       {`상품 ${totalElements}개`}
     </p>
   )
@@ -108,9 +110,9 @@ export function ProductsSection({
   }
 
   return (
-    <section role="tabpanel" id={`panel-${activeTabCode}`} aria-labelledby={activeTab} className="flex flex-col gap-4 md:gap-2">
+    <section role="tabpanel" id={`panel-${activeTabCode}`} aria-labelledby={activeTab} className="flex flex-col gap-2">
       {/* 탭 + 토글 + 정렬 */}
-      <div className="border-outline-variant flex flex-col justify-between gap-7 border-b pb-2 md:flex-row md:items-center md:gap-4 md:pt-15">
+      <div className="border-outline-variant flex flex-col justify-between gap-3 border-b pb-2 md:flex-row md:items-center md:gap-4 md:pt-15">
         <Tabs
           tabs={PRODUCT_TYPE_TABS}
           activeTab={activeTab}

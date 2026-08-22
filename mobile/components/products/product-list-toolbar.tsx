@@ -387,9 +387,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.onSurfaceMedium,
   },
-  // 건수는 읽히되 앞서지 않게 — 웹도 text-xs text-gray-500 이다
+  // 건수는 읽히되 앞서지 않게 — **색은 연하게 두고 크기만** 「판매중」 토글과 맞춘다.
+  // 바로 옆에 나란히 놓이는 두 글자라 크기가 다르면 층이 어긋나 보인다.
+  // 웹도 같다 — `ProductsSection.tsx` 의 `ProductListHeader` 가 `text-sm text-gray-500` 이고
+  // 토글은 `text-sm text-gray-600` 이다(크기 같음 · 색 다름).
   count: {
-    fontSize: 12,
+    fontSize: 14,
     color: colors.onSurfaceMuted,
   },
 
