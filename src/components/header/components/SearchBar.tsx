@@ -52,6 +52,17 @@ export default function SearchBar({
   function handleKeywordChange(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.nativeEvent.isComposing) return
     if (e.key === 'Enter') {
+      // ⚠️ **엔터의 기본 동작을 막는다.** 안 막으면 좁은 폭 검색 오버레이가 닫혔다가 곧바로
+      //    다시 열린다. 2026-08-22 에 진짜 크롬으로 재서 알았다:
+      //
+      //      ① 여기서 오버레이를 닫는다(아래 `onSearch`)
+      //      ② `useFocusTrap` 이 초점을 **열었던 자리(헤더 돋보기 단추)로 되돌린다**
+      //      ③ 엔터의 기본 동작이 그 단추를 누른다 — `event.detail === 0` 인 클릭이었다
+      //      ④ 그 단추는 토글이라 `!prev` 로 **다시 열린다**
+      //
+      //    「초점을 옮기면 뒤따르는 기본 동작의 대상이 바뀐다」는 함정이다.
+      //    `setPointerCapture` 가 뒤따르는 click 의 대상을 바꾸던 것과 같은 종류다.
+      e.preventDefault()
       const target = e.currentTarget
       target.blur()
       const searchKeyword = target.value.trim()

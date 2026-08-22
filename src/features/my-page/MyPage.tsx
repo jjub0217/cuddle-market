@@ -275,7 +275,16 @@ function MyPage() {
     },
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
     initialPageParam: 0,
-    enabled: activeMyPageTab === 'tab-blocked',
+    // ⚠️ **모바일 패널도 조건에 넣는다.** `activeMyPageTab` 은 `?tab=` 에서만 오는데,
+    //    좁은 폭에서는 주소가 `?panel=tab-blocked` 라 그 값이 'tab-sales' 로 떨어진다.
+    //    그러면 질의가 아예 안 돌아 **넓은 폭에서는 2명인데 좁은 폭에서는 0명**이 된다
+    //    (2026-08-22 에 실제로 그랬다).
+    //
+    //    ⚠️ 구매내역·찜은 `|| effectiveNav === 'nav-dash'` 라는 탈출구가 있어 좁은 폭에서도
+    //       돌았다. 차단만 그것이 없어서 이 하나만 빈 화면이었다.
+    //       여기에 `nav-dash` 를 붙이지 않는 까닭은 **대시보드에 차단 요약이 없기 때문**이다 —
+    //       붙이면 마이페이지를 열기만 해도 안 쓰는 목록을 받아온다.
+    enabled: activeMyPageTab === 'tab-blocked' || mobilePanelTab === 'tab-blocked',
   })
 
   const paginationProps = {
