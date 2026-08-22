@@ -18,7 +18,7 @@ import { ProductListToolbar } from '@/components/products/product-list-toolbar';
 import { useFavorite } from '@/hooks/use-favorite';
 import { useRefetchOnFocus } from '@/hooks/use-refetch-on-focus';
 import { fetchProducts } from '@/lib/products';
-import { EMPTY_FILTERS, toParams, type ProductFilters } from '@/lib/products/filters';
+import { EMPTY_FILTERS, SELLING, toParams, type ProductFilters } from '@/lib/products/filters';
 
 // 상품 목록. **홈과 검색 결과가 이 조각 하나를 나눠 쓴다.**
 //
@@ -39,6 +39,7 @@ import { EMPTY_FILTERS, toParams, type ProductFilters } from '@/lib/products/fil
 // ────────────────────
 // 소분류·카테고리            ← 목록과 함께 스크롤되어 사라진다     (ListHeaderComponent)
 // [전체][판매][판매요청] [⚙] ← 위로 올라가면 화면에 붙는다        (섹션 헤더)
+// ( ) 판매중        상품 61개  ← 툴바의 아랫줄이라 같이 붙는다      (#1009·#1010)
 // 상품들
 // ```
 //
@@ -144,6 +145,15 @@ export const ProductListView = forwardRef<ProductListViewRef, Props>(function Pr
   // 여러 페이지의 content를 하나의 Product[]로 이어붙임.
   const products: Product[] = data?.pages.flatMap((page) => page.content) ?? [];
 
+  // 조건에 맞는 **전체** 건수. 지금 화면에 그린 개수가 아니라 서버가 센 값이다.
+  //
+  // 첫 페이지에서 읽는다 — 페이지마다 같은 값이 온다. 웹도 같은 자리를 본다
+  // (src/features/home/Home.tsx:232 `data?.pages?.[0]?.totalElements`).
+  //
+  // ⚠️ **아직 못 받았으면 undefined 로 둔다.** 0 으로 채우면 첫 조회·오류일 때
+  //    「상품 0개」가 보인다 — 그게 진짜 0건인지 아직 못 받은 건지 구별이 안 된다.
+  const totalElements: number | undefined = data?.pages[0]?.totalElements;
+
   // 목록이 비었을 때 뭐라고 할지.
   //
   // ⚠️ **문구를 새로 짓지 않는다. 웹에 이미 있다.**
@@ -210,6 +220,11 @@ export const ProductListView = forwardRef<ProductListViewRef, Props>(function Pr
       onPressFilter={() => setSheetOpen(true)}
       // 시트가 담는 넷 중 하나라도 있으면 걸린 것이다 — 시트의 DetailFilterValue 와 같은 묶음
       hasDetailFilter={Boolean(filters.productStatus || filters.price || filters.sido || filters.gugun)}
+      // ⚠️ 시트의 넷과 달리 **누르면 바로** 걸린다. 그래서 hasDetailFilter 에도 안 넣는다 —
+      //    ⚙ 를 열어 보지 않아도 켜졌는지 눈에 그대로 보이기 때문이다
+      onlyOnSale={filters.tradeStatus === SELLING}
+      onChangeOnlyOnSale={(next) => patch({ tradeStatus: next ? SELLING : null })}
+      totalElements={totalElements}
     />
   );
 

@@ -26,16 +26,20 @@ function makeProps(overrides: Partial<React.ComponentProps<typeof ProductListToo
   const onChangeProductType = jest.fn();
   const onChangeSort = jest.fn();
   const onPressFilter = jest.fn();
+  const onChangeOnlyOnSale = jest.fn();
   return {
     onChangeProductType,
     onChangeSort,
     onPressFilter,
+    onChangeOnlyOnSale,
     props: {
       productType: null,
       sortBy: 'createdAt',
+      onlyOnSale: false,
       onChangeProductType,
       onChangeSort,
       onPressFilter,
+      onChangeOnlyOnSale,
       ...overrides,
     },
   };
@@ -52,12 +56,72 @@ it('알약 셋과 정렬·세부 필터 단추가 보인다', async () => {
   expect(screen.getByTestId('open-sort')).toBeTruthy();
 });
 
-it('상품 개수는 안 보여준다 (웹에 없다)', async () => {
+// ----- 「판매중」 토글 (#1009) -----
+//
+// ⚠️ 시트(detail-filter-sheet)의 「상품 상태」와 다르다. 이건 **누르면 바로** 알린다.
+
+it('판매중 토글이 보인다 (웹과 같은 문구)', async () => {
   const { props } = makeProps();
   await render(<ProductListToolbar {...props} />);
 
-  expect(screen.queryByText(/개$/)).toBeNull();
-  expect(screen.queryByText(/건$/)).toBeNull();
+  // 문구는 웹 ProductsSection.tsx:118 의 「판매중」이다
+  expect(screen.getByText('판매중')).toBeTruthy();
+  expect(screen.getByTestId('toggle-only-on-sale')).toBeTruthy();
+});
+
+it('꺼져 있을 때 누르면 켜라고 알린다', async () => {
+  const { props, onChangeOnlyOnSale } = makeProps();
+  await render(<ProductListToolbar {...props} />);
+
+  await fireEvent.press(screen.getByTestId('toggle-only-on-sale'));
+
+  expect(onChangeOnlyOnSale).toHaveBeenCalledWith(true);
+});
+
+it('켜져 있을 때 누르면 끄라고 알린다', async () => {
+  const { props, onChangeOnlyOnSale } = makeProps({ onlyOnSale: true });
+  await render(<ProductListToolbar {...props} />);
+
+  await fireEvent.press(screen.getByTestId('toggle-only-on-sale'));
+
+  expect(onChangeOnlyOnSale).toHaveBeenCalledWith(false);
+});
+
+it('켜짐/꺼짐이 소리로도 읽힌다', async () => {
+  const { props } = makeProps();
+  const view = await render(<ProductListToolbar {...props} />);
+
+  expect(screen.getByRole('switch', { name: '판매중', checked: false })).toBeTruthy();
+
+  await view.rerender(<ProductListToolbar {...props} onlyOnSale />);
+
+  expect(screen.getByRole('switch', { name: '판매중', checked: true })).toBeTruthy();
+});
+
+// ----- 몇 건인지 (#1010) -----
+
+it('건수를 받으면 웹과 같은 문구로 보여준다', async () => {
+  const { props } = makeProps({ totalElements: 61 });
+  await render(<ProductListToolbar {...props} />);
+
+  // 문구는 웹 ProductListHeader(ProductsSection.tsx:20) 그대로다.
+  // ⚠️ 「전체 N개」가 아니다 — 판매중을 켜면 걸러진 수가 오므로 「전체」는 거짓말이 된다
+  expect(screen.getByText('상품 61개')).toBeTruthy();
+  expect(screen.queryByText(/^전체 /)).toBeNull();
+});
+
+it('아직 못 받았으면 건수를 안 그린다 (「상품 0개」가 스치면 안 된다)', async () => {
+  const { props } = makeProps();
+  await render(<ProductListToolbar {...props} />);
+
+  expect(screen.queryByTestId('product-total-count')).toBeNull();
+});
+
+it('0건도 그대로 보여준다 (0 을 「없음」으로 보면 안 된다)', async () => {
+  const { props } = makeProps({ totalElements: 0 });
+  await render(<ProductListToolbar {...props} />);
+
+  expect(screen.getByText('상품 0개')).toBeTruthy();
 });
 
 it('판매를 누르면 SELL로 알린다', async () => {

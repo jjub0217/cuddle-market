@@ -32,11 +32,17 @@ import { colors } from '@/constants/colors';
 // 상품 목록 **바로 위에 고정되는** 줄.
 //
 //   [전체][판매][판매요청]              [⚙] 최신순 ▾
+//   ( ) 판매중                              상품 61개
 //
 // 위쪽 필터 알약 두 줄(product-filter-row.tsx)은 스크롤되어 사라지지만 이 줄은 남는다.
 // 종류를 바꾸거나 정렬을 바꾸는 건 목록을 보는 도중에 가장 자주 하는 일이라서다.
 //
-// ⚠️ 상품 개수는 안 넣는다 — 웹에도 없다(설계 §2).
+// 아랫줄 둘은 #1009·#1010 에서 넣었다. 웹도 같은 자리에 둘 다 있다
+// (src/features/home/components/product-section/ProductsSection.tsx 의 「판매중」 토글과
+//  ProductListHeader). **둘 다 웹 문구를 그대로 옮겼다 — 새로 짓지 마라.**
+//
+// ⚠️ 「판매중」은 **누르면 바로** 걸린다. 시트(detail-filter-sheet.tsx)의 「상품 상태」와
+//    다르다 — 그쪽은 [적용]을 눌러야 반영된다. 이 토글을 시트로 옮기지 마라.
 
 /**
  * 왼쪽 알약 값. 웹 `src/constants/constants.ts`의 `PRODUCT_TYPE_TABS`를 **그대로** 옮겼다.
@@ -83,6 +89,22 @@ interface Props {
    *    웹 모바일도 같은 자리에 같은 점을 찍는다 — 두 쪽이 달라 보이면 안 된다.
    */
   hasDetailFilter?: boolean;
+  /**
+   * 「판매중」 토글이 켜져 있는가.
+   *
+   * ⚠️ 켜지면 쓰는 쪽이 `tradeStatus: 'SELLING'` 을 걸고 **바로** 다시 받는다.
+   *    서버가 SELLING 을 물으면 거래 상태가 NULL 인 판매요청도 함께 준다 —
+   *    앱에서 또 거르지 않는다(lib/products/filters.ts 의 설명).
+   */
+  onlyOnSale: boolean;
+  onChangeOnlyOnSale: (next: boolean) => void;
+  /**
+   * 조건에 맞는 상품 수. **아직 못 받았으면 넘기지 않는다**(그때는 안 그린다).
+   *
+   * 대분류를 바꾸면 목록이 확 줄어드는데(전체 61 → 조류 4) 몇 건인지 안 알려주면
+   * 「고장인가?」로 보인다(#1010).
+   */
+  totalElements?: number;
 }
 
 export function ProductListToolbar({
@@ -92,6 +114,9 @@ export function ProductListToolbar({
   onChangeSort,
   onPressFilter,
   hasDetailFilter = false,
+  onlyOnSale,
+  onChangeOnlyOnSale,
+  totalElements,
 }: Props) {
   const [sortOpen, setSortOpen] = useState(false);
 
@@ -104,63 +129,104 @@ export function ProductListToolbar({
   };
 
   return (
-    <View style={styles.bar}>
-      {/* 알약이 셋뿐이라 대개 다 들어가지만, 글자 크기를 키운 기기에서는 넘칠 수 있어
-          가로로 밀 수 있게 둔다. 오른쪽 단추 자리는 flexShrink로 지킨다. */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.tabs}
-      >
-        {PRODUCT_TYPE_TABS.map((tab) => {
-          const code = tab.code === ALL_CODE ? null : tab.code;
-          const active = productType === code;
-          return (
-            <GesturePressable
-              key={tab.id}
-              testID={`product-type-${tab.code}`}
-              onPress={() => onChangeProductType(code)}
-              accessibilityRole="button"
-              accessibilityState={{ selected: active }}
-              style={({ pressed }) => [
-                styles.pill,
-                active ? styles.pillActive : styles.pillIdle,
-                pressed && styles.pressed,
-              ]}
-            >
-              <Text style={[styles.pillLabel, active ? styles.pillLabelActive : styles.pillLabelIdle]}>
-                {tab.label}
-              </Text>
-            </GesturePressable>
-          );
-        })}
-      </ScrollView>
-
-      <View style={styles.right}>
-        <GesturePressable
-          testID="open-detail-filter"
-          onPress={onPressFilter}
-          accessibilityRole="button"
-          accessibilityLabel={hasDetailFilter ? '세부 필터, 적용됨' : '세부 필터'}
-          style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
+    <View style={styles.container}>
+      <View style={styles.bar}>
+        {/* 알약이 셋뿐이라 대개 다 들어가지만, 글자 크기를 키운 기기에서는 넘칠 수 있어
+            가로로 밀 수 있게 둔다. 오른쪽 단추 자리는 flexShrink로 지킨다. */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.tabs}
         >
-          <SlidersHorizontal size={18} color={colors.onSurfaceMedium} strokeWidth={2} />
-          {/* 걸려 있음을 알리는 점. 아이콘 오른쪽 위에 붙는다 */}
-          {hasDetailFilter ? <View style={styles.filterDot} /> : null}
+          {PRODUCT_TYPE_TABS.map((tab) => {
+            const code = tab.code === ALL_CODE ? null : tab.code;
+            const active = productType === code;
+            return (
+              <GesturePressable
+                key={tab.id}
+                testID={`product-type-${tab.code}`}
+                onPress={() => onChangeProductType(code)}
+                accessibilityRole="button"
+                accessibilityState={{ selected: active }}
+                style={({ pressed }) => [
+                  styles.pill,
+                  active ? styles.pillActive : styles.pillIdle,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <Text style={[styles.pillLabel, active ? styles.pillLabelActive : styles.pillLabelIdle]}>
+                  {tab.label}
+                </Text>
+              </GesturePressable>
+            );
+          })}
+        </ScrollView>
+
+        <View style={styles.right}>
+          <GesturePressable
+            testID="open-detail-filter"
+            onPress={onPressFilter}
+            accessibilityRole="button"
+            accessibilityLabel={hasDetailFilter ? '세부 필터, 적용됨' : '세부 필터'}
+            style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
+          >
+            <SlidersHorizontal size={18} color={colors.onSurfaceMedium} strokeWidth={2} />
+            {/* 걸려 있음을 알리는 점. 아이콘 오른쪽 위에 붙는다 */}
+            {hasDetailFilter ? <View style={styles.filterDot} /> : null}
+          </GesturePressable>
+
+          <GesturePressable
+            testID="open-sort"
+            onPress={() => setSortOpen(true)}
+            accessibilityRole="button"
+            // 지금 고른 것이 소리로도 읽히게 이름에 같이 넣는다
+            accessibilityLabel={`정렬 ${selectedSort.label}`}
+            style={({ pressed }) => [styles.sortTrigger, pressed && styles.pressed]}
+          >
+            {/* 지금 고른 정렬은 늘 눈에 보여야 한다 — 열어 보지 않고도 알 수 있게 */}
+            <Text style={styles.sortLabel}>{selectedSort.label}</Text>
+            <ChevronDown size={16} color={colors.onSurfaceMedium} strokeWidth={2} />
+          </GesturePressable>
+        </View>
+      </View>
+
+      {/* 아랫줄 — 왼쪽에 「판매중」, 오른쪽에 건수. 웹도 이 둘이 같은 자리에 있다. */}
+      <View style={styles.secondRow}>
+        {/* ⚠️ 이 줄도 붙는 줄(섹션 헤더) 안이라 **gesture-handler 누름판**을 쓴다.
+            RN 누름판은 붙은 자리에서 onPress 를 버린다(맨 위 #935 설명). */}
+        <GesturePressable
+          testID="toggle-only-on-sale"
+          onPress={() => onChangeOnlyOnSale(!onlyOnSale)}
+          // 켜짐/꺼짐을 말하는 조각이라 switch 다. 소리로도 「판매중, 켜짐」으로 읽힌다
+          accessibilityRole="switch"
+          accessibilityState={{ checked: onlyOnSale }}
+          accessibilityLabel="판매중"
+          style={({ pressed }) => [styles.toggleRow, pressed && styles.pressed]}
+        >
+          {/* 웹과 같은 모양(작은 알약 + 흰 손잡이). RN 의 Switch 는 기기마다 모양이 달라
+              웹과 눈에 띄게 어긋나서 직접 그린다 */}
+          <View style={[styles.track, onlyOnSale ? styles.trackOn : styles.trackOff]}>
+            <View style={[styles.knob, onlyOnSale && styles.knobOn]} />
+          </View>
+          {/* ⚠️ 문구는 웹에서 그대로 옮겼다 — ProductsSection.tsx:118 의 「판매중」 */}
+          <Text style={styles.toggleLabel}>판매중</Text>
         </GesturePressable>
 
-        <GesturePressable
-          testID="open-sort"
-          onPress={() => setSortOpen(true)}
-          accessibilityRole="button"
-          // 지금 고른 것이 소리로도 읽히게 이름에 같이 넣는다
-          accessibilityLabel={`정렬 ${selectedSort.label}`}
-          style={({ pressed }) => [styles.sortTrigger, pressed && styles.pressed]}
-        >
-          {/* 지금 고른 정렬은 늘 눈에 보여야 한다 — 열어 보지 않고도 알 수 있게 */}
-          <Text style={styles.sortLabel}>{selectedSort.label}</Text>
-          <ChevronDown size={16} color={colors.onSurfaceMedium} strokeWidth={2} />
-        </GesturePressable>
+        {/* 아직 못 받았으면(첫 조회·오류) 아무것도 안 그린다. 「상품 0개」가 잠깐
+            스쳤다가 숫자가 바뀌면 그게 더 헷갈린다 */}
+        {totalElements === undefined ? null : (
+          <Text
+            testID="product-total-count"
+            style={styles.count}
+            // 숫자만 바뀌는 자리라 눈이 안 간다. 소리로는 읽어 준다(웹의 aria-live 와 같은 뜻)
+            accessibilityLiveRegion="polite"
+          >
+            {/* ⚠️ 문구는 웹 ProductListHeader 그대로다 — ProductsSection.tsx:20.
+                「전체 N개」가 아니다 — 판매중을 켜면 서버가 걸러서 55개만 주는데
+                그때 「전체 55개」는 거짓말이 된다(전체는 61개다) */}
+            {`상품 ${totalElements}개`}
+          </Text>
+        )}
       </View>
 
       {/* 고르는 목록은 앱의 다른 시트(고르는 칸·마이페이지)와 같은 껍데기를 쓴다 */}
@@ -194,19 +260,30 @@ export function ProductListToolbar({
 }
 
 const styles = StyleSheet.create({
+  // 두 줄을 감싸는 상자. **바탕·좌우 여백·아래 선은 여기 있다** —
+  // 줄마다 두면 선이 두 번 그어지고 좌우 여백이 어긋난다.
+  container: {
+    paddingHorizontal: 16,
+    backgroundColor: colors.surface,
+    // 아래 목록과 붙어 보이지 않게 선을 하나 긋는다. 웹도 이 줄 아래에 border-b가 있다.
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.outlineVariant,
+  },
   bar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 8,
-    paddingHorizontal: 16,
     // 알약 줄이 자기 위아래 여백(tabs.paddingVertical)을 갖고 있어 여기서는 적게 준다.
     // 둘을 더한 값이 줄 높이다 — 여기만 키우면 알약은 여전히 잘린다.
     paddingVertical: 3,
-    backgroundColor: colors.surface,
-    // 아래 목록과 붙어 보이지 않게 선을 하나 긋는다. 웹도 이 줄 아래에 border-b가 있다.
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.outlineVariant,
+  },
+  secondRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+    paddingBottom: 6,
   },
   tabs: {
     flexDirection: 'row',
@@ -277,6 +354,45 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.onSurfaceMedium,
   },
+  // ── 「판매중」 토글. 값은 웹(ProductsSection.tsx:107-119)에서 옮겼다.
+  //    웹은 h-4 w-7(16×28) 알약에 12px 손잡이가 12px 만큼 움직인다.
+  toggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    // 손가락이 닿는 자리를 넓힌다 — 알약만으로는 16dp 라 누르기 어렵다
+    paddingVertical: 4,
+  },
+  track: {
+    width: 28,
+    height: 16,
+    borderRadius: 999,
+  },
+  trackOn: { backgroundColor: colors.selected },
+  trackOff: { backgroundColor: colors.outlineVariant },
+  // 손잡이는 절대 자리로 놓는다. **top 을 반드시 준다** — 안 주면 자리를 부모의
+  // 정렬에 맡기게 되어, 나중에 track 의 정렬을 건드리면 손잡이가 같이 튄다.
+  knob: {
+    position: 'absolute',
+    top: 2,
+    left: 2,
+    width: 12,
+    height: 12,
+    borderRadius: 999,
+    backgroundColor: colors.surface,
+  },
+  // 켜지면 오른쪽으로 12 만큼 민다(웹의 translate-x-3 과 같은 값)
+  knobOn: { transform: [{ translateX: 12 }] },
+  toggleLabel: {
+    fontSize: 14,
+    color: colors.onSurfaceMedium,
+  },
+  // 건수는 읽히되 앞서지 않게 — 웹도 text-xs text-gray-500 이다
+  count: {
+    fontSize: 12,
+    color: colors.onSurfaceMuted,
+  },
+
   sheetLabelActive: {
     color: colors.accent,
     fontWeight: '600',

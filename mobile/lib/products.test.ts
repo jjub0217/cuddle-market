@@ -178,6 +178,19 @@ describe('fetchProducts', () => {
     expect(url).toContain('addressGugun=%EC%9D%80%ED%8F%89%EA%B5%AC')
   })
 
+  it('거래 상태(판매중)를 tradeStatuses 로 싣고, 없으면 아예 안 싣는다', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ code: 'SUCCESS', message: 'ok', data: { content: [], hasNext: false } }),
+    })
+
+    await fetchProducts({ page: 0, tradeStatuses: 'SELLING' })
+    expect(mockFetch.mock.calls[0][0] as string).toContain('tradeStatuses=SELLING')
+
+    await fetchProducts({ page: 0 })
+    expect(mockFetch.mock.calls[1][0] as string).not.toContain('tradeStatuses')
+  })
+
   it('가격 구간을 minPrice·maxPrice 로 싣는다', async () => {
     mockFetch.mockResolvedValue({
       ok: true,
