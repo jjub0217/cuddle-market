@@ -50,7 +50,7 @@ export const DetailFilter = memo(function DetailFilterSection({
             variant="link"
             size="sm"
             onClick={filterReset}
-            className="absolute top-6 right-6 hidden cursor-pointer items-center gap-1 p-0 text-xs font-medium text-gray-500 hover:text-[#825500] hover:no-underline md:top-4 md:right-6 md:flex"
+            className="absolute top-6 right-6 hidden cursor-pointer items-center gap-1 p-0 text-xs font-medium text-gray-500 hover:text-primary-600 hover:no-underline md:top-4 md:right-6 md:flex"
           >
             <RotateCcw size={12} aria-hidden="true" />
             필터 초기화

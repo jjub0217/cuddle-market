@@ -85,8 +85,8 @@ export function PetTypeFilter({ activeTab, selectedDetailPet, onTabChange }: Pet
                 // 단추만 한 크기면 화면을 다 잡아먹는다(#847).
                 'h-[26px] cursor-pointer rounded-full border px-3 py-1 text-xs font-medium whitespace-nowrap transition-all',
                 isActive
-                  ? 'border-[#825500] bg-[#825500] text-white shadow-sm'
-                  : 'border-outline-variant bg-white text-gray-600 hover:border-[#825500] hover:text-[#825500]'
+                  ? 'border-primary-600 bg-primary-600 text-white shadow-sm'
+                  : 'border-outline-variant bg-white text-gray-600 hover:border-primary-600 hover:text-primary-600'
               )}
             >
               {pet.name}

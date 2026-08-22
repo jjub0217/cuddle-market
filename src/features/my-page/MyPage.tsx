@@ -1,7 +1,7 @@
 'use client'
 
 import { useUserStore } from '@/store/userStore'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { useMutation, useInfiniteQuery, useQueryClient, useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api/api'
@@ -31,7 +31,7 @@ import Button from '@/components/commons/button/Button'
 import { cn } from '@/lib/utils/cn'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { PAGE_CONTAINER_MD, Z_INDEX } from '@/constants/ui'
+import { OVERLAY_ABOVE_ATTR, PAGE_CONTAINER_MD, Z_INDEX } from '@/constants/ui'
 import { ArrowLeft, Tag, Handbag, ChevronRight, Heart, MessageSquareText, UserX, Headphones, LogOut, UserMinus } from 'lucide-react'
 import Link from 'next/link'
 import { useLogout } from '@/hooks/useLogout'
@@ -115,7 +115,9 @@ function MyPage() {
   }
   const openProfileFullView = () => openPanel('profile')
 
-  const closeMobileOverlay = () => {
+  // ⚠️ `useCallback` 으로 감싼 까닭은 **ESC 훅(아래)이 이 함수를 의존성으로 받기 때문**이다(#1003).
+  //    감싸지 않으면 렌더마다 새 함수가 되어 훅이 렌더마다 다시 달린다(lint 경고).
+  const closeMobileOverlay = useCallback(() => {
     // 우리가 열어서 들어온 것이면 뒤로 가면 된다 — 히스토리가 늘지 않는다.
     // 주소로 바로 들어온 경우(링크 공유·새로고침)에는 뒤로 갈 데가 없으니 주소만 바꾼다.
     if (openedHereRef.current) {
@@ -127,7 +129,7 @@ function MyPage() {
     params.delete('panel')
     const query = params.toString()
     router.replace(query ? `${pathname}?${query}` : pathname)
-  }
+  }, [router, searchParams, pathname])
   const mobilePanelTitle =
     mobilePanelTab === 'tab-sales'
       ? '판매 내역'
@@ -419,6 +421,55 @@ function MyPage() {
     }
   }, [_hasHydrated, user?.id, pathname, router, setRedirectUrl])
 
+  // ESC 로 전체화면 패널 닫기(#1003). 다른 오버레이 다섯 곳과 같은 본을 따른다
+  // (`MobileSearchOverlay`).
+  //
+  // ⚠️ **초점 가둠(위 `useFocusTrap`)과 같이 `isMobile` 로 거른다.** `inert`(아래 두 패널)와는
+  //    다르다 — `inert` 는 **자기 자손만** 막지만 이것은 **창 전체의 키를 듣고 주소를 바꾼다.**
+  //    패널이 열렸는지는 주소(`?panel=`)로 정해지므로, 넓은 화면에서 그 주소로 들어오면
+  //    `md:hidden` 이라 아무것도 안 보이는데 「열림」이다. 거르지 않으면 **상자가 보이지도 않는
+  //    화면에서 ESC 가 뒤로가기를 일으킨다.**
+  //
+  // 두 패널은 같은 `?panel=` 하나로 갈려(위 `panel`) 동시에 열리지 못한다 — 그래서 훅 하나로 둔다.
+  //
+  // ⚠️ **내 위에 열린 오버레이가 있으면 ESC 는 그쪽 몫이다.** 이 패널 안에서는 오버레이가
+  //    세 겹까지 쌓인다 — 패널 → 상품 메뉴 시트(`⋮`) → 삭제 모달. 셋이 다 ESC 를 듣는데
+  //    셋 다 반응하면 한 번 눌러서 **패널까지 닫힌다.**
+  //
+  //    ⚠️ 「열린 모달 이름을 나열」하는 방법으로는 못 막는다. 시트의 열림 상태는
+  //    `MyList` 안에 있어(`isMoreMenuOpen`) 이 파일에서 볼 수가 없다. 그래서 상태가 아니라
+  //    **DOM 에 열린 것이 있는지**로 가른다 — 위에 있는 것들은 열렸을 때만 DOM 에 있다.
+  //      · 모달 둘   네이티브 `<dialog>` 라 열려 있으면 `open` 이 붙는다
+  //      · 상품 메뉴 시트  닫히면 렌더가 `null` 이다(`BottomSheet.tsx`) —
+  //                      `body` 로 portal 되므로 패널 안이 아니라 문서 전체에서 찾는다
+  //
+  //    ⚠️ 시트 쪽에서 `preventDefault()` 로 표시하는 방법을 쓰면 안 된다. 시트가 그걸 걸면
+  //       **그 위의 네이티브 모달이 ESC 로 안 닫힌다** (삭제를 눌러도 시트가 남아 있어
+  //       둘이 겹쳐 열린다).
+  //
+  // ⚠️⚠️ **반드시 캡처 단계여야 한다(세 번째 인자 `true`).** 버블로 달면 표식을 못 본다 —
+  //    시트는 `document` 에 리스너를 달아 놓았고, **리스너 하나가 끝날 때마다 마이크로태스크가
+  //    돌아** 리액트가 그 자리에서 시트를 DOM 에서 떼어낸다. 그래서 버블에 닿았을 때는
+  //    이미 사라진 뒤다. 2026-08-22 에 진짜 크롬으로 쟀다:
+  //
+  //      ① window 캡처      표식 있음
+  //      ② document(시트)   표식 있음   → 여기서 닫는다
+  //      ③ window 버블      표식 없음   ← 여기에 달았다가 패널까지 닫혔다
+  //
+  //    ⚠️ **이 경합은 jsdom 시험으로는 못 잡는다.** `userEvent` 가 `act()` 로 감싸서
+  //       리액트 갱신을 시험 끝까지 미루기 때문에, 버블에서도 표식이 남아 있는 것처럼 보인다.
+  useEffect(() => {
+    if (!isMobile) return
+    if (!isProfileFullViewOpen && mobilePanelTab === null) return
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      if (document.querySelector(`dialog[open], [${OVERLAY_ABOVE_ATTR}]`)) return
+      closeMobileOverlay()
+    }
+    window.addEventListener('keydown', handleKey, true)
+    return () => window.removeEventListener('keydown', handleKey, true)
+  }, [isMobile, isProfileFullViewOpen, mobilePanelTab, closeMobileOverlay])
+
   if ((isLoadingMyData && !myData) || (isLoadingMyProductData && !myProductsData)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -463,7 +514,7 @@ function MyPage() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={myData.profileImageUrl} alt={myData.nickname} className="h-full w-full object-cover" />
                   ) : (
-                    <span className="text-xl font-semibold text-[#825500]">{myData?.nickname?.charAt(0).toUpperCase()}</span>
+                    <span className="text-primary-600 text-xl font-semibold">{myData?.nickname?.charAt(0).toUpperCase()}</span>
                   )}
                 </div>
                 <div className="flex flex-1 flex-col gap-0.5">
@@ -710,6 +761,7 @@ function MyPage() {
         )}
         ref={profileFullViewRef}
         role="dialog"
+        aria-modal="true"
         aria-label="프로필 자세히"
         aria-hidden={!isProfileFullViewOpen}
         inert={!isProfileFullViewOpen}

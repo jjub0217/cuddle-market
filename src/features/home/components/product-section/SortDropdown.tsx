@@ -81,7 +81,7 @@ export function SortDropdown({ selectedSort, onSortChange, className }: SortDrop
                   }}
                   className={cn(
                     'flex w-full cursor-pointer items-center justify-between px-3 py-2.5 text-left text-[13px]',
-                    isActive ? 'font-bold text-[#825500]' : 'text-gray-600 hover:bg-gray-50'
+                    isActive ? 'font-bold text-primary-600' : 'text-gray-600 hover:bg-gray-50'
                   )}
                 >
                   {sort.label}

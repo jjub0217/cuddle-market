@@ -221,7 +221,7 @@ export function MobileFilterSidebar({ isOpen, onClose, value, onApply, onReset }
             type="button"
             size="md"
             onClick={() => onApply(draft)}
-            className="flex-1 cursor-pointer bg-[#825500] text-sm font-medium text-white"
+            className="flex-1 cursor-pointer bg-primary-600 text-sm font-medium text-white"
           >
             적용
           </Button>
@@ -250,8 +250,8 @@ function Chip({ label, isActive, onClick }: { label: string; isActive: boolean; 
         // 알약 모양·크기는 소분류 알약(PetTypeFilter)과 같은 값이다 — 한 화면에서 따로 놀지 않게.
         'h-[26px] cursor-pointer rounded-full border px-3 text-xs font-medium whitespace-nowrap transition-colors',
         isActive
-          ? 'border-[#825500] bg-[#825500] text-white'
-          : 'border-outline-variant bg-white text-gray-600 hover:border-[#825500] hover:text-[#825500]'
+          ? 'border-primary-600 bg-primary-600 text-white'
+          : 'border-outline-variant bg-white text-gray-600 hover:border-primary-600 hover:text-primary-600'
       )}
     >
       {label}

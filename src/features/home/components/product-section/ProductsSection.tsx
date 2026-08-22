@@ -112,7 +112,7 @@ export function ProductsSection({
                 onChange={(e) => setOnlyOnSale(e.target.checked)}
                 className="peer sr-only"
               />
-              <span className="block h-4 w-7 rounded-full bg-gray-200 transition-colors peer-checked:bg-[#825500]"></span>
+              <span className="block h-4 w-7 rounded-full bg-gray-200 transition-colors peer-checked:bg-primary-600"></span>
               <span className="absolute top-0.5 left-0.5 h-3 w-3 rounded-full bg-white transition-transform peer-checked:translate-x-3"></span>
             </span>
             <span className="text-sm text-gray-600 md:font-bold">판매중</span>
@@ -138,7 +138,7 @@ export function ProductsSection({
                 <SlidersHorizontal size={18} strokeWidth={2} className="text-gray-600" aria-hidden="true" />
                 {/* 걸려 있음을 알리는 점 — 앱과 같은 값이다(아이콘 오른쪽 위 · 6px · #825500) */}
                 {hasDetailFilter ? (
-                  <span className="absolute top-1.5 right-[5px] size-1.5 rounded-full bg-[#825500]" aria-hidden="true" />
+                  <span className="absolute top-1.5 right-[5px] size-1.5 rounded-full bg-primary-600" aria-hidden="true" />
                 ) : null}
               </button>
             ) : null}
@@ -158,7 +158,7 @@ export function ProductsSection({
                     onClick={() => handleSortChange(sort.label)}
                     className={cn(
                       'cursor-pointer p-0 text-[13px] font-normal whitespace-nowrap hover:no-underline md:text-sm',
-                      isActive ? 'text-[#825500] md:font-bold' : 'text-gray-500 hover:text-[#825500] md:font-medium'
+                      isActive ? 'text-primary-600 md:font-bold' : 'text-gray-500 hover:text-primary-600 md:font-medium'
                     )}
                   >
                     {sort.label}
@@ -178,7 +178,7 @@ export function ProductsSection({
       ) : (
         <div className="flex flex-col items-center justify-center gap-4 rounded-3xl border-2 border-dashed border-gray-200 bg-white px-7 py-16">
           <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#fff5e0]">
-            <SearchX size={40} strokeWidth={1.5} className="text-[#825500]" />
+            <SearchX size={40} strokeWidth={1.5} className="text-primary-600" />
           </div>
           <div className="flex flex-col items-center gap-1">
             <p className="text-base font-semibold text-gray-900 md:text-lg">검색 결과가 없습니다</p>

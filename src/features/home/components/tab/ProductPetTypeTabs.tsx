@@ -56,8 +56,8 @@ export function ProductPetTypeTabs({ activeTab, onTabChange }: ProductPetTypeTab
                 // Button 의 sm(h-9)이 들어오면 밑줄과 글자 사이가 벌어진다(#847).
                 '-mb-px h-auto cursor-pointer rounded-none border-b-2 px-3 pt-3 pb-1 whitespace-nowrap md:px-3 md:pb-3',
                 isActive
-                  ? 'border-[#825500] font-bold text-[#825500]'
-                  : 'border-transparent font-medium text-gray-500 hover:text-[#825500]'
+                  ? 'border-primary-600 font-bold text-primary-600'
+                  : 'border-transparent font-medium text-gray-500 hover:text-primary-600'
               )}
               role="tab"
               aria-selected={isActive}

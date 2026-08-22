@@ -326,7 +326,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
                       <div className="min-w-0 flex-1">
                         {/* Author + time */}
                         <div className="mb-3 flex items-end gap-2.5">
-                          <div className="bg-chip-surface flex size-9 items-center justify-center rounded-full text-sm font-bold text-[#825500]">
+                          <div className="bg-chip-surface flex size-9 items-center justify-center rounded-full text-sm font-bold text-primary-600">
                             {post.authorNickname.charAt(0).toUpperCase()}
                           </div>
                           <div className="flex flex-col gap-0.5 leading-tight md:gap-0">
