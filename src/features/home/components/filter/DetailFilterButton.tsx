@@ -40,7 +40,7 @@ export function DetailFilterButton({ isOpen, onToggle, filterReset, ariaControls
         variant="link"
         size="sm"
         onClick={filterReset}
-        className="cursor-pointer gap-1 p-0 text-xs font-medium text-gray-500 hover:text-[#825500] hover:no-underline"
+        className="cursor-pointer gap-1 p-0 text-xs font-medium text-gray-500 hover:text-primary-600 hover:no-underline"
       >
         <RotateCcw size={12} aria-hidden="true" />
         필터 초기화

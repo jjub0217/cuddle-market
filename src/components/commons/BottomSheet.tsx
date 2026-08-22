@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom'
 
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { cn } from '@/lib/utils/cn'
-import { Z_INDEX } from '@/constants/ui'
+import { OVERLAY_ABOVE_ATTR, Z_INDEX } from '@/constants/ui'
 
 // 아래에서 올라오는 시트. 좁은 폭에서 목록 항목의 ⋮ 메뉴로 쓴다.
 //
@@ -77,6 +77,9 @@ export function BottomSheet({ isOpen, onClose, children, label }: BottomSheetPro
 
   return createPortal(
     <div
+      // 이 시트가 열려 있는 동안에는 아래쪽 오버레이가 ESC 를 먹지 않게 한다(#1003).
+      // 자세한 까닭은 `OVERLAY_ABOVE_ATTR` 주석에 있다.
+      {...{ [OVERLAY_ABOVE_ATTR]: '' }}
       className={cn('fixed inset-0', Z_INDEX.MODAL)}
       // ⚠️ portal은 DOM에서만 body로 나간다. React 이벤트는 **여전히 React 트리를 따라**
       //    올라간다. 이 시트는 카드 전체를 감싼 <Link> 안에서 열리므로, 막지 않으면

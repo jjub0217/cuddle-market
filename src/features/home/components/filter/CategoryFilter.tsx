@@ -59,7 +59,7 @@ export function CategoryFilter({ selectedCategory }: CategoryFilterProps) {
                   className="h-20 w-20 object-cover md:h-16 md:w-16 md:object-contain"
                 />
               </span>
-              <span className="text-xs whitespace-nowrap text-gray-600 transition-colors group-hover:text-[#825500] md:text-sm md:font-bold">
+              <span className="text-xs whitespace-nowrap text-gray-600 transition-colors group-hover:text-primary-600 md:text-sm md:font-bold">
                 {category.name}
               </span>
             </Button>

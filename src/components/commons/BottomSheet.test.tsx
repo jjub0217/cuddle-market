@@ -3,6 +3,7 @@ import { useState } from 'react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
+import { OVERLAY_ABOVE_ATTR } from '@/constants/ui'
 import { render, screen } from '@/test/render'
 
 import { BottomSheet, BottomSheetItem } from './BottomSheet'
@@ -64,6 +65,24 @@ describe('여닫기', () => {
     await user.keyboard('{Escape}')
 
     expect(onClose).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('겹쳐 열렸을 때 ESC 를 누가 먹는가 (#1003)', () => {
+  // 마이페이지에서는 오버레이가 세 겹까지 쌓인다 — 패널 → 이 시트 → 삭제 모달.
+  // 셋이 다 ESC 를 듣기 때문에, 아래쪽 패널은 「내 위에 열린 것이 있으면 비킨다」로
+  // 가른다. 그 판단의 근거가 이 표식이다. 표식이 사라지면 **ESC 한 번에 패널까지
+  // 닫힌다** — 시험이 초록인데 화면에서만 드러나는 자리라 여기서 잠근다.
+  it('열려 있는 동안 「내가 위에 있다」는 표식을 단다', () => {
+    render(<Harness />)
+
+    expect(document.querySelector(`[${OVERLAY_ABOVE_ATTR}]`)).not.toBeNull()
+  })
+
+  it('닫히면 표식도 같이 사라진다', () => {
+    render(<Harness isOpen={false} />)
+
+    expect(document.querySelector(`[${OVERLAY_ABOVE_ATTR}]`)).toBeNull()
   })
 })
 
