@@ -65,3 +65,27 @@ describe('MobileFilterSidebar 초점 가둠', () => {
     expect(document.activeElement).toBe(여는단추)
   })
 })
+
+// 닫혀 있는 동안 **탭 순서에서 빠지는지**(#999).
+//
+// ⚠️ **jsdom 은 `inert` 를 흉내 내지 못한다.** 진짜 브라우저에서는 `inert` 가 붙은 가지 안의
+//    알약·[초기화][적용] 이 탭으로 안 잡히지만, jsdom 은 그 속성을 글자로만 들고 있다.
+//    그래서 여기서 지킬 수 있는 것은 **속성이 붙었는가**까지다 — 「초점이 정말 막히는가」는
+//    사람이 브라우저에서 탭을 눌러 봐야 한다.
+// ⚠️ `getByRole('dialog')` 에 `hidden: true` 를 준다. 닫혔을 때는 `aria-hidden` 이 붙어
+//    접근성 나무에서 빠지는데, 그러면 그냥 `getByRole` 로는 못 찾는다.
+describe('MobileFilterSidebar 닫혔을 때 탭 순서', () => {
+  it('닫혀 있으면 inert 가 붙는다', () => {
+    render(
+      <MobileFilterSidebar isOpen={false} onClose={() => {}} value={EMPTY} onApply={() => {}} onReset={() => {}} />
+    )
+
+    expect(screen.getByRole('dialog', { hidden: true })).toHaveAttribute('inert')
+  })
+
+  it('열려 있으면 inert 가 안 붙는다', () => {
+    render(<MobileFilterSidebar isOpen onClose={() => {}} value={EMPTY} onApply={() => {}} onReset={() => {}} />)
+
+    expect(screen.getByRole('dialog', { hidden: true })).not.toHaveAttribute('inert')
+  })
+})

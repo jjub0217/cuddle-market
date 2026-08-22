@@ -106,12 +106,18 @@ export function MobileFilterSidebar({ isOpen, onClose, value, onApply, onReset }
           isOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
         )}
       />
+      {/* ⚠️ **닫혀 있는 동안 탭 순서에서 뺀다**(#999). 서랍은 닫혀도 DOM 에 남아(왼쪽으로 밀어 둘 뿐)
+          안의 알약·[초기화][적용] 이 탭 순서에 그대로 있었다 — 초점 테두리는 안 보이는데 엔터는 눌렸다.
+          `aria-hidden` 은 화면낭독기에서만 감추고 **초점은 못 막아서** 둘 다 필요하다.
+          `visibility: hidden` 은 초점은 막지만 **밀려 나오는 애니메이션을 끊는다** — `inert` 는 시각에 영향이 없다.
+          뒤 그늘은 안 건드린다. 초점 줄 것이 없고 이미 `pointer-events-none` 이다. */}
       <aside
         ref={서랍}
         role="dialog"
         aria-modal="true"
         aria-label="세부 필터"
         aria-hidden={!isOpen}
+        inert={!isOpen}
         className={cn(
           // ⚠️ 폭은 화면의 80% 다. 절반이면 시/군/구 이름이 두 줄로 접혔다.
           //    그래도 오른쪽 20% 는 남긴다 — 뒤에 목록이 비쳐야 「무엇을 거르는 중인지」가

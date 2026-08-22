@@ -178,5 +178,24 @@ export default function NaverMap() {
     })
   }, [markers, createMarkerIcon, setSelectedPlace])
 
-  return <div ref={mapRef} data-naver-map className="h-full w-full" />
+  // ⚠️ **`isolate` 를 빼지 마라 — 저작권 표시가 장소 목록 위로 튀어나온다**(#1003).
+  //
+  // 네이버 지도 SDK 는 우리 클래스를 안 쓰고 **자기 z-index** 를 붙인다. 저작권 표시
+  // (`div.map_copyright`, 「© NAVER Corp.」)를 담은 칸이 **z-index:100** 이다
+  // (2026-08-22 실제 크롬에서 잰 값. `getComputedStyle` 로 확인했다).
+  //
+  // 이 칸은 `position:relative` 지만 `z-index:auto` 라 **쌓임 맥락을 안 만든다.**
+  // 그래서 SDK 의 100 이 상자 안에 안 갇히고 **바깥까지 나가** 좁은 폭 장소 목록
+  // (`MAP_PANEL` = z-30)과 맞붙었다 — 100 > 30 이라 목록 위에 그려졌다.
+  //
+  //   z-[100] 이던 시절   목록(100) 이 우연히 비겼다 → 안 보였다
+  //   z-30 으로 내린 뒤   목록(30) < 저작권(100)     → 목록 위로 드러났다  ← #998 의 부작용
+  //
+  // `isolation: isolate` 는 **이 상자에 쌓임 맥락을 만든다.** SDK 가 몇을 쓰든 그 값은
+  // 상자 안에서만 겨루고, 바깥에서는 이 상자 하나가 `z-index:auto` 로 취급된다.
+  // 지도 안 그림(마커·확대 단추)의 앞뒤 차례는 그대로다.
+  //
+  // ⚠️ **감추는 것이 아니다.** 지도 약관상 저작권 표시는 보여야 한다 — `display:none`
+  //    을 쓰지 않았고, 목록을 닫으면 그대로 다시 보인다. 목록이 **덮는** 것뿐이다.
+  return <div ref={mapRef} data-naver-map className="isolate h-full w-full" />
 }

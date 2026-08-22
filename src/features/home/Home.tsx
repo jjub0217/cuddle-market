@@ -253,7 +253,7 @@ function Home() {
         <div className="flex min-h-100 items-center justify-center bg-white">
           <div className="flex flex-col items-center gap-4">
             <p>상품을 불러올 수 없습니다</p>
-            <Button variant="link" onClick={() => refetch()} className="hover:text-primary font-bold text-[#825500]">
+            <Button variant="link" onClick={() => refetch()} className="hover:text-primary text-primary-600 font-bold">
               다시 시도
             </Button>
           </div>
@@ -299,7 +299,7 @@ function Home() {
                   <div className="flex flex-col gap-1">
                     <h2 className="flex flex-wrap items-center gap-2 text-sm font-medium text-gray-900">
                       우리 아이 맞춤 검색
-                      <span className="text-xs font-normal text-[#825500]/70">어떤 아이와 함께하시나요?</span>
+                      <span className="text-primary-600/70 text-xs font-normal">어떤 아이와 함께하시나요?</span>
                     </h2>
                   </div>
                 )}
@@ -386,7 +386,7 @@ function Home() {
       {isLoggedIn ? (
         <Link
           href="/product-post"
-          className={`fixed right-8 bottom-8 flex items-center gap-2 rounded-full bg-[#825500] px-4 py-3 text-white shadow-lg transition-all hover:brightness-110 active:scale-95 max-md:right-4 max-md:bottom-20 md:px-6 md:py-4 ${Z_INDEX.FLOATING_BUTTON}`}
+          className={`bg-primary-600 fixed right-8 bottom-8 flex items-center gap-2 rounded-full px-4 py-3 text-white shadow-lg transition-all hover:brightness-110 active:scale-95 max-md:right-4 max-md:bottom-20 md:px-6 md:py-4 ${Z_INDEX.FLOATING_BUTTON}`}
           aria-label="상품 등록"
         >
           <Plus size={20} strokeWidth={2.5} />

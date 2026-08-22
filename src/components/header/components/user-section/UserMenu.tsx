@@ -11,6 +11,7 @@ import React, { useRef } from 'react'
 import { useOutsideClick } from '@/hooks/useOutsideClick'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import IconButton from '@/components/commons/button/IconButton'
+import { HEADER_ICON_BUTTON_SIZE } from '@/components/header/headerIconButtonSize'
 import { useLogout } from '@/hooks/useLogout'
 
 interface UserMenuProps {
@@ -78,7 +79,7 @@ export default function UserMenu({
       ) : null}
     </div>
   ) : (
-    <IconButton aria-label="메뉴" onClick={() => setIsSideOpen((prev) => !prev)}>
+    <IconButton aria-label="메뉴" size={HEADER_ICON_BUTTON_SIZE} onClick={() => setIsSideOpen((prev) => !prev)}>
       <Menu className="text-header-icon" />
     </IconButton>
   )

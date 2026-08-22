@@ -47,6 +47,15 @@ export default function MobilePlaceListOverlay({ isOpen, onClose }: MobilePlaceL
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [isOpen, onClose])
 
+  // 닫혀 있는 동안 탭 순서에서 뺀다(#999).
+  //
+  // ⚠️ 이 패널은 닫혀도 **DOM 에 남는다** — 아래로 밀어 둘 뿐이라 안의 「목록 닫기」·장소 줄이
+  //    탭 순서에 그대로 있었다. 그래서 좁은 폭에서 탭을 누르면 **초점 테두리는 안 보이는데
+  //    엔터는 눌리는** 일이 났다.
+  // ⚠️ **`aria-hidden` 만으로는 못 막는다.** 그건 화면낭독기에서만 감추고 초점은 그대로 간다.
+  //    둘을 나란히 둔다.
+  // ⚠️ `visibility: hidden` 을 안 쓴 이유 — 초점은 막지만 **여닫는 애니메이션이 끊긴다.**
+  //    `inert` 는 시각에 영향이 없어 지금 미끄러지는 모습이 그대로다.
   return (
     <div
       ref={상자}
@@ -54,6 +63,7 @@ export default function MobilePlaceListOverlay({ isOpen, onClose }: MobilePlaceL
       aria-modal="true"
       aria-label={`${categoryLabel} 목록`}
       aria-hidden={!isOpen}
+      inert={!isOpen}
       className={cn(
         // ⚠️ 화면을 다 덮지 않고 **아래 절반**만 차지한다. 위쪽 지도가 보여야
         //    「어디를 보고 있는지」가 남는다(사용자 시안).
@@ -65,7 +75,11 @@ export default function MobilePlaceListOverlay({ isOpen, onClose }: MobilePlaceL
         //       실제로는 57 + 안전영역이다(실측). 셋을 그대로 더한다.
         'fixed inset-x-0 flex h-1/2 flex-col rounded-t-2xl bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.15)] transition-transform duration-300 ease-out md:hidden',
         'bottom-[calc(3.5rem+1px+env(safe-area-inset-bottom))]',
-        Z_INDEX.MODAL,
+        // ⚠️ **탭바보다 위로 올리지 마라**(#998). 예전에는 `Z_INDEX.MODAL`(z-[100]) 이라
+        //    다 열린 자리는 맞는데 **오르내리는 동안 하단 탭바를 덮으며** 지나갔다.
+        //    `MAP_PANEL` 은 탭바와 같은 30 이고, 탭바가 DOM 에서 뒤라 늘 탭바가 위다.
+        //    (왜 30 인지 · 왜 더 낮추면 안 되는지는 constants/ui.ts 의 주석에 적었다)
+        Z_INDEX.MAP_PANEL,
         // ⚠️ **닫을 때는 자기 높이 + 바닥에서 띄운 만큼**을 내려야 한다.
         //    `translate-y-full` 은 자기 높이(50%)만큼만 내리는데, 이 패널은 탭바 위에
         //    57px 떠 있어서 **그 57px 이 남아 머리글이 탭바를 덮고 있었다**(실측).

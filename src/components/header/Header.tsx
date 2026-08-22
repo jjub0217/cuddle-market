@@ -9,6 +9,7 @@ import { ROUTES } from '@/constants/routes'
 import { isHeaderHiddenMobile } from '@/components/header/isHeaderHiddenMobile'
 import { Suspense, useEffect, useState, useSyncExternalStore } from 'react'
 import IconButton from '@/components/commons/button/IconButton'
+import { HEADER_ICON_BUTTON_SIZE } from '@/components/header/headerIconButtonSize'
 import SearchBar from '@/components/header/components/SearchBar'
 import MobileSearchOverlay from '@/components/header/components/MobileSearchOverlay'
 import { Search } from 'lucide-react'
@@ -204,7 +205,12 @@ export default function Header() {
             {!isMinimalHeader ? (
               <div className="flex shrink-0 items-center gap-1 lg:gap-4">
                 {showMobileSearch ? (
-                  <IconButton aria-label="검색" className="lg:hidden" onClick={() => setIsSearchOpen((prev) => !prev)}>
+                  <IconButton
+                    aria-label="검색"
+                    size={HEADER_ICON_BUTTON_SIZE}
+                    className="lg:hidden"
+                    onClick={() => setIsSearchOpen((prev) => !prev)}
+                  >
                     <Search className="text-header-icon" />
                   </IconButton>
                 ) : null}

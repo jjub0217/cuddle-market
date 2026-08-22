@@ -42,7 +42,7 @@ export default function HomeLoadingState() {
               <div className="flex flex-col gap-1">
                 <h2 className="flex flex-wrap items-center gap-2 text-sm font-medium text-gray-900">
                   우리 아이 맞춤 검색
-                  <span className="text-xs font-normal text-[#825500]/70">어떤 아이와 함께하시나요?</span>
+                  <span className="text-primary-600/70 text-xs font-normal">어떤 아이와 함께하시나요?</span>
                 </h2>
               </div>
 
