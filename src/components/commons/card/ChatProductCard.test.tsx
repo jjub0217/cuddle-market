@@ -29,4 +29,17 @@ describe('거래 상태 뱃지', () => {
     expect(screen.queryByText('판매완료')).not.toBeInTheDocument()
     expect(screen.queryByText('예약중')).not.toBeInTheDocument()
   })
+
+  // #1038 — 라벨을 공용 함수 getTradeLabel(@cuddle/shared)에 맡겨, 판매요청(REQUEST)
+  // 상품의 채팅방에서도 앱과 같은 문구가 보이는지 확인한다.
+  it("productType='REQUEST' 이고 COMPLETED 면 「요청완료」가 보인다", () => {
+    render(<ChatProductCard productTitle="상품" productPrice={1000} tradeStatus="COMPLETED" productType="REQUEST" />)
+    expect(screen.getByText('요청완료')).toBeInTheDocument()
+    expect(screen.queryByText('판매완료')).not.toBeInTheDocument()
+  })
+
+  it("productType='SELL' 이고 COMPLETED 면 「판매완료」가 보인다", () => {
+    render(<ChatProductCard productTitle="상품" productPrice={1000} tradeStatus="COMPLETED" productType="SELL" />)
+    expect(screen.getByText('판매완료')).toBeInTheDocument()
+  })
 })

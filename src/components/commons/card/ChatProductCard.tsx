@@ -3,6 +3,7 @@
 import { getImageSrcSet, IMAGE_SIZES, toResizedWebpUrl, PLACEHOLDER_IMAGES, PLACEHOLDER_SRCSET } from '@/lib/utils/imageUrl'
 import { formatPrice } from '@/lib/utils/formatPrice'
 import { cn } from '@/lib/utils/cn'
+import { getTradeLabel } from '@cuddle/shared'
 
 interface ChatProductCardProps {
   productImageUrl?: string
@@ -11,6 +12,12 @@ interface ChatProductCardProps {
   size?: 'sm' | 'md'
   /** 거래 상태. 주면 썸네일 위에 뱃지를 얹는다. 없으면 아무것도 안 그린다 */
   tradeStatus?: string | null
+  /**
+   * SELL(판매) 또는 REQUEST(판매요청). `getTradeLabel`이 COMPLETED일 때 「판매완료」·「요청완료」를
+   * 가르는 데 쓴다. 안 주면 판매(SELL)로 친다 — `getTradeLabel`도 REQUEST가 아니면 판매로
+   * 취급해서 지금까지의 「늘 판매완료」 동작과 같다.
+   */
+  productType?: string
 }
 
 const sizeClasses = {
@@ -25,8 +32,10 @@ const priceClasses = {
 
 // 마이페이지 판매내역(MyList.tsx:132~168)의 오버레이·알약 모양을 그대로 따른다 — 새로 짓지 않는다.
 // 다만 셋은 일부러 다르게 한다:
-//  1) 「구매완료」 문구를 안 쓴다 — MyList 는 탭(판매/구매)으로 갈라 문구를 고르지만,
-//     채팅방에는 그 탭 개념이 없다. 늘 「판매완료」로 고정한다.
+//  1) 라벨 문구는 공용 함수 `getTradeLabel`(원본 packages/shared)이 정한다 — 판매(SELL)
+//     상품은 COMPLETED일 때 「판매완료」, 판매요청(REQUEST) 상품은 「요청완료」다. MyList 는
+//     탭(판매/구매)으로 갈라 문구를 고르지만, 채팅방에는 그 탭 개념이 없어 productType 으로
+//     가른다. 앱(mobile/lib/tradeStatus.ts 의 `getOverlay`)도 같은 함수로 라벨을 받는다.
 //  2) 사진을 흐리게(opacity·grayscale) 하지 않는다 — MyList 썸네일은 96~128px 이지만
 //     이 카드는 64px(md)이다. 그 크기에서 흐리기까지 더하면 무슨 상품인지 못 알아본다.
 //  3) 알약 크기를 줄인다 — MyList 의 `px-4 py-1.5 text-xs` 를 그대로 쓰면 64px 상자보다
@@ -39,9 +48,12 @@ const priceClasses = {
 //    미리 만들어 두지 않는다 — 안 쓰는 값은 재보지도 못한 채 남는다.
 const BADGE_CLASSNAME = 'px-1.5 py-0.5 text-[10px]'
 
-function getOverlay(tradeStatus?: string | null) {
-  if (tradeStatus === 'COMPLETED') return { label: '판매완료', bg: 'bg-black/60' }
-  if (tradeStatus === 'RESERVED') return { label: '예약중', bg: 'bg-black/40' }
+// 뱃지를 그릴지 말지는 이 조각이 정한다(앱의 getOverlay 도 같은 구조) — `getTradeLabel` 은
+// SELLING 에도 「판매중」을 돌려주지만, 그 경우는 뱃지를 안 그린다. 「무슨 글자냐」는 라벨
+// 함수에, 「그릴지 말지」는 여기에 남긴다.
+function getOverlay(tradeStatus?: string | null, productType?: string) {
+  if (tradeStatus === 'COMPLETED') return { label: getTradeLabel(tradeStatus, productType ?? 'SELL'), bg: 'bg-black/60' }
+  if (tradeStatus === 'RESERVED') return { label: getTradeLabel(tradeStatus, productType ?? 'SELL'), bg: 'bg-black/40' }
   return null
 }
 
@@ -51,8 +63,9 @@ export default function ChatProductCard({
   productPrice,
   size = 'sm',
   tradeStatus,
+  productType,
 }: ChatProductCardProps) {
-  const overlay = getOverlay(tradeStatus)
+  const overlay = getOverlay(tradeStatus, productType)
 
   return (
     <>

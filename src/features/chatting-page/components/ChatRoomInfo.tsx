@@ -52,10 +52,12 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
   const { data: product } = useQuery({
     queryKey: ['product', data.productId],
     queryFn: async () => {
-      const result = await fetchGraphQL<{ product: { tradeStatus: string | null; sellerInfo: { sellerId: number } } }>(
+      const result = await fetchGraphQL<{
+        product: { tradeStatus: string | null; productType: string; sellerInfo: { sellerId: number } }
+      }>(
         `
         query Product($id: Int!) {
-          product(id: $id) { tradeStatus sellerInfo { sellerId } }
+          product(id: $id) { tradeStatus productType sellerInfo { sellerId } }
         }
       `,
         { id: data.productId }
@@ -239,6 +241,7 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
           productPrice={data?.productPrice}
           size="md"
           tradeStatus={product?.tradeStatus}
+          productType={product?.productType}
         />
       </Link>
     </div>
