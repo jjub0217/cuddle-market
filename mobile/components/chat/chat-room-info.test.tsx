@@ -104,3 +104,58 @@ it('가격이 없으면 가격 줄만 빠진다', async () => {
   expect(screen.getByText('개구리 사료')).toBeTruthy();
   expect(screen.queryByText(/원$/)).toBeNull();
 });
+
+// ── 거래 상태 뱃지(#1035 의 앱 몫) ─────────────────────────────────────────────
+//
+// 웹과 같은 규칙이다(`ChatProductCard.tsx` 의 `getOverlay`).
+//   COMPLETED → 어두운 막 + 「판매완료」(판매요청 상품은 「요청완료」)
+//   RESERVED  → 조금 옅은 막 + 「예약중」
+//   SELLING   → 아무것도 안 그린다
+//
+// ⚠️ 문구는 여기서 짓지 않는다. `@cuddle/shared` 의 `getTradeLabel` 이 정한 말이라,
+//    이 시험이 지키는 것은 「그 말이 화면에 뜨는가」다.
+
+it('판매 상품이 판매완료면 「판매완료」 뱃지가 보인다', async () => {
+  await render(<ChatRoomInfo room={방()} tradeStatus="COMPLETED" productType="SELL" />);
+
+  expect(screen.getByText('판매완료')).toBeTruthy();
+});
+
+it('판매요청 상품이 완료면 「요청완료」 뱃지가 보인다', async () => {
+  await render(<ChatRoomInfo room={방()} tradeStatus="COMPLETED" productType="REQUEST" />);
+
+  expect(screen.getByText('요청완료')).toBeTruthy();
+  // 판매 상품의 말이 섞여 나오면 안 된다.
+  expect(screen.queryByText('판매완료')).toBeNull();
+});
+
+it('판매 상품이 예약중이면 「예약중」 뱃지가 보인다', async () => {
+  await render(<ChatRoomInfo room={방()} tradeStatus="RESERVED" productType="SELL" />);
+
+  expect(screen.getByText('예약중')).toBeTruthy();
+});
+
+// 지금은 판매요청도 「예약중」으로 같다. 그래도 따로 재 두는 까닭은, 라벨을 공용 함수에
+// 맡겨 두어서 **나중에 판매요청 쪽 문구가 갈리면 여기가 먼저 빨개지게** 하려는 것이다.
+it('판매요청 상품이 예약중이어도 「예약중」 뱃지가 보인다', async () => {
+  await render(<ChatRoomInfo room={방()} tradeStatus="RESERVED" productType="REQUEST" />);
+
+  expect(screen.getByText('예약중')).toBeTruthy();
+});
+
+// ⚠️ 판매중에 「판매중」을 그리면 **모든 방에 뱃지가 붙는다.** 뱃지는 「보통이 아닌 상태」를
+//    알리는 것이라 판매중에는 안 그린다. 웹도 그렇다.
+it('판매중이면 뱃지를 안 그린다', async () => {
+  await render(<ChatRoomInfo room={방()} tradeStatus="SELLING" productType="SELL" />);
+
+  expect(screen.queryByText('판매중')).toBeNull();
+});
+
+// 상품을 아직 못 받았을 때다(질의가 도는 동안). 그때 「판매중」이 잠깐 떴다 사라지면 안 된다.
+it('거래 상태를 안 주면 뱃지를 안 그린다', async () => {
+  await render(<ChatRoomInfo room={방()} />);
+
+  expect(screen.queryByText('판매완료')).toBeNull();
+  expect(screen.queryByText('예약중')).toBeNull();
+  expect(screen.queryByText('판매중')).toBeNull();
+});

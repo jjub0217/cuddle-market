@@ -20,7 +20,11 @@ export interface TradeOverlay {
 export function getOverlay(tradeStatus: string | null, productType: string): TradeOverlay | null {
   switch (tradeStatus) {
     case 'RESERVED':
-      return { scrim: 'rgba(0, 0, 0, 0.40)', label: '예약중' }
+      // ⚠️ **예약중도 `getTradeLabel` 에 맡긴다.** 지금은 `productType` 과 무관하게 늘 「예약중」이라
+      //    여기에 직접 적어도 결과가 같지만, 라벨을 공용 함수에 맡겨 두면 **나중에 판매요청 쪽
+      //    문구가 갈려도 여기가 저절로 따라온다.** 웹도 같은 까닭으로 옮겼다(#1038 —
+      //    `ChatProductCard.tsx` 의 `getOverlay`). 문구를 두 곳에서 정하지 않는 것이 요점이다.
+      return { scrim: 'rgba(0, 0, 0, 0.40)', label: getTradeLabel(tradeStatus, productType) }
     case 'COMPLETED':
       return { scrim: 'rgba(0, 0, 0, 0.60)', label: getTradeLabel(tradeStatus, productType) }
     default:

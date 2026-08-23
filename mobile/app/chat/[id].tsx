@@ -1,5 +1,5 @@
 import { CHAT_BLOCKED_NOTICE, CHAT_EMPTY_DESCRIPTION, CHAT_EMPTY_TITLE } from '@cuddle/shared';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
@@ -58,6 +58,7 @@ type Row =
 
 export default function ChatRoomScreen() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { id } = useLocalSearchParams<{ id: string }>();
   const chatRoomId = Number(id);
 
@@ -90,13 +91,15 @@ export default function ChatRoomScreen() {
   // 「판매완료 처리」는 **내 상품일 때만** 보여야 한다(#894). 그런데 방 정보에는 파는 사람이
   // 없어서 상품을 따로 봐야 안다.
   //
-  // ⚠️ 메뉴를 열 때만 부른다. 채팅방에 들어올 때마다 부르면, 넷 중 하나를 위해 모두가
-  //    요청을 하나씩 더 내는 셈이다.
+  // 전에는 **메뉴를 열 때만** 불렀다(`enabled: isSheetOpen && …`) — 메뉴 항목 하나를 위해
+  // 모두가 요청을 더 내는 것이 아까웠다. 이제는 **거래 상태 뱃지**(`ChatRoomInfo`)가 방을
+  // 열자마자 늘 보여야 해서 방을 열 때 받아온다. 뱃지가 생기며 저울이 바뀐 것이다.
+  // 웹도 같은 까닭으로 같은 날 바꿨다(`ChatRoomInfo.tsx` 의 상품 질의).
   const productId = room?.productId ?? null;
   const { data: product } = useQuery({
     queryKey: ['product', productId],
     queryFn: () => fetchProductDetail(productId as number),
-    enabled: isSheetOpen && productId != null,
+    enabled: productId != null,
   });
   const isMyProduct = Boolean(product && me && product.sellerInfo.sellerId === me.id);
 
@@ -252,6 +255,11 @@ export default function ChatRoomScreen() {
                 // ⚠️ 값은 **COMPLETED** 다. 서버 enum 에 SOLD_OUT 은 없다(TradeStatus.java).
                 //    웹은 그 없는 값을 보내고 있어 눌러도 반드시 실패한다.
                 await updateTradeStatus(productId as number, 'COMPLETED');
+                // 이 상품 질의를 지워야 **뱃지가 「판매완료」로 바뀐다.** 안 지우면 조금 전에
+                // 받아 둔 SELLING 이 그대로 남아 「눌러도 화면에 아무 변화가 없다」로 보인다.
+                // 웹도 같은 자리에서 같은 열쇠를 지운다(`ChatRoomInfo.tsx` 의
+                // `handleTradeStatusChange`).
+                queryClient.invalidateQueries({ queryKey: ['product', productId] });
                 showToast('판매완료로 바꿨어요');
               } catch {
                 showToast('판매완료 처리에 실패했어요');
@@ -513,7 +521,13 @@ export default function ChatRoomScreen() {
       {/* 누구와 무슨 상품 이야기인지(#889). 목록이 아니라 **머리말 바로 아래**에 붙박이로 둔다 —
           웹도 같은 자리다(ChattingPage.tsx 의 sticky top-0). 조회가 실패하면 room 이 없어
           아무것도 안 그려지고, 그 자리는 아래의 오류 안내가 채운다. */}
-      {room ? <ChatRoomInfo room={room} /> : null}
+      {room ? (
+        <ChatRoomInfo
+          room={room}
+          tradeStatus={product?.tradeStatus}
+          productType={product?.productType}
+        />
+      ) : null}
       {/* 안 붙어 있는 동안에도 지난 메시지는 보인다(REST 로 가져왔다). 보내기만 막는다.
           차단한 방에서는 이 띠를 안 띄운다 — 아래에 이미 안내가 있어 두 번 말하게 된다. */}
       {!connected && !isOpponentBlocked ? (
