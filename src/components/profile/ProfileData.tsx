@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Camera, Flag, Ban, LockOpen, ShieldAlert, EllipsisVertical } from 'lucide-react'
+import { Camera, ShieldAlert, EllipsisVertical } from 'lucide-react'
 import { formatJoinDate } from '@cuddle/shared'
 import { getImageSrcSet, IMAGE_SIZES, toResizedWebpUrl } from '@/lib/utils/imageUrl'
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
@@ -10,8 +10,7 @@ import { ROUTES } from '@/constants/routes'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useUserStore } from '@/store/userStore'
 import IconButton from '@/components/commons/button/IconButton'
-import { useOutsideClick } from '@/hooks/useOutsideClick'
-import { Z_INDEX } from '@/constants/ui'
+import { DropdownMenu, DropdownMenuItem } from '@/components/commons/DropdownMenu'
 import { cn } from '@/lib/utils/cn'
 import { uploadImage } from '@/lib/api/products'
 import { fetchGraphQL } from '@/lib/api/graphql'
@@ -82,11 +81,7 @@ export default function ProfileData({
   const isProfileEditPage = pathname === '/profile-update'
 
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false)
-  const moreMenuRef = useRef<HTMLDivElement>(null)
-  useOutsideClick(isMoreMenuOpen, [moreMenuRef], () => setIsMoreMenuOpen(false))
-
-  const menuItemClass =
-    'flex w-full cursor-pointer items-center gap-2 whitespace-nowrap px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container-high transition-colors'
+  const moreMenuButtonRef = useRef<HTMLButtonElement>(null)
 
   /** 앞뒤 공백을 뗀 소개글. 공백만 있으면 「없다」와 같게 다룬다 */
   const introduction = data?.introduction?.trim() ?? ''
@@ -203,8 +198,9 @@ export default function ProfileData({
       <div className="text-text-primary sticky top-24 flex flex-col rounded-xl">
         <div className="relative flex flex-col gap-3 md:gap-6">
           {!isMyProfile ? (
-            <div ref={moreMenuRef} className="absolute top-0 right-0 z-10">
+            <div className="absolute top-0 right-0 z-10">
               <IconButton
+                ref={moreMenuButtonRef}
                 size="sm"
                 onClick={() => setIsMoreMenuOpen((prev) => !prev)}
                 aria-label="유저 옵션 메뉴 열기"
@@ -213,66 +209,46 @@ export default function ProfileData({
               >
                 <EllipsisVertical size={16} className="text-gray-500" />
               </IconButton>
-              {isMoreMenuOpen ? (
-                <div
-                  role="menu"
-                  className={cn(
-                    'border-outline-variant/60 absolute top-9 right-0 flex flex-col overflow-hidden rounded-lg border bg-white shadow-md',
-                    Z_INDEX.DROPDOWN
-                  )}
-                >
-                  {data?.isBlocked ? (
-                    <button
-                      type="button"
-                      role="menuitem"
-                      className={menuItemClass}
-                      onClick={() => {
-                        unblockUser?.()
-                        setIsMoreMenuOpen(false)
-                      }}
-                    >
-                      <LockOpen size={16} />
-                      <span>차단 해제</span>
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      role="menuitem"
-                      className={menuItemClass}
-                      onClick={() => {
-                        setIsBlockModalOpen?.(true)
-                        setIsMoreMenuOpen(false)
-                      }}
-                    >
-                      <Ban size={16} />
-                      <span>차단하기</span>
-                    </button>
-                  )}
-                  {data?.isReported ? (
-                    <div
-                      role="menuitem"
-                      aria-disabled="true"
-                      className="flex items-center gap-2 px-4 py-2.5 text-sm whitespace-nowrap text-gray-400"
-                    >
-                      <Flag size={16} />
-                      <span>신고완료</span>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      role="menuitem"
-                      className={menuItemClass}
-                      onClick={() => {
-                        setIsReportModalOpen?.(true)
-                        setIsMoreMenuOpen(false)
-                      }}
-                    >
-                      <Flag size={16} />
-                      <span>신고하기</span>
-                    </button>
-                  )}
-                </div>
-              ) : null}
+              <DropdownMenu
+                isOpen={isMoreMenuOpen}
+                onClose={() => setIsMoreMenuOpen(false)}
+                triggerRef={moreMenuButtonRef}
+                label="유저 옵션 메뉴"
+              >
+                {data?.isBlocked ? (
+                  <DropdownMenuItem
+                    onClick={() => {
+                      unblockUser?.()
+                      setIsMoreMenuOpen(false)
+                    }}
+                  >
+                    <span>차단 해제</span>
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setIsBlockModalOpen?.(true)
+                      setIsMoreMenuOpen(false)
+                    }}
+                  >
+                    <span>차단하기</span>
+                  </DropdownMenuItem>
+                )}
+                {data?.isReported ? (
+                  <DropdownMenuItem disabled>
+                    <span>신고완료</span>
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setIsReportModalOpen?.(true)
+                      setIsMoreMenuOpen(false)
+                    }}
+                  >
+                    <span>신고하기</span>
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenu>
             </div>
           ) : null}
           {/* ⚠️ **줄 수에 따라 맞춤이 갈린다.** 오른쪽 열이 사진(56px)보다 긴지 짧은지로 갈린다.

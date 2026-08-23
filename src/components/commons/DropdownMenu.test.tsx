@@ -228,6 +228,62 @@ describe('자리 안전망 — 화면 밖으로 안 나가게 (①②)', () => {
   })
 })
 
+describe('못 누르는 항목 (disabled, #1034)', () => {
+  // 프로필의 「신고완료」처럼 이미 끝난 일을 보여만 주는 줄이다. 프로필이 직접 아이콘 없는
+  // <div role="menuitem"> 을 그리다가 DropdownMenuItem 과 여백이 어긋났던 것을, 조각이
+  // disabled 를 갖는 것으로 옮겼다 — 여기서 그 계약을 지킨다.
+
+  function DisabledFirstHarness({ isOpen = true, onClose = vi.fn() }: { isOpen?: boolean; onClose?: () => void }) {
+    const triggerRef = useRef<HTMLButtonElement>(null)
+    return (
+      <div>
+        <button type="button" ref={triggerRef} aria-label="상품 옵션 메뉴 열기">
+          ⋮
+        </button>
+        <DropdownMenu isOpen={isOpen} onClose={onClose} triggerRef={triggerRef} label="상품 메뉴">
+          <DropdownMenuItem disabled>신고완료</DropdownMenuItem>
+          <DropdownMenuItem onClick={vi.fn()}>신고하기</DropdownMenuItem>
+        </DropdownMenu>
+      </div>
+    )
+  }
+
+  it('button 이 아니라 div 로 그려지고 aria-disabled 가 붙는다', () => {
+    render(<DisabledFirstHarness />)
+
+    const item = screen.getByRole('menuitem', { name: '신고완료' })
+
+    expect(item.tagName).toBe('DIV')
+    expect(item).toHaveAttribute('aria-disabled', 'true')
+  })
+
+  it('열 때 초점이 못 누르는 첫 항목을 건너뛰고 그다음 누를 수 있는 항목으로 들어간다', async () => {
+    function ToggleDisabledFirstHarness() {
+      const [open, setOpen] = useState(false)
+      const triggerRef = useRef<HTMLButtonElement>(null)
+      return (
+        <div>
+          <button type="button" ref={triggerRef} onClick={() => setOpen((p) => !p)} aria-label="상품 옵션 메뉴 열기">
+            ⋮
+          </button>
+          <DropdownMenu isOpen={open} onClose={() => setOpen(false)} triggerRef={triggerRef} label="상품 메뉴">
+            <DropdownMenuItem disabled>신고완료</DropdownMenuItem>
+            <DropdownMenuItem onClick={vi.fn()}>신고하기</DropdownMenuItem>
+          </DropdownMenu>
+        </div>
+      )
+    }
+
+    const user = userEvent.setup()
+    render(<ToggleDisabledFirstHarness />)
+
+    await user.click(screen.getByRole('button', { name: '상품 옵션 메뉴 열기' }))
+
+    // 첫 DOM 순서는 「신고완료」(disabled)지만, 초점은 그걸 건너뛰고 눌리는 「신고하기」로 가야 한다
+    expect(screen.getByRole('menuitem', { name: '신고하기' })).toHaveFocus()
+  })
+})
+
 describe('항목', () => {
   it('누르면 그 항목의 일이 돈다', async () => {
     const onEdit = vi.fn()
