@@ -199,12 +199,18 @@ export default function MyPagePanel({
               ) : (
                 <div
                   className={cn(
-                    '-m-2 p-2',
-                    productCount > 1 && 'scrollbar-hide max-h-[60vh] overflow-y-auto',
-                    productCount <= 1 && 'overflow-visible'
+                    // ⚠️ 좁은 폭에서는 자르지 않는다. 이 목록이 사는 모바일 전체화면 패널이
+                    //    이미 통째로 스크롤된다(MyPage.tsx:810 의 `fixed inset-0 overflow-y-auto`).
+                    //    그 안에 60vh 짜리 스크롤 상자를 또 두면 스크롤이 두 겹이 되고,
+                    //    `scrollbar-hide` 때문에 스크롤바도 안 보여 **마지막 카드가 잘린 것처럼 보인다.**
+                    //    넓은 폭(데스크탑 탭 화면)에서는 옆에 사이드바가 있어 높이 제한이 맞다.
+                    //    ⚠️ 데스크탑 쪽 MyPagePanel 은 `hidden … md:flex`(MyPage.tsx:700) 안이라
+                    //       좁은 폭에서는 안 그려진다 — 그래서 `md:` 로 가르면 정확히 맞는다.
+                    '-m-2 overflow-visible p-2',
+                    productCount > 1 && 'md:scrollbar-hide md:max-h-[60vh] md:overflow-y-auto'
                   )}
                 >
-                  <ul className="flex flex-col items-stretch justify-start gap-2 divide-y divide-gray-200 md:gap-2.5 md:divide-y-0">
+                  <ul className="flex flex-col items-stretch justify-start gap-2 md:gap-2.5">
                     {productData.content.map((product) => (
                       <MyList key={product.id} {...product} activeTab={activeMyPageTab} handleConfirmModal={handleConfirmModal} />
                     ))}
