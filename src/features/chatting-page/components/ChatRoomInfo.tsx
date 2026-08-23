@@ -45,7 +45,9 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
   // 「판매완료 처리」는 **내 상품일 때만** 보여야 한다(#894). 방 정보에는 파는 사람이 없어서
   // 상품을 따로 봐야 안다.
   //
-  // ⚠️ 메뉴를 열 때만 부른다. 방을 열 때마다 부르면 넷 중 하나를 위해 모두가 요청을 더 낸다.
+  // 전에는 메뉴 항목 하나(「판매완료 처리」)를 위해서만 필요해서 메뉴를 열 때만 불렀다.
+  // 이제는 **거래 상태 뱃지**(ChatProductCard)가 방을 열자마자 늘 보여야 하므로 방을 열 때
+  // 받아온다 — 「넷 중 하나를 위해 모두가 요청을 더 낸다」던 저울이, 뱃지가 생기며 바뀌었다.
   const { user } = useUserStore()
   const { data: product } = useQuery({
     queryKey: ['product', data.productId],
@@ -60,7 +62,7 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
       )
       return result.product
     },
-    enabled: isMenuOpen && data.productId != null,
+    enabled: data.productId != null,
   })
   const isMyProduct = !!user && product?.sellerInfo?.sellerId === user.id
 
@@ -94,7 +96,11 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
         //    「판매완료 처리에 실패했습니다」가 서버 탈처럼 보여 원인을 알기 어려웠다(#894).
         { id: data.productId, tradeStatus: 'COMPLETED' }
       )
+      // 'chatRooms' 는 방 목록(마지막 메시지 등)을 새로 그리려고, 'product' 는 이 방의
+      // 거래 상태 뱃지(ChatProductCard)를 새로 그리려고 — 상품 질의를 안 지우면 뱃지가
+      // 그대로 남아 「눌러도 화면에 아무 변화가 없다」는 원래 버그가 재현된다.
       queryClient.invalidateQueries({ queryKey: ['chatRooms'] })
+      queryClient.invalidateQueries({ queryKey: ['product', data.productId] })
     } catch (error) {
       // 전에는 console.error 만 해서, 실패해도 사용자에게는 아무 일도 안 일어난 것처럼 보였다.
       console.error('거래 상태 변경 실패:', error)
@@ -232,6 +238,7 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
           productTitle={data?.productTitle}
           productPrice={data?.productPrice}
           size="md"
+          tradeStatus={product?.tradeStatus}
         />
       </Link>
     </div>
