@@ -188,7 +188,30 @@ function UserPage() {
             ) : null}
           </AnimatePresence>
         </div>
-        <div className={cn(PAGE_CONTAINER_MD, 'flex min-h-screen flex-col md:min-h-0 md:flex-row md:gap-8')}>
+        {/* ⭐ **목록이 스스로 구른다.** 페이지 전체가 길어지는 대신 이 줄을 화면 높이로
+            묶고, 안쪽 목록 상자만 스크롤을 갖는다. 그래서 프로필 카드는 가만히 있는다.
+
+            ⚠️ **`sticky` 로도 되지만 안 쓴다.** 2026-08-23 에 두 방식을 만들어 눈으로
+               견주고 이쪽을 골랐다. sticky 는 카드가 「따라 올라가다 멈추는」 움직임이라
+               목록만 구르는 이 방식이 조용하다.
+
+            ⚠️ `min-h-screen` 을 뺐다. 높이를 정해 줘도 **`min-height` 가 이겨서**
+               페이지가 그대로 길어진다. 이 줄이 빠지면 아래 넷이 다 무의미해진다.
+
+            높이에서 빼는 값의 근거(코드에서 직접 잰 것)
+              헤더      py-3 + h-12 = 72px   (main)/layout.tsx 이 `pt-18` 로 비켜 준다
+              하단 탭바  h-14        = 56px   같은 곳이 `pb-14` 로 비켜 준다
+            ⚠️ 탭바는 `lg:hidden` 이라 **1024 미만**에서 보인다(768 이 아니다).
+               그래서 lg 이상에서는 탭바 몫 56 을 돌려받아 4.5rem 만 뺀다.
+            ⚠️ `env(safe-area-inset-bottom)` 은 안 넣었다. 아이폰 아래 여백이 필요하면
+               여기에 더한다 — 실기기로 보고 정할 것. */}
+        <div
+          className={cn(
+            PAGE_CONTAINER_MD,
+            'flex min-h-0 flex-col md:flex-row md:gap-8',
+            'h-[calc(100dvh-8rem)] lg:h-[calc(100dvh-4.5rem)]'
+          )}
+        >
           {/* ⚠️ showJoinDate — 가입일은 중고거래에서 **신뢰 신호**다. 「3년 된 사람」과
               「어제 가입한 사람」은 거래를 결정할 때 다르게 읽힌다. 예전에는 거꾸로
               프로필 수정 화면에만 있었다(ProfileUpdate.tsx 에서 뺐다) */}
@@ -208,7 +231,12 @@ function UserPage() {
                  밀려났고, 이 짜임은 1200px 를 더 내려도 117 자리에 그대로 멈춰 있었다.
                  카드 너비는 288 로 양쪽이 같아 배치는 안 바뀐다.
                  **이 화면 자체는 아직 눈으로 안 봤다.** */}
-          <div className="md:sticky md:top-24 md:self-start">
+          {/* ⚠️ **여기에 `sticky` 를 붙이지 마라.** 페이지 자체가 안 구르니 붙을 것이 없다.
+              예전에는 `ProfileData` 안쪽에 `sticky top-24` 가 있었는데 그 위 `<aside>` 의
+              `h-fit` 때문에 **네 화면 어디에서도 안 먹었다**(#1043). 그래서 걷었다.
+              ⚠️ `shrink-0` — 좁은 폭에서는 이 카드가 위에 쌓인다. 없으면 카드가 눌려
+                 찌그러진다. 대신 **카드가 먹고 남은 만큼만 목록이 갖는다.** */}
+          <div className="shrink-0 md:self-start">
             <ProfileData
               setIsWithdrawModalOpen={setIsWithdrawModalOpen}
               setIsReportModalOpen={setIsReportModalOpen}
@@ -220,7 +248,13 @@ function UserPage() {
               showJoinDate
             />
           </div>
-          <section className="flex w-full flex-col gap-1 px-4 py-5 md:gap-6 md:p-0" aria-labelledby="user-product-heading">
+          {/* ⚠️ `min-h-0` 이 **꼭 있어야 한다.** flex 자식은 기본이 `min-height: auto` 라,
+              없으면 안쪽 목록이 안 줄고 상자 밖으로 넘친다. 눈에는 「스크롤이 안 생긴다」로
+              보여서 원인을 엉뚱한 데서 찾기 쉽다. */}
+          <section
+            className="flex w-full min-h-0 flex-col gap-1 px-4 py-5 md:gap-6 md:p-0"
+            aria-labelledby="user-product-heading"
+          >
             <h4 id="user-product-heading" className="sr-only">
               {userData?.nickname}님의 {activeTabLabel}
             </h4>
@@ -242,7 +276,11 @@ function UserPage() {
               />
               <p className="text-sm text-gray-500">총 {totalProducts}개</p>
             </div>
-            <div className="border-outline-variant/40 rounded-xl py-5 md:border md:p-5">
+            {/* ⭐ **여기가 스크롤 상자다.** 넓은 폭·좁은 폭 둘 다 준다.
+                ⚠️ 스크롤 막대를 감추지 마라(`scrollbar-hide`). 감추면 더 있는지 몰라서
+                   **「마지막 카드가 잘렸다」로 보인다** — 마이페이지 패널에서 실제로
+                   그랬다(#1031). 막대가 보여야 구를 수 있다는 것을 안다. */}
+            <div className="border-outline-variant/40 min-h-0 flex-1 overflow-y-auto rounded-xl py-5 md:border md:p-5">
               <div className="gap-lg flex flex-col">
                 {allProducts.length ? (
                   <>
