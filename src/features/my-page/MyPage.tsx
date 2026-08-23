@@ -826,8 +826,16 @@ function MyPage() {
           <span className="text-base font-bold">{mobilePanelTitle}</span>
         </div>
         <div className="flex flex-col">
+          {/* 알약(거래 상태 거르개)은 목록을 보다가 바꾸고 싶어지는 도구라 **스크롤에 안 밀리게 붙인다**(#1031).
+              · `top-16`  바로 위 머리글이 `h-16`(64px)이다. 실측으로 알약이 y=64 에서 시작하는 것을 확인했다
+              · `bg-white` 없으면 밑으로 지나가는 카드가 알약 사이로 비쳐 보인다
+              · `z-20`    카드에 `hover:z-10`(MyList.tsx)이 있다. 그보다 위여야 마우스 올린 카드가 알약을 안 덮는다
+              ⚠️ 높이를 정하는 방식(flex 기둥 + h-dvh)을 쓰지 않은 까닭: 주소창이 접혔다 펴질 때
+                 높이가 어긋나고, 패널→조각→목록까지 `min-h-0` 사슬을 이어야 해서 잘 깨진다.
+                 머리글이 이미 `sticky top-0` 으로 도는 것과 같은 방식이라 코드도 일관된다.
+              ⚠️ 이 상자 전체가 `md:hidden` 이라 데스크탑에는 안 그려진다 — `md:` 분기가 따로 필요 없다. */}
           {mobilePanelTab === 'tab-sales' || mobilePanelTab === 'tab-purchases' ? (
-            <div className="p-4">
+            <div className="sticky top-16 z-20 bg-white p-4">
               <Tabs
                 tabs={mobileTradeStatusTabs}
                 activeTab={activeTradeStatus}
