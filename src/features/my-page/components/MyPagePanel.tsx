@@ -9,7 +9,7 @@ import MyPageTitle from './MyPageTitle'
 import MyList from './MyList'
 import ProductCard from '@/components/product/ProductCard'
 import Button from '@/components/commons/button/Button'
-import LoadMoreButton from '@/components/commons/button/LoadMoreButton'
+import InfiniteScrollSentinel from '@/components/commons/InfiniteScrollSentinel'
 import EmptyState from '@/components/EmptyState'
 import { Package, Heart, type LucideIcon } from 'lucide-react'
 import Link from 'next/link'
@@ -222,7 +222,12 @@ export default function MyPagePanel({
                   </ul>
                 </div>
               )}
-              {hasNextPage ? <LoadMoreButton onClick={() => fetchNextPage()} isLoading={isFetchingNextPage} /> : null}
+              <InfiniteScrollSentinel
+                enabled={productData.content.length > 0}
+                hasNextPage={hasNextPage}
+                isFetchingNextPage={isFetchingNextPage}
+                onLoadMore={fetchNextPage}
+              />
             </>
           ) : config ? (
             <EmptyState icon={config.emptyIcon} title={config.emptyTitle} description={config.emptyDescription} />
@@ -255,7 +260,12 @@ export default function MyPagePanel({
                 </li>
               ))}
             </ul>
-            {hasNextPage ? <LoadMoreButton onClick={() => fetchNextPage()} isLoading={isFetchingNextPage} /> : null}
+            <InfiniteScrollSentinel
+              enabled={myBlockedData.length > 0}
+              hasNextPage={hasNextPage}
+              isFetchingNextPage={isFetchingNextPage}
+              onLoadMore={fetchNextPage}
+            />
           </>
         ) : null}
       </div>
