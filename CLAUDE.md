@@ -86,7 +86,11 @@ src/ (웹)          vitest    웹 화면·훅 (jsdom + React Testing Library)
 export { formatBirthDate } from '@cuddle/shared'
 ```
 
-지금 이렇게 된 것: `formatPrice` · `formatBirthDate` · `formatJoinDate`.
+지금 껍데기가 있는 것: `formatPrice` · `formatBirthDate`.
+
+⚠️ **쓰임이 없어진 껍데기는 걷는다.** `formatJoinDate`도 껍데기가 있었는데 호출부가 전부
+`@cuddle/shared`로 옮겨가 아무도 옛 경로를 안 쓰게 되어 지웠다(#1028). 껍데기는 **호출부를
+안 고치려고** 두는 것이라, 호출부가 없으면 둘 이유도 없다.
 
 ⚠️ **한쪽에만 있는 함수는 같은 값을 화면마다 다르게 보이게 한다.** 18바퀴에 실제로 그랬다 — 날짜 표기가 웹에 셋, 앱에 하나였고 웹의 `formatJoinDate`는 조각 파일 안에 갇혀 있어 앱이 아예 못 썼다.
 
