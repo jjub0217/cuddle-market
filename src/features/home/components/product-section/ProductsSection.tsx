@@ -9,17 +9,25 @@ import { SearchX, SlidersHorizontal } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import Button from '@/components/commons/button/Button'
 import { SortDropdown } from './SortDropdown'
+import { productListLabel } from '@/features/home/productListLabel'
 
 interface ProductListHeaderProps {
   totalElements: number
+  /** 검색 중이면 검색어. 없으면(홈) 개수만 적는다 */
+  keyword?: string | null
 }
 
-function ProductListHeader({ totalElements }: ProductListHeaderProps) {
+function ProductListHeader({ totalElements, keyword }: ProductListHeaderProps) {
   // ⚠️ 크기를 「판매중」 토글 글자와 **같게** 맞춘다(둘 다 `text-sm`). 좁은 폭에서 바로 위아래에
   //    놓이는 두 글자라 크기가 다르면 층이 어긋나 보인다.
+  //
+  // ⚠️ 문구는 `productListLabel` 이 만든다 — 하이드레이션 전에는 StaticHomeFallback 이
+  //    같은 자리를 그리므로 **두 곳이 같은 말을 써야 한다.** 까닭은 그 파일 주석에 있다.
+  //
+  // ⚠️ 검색칸에 `maxLength` 가 없어 검색어가 얼마든지 길 수 있다. `truncate` 로 한 줄에서 자른다.
   return (
-    <p className="text-sm text-gray-500" aria-live="polite">
-      {`상품 ${totalElements}개`}
+    <p className="truncate text-sm text-gray-500" aria-live="polite">
+      {productListLabel(totalElements, keyword)}
     </p>
   )
 }
@@ -49,6 +57,8 @@ interface ProductsSectionProps {
    *    (#954 — 검색 중에는 필터 묶음을 감춘다).
    */
   compactMobileToolbar?: boolean
+  /** 검색 중이면 검색어. 목록 위 개수 줄에 같이 적는다(#1026) */
+  keyword?: string | null
 }
 
 export function ProductsSection({
@@ -60,6 +70,7 @@ export function ProductsSection({
   onOpenMobileFilter,
   hasDetailFilter = false,
   compactMobileToolbar = false,
+  keyword,
 }: ProductsSectionProps) {
   const { searchParams, pathname, push } = useFilterNavigation()
 
@@ -189,7 +200,7 @@ export function ProductsSection({
         </div>
       </div>
 
-      <ProductListHeader totalElements={totalElements} />
+      <ProductListHeader totalElements={totalElements} keyword={keyword} />
 
       {products.length > 0 ? (
         <ProductList products={products} />

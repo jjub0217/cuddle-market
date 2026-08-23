@@ -93,7 +93,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         />
       ) : null}
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <Suspense fallback={<StaticHomeFallback products={products} totalElements={totalElements} />}>
+        <Suspense
+          fallback={
+            <StaticHomeFallback products={products} totalElements={totalElements} keyword={filterParams.keyword} />
+          }
+        >
           <FilterNavigationProvider>
             <Home />
           </FilterNavigationProvider>
