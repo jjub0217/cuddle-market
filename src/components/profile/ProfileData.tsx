@@ -57,9 +57,18 @@ interface ProfileDataProps {
 // 가입일 모양은 packages/shared 로 옮겼다. 앱의 남의 프로필도 같은 함수를 쓴다 —
 // 여기 갇혀 있던 탓에 앱은 가입일을 아예 못 그렸다(생년월일도 같은 이유로 갈렸었다).
 
+// ⚠️ `purchases` 는 **내가 산 물건 수가 아니다.** 부르는 쪽(MyPage.tsx)이 넣어 주는 값이
+//    `/profile/me/purchase-requests` 의 `total` 이라, 서버가 `ProductType.REQUEST` 로 걸러
+//    센 **내가 올린 판매요청 글 수**다. 그래서 「요청내역」이라 쓴다.
+//    「구매내역」으로 되돌리지 마라 — 열쇠 이름(`purchases`)만 보고 헷갈리기 쉽다.
+//
+// ⚠️ **여기만 빈칸 없이 붙여 쓴다**(「판매요청내역」). 형제가 「판매내역」이라 결을 맞춘 것이다.
+//    메뉴 쪽은 형제가 「판매 내역」이라 빈칸을 넣는다(「판매요청 내역」 — constants.ts 의 MY_PAGE_NAV).
+//    ⚠️ 이 세 칸은 `grid-cols-3` 에 카드가 `max-w-72`(288px)라 **칸이 빠듯하다.**
+//       글자를 더 늘리기 전에 넘치는지 눈으로 볼 것.
 const SUMMARY_ITEMS: Array<{ key: keyof ProfileSummaryCounts; label: string }> = [
   { key: 'sales', label: '판매내역' },
-  { key: 'purchases', label: '구매내역' },
+  { key: 'purchases', label: '판매요청내역' },
   { key: 'wishlist', label: '찜한 상품' },
 ]
 
@@ -195,7 +204,13 @@ export default function ProfileData({
           </InlineNotification>
         ) : null}
       </AnimatePresence>
-      <div className="text-text-primary sticky top-24 flex flex-col rounded-xl">
+      {/* ⚠️ **여기에 `sticky top-24` 를 다시 붙이지 마라.** 붙어 있었지만 아무 데서도 안 먹었다.
+          바로 위 `<aside>` 에 `h-fit` 이 있어 상자 높이가 이 안쪽 상자 높이와 똑같다 —
+          미끄러질 여백이 0 이라 그냥 위로 사라진다. 이 조각을 쓰는 네 곳(남의 프로필·
+          마이페이지 데스크탑·마이페이지 모바일 전체화면·프로필 수정)이 전부 그랬다.
+          붙게 하려면 **이 조각 밖**, 옆 칸까지 품은 상자 안에서 감싼다 —
+          남의 프로필이 그렇게 한다(UserPage.tsx). */}
+      <div className="text-text-primary flex flex-col rounded-xl">
         <div className="relative flex flex-col gap-3 md:gap-6">
           {!isMyProfile ? (
             <div className="absolute top-0 right-0 z-10">

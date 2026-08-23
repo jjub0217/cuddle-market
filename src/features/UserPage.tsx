@@ -192,16 +192,34 @@ function UserPage() {
           {/* ⚠️ showJoinDate — 가입일은 중고거래에서 **신뢰 신호**다. 「3년 된 사람」과
               「어제 가입한 사람」은 거래를 결정할 때 다르게 읽힌다. 예전에는 거꾸로
               프로필 수정 화면에만 있었다(ProfileUpdate.tsx 에서 뺐다) */}
-          <ProfileData
-            setIsWithdrawModalOpen={setIsWithdrawModalOpen}
-            setIsReportModalOpen={setIsReportModalOpen}
-            setIsBlockModalOpen={setIsBlockModalOpen}
-            data={userData!}
-            // isMyProfile 을 안 넘긴다 — 내 프로필이면 위에서 마이페이지로 보내므로
-            // 여기까지 오는 것은 **늘 남의 프로필**이다(#869).
-            unblockUser={unblockUser}
-            showJoinDate
-          />
+          {/* ⚠️ **붙어 있게 하는 것은 이 감싸개다.** 예전에는 ProfileData 안쪽 상자에
+              `sticky top-24` 가 붙어 있었는데 **아무 데서도 안 먹었다.** 프로필 카드
+              (`<aside>`)에 `h-fit` 이 있어 상자 높이가 내용 높이와 똑같고, 그러면
+              **미끄러질 여백이 0** 이라 그냥 위로 사라진다.
+              그래서 카드보다 한 겹 바깥에 감싸개를 두고 여기를 붙인다 — 감싸개의 기준은
+              옆 상품 목록까지 품은 이 가로 줄이라 목록만큼 길다.
+              `md:self-start` 가 있어야 한다. 없으면 감싸개가 줄 높이만큼 늘어나(flex 기본값)
+              또 여백이 0 이 된다.
+              ⚠️ 좁은 화면에는 안 붙인다(`md:`) — 거기서는 프로필이 위아래로 쌓인 띠다.
+              ⚠️ ProfileData 를 고치지 않고 여기서 감싼 까닭: 그 조각은 마이페이지·프로필
+                 수정도 같이 쓴다. 안쪽을 건드리면 그 화면들 움직임까지 바뀐다.
+              ⚠️ 잰 것은 **이 화면이 아니라 같은 상자 짜임을 그대로 옮겨 놓은 쪽지**다
+                 (2026-08-23, 진짜 크롬). 고치기 전 짜임은 카드가 화면 위 -1124 까지
+                 밀려났고, 이 짜임은 1200px 를 더 내려도 117 자리에 그대로 멈춰 있었다.
+                 카드 너비는 288 로 양쪽이 같아 배치는 안 바뀐다.
+                 **이 화면 자체는 아직 눈으로 안 봤다.** */}
+          <div className="md:sticky md:top-24 md:self-start">
+            <ProfileData
+              setIsWithdrawModalOpen={setIsWithdrawModalOpen}
+              setIsReportModalOpen={setIsReportModalOpen}
+              setIsBlockModalOpen={setIsBlockModalOpen}
+              data={userData!}
+              // isMyProfile 을 안 넘긴다 — 내 프로필이면 위에서 마이페이지로 보내므로
+              // 여기까지 오는 것은 **늘 남의 프로필**이다(#869).
+              unblockUser={unblockUser}
+              showJoinDate
+            />
+          </div>
           <section className="flex w-full flex-col gap-1 px-4 py-5 md:gap-6 md:p-0" aria-labelledby="user-product-heading">
             <h4 id="user-product-heading" className="sr-only">
               {userData?.nickname}님의 {activeTabLabel}
