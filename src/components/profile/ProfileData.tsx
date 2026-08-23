@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Camera, Flag, Ban, LockOpen, ShieldAlert, EllipsisVertical } from 'lucide-react'
+import { Camera, ShieldAlert, EllipsisVertical } from 'lucide-react'
 import { formatJoinDate } from '@cuddle/shared'
 import { getImageSrcSet, IMAGE_SIZES, toResizedWebpUrl } from '@/lib/utils/imageUrl'
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
@@ -222,7 +222,6 @@ export default function ProfileData({
                       setIsMoreMenuOpen(false)
                     }}
                   >
-                    <LockOpen size={16} />
                     <span>차단 해제</span>
                   </DropdownMenuItem>
                 ) : (
@@ -232,19 +231,13 @@ export default function ProfileData({
                       setIsMoreMenuOpen(false)
                     }}
                   >
-                    <Ban size={16} />
                     <span>차단하기</span>
                   </DropdownMenuItem>
                 )}
                 {data?.isReported ? (
-                  <div
-                    role="menuitem"
-                    aria-disabled="true"
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm whitespace-nowrap text-gray-400"
-                  >
-                    <Flag size={16} />
+                  <DropdownMenuItem disabled>
                     <span>신고완료</span>
-                  </div>
+                  </DropdownMenuItem>
                 ) : (
                   <DropdownMenuItem
                     onClick={() => {
@@ -252,7 +245,6 @@ export default function ProfileData({
                       setIsMoreMenuOpen(false)
                     }}
                   >
-                    <Flag size={16} />
                     <span>신고하기</span>
                   </DropdownMenuItem>
                 )}

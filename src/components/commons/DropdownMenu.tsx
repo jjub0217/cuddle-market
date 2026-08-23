@@ -189,7 +189,11 @@ export function DropdownMenu({ isOpen, onClose, triggerRef, label, children }: D
       return
     }
     if (focusedOnOpenRef.current || !visible) return
-    const firstItem = menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]')
+    // ⚠️ **못 누르는 항목(aria-disabled)은 건너뛴다.** 지금 이 저장소의 메뉴들은 첫 항목이
+    //    disabled 인 경우가 없지만(ProfileData 는 차단→신고 순이라 늘 첫 항목이 눌린다),
+    //    이건 공용 조각이라 다른 메뉴에서 첫 항목이 disabled 면 초점이 못 누르는 데 갇힌다.
+    //    전부 disabled 면(고를 게 없으면) 아무 데도 초점을 넣지 않는다.
+    const firstItem = menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]:not([aria-disabled="true"])')
     if (!firstItem) return
     firstItem.focus()
     focusedOnOpenRef.current = true
@@ -261,17 +265,35 @@ export function DropdownMenu({ isOpen, onClose, triggerRef, label, children }: D
   )
 }
 
+// 줄 높이·안팎 여백·구분선은 눌리는 항목과 못 누르는 항목이 **똑같아야** 한다 — 다르면
+// 목록에서 줄이 어긋나 보인다(프로필 「신고완료」가 그래서 어긋났었다, #1034). 그래서 이
+// 공통 모양을 한 곳에 두고, 누를 수 있는지에 따라 갈리는 부분(커서·hover·글자색)만 아래에서 cn 으로 붙인다.
+const MENU_ITEM_LAYOUT_CLASSNAME =
+  'border-outline-variant/40 flex min-h-11 w-full items-center gap-3 border-b px-4 py-3 text-left text-sm whitespace-nowrap last:border-b-0'
+
 /** 메뉴 안의 한 줄 */
 export function DropdownMenuItem({
   onClick,
   tone = 'default',
+  disabled = false,
   children,
 }: {
-  onClick: (e: React.MouseEvent) => void
+  /** disabled 일 때는 안 부른다 — 그때는 생략해도 된다 */
+  onClick?: (e: React.MouseEvent) => void
   /** danger 는 되돌리기 어려운 것(삭제)에만 */
   tone?: 'default' | 'danger'
+  /** 못 누르는 줄(예: 이미 신고완료). <button> 대신 <div role="menuitem" aria-disabled> 로 그린다 */
+  disabled?: boolean
   children: React.ReactNode
 }) {
+  if (disabled) {
+    return (
+      <div role="menuitem" aria-disabled="true" className={cn(MENU_ITEM_LAYOUT_CLASSNAME, 'text-gray-400')}>
+        {children}
+      </div>
+    )
+  }
+
   return (
     <button
       type="button"
@@ -282,7 +304,8 @@ export function DropdownMenuItem({
         //    이었는데, 폭이 내용에 맞춰지는 드롭다운에는 해당하지 않는다.
         // ⚠️ **min-h-11(44px).** 거래완료 상태에서는 「삭제」 한 줄뿐이라 상자가 아주 작아진다.
         //    손가락이 닿을 크기를 지킨다.
-        'border-outline-variant/40 flex min-h-11 w-full cursor-pointer items-center gap-3 border-b px-4 py-3 text-left text-sm whitespace-nowrap transition-colors last:border-b-0 hover:bg-gray-50 active:bg-gray-100',
+        MENU_ITEM_LAYOUT_CLASSNAME,
+        'cursor-pointer transition-colors hover:bg-gray-50 active:bg-gray-100',
         tone === 'danger' ? 'text-danger-500' : 'text-gray-900'
       )}
     >
