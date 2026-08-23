@@ -50,7 +50,7 @@ describe('내 목록 조회', () => {
     );
   });
 
-  it('구매 내역은 /profile/me/purchase-requests 를 부른다', async () => {
+  it('판매요청 내역은 /profile/me/purchase-requests 를 부른다', async () => {
     await fetchMyPurchases(0);
 
     expect(mockFetch.mock.calls[0][0]).toBe(
@@ -90,7 +90,9 @@ describe('내 목록 조회', () => {
   it('실패하면 목록 이름이 담긴 오류를 던진다', async () => {
     mockFetch.mockResolvedValue(reply(500));
 
-    await expect(fetchMyPurchases(0)).rejects.toThrow('구매 내역');
+    // ⚠️ 오류에 담기는 **목록 이름**이다. 화면 제목과 같은 말이어야 한다 —
+    //    길 이름(`purchase-requests`)이 「purchase」인 것과는 상관없다.
+    await expect(fetchMyPurchases(0)).rejects.toThrow('판매요청 내역');
   });
   it('tradeStatus를 주면 쿼리에 붙는다', async () => {
     await fetchMyProducts(0, 'COMPLETED');

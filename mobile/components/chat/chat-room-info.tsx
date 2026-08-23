@@ -6,6 +6,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors } from '@/constants/colors';
 import type { ChatRoomSummary } from '@/lib/chat/api';
 import { productDetailHref } from '@/lib/product-routes';
+import { getOverlay } from '@/lib/tradeStatus';
 
 // 채팅방 머리말 — **무슨 상품** 이야기인가(#889).
 // 웹 `src/features/chatting-page/components/ChatRoomInfo.tsx` 를 옮긴 것이다.
@@ -20,9 +21,23 @@ import { productDetailHref } from '@/lib/product-routes';
 
 interface Props {
   room: ChatRoomSummary;
+  /**
+   * 거래 상태(SELLING · RESERVED · COMPLETED). 주면 썸네일 위에 뱃지를 얹는다.
+   * 없으면(아직 상품을 못 받았을 때) 아무것도 안 그린다.
+   *
+   * ⚠️ 이 값은 **방 정보에 없다.** 상품을 따로 받아야 안다 — 부르는 쪽(`app/chat/[id].tsx`)이
+   *    상품 조회 결과를 넘겨준다. 웹도 같은 방식이다(`ChatRoomInfo.tsx` 가 상품을 받아
+   *    `ChatProductCard` 에 넘긴다).
+   */
+  tradeStatus?: string | null;
+  /**
+   * SELL(판매) 또는 REQUEST(판매요청). COMPLETED 일 때 「판매완료」·「요청완료」를 가른다.
+   * 안 주면 판매(SELL)로 친다 — `getTradeLabel` 도 REQUEST 가 아니면 판매로 취급한다.
+   */
+  productType?: string;
 }
 
-export function ChatRoomInfo({ room }: Props) {
+export function ChatRoomInfo({ room, tradeStatus, productType }: Props) {
   const router = useRouter();
 
   // 누를 곳이 없으면 아예 안 그린다 — 눌리는데 아무 일도 안 일어나는 것보다 정직하다.
@@ -35,6 +50,11 @@ export function ChatRoomInfo({ room }: Props) {
   const openProduct = () => {
     router.push(productDetailHref('home', room.productId as number) as Href);
   };
+
+  // 그릴지 말지·무슨 색인지는 `lib/tradeStatus.ts` 의 `getOverlay` 하나가 정한다 — 목록 썸네일
+  // (`product-thumbnail.tsx`)·상세 사진(`image-carousel.tsx`)과 같은 규칙이다.
+  // 판매중·요청중이면 null 이라 아무것도 안 그린다. 웹도 그렇다.
+  const overlay = getOverlay(tradeStatus ?? null, productType ?? 'SELL');
 
   return (
     <View style={styles.container}>
@@ -51,6 +71,13 @@ export function ChatRoomInfo({ room }: Props) {
               style={styles.thumbImage}
               contentFit="cover"
             />
+          ) : null}
+          {overlay ? (
+            <View style={[styles.scrim, { backgroundColor: overlay.scrim }]}>
+              <Text style={styles.badge} numberOfLines={1}>
+                {overlay.label}
+              </Text>
+            </View>
           ) : null}
         </View>
         <View style={styles.productBody}>
@@ -99,6 +126,39 @@ const styles = StyleSheet.create({
     backgroundColor: colors.outlineVariant,
   },
   thumbImage: { width: '100%', height: '100%' },
+  // 썸네일 전체를 덮는 어두운 막. 색은 `getOverlay` 가 준다(예약중 0.40 · 완료 0.60).
+  scrim: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  // 흰 알약. 모양(둥근 모서리·흰 바탕·굵은 글씨)은 목록 썸네일(`product-thumbnail.tsx` 의
+  // `pill`)·웹(`ChatProductCard.tsx` 의 `BADGE_CLASSNAME`)과 같고 **치수만 다시 잡았다.**
+  //
+  // ⚠️ **여기 썸네일은 48 이다.** 목록 썸네일의 알약 치수(글자 11 · 좌우 12 · 상하 4)는
+  //    100 기준이라 그대로 쓰면 「판매완료」 넉 자가 48 을 넘어 잘린다 — 어림잡아
+  //    11×4 + 24 = 68 로 상자보다 크다. 웹 채팅방 카드도 64 기준이라(글자 10 · 좌우 6)
+  //    그대로는 못 쓴다.
+  //    그래서 글자 9 · 좌우 4 · 상하 1 로 줄였다. 한글은 한 자가 대략 글자 크기의 0.9배라
+  //    9×4 + 8 ≈ 44 로 48 안에 들어온다(좌우로 2씩 남는다).
+  //    ✅ **2026-08-23 에 실기기(Expo Go · 안드로이드)로 봤다. 「판매완료」가 안 잘린다.**
+  //       다만 사람 말로 「빡빡하다」였다 — 계산한 44 와 상자 48 사이에 여유가 정말 적다.
+  //    ⚠️ **그래서 이 값을 늘리지 마라.** 글자·좌우 여백을 한 단만 키워도 넘칠 자리다.
+  //       늘려야 하면 반드시 실기기로 다시 볼 것 — 이 배치는 jest 도 크롬도 못 잰다.
+  //       (`numberOfLines={1}` 은 그래도 두 줄로 접히지 않게 하려는 안전장치다.)
+  //    ⚠️ 「요청완료」도 넉 자라 폭은 같다. 판매요청 상품의 방은 아직 못 봤지만
+  //       글자 수가 같아 폭 문제는 안 생긴다.
+  badge: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: colors.onSurface,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 999,
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    // ⚠️ 안드로이드는 이게 없으면 `<Text>` 의 둥근 모서리가 안 깎인다(날짜 알약도 같다).
+    overflow: 'hidden',
+  },
   productBody: { flex: 1, gap: 2 },
   // 웹 text-sm font-medium
   productTitle: { fontSize: 14, fontWeight: '500', color: colors.onSurface },

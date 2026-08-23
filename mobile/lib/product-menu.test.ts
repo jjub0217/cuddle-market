@@ -22,14 +22,17 @@ describe('buildStatusActions — 판매 내역', () => {
   });
 });
 
-describe('buildStatusActions — 구매 내역', () => {
-  it('완료 전이면 구매완료만 보여준다', () => {
+// ⚠️ **「요청완료」다. 「구매완료」가 아니다.** 판매요청 내역에 실리는 것은 내가 산 물건이
+//    아니라 내가 올린 판매요청 글이라, 공용 `getTradeLabel` 이 정한 「요청완료」를 쓴다.
+//    갈래 이름(`purchases`)과 보내는 값(`COMPLETED`)은 서버 것이라 그대로다.
+describe('buildStatusActions — 판매요청 내역', () => {
+  it('완료 전이면 요청완료만 보여준다', () => {
     expect(buildStatusActions('purchases', 'SELLING')).toEqual([
-      { label: '구매완료로 변경', next: 'COMPLETED' },
+      { label: '요청완료로 변경', next: 'COMPLETED' },
     ]);
   });
 
-  it('구매완료면 상태 변경 항목이 하나도 없다', () => {
+  it('요청완료면 상태 변경 항목이 하나도 없다', () => {
     expect(buildStatusActions('purchases', 'COMPLETED')).toEqual([]);
   });
 });
@@ -77,7 +80,7 @@ describe('내 상품 ⋮ 전체', () => {
     const actions = buildOwnerActions('purchases', 'SELLING');
 
     expect(actions).toEqual([
-      { kind: 'status', label: '구매완료로 변경', next: 'COMPLETED' },
+      { kind: 'status', label: '요청완료로 변경', next: 'COMPLETED' },
       { kind: 'edit', label: '수정하기' },
       { kind: 'delete', label: '삭제', tone: 'danger' },
     ]);
