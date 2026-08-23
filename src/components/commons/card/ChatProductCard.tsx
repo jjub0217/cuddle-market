@@ -33,9 +33,10 @@ const priceClasses = {
 // 마이페이지 판매내역(MyList.tsx:132~168)의 오버레이·알약 모양을 그대로 따른다 — 새로 짓지 않는다.
 // 다만 셋은 일부러 다르게 한다:
 //  1) 라벨 문구는 공용 함수 `getTradeLabel`(원본 packages/shared)이 정한다 — 판매(SELL)
-//     상품은 COMPLETED일 때 「판매완료」, 판매요청(REQUEST) 상품은 「요청완료」다. MyList 는
-//     탭(판매/구매)으로 갈라 문구를 고르지만, 채팅방에는 그 탭 개념이 없어 productType 으로
-//     가른다. 앱(mobile/lib/tradeStatus.ts 의 `getOverlay`)도 같은 함수로 라벨을 받는다.
+//     상품은 COMPLETED일 때 「판매완료」, 판매요청(REQUEST) 상품은 「요청완료」다.
+//     ⚠️ MyList 도 이제 같다 — 예전에는 탭(판매/구매)으로 갈라 문구를 골라서 판매요청 글에
+//        「구매완료」가 나왔는데, 지금은 거기도 `productType` 으로 가른다.
+//     앱(mobile/lib/tradeStatus.ts 의 `getOverlay`)도 같은 함수로 라벨을 받는다.
 //  2) 사진을 흐리게(opacity·grayscale) 하지 않는다 — MyList 썸네일은 96~128px 이지만
 //     이 카드는 64px(md)이다. 그 크기에서 흐리기까지 더하면 무슨 상품인지 못 알아본다.
 //  3) 알약 크기를 줄인다 — MyList 의 `px-4 py-1.5 text-xs` 를 그대로 쓰면 64px 상자보다
