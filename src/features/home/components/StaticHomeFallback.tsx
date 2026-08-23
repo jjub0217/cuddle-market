@@ -13,6 +13,7 @@ import Badge from '@/components/commons/badge/Badge'
 import Link from 'next/link'
 import { ROUTES } from '@/constants/routes'
 import { PAGE_CONTAINER } from '@/constants/ui'
+import { productListLabel } from '@/features/home/productListLabel'
 
 /**
  * Suspense fallback용 서버 컴포넌트
@@ -29,9 +30,11 @@ import { PAGE_CONTAINER } from '@/constants/ui'
 interface StaticHomeFallbackProps {
   products: Product[]
   totalElements: number
+  /** 검색 중이면 검색어. 하이드레이션 뒤 이 자리를 대신하는 ProductsSection 과 **같은 문구**여야 한다 */
+  keyword?: string | null
 }
 
-export default function StaticHomeFallback({ products, totalElements }: StaticHomeFallbackProps) {
+export default function StaticHomeFallback({ products, totalElements, keyword }: StaticHomeFallbackProps) {
   return (
     <div className="pb-4xl pt-6">
       <div className={PAGE_CONTAINER}>
@@ -49,7 +52,9 @@ export default function StaticHomeFallback({ products, totalElements }: StaticHo
             {/* 실제 상품 데이터 렌더링 */}
             <section className="flex flex-col gap-5">
               <div className="flex items-center justify-between">
-                <p className="text-text-secondary">{`상품 ${totalElements}개`}</p>
+                {/* 문구는 ProductsSection 의 개수 줄과 **한 곳에서** 만든다 — 다르면
+                    Home 이 이 대역을 대신하는 순간 글자가 튄다(productListLabel 주석 참고). */}
+                <p className="text-text-secondary truncate">{productListLabel(totalElements, keyword)}</p>
                 <div className="w-36">
                   <div className="bg-primary-50 rounded px-3 py-2 text-gray-900 text-sm">최신순</div>
                 </div>

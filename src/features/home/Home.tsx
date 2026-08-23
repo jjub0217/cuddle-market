@@ -350,6 +350,7 @@ function Home() {
                   onOpenMobileFilter={검색중이다 ? () => setIsMobileFilterOpen(true) : undefined}
                   hasDetailFilter={hasDetailFilter}
                   compactMobileToolbar={검색중이다}
+                  keyword={filterParams.keyword}
                 />
               )}
             </section>
