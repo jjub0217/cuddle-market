@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { EllipsisVertical } from 'lucide-react'
 import Image from 'next/image'
@@ -18,7 +18,7 @@ import { api } from '@/lib/api/api'
 import { ROUTES } from '@/constants/routes'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import IconButton from '@/components/commons/button/IconButton'
-import { BottomSheet, BottomSheetItem } from '@/components/commons/BottomSheet'
+import { DropdownMenu, DropdownMenuItem } from '@/components/commons/DropdownMenu'
 
 interface StatusDropdownProps {
   className?: string
@@ -61,6 +61,7 @@ export default function MyList({
   const [currentTradeStatus, setCurrentTradeStatus] = useState(tradeStatus)
   const currentTradeStatusKo = STATUS_EN_TO_KO.find((s) => s.value === currentTradeStatus)?.name ?? '판매중'
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false)
+  const moreButtonRef = useRef<HTMLButtonElement>(null)
   const [imgError, setImgError] = useState(false)
   const [usePlaceholder, setUsePlaceholder] = useState(false)
 
@@ -175,56 +176,61 @@ export default function MyList({
                 {!isMd ? (
                   <div className="relative flex w-full items-start justify-between gap-2">
                     <h3 className="line-clamp-2 w-full text-sm font-normal">{title}</h3>
-                    <IconButton size="sm" onClick={handleMoreToggle} aria-label="상품 옵션 메뉴 열기">
+                    <IconButton
+                      ref={moreButtonRef}
+                      size="sm"
+                      onClick={handleMoreToggle}
+                      aria-label="상품 옵션 메뉴 열기"
+                      aria-haspopup="menu"
+                      aria-expanded={isMoreMenuOpen}
+                    >
                       <EllipsisVertical size={16} className="text-gray-500" />
                     </IconButton>
-                    {/* 좁은 폭에서는 아래에서 올라오는 시트로 연다.
-                        한 손으로 닿는 자리이고, 삭제를 화면 한가운데가 아니라
-                        아래로 떨어뜨려 둘 수 있다. 앱과 같은 모양이다(#793). */}
-                    <BottomSheet
+                    {/* 단추에 붙는 드롭다운으로 연다(#1030).
+                        모바일 웹은 앱이 아니라 데스크탑 웹의 반응형이라, 「이 항목에 대한
+                        할 일」은 아래에서 올라오는 시트가 아니라 드롭다운이 맞다. */}
+                    <DropdownMenu
                       isOpen={isMoreMenuOpen}
                       onClose={() => setIsMoreMenuOpen(false)}
+                      triggerRef={moreButtonRef}
                       label={`${title} 상품 메뉴`}
                     >
                       {/* 판매내역 — 거래 상태 변경 */}
                       {isSalesTab && !isCompleted && currentTradeStatus !== 'SELLING' ? (
-                        <BottomSheetItem onClick={handleChangeTradeStatus('SELLING')}>
+                        <DropdownMenuItem onClick={handleChangeTradeStatus('SELLING')}>
                           <span>판매중으로 바꾸기</span>
-                        </BottomSheetItem>
+                        </DropdownMenuItem>
                       ) : null}
                       {isSalesTab && !isCompleted && currentTradeStatus !== 'RESERVED' ? (
-                        <BottomSheetItem onClick={handleChangeTradeStatus('RESERVED')}>
+                        <DropdownMenuItem onClick={handleChangeTradeStatus('RESERVED')}>
                           <span>예약중으로 바꾸기</span>
-                        </BottomSheetItem>
+                        </DropdownMenuItem>
                       ) : null}
                       {isSalesTab && !isCompleted ? (
-                        <BottomSheetItem onClick={handleChangeTradeStatus('COMPLETED')}>
+                        <DropdownMenuItem onClick={handleChangeTradeStatus('COMPLETED')}>
                           <span>판매완료로 바꾸기</span>
-                        </BottomSheetItem>
+                        </DropdownMenuItem>
                       ) : null}
 
                       {/* 구매내역 — 구매완료 */}
                       {isPurchasesTab && !isCompleted ? (
-                        <BottomSheetItem onClick={handleChangeTradeStatus('COMPLETED')}>
+                        <DropdownMenuItem onClick={handleChangeTradeStatus('COMPLETED')}>
                           <span>구매완료로 바꾸기</span>
-                        </BottomSheetItem>
+                        </DropdownMenuItem>
                       ) : null}
 
                       {/* 수정 */}
                       {isMyProductTab && !isCompleted ? (
-                        <BottomSheetItem onClick={handleProductUpdate}>
+                        <DropdownMenuItem onClick={handleProductUpdate}>
                           <span>수정하기</span>
-                        </BottomSheetItem>
+                        </DropdownMenuItem>
                       ) : null}
 
                       {/* 삭제 */}
-                      <BottomSheetItem
-                        tone="danger"
-                        onClick={handleDeleteClick}
-                      >
+                      <DropdownMenuItem tone="danger" onClick={handleDeleteClick}>
                         <span>삭제</span>
-                      </BottomSheetItem>
-                    </BottomSheet>
+                      </DropdownMenuItem>
+                    </DropdownMenu>
                   </div>
                 ) : null}
                 <span className="text-base font-bold text-gray-900">{formatPrice(price)} 원</span>
