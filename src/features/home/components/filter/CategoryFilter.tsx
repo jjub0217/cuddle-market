@@ -51,12 +51,21 @@ export function CategoryFilter({ selectedCategory }: CategoryFilterProps) {
               className="group flex h-auto shrink-0 flex-col items-center gap-1 rounded-none bg-transparent p-0 transition-all hover:bg-transparent md:min-w-20 md:gap-0"
             >
               <span className="bg-primary-50 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full transition-all group-hover:-translate-y-1 md:h-20 md:w-20 md:overflow-visible md:rounded-none md:bg-transparent">
+                {/* ⚠️ `max-w-none` 이 **꼭 있어야 한다.** 테일윈드 기본 스타일이 모든 `<img>` 에
+                    `max-width: 100%` 를 건다. 좁은 폭에서 감싸개가 64 라 이 그림은 `w-20`(80)을
+                    원해도 **가로만 64 로 깎이고 세로는 80 그대로** 남는다(실측: 64x80).
+                    그러면 `next/image` 에 넘긴 80x80 과 어긋나 개발 콘솔에 경고가 뜬다(#1047).
+                    ⚠️ **flex 탓이 아니다.** `shrink-0` 을 줘 봤지만(`flexShrink: 0` 까지 확인)
+                       크기가 그대로였다. 범인은 `max-width` 였다.
+                    ⚠️ **보이는 모습은 안 바뀐다.** 감싸개가 `h-16 w-16 overflow-hidden` 이라
+                       어차피 가운데 64x64 만 보인다 — 깎여서 64x80 이든, 안 깎여서 80x80 이든
+                       보이는 그림은 같다. 고치기 전후 사진을 견줘 확인했다(2026-08-23). */}
                 <Image
                   src={category.iconImage}
                   alt=""
                   width={80}
                   height={80}
-                  className="h-20 w-20 object-cover md:h-16 md:w-16 md:object-contain"
+                  className="h-20 w-20 max-w-none object-cover md:h-16 md:w-16 md:object-contain"
                 />
               </span>
               <span className="text-xs whitespace-nowrap text-gray-600 transition-colors group-hover:text-primary-600 md:text-sm md:font-bold">

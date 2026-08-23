@@ -7,6 +7,10 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   interactiveWidget: 'resizes-content',
+  // ⚠️ **`metadata` 가 아니라 여기다.** `metadata` 에 두면 Next 가 개발 콘솔에
+  //    「Unsupported metadata themeColor … move it to viewport export instead」를
+  //    띄운다. 예전에 `metadata` 안에 있었다(#1047).
+  themeColor: '#FF6F0F',
 }
 
 export const metadata: Metadata = {
@@ -14,7 +18,6 @@ export const metadata: Metadata = {
   title: '커들마켓',
   description: '반려동물 용품을 사고팔 수 있는 커들마켓',
   manifest: '/manifest.json',
-  themeColor: '#FF6F0F',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
