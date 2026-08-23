@@ -31,7 +31,9 @@ interface TabConfig {
 
 const TAB_CONFIG: Record<DashboardTab, TabConfig> = {
   sales: { label: '판매 내역', nav: 'nav-sales', tab: 'tab-sales' },
-  purchases: { label: '구매 내역', nav: 'nav-purchases', tab: 'tab-purchases' },
+  // ⚠️ 열쇠·nav·tab 이름은 `purchases` 지만 문구는 「판매요청 내역」이다. 내가 산 물건이
+  //    아니라 내가 올린 판매요청 글이다. **이름은 고치지 마라, 문구만이다**
+  purchases: { label: '판매요청 내역', nav: 'nav-purchases', tab: 'tab-purchases' },
   wishlist: { label: '찜한 상품', nav: 'nav-wishlist', tab: 'tab-wishlist' },
 }
 

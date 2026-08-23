@@ -42,7 +42,7 @@ export const WithRightSlot: Story = {
   args: {
     tabs: [
       { id: 'sales', label: '판매 내역', code: 'sales' },
-      { id: 'purchases', label: '구매 내역', code: 'purchases' },
+      { id: 'purchases', label: '판매요청 내역', code: 'purchases' },
       { id: 'wishlist', label: '찜한 상품', code: 'wishlist' },
     ],
     activeTab: 'sales',

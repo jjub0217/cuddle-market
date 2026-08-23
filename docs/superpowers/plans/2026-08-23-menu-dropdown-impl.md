@@ -1,5 +1,20 @@
 # 모바일 웹 더보기 메뉴를 드롭다운으로 — 구현 계획
 
+> ✅ **다 끝났다 (2026-08-23).** 체크상자는 일이 끝난 뒤에 채웠다 — 진행 중에 못 채워
+> 한동안 「빈칸 22개」로 남아 있었고, 나중에 읽는 사람이 안 한 일로 오해할 뻔했다.
+>
+> ```
+> 과제 1  DropdownMenu 조각      → PR #1032   src/components/commons/DropdownMenu.tsx 315줄 · 짝 시험 316줄
+> 과제 2  MyList 갈아 끼우기      → PR #1032   MyList.tsx:21 이 그 조각을 부른다
+> 과제 3  쓰임 없어진 시트 걷기    → PR #1032   BottomSheet 흔적이 src 에 하나도 없다
+> ```
+>
+> 그 뒤 **채팅방·프로필 ⋮ 도 같은 조각으로 옮겼다**(#1034 → PR #1036).
+> 지금 이 조각을 쓰는 곳은 셋이다 — `MyList` · `ChatRoomInfo` · `ProfileData`.
+>
+> ⚠️ **계획 문서의 빈 체크상자는 「안 한 일」이라는 뜻이 아니다.** 판단하기 전에
+> 코드를 열어 실제로 있는지 봐라. 위 셋은 전부 파일로 확인한 것이다.
+
 > **에이전트에게:** 이 계획은 `superpowers:subagent-driven-development` 또는 `superpowers:executing-plans` 로 한 과제씩 진행한다. 단계는 체크상자(`- [ ]`)로 따라간다.
 
 **목표:** 마이페이지 상품 카드의 ⋮ 메뉴를 「아래에서 올라오는 시트」에서 「단추에 붙는 드롭다운」으로 바꾼다.
@@ -67,7 +82,7 @@
   }): React.JSX.Element
   ```
 
-- [ ] **1단계: 떨어지는 시험을 먼저 쓴다**
+- [x] **1단계: 떨어지는 시험을 먼저 쓴다**
 
 `src/components/commons/DropdownMenu.test.tsx` 를 만든다.
 
@@ -262,7 +277,7 @@ describe('항목', () => {
 })
 ```
 
-- [ ] **2단계: 떨어지는 것을 확인한다**
+- [x] **2단계: 떨어지는 것을 확인한다**
 
 ```bash
 npx vitest run src/components/commons/DropdownMenu.test.tsx
@@ -270,7 +285,7 @@ npx vitest run src/components/commons/DropdownMenu.test.tsx
 
 예상: `Failed to resolve import "./DropdownMenu"` 로 **떨어진다.**
 
-- [ ] **3단계: 조각을 만든다**
+- [x] **3단계: 조각을 만든다**
 
 `src/components/commons/DropdownMenu.tsx`:
 
@@ -437,7 +452,7 @@ export function DropdownMenuItem({
 }
 ```
 
-- [ ] **4단계: 시험이 통과하는지 본다**
+- [x] **4단계: 시험이 통과하는지 본다**
 
 ```bash
 npx vitest run src/components/commons/DropdownMenu.test.tsx
@@ -445,7 +460,7 @@ npx vitest run src/components/commons/DropdownMenu.test.tsx
 
 예상: **9개 전부 통과.**
 
-- [ ] **5단계: 마커 검증 — 시험이 진짜로 지키는지 증명한다**
+- [x] **5단계: 마커 검증 — 시험이 진짜로 지키는지 증명한다**
 
 `DropdownMenu.tsx` 에서 표식 한 줄만 잠깐 지운다.
 
@@ -460,7 +475,7 @@ npx vitest run src/components/commons/DropdownMenu.test.tsx
 예상: **「열려 있는 동안 「내가 위에 있다」는 표식을 단다」 하나만 빨개진다.**
 확인했으면 **주석을 되돌리고** 다시 돌려 전부 초록인 것을 본다.
 
-- [ ] **6단계: 게이트**
+- [x] **6단계: 게이트**
 
 ```bash
 P=$(lsof -ti:3000 | head -1); [ -n "$P" ] && kill $P
@@ -469,7 +484,7 @@ pnpm gate
 
 예상: `EXIT=0` · 경고 31 이하.
 
-- [ ] **7단계: 커밋**
+- [x] **7단계: 커밋**
 
 ```bash
 git add src/components/commons/DropdownMenu.tsx src/components/commons/DropdownMenu.test.tsx
@@ -487,7 +502,7 @@ git commit -m "feat: 단추에 붙는 더보기 메뉴 조각을 만든다(#1030
 - 쓰는 것: 과제 1 의 `DropdownMenu`·`DropdownMenuItem`
 - 내놓는 것: 없음 (화면 하나를 바꿀 뿐)
 
-- [ ] **1단계: ⋮ 단추에 ref 와 낱말을 단다**
+- [x] **1단계: ⋮ 단추에 ref 와 낱말을 단다**
 
 `MyList.tsx` 위쪽 `useState` 들 옆에 ref 를 더한다(63줄 언저리).
 
@@ -498,7 +513,7 @@ git commit -m "feat: 단추에 붙는 더보기 메뉴 조각을 만든다(#1030
 
 `useRef` 를 import 에 더한다(`react` 에서 이미 `useState` 를 가져오고 있다).
 
-- [ ] **2단계: import 를 바꾼다**
+- [x] **2단계: import 를 바꾼다**
 
 ```tsx
 // 지운다
@@ -507,7 +522,7 @@ import { BottomSheet, BottomSheetItem } from '@/components/commons/BottomSheet'
 import { DropdownMenu, DropdownMenuItem } from '@/components/commons/DropdownMenu'
 ```
 
-- [ ] **3단계: 175~228줄의 묶음을 갈아 끼운다**
+- [x] **3단계: 175~228줄의 묶음을 갈아 끼운다**
 
 `{!isMd ? ( … ) : null}` 안을 통째로 아래로 바꾼다.
 
@@ -576,7 +591,7 @@ import { DropdownMenu, DropdownMenuItem } from '@/components/commons/DropdownMen
 
 ⚠️ **항목 조건과 처리 함수는 하나도 안 바꾼다.** `handleChangeTradeStatus`·`handleProductUpdate`·`handleDeleteClick` 이 저마다 하는 `preventDefault`/`stopPropagation` 은 `<Link>` 안이라는 사실이 안 바뀌므로 그대로 필요하다.
 
-- [ ] **4단계: `IconButton` 이 ref 를 받는지 확인한다**
+- [x] **4단계: `IconButton` 이 ref 를 받는지 확인한다**
 
 ```bash
 grep -n "forwardRef\|ref" src/components/commons/button/IconButton.tsx | head
@@ -585,7 +600,7 @@ grep -n "forwardRef\|ref" src/components/commons/button/IconButton.tsx | head
 - **받으면** 그대로 둔다.
 - **안 받으면** `IconButton` 을 감싼 `<span ref={moreButtonRef} className="inline-flex">` 로 바꾸고, `triggerRef` 에 그 span 을 넘긴다. (React 19 는 함수 컴포넌트도 `ref` 를 props 로 받을 수 있으므로, 대개 `ref` 를 props 에 더하는 것으로 끝난다.)
 
-- [ ] **5단계: 타입체크와 시험**
+- [x] **5단계: 타입체크와 시험**
 
 ```bash
 npx tsc --noEmit
@@ -594,7 +609,7 @@ npx vitest run
 
 예상: 타입 오류 0 · 시험 전부 통과(이 시점에는 `BottomSheet.test.tsx` 도 아직 돈다).
 
-- [ ] **6단계: ⭐ 진짜 크롬으로 셋을 잰다 — jsdom 이 못 잡는 것들**
+- [x] **6단계: ⭐ 진짜 크롬으로 셋을 잰다 — jsdom 이 못 잡는 것들**
 
 dev 서버를 띄우고, **저장소 뿌리**에 잴 파일을 만든다.
 
@@ -663,7 +678,7 @@ node /Users/osejin/Desktop/cuddle-market/.tmp-menu.mjs
 
 ⚠️ **①은 상품이 2개 이상일 때만 뜻이 있다.** 1개 이하면 `MyPagePanel.tsx:204` 가 `overflow-visible` 이라 자름이 애초에 없다.
 
-- [ ] **7단계: ⭐ 마커 검증 — ②가 표식 때문인지 증명한다**
+- [x] **7단계: ⭐ 마커 검증 — ②가 표식 때문인지 증명한다**
 
 `DropdownMenu.tsx` 에서 표식 한 줄만 잠깐 지우고 ②만 다시 잰다.
 
@@ -676,7 +691,7 @@ node /Users/osejin/Desktop/cuddle-market/.tmp-menu.mjs
 
 「고쳤다」가 아니라 **「이것 때문이다」**를 증명하는 단계다.
 
-- [ ] **8단계: 잰 파일을 지우고 게이트**
+- [x] **8단계: 잰 파일을 지우고 게이트**
 
 ```bash
 rm -f /Users/osejin/Desktop/cuddle-market/.tmp-menu.mjs
@@ -685,7 +700,7 @@ pnpm gate
 nohup pnpm dev > /tmp/dev.log 2>&1 &
 ```
 
-- [ ] **9단계: 커밋**
+- [x] **9단계: 커밋**
 
 ```bash
 git add src/features/my-page/components/MyList.tsx
@@ -705,7 +720,7 @@ git commit -m "refactor: 마이페이지 더보기 메뉴를 시트에서 드롭
 - 쓰는 것: 과제 2 가 끝나 `BottomSheet` 를 쓰는 곳이 0 이 된 상태
 - 내놓는 것: 없음
 
-- [ ] **1단계: 정말 아무도 안 쓰는지 확인한다**
+- [x] **1단계: 정말 아무도 안 쓰는지 확인한다**
 
 ```bash
 grep -rn "BottomSheet" src --include='*.ts' --include='*.tsx'
@@ -716,7 +731,7 @@ grep -rn "bottom-sheet__panel\|bottom-sheet-rise" src
 
 ⚠️ 앱의 `mobile/components/ui/bottom-sheet.tsx` 는 **다른 파일**이고 앱 5곳이 쓴다. `src/` 만 본다.
 
-- [ ] **2단계: `globals.css` 에서 시트 애니메이션을 지운다**
+- [x] **2단계: `globals.css` 에서 시트 애니메이션을 지운다**
 
 `src/app/globals.css` 의 110~132줄 언저리, `@keyframes bottom-sheet-rise` · `.bottom-sheet__panel` · 그 `prefers-reduced-motion` 블록을 지운다. 먼저 눈으로 범위를 본다.
 
@@ -724,13 +739,13 @@ grep -rn "bottom-sheet__panel\|bottom-sheet-rise" src
 sed -n 105,135p src/app/globals.css
 ```
 
-- [ ] **3단계: 파일 둘을 지운다**
+- [x] **3단계: 파일 둘을 지운다**
 
 ```bash
 git rm src/components/commons/BottomSheet.tsx src/components/commons/BottomSheet.test.tsx
 ```
 
-- [ ] **4단계: 게이트 셋 다**
+- [x] **4단계: 게이트 셋 다**
 
 ```bash
 P=$(lsof -ti:3000 | head -1); [ -n "$P" ] && kill $P
@@ -741,14 +756,14 @@ pnpm gate:all
 - 웹 시험이 **`BottomSheet.test.tsx` 의 18개만큼 줄고 `DropdownMenu.test.tsx` 의 9개만큼 는다.**
 - ⚠️ **앱 시험 수는 그대로여야 한다.** 줄었으면 앱 파일을 잘못 건드린 것이다.
 
-- [ ] **5단계: 커밋**
+- [x] **5단계: 커밋**
 
 ```bash
 git add -A src/app/globals.css
 git commit -m "refactor: 쓰임이 없어진 하단 시트 조각을 걷는다(#1030)"
 ```
 
-- [ ] **6단계: 푸시하고 PR**
+- [x] **6단계: 푸시하고 PR**
 
 ```bash
 git push -u origin refactor/1030--menu-dropdown
