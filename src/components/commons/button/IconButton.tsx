@@ -3,7 +3,7 @@
 import { cn } from '@/lib/utils/cn'
 import type { ReactNode, MouseEvent } from 'react'
 
-interface IconButtonProps extends Omit<React.ComponentPropsWithoutRef<'button'>, 'onClick'> {
+interface IconButtonProps extends Omit<React.ComponentPropsWithRef<'button'>, 'onClick'> {
   children: ReactNode
   onClick?: (e: MouseEvent<HTMLButtonElement>) => void
   size?: 'sm' | 'md' | 'lg'
