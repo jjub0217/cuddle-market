@@ -4,7 +4,7 @@ import type { LucideIcon } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
 
-// 마이 목록(찜한 상품 · 판매 내역 · 구매 내역)의 빈 상태.
+// 마이 목록(찜한 상품 · 판매 내역 · 판매요청 내역)의 빈 상태.
 // 웹 src/components/EmptyState.tsx 와 같은 결 — 점선 테두리 박스 + 원형 배경 아이콘.
 //
 // 홈의 빈 상태(list-states.tsx의 EmptyState, 🐾 + 글자)와 왜 다른가:
@@ -15,7 +15,7 @@ import { colors } from '@/constants/colors';
 interface Props {
   /**
    * Lucide 아이콘 그 자체. 웹 MyPagePanel도 `emptyIcon: LucideIcon`으로 같은 모양이다
-   * — Package(판매·구매) · Heart(찜).
+   * — Package(판매 내역·판매요청 내역) · Heart(찜).
    */
   icon: LucideIcon;
   title: string;

@@ -22,7 +22,7 @@ interface Props {
   product: Product;
   /** 넘기면 썸네일에 찜 버튼이 붙는다. 카드는 그대로 전달만 한다. */
   favorite?: FavoriteControl;
-  /** 넘기면 오른쪽 위에 ⋮ 가 붙는다. 관리하는 목록(판매 · 구매)만 넘긴다. */
+  /** 넘기면 오른쪽 위에 ⋮ 가 붙는다. 관리하는 목록(판매 내역 · 판매요청 내역)만 넘긴다. */
   onMorePress?: () => void;
 }
 

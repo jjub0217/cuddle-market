@@ -126,12 +126,15 @@ export default function MyScreen() {
           <ChevronRight size={22} color={colors.onSurfaceSubtle} />
         </Pressable>
 
-        {/* 웹 모바일 마이페이지와 같은 묶음·이름. 웹은 「구매내역」으로 붙여 썼는데
-            나머지 둘은 띄어써서, 여기서는 띄어쓰고 웹 표기도 함께 고친다. */}
+        {/* 웹 모바일 마이페이지와 같은 묶음·이름.
+            ⚠️ 셋째 줄은 **「판매요청 내역」**이다. 「구매 내역」이 아니다 — 여기 실리는 것은
+               내가 산 물건이 아니라 내가 올린 **판매요청 글**이라, 형제인 「판매 내역」과
+               결이 맞는 이 이름으로 정했다. 웹도 같은 말이다(`constants.ts` 의
+               nav-purchases). ⚠️ **길 이름(`my-purchases`)은 그대로 둔다** — 문구만 바뀐 것이다. */}
         {/* 줄 왼쪽 아이콘은 웹 모바일 마이페이지(MyPage.tsx의 md:hidden 블록)와 같은 것이다. */}
         <SectionCard title="내 상품 관리">
           <SectionRow icon={Tag} label="판매 내역" onPress={() => router.push('/(tabs)/(my)/my-products')} />
-          <SectionRow icon={Handbag} label="구매 내역" onPress={() => router.push('/(tabs)/(my)/my-purchases')} />
+          <SectionRow icon={Handbag} label="판매요청 내역" onPress={() => router.push('/(tabs)/(my)/my-purchases')} />
           <SectionRow icon={Heart} label="찜한 상품" onPress={() => router.push('/(tabs)/(my)/my-favorites')} />
         </SectionCard>
 
