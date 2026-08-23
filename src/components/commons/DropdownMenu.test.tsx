@@ -196,6 +196,38 @@ describe('초점 (#981)', () => {
   })
 })
 
+describe('자리 안전망 — 화면 밖으로 안 나가게 (①②)', () => {
+  // 배치(몇 픽셀에 그려지나)와 실제 뒤집힘은 jsdom 이 못 본다(getBoundingClientRect 가 늘 0).
+  // 그래서 「①안전망이 실제로 걸려 있는가」·「자리가 모자라도 메뉴를 숨겨 버리지는 않는가」를
+  // 대신 지킨다. 픽셀 값은 크롬으로 잰다(과제 2).
+
+  it('메뉴에 maxHeight 가 걸려 있다', () => {
+    render(<Harness />)
+
+    const menu = screen.getByRole('menu')
+    // 값이 정확히 몇 px 인지는 안 본다 — 「안전망이 달려 있다」만 본다
+    expect(menu.style.maxHeight).not.toBe('')
+  })
+
+  it('화면이 아주 낮아도 메뉴는 그려지고 항목이 다 DOM 에 있다', () => {
+    const original = window.innerHeight
+    // 단추 자리도 jsdom 에서는 늘 (0,0,0,0)이라, 남는 자리가 음수가 되려면
+    // 화면 높이를 GAP+여백(12px)보다 작게 줘야 한다.
+    Object.defineProperty(window, 'innerHeight', { value: 5, configurable: true })
+
+    try {
+      render(<Harness />)
+
+      // 자리가 모자란다고 메뉴를 통째로 숨기면(예: 이른 return null) 안 된다 —
+      // maxHeight 로 가두고 스크롤시켜야지, 항목 자체를 지우면 안 된다.
+      expect(screen.getByRole('menu')).toBeInTheDocument()
+      expect(screen.getAllByRole('menuitem')).toHaveLength(2)
+    } finally {
+      Object.defineProperty(window, 'innerHeight', { value: original, configurable: true })
+    }
+  })
+})
+
 describe('항목', () => {
   it('누르면 그 항목의 일이 돈다', async () => {
     const onEdit = vi.fn()

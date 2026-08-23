@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { createPortal } from 'react-dom'
 
 import { OVERLAY_ABOVE_ATTR, Z_INDEX } from '@/constants/ui'
@@ -34,10 +34,38 @@ interface DropdownMenuProps {
 
 /** 단추와 메뉴 사이 틈 */
 const GAP_PX = 4
+/** 화면 가장자리에 딱 붙지 않게 두는 여유 */
+const EDGE_MARGIN_PX = 8
+
+/** 자리 하나 — 위/아래 중 고른 쪽만 값이 있다. `right` 정렬은 늘 같이 잰다 */
+type MenuStyle = { top: number; right: number; maxHeight: number } | { bottom: number; right: number; maxHeight: number }
+
+/** 단추 기준으로 위·아래에 각각 얼마나 자리가 남는지 (음수면 모자란다는 뜻) */
+function getSpace(rect: DOMRect) {
+  return {
+    below: window.innerHeight - rect.bottom - GAP_PX - EDGE_MARGIN_PX,
+    above: rect.top - GAP_PX - EDGE_MARGIN_PX,
+  }
+}
+
+/** 고른 방향으로 실제 자리(top/bottom·right·maxHeight)를 만든다. maxHeight 는 절대 음수를 안 준다 —
+ *  음수 max-height 는 CSS 에서 무효라 아예 안 먹혀서, 모자란 자리 그대로 아무 제한 없이 튀어나간다. */
+function computeMenuStyle(rect: DOMRect, placement: 'below' | 'above'): MenuStyle {
+  const right = window.innerWidth - rect.right
+  const { below, above } = getSpace(rect)
+  if (placement === 'above') {
+    return { bottom: window.innerHeight - rect.top + GAP_PX, right, maxHeight: Math.max(above, 0) }
+  }
+  return { top: rect.bottom + GAP_PX, right, maxHeight: Math.max(below, 0) }
+}
 
 export function DropdownMenu({ isOpen, onClose, triggerRef, label, children }: DropdownMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null)
-  const [position, setPosition] = useState<{ top: number; right: number } | null>(null)
+  const [position, setPosition] = useState<MenuStyle | null>(null)
+  // ② 두 번 그리기 중 「아직 안 보여줘도 되나」 — 방향을 정하기 전까지는 false.
+  const [visible, setVisible] = useState(false)
+  // 이번에 열린 동안 고른 방향. 스크롤 중에는 안 바뀐다 — 열 때 한 번만 정한다(아래 useLayoutEffect).
+  const placementRef = useRef<'below' | 'above'>('below')
 
   // 서버에는 document 가 없다. 붙은 뒤에만 portal 한다.
   // useEffect + setState 로 하면 한 번 그린 뒤 또 그린다(#788 에서 없앤 패턴).
@@ -57,16 +85,32 @@ export function DropdownMenu({ isOpen, onClose, triggerRef, label, children }: D
   const refs = useMemo(() => [triggerRef, menuRef], [triggerRef])
   useOutsideClick(isOpen, refs, onClose)
 
+  // 열릴 때마다 「아직 안 보인다」 상태로 새로 시작한다.
+  //
+  // ⚠️ useEffect 에 두면 react-hooks/set-state-in-effect 가 막는다(게이트 실패) — 이 저장소는
+  //    렌더 도중에 맞추는 방식을 쓴다(PhotoViewer.tsx:150-165, useFavorite.ts:27-31 과 같다).
+  //    「이전 값을 기억해 두고 달라졌을 때만」이 핵심이다 — 그냥 대입하면 스크롤로 position 이
+  //    새로 잡힐 때마다(아래 effect) 이 렌더도 매번 다시 돌아 무한히 반복된다.
+  // ⚠️ placementRef 는 여기서 안 건드린다 — ref는 렌더 도중 손대면 안 되고(react-hooks/refs),
+  //    ref는 setState 와 달리 effect 안에서 만져도 되는 값이라 아래 effect 쪽에 남겨 뒀다.
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen)
+  if (prevIsOpen !== isOpen) {
+    setPrevIsOpen(isOpen)
+    if (isOpen) setVisible(false)
+  }
+
   // 단추 자리에 맞춘다. 오른쪽 정렬이라 left 가 아니라 right 로 잰다.
-  // 스크롤·크기바뀜에 따라 다시 잰다(SelectDropdown 과 같은 방식).
+  // 스크롤·크기바뀜에 따라 다시 잰다(SelectDropdown 과 같은 방식) — 단, **방향(위/아래)은 안 다시
+  // 정한다.** placementRef 는 열 때(여기서) 한 번만 「아래로」 리셋되고, 그 뒤로는 아래
+  // useLayoutEffect 가 딱 한 번만 바꾼다. 여기서는 그 방향을 유지한 채 단추를 계속 따라가기만 한다.
   useEffect(() => {
     if (!isOpen) return
+    placementRef.current = 'below'
 
     const updatePosition = () => {
       const trigger = triggerRef.current
       if (!trigger) return
-      const rect = trigger.getBoundingClientRect()
-      setPosition({ top: rect.bottom + GAP_PX, right: window.innerWidth - rect.right })
+      setPosition(computeMenuStyle(trigger.getBoundingClientRect(), placementRef.current))
     }
 
     updatePosition()
@@ -79,6 +123,37 @@ export function DropdownMenu({ isOpen, onClose, triggerRef, label, children }: D
       window.removeEventListener('scroll', updatePosition, true)
     }
   }, [isOpen, triggerRef])
+
+  // ② 방향을 딱 한 번 정한다 — 위 effect 가 일단 「아래로」 그려 둔 것을 재서 판단한다.
+  //
+  //   1) 위 effect 가 이미 「아래로」 그렸다 — 단 visible 이 아직 false 라 안 보인다(아래 JSX 의
+  //      opacity-0 pointer-events-none)
+  //   2) 여기서 menuRef 의 실제 높이(scrollHeight)를 잰다 — 그려져야만 알 수 있는 값이다
+  //   3) 아래 자리에 다 안 들어가고 & 위가 더 넓으면 → 방향을 뒤집고 위 기준으로 다시 잰다
+  //   4) 마지막으로 visible 을 true 로 켠다
+  //
+  // ⚠️ **useLayoutEffect 를 쓰는 까닭.** useEffect 는 브라우저가 그린 뒤에 돈다 — 그 사이에
+  //    「아래로 그린 모습」이 화면에 한 프레임 노출될 수 있다(안 보이게 해 뒀어도 그 자체가 위험).
+  //    useLayoutEffect 는 브라우저가 그리기 **전에** 동기로 돌아, 여기서 setPosition·setVisible 을
+  //    부르면 리액트가 그 결과까지 반영한 뒤에야 브라우저에 넘긴다 — 최종 자리만 한 번에 보인다.
+  // ⚠️ position 을 의존성에 넣지만, **visible 이 true 가 되면 곧바로 빠져나간다.** 그래서 스크롤 중
+  //    updatePosition 이 position 을 계속 바꿔도(위 effect) 여기서 다시 방향을 재지는 않는다.
+  useLayoutEffect(() => {
+    if (!isOpen || !position || visible) return
+    const trigger = triggerRef.current
+    const menu = menuRef.current
+    if (!trigger || !menu) return
+
+    const rect = trigger.getBoundingClientRect()
+    const { below, above } = getSpace(rect)
+    const menuHeight = menu.scrollHeight
+
+    if (menuHeight > below && above > below) {
+      placementRef.current = 'above'
+      setPosition(computeMenuStyle(rect, 'above'))
+    }
+    setVisible(true)
+  }, [isOpen, position, visible, triggerRef])
 
   // 닫을 때 초점을 열기 전 자리(⋮ 단추)로 되돌린다(#981).
   // 시트의 useFocusTrap 이 해 주던 일인데, 드롭다운은 모달이 아니라 가둠은 안 쓴다.
@@ -94,6 +169,7 @@ export function DropdownMenu({ isOpen, onClose, triggerRef, label, children }: D
     if (wasOpen.current && !isOpen) {
       triggerRef.current?.focus()
       setPosition(null)
+      setVisible(false)
     }
     wasOpen.current = isOpen
   }, [isOpen, triggerRef])
@@ -102,22 +178,22 @@ export function DropdownMenu({ isOpen, onClose, triggerRef, label, children }: D
   // 드롭다운은 body 로 portal 되어 마이페이지 패널의 focus trap 고리 밖에 있다 — 넣어 주지
   // 않으면 Tab 을 눌러도 메뉴로 못 들어간다.
   //
-  // ⚠️ position 을 의존성에 넣되, 「이미 넣었다」를 ref 로 기억해 한 번만 한다.
-  //    안 그러면 스크롤할 때마다 position 이 새로 잡혀(73~75줄) 초점이 계속 튄다.
-  // ⚠️ 열리는 첫 프레임에는 position 이 아직 null 이라 메뉴가 DOM 에 없다(95줄).
-  //    이 효과는 position 이 잡혀 메뉴가 실제로 그려진 뒤에야 menuRef.current 를 찾는다.
+  // ⚠️ position 이 아니라 **visible 을 의존성으로 본다.** position 은 방향이 정해지기 전(아래로
+  //    임시로 그린 첫 프레임)에도 값이 있어서, 그걸 기준으로 삼으면 뒤집히기 **전** 자리에 초점이
+  //    들어가 버린다 — 초점 이동은 스크롤을 일으키므로 자리가 확정된 뒤에야 넣어야 깜빡임과 안 겹친다.
+  //    「이미 넣었다」는 별도 ref 로 기억해 한 번만 한다 — 안 그러면 스크롤할 때마다 초점이 튄다.
   const focusedOnOpenRef = useRef(false)
   useEffect(() => {
     if (!isOpen) {
       focusedOnOpenRef.current = false
       return
     }
-    if (focusedOnOpenRef.current || !position) return
+    if (focusedOnOpenRef.current || !visible) return
     const firstItem = menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]')
     if (!firstItem) return
     firstItem.focus()
     focusedOnOpenRef.current = true
-  }, [isOpen, position])
+  }, [isOpen, visible])
 
   // ⚠️ **자리를 알기 전에는 안 그린다.** 먼저 그렸다가 옮기면 한 프레임 동안 엉뚱한 데
   //    나타났다 튄다. 위 useEffect 가 붙은 직후 자리를 잡아 주므로 곧바로 다시 그린다.
@@ -132,8 +208,12 @@ export function DropdownMenu({ isOpen, onClose, triggerRef, label, children }: D
       //
       // MODAL(z-[100]) 을 쓰는 까닭: 마이페이지 모바일 패널도 같은 값이다. 값이 같으면
       // body 에 나중에 붙은 쪽이 이기고, portal 인 이쪽이 나중이다. 시트가 쓰던 방법 그대로다.
-      className={cn('fixed', Z_INDEX.MODAL)}
-      style={position}
+      //
+      // ⚠️ **방향이 정해지기 전(visible === false)에는 opacity-0 + pointer-events-none 로 숨긴다.**
+      //    display:none·visibility:hidden 은 쓰지 않는다 — 그러면 menuRef 의 높이를 못 재고(화면 밖
+      //    버그의 원인이었던 것과 같은 문제), 첫 항목 초점(위 focusedOnOpenRef 효과)도 안 먹는다.
+      className={cn('fixed', Z_INDEX.MODAL, !visible && 'pointer-events-none opacity-0')}
+      style={{ right: position.right, ...('top' in position ? { top: position.top } : { bottom: position.bottom }) }}
       // 이 메뉴가 열려 있는 동안에는 아래쪽 오버레이가 ESC 를 먹지 않게 한다(#1003).
       {...{ [OVERLAY_ABOVE_ATTR]: '' }}
       // ⚠️ portal 은 DOM 에서만 body 로 나간다. 리액트 사건은 **여전히 리액트 트리를 따라**
@@ -168,7 +248,11 @@ export function DropdownMenu({ isOpen, onClose, triggerRef, label, children }: D
         ref={menuRef}
         role="menu"
         aria-label={label}
-        className="border-outline-variant/60 flex min-w-40 flex-col overflow-hidden rounded-lg border bg-white shadow-md"
+        // ① 안전망 — maxHeight 를 늘 준다. 남는 자리보다 항목이 많으면 화면 밖으로 새는 대신
+        //    **여기 안에서** 스크롤된다(overflow-y-auto). overflow-hidden 이었을 때도 rounded 모서리를
+        //    지키려던 것뿐이라, auto 로 바꿔도 넘치지 않을 땐 그대로 잘려 보인다 — 스크롤바만 필요할 때 붙는다.
+        style={{ maxHeight: position.maxHeight }}
+        className="border-outline-variant/60 flex min-w-40 flex-col overflow-y-auto rounded-lg border bg-white shadow-md"
       >
         {children}
       </div>
