@@ -64,7 +64,7 @@ function MyPage() {
   // 모바일에서는 사이드 nav 숨김 + 대시보드 강제 노출
   const isMobile = useMediaQuery('(max-width: 767px)')
   const effectiveNav: MyPageNavId = isMobile ? 'nav-dash' : activeMyPageNav
-  // 모바일 전체 화면 패널(판매내역·구매내역·찜·차단·활동·프로필)이 무엇인지는 **주소에 담는다.**
+  // 모바일 전체 화면 패널(판매내역·판매요청내역·찜·차단·활동·프로필)이 무엇인지는 **주소에 담는다.**
   //
   // 예전에는 useState + history.pushState였다. 주소를 안 바꾸고 히스토리만 밀어 넣어서
   // 「패널 안에서의 뒤로가기」는 됐지만, 상품 상세나 수정 화면으로 나갔다 돌아오면
@@ -134,7 +134,7 @@ function MyPage() {
     mobilePanelTab === 'tab-sales'
       ? '판매 내역'
       : mobilePanelTab === 'tab-purchases'
-        ? '구매 내역'
+        ? '판매요청 내역'
         : mobilePanelTab === 'tab-wishlist'
           ? '찜한 상품'
           : mobilePanelTab === 'tab-blocked'
@@ -146,12 +146,14 @@ function MyPage() {
     mobilePanelTab && mobilePanelTab !== 'activity'
       ? (MY_PAGE_TABS.find((tab) => tab.id === mobilePanelTab)?.code ?? 'SELL')
       : 'SELL'
+  // ⚠️ 「판매요청」 탭이라 **요청 갈래** 말을 쓴다. 공용 `getTradeLabel` 도 「요청완료」다.
+  //    「구매완료」로 되돌리지 마라 — 내가 산 물건이 아니라 내가 올린 판매요청 글이다.
   const mobileTradeStatusTabs =
     mobilePanelTab === 'tab-purchases'
       ? [
           { id: 'ALL', label: '전체', code: 'ALL' },
           { id: 'SELLING', label: '요청중', code: 'SELLING' },
-          { id: 'COMPLETED', label: '구매완료', code: 'COMPLETED' },
+          { id: 'COMPLETED', label: '요청완료', code: 'COMPLETED' },
         ]
       : [
           { id: 'ALL', label: '전체', code: 'ALL' },
@@ -280,7 +282,7 @@ function MyPage() {
     //    그러면 질의가 아예 안 돌아 **넓은 폭에서는 2명인데 좁은 폭에서는 0명**이 된다
     //    (2026-08-22 에 실제로 그랬다).
     //
-    //    ⚠️ 구매내역·찜은 `|| effectiveNav === 'nav-dash'` 라는 탈출구가 있어 좁은 폭에서도
+    //    ⚠️ 판매요청내역·찜은 `|| effectiveNav === 'nav-dash'` 라는 탈출구가 있어 좁은 폭에서도
     //       돌았다. 차단만 그것이 없어서 이 하나만 빈 화면이었다.
     //       여기에 `nav-dash` 를 붙이지 않는 까닭은 **대시보드에 차단 요약이 없기 때문**이다 —
     //       붙이면 마이페이지를 열기만 해도 안 쓰는 목록을 받아온다.
@@ -304,11 +306,13 @@ function MyPage() {
 
   const isPurchasesTabActive = activeMyPageTab === 'tab-purchases'
   // 백엔드 TradeStatus: 판매 상품은 SELLING/RESERVED/COMPLETED, 판매 요청은 SELLING/COMPLETED만 사용 (RESERVED 미사용)
+  // ⚠️ 「판매요청」 탭이라 **요청 갈래** 말을 쓴다. 공용 `getTradeLabel` 도 「요청완료」다.
+  //    「구매완료」로 되돌리지 마라 — 내가 산 물건이 아니라 내가 올린 판매요청 글이다.
   const tradeStatusTabs = isPurchasesTabActive
     ? [
         { id: 'ALL', label: '전체', code: 'ALL' },
         { id: 'SELLING', label: '요청중', code: 'SELLING' },
-        { id: 'COMPLETED', label: '구매완료', code: 'COMPLETED' },
+        { id: 'COMPLETED', label: '요청완료', code: 'COMPLETED' },
       ]
     : [
         { id: 'ALL', label: '전체', code: 'ALL' },
@@ -577,7 +581,7 @@ function MyPage() {
                     className="text-on-surface flex cursor-pointer items-center gap-3 py-2"
                   >
                     <Handbag size={20} strokeWidth={1.5} />
-                    <span className="flex-1 text-left text-base">구매 내역</span>
+                    <span className="flex-1 text-left text-base">판매요청 내역</span>
                     <ChevronRight size={22} strokeWidth={1.5} className="text-on-surface-muted" />
                   </button>
                   <button
@@ -714,7 +718,7 @@ function MyPage() {
                   tabs={tradeStatusTabs}
                   activeTab={activeTradeStatus}
                   onTabChange={(tabId) => setActiveTradeStatus(tabId as TransactionStatus | 'ALL')}
-                  ariaLabel={activeMyPageTab === 'tab-sales' ? '판매 상태 메뉴' : '구매 상태 메뉴'}
+                  ariaLabel={activeMyPageTab === 'tab-sales' ? '판매 상태 메뉴' : '판매요청 상태 메뉴'}
                   variant="card-pill"
                 />
               </div>
@@ -850,7 +854,7 @@ function MyPage() {
                 tabs={mobileTradeStatusTabs}
                 activeTab={activeTradeStatus}
                 onTabChange={(tabId) => setActiveTradeStatus(tabId as TransactionStatus | 'ALL')}
-                ariaLabel={mobilePanelTab === 'tab-sales' ? '판매 상태 메뉴' : '구매 상태 메뉴'}
+                ariaLabel={mobilePanelTab === 'tab-sales' ? '판매 상태 메뉴' : '판매요청 상태 메뉴'}
                 variant="card-pill"
               />
             </div>

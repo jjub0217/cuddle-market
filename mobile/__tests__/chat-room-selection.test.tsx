@@ -41,6 +41,26 @@ jest.mock('@/lib/chat/socket', () => ({
   },
 }));
 
+// 상품 조회도 막는다. 거래 상태 뱃지가 붙으면서 채팅방이 **열자마자** 상품을 부르게
+// 바뀌었다(#1035 의 앱 몫) — 전에는 ⋮ 메뉴를 열 때만 불러서 이 시험에 걸릴 일이 없었다.
+//
+// ⚠️ **안 막아도 지금은 시험이 통과한다**(재 봤다). 시험에는 `EXPO_PUBLIC_API_BASE_URL` 이
+//    없어서 `apiBaseUrl()` 이 먼저 던지고, 그 탈을 react-query 가 삼키기 때문이다 —
+//    바깥으로 나가는 요청은 하나도 없었다(`global.fetch` 를 지켜봐서 확인).
+//    그래도 막아 두는 것은 **그 환경값이 있는 곳에서는 진짜 서버로 나가기 때문**이다.
+//    바로 위 소켓을 막아 둔 것과 같은 까닭이다.
+jest.mock('@/lib/products', () => ({
+  ...jest.requireActual('@/lib/products'),
+  fetchProductDetail: jest.fn(() =>
+    Promise.resolve({
+      tradeStatus: 'SELLING',
+      productType: 'SELL',
+      // 파는 사람이 내가 아니어야 「판매완료 처리」가 안 뜬다(내 id 는 1 로 흉내 냈다).
+      sellerInfo: { sellerId: 2 },
+    })
+  ),
+}));
+
 jest.mock('@/lib/chat/api', () => ({
   ...jest.requireActual('@/lib/chat/api'),
   fetchChatMessages: jest.fn(),

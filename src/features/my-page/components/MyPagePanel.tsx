@@ -44,10 +44,15 @@ const TRADE_STATUS_LABEL: Record<'tab-sales' | 'tab-purchases', Partial<Record<T
     RESERVED: '예약중',
     COMPLETED: '판매완료',
   },
+  // ⚠️ 「판매요청」 탭이라 **요청 갈래** 말을 쓴다. 공용 `getTradeLabel`(packages/shared)도
+  //    REQUEST 상품에는 「요청중」·「요청완료」를 돌려준다. 「구매완료」로 되돌리지 마라 —
+  //    이 탭은 내가 산 물건이 아니라 **내가 올린 판매요청 글** 목록이다.
+  //    여기를 `getTradeLabel` 로 바꾸지 않는 까닭: 칩에는 `ALL: '전체'` 가 섞여 있어
+  //    함수 하나로 안 덮인다.
   'tab-purchases': {
     ALL: '전체',
     SELLING: '요청중',
-    COMPLETED: '구매완료',
+    COMPLETED: '요청완료',
   },
 }
 
@@ -97,11 +102,11 @@ const TAB_CONFIG: {
     navigateTo: '/product-post?tab=tab-sales',
   },
   'tab-purchases': {
-    heading: '내가 등록한 구매 요청',
+    heading: '내가 등록한 판매요청',
     description: '상품',
     emptyIcon: Package,
-    emptyTitle: '등록한 구매 요청이 없습니다',
-    emptyDescription: '구매 요청을 등록해보세요',
+    emptyTitle: '등록한 판매요청이 없습니다',
+    emptyDescription: '판매요청을 등록해보세요',
     buttonLabel: '판매요청 등록',
     navigateTo: '/product-post?tab=tab-purchases',
   },

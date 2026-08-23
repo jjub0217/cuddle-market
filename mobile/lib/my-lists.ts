@@ -46,5 +46,7 @@ export function fetchMyProducts(page: number, tradeStatus?: TradeStatus): Promis
 }
 
 export function fetchMyPurchases(page: number, tradeStatus?: TradeStatus): Promise<MyListPage> {
-  return fetchMyList('/profile/me/purchase-requests', page, '구매 내역', tradeStatus);
+  // ⚠️ 길(`/profile/me/purchase-requests`)은 서버 것이라 그대로다. 바뀐 것은 **오류 문구에
+  //    쓰이는 이름**뿐이다 — 화면 제목과 같은 「판매요청 내역」으로 맞춘다.
+  return fetchMyList('/profile/me/purchase-requests', page, '판매요청 내역', tradeStatus);
 }

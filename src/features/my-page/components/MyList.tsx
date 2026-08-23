@@ -19,6 +19,7 @@ import { ROUTES } from '@/constants/routes'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import IconButton from '@/components/commons/button/IconButton'
 import { DropdownMenu, DropdownMenuItem } from '@/components/commons/DropdownMenu'
+import { getTradeLabel } from '@cuddle/shared'
 
 interface StatusDropdownProps {
   className?: string
@@ -53,6 +54,7 @@ export default function MyList({
   price,
   mainImageUrl,
   tradeStatus,
+  productType,
   favoriteCount,
   viewCount,
   activeTab,
@@ -126,11 +128,22 @@ export default function MyList({
   const isCompleted = currentTradeStatus === 'COMPLETED'
   const isReserved = currentTradeStatus === 'RESERVED'
   const isSalesTab = activeTab === 'tab-sales'
-  const isPurchasesTab = activeTab === 'tab-purchases'
-  const isMyProductTab = isSalesTab || isPurchasesTab
+  // ⚠️ 탭 이름은 'tab-purchases' 지만 실제 탭 문구는 「판매요청」이다(constants.ts 의 MY_PAGE_TABS).
+  //    「구매」로 읽으면 뱃지 문구를 잘못 고르게 되어, 여기서는 이름을 요청 쪽으로 맞춘다.
+  const isRequestsTab = activeTab === 'tab-purchases'
+  const isMyProductTab = isSalesTab || isRequestsTab
 
   // 메인 페이지 ProductThumbnail 패턴: 이미지 위 오버레이 + 라운드 흰 배지
-  const overlayLabel = isCompleted ? (isPurchasesTab ? '구매완료' : '판매완료') : isReserved ? '예약중' : null
+  //
+  // 문구는 공용 함수 `getTradeLabel`(원본 packages/shared)이 정한다 — 채팅방 상품 카드
+  // (ChatProductCard.tsx 의 getOverlay)와 같은 방식이다. 「그릴지 말지」는 여기가 정하고
+  // (SELLING 은 뱃지를 안 그린다), 「무슨 글자냐」만 공용 함수에 맡긴다.
+  //
+  // 탭이 아니라 상품의 `productType` 으로 가르는 까닭: 서버가 탭마다 종류를 이미 갈라서 준다.
+  // 판매상품 탭은 /profile/me/products(ProductType.SELL), 판매요청 탭은
+  // /profile/me/purchase-requests(ProductType.REQUEST) 다. 그러니 값을 그대로 믿으면 되고,
+  // 탭으로 짐작할 이유가 없다.
+  const overlayLabel = isCompleted || isReserved ? getTradeLabel(currentTradeStatus, productType) : null
   const overlayBg = isCompleted ? 'bg-black/60' : 'bg-black/40'
 
   const handleMoreToggle = (e: React.MouseEvent) => {
@@ -212,10 +225,12 @@ export default function MyList({
                         </DropdownMenuItem>
                       ) : null}
 
-                      {/* 구매내역 — 구매완료 */}
-                      {isPurchasesTab && !isCompleted ? (
+                      {/* 판매요청 탭 — 거래 완료 처리.
+                          ⚠️ 「판매요청」 탭이라 **요청 갈래** 말을 쓴다. 뱃지도 위에서
+                             `getTradeLabel` 이 「요청완료」를 준다. 「구매완료」로 되돌리지 마라 */}
+                      {isRequestsTab && !isCompleted ? (
                         <DropdownMenuItem onClick={handleChangeTradeStatus('COMPLETED')}>
-                          <span>구매완료로 바꾸기</span>
+                          <span>요청완료로 바꾸기</span>
                         </DropdownMenuItem>
                       ) : null}
 
@@ -246,9 +261,10 @@ export default function MyList({
           {/* 데스크탑 우측 액션 컬럼 */}
           {isMd ? (
             <div className="flex w-40 flex-col items-stretch gap-2">
-              {isPurchasesTab && !isCompleted ? (
+              {/* ⚠️ 「판매요청」 탭이라 **요청 갈래** 말을 쓴다. 위 뱃지·⋮ 메뉴와 같은 말이다 */}
+              {isRequestsTab && !isCompleted ? (
                 <Button size="sm" variant="primary" className="cursor-pointer" onClick={productTradeStatusCompleted}>
-                  구매완료
+                  요청완료
                 </Button>
               ) : null}
               {isSalesTab && !isCompleted ? (

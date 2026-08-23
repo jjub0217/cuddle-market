@@ -6,7 +6,7 @@ import type { TradeStatus } from './product-actions';
 // 조건이 얽혀 있고(목록 종류 × 현재 상태), 특히 "완료 뒤에는 못 바꾼다"가 어긋나면
 // 끝난 거래를 되돌리게 된다. 화면 없이 테스트할 수 있어야 한다.
 
-/** 어느 목록에서 열었는가. 판매와 구매는 고를 수 있는 상태가 다르다. */
+/** 어느 목록에서 열었는가. 판매 내역과 판매요청 내역은 고를 수 있는 상태가 다르다. */
 export type MenuKind = 'sales' | 'purchases';
 
 export interface StatusAction {
@@ -29,7 +29,11 @@ export function buildStatusActions(kind: MenuKind, current: string | null): Stat
   if (current === 'COMPLETED') return [];
 
   if (kind === 'purchases') {
-    return [{ label: '구매완료로 변경', next: 'COMPLETED' }];
+    // ⚠️ **「요청완료」다. 「구매완료」가 아니다.** 여기 실리는 것은 내가 산 물건이 아니라
+    //    내가 올린 **판매요청 글**이다. 공용 `getTradeLabel`(packages/shared)도 REQUEST 에는
+    //    「요청완료」를 돌려준다 — 그 말과 어긋나면 목록의 뱃지와 메뉴 항목이 따로 논다.
+    //    ⚠️ 보내는 값(`COMPLETED`)과 갈래 이름(`purchases`)은 서버 쪽이라 그대로 둔다.
+    return [{ label: '요청완료로 변경', next: 'COMPLETED' }];
   }
 
   // 지금 상태를 다시 고르게 두면 눌러도 아무 일이 없는 항목이 생긴다.

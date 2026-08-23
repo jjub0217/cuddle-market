@@ -126,7 +126,10 @@ export type MyPageTabId = (typeof MY_PAGE_TABS)[number]['id']
 export const MY_PAGE_NAV = [
   { id: 'nav-dash', label: '대시보드', code: 'DASH_BOARD' },
   { id: 'nav-sales', label: '판매 내역', code: 'SELL' },
-  { id: 'nav-purchases', label: '구매 내역', code: 'PURCHASES' },
+  // ⚠️ 문구는 「판매요청 내역」인데 code 는 `PURCHASES` 다. **code 는 고치지 마라** —
+  //    `NAV_TO_TAB`(MyPage.tsx)의 열쇠라 바꾸면 메뉴가 아무 데도 안 간다.
+  //    이 메뉴가 여는 것은 내가 산 물건이 아니라 **내가 올린 판매요청 글** 목록이다.
+  { id: 'nav-purchases', label: '판매요청 내역', code: 'PURCHASES' },
   { id: 'nav-wishlist', label: '찜한 상품', code: 'FAVORITE' },
   { id: 'nav-activity', label: '내 활동', code: 'ACTIVITY' },
   { id: 'nav-blocked', label: '차단한 사용자', code: 'BLOCKED' },

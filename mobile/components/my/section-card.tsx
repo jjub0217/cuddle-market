@@ -34,7 +34,7 @@ interface SectionRowProps {
   label: string;
   onPress: () => void;
   /**
-   * 줄 왼쪽 아이콘. 웹 모바일과 같은 것을 넘긴다(판매=Tag · 구매=Handbag · 찜=Heart …).
+   * 줄 왼쪽 아이콘. 웹 모바일과 같은 것을 넘긴다(판매 내역=Tag · 판매요청 내역=Handbag · 찜=Heart …).
    *
    * 안 넘겨도 된다 — 개인정보처리방침·계정 삭제 안내는 **앱에만 있는 줄**이라
    * 웹에서 가져올 아이콘이 없다. 없는 것을 지어내기보다 비워 두기로 했다.

@@ -29,7 +29,7 @@ import { colors } from '@/constants/colors';
 import { deleteProduct } from '@/lib/products';
 import { showToast } from '@/lib/toast';
 
-// 마이 목록 화면 셋(찜한 상품 · 판매 내역 · 구매 내역)의 공통 껍데기.
+// 마이 목록 화면 셋(찜한 상품 · 판매 내역 · 판매요청 내역)의 공통 껍데기.
 //
 // 세 화면은 제목 · 조회 함수 · 쿼리 키 · 빈 상태 문구 · 찜 버튼 유무만 다르다.
 // 껍데기를 하나 두면 5바퀴에서 거래 상태 필터를 넣을 때도 여기 한 곳만 고치면 된다.
@@ -54,7 +54,7 @@ interface Props {
    * 11바퀴에 등록 화면이 생겨 이제 눌린다. 그전에는 흐린 채로 자리만 잡고 있었다.
    */
   registerLabel?: string;
-  /** 찜한 상품 화면만 켠다. 판매 · 구매는 관리용이라 끈다(설계 §5). */
+  /** 찜한 상품 화면만 켠다. 판매 내역 · 판매요청 내역은 관리용이라 끈다(설계 §5). */
   showFavorite?: boolean;
   /** 있으면 카드에 ⋮ 가 붙고 관리 시트를 연다. 찜한 상품은 넘기지 않는다. */
   listKind?: MenuKind;
@@ -76,7 +76,7 @@ function RowShell({ productId, children }: { productId: number; children: ReactN
   );
 }
 
-/** 찜 버튼이 없는 줄(판매 · 구매). 관리 목록이면 ⋮ 가 붙는다. */
+/** 찜 버튼이 없는 줄(판매 내역 · 판매요청 내역). 관리 목록이면 ⋮ 가 붙는다. */
 function PlainRow({ product, onMorePress }: { product: Product; onMorePress?: () => void }) {
   return (
     <RowShell productId={product.id}>
