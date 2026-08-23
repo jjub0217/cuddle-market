@@ -7,7 +7,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tansta
 import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import { api } from '@/lib/api/api'
 import ProductCard from '@/components/product/ProductCard'
-import LoadMoreButton from '@/components/commons/button/LoadMoreButton'
+import InfiniteScrollSentinel from '@/components/commons/InfiniteScrollSentinel'
 import EmptyState from '@/components/EmptyState'
 import { Package } from 'lucide-react'
 import Tabs from '@/components/Tabs'
@@ -296,7 +296,12 @@ function UserPage() {
                         </li>
                       ))}
                     </ul>
-                    {hasNextPage ? <LoadMoreButton onClick={() => fetchNextPage()} isLoading={isFetchingNextPage} /> : null}
+                    <InfiniteScrollSentinel
+                      enabled={allProducts.length > 0}
+                      hasNextPage={hasNextPage}
+                      isFetchingNextPage={isFetchingNextPage}
+                      onLoadMore={fetchNextPage}
+                    />
                   </>
                 ) : (
                   <EmptyState icon={Package} title={`등록한 ${activeTabLabel}이 없습니다`} />
