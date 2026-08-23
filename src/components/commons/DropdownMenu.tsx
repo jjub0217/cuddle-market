@@ -80,13 +80,15 @@ export function DropdownMenu({ isOpen, onClose, triggerRef, label, children }: D
     }
   }, [isOpen, triggerRef])
 
-  // 닫을 때 초점을 열기 전 자리로 되돌린다(#981).
-  // 시트의 useFocusTrap 이 해 주던 일인데, 드롭다운은 모달이 아니라 가둠은 안 쓴다 —
-  // 「탭 하면 닫히고 다음으로」가 드롭다운의 표준이다.
+  // 닫을 때 초점을 열기 전 자리(⋮ 단추)로 되돌린다(#981).
+  // 시트의 useFocusTrap 이 해 주던 일인데, 드롭다운은 모달이 아니라 가둠은 안 쓴다.
+  //
+  // ⚠️ **이 되돌리기가 실제로 보이는 것은 ESC·바깥 누르기로 닫을 때다.**
+  //    Tab 으로 닫을 때는 초점이 다른 데로 간다 — 까닭은 아래 onKeyDown 주석에 있다.
   //
   // 닫힐 때 position 도 함께 비운다. 안 비우면 두 번째로 열 때 옛 좌표로 먼저 그렸다가
-  // useEffect 가 새 자리로 고치는 한 프레임짜리 튐이 생긴다(92~94줄의 "자리를 알기 전에는
-  // 안 그린다" 약속은 첫 열림에만 지켜지고 있었다).
+  // useEffect 가 새 자리로 고치는 한 프레임짜리 튐이 생긴다 — 아래 「자리를 알기 전에는
+  // 안 그린다」 약속이 첫 열림에만 지켜지고 있었다.
   const wasOpen = useRef(false)
   useEffect(() => {
     if (wasOpen.current && !isOpen) {
@@ -143,6 +145,24 @@ export function DropdownMenu({ isOpen, onClose, triggerRef, label, children }: D
       }}
       onMouseDown={(e) => e.stopPropagation()}
       // ⚠️ 키 이벤트는 막지 않는다. 막으면 ESC 가 document 까지 못 올라가 안 닫힌다.
+      //
+      // Tab 은 WAI-ARIA menu button 패턴대로 메뉴를 닫는다(#981). preventDefault·stopPropagation
+      // 은 쓰지 않는다 — onClose() 만 부르고 브라우저 기본 동작(초점 이동)은 그대로 흘려보낸다.
+      //
+      // 닫힌 뒤 초점이 어디로 가는지 — 2026-08-23 에 진짜 크롬으로 쟀다:
+      //
+      //   ESC 로 닫으면    ⋮ 단추로 돌아온다 (위 「닫을 때 되돌린다」 효과)
+      //   Tab 으로 닫으면   마이페이지 패널의 「닫기」 단추로 간다.
+      //                    그 패널은 useFocusTrap(MyPage.tsx:90)이 걸린 상자라,
+      //                    메뉴가 떨어져 나가면 초점을 패널 안 첫 요소로 끌어간다
+      //
+      // 표준(단추 다음 요소로)과는 다르지만, 메뉴는 확실히 닫히고 초점도 패널 안에 남아
+      // 길을 잃지 않는다. 억지로 ⋮ 로 되돌리려 하면 패널의 focus trap 과 싸우게 된다.
+      //
+      // ⚠️ 이 차이는 jsdom 시험으로 못 본다 — 배치도 focus trap 도 없다.
+      onKeyDown={(e) => {
+        if (e.key === 'Tab') onClose()
+      }}
     >
       <div
         ref={menuRef}

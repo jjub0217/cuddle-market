@@ -181,6 +181,19 @@ describe('초점 (#981)', () => {
 
     expect(document.activeElement).toBe(trigger)
   })
+
+  it('메뉴 안에서 탭을 누르면 닫힌다', async () => {
+    const onClose = vi.fn()
+    const user = userEvent.setup()
+    render(<Harness onClose={onClose} />)
+
+    // ESC 시험과 마찬가지로 메뉴가 열려 그려진 뒤 항목에 초점이 있는 상태에서 잰다.
+    screen.getByRole('menuitem', { name: '수정하기' }).focus()
+
+    await user.tab()
+
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe('항목', () => {
