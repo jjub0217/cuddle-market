@@ -59,16 +59,17 @@ interface ProfileDataProps {
 
 // ⚠️ `purchases` 는 **내가 산 물건 수가 아니다.** 부르는 쪽(MyPage.tsx)이 넣어 주는 값이
 //    `/profile/me/purchase-requests` 의 `total` 이라, 서버가 `ProductType.REQUEST` 로 걸러
-//    센 **내가 올린 판매요청 글 수**다. 그래서 「요청내역」이라 쓴다.
+//    센 **내가 올린 판매요청 글 수**다. 그래서 「판매요청 내역」이라 쓴다.
 //    「구매내역」으로 되돌리지 마라 — 열쇠 이름(`purchases`)만 보고 헷갈리기 쉽다.
 //
-// ⚠️ **여기만 빈칸 없이 붙여 쓴다**(「판매요청내역」). 형제가 「판매내역」이라 결을 맞춘 것이다.
-//    메뉴 쪽은 형제가 「판매 내역」이라 빈칸을 넣는다(「판매요청 내역」 — constants.ts 의 MY_PAGE_NAV).
-//    ⚠️ 이 세 칸은 `grid-cols-3` 에 카드가 `max-w-72`(288px)라 **칸이 빠듯하다.**
-//       글자를 더 늘리기 전에 넘치는지 눈으로 볼 것.
+// ⚠️ 이 세 칸은 `grid-cols-3` 에 카드가 `max-w-72`(288px)라 **칸이 빠듯하다.**
+//    「판매요청 내역」(7자)은 **2026-08-23 에 사람이 개발자도구로 글자를 직접 바꿔 넣어
+//    넘치지 않는 것을 확인했다.** 여기서 더 늘리려면 같은 방법으로 다시 볼 것.
+//    ⚠️ 붙여 쓴 「판매요청내역」도 재 봤지만, 메뉴 쪽(constants.ts 의 MY_PAGE_NAV)과
+//       표기를 갈라 둘 이유가 없어 빈칸 있는 쪽으로 맞췄다.
 const SUMMARY_ITEMS: Array<{ key: keyof ProfileSummaryCounts; label: string }> = [
   { key: 'sales', label: '판매내역' },
-  { key: 'purchases', label: '판매요청내역' },
+  { key: 'purchases', label: '판매요청 내역' },
   { key: 'wishlist', label: '찜한 상품' },
 ]
 
