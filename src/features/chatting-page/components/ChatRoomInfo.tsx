@@ -11,7 +11,7 @@ import { chatSocketStore } from '@/store/chatSocketStore'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, EllipsisVertical } from 'lucide-react'
 import IconButton from '@/components/commons/button/IconButton'
-import { useOutsideClick } from '@/hooks/useOutsideClick'
+import { DropdownMenu, DropdownMenuItem } from '@/components/commons/DropdownMenu'
 import { useToastStore } from '@/store/toastStore'
 import { useUserStore } from '@/store/userStore'
 import dynamic from 'next/dynamic'
@@ -40,7 +40,7 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
   // ⚠️ 「방을 나간」 것과는 다르다. 나간 상대는 opponentId 가 그대로 있고, 그때는 신고·차단이
   //    되어야 한다 — 사기를 당하고 상대가 도망친 경우가 그렇다.
   const hasOpponent = data.opponentId != null
-  const menuRef = useRef<HTMLDivElement>(null)
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
 
   // 「판매완료 처리」는 **내 상품일 때만** 보여야 한다(#894). 방 정보에는 파는 사람이 없어서
   // 상품을 따로 봐야 안다.
@@ -63,7 +63,6 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
     enabled: isMenuOpen && data.productId != null,
   })
   const isMyProduct = !!user && product?.sellerInfo?.sellerId === user.id
-  useOutsideClick(isMenuOpen, [menuRef], () => setIsMenuOpen(false))
 
   // 여기서 잡지 않는다 — 던지면 확인창이 받아서 「나가지 못했습니다」를 띄우고 창을 닫지 않는다.
   // 전에는 console.error 만 해서, 실패해도 사용자에게는 아무 일도 안 일어난 것처럼 보였다.
@@ -106,7 +105,7 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
     }
   }
 
-  const menuItems = [
+  const menuItems: { label: string; onClick: () => void; tone?: 'default' | 'danger' }[] = [
     // 내 상품이고 아직 끝나지 않은 거래일 때만. 산 사람에게 보여 봐야 서버가 막는다.
     ...(isMyProduct && product?.tradeStatus !== 'COMPLETED'
       ? [{ label: '판매완료 처리', onClick: handleTradeStatusChange }]
@@ -124,7 +123,7 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
               setIsMenuOpen(false)
               setIsReportOpen(true)
             },
-            className: 'text-danger-500',
+            tone: 'danger' as const,
           },
           {
             label: '차단하기',
@@ -132,7 +131,7 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
               setIsMenuOpen(false)
               setIsBlockOpen(true)
             },
-            className: 'text-danger-500',
+            tone: 'danger' as const,
           },
         ]
       : []),
@@ -143,7 +142,7 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
         setIsMenuOpen(false)
         setIsLeaveOpen(true)
       },
-      className: 'text-danger-500',
+      tone: 'danger' as const,
     },
   ]
 
@@ -202,25 +201,27 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
             </div>
           )}
         </div>
-        <div className="relative" ref={menuRef}>
-          <IconButton aria-label="더보기" onClick={() => setIsMenuOpen((prev) => !prev)}>
-            <EllipsisVertical size={20} className="text-gray-500" />
-          </IconButton>
-          {isMenuOpen ? (
-            <div className="absolute top-8 right-0 z-50 flex flex-col rounded border border-gray-200 bg-white shadow-md">
-              {menuItems.map((item) => (
-                <button
-                  key={item.label}
-                  type="button"
-                  className={`cursor-pointer px-4 py-2 text-left text-sm whitespace-nowrap hover:bg-gray-50 ${item.className ?? ''}`}
-                  onClick={item.onClick}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-          ) : null}
-        </div>
+        <IconButton
+          ref={menuButtonRef}
+          aria-label="더보기"
+          aria-haspopup="menu"
+          aria-expanded={isMenuOpen}
+          onClick={() => setIsMenuOpen((prev) => !prev)}
+        >
+          <EllipsisVertical size={20} className="text-gray-500" />
+        </IconButton>
+        <DropdownMenu
+          isOpen={isMenuOpen}
+          onClose={() => setIsMenuOpen(false)}
+          triggerRef={menuButtonRef}
+          label="채팅방 메뉴"
+        >
+          {menuItems.map((item) => (
+            <DropdownMenuItem key={item.label} onClick={item.onClick} tone={item.tone}>
+              {item.label}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenu>
       </div>
       <Link
         href={ROUTES.DETAIL_ID(Number(data?.productId), data?.productTitle)}
