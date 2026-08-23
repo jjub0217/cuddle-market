@@ -122,6 +122,33 @@ describe('링크 안에서 열렸을 때 (#793)', () => {
 })
 
 describe('초점 (#981)', () => {
+  it('열면 첫 항목으로 초점이 들어간다', async () => {
+    function ToggleHarness() {
+      const [open, setOpen] = useState(false)
+      const triggerRef = useRef<HTMLButtonElement>(null)
+      return (
+        <div>
+          <button type="button" ref={triggerRef} onClick={() => setOpen((p) => !p)} aria-label="상품 옵션 메뉴 열기">
+            ⋮
+          </button>
+          <DropdownMenu isOpen={open} onClose={() => setOpen(false)} triggerRef={triggerRef} label="상품 메뉴">
+            <DropdownMenuItem onClick={vi.fn()}>수정하기</DropdownMenuItem>
+            <DropdownMenuItem tone="danger" onClick={vi.fn()}>
+              삭제
+            </DropdownMenuItem>
+          </DropdownMenu>
+        </div>
+      )
+    }
+
+    const user = userEvent.setup()
+    render(<ToggleHarness />)
+
+    await user.click(screen.getByRole('button', { name: '상품 옵션 메뉴 열기' }))
+
+    expect(screen.getByRole('menuitem', { name: '수정하기' })).toHaveFocus()
+  })
+
   it('닫으면 열기 전 자리로 초점을 되돌린다', async () => {
     function ToggleHarness() {
       const [open, setOpen] = useState(false)

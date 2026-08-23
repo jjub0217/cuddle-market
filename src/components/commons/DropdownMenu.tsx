@@ -83,11 +83,39 @@ export function DropdownMenu({ isOpen, onClose, triggerRef, label, children }: D
   // 닫을 때 초점을 열기 전 자리로 되돌린다(#981).
   // 시트의 useFocusTrap 이 해 주던 일인데, 드롭다운은 모달이 아니라 가둠은 안 쓴다 —
   // 「탭 하면 닫히고 다음으로」가 드롭다운의 표준이다.
+  //
+  // 닫힐 때 position 도 함께 비운다. 안 비우면 두 번째로 열 때 옛 좌표로 먼저 그렸다가
+  // useEffect 가 새 자리로 고치는 한 프레임짜리 튐이 생긴다(92~94줄의 "자리를 알기 전에는
+  // 안 그린다" 약속은 첫 열림에만 지켜지고 있었다).
   const wasOpen = useRef(false)
   useEffect(() => {
-    if (wasOpen.current && !isOpen) triggerRef.current?.focus()
+    if (wasOpen.current && !isOpen) {
+      triggerRef.current?.focus()
+      setPosition(null)
+    }
     wasOpen.current = isOpen
   }, [isOpen, triggerRef])
+
+  // 열릴 때 메뉴 안 첫 항목으로 초점을 넣는다(#981). 옛 시트는 useFocusTrap 이 이걸 해 줬는데
+  // 드롭다운은 body 로 portal 되어 마이페이지 패널의 focus trap 고리 밖에 있다 — 넣어 주지
+  // 않으면 Tab 을 눌러도 메뉴로 못 들어간다.
+  //
+  // ⚠️ position 을 의존성에 넣되, 「이미 넣었다」를 ref 로 기억해 한 번만 한다.
+  //    안 그러면 스크롤할 때마다 position 이 새로 잡혀(73~75줄) 초점이 계속 튄다.
+  // ⚠️ 열리는 첫 프레임에는 position 이 아직 null 이라 메뉴가 DOM 에 없다(95줄).
+  //    이 효과는 position 이 잡혀 메뉴가 실제로 그려진 뒤에야 menuRef.current 를 찾는다.
+  const focusedOnOpenRef = useRef(false)
+  useEffect(() => {
+    if (!isOpen) {
+      focusedOnOpenRef.current = false
+      return
+    }
+    if (focusedOnOpenRef.current || !position) return
+    const firstItem = menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]')
+    if (!firstItem) return
+    firstItem.focus()
+    focusedOnOpenRef.current = true
+  }, [isOpen, position])
 
   // ⚠️ **자리를 알기 전에는 안 그린다.** 먼저 그렸다가 옮기면 한 프레임 동안 엉뚱한 데
   //    나타났다 튄다. 위 useEffect 가 붙은 직후 자리를 잡아 주므로 곧바로 다시 그린다.

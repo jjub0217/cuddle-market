@@ -103,7 +103,7 @@ export default function MyList({
     setIsMoreMenuOpen(false)
   }
 
-  // ⚠️ **삭제도 다른 항목처럼 시트를 닫는다.** 예전에는 안 닫아서, 삭제 모달 **뒤에 시트가
+  // ⚠️ **삭제도 다른 항목처럼 메뉴를 닫는다.** 예전에는 안 닫아서, 삭제 모달 **뒤에 시트가
   //    그대로 남아** 오버레이가 세 겹으로 쌓였다. 그 상태로 ESC 를 누르면 시트와 모달이
   //    한꺼번에 닫혀 「무엇을 닫았는지」가 흐려진다(#1003).
   const handleDeleteClick = (e: React.MouseEvent) => {
