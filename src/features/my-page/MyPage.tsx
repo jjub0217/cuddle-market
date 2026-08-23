@@ -819,7 +819,17 @@ function MyPage() {
         aria-hidden={!mobilePanelTab}
         inert={!mobilePanelTab}
       >
-        <div className="sticky top-0 flex h-16 items-center gap-3 border-b border-gray-200 bg-white px-4">
+        {/* ⚠️ `Z_INDEX.HEADER`(z-30)가 **꼭 있어야 한다.** 없으면 상품 카드가 이 머리글을
+            덮고 지나간다(#1045). 카드는 `relative`(MyList.tsx:156)라 z 가 auto 인데,
+            **z 가 같으면 DOM 에서 뒤에 오는 것이 위에 그려진다** — 카드가 뒤라 이긴다.
+            바로 아래 알약이 `z-20` 이라 멀쩡했던 것과 같은 까닭이다(#1031에서 알약만 챙겼다).
+            알약(20)보다 높아야 한다 — 머리글이 늘 위층이다. */}
+        <div
+          className={cn(
+            'sticky top-0 flex h-16 items-center gap-3 border-b border-gray-200 bg-white px-4',
+            Z_INDEX.HEADER
+          )}
+        >
           <button type="button" onClick={closeMobileOverlay} aria-label="닫기" className="cursor-pointer">
             <ArrowLeft size={20} />
           </button>
