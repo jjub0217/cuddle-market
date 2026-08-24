@@ -10,6 +10,8 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api/api'
 import { Eye, MessageSquare, MessageSquareText, PenLine, Plus, Search, X } from 'lucide-react'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
+import LoadMoreFocusButton from '@/components/commons/LoadMoreFocusButton'
+import SkipToLoadMoreLink from '@/components/commons/SkipToLoadMoreLink'
 import { getTimeAgo } from '@cuddle/shared'
 import { useUserStore } from '@/store/userStore'
 import { cn } from '@/lib/utils/cn'
@@ -307,6 +309,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
         </section>
 
         {/* Post list */}
+        <SkipToLoadMoreLink targetId="community-posts-load-more" hasNextPage={hasNextPage} />
         <section
           id={`panel-${COMMUNITY_TABS.find((tab) => tab.id === activeCommunityTypeTab)?.code}`}
           role="tabpanel"
@@ -372,6 +375,13 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
             {isFetchingNextPage ? <Spinner size="sm" /> : null}
           </div>
         ) : null}
+        <LoadMoreFocusButton
+          id="community-posts-load-more"
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          onLoadMore={() => fetchNextPage()}
+          label="글 더 불러오기"
+        />
       </main>
 
       {/* Mobile FAB */}

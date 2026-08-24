@@ -46,7 +46,7 @@ describe('InfiniteScrollSentinel', () => {
   it('깃발이 보이면 다음 페이지를 부른다', () => {
     const onLoadMore = vi.fn()
     render(
-      <InfiniteScrollSentinel enabled hasNextPage isFetchingNextPage={false} onLoadMore={onLoadMore} />
+      <InfiniteScrollSentinel id="test-load-more" enabled hasNextPage isFetchingNextPage={false} onLoadMore={onLoadMore} />
     )
     깃발이보이게하자()
     expect(onLoadMore).toHaveBeenCalledTimes(1)
@@ -55,7 +55,7 @@ describe('InfiniteScrollSentinel', () => {
   it('다음 페이지가 없으면 안 부른다', () => {
     const onLoadMore = vi.fn()
     render(
-      <InfiniteScrollSentinel enabled hasNextPage={false} isFetchingNextPage={false} onLoadMore={onLoadMore} />
+      <InfiniteScrollSentinel id="test-load-more" enabled hasNextPage={false} isFetchingNextPage={false} onLoadMore={onLoadMore} />
     )
     깃발이보이게하자()
     expect(onLoadMore).not.toHaveBeenCalled()
@@ -63,7 +63,7 @@ describe('InfiniteScrollSentinel', () => {
 
   it('이미 받는 중이면 또 부르지 않는다', () => {
     const onLoadMore = vi.fn()
-    render(<InfiniteScrollSentinel enabled hasNextPage isFetchingNextPage onLoadMore={onLoadMore} />)
+    render(<InfiniteScrollSentinel id="test-load-more" enabled hasNextPage isFetchingNextPage onLoadMore={onLoadMore} />)
     깃발이보이게하자()
     expect(onLoadMore).not.toHaveBeenCalled()
   })
@@ -74,6 +74,7 @@ describe('InfiniteScrollSentinel', () => {
     const onLoadMore = vi.fn()
     render(
       <InfiniteScrollSentinel
+        id="test-load-more"
         enabled={false}
         hasNextPage
         isFetchingNextPage={false}
@@ -89,16 +90,16 @@ describe('InfiniteScrollSentinel', () => {
   //    줬으므로, 낭독기가 읽는 것은 `role="status"` 하나다. 그것으로 확인한다.
   it('받는 중일 때만 「더 불러오는 중」을 보여준다', () => {
     const { rerender } = render(
-      <InfiniteScrollSentinel enabled hasNextPage isFetchingNextPage={false} onLoadMore={vi.fn()} />
+      <InfiniteScrollSentinel id="test-load-more" enabled hasNextPage isFetchingNextPage={false} onLoadMore={vi.fn()} />
     )
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
 
-    rerender(<InfiniteScrollSentinel enabled hasNextPage isFetchingNextPage onLoadMore={vi.fn()} />)
+    rerender(<InfiniteScrollSentinel id="test-load-more" enabled hasNextPage isFetchingNextPage onLoadMore={vi.fn()} />)
     expect(screen.getByRole('status', { name: '더 불러오는 중' })).toBeInTheDocument()
   })
 
   it('낭독기가 「더 불러오는 중」을 두 번 읽지 않는다', () => {
-    render(<InfiniteScrollSentinel enabled hasNextPage isFetchingNextPage onLoadMore={vi.fn()} />)
+    render(<InfiniteScrollSentinel id="test-load-more" enabled hasNextPage isFetchingNextPage onLoadMore={vi.fn()} />)
     const 보이는글자 = screen.getAllByText('더 불러오는 중').filter((el) => el.getAttribute('aria-hidden') === 'true')
     expect(보이는글자).toHaveLength(1)
   })
@@ -107,6 +108,7 @@ describe('InfiniteScrollSentinel', () => {
   it('다음 페이지가 없어도 깃발 마디는 남아 있는다', () => {
     const { container } = render(
       <InfiniteScrollSentinel
+        id="test-load-more"
         enabled
         hasNextPage={false}
         isFetchingNextPage={false}

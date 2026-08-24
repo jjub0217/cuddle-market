@@ -9,6 +9,8 @@ import { fetchGraphQL } from '@/lib/api/graphql'
 import { markNotificationRead } from '@/lib/api/notifications'
 import { useUserStore } from '@/store/userStore'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
+import LoadMoreFocusButton from '@/components/commons/LoadMoreFocusButton'
+import SkipToLoadMoreLink from '@/components/commons/SkipToLoadMoreLink'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { NotificationItem as NotificationItemType } from '@/types/notifications'
 import NotificationItem from './notification-section/NotificationItem'
@@ -190,6 +192,7 @@ export default function MobileNotificationsOverlay({ isOpen, onClose }: MobileNo
           <NotificationsSkeleton />
         ) : notificationsData?.pages.some((page) => page.content.length > 0) ? (
           <>
+            <SkipToLoadMoreLink targetId="notifications-mobile-load-more" hasNextPage={hasNextPage} />
             {notificationsData?.pages.flatMap((page) =>
               page.content.map((notification: NotificationItemType) => (
                 <NotificationItem
@@ -200,6 +203,13 @@ export default function MobileNotificationsOverlay({ isOpen, onClose }: MobileNo
               ))
             )}
             <div ref={observerTargetRef} className="h-1" />
+            <LoadMoreFocusButton
+              id="notifications-mobile-load-more"
+              hasNextPage={hasNextPage}
+              isFetchingNextPage={isFetchingNextPage}
+              onLoadMore={() => fetchNextPage()}
+              label="알림 더 불러오기"
+            />
           </>
         ) : (
           <NotificationsEmpty className="min-h-32" />

@@ -10,6 +10,7 @@ import MyList from './MyList'
 import ProductCard from '@/components/product/ProductCard'
 import Button from '@/components/commons/button/Button'
 import InfiniteScrollSentinel from '@/components/commons/InfiniteScrollSentinel'
+import SkipToLoadMoreLink from '@/components/commons/SkipToLoadMoreLink'
 import EmptyState from '@/components/EmptyState'
 import { Package, Heart, type LucideIcon } from 'lucide-react'
 import Link from 'next/link'
@@ -193,6 +194,7 @@ export default function MyPagePanel({
         {activeMyPageTab !== 'tab-blocked' ? (
           productData?.content?.length ? (
             <>
+              <SkipToLoadMoreLink targetId="my-page-products-load-more" hasNextPage={hasNextPage} />
               {activeMyPageTab === 'tab-wishlist' ? (
                 <ul className="grid grid-cols-2 gap-4 lg:grid-cols-4">
                   {productData.content.map((product) => (
@@ -223,6 +225,7 @@ export default function MyPagePanel({
                 </div>
               )}
               <InfiniteScrollSentinel
+                id="my-page-products-load-more"
                 enabled={productData.content.length > 0}
                 hasNextPage={hasNextPage}
                 isFetchingNextPage={isFetchingNextPage}
@@ -234,6 +237,7 @@ export default function MyPagePanel({
           ) : null
         ) : myBlockedData?.length ? (
           <>
+            <SkipToLoadMoreLink targetId="my-page-blocked-load-more" hasNextPage={hasNextPage} />
             <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
               {myBlockedData.map((user) => (
                 <li
@@ -261,6 +265,7 @@ export default function MyPagePanel({
               ))}
             </ul>
             <InfiniteScrollSentinel
+              id="my-page-blocked-load-more"
               enabled={myBlockedData.length > 0}
               hasNextPage={hasNextPage}
               isFetchingNextPage={isFetchingNextPage}
