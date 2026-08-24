@@ -8,6 +8,7 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import { api } from '@/lib/api/api'
 import ProductCard from '@/components/product/ProductCard'
 import InfiniteScrollSentinel from '@/components/commons/InfiniteScrollSentinel'
+import SkipToLoadMoreLink from '@/components/commons/SkipToLoadMoreLink'
 import EmptyState from '@/components/EmptyState'
 import { Package } from 'lucide-react'
 import Tabs from '@/components/Tabs'
@@ -289,6 +290,7 @@ function UserPage() {
               <div className="gap-lg flex flex-col">
                 {allProducts.length ? (
                   <>
+                    <SkipToLoadMoreLink targetId="user-products-load-more" hasNextPage={hasNextPage} />
                     <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                       {allProducts.map((product) => (
                         <li key={product.id}>
@@ -297,6 +299,7 @@ function UserPage() {
                       ))}
                     </ul>
                     <InfiniteScrollSentinel
+                      id="user-products-load-more"
                       enabled={allProducts.length > 0}
                       hasNextPage={hasNextPage}
                       isFetchingNextPage={isFetchingNextPage}

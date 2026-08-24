@@ -90,6 +90,13 @@ export function ProductStateFilter({
 
   const styles = VARIANT_STYLES[variant]
 
+  // ⚠️ 진짜 초점은 **화면에서 숨긴 `<input>`**(`peer sr-only`)이 받는다. 그래서 전역 초점 규칙
+  //    (globals.css 의 `:focus-visible`)이 걸려도 **눈에는 아무것도 안 보인다** —
+  //    2026-08-24 에 사용자가 「탭을 눌렀는데 아무 데도 초점이 없어 보인다」고 짚어 찾았다.
+  //    보이는 짝인 `<label>` 에 `peer-focus-visible:` 로 같은 표시를 옮겨 준다.
+  //    두께·색은 전역 규칙과 같게 맞춘다(1.2px · primary-500). 한쪽만 바꾸면 어긋난다.
+  const 초점표시 = 'peer-focus-visible:border-[1.2px] peer-focus-visible:border-primary-500'
+
   return (
     // 좁은 폭에서 이름표와 고르는 칸이 붙어 보이던 것(max-md:gap-0)을 pill에서만 띄운다.
     // pill은 등록 폼이 쓰고, 거기서는 이름표가 「무엇을 고르는 칸인지」를 알리는 역할이라
@@ -120,7 +127,7 @@ export function ProductStateFilter({
               />
               <label
                 htmlFor={`productStatus-${item.value}`}
-                className={cn(styles.label, isActive ? styles.activeLabel : styles.inactiveLabel)}
+                className={cn(styles.label, 초점표시, isActive ? styles.activeLabel : styles.inactiveLabel)}
               >
                 <span>{item.title}</span>
                 {subTitle && variant === 'default' ? (

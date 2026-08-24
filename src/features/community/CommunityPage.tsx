@@ -10,6 +10,8 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api/api'
 import { Eye, MessageSquare, MessageSquareText, PenLine, Plus, Search, X } from 'lucide-react'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
+import LoadMoreFocusButton from '@/components/commons/LoadMoreFocusButton'
+import SkipToLoadMoreLink from '@/components/commons/SkipToLoadMoreLink'
 import { getTimeAgo } from '@cuddle/shared'
 import { useUserStore } from '@/store/userStore'
 import { cn } from '@/lib/utils/cn'
@@ -252,7 +254,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
               onKeyDown={handleSearchSubmit}
               placeholder="궁금한 내용을 검색해보세요"
               enterKeyHint="search"
-              className="border-outline-variant/40 bg-surface-container-low focus:border-primary focus:ring-primary/20 w-full rounded-full border py-2 pr-11 pl-11 text-sm text-[#1c1b1b] placeholder:text-sm placeholder:text-[#827565] focus:ring-2 focus:outline-none"
+              className="border-outline-variant/40 bg-surface-container-low focus-visible:border-primary w-full rounded-full border py-2 pr-11 pl-11 text-sm text-[#1c1b1b] placeholder:text-sm placeholder:text-[#827565]"
             />
             {/* 글자가 있을 때만 보인다. 누르면 곧바로 전체 목록으로 돌아간다 */}
             {searchInput ? (
@@ -307,6 +309,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
         </section>
 
         {/* Post list */}
+        <SkipToLoadMoreLink targetId="community-posts-load-more" hasNextPage={hasNextPage} />
         <section
           id={`panel-${COMMUNITY_TABS.find((tab) => tab.id === activeCommunityTypeTab)?.code}`}
           role="tabpanel"
@@ -372,6 +375,13 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
             {isFetchingNextPage ? <Spinner size="sm" /> : null}
           </div>
         ) : null}
+        <LoadMoreFocusButton
+          id="community-posts-load-more"
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          onLoadMore={() => fetchNextPage()}
+          label="글 더 불러오기"
+        />
       </main>
 
       {/* Mobile FAB */}

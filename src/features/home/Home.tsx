@@ -6,6 +6,8 @@ import { DetailFilter } from '@/features/home/components/filter/DetailFilter'
 import { ProductsSection } from '@/features/home/components/product-section/ProductsSection'
 import { fetchGraphQL } from '@/lib/api/graphql'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
+import LoadMoreFocusButton from '@/components/commons/LoadMoreFocusButton'
+import SkipToLoadMoreLink from '@/components/commons/SkipToLoadMoreLink'
 import { PRODUCT_TYPE_TABS, PET_TYPE_TABS, type ProductTypeTabId, SORT_TYPE, type PetTypeTabId } from '@/constants/constants'
 import { PetTypeFilter } from './components/filter/PetTypeFilter'
 import { CategoryFilter } from './components/filter/CategoryFilter'
@@ -347,6 +349,7 @@ function Home() {
             </section>
 
             {/* Product list section */}
+            <SkipToLoadMoreLink targetId="home-products-load-more" hasNextPage={hasNextPage} />
             <section aria-label="상품 목록" className="flex flex-col gap-6 pt-2 md:pt-0">
               {/* <h2 className="heading-h4 text-gray-900">상품 목록</h2> */}
               {isLoading && allProducts.length === 0 ? (
@@ -370,6 +373,13 @@ function Home() {
           </div>
           {/* 무한 스크롤 감지용 요소 */}
           <div ref={targetRef} className="h-10" aria-hidden="true" />
+          <LoadMoreFocusButton
+            id="home-products-load-more"
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            onLoadMore={fetchNextPage}
+            label="상품 더 불러오기"
+          />
 
           {/* 세부 필터 서랍 — 좁은 화면에서 검색 중일 때만 쓴다.
               ⚠️ 늘 그려 두고 CSS 로 밀어 두는 것이 아니라 **검색 중일 때만 그린다.**

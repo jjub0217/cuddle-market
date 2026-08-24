@@ -1,9 +1,8 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react-native';
-import type { ReactNode } from 'react';
 
 import MyScreen from '@/app/(tabs)/(my)/index';
 import { useAuthStore } from '@/lib/auth/store';
+import { createQueryWrapper } from '@/test-utils/query-wrapper';
 
 // 마이 화면의 **계정 카드**를 지킨다.
 //
@@ -31,16 +30,8 @@ function 내정보(overrides: Record<string, unknown> = {}) {
 
 // ⚠️ 이 화면은 `useMe` 말고도 조회를 쓴다(안 읽은 알림 개수). 하나만 막으면
 //    「No QueryClient set」으로 터진다 — 감싸개가 필요하다.
-function 감싸기({ children }: { children: ReactNode }) {
-  // ⚠️ `gcTime: Infinity` 가 **꼭 있어야 한다.** 없으면 시험은 다 초록인데
-  //    **jest 가 스스로 안 끝난다** — 기본 `gcTime` 이 5분이라 「5분 뒤에 버린다」
-  //    타이머가 남는다(`mobile/AGENTS.md` 에 적힌 함정이다).
-  //    ⚠️ 이 파일을 포함해 **다섯**이 이걸 안 따르고 있었다(2026-08-24 에 재서 찾아 고쳤다) —
-  //       chat-list-screen · my-screen · product-list-view ·
-  //       community-list-write-button · community-list-screen.
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity } } });
-  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
-}
+// QueryClient 설정은 mobile/test-utils/query-wrapper.tsx 로 모았다(#1059).
+const 감싸기 = createQueryWrapper();
 
 beforeEach(() => {
   useAuthStore.setState({ status: 'authed', accessToken: 'token', refreshToken: 'refresh' });
