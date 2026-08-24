@@ -65,3 +65,7 @@ docs/session-logs/
 # 로컬 툴링
 .claude/worktrees/
 claude-code-skills/
+
+# 브라우저로 재려고 잠깐 만드는 스크립트 자리 (playwright 등).
+# 다 쓰면 지우지만, 잊어도 커밋되지 않게 여기서 뺀다.
+probe/

@@ -143,7 +143,7 @@ git push -u origin refactor/{ISSUE_NUMBER}--react-best-practice
 
 **PR 생성**:
 ```bash
-gh pr create --base develop --title "refactor: Vercel React Best Practice 규칙 기반 어드민 코드 리팩토링(#{ISSUE_NUMBER})" --body "$(cat <<'EOF'
+gh pr create --base develop --head "$(git branch --show-current)" --title "refactor: Vercel React Best Practice 규칙 기반 어드민 코드 리팩토링(#{ISSUE_NUMBER})" --body "$(cat <<'EOF'
 ## 📌 개요
 
 - Vercel React Best Practice Skill(58개 규칙)로 어드민 코드를 스캔하여 발견된 위반 사항을 리팩토링
@@ -163,6 +163,11 @@ Closes #{ISSUE_NUMBER}
 EOF
 )"
 ```
+
+⚠️ **`--head` 를 빼지 마라.** 빼면 `gh` 가 **지금 서 있는 브랜치**로 PR 을 만든다.
+   브랜치를 옮기는 것을 잊으면 **엉뚱한 브랜치에 올라간다** — 2026-08-23 에 실제로
+   그래서 제목·본문을 통째로 고쳐야 했다(#1056).
+
 
 PR URL 저장 → `{PR_URL}`
 
