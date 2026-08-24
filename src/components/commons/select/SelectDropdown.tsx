@@ -275,6 +275,10 @@ export default function SelectDropdown({
    *
    * ⚠️ **방향키에 `preventDefault` 를 꼭 해야 한다.** 안 하면 눌린 키가 브라우저
    *    기본 동작으로 흘러가 **페이지가 위아래로 스크롤된다** — 고치기 전이 그랬다.
+   *
+   * ⚠️ **`Escape` 는 여기 없다.** 아래 `document` 의 `keydown` 리스너(`handleEscape`)가
+   *    잡는다 — 초점이 어디에 있든 닫아야 해서 단추 전용인 이 함수로는 못 잡는다.
+   *    (#1070 kimi 리뷰가 여기서 빠졌다고 봤는데, 실제로는 아래에 있다.)
    */
   const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
     if (disabled) return
