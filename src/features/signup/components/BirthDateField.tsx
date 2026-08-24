@@ -18,7 +18,11 @@ interface BirthDateFieldProps<T extends FieldValues> {
  *    공용 Input 의 색을 바꾸자 색까지 혼자 남았다.
  */
 const BIRTH_INPUT_CLASS =
-  'focus:border-primary-500 border-outline h-10 w-full rounded-lg border bg-white px-3 text-sm placeholder:text-gray-400 focus:outline-none'
+  // 초점 색·굵기는 globals.css 의 전역 :focus-visible 규칙(#1062)이 정한다.
+  // 예전엔 여기서 focus:border-primary-500 focus:outline-none 으로 직접 정했는데,
+  // 전역 규칙이 같은 값(primary-500·1.2px)을 더 세게(specificity 동점 + 소스 순서로) 덮어써서
+  // 죽은 클래스가 됐다 — 지웠다.
+  'border-outline h-10 w-full rounded-lg border bg-white px-3 text-sm placeholder:text-gray-400'
 
 const validateBirthDate = (value: string): string | true => {
   const [yearStr, monthStr, dayStr] = value.split('-')

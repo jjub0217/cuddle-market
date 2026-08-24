@@ -51,7 +51,12 @@ export default function Input({
         // 전에는 h-full(부모를 따라감) + <input> 의 py-* 로 정해져서, 글자 크기를
         // 바꾸면 높이가 따라 흔들렸다.
         'relative flex h-10 w-full items-center overflow-hidden rounded-lg transition-colors',
-        border && 'focus-within:border-primary-500 border',
+        // ⚠️ 초점 표시를 **안쪽 <input> 이 아니라 이 상자**가 그린다. 이 상자에 `overflow-hidden`
+        //    이 있어서 안쪽 요소의 표시는 잘려 안 보이기 때문이다(2026-08-24 크롬 실측).
+        //    그래서 안쪽 <input> 에는 `focus-ring-custom` 을 붙여 전역 규칙에서 빼 뒀다 —
+        //    안 빼면 이 상자 테두리와 **두 겹**으로 보인다.
+        //    두께 1.2px · primary-500 은 globals.css 의 전역 규칙과 같은 값이다. 한쪽만 바꾸지 말 것.
+        border && 'focus-within:border-primary-500 focus-within:border-[1.2px] border',
         border && borderColor,
         backgroundColor,
         Icon && 'pl-9',
@@ -72,7 +77,7 @@ export default function Input({
         aria-label={placeholder}
         className={cn(
           // 높이는 바깥 상자가 정한다. 여기서 py-* 를 주면 두 곳이 높이를 다툰다.
-          'h-full w-full placeholder:text-gray-400 focus:border-transparent focus:outline-none',
+          'focus-ring-custom h-full w-full placeholder:text-gray-400 focus:border-transparent focus:outline-none',
           backgroundColor,
           Icon ? 'pl-0' : 'px-3',
           size,

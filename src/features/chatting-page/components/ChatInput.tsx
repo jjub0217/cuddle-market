@@ -70,7 +70,7 @@ export default function ChatInput({ value, onChange, onSubmit }: ChatInputProps)
       // py-2 는 **세로 정렬을 맞추는 값이다.** 묶음이 items-end 라서(여러 줄일 때 단추가
       // 아래에 붙게 하려고) 여백이 없으면 20px 짜리 글자칸이 36px 짜리 단추 바닥에 붙어
       // 글자만 8px 아래로 내려앉는다(#890). 20 + 8×2 = 36 — 한 줄일 때 단추와 키가 같아진다.
-      className="w-full resize-none overflow-y-auto bg-transparent py-2 text-sm placeholder:text-gray-400 focus:outline-none"
+      className="w-full resize-none overflow-y-auto bg-transparent py-2 text-sm placeholder:text-gray-400"
     />
   )
 }

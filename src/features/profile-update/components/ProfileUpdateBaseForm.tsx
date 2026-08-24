@@ -383,7 +383,7 @@ export default function ProfileUpdateBaseForm({ myData, onWithdrawClick }: Profi
                       id="profile-introduction"
                       placeholder="소개글을 작성해주세요"
                       className={cn(
-                        'focus:border-primary-500 min-h-[7vh] w-full resize-none rounded-lg border border-gray-400 bg-white px-3 py-3 text-sm placeholder:text-sm placeholder:text-gray-400 focus:outline-none'
+                        'min-h-[7vh] w-full resize-none rounded-lg border border-gray-400 bg-white px-3 py-3 text-sm placeholder:text-sm placeholder:text-gray-400'
                       )}
                       {...register('introduction', profileValidationRules.introduction)}
                     />
