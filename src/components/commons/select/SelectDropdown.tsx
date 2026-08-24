@@ -103,6 +103,12 @@ function SelectOption({
         'flex w-full items-center justify-between gap-2 rounded-md p-2 text-left text-sm transition hover:bg-gray-100 focus:outline-none',
         // 고른 것과 지금 후보는 **다르게 보여야 한다.** 고른 것은 옅은 회색,
         // 지금 후보는 테두리로 짚어 준다 — 마우스 hover 와도 구분된다.
+        //
+        // ⚠️ #1062 가 넣었던 `focus-visible:bg-gray-100` 은 걷었다. 이 이슈(#1064)에서
+        //    항목이 `tabIndex={-1}` 이 되어 **초점을 아예 안 받으므로** 죽은 클래스가 됐다.
+        //    그 자리를 아래 `isActive`(방향키로 짚고 있는 후보)가 대신한다.
+        //    ⚠️ 자동 리뷰는 이것을 **못 잡는다** — PR 하나의 diff 만 보기 때문에
+        //       두 브랜치를 겹쳐야 보이는 이런 어긋남은 사람이 합쳐 봐야 안다.
         isSelected && 'bg-gray-100',
         isActive && 'border-primary-500 border-[1.2px] bg-gray-100',
         optionClassName,

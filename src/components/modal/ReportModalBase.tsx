@@ -130,7 +130,7 @@ export default function ReportModalBase({ isOpen, heading, description, reasons,
             <div className="flex flex-col gap-0.5">
               <textarea
                 placeholder="신고 상세 사유를 입력해주세요."
-                className="bg-primary-50 focus:border-primary-500 min-h-32 w-full resize-none rounded-lg px-3 py-3 text-sm placeholder:text-gray-500 focus:outline-none md:min-h-20"
+                className="bg-primary-50 min-h-32 w-full resize-none rounded-lg px-3 py-3 text-sm placeholder:text-gray-500 md:min-h-20"
                 id="reportReasonDetail"
                 {...register('detailReason', {
                   maxLength: ReportApiErrors.detailReason.maxLength,

@@ -1,9 +1,7 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
-import type { ReactNode } from 'react';
-import { SafeAreaProvider, type Metrics } from 'react-native-safe-area-context';
 
 import ProfileEditScreen from '@/app/profile-edit';
+import { createScreenWrapper } from '@/test-utils/query-wrapper';
 
 // 프로필 수정 **화면**의 시험.
 //
@@ -63,22 +61,9 @@ function 내정보(provider: string | null = 'LOCAL') {
   };
 }
 
-// ⚠️ 지역 고르기(RegionField)가 목록을 시트로 여는데, 그 시트가 useSafeAreaInsets 를 부른다.
-//    시험에는 재는 사람이 없어 「No safe area value available」로 터지므로 값을 못 박아
-//    감싸 준다(아이폰 14 기준). #855 에서도 같은 함정을 밟았다.
-const METRICS: Metrics = {
-  frame: { x: 0, y: 0, width: 390, height: 844 },
-  insets: { top: 47, left: 0, right: 0, bottom: 34 },
-};
-
-function 감싸기({ children }: { children: ReactNode }) {
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return (
-    <SafeAreaProvider initialMetrics={METRICS}>
-      <QueryClientProvider client={client}>{children}</QueryClientProvider>
-    </SafeAreaProvider>
-  );
-}
+// 안전영역 값과 QueryClient 설정은 mobile/test-utils/query-wrapper.tsx 로 모았다(#1059).
+// ⚠️ 옮기기 전에는 이 파일만 gcTime 이 빠져 있었다 — 옮기면서 자동으로 채워진다.
+const 감싸기 = createScreenWrapper({ safeArea: true });
 
 beforeEach(() => {
   updateMe.mockReset().mockResolvedValue(undefined);

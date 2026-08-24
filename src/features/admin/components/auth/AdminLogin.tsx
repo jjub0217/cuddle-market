@@ -83,7 +83,7 @@ export default function AdminLogin() {
               type="email"
               placeholder="아이디 (example@gmail.com)"
               autoComplete="email"
-              className="w-full rounded border border-gray-300 px-4 py-2 text-sm transition-colors outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+              className="focus-ring-custom w-full rounded border border-gray-300 px-4 py-2 text-sm transition-colors outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
               {...register('email', authValidationRules.email)}
             />
             {errors.email ? <p className="mt-1 text-xs text-red-500">{errors.email.message}</p> : null}
@@ -94,7 +94,7 @@ export default function AdminLogin() {
               type="password"
               placeholder="비밀번호 (6~15자의 영문 대소문자, 숫자, 특수문자 포함)"
               autoComplete="current-password"
-              className="w-full rounded border border-gray-300 px-4 py-2 text-sm transition-colors outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+              className="focus-ring-custom w-full rounded border border-gray-300 px-4 py-2 text-sm transition-colors outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
               {...register('password', { required: '비밀번호를 입력해주세요' })}
             />
             {errors.password ? <p className="mt-1 text-xs text-red-500">{errors.password.message}</p> : null}

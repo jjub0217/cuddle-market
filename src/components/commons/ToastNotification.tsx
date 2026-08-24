@@ -47,7 +47,7 @@ export default function ToastNotification({ type, title, children, durationMs, s
             aria-label="토스트 닫기"
             onClick={onClose}
             className={cn(
-              'ml-1 shrink-0 cursor-pointer rounded p-1 transition-colors',
+              'focus-ring-custom ml-1 shrink-0 cursor-pointer rounded p-1 transition-colors',
               'focus:outline-none focus-visible:ring-2',
               TOAST_CLOSE_BTN[type]
             )}
