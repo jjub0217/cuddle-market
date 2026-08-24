@@ -14,6 +14,7 @@ import HomeHero from './components/HomeHero'
 import HomeLoadingState from './components/HomeLoadingState'
 import Link from 'next/link'
 import { useFilterNavigation } from '@/hooks/useFilterNavigation'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { Plus } from 'lucide-react'
 import Button from '@/components/commons/button/Button'
 import { useUserStore } from '@/store/userStore'
@@ -104,6 +105,18 @@ function Home() {
 
   const hasDetailFilter = searchParams.has('productStatuses') || searchParams.has('minPrice') || searchParams.has('addressSido')
   const [isDetailFilterOpen, setIsDetailFilterOpen] = useState(false)
+
+  // ⚠️ **넓은 화면에서는 늘 펼쳐 둔다.** 여는 단추가 `md:hidden` 으로 숨겨져 있어(#686)
+  //    접힌 채로 두면 **열 방법이 아예 없다.** 예전에는 이 상태의 기본값이 `true` 라서
+  //    단추 없이도 펼쳐져 있었는데, #1011 이 「기본 닫힘」으로 바꾸면서 그 짝이 깨졌다
+  //    — 좁은 화면은 단추가 있어 괜찮았지만 넓은 화면만 막혔다(#1063).
+  //
+  // ⚠️ 기준을 **단추가 숨는 것과 같은 `md`(768)** 로 맞춘다. 저장소의 「데스크탑」 기준은
+  //    1024 지만(#959), 여기서 1024 를 쓰면 **768~1023 구간이 그대로 막힌다** —
+  //    그 폭에서는 단추도 없고 펼쳐지지도 않기 때문이다. 단추를 숨기는 기준을 바꾸면
+  //    이 줄도 같이 바꿔야 한다.
+  const 단추가없는폭이다 = useMediaQuery('(min-width: 768px)')
+  const 세부필터를편다 = 단추가없는폭이다 || isDetailFilterOpen
   const [prevSearchParams, setPrevSearchParams] = useState(searchParams)
 
   if (searchParams !== prevSearchParams) {
@@ -325,7 +338,7 @@ function Home() {
                    md 부터는 그대로 펼친다 — 자리가 나기 때문이다. */}
             <section aria-label="세부 필터" data-nosnippet className={검색중이다 ? 'hidden md:block' : undefined}>
               <DetailFilter
-                isOpen={isDetailFilterOpen}
+                isOpen={세부필터를편다}
                 onToggle={handleDetailFilterToggle}
                 selectedProductStatus={selectedProductStatus}
                 selectedPriceRange={selectedProductPrice}
