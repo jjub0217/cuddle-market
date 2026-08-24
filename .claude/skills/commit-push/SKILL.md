@@ -117,7 +117,7 @@ gh pr list --head 브랜치명 --state open
 
 PR 생성 (PR 템플릿 형식 준수):
 ```bash
-gh pr create --base develop --title "타입: 제목(#이슈번호)" --body "$(cat <<'EOF'
+gh pr create --base develop --head "$(git branch --show-current)" --title "타입: 제목(#이슈번호)" --body "$(cat <<'EOF'
 ## 개요
 
 - PR의 목적과 해결하려는 문제를 간단히 설명
@@ -140,6 +140,11 @@ Closes #이슈번호
 EOF
 )"
 ```
+
+⚠️ **`--head` 를 빼지 마라.** 빼면 `gh` 가 **지금 서 있는 브랜치**로 PR 을 만든다.
+   브랜치를 옮기는 것을 잊으면 **엉뚱한 브랜치에 올라간다** — 2026-08-23 에 실제로
+   그래서 제목·본문을 통째로 고쳐야 했다(#1056).
+
 
 **이슈 자동 close 키워드 규칙**:
 - `Closes #이슈번호` 또는 `Fixes #이슈번호` 형식 사용

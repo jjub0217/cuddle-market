@@ -166,7 +166,7 @@ git push -u origin fix/{ISSUE_NUMBER}--브랜치이름
 **중요**: PR body에 `📋 QA 티켓` 섹션을 추가하여 Notion 링크를 포함한다.
 
 ```bash
-gh pr create --base develop --title "fix: 제목(#{ISSUE_NUMBER})" --body "$(cat <<'EOF'
+gh pr create --base develop --head "$(git branch --show-current)" --title "fix: 제목(#{ISSUE_NUMBER})" --body "$(cat <<'EOF'
 ## 📌 개요
 
 - [버그 설명 및 수정 내용]
@@ -193,6 +193,11 @@ Closes #{ISSUE_NUMBER}
 EOF
 )"
 ```
+
+⚠️ **`--head` 를 빼지 마라.** 빼면 `gh` 가 **지금 서 있는 브랜치**로 PR 을 만든다.
+   브랜치를 옮기는 것을 잊으면 **엉뚱한 브랜치에 올라간다** — 2026-08-23 에 실제로
+   그래서 제목·본문을 통째로 고쳐야 했다(#1056).
+
 
 **Agent 실행이 끝나면** PR URL을 반환받는다 → `{PR_URL}`
 

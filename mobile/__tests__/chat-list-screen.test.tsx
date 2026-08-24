@@ -63,7 +63,13 @@ const METRICS = {
 
 /** 시험마다 새 클라이언트를 준다 — 앞 시험이 받아 둔 것을 물려받으면 안 된다. */
 function 감싸기({ children }: { children: ReactNode }) {
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  // ⚠️ `gcTime: Infinity` 가 **꼭 있어야 한다.** 없으면 시험은 다 초록인데
+  //    **jest 가 스스로 안 끝난다** — 기본 `gcTime` 이 5분이라 「5분 뒤에 버린다」
+  //    타이머가 남는다(`mobile/AGENTS.md` 에 적힌 함정이다).
+  //    ⚠️ 이 파일을 포함해 **다섯**이 이걸 안 따르고 있었다(2026-08-24 에 재서 찾아 고쳤다) —
+  //       chat-list-screen · my-screen · product-list-view ·
+  //       community-list-write-button · community-list-screen.
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity } } });
   return (
     <SafeAreaProvider initialMetrics={METRICS}>
       <QueryClientProvider client={client}>{children}</QueryClientProvider>
