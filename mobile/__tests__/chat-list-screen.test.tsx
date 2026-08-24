@@ -1,10 +1,8 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, render, screen, waitFor } from '@testing-library/react-native';
-import type { ReactNode } from 'react';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import ChatRoomsScreen from '@/app/(tabs)/(chat)/index';
 import { useAuthStore } from '@/lib/auth/store';
+import { createScreenWrapper } from '@/test-utils/query-wrapper';
 
 // 채팅 목록 화면이 **게스트를 어떻게 맞이하는가**(#916).
 //
@@ -56,26 +54,8 @@ const { chatSocket } = jest.requireMock('@/lib/chat/socket') as {
 };
 
 // 방 줄에 사진 자리가 있어 안전영역을 쓰는 조각이 딸려 온다 — 감싸 줘야 한다.
-const METRICS = {
-  frame: { x: 0, y: 0, width: 390, height: 844 },
-  insets: { top: 47, left: 0, right: 0, bottom: 34 },
-};
-
-/** 시험마다 새 클라이언트를 준다 — 앞 시험이 받아 둔 것을 물려받으면 안 된다. */
-function 감싸기({ children }: { children: ReactNode }) {
-  // ⚠️ `gcTime: Infinity` 가 **꼭 있어야 한다.** 없으면 시험은 다 초록인데
-  //    **jest 가 스스로 안 끝난다** — 기본 `gcTime` 이 5분이라 「5분 뒤에 버린다」
-  //    타이머가 남는다(`mobile/AGENTS.md` 에 적힌 함정이다).
-  //    ⚠️ 이 파일을 포함해 **다섯**이 이걸 안 따르고 있었다(2026-08-24 에 재서 찾아 고쳤다) —
-  //       chat-list-screen · my-screen · product-list-view ·
-  //       community-list-write-button · community-list-screen.
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity } } });
-  return (
-    <SafeAreaProvider initialMetrics={METRICS}>
-      <QueryClientProvider client={client}>{children}</QueryClientProvider>
-    </SafeAreaProvider>
-  );
-}
+// 안전영역 값과 QueryClient 설정은 mobile/test-utils/query-wrapper.tsx 로 모았다(#1059).
+const 감싸기 = createScreenWrapper({ safeArea: true });
 
 const 오류문구 = '채팅 목록을 불러오지 못했어요.';
 

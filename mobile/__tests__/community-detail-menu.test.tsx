@@ -1,10 +1,9 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
-import type { ReactNode } from 'react';
 import { Keyboard } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import PostDetailScreen from '@/app/(tabs)/(community)/posts/[id]';
+import { createScreenWrapper } from '@/test-utils/query-wrapper';
 
 // 게시글 상세의 헤더 ⋮ 메뉴 시험.
 //
@@ -92,32 +91,8 @@ function 남의글로() {
   useMe.mockReturnValue({ data: { id: 99 } });
 }
 
-/**
- * ⚠️ `SafeAreaProvider` 로 감싼다. 안 감싸면 「No safe area value available」로 죽는다
- *    (bottom-sheet.test.tsx·photo-viewer.test.tsx 의 Wrapper 를 그대로 본떴다).
- */
-const METRICS = {
-  frame: { x: 0, y: 0, width: 390, height: 844 },
-  insets: { top: 47, left: 0, right: 0, bottom: 34 },
-};
-
-/**
- * 시험마다 새 클라이언트를 준다 — 앞 시험이 받아 둔 것을 물려받으면 안 된다.
- *
- * ⚠️ **`gcTime: Infinity` 를 준다.** 기본값(5분)이면 「5분 뒤에 버린다」 타이머가 남아
- *    시험이 다 초록인데도 **jest 가 안 끝난다**(「Jest did not exit one second after…」).
- *    무한이면 타이머를 아예 안 건다.
- */
-function 감싸기({ children }: { children: ReactNode }) {
-  const client = new QueryClient({
-    defaultOptions: { queries: { retry: false, gcTime: Infinity } },
-  });
-  return (
-    <QueryClientProvider client={client}>
-      <SafeAreaProvider initialMetrics={METRICS}>{children}</SafeAreaProvider>
-    </QueryClientProvider>
-  );
-}
+// 안전영역 값과 QueryClient 설정은 mobile/test-utils/query-wrapper.tsx 로 모았다(#1059).
+const 감싸기 = createScreenWrapper({ safeArea: true });
 
 /** 화면을 그리고 헤더 ⋮ 를 연다 */
 async function 메뉴를연다() {
