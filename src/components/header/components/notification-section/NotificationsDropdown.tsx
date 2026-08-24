@@ -4,6 +4,8 @@ import { useRef } from 'react'
 import { Z_INDEX } from '@/constants/ui'
 import { cn } from '@/lib/utils/cn'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
+import LoadMoreFocusButton from '@/components/commons/LoadMoreFocusButton'
+import SkipToLoadMoreLink from '@/components/commons/SkipToLoadMoreLink'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchGraphQL } from '@/lib/api/graphql'
 import { markNotificationRead } from '@/lib/api/notifications'
@@ -130,6 +132,7 @@ export default function NotificationsDropdown({ isNotificationOpen, setIsNotific
           <NotificationsSkeleton />
         ) : notificationsData?.pages.some((page) => page.content.length > 0) ? (
           <>
+            <SkipToLoadMoreLink targetId="notifications-dropdown-load-more" hasNextPage={hasNextPage} />
             {notificationsData?.pages.flatMap((page) =>
               page.content.map((notification: NotificationItemType) => (
                 <NotificationItem
@@ -140,6 +143,13 @@ export default function NotificationsDropdown({ isNotificationOpen, setIsNotific
               ))
             )}
             <div ref={observerTargetRef} className="h-1" />
+            <LoadMoreFocusButton
+              id="notifications-dropdown-load-more"
+              hasNextPage={hasNextPage}
+              isFetchingNextPage={isFetchingNextPage}
+              onLoadMore={() => fetchNextPage()}
+              label="알림 더 불러오기"
+            />
           </>
         ) : (
           <NotificationsEmpty className="min-h-32" />

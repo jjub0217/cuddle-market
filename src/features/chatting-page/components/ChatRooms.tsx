@@ -7,6 +7,8 @@ import { chatSocketStore } from '@/store/chatSocketStore'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import { Z_INDEX } from '@/constants/ui'
 import Spinner from '@/components/commons/spinner/Spinner'
+import LoadMoreFocusButton from '@/components/commons/LoadMoreFocusButton'
+import SkipToLoadMoreLink from '@/components/commons/SkipToLoadMoreLink'
 
 interface ChatRoomsProps {
   rooms: fetchChatRoom[]
@@ -51,6 +53,7 @@ export function ChatRooms({
     <section className="relative flex flex-col rounded-none py-3 md:max-w-96 md:min-w-96 md:p-6">
       <h2 className={cn('hidden md:static md:block', Z_INDEX.HEADER)}>채팅목록</h2>
       <div className="scrollbar-hide flex-1 overflow-y-scroll md:py-5">
+        <SkipToLoadMoreLink targetId="chat-rooms-load-more" hasNextPage={hasNextPage} />
         <ul className="flex flex-col md:gap-2">
           {rooms &&
             rooms.map((room) => {
@@ -144,6 +147,13 @@ export function ChatRooms({
             })}
         </ul>
         <div ref={targetRef} className="h-10" aria-hidden="true" />
+        <LoadMoreFocusButton
+          id="chat-rooms-load-more"
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          onLoadMore={fetchNextPage}
+          label="채팅방 더 불러오기"
+        />
         {isFetchingNextPage ? (
           <div className="flex items-center justify-center py-8">
             <Spinner size="md" label="채팅방 로딩 중" />

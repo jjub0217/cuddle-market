@@ -9,6 +9,8 @@ import NotificationItem from '@/components/header/components/notification-sectio
 import { useRouter, usePathname } from 'next/navigation'
 import { getNavigationPath } from '@/lib/utils/getNavigationPath'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
+import LoadMoreFocusButton from '@/components/commons/LoadMoreFocusButton'
+import SkipToLoadMoreLink from '@/components/commons/SkipToLoadMoreLink'
 import { chatSocketStore } from '@/store/chatSocketStore'
 import NotificationsSkeleton from '@/components/header/components/notification-section/NotificationsSkeleton'
 import NotificationsEmpty from '@/components/header/components/notification-section/NotificationsEmpty'
@@ -107,6 +109,7 @@ export default function NotificationsPage() {
           <NotificationsSkeleton />
         ) : notificationsData?.pages.some((page) => page.content.length > 0) ? (
           <>
+            <SkipToLoadMoreLink targetId="notifications-load-more" hasNextPage={hasNextPage} />
             {notificationsData?.pages.flatMap((page) =>
               page.content.map((notification: NotificationItemType) => (
                 <NotificationItem
@@ -117,6 +120,13 @@ export default function NotificationsPage() {
               ))
             )}
             <div ref={observerTargetRef} className="h-1" />
+            <LoadMoreFocusButton
+              id="notifications-load-more"
+              hasNextPage={hasNextPage}
+              isFetchingNextPage={isFetchingNextPage}
+              onLoadMore={() => fetchNextPage()}
+              label="알림 더 불러오기"
+            />
           </>
         ) : (
           <NotificationsEmpty className="h-64" />
