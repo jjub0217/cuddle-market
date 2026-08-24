@@ -1,5 +1,6 @@
 'use client'
 
+import LoadMoreFocusButton from '@/components/commons/LoadMoreFocusButton'
 import Spinner from '@/components/commons/spinner/Spinner'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import { cn } from '@/lib/utils/cn'
@@ -17,10 +18,21 @@ import { cn } from '@/lib/utils/cn'
 //      ① 기법만 떼어내 진짜 크롬으로 쟀다(굴리기 전 0회 → 상자를 끝까지 굴린 뒤 1회)
 //      ② 세 화면 모두 사람이 로그인해 눈으로 봤다. 저절로 이어진다
 //
-// ⚠️ **키보드만 쓰는 사람은 다음 페이지로 못 간다.** 구르는 것은 마우스·터치 동작이라
-//    깃발이 안 걸린다. 홈·알림·채팅방 목록이 이미 같은 상태라 여기만 다르게 두지 않았다.
-//    고칠 때는 **네 곳을 같이** 고쳐야 한다.
+// ✅ **키보드만 쓰는 사람도 다음 페이지로 갈 수 있다**(#1061). 구르는 것은 마우스·터치
+//    동작이라 깃발만으로는 안 걸린다 — 그래서 깃발 옆에 `LoadMoreFocusButton`(화면엔
+//    안 보이지만 Tab 으로는 걸리는 단추)을 하나 더 둔다.
+//    예전 주석은 「네 곳」이라 적었는데, 실제로 세어 보니 **아홉 곳**이었다 — 홈·커뮤니티·
+//    채팅방 목록, 알림(전용 페이지·헤더 드롭다운·모바일 덮개로 **셋**), 그리고 이 컴포넌트를
+//    쓰는 자리 셋(남의 프로필, 마이페이지 상품/차단 목록). 알림 셋은 컴포넌트가 각자 따로라
+//    여기 고치는 것과 별개로 그쪽 세 파일도 따로 고쳐야 했다.
+//
+// ⚠️ 이 단추까지 Tab 이 수십~백 번 걸릴 수 있어(홈 실측 104번) `id` 를 반드시 받는다.
+//    부르는 쪽이 이 id 를 그대로 `SkipToLoadMoreLink` 의 `targetId` 로 넘겨, 목록 **앞**에
+//    건너뛰기 링크를 따로 둔다. 이 컴포넌트는 목록 **끝**에만 놓이므로 그 링크는
+//    스스로 그리지 않는다 — 부르는 쪽(UserPage·MyPagePanel)이 목록 앞에 직접 둔다.
 interface InfiniteScrollSentinelProps {
+  /** 숨은 단추의 id. 부르는 쪽이 `SkipToLoadMoreLink` 에도 같은 값을 `targetId` 로 넘겨야 한다. */
+  id: string
   /** 다음 페이지가 남았는가 (`useInfiniteQuery` 가 준다) */
   hasNextPage?: boolean
   /** 지금 다음 페이지를 받는 중인가 */
@@ -36,6 +48,7 @@ interface InfiniteScrollSentinelProps {
 }
 
 export default function InfiniteScrollSentinel({
+  id,
   hasNextPage,
   isFetchingNextPage,
   onLoadMore,
@@ -56,6 +69,7 @@ export default function InfiniteScrollSentinel({
   return (
     <div className={cn('flex flex-col items-center justify-center', className)}>
       <div ref={targetRef} className="h-10 w-full" aria-hidden="true" />
+      <LoadMoreFocusButton id={id} hasNextPage={hasNextPage} isFetchingNextPage={isFetchingNextPage} onLoadMore={onLoadMore} />
       {/* 문구는 앱과 같은 말을 쓴다(`mobile/components/list-states.tsx` 의 `ListFooter`).
           ⚠️ **눈에 보이는 글자에 `aria-hidden` 을 준다.** `Spinner` 가 스스로 `role="status"` 와
              같은 말을 품고 있어서, 안 가리면 화면 낭독기가 「더 불러오는 중」을 **두 번 읽는다.**

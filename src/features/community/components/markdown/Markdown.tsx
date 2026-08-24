@@ -124,7 +124,7 @@ export default function Markdown({ value, onChange, placeholder = DEFAULT_PLACEH
                 onDragOver={handleDragOver}
                 onPaste={handlePaste}
                 placeholder={placeholder}
-                className="absolute inset-0 box-border h-full w-full resize-none bg-white p-3 outline-none"
+                className="absolute inset-0 box-border h-full w-full resize-none bg-white p-3"
                 disabled={isUploading}
               />
               {isUploading ? (

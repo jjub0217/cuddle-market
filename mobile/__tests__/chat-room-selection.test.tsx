@@ -1,10 +1,8 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import type { ReactNode } from 'react';
 import { Keyboard } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import ChatRoomScreen from '@/app/chat/[id]';
+import { createScreenWrapper } from '@/test-utils/query-wrapper';
 
 // 채팅방에서 **고른 글자가 아무 데나 눌러 풀리는가**(#994).
 //
@@ -133,27 +131,8 @@ const 방 = {
   productImageUrl: null,
 };
 
-/**
- * ⚠️ `SafeAreaProvider` 로 감싼다. 확대창(PhotoViewer)이 안전영역을 써서 안 감싸면
- *    「No safe area value available」로 죽는다.
- * ⚠️ 시험용 `QueryClient` 에 **`gcTime: Infinity`** — 기본값(5분)이면 타이머가 남아
- *    시험이 다 초록인데도 jest 가 안 끝난다(mobile/AGENTS.md).
- */
-const METRICS = {
-  frame: { x: 0, y: 0, width: 390, height: 844 },
-  insets: { top: 47, left: 0, right: 0, bottom: 34 },
-};
-
-function 감싸기({ children }: { children: ReactNode }) {
-  const client = new QueryClient({
-    defaultOptions: { queries: { retry: false, gcTime: Infinity } },
-  });
-  return (
-    <QueryClientProvider client={client}>
-      <SafeAreaProvider initialMetrics={METRICS}>{children}</SafeAreaProvider>
-    </QueryClientProvider>
-  );
-}
+// 안전영역 값과 QueryClient 설정은 mobile/test-utils/query-wrapper.tsx 로 모았다(#1059).
+const 감싸기 = createScreenWrapper({ safeArea: true });
 
 beforeEach(() => {
   mock마운트.글자 = 0;

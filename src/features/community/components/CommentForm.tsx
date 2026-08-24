@@ -74,7 +74,7 @@ export function CommentForm({
           <textarea
             id={id}
             placeholder={placeholder}
-            className="scrollbar-hide flex-1 resize-none bg-transparent text-sm leading-6 placeholder:text-gray-400 focus:outline-none"
+            className="scrollbar-hide flex-1 resize-none bg-transparent text-sm leading-6 placeholder:text-gray-400"
             style={{ height: `${baseHeight}px`, maxHeight: `${maxHeight}px`, overflowY: 'auto' }}
             ref={setRefs}
             value={onChangeValue ? value : undefined}
@@ -102,7 +102,7 @@ export function CommentForm({
           id={id}
           placeholder={placeholder}
           className={cn(
-            'scrollbar-hide bg-primary-50 w-full flex-1 resize-none leading-tight focus:outline-none',
+            'scrollbar-hide bg-primary-50 w-full flex-1 resize-none leading-tight',
             'md:h-auto md:leading-normal'
           )}
           style={{ height: `${baseHeight}px`, maxHeight: `${maxHeight}px`, overflowY: 'auto' }}
