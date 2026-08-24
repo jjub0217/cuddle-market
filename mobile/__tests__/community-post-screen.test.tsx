@@ -1,9 +1,8 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
-import type { ReactNode } from 'react';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import CommunityPostScreen from '@/app/community-post';
+import { createScreenWrapper } from '@/test-utils/query-wrapper';
 
 // 커뮤니티 글쓰기 **화면**의 시험.
 //
@@ -78,30 +77,9 @@ beforeEach(() => {
   uploadOne.mockReset();
 });
 
-/**
- * ⚠️ `SafeAreaProvider` 로 감싼다. 안 감싸면 「No safe area value available」로 죽는다
- *    (bottom-sheet.test.tsx·photo-viewer.test.tsx 의 Wrapper 를 그대로 본떴다).
- */
-const METRICS = {
-  frame: { x: 0, y: 0, width: 390, height: 844 },
-  insets: { top: 47, left: 0, right: 0, bottom: 34 },
-};
-function 감싸기({ children }: { children: ReactNode }) {
-  // ⚠️ QueryClientProvider 도 필요하다 — 등록 뒤 목록을 무르게 하려고 useQueryClient 를 쓴다(#922).
-  //    시험마다 새 client 를 만든다. 나눠 쓰면 앞 시험이 담아 둔 값이 다음 시험에 남는다.
-  // ⚠️ `gcTime: Infinity` 를 준다. 기본값(5분)이면 조회가 끝나고 화면이 걷힌 뒤에도
-  //    「5분 뒤에 버린다」 타이머가 남아 **jest 가 안 끝난다** — 시험은 다 초록인데
-  //    명령이 5분을 매달려 있다가 죽는다. Infinity 면 타이머를 아예 안 건다
-  //    (react-query 의 isValidTimeout 이 Infinity 를 거른다).
-  const client = new QueryClient({
-    defaultOptions: { queries: { retry: false, gcTime: Infinity } },
-  });
-  return (
-    <QueryClientProvider client={client}>
-      <SafeAreaProvider initialMetrics={METRICS}>{children}</SafeAreaProvider>
-    </QueryClientProvider>
-  );
-}
+// 안전영역 값과 QueryClient 설정은 mobile/test-utils/query-wrapper.tsx 로 모았다(#1059).
+// ⚠️ QueryClientProvider 가 필요하다 — 등록 뒤 목록을 무르게 하려고 useQueryClient 를 쓴다(#922).
+const 감싸기 = createScreenWrapper({ safeArea: true });
 
 const 제목칸 = () => screen.getByPlaceholderText('제목을 입력해 주세요');
 const 본문칸 = () => screen.getByPlaceholderText('내용을 입력하세요');

@@ -1,10 +1,8 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react-native';
-import type { ReactNode } from 'react';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import UserProfileScreen from '@/app/(tabs)/(home)/users/[id]';
 import { UserNotFoundError } from '@/lib/user-profile';
+import { createScreenWrapper } from '@/test-utils/query-wrapper';
 
 // 남의 프로필 **화면**의 시험.
 //
@@ -15,11 +13,6 @@ import { UserNotFoundError } from '@/lib/user-profile';
 // ⚠️ 이 시험 파일은 **app/ 밖에** 둔다. expo-router 가 app/ 안의 모든 파일을 화면으로
 //    보기 때문에, 거기 두면 실기기가 아예 안 뜬다(mobile/AGENTS.md).
 // ⚠️ render 는 기다려야 한다(RNTL 14).
-
-const METRICS = {
-  frame: { x: 0, y: 0, width: 390, height: 844 },
-  insets: { top: 47, left: 0, right: 0, bottom: 34 },
-};
 
 const mock뒤로 = jest.fn();
 
@@ -46,22 +39,11 @@ const { fetchUserProfile, fetchUserProducts } = jest.requireMock('@/lib/user-pro
   fetchUserProducts: jest.Mock;
 };
 
-/**
- * ⚠️ `gcTime: Infinity` 를 준다. 기본값(5분)이면 타이머가 남아 jest 가 안 끝난다.
- * ⚠️ `retryDelay: 0` 을 준다. 화면이 `retry` 를 **직접 정하므로**(404만 안 되풀이한다)
- *    여기서 `retry: false` 를 줘도 안 먹는다 — 네트워크 탈 시험이 다시 물어보는 사이
- *    1초·2초를 기다리다 시간이 넘는다. 기다림만 없애면 그대로 흘러간다.
- */
-function 감싸기({ children }: { children: ReactNode }) {
-  const client = new QueryClient({
-    defaultOptions: { queries: { retry: false, retryDelay: 0, gcTime: Infinity } },
-  });
-  return (
-    <QueryClientProvider client={client}>
-      <SafeAreaProvider initialMetrics={METRICS}>{children}</SafeAreaProvider>
-    </QueryClientProvider>
-  );
-}
+// 안전영역 값과 QueryClient 설정은 mobile/test-utils/query-wrapper.tsx 로 모았다(#1059).
+// ⚠️ `retryDelay: 0` 을 준다. 화면이 `retry` 를 **직접 정하므로**(404만 안 되풀이한다)
+//    기본 `retry: false` 만으로는 안 먹는다 — 네트워크 탈 시험이 다시 물어보는 사이
+//    1초·2초를 기다리다 시간이 넘는다. 기다림만 없애면 그대로 흘러간다.
+const 감싸기 = createScreenWrapper({ safeArea: true, queryOptions: { retryDelay: 0 } });
 
 beforeEach(() => {
   mock뒤로.mockReset();

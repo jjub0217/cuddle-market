@@ -1,15 +1,13 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react-native';
 import { createRef } from 'react';
-import type { ReactNode } from 'react';
 import { SectionList } from 'react-native';
 import { getAnimatedStyle } from 'react-native-reanimated';
-import { SafeAreaProvider, type Metrics } from 'react-native-safe-area-context';
 
 import {
   ProductListView,
   type ProductListViewRef,
 } from '@/components/products/product-list-view';
+import { createScreenWrapper } from '@/test-utils/query-wrapper';
 
 // 홈에서 오려낸 조각이라 **전과 똑같이 도는지**가 핵심이다.
 // 홈은 앱에서 가장 중요한 화면인데, 뜯어내면서 조용히 달라지면 알아채기 어렵다.
@@ -76,27 +74,8 @@ function 한페이지(items: ReturnType<typeof 상품>[], hasNext = false, total
   };
 }
 
-// 세부 필터 시트가 쓰는 BottomSheet가 useSafeAreaInsets를 부른다. 시험에서는 재는 사람이
-// 없어 「No safe area value available」로 터지므로, 값을 못 박아 감싸 준다(아이폰 14 기준).
-const METRICS: Metrics = {
-  frame: { x: 0, y: 0, width: 390, height: 844 },
-  insets: { top: 47, left: 0, right: 0, bottom: 34 },
-};
-
-/** 시험마다 새 클라이언트를 준다 — 앞 시험이 받아 둔 것을 물려받으면 안 된다. */
-function 감싸기({ children }: { children: ReactNode }) {
-  // ⚠️ `gcTime: Infinity` 가 **꼭 있어야 한다.** 없으면 시험은 다 초록인데 **jest 가
-  //    스스로 안 끝난다** — 기본 `gcTime` 이 5분이라 「5분 뒤에 버린다」 타이머가 남는다
-  //    (`mobile/AGENTS.md` 에 적힌 함정이다). 2026-08-24 에 재서 찾아 고쳤다.
-  const client = new QueryClient({
-    defaultOptions: { queries: { retry: false, gcTime: Infinity } },
-  });
-  return (
-    <SafeAreaProvider initialMetrics={METRICS}>
-      <QueryClientProvider client={client}>{children}</QueryClientProvider>
-    </SafeAreaProvider>
-  );
-}
+// 안전영역 값과 QueryClient 설정은 mobile/test-utils/query-wrapper.tsx 로 모았다(#1059).
+const 감싸기 = createScreenWrapper({ safeArea: true });
 
 beforeEach(() => {
   fetchProducts.mockReset();

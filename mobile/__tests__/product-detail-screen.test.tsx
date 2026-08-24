@@ -1,10 +1,8 @@
 import type { ProductDetailItem } from '@cuddle/shared';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react-native';
-import type { ReactNode } from 'react';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import ProductDetailScreen from '@/app/(tabs)/(home)/products/[id]';
+import { createScreenWrapper } from '@/test-utils/query-wrapper';
 
 // 상품 상세 **화면**의 시험.
 //
@@ -17,11 +15,6 @@ import ProductDetailScreen from '@/app/(tabs)/(home)/products/[id]';
 //    보기 때문에, 거기 두면 실기기가 아예 안 뜬다(mobile/AGENTS.md).
 //
 // ⚠️ render 는 기다려야 한다(RNTL 14). 안 기다리면 «render function has not been called».
-
-const METRICS = {
-  frame: { x: 0, y: 0, width: 390, height: 844 },
-  insets: { top: 47, left: 0, right: 0, bottom: 34 },
-};
 
 jest.mock('expo-router', () => ({
   useLocalSearchParams: () => ({ id: '1' }),
@@ -73,22 +66,8 @@ const 상품: ProductDetailItem = {
   sellerOtherProducts: [],
 };
 
-/**
- * ⚠️ `SafeAreaProvider` 로 감싼다 — 사진 확대창(photo-viewer)이 안전영역을 쓰기 때문에
- *    안 감싸면 「No safe area value available」로 죽는다.
- * ⚠️ `gcTime: Infinity` 를 준다. 기본값(5분)이면 「5분 뒤에 버린다」 타이머가 남아
- *    시험이 다 초록인데도 **jest 가 안 끝난다**(mobile/AGENTS.md).
- */
-function 감싸기({ children }: { children: ReactNode }) {
-  const client = new QueryClient({
-    defaultOptions: { queries: { retry: false, gcTime: Infinity } },
-  });
-  return (
-    <QueryClientProvider client={client}>
-      <SafeAreaProvider initialMetrics={METRICS}>{children}</SafeAreaProvider>
-    </QueryClientProvider>
-  );
-}
+// 안전영역 값과 QueryClient 설정은 mobile/test-utils/query-wrapper.tsx 로 모았다(#1059).
+const 감싸기 = createScreenWrapper({ safeArea: true });
 
 beforeEach(() => {
   fetchProductDetail.mockReset();
