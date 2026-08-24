@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { cn } from '@/lib/utils/cn'
 import { ChevronDown as DownArrow, Check } from 'lucide-react'
@@ -10,21 +10,48 @@ interface SelectProps {
   isOpen: boolean
   disabled: boolean
   onClick: () => void
+  onKeyDown: (event: React.KeyboardEvent<HTMLButtonElement>) => void
   id?: string
   buttonClassName?: string
   selectedLabel?: string
   placeholder?: string
+  /** 짝이 되는 목록의 id — `aria-controls` 로 이어 준다 */
+  listboxId: string
+  /** 지금 후보인 항목의 id — 낭독기가 이걸로 「어디에 있는지」를 읽는다 */
+  activeOptionId?: string
 }
 
-function Select({ isOpen, disabled, onClick, id, buttonClassName, selectedLabel, placeholder }: SelectProps) {
+function Select({
+  isOpen,
+  disabled,
+  onClick,
+  onKeyDown,
+  id,
+  buttonClassName,
+  selectedLabel,
+  placeholder,
+  listboxId,
+  activeOptionId,
+}: SelectProps) {
   return (
     <button
       type="button"
+      // ⚠️ **`role="combobox"` 를 준다.** 아래 `aria-activedescendant` 는 단추의 기본 역할
+      //    (button)에서는 통하지 않는다 — lint 가 그것을 잡아 준다
+      //    (jsx-a11y/role-supports-aria-props). 「목록에서 하나를 고르는 단추」는
+      //    W3C 가 정한 **선택 전용 콤보박스** 꼴이고, 그 역할에서만 이 속성이 유효하다.
+      role="combobox"
       aria-haspopup="listbox"
       aria-expanded={isOpen}
       aria-label={placeholder}
+      // ⚠️ 열려 있을 때는 **초점이 이 단추에 그대로 남는다.** 항목으로 옮기지 않는다
+      //    (그것이 listbox 의 표준 방식이다). 대신 「지금 어느 항목이 후보인가」를
+      //    이 두 속성으로 알린다 — 낭독기는 이것을 보고 후보를 읽어 준다.
+      aria-controls={isOpen ? listboxId : undefined}
+      aria-activedescendant={isOpen ? activeOptionId : undefined}
       disabled={disabled}
       onClick={onClick}
+      onKeyDown={onKeyDown}
       id={id}
       className={cn(
         'relative flex w-full items-center cursor-pointer rounded-lg border border-gray-400 bg-white px-3 py-3 pr-10 text-sm disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100/30 disabled:text-gray-300',
@@ -42,23 +69,48 @@ function Select({ isOpen, disabled, onClick, id, buttonClassName, selectedLabel,
 interface SelectOptionProps {
   option: { value: string; label: string }
   isSelected: boolean
+  /** 방향키로 짚고 있는 「지금 후보」인가 — 고른 것(isSelected)과 다른 개념이다 */
+  isActive: boolean
+  optionId: string
   onSelect: (value: string) => void
   optionClassName?: string
   optionRef?: React.RefObject<HTMLButtonElement | null>
 }
 
-function SelectOption({ option, isSelected, onSelect, optionClassName, optionRef }: SelectOptionProps) {
+function SelectOption({
+  option,
+  isSelected,
+  isActive,
+  optionId,
+  onSelect,
+  optionClassName,
+  optionRef,
+}: SelectOptionProps) {
   return (
     <button
       ref={optionRef}
       key={option.value}
+      id={optionId}
       role="option"
       type="button"
       aria-selected={isSelected}
+      // ⚠️ **Tab 순서에서 뺀다.** `role="option"` 은 방향키로 옮기는 것이 표준이라
+      //    Tab 으로 하나씩 걸리면 안 된다. 초점은 여는 단추에 남고, 「지금 어디인가」는
+      //    `aria-activedescendant` 로 알린다(#1064).
+      tabIndex={-1}
       onClick={() => onSelect(option.value)}
       className={cn(
-        'flex w-full items-center justify-between gap-2 rounded-md p-2 text-left text-sm transition hover:bg-gray-100 focus-visible:bg-gray-100',
-        isSelected && 'bg-gray-100 ring-1 ring-gray-300',
+        'flex w-full items-center justify-between gap-2 rounded-md p-2 text-left text-sm transition hover:bg-gray-100 focus:outline-none',
+        // 고른 것과 지금 후보는 **다르게 보여야 한다.** 고른 것은 옅은 회색,
+        // 지금 후보는 테두리로 짚어 준다 — 마우스 hover 와도 구분된다.
+        //
+        // ⚠️ #1062 가 넣었던 `focus-visible:bg-gray-100` 은 걷었다. 이 이슈(#1064)에서
+        //    항목이 `tabIndex={-1}` 이 되어 **초점을 아예 안 받으므로** 죽은 클래스가 됐다.
+        //    그 자리를 아래 `isActive`(방향키로 짚고 있는 후보)가 대신한다.
+        //    ⚠️ 자동 리뷰는 이것을 **못 잡는다** — PR 하나의 diff 만 보기 때문에
+        //       두 브랜치를 겹쳐야 보이는 이런 어긋남은 사람이 합쳐 봐야 안다.
+        isSelected && 'bg-gray-100',
+        isActive && 'border-primary-500 border-[1.2px] bg-gray-100',
         optionClassName,
       )}
     >
@@ -71,15 +123,30 @@ function SelectOption({ option, isSelected, onSelect, optionClassName, optionRef
 interface SelectOptionsProps {
   options: { value: string; label: string }[]
   selectedValue: string
+  /** 방향키로 짚고 있는 자리 */
+  activeIndex: number
+  listboxId: string
+  optionId: (index: number) => string
   onSelect: (value: string) => void
   placeholder?: string
   optionClassName?: string
   style?: React.CSSProperties
 }
 
-function SelectOptions({ options, selectedValue, onSelect, placeholder, optionClassName, style }: SelectOptionsProps) {
+function SelectOptions({
+  options,
+  selectedValue,
+  activeIndex,
+  listboxId,
+  optionId,
+  onSelect,
+  placeholder,
+  optionClassName,
+  style,
+}: SelectOptionsProps) {
   const listboxRef = useRef<HTMLDivElement>(null)
   const selectedOptionRef = useRef<HTMLButtonElement>(null)
+  const activeOptionRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     if (selectedOptionRef.current && listboxRef.current) {
@@ -95,9 +162,17 @@ function SelectOptions({ options, selectedValue, onSelect, placeholder, optionCl
     }
   }, [])
 
+  // ⚠️ 방향키로 후보를 옮기면 **그 항목이 보이게 목록을 굴려 준다.** 초점은 여는 단추에
+  //    남아 있어서 브라우저가 스스로 굴려 주지 않는다 — 손으로 해 줘야 한다.
+  //    `block: 'nearest'` 라 이미 보이는 항목에서는 화면이 안 흔들린다.
+  useEffect(() => {
+    activeOptionRef.current?.scrollIntoView({ block: 'nearest' })
+  }, [activeIndex])
+
   return (
     <div
       ref={listboxRef}
+      id={listboxId}
       role="listbox"
       aria-label={placeholder}
       style={style}
@@ -106,16 +181,19 @@ function SelectOptions({ options, selectedValue, onSelect, placeholder, optionCl
         Z_INDEX.DROPDOWN,
       )} 
     >
-      {options.map((option) => {
+      {options.map((option, index) => {
         const isSelected = selectedValue === option.value
+        const isActive = index === activeIndex
         return (
           <SelectOption
             key={option.value}
             option={option}
             isSelected={isSelected}
+            isActive={isActive}
+            optionId={optionId(index)}
             onSelect={onSelect}
             optionClassName={optionClassName}
-            optionRef={isSelected ? selectedOptionRef : undefined}
+            optionRef={isActive ? activeOptionRef : isSelected ? selectedOptionRef : undefined}
           />
         )
       })}
@@ -165,20 +243,90 @@ export default function SelectDropdown({
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null)
 
   const selectedOption = options.find((option) => option.value === value)
+  const selectedIndex = options.findIndex((option) => option.value === value)
+
+  // 방향키로 짚고 있는 자리. 고른 것(`value`)과는 **다른 개념**이다 —
+  // 후보를 옮기기만 하고 엔터를 안 치면 고른 값은 그대로다.
+  const [activeIndex, setActiveIndex] = useState(-1)
+
+  const 목록id = useId()
+  const 항목id = (index: number) => `${목록id}-option-${index}`
+
+  const 열기 = (시작자리: number) => {
+    // 여는 순간에만 담을 곳을 다시 본다. 이벤트 처리 함수라 ref를 읽어도 된다.
+    setPortalTarget(selectRef.current?.closest('dialog') ?? document.body)
+    setActiveIndex(시작자리)
+    setIsOpen(true)
+  }
 
   const handleToggle = () => {
     if (disabled) return
 
-    // 여는 순간에만 담을 곳을 다시 본다. 이벤트 처리 함수라 ref를 읽어도 된다.
-    if (!isOpen) {
-      setPortalTarget(selectRef.current?.closest('dialog') ?? document.body)
+    if (isOpen) {
+      setIsOpen(false)
+      return
     }
-    setIsOpen((prev) => !prev)
+    // 열 때는 이미 고른 것에서 시작한다. 고른 게 없으면 맨 위.
+    열기(selectedIndex >= 0 ? selectedIndex : 0)
   }
 
   const handleSelect = (optionValue: string) => {
     onChange(optionValue)
     setIsOpen(false)
+  }
+
+  /**
+   * 여는 단추에서 받는 키. **초점은 늘 이 단추에 있고** 항목으로 옮기지 않는다 —
+   * 그것이 `role="listbox"` 의 표준 방식이다(#1064).
+   *
+   * ⚠️ **방향키에 `preventDefault` 를 꼭 해야 한다.** 안 하면 눌린 키가 브라우저
+   *    기본 동작으로 흘러가 **페이지가 위아래로 스크롤된다** — 고치기 전이 그랬다.
+   *
+   * ⚠️ **`Escape` 는 여기 없다.** 아래 `document` 의 `keydown` 리스너(`handleEscape`)가
+   *    잡는다 — 초점이 어디에 있든 닫아야 해서 단추 전용인 이 함수로는 못 잡는다.
+   *    (#1070 kimi 리뷰가 여기서 빠졌다고 봤는데, 실제로는 아래에 있다.)
+   */
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (disabled) return
+    const 마지막 = options.length - 1
+    if (마지막 < 0) return
+
+    switch (event.key) {
+      case 'ArrowDown':
+      case 'ArrowUp': {
+        event.preventDefault()
+        if (!isOpen) {
+          열기(selectedIndex >= 0 ? selectedIndex : 0)
+          return
+        }
+        const 걸음 = event.key === 'ArrowDown' ? 1 : -1
+        // 끝에서 반대편으로 돌지 않는다 — 어디가 끝인지 손끝으로 알 수 있게.
+        setActiveIndex((prev) => Math.min(마지막, Math.max(0, prev + 걸음)))
+        return
+      }
+      case 'Home':
+      case 'End': {
+        if (!isOpen) return
+        event.preventDefault()
+        setActiveIndex(event.key === 'Home' ? 0 : 마지막)
+        return
+      }
+      case 'Enter':
+      case ' ': {
+        if (!isOpen) return // 닫혀 있으면 단추의 기본 동작(열기)에 맡긴다
+        event.preventDefault()
+        const 고른것 = options[activeIndex]
+        if (고른것) handleSelect(고른것.value)
+        return
+      }
+      case 'Tab': {
+        // Tab 은 막지 않는다 — 목록을 닫고 다음 자리로 넘어가는 것이 자연스럽다.
+        if (isOpen) setIsOpen(false)
+        return
+      }
+      default:
+        return
+    }
   }
 
   useEffect(() => {
@@ -235,10 +383,13 @@ export default function SelectDropdown({
         isOpen={isOpen}
         disabled={disabled}
         onClick={handleToggle}
+        onKeyDown={handleKeyDown}
         id={id}
         buttonClassName={buttonClassName}
         selectedLabel={displayValue || selectedOption?.label}
         placeholder={placeholder}
+        listboxId={목록id}
+        activeOptionId={activeIndex >= 0 ? 항목id(activeIndex) : undefined}
       />
 
       {isOpen && !disabled && dropdownStyle && portalTarget
@@ -255,6 +406,9 @@ export default function SelectDropdown({
               <SelectOptions
                 options={options}
                 selectedValue={value}
+                activeIndex={activeIndex}
+                listboxId={목록id}
+                optionId={항목id}
                 onSelect={handleSelect}
                 placeholder={placeholder}
                 optionClassName={optionClassName}
