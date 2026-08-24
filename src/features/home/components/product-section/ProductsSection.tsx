@@ -141,7 +141,10 @@ export function ProductsSection({
                 onChange={(e) => handleOnlyOnSaleChange(e.target.checked)}
                 className="peer sr-only"
               />
-              <span className="block h-4 w-7 rounded-full bg-gray-200 transition-colors peer-checked:bg-primary-600"></span>
+              {/* ⚠️ 초점은 위의 숨긴 `<input>`(`peer sr-only`)이 받는다. 전역 초점 규칙이 걸려도
+                  눈에는 안 보이므로 **보이는 이 스위치**에 `peer-focus-visible:` 로 옮겨 준다.
+                  두께·색은 globals.css 의 전역 규칙과 같게 맞췄다(1.2px · primary-500). */}
+              <span className="peer-focus-visible:border-[1.2px] peer-focus-visible:border-primary-500 block h-4 w-7 rounded-full bg-gray-200 transition-colors peer-checked:bg-primary-600"></span>
               <span className="absolute top-0.5 left-0.5 h-3 w-3 rounded-full bg-white transition-transform peer-checked:translate-x-3"></span>
             </span>
             <span className="text-sm text-gray-600 md:font-bold">판매중</span>

@@ -57,7 +57,7 @@ function SelectOption({ option, isSelected, onSelect, optionClassName, optionRef
       aria-selected={isSelected}
       onClick={() => onSelect(option.value)}
       className={cn(
-        'flex w-full items-center justify-between gap-2 rounded-md p-2 text-left text-sm transition hover:bg-gray-100 focus:bg-gray-100 focus:outline-none',
+        'flex w-full items-center justify-between gap-2 rounded-md p-2 text-left text-sm transition hover:bg-gray-100 focus-visible:bg-gray-100',
         isSelected && 'bg-gray-100 ring-1 ring-gray-300',
         optionClassName,
       )}

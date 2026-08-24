@@ -37,7 +37,7 @@ export default function AdminTableFilters({
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder={searchPlaceholder}
-              className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-3 text-sm outline-none focus:border-gray-500"
+              className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-3 text-sm"
             />
           </div>
         </div>

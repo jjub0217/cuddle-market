@@ -270,7 +270,7 @@ export default function CommunityPostForm() {
                     placeholder="제목을 입력해 주세요"
                     rows={1}
                     maxLength={50}
-                    className="text-primary placeholder:text-primary/20 w-full resize-none overflow-hidden border-none bg-transparent text-2xl leading-tight font-bold focus:ring-0 focus:outline-none"
+                    className="text-primary placeholder:text-primary/20 w-full resize-none overflow-hidden border-none bg-transparent text-2xl leading-tight font-bold"
                   />
                   <div className="flex items-center justify-between text-xs">
                     {errors.title ? <p className="font-semibold text-red-500">{errors.title.message}</p> : <span />}
