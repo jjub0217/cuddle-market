@@ -62,6 +62,15 @@ setPointerCapture  없다. 그런데 이것은 **뒤따르는 click 의 대상�
 IntersectionObserver  흉내는 있는데 **observe() 가 빈 함수**다(vitest.setup.ts).
                「보였다」를 스스로 만들 수가 없다 → 시험 안에서 클래스를 갈아 끼워
                콜백을 붙잡았다가 직접 쏜다. InfiniteScrollSentinel.test.tsx 를 본떠라
+disabled 가 초점을 뗀다  **흉내가 없다.** 진짜 브라우저는 이미 초점이 가 있는 요소에
+               `disabled` 가 붙으면 **초점을 강제로 뗀다**(2026-08-24 크롬 실측: 60ms 만에
+               body 로 튕겼다). jsdom 은 그 반응을 안 한다 — 이미 disabled 인 것에
+               초점을 못 주는 것까지만 흉내 낸다.
+               ⚠️ 그래서 「초점이 남아 있나」로 시험을 쓰면 **회귀를 심어도 통과한다.**
+               실제로 #1061 에서 `disabled` 로 되돌려 보니 그 시험은 초록이었고,
+               **「`disabled` 속성이 안 붙는다」를 직접 본 시험만 잡아냈다.**
+               → 「결과(초점)」가 아니라 **「원인(속성)」을 직접 보는 시험**을 써라.
+               LoadMoreFocusButton.test.tsx 가 그 예다
 ```
 
 ⚠️ **리액트의 `onWheel` 로는 브라우저 확대를 못 막는다.** 리액트가 휠을 passive 로 달아
