@@ -62,6 +62,11 @@ fi
 echo "${GREEN}✔ 해시가 같다 — ${main_sha:0:8}${OFF}"
 
 # ⑤ 푸시는 물어본다
+# ⚠️ `read -r -p` 는 **맥 기본 bash 3.2 에서도 된다.** 2026-08-24 에 확인했다
+#    (GNU bash 3.2.57 · arm64-apple-darwin25). `-p` 는 bash 내장이라 readline 유무와 무관하다.
+#    스크립트 전체를 끝까지 돌려 이 줄까지 오는 것도 확인했다.
+# ⚠️ 터미널이 아닌 곳(CI 등)에서는 여기서 멈춰 선다. **그러라고 둔 것이다** —
+#    이 스크립트는 사람이 손으로 치는 것이지 자동으로 부를 것이 아니다.
 echo
 read -r -p "main 을 origin 에 푸시할까? (y/N) " answer
 if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
