@@ -202,9 +202,9 @@ find ~/Desktop/cmarket_api -name "*.java" | xargs grep -ln "enum <이름>"
 - `/context-sync` - Notion + GitHub 병렬 수집 → 싱크 문서 + Daily Scrum 페이지 생성 (고급)
 - `/schedule` - Schedule List 일정 등록
 
-## 이어받기 문서는 **PR 없이 develop 에 바로 커밋한다**
+## 문서만 바뀌면 **PR 없이 develop 에 바로 커밋한다**
 
-`docs/superpowers/plans/*-handoff.md` 는 **혼자 보는 이어받기 문서**다. PR 을 만들지 마라.
+`.md` 만 바뀌는 변경은 PR 을 만들지 마라. 이어받기 문서든 `CLAUDE.md` 든 마찬가지다.
 
 ```bash
 # develop 에서 그냥 커밋하고 밀면 끝이다
@@ -215,6 +215,9 @@ git push origin develop
 
 ⚠️ **`main` 에는 안 맞춰도 된다.** 세 기기(맥미니·맥북·폰)가 다 `develop` 을 본다.
 `main` 은 코드 릴리스용이다 — 문서 때문에 `develop → main` 을 돌리지 마라.
+
+⚠️ **커밋 메시지 규칙은 그대로다.** `docs:` 는 이슈 번호가 면제지만 다른 타입은 아니다
+   (`chore:` 로 썼다가 commitlint 에 막힌 적이 있다 — 헤더 끝에 `(#번호)` 를 요구한다).
 
 ### 왜 이렇게 정했나 (2026-08-25)
 
@@ -241,17 +244,27 @@ push 로 바꾸면 무엇이 없어지나
 develop 보호 규칙   PR 필수 없음 · enforce_admins: false (저장소 소유자는 필수 검사에 안 막힌다)
 ```
 
-### ⚠️ 그래도 PR 로 가는 문서
-
-**코드와 함께 읽히는 규칙 문서**는 이력이 남아야 한다.
+### ⚠️ 가르는 기준은 「문서냐 코드냐」가 아니다 — **「게이트가 막을 게 있느냐」**다
 
 ```
-PR 없이   docs/superpowers/plans/*-handoff.md      ← 혼자 보는 이어받기 문서
-PR 로     CLAUDE.md · mobile/AGENTS.md · .claude/skills/**  ← 규칙·명령
-          docs/superpowers/specs/**                ← 설계 문서
+문서만 바뀐다      게이트가 막을 게 없다(2초에 통과) → **PR 이 할 일이 없다**
+코드가 섞인다      게이트가 진짜로 막는다            → **PR 로 간다**
+                  필수 검사 넷이 머지 전에 걸러 준다
 ```
 
-⚠️ **문서와 코드가 섞이면 PR 로 간다.** 게이트도 그때는 다 돈다(#1075 의 판별식).
+⚠️ 처음엔 「규칙 문서(CLAUDE.md·스킬)는 이력이 남아야 하니 PR 로」라고 그었다가 **고쳤다.**
+   **이력은 커밋만으로도 남는다.** PR 이 따로 주는 것은 리뷰와 논의 기록인데,
+   혼자 작업하면 둘 다 없다. 남는 것은 **게이트가 막아 주는 것**뿐이고
+   그건 코드일 때만 뜻이 있다.
+
+```
+PR 없이   *.md 만 바뀌는 모든 변경
+          이어받기 문서 · CLAUDE.md · AGENTS.md · .claude/skills/** · specs/**
+PR 로     코드가 한 줄이라도 섞이면
+```
+
+⚠️ **한 줄이라도 코드가 섞이면 PR 이다.** `#1075` 의 판별식이 그 경계와 같다 —
+   `docs/**` 와 `*.md` 밖의 것이 하나라도 있으면 게이트가 다 돈다.
 
 ---
 
@@ -274,8 +287,8 @@ PR 로     CLAUDE.md · mobile/AGENTS.md · .claude/skills/**  ← 규칙·명�
 
 사용자가 "머지", "머지했어", "PR 머지했어" 등의 표현을 사용하면:
 
-⚠️ **이것은 PR 을 머지했을 때의 이야기다.** 이어받기 문서를 `develop` 에 바로 밀었을 때는
-   **`main` 을 안 맞춘다**(위 「이어받기 문서는 PR 없이…」 절). 문서 때문에 `develop → main`
+⚠️ **이것은 PR 을 머지했을 때의 이야기다.** 문서만 바뀌어 `develop` 에 바로 밀었을 때는
+   **`main` 을 안 맞춘다**(위 「문서만 바뀌면 PR 없이…」 절). 문서 때문에 `develop → main`
    을 돌리지 마라 — `main` 은 코드 릴리스용이고, 세 기기가 다 `develop` 을 본다.
 
 1. develop 브랜치를 main에 **직접 머지** (PR 생성 금지)
