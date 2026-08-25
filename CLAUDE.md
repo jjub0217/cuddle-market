@@ -202,6 +202,21 @@ find ~/Desktop/cmarket_api -name "*.java" | xargs grep -ln "enum <이름>"
 - `/context-sync` - Notion + GitHub 병렬 수집 → 싱크 문서 + Daily Scrum 페이지 생성 (고급)
 - `/schedule` - Schedule List 일정 등록
 
+## ⚡ 세션을 이어받을 때 — **이 문서부터 읽는다**
+
+```bash
+ls -t docs/session-logs/*handoff*.md | head -1     # 가장 최근 것이 이어서 할 자리다
+```
+
+⚠️ **`docs/session-logs/` 를 먼저 본다.** 거기 것이 최신이다.
+   `docs/superpowers/plans/` 에도 `*-handoff.md` 가 12개 있는데 **2026-08-24 까지의 옛 것**이다
+   (그날 자리를 옮겼다 — 아래 절 참고). 헷갈리면 **날짜가 늦은 쪽**을 본다.
+
+사용자가 「핸드오프 문서 읽어줘」·「이어서 하자」라고 하면 그 파일을 열고,
+그 문서의 「다음에 할 일」부터 이어 간다.
+
+---
+
 ## 이어받기 문서는 **저장소에 안 올린다** — `docs/session-logs/`
 
 ```
