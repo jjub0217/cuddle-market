@@ -202,6 +202,59 @@ find ~/Desktop/cmarket_api -name "*.java" | xargs grep -ln "enum <이름>"
 - `/context-sync` - Notion + GitHub 병렬 수집 → 싱크 문서 + Daily Scrum 페이지 생성 (고급)
 - `/schedule` - Schedule List 일정 등록
 
+## 이어받기 문서는 **PR 없이 develop 에 바로 커밋한다**
+
+`docs/superpowers/plans/*-handoff.md` 는 **혼자 보는 이어받기 문서**다. PR 을 만들지 마라.
+
+```bash
+# develop 에서 그냥 커밋하고 밀면 끝이다
+git add docs/superpowers/plans/2026-08-25-handoff.md
+git commit -m "docs: …"
+git push origin develop
+```
+
+⚠️ **`main` 에는 안 맞춰도 된다.** 세 기기(맥미니·맥북·폰)가 다 `develop` 을 본다.
+`main` 은 코드 릴리스용이다 — 문서 때문에 `develop → main` 을 돌리지 마라.
+
+### 왜 이렇게 정했나 (2026-08-25)
+
+```
+2026-08-24~25 한 세션에서 **문서만 바뀐 PR 을 여섯 개** 만들었다.
+그중 넷(#1071·#1073·#1074·#1077)은 **같은 파일 하나**를 네 번 나눠 올린 것이었다.
+매번   브랜치 → 커밋 → 푸시 → PR 본문 → kimi 리뷰 → 게이트 → 머지
+      → develop→main → 브랜치 로컬·원격 삭제  를 다 밟았다
+```
+
+**검토받을 사람이 없다.** 작업자가 한 사람이고, PR 을 열고 스스로 머지한다. 그런데도
+`kimi` 리뷰가 일곱 번 돌았고 전부 「특이사항 없음」이었다 — 순수한 토큰 낭비다.
+
+```
+push 로 바꾸면 무엇이 없어지나
+  kimi 리뷰      ⭐ 아예 안 돈다 (kimi-review.yml 은 pull_request 에만 걸려 있다)
+  PR 본문 쓰기 · 머지 클릭 · develop→main · 브랜치 삭제
+게이트           그대로 돈다. 다만 문서만 바뀌면 **2초**다(#1075)
+```
+
+⚠️ **막히지 않는다** — 2026-08-25 에 확인했다.
+
+```
+develop 보호 규칙   PR 필수 없음 · enforce_admins: false (저장소 소유자는 필수 검사에 안 막힌다)
+```
+
+### ⚠️ 그래도 PR 로 가는 문서
+
+**코드와 함께 읽히는 규칙 문서**는 이력이 남아야 한다.
+
+```
+PR 없이   docs/superpowers/plans/*-handoff.md      ← 혼자 보는 이어받기 문서
+PR 로     CLAUDE.md · mobile/AGENTS.md · .claude/skills/**  ← 규칙·명령
+          docs/superpowers/specs/**                ← 설계 문서
+```
+
+⚠️ **문서와 코드가 섞이면 PR 로 간다.** 게이트도 그때는 다 돈다(#1075 의 판별식).
+
+---
+
 ## 이슈·PR 템플릿
 
 **템플릿은 기억으로 쓰지 말고 파일을 열어 그대로 따른다.**
@@ -220,6 +273,10 @@ find ~/Desktop/cmarket_api -name "*.java" | xargs grep -ln "enum <이름>"
 ## 머지 워크플로우
 
 사용자가 "머지", "머지했어", "PR 머지했어" 등의 표현을 사용하면:
+
+⚠️ **이것은 PR 을 머지했을 때의 이야기다.** 이어받기 문서를 `develop` 에 바로 밀었을 때는
+   **`main` 을 안 맞춘다**(위 「이어받기 문서는 PR 없이…」 절). 문서 때문에 `develop → main`
+   을 돌리지 마라 — `main` 은 코드 릴리스용이고, 세 기기가 다 `develop` 을 본다.
 
 1. develop 브랜치를 main에 **직접 머지** (PR 생성 금지)
 2. PR 생성 시 kimi 코드리뷰가 자동 트리거되어 토큰이 소진되므로, main 머지는 항상 로컬에서 직접 수행
