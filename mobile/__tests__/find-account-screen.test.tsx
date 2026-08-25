@@ -25,7 +25,8 @@ jest.mock('expo-router', () => ({
  * 웹의 것과 **글자까지 같다**(src/features/find-account/components/FindAccountForm.tsx
  * 의 SENT_MESSAGE). 앱 문구를 따로 지어내지 말라는 것은 이 저장소의 규칙이다.
  */
-const 같은_문구 = '가입된 계정이 있다면 안내 메일을 보냈습니다.\n메일함을 확인해주세요.';
+const 같은_문구 =
+  '가입된 계정이 있다면 안내 메일을 보냈습니다.\n메일함(스팸함도)을 확인해주세요.\n같은 안내는 잠시 동안 다시 보내지 않아요.';
 
 /** 서버가 이 상태·문구로 답했다고 치자. */
 function 서버가_답한다(status: number, message: string) {
