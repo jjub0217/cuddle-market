@@ -37,7 +37,8 @@ import { validateEmail } from '@/lib/signup/validation';
  * 진짜 안내(「카카오로 가입되어 있어요」)는 **메일로** 간다. 메일함을 여는 사람은
  * 그 주소의 주인뿐이라 거기서는 알려 줘도 된다.
  */
-const SENT_MESSAGE = '가입된 계정이 있다면 안내 메일을 보냈습니다.\n메일함을 확인해주세요.';
+// ⚠️ 웹과 **같은 말**이다. 까닭은 웹 FindAccountForm.tsx 의 SENT_MESSAGE 주석 참고(#1091).
+const SENT_MESSAGE = '가입된 계정이 있다면 안내 메일을 보냈습니다.\n메일함(스팸함도)을 확인해주세요.\n같은 안내는 잠시 동안 다시 보내지 않아요.';
 
 /**
  * 서버에 닿지도 못했을 때의 문구. 이것도 웹과 같은 글자다(NETWORK_MESSAGE).
