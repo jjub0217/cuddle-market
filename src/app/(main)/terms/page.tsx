@@ -29,8 +29,9 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 }
 
-// TODO(사람): 실제 공표하는 날로 바꾼다. 최초 제정이라 사전 공지 기간은 없다.
-const EFFECTIVE_DATE = '2026년 9월 1일'
+// 최초 제정이라 사전 공지 기간 없이 이날부터 적용한다(2026-08-25 운영자가 정했다).
+// 약관을 **고칠** 때는 다르다 — 제3조가 정한 대로 미리 알려야 한다.
+const EFFECTIVE_DATE = '2026년 8월 25일'
 
 const CONTACT_EMAIL = 'devel.jjub@gmail.com'
 
@@ -430,6 +431,9 @@ export default function TermsPage() {
                 {CONTACT_EMAIL}
               </a>
             </Row>
+            {/* 전자상거래법 제10조 제1항이 「호스팅서비스를 제공하는 사업자의 상호」도
+                초기화면에 표시하라고 정한다. 웹과 서버가 다른 곳에 올라가 있어 둘 다 적는다. */}
+            <Row label="호스팅">웹 Vercel Inc. · 서버 Amazon Web Services</Row>
           </dl>
           <p>
             개인정보에 관한 문의도 같은 곳에서 받습니다. 처리 방침은{' '}
