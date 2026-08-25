@@ -106,7 +106,22 @@ export default function LoginScreen() {
 
               「비밀번호 찾기」는 #829 에서 웹 페이지를 열게 해 뒀던 것을 #838 에서 앱 안
               화면으로 바꿨다. 문구는 그 화면의 제목과 같은 말이다(app/find-password.tsx). */}
+          {/* 「계정 찾기」가 맨 앞이다 — 여기서 막히는 사람은 **어느 방법으로 가입했는지**를
+              모르는 사람이고, 그 사람은 비밀번호 찾기로 가 봐야 답을 못 얻는다(#849).
+              웹은 로그인 폼 안에 「가입 방법을 잊으셨나요?」로 문장처럼 둔다 — 거기는
+              문장 옆이라 풀어 쓰고, 여기는 나란한 링크라 이름만 남긴다(아래 옛 주석과 같은 규칙). */}
           <View style={styles.bottomLinks}>
+            <Pressable
+              onPress={() => router.push('/find-account')}
+              accessibilityRole="button"
+              hitSlop={8}
+              style={({ pressed }) => (pressed ? styles.bottomLinkPressed : undefined)}
+            >
+              <Text style={styles.bottomLinkText}>계정 찾기</Text>
+            </Pressable>
+
+            <View style={styles.bottomLinkDivider} />
+
             <Pressable
               onPress={() => router.push('/find-password')}
               accessibilityRole="button"

@@ -122,9 +122,20 @@ export function LoginForm() {
           </div>
           {/* 밑줄 — 링크임을 색만으로 알리면 안 된다(WCAG 1.4.1 「색에 의존하지 않기」).
               underline-offset-2 는 글자 아래 획(ㅁ·ㅂ 등)에 선이 닿지 않게 띄운 값이다. */}
-          <Link href={ROUTES.FIND_PASSWORD} className="text-primary text-xs font-medium underline underline-offset-2">
-            비밀번호를 잊으셨나요?
-          </Link>
+          {/* 둘은 **다른 것을 잊은 사람**을 위한 길이다. 비밀번호를 잊은 사람과
+              「내가 카카오로 가입했던가?」를 잊은 사람은 서로 다른 곳으로 가야 한다.
+              뒤엣것이 없어서 지금까지는 비밀번호 찾기가 그 노릇을 겸했고, 그러느라
+              화면이 가입 여부를 말해야 했다 — 그게 #849 의 뿌리다.
+              나란히 두고 가운데 막대로 가른다(앱 로그인 관문의 아래 링크와 같은 모양). */}
+          <div className="flex items-center gap-2">
+            <Link href={ROUTES.FIND_PASSWORD} className="text-primary text-xs font-medium underline underline-offset-2">
+              비밀번호를 잊으셨나요?
+            </Link>
+            <span className="bg-outline h-3 w-px" aria-hidden="true" />
+            <Link href={ROUTES.FIND_ACCOUNT} className="text-primary text-xs font-medium underline underline-offset-2">
+              가입 방법을 잊으셨나요?
+            </Link>
+          </div>
         </div>
         {/* md 는 입력칸과 같은 40 이다(#847). 전에는 sm + py-3 md:py-2 로 높이를 손으로
             맞췄는데, 공용 조각이 h-* 로 정해지면서 그럴 필요가 없어졌다. */}
