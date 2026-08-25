@@ -32,6 +32,11 @@ globalIgnores([
   // 지우는 걸 잊으면 반드시 lint 가 막혔다(2026-08-23 에 실제로 깨졌다).
   // .gitignore 에도 들어 있어 실수로 커밋되지도 않는다.
   'probe/**',
+  // 위 probe/ 에서 **다시 쓸 값어치가 있어 남긴 것**을 옮겨 두는 자리(2026-08-25).
+  // 브라우저를 띄워 재는 Node 스크립트라 `require()` 를 쓴다 — 웹 규칙으로 훑으면
+  // no-require-imports 가짜 경고만 난다(아래 mobile/** 을 뺀 것과 같은 까닭이다).
+  // ⚠️ probe/ 와 달리 **여기는 커밋된다.** 다음 세션이 그대로 쓸 수 있게 남기는 자리다.
+  'scripts/probe/**',
   // RN 앱. 자기 설정(mobile/eslint.config.js)과 자기 게이트(npx expo lint)를 따로 갖는다.
   // 웹 규칙으로 다시 훑으면 가짜 경고만 나온다 — expo-image의 <Image>에 alt를 요구하거나,
   // Node 설정 파일(metro.config.js 등)의 require를 금지하거나, 자동 생성 파일까지 검사한다.
