@@ -13,7 +13,7 @@ import { AppHeader } from '@/components/ui/app-header';
 import { colors } from '@/constants/colors';
 import { useMe } from '@/hooks/use-me';
 import { useAuthStore } from '@/lib/auth/store';
-import { ACCOUNT_DELETION_URL, PRIVACY_URL, SUPPORT_MAIL_URL } from '@/lib/support-links';
+import { ACCOUNT_DELETION_URL, PRIVACY_URL, SUPPORT_MAIL_URL, TERMS_URL } from '@/lib/support-links';
 
 // 마이페이지. 웹 모바일 마이페이지와 같은 카드 결.
 //
@@ -140,8 +140,9 @@ export default function MyScreen() {
 
         <SectionCard title="고객지원">
           <SectionRow icon={Headphones} label="고객센터" onPress={() => Linking.openURL(SUPPORT_MAIL_URL)} />
-          {/* 아래 둘은 웹 마이페이지에 없는 줄이라(웹은 푸터·햄버거에 둔다) 가져올
+          {/* 아래 셋은 웹 마이페이지에 없는 줄이라(웹은 푸터·햄버거에 둔다) 가져올
               아이콘이 없다. 지어내지 않고 비워 둔다. */}
+          <SectionRow label="이용약관" onPress={() => Linking.openURL(TERMS_URL)} />
           <SectionRow label="개인정보처리방침" onPress={() => Linking.openURL(PRIVACY_URL)} />
           <SectionRow label="계정 삭제 안내" onPress={() => Linking.openURL(ACCOUNT_DELETION_URL)} />
         </SectionCard>

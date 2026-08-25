@@ -12,6 +12,15 @@
 export const SUPPORT_MAIL_URL = 'mailto:devel.jjub@gmail.com?subject=커들마켓 1:1 문의';
 
 /**
+ * 이용약관.
+ *
+ * ⚠️ 개인정보처리방침과 마찬가지로 **로그인 없이 닿아야 한다.** 전자상거래법 제10조
+ * 제1항이 사이버몰 운영자에게 이용약관을 초기화면에 표시하도록 정하는데, 앱에서
+ * 마이 탭 안에만 두면 로그인해야만 볼 수 있다. 그래서 헤더 햄버거에도 같이 둔다.
+ */
+export const TERMS_URL = 'https://cuddle-market.vercel.app/terms';
+
+/**
  * 개인정보처리방침.
  *
  * ⚠️ 로그인 없이도 닿을 수 있어야 한다 — Play 정책이 「앱 안에서」 방침에 닿을 길을
