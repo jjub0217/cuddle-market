@@ -76,6 +76,17 @@ describe('SkipToSectionLink', () => {
     expect(링크).toHaveClass('focus:not-sr-only')
   })
 
+  it('부르는 쪽이 뜨는 자리를 덮을 수 있다 — 같은 갈래는 넘긴 쪽이 이긴다', () => {
+    // ⚠️ 왜 필요한가: 고정 헤더(`Z_INDEX.HEADER` = z-30)와 같은 자리에 뜨는 링크는
+    //    기본값 `focus:z-10` 이면 **헤더 뒤에 숨는다**(#1082 본문 바로가기).
+    //    `cn` 이 tailwind-merge 라 같은 갈래는 뒤엣것만 남는다 — 그것을 여기서 지킨다.
+    render(<SkipToSectionLink targetId="main-content" label="본문 바로가기" className="focus:z-40" />)
+    const 링크 = screen.getByRole('link')
+    expect(링크).toHaveClass('focus:z-40')
+    expect(링크).not.toHaveClass('focus:z-10')
+    expect(링크).toHaveClass('sr-only')
+  })
+
   it('목적지가 늘 있으므로 조건 없이 그린다 — 다음 페이지 여부를 안 본다', () => {
     render(<SkipToSectionLink targetId="product-list" label="필터 건너뛰고 상품 목록 보기" />)
     expect(screen.getByRole('link', { name: '필터 건너뛰고 상품 목록 보기' })).toBeInTheDocument()

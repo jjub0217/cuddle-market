@@ -1,6 +1,7 @@
 'use client'
 
 import Header from '@/components/header/Header'
+import SkipToSectionLink from '@/components/commons/SkipToSectionLink'
 import BottomNav from '@/components/bottom-nav/BottomNav'
 import { isBottomNavHidden } from '@/components/bottom-nav/isBottomNavHidden'
 import { isHeaderHiddenMobile } from '@/components/header/isHeaderHiddenMobile'
@@ -38,10 +39,22 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   const headerHiddenMobile = isHeaderHiddenMobile(pathname)
   const paddingTopClass = isHome ? 'pt-0' : headerHiddenMobile ? 'pt-0 lg:pt-18' : 'pt-18'
 
+  // ⚠️ 아래 `relative` 는 「본문 바로가기」를 띄울 **기준 자리**다. 지우지 말 것.
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="relative flex min-h-screen flex-col">
+      {/* 헤더를 건너뛰고 곧장 본문으로 (#1082)
+          키보드만 쓰는 사람은 화면을 옮길 때마다 헤더의 초점 대상 6개(로고·메뉴·검색·
+          로그인 등)를 **매번 다시** 거쳐야 했다. 이 링크가 그것을 한 번에 건너뛴다.
+          ⚠️ **`<Header />` 보다 앞에 있어야 뜻이 있다.** 차례를 바꾸지 말 것.
+          ⚠️ `focus:z-40` 은 헤더(`Z_INDEX.HEADER` = z-30)보다 **위**여야 해서 준다.
+             안 주면 초점을 받아도 헤더 뒤에 숨어 안 보인다. */}
+      <SkipToSectionLink targetId="main-content" label="본문 바로가기" className="focus:z-40" />
       <Header />
+      {/* ⚠️ `id` 와 `tabIndex={-1}` 은 위 링크의 **목적지**다(#1082).
+          `tabIndex={-1}` 이 없으면 `<main>` 은 초점을 못 받아 링크가 헛돈다. */}
       <main
+        id="main-content"
+        tabIndex={-1}
         className={cn(
           'w-full flex-1 bg-white transition-[padding-top] duration-300 lg:pb-0',
           paddingTopClass,
