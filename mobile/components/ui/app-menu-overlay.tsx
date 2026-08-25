@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LogoutModal } from '@/components/my/logout-modal';
 import { colors } from '@/constants/colors';
 import { useAuthStore } from '@/lib/auth/store';
-import { ACCOUNT_DELETION_URL, PRIVACY_URL, SUPPORT_MAIL_URL } from '@/lib/support-links';
+import { ACCOUNT_DELETION_URL, PRIVACY_URL, SUPPORT_MAIL_URL, TERMS_URL } from '@/lib/support-links';
 
 // 헤더 햄버거(☰)로 여는 전체 화면 메뉴.
 //
@@ -49,6 +49,7 @@ interface MenuItem {
 
 const ITEMS: MenuItem[] = [
   { label: '고객센터', url: SUPPORT_MAIL_URL },
+  { label: '이용약관', url: TERMS_URL },
   { label: '개인정보처리방침', url: PRIVACY_URL },
   { label: '계정 삭제 안내', url: ACCOUNT_DELETION_URL },
 ];
