@@ -44,25 +44,29 @@ jobs:
           # 견줄 대상을 받아야 하므로 얕게 받으면 안 된다
           fetch-depth: 0
       - id: check
+        # ⚠️ **변수 이름을 한국어로 짓지 마라.** GitHub Actions 의 `run` 은 **bash** 로 돌고,
+        #    bash 는 한글 변수 이름을 못 쓴다 — `기준=...: command not found` 로 죽는다
+        #    (zsh 는 된다. 2026-08-24 에 merge-to-main.sh 에서 한 번, 08-25 에 여기서 또 걸렸다).
+        #    **이름만 영문으로. 문구는 한국어로 둬도 된다.**
         run: |
           # PR 이면 base 와 견주고, push 면 바로 앞 커밋과 견준다
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            기준="${{ github.event.pull_request.base.sha }}"
+            BASE="${{ github.event.pull_request.base.sha }}"
           else
-            기준="${{ github.event.before }}"
+            BASE="${{ github.event.before }}"
           fi
           # 첫 푸시 등으로 기준이 비었으면 안전하게 「코드 있음」으로 본다
-          if [ -z "$기준" ] || ! git cat-file -e "$기준" 2>/dev/null; then
-            echo "기준을 못 잡았다 → 안전하게 다 돌린다"
+          if [ -z "$BASE" ] || ! git cat-file -e "$BASE" 2>/dev/null; then
+            echo "기준 커밋을 못 잡았다 → 안전하게 다 돌린다"
             echo "has_code=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          바뀐것=$(git diff --name-only "$기준" HEAD)
-          echo "바뀐 파일:"; echo "$바뀐것" | sed 's/^/  /'
+          CHANGED=$(git diff --name-only "$BASE" HEAD)
+          echo "바뀐 파일:"; echo "$CHANGED" | sed 's/^/  /'
           # 문서가 아닌 것이 하나라도 있으면 다 돌린다
-          코드=$(echo "$바뀐것" | grep -vE '^docs/|\.md$' | grep -c . || true)
-          if [ "$코드" -gt 0 ]; then
-            echo "→ 코드가 $코드 개 바뀌었다. 게이트를 다 돌린다"
+          CODE=$(echo "$CHANGED" | grep -vE '^docs/|\.md$' | grep -c . || true)
+          if [ "$CODE" -gt 0 ]; then
+            echo "→ 코드가 $CODE 개 바뀌었다. 게이트를 다 돌린다"
             echo "has_code=true" >> "$GITHUB_OUTPUT"
           else
             echo "→ 문서만 바뀌었다. 게이트를 건너뛴다"
