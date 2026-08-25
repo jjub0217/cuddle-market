@@ -42,6 +42,7 @@ export const ROUTES = {
   FIND_PASSWORD: '/auth/find-password',
 
   // Legal
+  TERMS: '/terms',
   PRIVACY: '/privacy',
   ACCOUNT_DELETION: '/account-deletion',
 
