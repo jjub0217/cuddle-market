@@ -23,26 +23,6 @@ interface FindPasswordFormValues {
   passwordConfirm: string
 }
 
-/**
- * 막다른 길 안내 문구. 앱과 같은 말을 쓴다(mobile/app/find-password.tsx 의 blockedText).
- *
- * **「비밀번호 대신」이 핵심이다.** 여기 온 사람은 「비밀번호를 찾으러」 왔으므로,
- * 「그럼 내 비밀번호는?」에 답이 있어야 발길을 돌린다. 「재설정이 불가능합니다」는 그 답이 없다.
- *
- * 어느 소셜인지 알면 콕 집어 말한다. 모를 때만 「카카오 또는 구글」로 벌려 쓴다 —
- * 「카카오·구글로 가입한」은 **둘 다로 가입한 것처럼** 읽힌다.
- */
-function blockedText(blocked: 'kakao' | 'google' | 'social' | 'notFound'): string {
-  if (blocked === 'notFound') {
-    return '가입된 계정을 찾지 못했어요.\n이메일을 다시 확인해주세요.'
-  }
-  if (blocked === 'social') {
-    return '카카오 또는 구글로 가입한 계정이에요.\n비밀번호 대신 그 방법으로 로그인해주세요.'
-  }
-  const name = blocked === 'kakao' ? '카카오' : '구글'
-  return `${name}로 가입한 계정이에요.\n비밀번호 대신 ${name} 로그인을 이용해주세요.`
-}
-
 /** 서버 만료가 5분이다(EmailVerificationServiceImpl 의 VERIFICATION_CODE_EXPIRY_MINUTES). */
 const CODE_TTL_SECONDS = 300
 
@@ -89,8 +69,9 @@ export function FindPasswordForm() {
   /**
    * 시간이 다 돼서 1단계로 되돌아왔을 때 알리는 말.
    *
-   * ⚠️ sendValidCodeResult 에 얹지 않는다 — 그 값은 「막다른 길」을 가리는 데 쓰여서
-   *    (blocked), 만료 문구를 넣으면 「가입된 계정을 찾지 못했어요」 박스가 뜬다.
+   * ⚠️ sendValidCodeResult 에 얹지 않는다 — 그 값은 이메일 칸 아래 오류 문구로 그대로
+   *    나가는 값이라, 만료 안내를 얹으면 「서버가 거절했다」처럼 보인다.
+   *    (#849 이전에는 여기에 「막다른 길」 박스까지 걸려 있었다. 그 갈래는 걷어냈다.)
    */
   const [expiredNotice, setExpiredNotice] = useState('')
   const [passwordResetError, setPasswordResetError] = useState<string | null>(null)
@@ -121,20 +102,6 @@ export function FindPasswordForm() {
   /** 지금 칸에 있는 이메일에 대한 결과인가. 아니면 옛 판단이라 안 보여준다. */
   const resultIsCurrent = sendValidCodeResult.email === email
 
-  // ⚠️ 옛 문구(「소셜 로그인 사용자는…」)도 함께 알아본다. 백엔드와 웹은 따로 배포되므로
-  //    그 사이에는 서버가 옛 문구를 준다. 안 받아주면 그동안 「가입 이력이 없는 이메일」로
-  //    잘못 안내하게 된다 — 없는 것보다 나쁜 안내다.
-  const blocked: 'kakao' | 'google' | 'social' | 'notFound' | null = !(
-    sendValidCodeResult.status === 'error' && resultIsCurrent
-  )
-    ? null
-    : sendValidCodeResult.message.includes('카카오')
-      ? 'kakao'
-      : sendValidCodeResult.message.includes('구글')
-        ? 'google'
-        : sendValidCodeResult.message.includes('소셜')
-          ? 'social'
-          : 'notFound'
   const code = useWatch({ control, name: 'AuthenticationCode' })
   const password = useWatch({ control, name: 'password' })
   const passwordConfirm = useWatch({ control, name: 'passwordConfirm' })
@@ -216,9 +183,14 @@ export function FindPasswordForm() {
     } catch (error) {
       console.error('인증코드 전송 실패:', error)
       if (isAxiosError(error)) {
+        // ⚠️ **서버 문구(error.response.data.message)를 화면에 옮기지 않는다**(#849).
+        //    예전에는 그대로 뿌렸고, 그 문구가 「카카오로 가입한 계정입니다」였다 —
+        //    남의 이메일을 넣어 본 사람에게 가입 여부와 가입 경로를 그대로 알려준 셈이다.
+        //    막다른 길 박스를 걷어내도 **이 줄이 남아 있으면 구멍은 그대로다.**
+        //    (2026-08-25: 박스만 지웠다가 이 줄로 새는 것을 시험이 잡아냈다)
         setSendValidCodeResult({
           status: 'error',
-          message: error.response?.data?.message || '인증코드 전송에 실패했습니다.',
+          message: '인증코드 발송에 실패했어요. 잠시 후 다시 시도해주세요.',
           email,
         })
       } else {
@@ -427,49 +399,38 @@ export function FindPasswordForm() {
                     checkResult={
                       expiredNotice
                         ? { status: 'error', message: expiredNotice }
-                        : sendValidCodeResult.status === 'error' && resultIsCurrent && blocked === null
+                        : sendValidCodeResult.status === 'error' && resultIsCurrent
                           ? sendValidCodeResult
                           : undefined
                     }
                     registration={register('email', authValidationRules.email)}
                   />
                 </div>
-                {/* 서버가 막았을 때 「안 된다」로 끝내지 않고 갈 길을 준다.
-                    여기 온 사람은 대개 카카오·구글로 가입한 걸 잊고 이메일 로그인을 하려다 온 사람이다.
-                    앱도 같은 안내를 한다(#838). */}
-                {/* 막다른 길이면 **그 길만 남긴다.**
-                    ① 「인증코드 전송」을 숨긴다 — 방금 서버가 「안 된다」고 답한 행동이다.
-                       가장 진한 단추가 눌러도 같은 오류가 나는 단추이면 위계가 거꾸로다.
-                       흐리게(disabled) 두는 대신 숨기는 이유: 흐린 단추는 「왜 안 되지?」를
-                       만들지만, 숨기면 그 질문이 안 생긴다. 이유는 바로 위 박스가 말한다.
-                    ② 「로그인으로 돌아가기」도 숨긴다 — 박스 단추와 **가는 곳이 같다.**
-                       한 화면에 목적지가 같은 길이 둘이면 「뭐가 다르지?」를 생각하게 만든다.
-                    이메일 칸은 남긴다. 오타였을 수 있고, 고치면 이 박스가 사라지며
-                    아래 단추들이 돌아온다(resultIsCurrent). */}
-                {blocked ? (
-                  <div className="bg-surface-container-low flex flex-col gap-3 rounded-lg p-4">
-                    <p className="text-sm whitespace-pre-line text-gray-700">{blockedText(blocked)}</p>
-                    <Link
-                      href={blocked === 'notFound' ? ROUTES.SIGNUP : ROUTES.LOGIN}
-                      className="bg-primary-600 rounded-lg px-4 py-2.5 text-center text-sm font-semibold text-white"
-                    >
-                      {blocked === 'notFound' ? '회원가입하러 가기' : '로그인하러 가기'}
-                    </Link>
-                  </div>
-                ) : (
-                  <>
-                    <Button
-                      size="md"
-                      className="bg-primary-600 w-full cursor-pointer text-sm text-white"
-                      type="submit"
-                    >
-                      인증코드 전송
-                    </Button>
-                    <Link href={ROUTES.LOGIN} className="text-primary w-full text-center text-sm font-medium">
-                      로그인으로 돌아가기
-                    </Link>
-                  </>
-                )}
+                {/* ⚠️ **막다른 길 안내(blocked)를 걷어냈다**(#849 2단계).
+                    예전에는 서버 오류 문구를 뒤져서 「카카오로 가입한 계정이에요」·
+                    「가입된 계정을 찾지 못했어요」 박스를 띄웠다. 그런데 그 안내가
+                    곧 **남의 이메일을 넣어 본 사람에게 주는 답**이었다(계정 열거).
+
+                    이제 서버는 세 경우(없는 이메일·소셜·LOCAL)에 모두 같은 200 을 준다.
+                    그래서 여기서 갈래를 만들 근거 자체가 없다 — 누구나 인증코드 칸으로 간다.
+
+                    ⚠️ **친절이 사라진 것이 아니라 옮겨 갔다.** 소셜로 가입한 사람에게는
+                       「카카오로 가입되어 있어요」가 **메일로** 간다. 그 메일함을 여는 사람은
+                       그 이메일의 주인뿐이라, 알아야 할 사람에게만 닿는다.
+
+                    ⚠️ 잃는 것도 있다 — 이메일에 오타를 낸 사람이 인증코드 칸에서 오지 않는
+                       메일을 기다린다. StepHeader 의 「메일이 오지 않으면 가입 방법이 다를
+                       수 있어요」가 그 사람을 위한 최소한의 안내다. */}
+                <Button
+                  size="md"
+                  className="bg-primary-600 w-full cursor-pointer text-sm text-white"
+                  type="submit"
+                >
+                  인증코드 전송
+                </Button>
+                <Link href={ROUTES.LOGIN} className="text-primary w-full text-center text-sm font-medium">
+                  로그인으로 돌아가기
+                </Link>
               </div>
             )}
           </div>

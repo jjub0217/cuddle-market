@@ -30,30 +30,33 @@ describe('sendResetCode', () => {
     );
   });
 
-  it('소셜 계정이면 reason이 social인 오류를 던진다', async () => {
+  // ⚠️ **아래 시험은 #849 2단계에서 뒤집혔다.** 예전에는 「소셜이면 reason: social 로
+  //    던진다」·「없는 이메일이면 서버 문구를 그대로 담아 던진다」를 지켰는데,
+  //    그 서버 문구가 화면으로 나가는 것이 곧 계정 열거였다.
+  //    이제 서버는 셋 모두에 200 을 주고, 앱은 **서버 문구를 아예 안 본다.**
+
+  it('서버 문구로 갈래를 만들지 않는다 — 400 이 와도 뭉뚱그린 오류다', async () => {
     mockFetch.mockResolvedValue(
       reply(400, {
         code: 'BAD_REQUEST',
         message: '소셜 로그인 사용자는 비밀번호 재설정이 불가능합니다.',
       })
     );
-    await expect(sendResetCode('me@cuddle.com')).rejects.toMatchObject({
-      reason: 'social',
-      message: '소셜 로그인 사용자는 비밀번호 재설정이 불가능합니다.',
-    });
-    await expect(sendResetCode('me@cuddle.com')).rejects.toBeInstanceOf(
+    // 옛 서버(아직 안 배포된 상태)가 갈라 말해도 앱은 그 문구를 안 옮긴다
+    await expect(sendResetCode('me@cuddle.com')).rejects.not.toBeInstanceOf(
       PasswordResetRejectedError
     );
+    await expect(sendResetCode('me@cuddle.com')).rejects.toThrow('인증코드 발송에 실패했어요');
   });
 
-  it('없는 이메일이면 서버 문구를 그대로 담아 던진다', async () => {
+  it('서버가 준 문구가 오류 메시지에 새어 나가지 않는다', async () => {
     mockFetch.mockResolvedValue(
       reply(400, { code: 'BAD_REQUEST', message: '등록되지 않은 이메일입니다.' })
     );
-    await expect(sendResetCode('nobody@cuddle.com')).rejects.toMatchObject({
-      reason: 'unknown',
-      message: '등록되지 않은 이메일입니다.',
-    });
+    // ⚠️ 「원인」을 직접 본다 — 서버 문구가 그대로 실려 나가면 화면이 그것을 보여줄 수 있다
+    await expect(sendResetCode('nobody@cuddle.com')).rejects.toThrow(
+      expect.not.stringContaining('등록되지 않은')
+    );
   });
 
   it('500이면 일반 오류를 던진다', async () => {

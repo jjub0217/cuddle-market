@@ -30,26 +30,6 @@ function mmss(totalSeconds: number): string {
   return `${m}:${String(s).padStart(2, '0')}`;
 }
 
-/**
- * 막다른 길 안내 문구.
- *
- * **「비밀번호 대신」이 핵심이다.** 여기 온 사람은 「비밀번호를 찾으러」 왔으므로,
- * 「그럼 내 비밀번호는?」에 답이 있어야 발길을 돌린다. 「재설정이 불가능합니다」는 그 답이 없다.
- *
- * 어느 소셜인지 알면 콕 집어 말한다. 서버가 문구에 담아 준다(AuthProvider.displayName).
- * 모를 때(서버가 아직 옛 문구를 주는 동안)만 「카카오 또는 구글」로 벌려 쓴다 —
- * 「카카오·구글로 가입한」은 **둘 다로 가입한 것처럼** 읽힌다.
- */
-function blockedText(blocked: 'kakao' | 'google' | 'social' | 'notFound'): string {
-  if (blocked === 'notFound') {
-    return '가입된 계정을 찾지 못했어요.\n이메일을 다시 확인해주세요.';
-  }
-  if (blocked === 'social') {
-    return '카카오 또는 구글로 가입한 계정이에요.\n비밀번호 대신 그 방법으로 로그인해주세요.';
-  }
-  const name = blocked === 'kakao' ? '카카오' : '구글';
-  return `${name}로 가입한 계정이에요.\n비밀번호 대신 ${name} 로그인을 이용해주세요.`;
-}
 
 export default function FindPasswordScreen() {
   const router = useRouter();
@@ -93,7 +73,13 @@ export default function FindPasswordScreen() {
     form.step === 3
       ? { title: '비밀번호 재설정', desc: '새로 쓸 비밀번호를 입력해주세요' }
       : form.step === 2
-        ? { title: '이메일 인증', desc: `${form.values.email}로 인증코드를 보냈어요` }
+        ? {
+            title: '이메일 인증',
+            // ⚠️ **「인증코드를 보냈어요」라고 단정하지 않는다**(#849). 여기 오는 사람 중에는
+            //    인증코드가 아니라 **가입 방법 안내**를 받는 사람(소셜)과 **아무것도 못 받는**
+            //    사람(가입 안 함)이 섞여 있다. 웹 StepHeader 와 같은 말을 쓴다.
+            desc: `${form.values.email}로 안내 메일을 보냈어요\n메일이 오지 않으면 가입 방법이 다를 수 있어요`,
+          }
         : { title: '이메일 입력', desc: '가입하신 이메일을 입력하면 인증코드를 보내드려요' };
 
   return (
@@ -146,25 +132,12 @@ export default function FindPasswordScreen() {
                 }
               />
 
-              {/* 막다른 길 안내. 「고쳐서 다시 하세요」(칸 아래 빨간 오류)와 성격이 달라
-                  모양도 다르게 둔다 — 이건 「여기 말고 저쪽으로 가세요」다.
-                  둘 다 갈 곳을 함께 준다. 「안 됩니다」로 끝나면 그 사람은 거기서 떠난다. */}
-              {form.blocked ? (
-                <View style={styles.blockedBox}>
-                  <Text style={styles.blockedText}>{blockedText(form.blocked)}</Text>
-                  <Pressable
-                    onPress={() =>
-                      form.blocked === 'notFound' ? router.replace('/signup') : router.replace('/login')
-                    }
-                    accessibilityRole="button"
-                    style={({ pressed }) => [styles.blockedButton, pressed && styles.pressed]}
-                  >
-                    <Text style={styles.blockedButtonLabel}>
-                      {form.blocked === 'notFound' ? '회원가입하러 가기' : '로그인하러 가기'}
-                    </Text>
-                  </Pressable>
-                </View>
-              ) : null}
+              {/* ⚠️ **막다른 길 안내(blocked)를 걷어냈다**(#849 2단계).
+                  예전에는 서버 400 문구를 뒤져 「카카오로 가입한 계정이에요」 박스를 띄웠는데,
+                  그 안내가 곧 남의 이메일을 넣어 본 사람에게 주는 답이었다(계정 열거).
+                  이제 서버가 셋 모두에 200 을 주므로 갈래를 만들 근거 자체가 없다.
+                  ⚠️ 친절이 사라진 게 아니라 **메일로 옮겨 갔다** — 소셜로 가입한 사람에게는
+                     「카카오로 가입되어 있어요」가 메일로 간다. */}
 
             </View>
           ) : null}
@@ -319,19 +292,8 @@ const styles = StyleSheet.create({
   },
   secondaryLabel: { fontSize: 15, fontWeight: '600', color: colors.onSurface },
   formError: { fontSize: 13, fontWeight: '600', color: colors.danger },
-  blockedBox: { backgroundColor: colors.surfaceMuted, borderRadius: 8, padding: 14, gap: 10 },
-  blockedText: { fontSize: 13, lineHeight: 19, color: colors.onSurfaceStrong },
   // 막다른 길에서는 **이 단추가 유일한 길**이라 주 단추 색을 쓴다(앱의 기본 단추와 같은 값).
   // 연한 색으로 두면, 방금 서버가 「안 된다」고 답한 「인증받기」보다 덜 눈에 띄어 위계가
   // 거꾸로가 된다. 웹은 아래 「인증코드 전송」을 숨겨서 같은 결과를 만든다 —
   // 앱은 그 단추가 칸 안(trailing)에 있어 숨기면 칸이 갑자기 달라 보여서 색으로 가른다.
-  blockedButton: {
-    // 같은 화면의 submit·secondary 와 같은 48 이다. 전에는 44 라 혼자 낮았다(#847).
-    height: 48,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.action,
-  },
-  blockedButtonLabel: { fontSize: 15, fontWeight: '600', color: colors.onAction },
 });

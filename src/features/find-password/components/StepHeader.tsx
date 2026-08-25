@@ -29,7 +29,12 @@ export function StepHeader({ currentStep, email }: StepHeaderProps) {
         ) : currentStep === 2 ? (
           <>
             <h2 className="text-base font-semibold">이메일 인증</h2>
-            <p>{`${email}로 인증코드를 발송했습니다.`}</p>
+            {/* ⚠️ **「인증코드를 발송했습니다」라고 단정하지 않는다**(#849). 이제 서버는
+                가입 여부를 화면에 알려주지 않아서, 여기 오는 사람 중에는 인증코드가
+                아니라 **가입 방법 안내**를 받는 사람(소셜 가입)과 **아무것도 못 받는**
+                사람(가입 안 함)이 섞여 있다. 셋 다에게 맞는 말을 써야 거짓말이 안 된다. */}
+            <p>{`${email}로 안내 메일을 보냈습니다.`}</p>
+            <p className="text-sm text-gray-500">메일이 오지 않으면 가입 방법이 다를 수 있어요.</p>
           </>
         ) : (
           <>

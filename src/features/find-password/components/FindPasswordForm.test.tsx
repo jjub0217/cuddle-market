@@ -78,35 +78,36 @@ describe('① 이메일 입력', () => {
   })
 
   // #836 증상 ① — 소셜 가입 이메일
-  it('소셜 가입 이메일이면 ①에 머물고 실패 사유가 보인다', async () => {
+  // ⚠️ **아래 둘은 #849 2단계에서 뒤집힌 시험이다.** 예전에는 「소셜이면 ①에 머물고
+  //    사유가 보인다」를 지켰는데, 그 사유가 보이는 것이 곧 계정 열거였다 —
+  //    남의 이메일을 넣어 본 사람도 「이 사람은 카카오로 가입했다」를 알게 된다.
+  //    이제 서버가 셋 모두에 200 을 주므로 지켜야 할 것이 반대가 됐다.
+
+  it('소셜 가입 이메일이어도 다른 사람과 똑같이 ②로 간다', async () => {
     const user = userEvent.setup()
-    sendValidCode.mockRejectedValue(serverError('소셜 로그인 사용자는 비밀번호 재설정이 불가능합니다.'))
+    sendValidCode.mockResolvedValue(OK)
     render(<FindPasswordForm />)
 
     await user.type(screen.getByPlaceholderText(EMAIL_PLACEHOLDER), 'kakao@example.com')
     await user.click(screen.getByRole('button', { name: '인증코드 전송' }))
 
-    // 서버 문구를 그대로 띄우지 않는다 — 사람 말로 다시 쓰고 갈 길을 함께 준다
-    expect(await screen.findByText(/카카오 또는 구글로 가입한 계정이에요/)).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: '로그인하러 가기' })).toHaveAttribute('href', '/auth/login')
-    // 같은 말을 칸 아래에 또 띄우지 않는다
-    expect(screen.queryByText('소셜 로그인 사용자는 비밀번호 재설정이 불가능합니다.')).not.toBeInTheDocument()
-    expect(screen.queryByPlaceholderText(CODE_PLACEHOLDER)).not.toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '이메일 입력' })).toBeInTheDocument()
+    expect(await screen.findByPlaceholderText(CODE_PLACEHOLDER)).toBeInTheDocument()
+    // 어느 소셜인지 화면이 말하지 않는다 — 그 말이 곧 열거 통로였다
+    expect(screen.queryByText(/카카오/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/구글/)).not.toBeInTheDocument()
   })
 
-  // #836 증상 ② — 탈퇴한 계정
-  it('없는 이메일이면 ①에 머물고 실패 사유가 보인다', async () => {
+  it('가입되지 않은 이메일이어도 똑같이 ②로 간다', async () => {
     const user = userEvent.setup()
-    sendValidCode.mockRejectedValue(serverError('등록되지 않은 이메일입니다'))
+    sendValidCode.mockResolvedValue(OK)
     render(<FindPasswordForm />)
 
-    await user.type(screen.getByPlaceholderText(EMAIL_PLACEHOLDER), 'gone@example.com')
+    await user.type(screen.getByPlaceholderText(EMAIL_PLACEHOLDER), 'nobody@example.com')
     await user.click(screen.getByRole('button', { name: '인증코드 전송' }))
 
-    expect(await screen.findByText(/가입된 계정을 찾지 못했어요/)).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: '회원가입하러 가기' })).toHaveAttribute('href', '/auth/signup')
-    expect(screen.queryByPlaceholderText(CODE_PLACEHOLDER)).not.toBeInTheDocument()
+    expect(await screen.findByPlaceholderText(CODE_PLACEHOLDER)).toBeInTheDocument()
+    expect(screen.queryByText(/가입된 계정을 찾지 못했어요/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: '회원가입하러 가기' })).not.toBeInTheDocument()
   })
 
   it('전송에 성공해야 ②로 넘어간다', async () => {
@@ -115,7 +116,10 @@ describe('① 이메일 입력', () => {
     expect(screen.getByPlaceholderText(CODE_PLACEHOLDER)).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '이메일 인증' })).toBeInTheDocument()
     // 전송 성공은 헤더가 말한다. 칸 아래에 또 띄우면 같은 말이 두 줄이 된다
-    expect(screen.getByText(/인증코드를 발송했습니다/)).toBeInTheDocument()
+    // ⚠️ 「인증코드를 발송했습니다」가 아니다(#849). 여기 오는 사람 중에는 인증코드가
+    //    아니라 가입 방법 안내를 받는 사람도, 아무것도 못 받는 사람도 섞여 있다.
+    expect(screen.getByText(/안내 메일을 보냈습니다/)).toBeInTheDocument()
+    expect(screen.getByText(/메일이 오지 않으면 가입 방법이 다를 수 있어요/)).toBeInTheDocument()
     expect(screen.queryByText('인증 번호를 발송했습니다.')).not.toBeInTheDocument()
   })
 })
@@ -140,10 +144,12 @@ describe('② 이메일 인증', () => {
     const user = await goToStep2()
     await user.type(screen.getByPlaceholderText(CODE_PLACEHOLDER), '123456')
 
-    sendValidCode.mockRejectedValue(serverError('잠시 후 다시 시도해주세요.'))
+    // ⚠️ 서버가 갈라 말하는 문구를 일부러 넣는다 — 재전송 경로로도 새지 않는지 본다(#849)
+    sendValidCode.mockRejectedValue(serverError('카카오로 가입한 계정입니다.'))
     await user.click(screen.getByRole('button', { name: '재전송' }))
 
-    expect(await screen.findByText('잠시 후 다시 시도해주세요.')).toBeInTheDocument()
+    expect(await screen.findByText('인증코드 발송에 실패했어요. 잠시 후 다시 시도해주세요.')).toBeInTheDocument()
+    expect(screen.queryByText(/카카오/)).not.toBeInTheDocument()
     expect(screen.getByPlaceholderText(CODE_PLACEHOLDER)).toHaveValue('123456')
   })
 
@@ -158,7 +164,7 @@ describe('② 이메일 인증', () => {
     sendValidCode.mockResolvedValue(OK)
     await user.click(screen.getByRole('button', { name: '재전송' }))
 
-    expect(await screen.findByText(/인증코드를 발송했습니다/)).toBeInTheDocument()
+    expect(await screen.findByText(/안내 메일을 보냈습니다/)).toBeInTheDocument()
     expect(screen.queryByText('만료된 인증 코드입니다. 인증코드를 재발급 받아주세요.')).not.toBeInTheDocument()
   })
 
@@ -229,84 +235,26 @@ describe('인증코드 만료 시간', () => {
   })
 })
 
-describe('소셜 계정 안내', () => {
-  it('소셜 계정이면 「로그인하러 가기」 길을 함께 준다', async () => {
+// ⚠️ **예전의 「소셜 계정 안내」 묶음(다섯 시험)을 통째로 지웠다**(#849 2단계).
+//    그 다섯은 「막다른 길 박스가 뜨는가」·「어느 소셜인지 콕 집어 말하는가」를 지켰는데,
+//    그것이 바로 계정 열거였다. 지금은 그 박스 자체가 없다.
+//
+//    ⚠️ **친절이 사라진 게 아니라 메일로 옮겨 갔다.** 소셜로 가입한 사람에게는
+//       「카카오로 가입되어 있어요」가 메일로 간다. 그 확인은 서버 몫이라 여기서 못 한다.
+describe('계정 열거 차단', () => {
+  it('서버가 갈라 말해도 화면은 그 문구를 옮기지 않는다', async () => {
     const user = userEvent.setup()
-    sendValidCode.mockRejectedValue(serverError('소셜 로그인 사용자는 비밀번호 재설정이 불가능합니다.'))
+    // 아직 안 배포된 옛 서버가 400 으로 갈라 말하는 상황
+    sendValidCode.mockRejectedValue(serverError('카카오로 가입한 계정입니다. 카카오 로그인을 이용해주세요.'))
     render(<FindPasswordForm />)
 
     await user.type(screen.getByPlaceholderText(EMAIL_PLACEHOLDER), 'kakao@example.com')
     await user.click(screen.getByRole('button', { name: '인증코드 전송' }))
 
-    expect(await screen.findByText(/카카오 또는 구글로 가입한 계정/)).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: '로그인하러 가기' })).toHaveAttribute('href', '/auth/login')
-  })
-
-  it('그냥 없는 이메일이면 그 안내는 뜨지 않는다', async () => {
-    const user = userEvent.setup()
-    sendValidCode.mockRejectedValue(serverError('등록되지 않은 이메일입니다'))
-    render(<FindPasswordForm />)
-
-    await user.type(screen.getByPlaceholderText(EMAIL_PLACEHOLDER), 'gone@example.com')
-    await user.click(screen.getByRole('button', { name: '인증코드 전송' }))
-
-    expect(await screen.findByText(/가입된 계정을 찾지 못했어요/)).toBeInTheDocument()
-    expect(screen.queryByText(/카카오 또는 구글로 가입한 계정/)).not.toBeInTheDocument()
+    // ⚠️ 「결과」가 아니라 「원인」을 본다 — 서버 문구가 화면 어디에도 나오면 안 된다
+    expect(await screen.findByRole('heading', { name: '이메일 입력' })).toBeInTheDocument()
+    expect(screen.queryByText(/카카오/)).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: '로그인하러 가기' })).not.toBeInTheDocument()
-  })
-
-  it('막다른 길이면 인증코드 전송·로그인으로 돌아가기를 숨긴다', async () => {
-    const user = userEvent.setup()
-    sendValidCode.mockRejectedValue(serverError('카카오로 가입한 계정입니다. 카카오 로그인을 이용해주세요.'))
-    render(<FindPasswordForm />)
-
-    const emailInput = screen.getByPlaceholderText(EMAIL_PLACEHOLDER)
-    await user.type(emailInput, 'kakao@example.com')
-    await user.click(screen.getByRole('button', { name: '인증코드 전송' }))
-
-    // 남는 길은 하나뿐이다
-    expect(await screen.findByRole('link', { name: '로그인하러 가기' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '인증코드 전송' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: '로그인으로 돌아가기' })).not.toBeInTheDocument()
-
-    // 이메일을 고치면 원래대로 돌아온다 — 오타였을 수 있다
-    await user.clear(emailInput)
-    expect(screen.getByRole('button', { name: '인증코드 전송' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: '로그인으로 돌아가기' })).toBeInTheDocument()
-  })
-
-  it('서버가 어느 소셜인지 알려주면 콕 집어 말한다', async () => {
-    const user = userEvent.setup()
-    // 백엔드가 AuthProvider.displayName 을 담아 주는 새 문구
-    sendValidCode.mockRejectedValue(serverError('카카오로 가입한 계정입니다. 카카오 로그인을 이용해주세요.'))
-    render(<FindPasswordForm />)
-
-    await user.type(screen.getByPlaceholderText(EMAIL_PLACEHOLDER), 'kakao@example.com')
-    await user.click(screen.getByRole('button', { name: '인증코드 전송' }))
-
-    expect(await screen.findByText(/카카오로 가입한 계정이에요/)).toBeInTheDocument()
-    expect(screen.getByText(/비밀번호 대신 카카오 로그인을 이용해주세요/)).toBeInTheDocument()
-    // 「또는 구글」로 벌려 쓰지 않는다
-    expect(screen.queryByText(/카카오 또는 구글/)).not.toBeInTheDocument()
-  })
-
-  it('이메일을 고치면 앞서 뜬 안내가 사라진다', async () => {
-    const user = userEvent.setup()
-    sendValidCode.mockRejectedValue(serverError('소셜 로그인 사용자는 비밀번호 재설정이 불가능합니다.'))
-    render(<FindPasswordForm />)
-
-    const emailInput = screen.getByPlaceholderText(EMAIL_PLACEHOLDER)
-    await user.type(emailInput, 'kakao@example.com')
-    await user.click(screen.getByRole('button', { name: '인증코드 전송' }))
-    expect(await screen.findByText(/카카오 또는 구글로 가입한 계정이에요/)).toBeInTheDocument()
-
-    // 값을 고치면 그 값에 대한 판단은 무효다. 안 지우면 화면이 거짓말을 한다 —
-    // 다른 이메일을 넣었는데 「소셜 계정이에요」가 그대로 보였다(2026-08-05 신고).
-    await user.clear(emailInput)
-    expect(screen.queryByText(/카카오 또는 구글로 가입한 계정이에요/)).not.toBeInTheDocument()
-
-    await user.type(emailInput, 'other@example.com')
-    expect(screen.queryByText(/카카오 또는 구글로 가입한 계정이에요/)).not.toBeInTheDocument()
   })
 })
 
