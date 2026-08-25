@@ -8,6 +8,7 @@ import { fetchGraphQL } from '@/lib/api/graphql'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import LoadMoreFocusButton from '@/components/commons/LoadMoreFocusButton'
 import SkipToLoadMoreLink from '@/components/commons/SkipToLoadMoreLink'
+import SkipToSectionLink from '@/components/commons/SkipToSectionLink'
 import { PRODUCT_TYPE_TABS, PET_TYPE_TABS, type ProductTypeTabId, SORT_TYPE, type PetTypeTabId } from '@/constants/constants'
 import { PetTypeFilter } from './components/filter/PetTypeFilter'
 import { CategoryFilter } from './components/filter/CategoryFilter'
@@ -294,7 +295,15 @@ function Home() {
             md 부터는 원래 값(72)이 이미 헤더 높이와 같아 그대로 둔다. */}
         <div className={cn(PAGE_CONTAINER, 'pb-24 md:pt-18', 검색중이다 ? 'pt-22' : 'pt-12')}>
           <h1 className="sr-only">커들마켓</h1>
-          <div className="flex flex-col gap-6">
+          {/* ⚠️ `relative` 는 아래 건너뛰기 링크를 띄울 **기준 자리**다. 지우지 말 것 —
+              없으면 초점을 받은 링크가 페이지 맨 위로 날아간다. */}
+          <div className="relative flex flex-col gap-6">
+            {/* 필터를 건너뛰고 곧장 상품 목록으로 (#1072)
+                키보드만 쓰는 사람이 목록에 닿기까지 Tab 을 65번 눌러야 했다 —
+                품종 알약 41 · 카테고리 8 · 세부 필터 7 을 다 지나야 해서다.
+                ⚠️ **이 줄은 필터보다 앞에 있어야 뜻이 있다.** 아래로 옮기지 말 것.
+                ⚠️ 목록 안 카드를 건너뛰는 `SkipToLoadMoreLink`(아래)와 목적이 다르다. */}
+            <SkipToSectionLink targetId="home-product-list" label="필터 건너뛰고 상품 목록 보기" />
             {/* Pet category & filters section */}
             {/* ⚠️ **검색 중이면 이 줄의 「모습」이 달라진다.**
 
@@ -350,7 +359,17 @@ function Home() {
 
             {/* Product list section */}
             <SkipToLoadMoreLink targetId="home-products-load-more" hasNextPage={hasNextPage} />
-            <section aria-label="상품 목록" className="flex flex-col gap-6 pt-2 md:pt-0">
+            {/* ⚠️ `id` 와 `tabIndex={-1}` 은 위 건너뛰기 링크의 **목적지**다(#1072).
+                `tabIndex={-1}` 이 없으면 `<section>` 은 초점을 못 받아 링크가 헛돈다.
+                Tab 차례에는 안 낀다 — 프로그램으로 줄 때만 받는다.
+                ⚠️ `scroll-mt-22`(88px)는 **고정 헤더(72px)에 목록 머리가 가리지 않게** 두는
+                   빈칸이다. 72 + 숨통 16 = 88 — 위 `pt-22` 와 같은 셈법이다. */}
+            <section
+              aria-label="상품 목록"
+              id="home-product-list"
+              tabIndex={-1}
+              className="flex flex-col gap-6 scroll-mt-22 pt-2 md:pt-0"
+            >
               {/* <h2 className="heading-h4 text-gray-900">상품 목록</h2> */}
               {isLoading && allProducts.length === 0 ? (
                 <HomeSkeleton />
