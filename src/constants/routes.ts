@@ -43,6 +43,7 @@ export const ROUTES = {
   FIND_ACCOUNT: '/auth/find-account',
 
   // Legal
+  TERMS: '/terms',
   PRIVACY: '/privacy',
   ACCOUNT_DELETION: '/account-deletion',
 
