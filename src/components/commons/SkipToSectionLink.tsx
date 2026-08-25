@@ -1,5 +1,7 @@
 'use client'
 
+import { cn } from '@/lib/utils/cn'
+
 // 화면 앞쪽에 **매번 거쳐야 하는 덩어리**가 있을 때, 그것을 건너뛰고 곧장 본론으로
 // 보내는 **건너뛰기 링크**(skip link) — 웹 표준 관행이다.
 //
@@ -28,6 +30,11 @@
 //    (`:focus-visible:not(.focus-ring-custom)`)이 1.2px 테두리를 대신 그려 준다.
 //    여기서 또 그리면 두 겹이 되거나 두께가 다른 자리와 어긋난다(#1062).
 //
+// ⚠️ **뜨는 자리는 부르는 쪽이 바꿀 수 있다**(`className`). 기본값은 본문 안에 두는
+//    경우(홈)에 맞춰 놨는데, 고정 헤더와 같은 자리에 뜨는 경우(#1082 본문 바로가기)는
+//    **헤더(`Z_INDEX.HEADER` = z-30) 뒤에 숨는다.** 그럴 때 `focus:z-40` 을 넘긴다.
+//    `cn` 이 tailwind-merge 라 같은 갈래는 **뒤엣것이 이긴다.**
+//
 // ⚠️ **부모에 `relative` 가 있어야 한다.** 초점을 받았을 때 `absolute` 로 띄워서
 //    뒤 내용을 밀지 않게 하는데, 기준이 될 자리가 없으면 페이지 맨 위로 날아간다.
 interface SkipToSectionLinkProps {
@@ -35,13 +42,18 @@ interface SkipToSectionLinkProps {
   targetId: string
   /** 화면 낭독기가 읽고, 초점을 받으면 화면에도 보이는 말. 무엇을 건너뛰는지 적는다. */
   label: string
+  /** 뜨는 자리를 바꿀 때. 기본값과 같은 갈래를 주면 이쪽이 이긴다(예: `focus:z-40`). */
+  className?: string
 }
 
-export default function SkipToSectionLink({ targetId, label }: SkipToSectionLinkProps) {
+export default function SkipToSectionLink({ targetId, label, className }: SkipToSectionLinkProps) {
   return (
     <a
       href={`#${targetId}`}
-      className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-10 focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-600 focus:shadow-md"
+      className={cn(
+        'sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-10 focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-600 focus:shadow-md',
+        className
+      )}
       onClick={(event) => {
         event.preventDefault()
         const 목적지 = document.getElementById(targetId)
