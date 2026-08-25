@@ -18,6 +18,7 @@ import { RegionField } from '@/components/products/region-field';
 import { BirthDateField } from '@/components/signup/birth-date-field';
 import { Field, fieldStyles, messageStyles } from '@/components/signup/field';
 import { colors } from '@/constants/colors';
+import { ConsentCheckboxes, type ConsentState } from '@/components/signup/consent-checkboxes';
 import { fetchMe, updateMe } from '@/lib/profile';
 import { checkNicknameAvailable } from '@/lib/signup/api';
 import { useFieldScroll } from '@/lib/signup/use-field-scroll';
@@ -61,6 +62,15 @@ export default function SocialSignupScreen() {
   const [regionError, setRegionError] = useState<string | undefined>();
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // 필수 동의 둘(#1088). 이 화면은 폼 훅(`use-signup-form.ts`)을 안 쓰고 상태를 직접
+  // 들고 있어서 여기에 둔다. 동작은 같다 — 둘 다 켜져야 단추가 켜진다.
+  const [consents, setConsents] = useState<ConsentState>({ terms: false, privacy: false });
+  const hasAllConsents = consents.terms && consents.privacy;
+
+  const setConsent = useCallback((key: keyof ConsentState, next: boolean) => {
+    setConsents((prev) => ({ ...prev, [key]: next }));
+    setFormError(null);
+  }, []);
 
   // 안드로이드 하드웨어 뒤로가기를 삼킨다. true를 돌려주면 화면이 안 닫힌다.
   // (`app/signup.tsx` 의 `useFocusEffect`+`BackHandler` 와 같은 방식.
@@ -140,6 +150,13 @@ export default function SocialSignupScreen() {
   const handleSubmit = async () => {
     if (submitting) return;
 
+    // ⚠️ 단추를 끄는 것만으로는 못 막는다 — 까닭은 `use-signup-form.ts` 의 같은 자리에
+    //    적었다. 여기서 막아야 저장 API 가 정말 안 불린다.
+    if (!consents.terms || !consents.privacy) {
+      setFormError('이용약관과 개인정보처리방침에 동의해주세요.');
+      return;
+    }
+
     // 어느 칸이 문제인지 화면에 다 표시한다. 첫 오류에서 멈추면 눌러 볼 때마다 하나씩 나온다.
     const nicknameProblem = validateNickname(nickname);
     const birthProblem = validateBirthDate(birth.year, birth.month, birth.day);
@@ -166,6 +183,8 @@ export default function SocialSignupScreen() {
         // ⚠️ 이 화면에서 안 고치는 값들. 그대로 되돌려 보내야 서버가 안 지운다
         profileImageUrl: keep.profileImageUrl,
         introduction: keep.introduction,
+        termsAgreed: true,
+        privacyAgreed: true,
       });
       // 뒤로 갈 곳이 없는 화면이라 replace로 갈아탄다. '/'는 홈과 마이 양쪽을
       // 가리켜 어디로 갈지 정해지지 않는다(`login.tsx` 의 `close` 와 같은 이유).
@@ -263,16 +282,19 @@ export default function SocialSignupScreen() {
                 />
               </View>
 
+              {/* 동의는 가입 단추 바로 위에 둔다 — 앱 일반 가입·웹 두 화면과 같은 자리다. */}
+              <ConsentCheckboxes value={consents} onChange={setConsent} />
+
               {formError ? <Text style={messageStyles.error}>{formError}</Text> : null}
 
               <Pressable
                 onPress={() => void handleSubmit()}
-                disabled={submitting}
+                disabled={submitting || !hasAllConsents}
                 accessibilityRole="button"
                 style={({ pressed }) => [
                   styles.submit,
                   pressed && styles.submitPressed,
-                  submitting && styles.submitDisabled,
+                  (submitting || !hasAllConsents) && styles.submitDisabled,
                 ]}
               >
                 {submitting ? (

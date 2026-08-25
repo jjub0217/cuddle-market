@@ -34,6 +34,18 @@ function fillEverything(form: Form) {
   form.setValue('addressGugun', '강남구');
 }
 
+/**
+ * 필수 동의 둘을 켠다(#1088).
+ *
+ * ⚠️ **fillEverything 안에 안 넣었다.** 「동의만 빼고 전부 통과한」 상태를 만들 수
+ *    있어야 동의 자물쇠를 따로 시험할 수 있기 때문이다. 한 데 묶어 두면
+ *    자물쇠를 빼도 다른 검증이 먼저 막아서 **시험이 그대로 통과해 버린다.**
+ */
+function agreeAll(form: Form) {
+  form.setConsent('terms', true);
+  form.setConsent('privacy', true);
+}
+
 /** 이메일 인증을 끝까지 통과시킨다. */
 async function passVerification(result: { current: Form }) {
   await act(async () => result.current.setValue('email', 'me@cuddle.com'));
@@ -235,6 +247,7 @@ describe('submit', () => {
     const { result } = await renderHook(() => useSignupForm());
     await passVerification(result);
     await act(async () => fillEverything(result.current));
+    await act(async () => agreeAll(result.current));
     await act(async () => {
       await result.current.checkNickname();
     });
@@ -253,6 +266,8 @@ describe('submit', () => {
       birthDate: '2000-03-07',
       addressSido: '서울특별시',
       addressGugun: '강남구',
+      termsAgreed: true,
+      privacyAgreed: true,
     });
     expect(mockedSession.login).toHaveBeenCalledWith('me@cuddle.com', 'Abcdef1!xy');
   });
@@ -264,6 +279,7 @@ describe('submit', () => {
     const { result } = await renderHook(() => useSignupForm());
     await passVerification(result);
     await act(async () => fillEverything(result.current));
+    await act(async () => agreeAll(result.current));
     await act(async () => {
       await result.current.checkNickname();
     });
@@ -313,5 +329,85 @@ describe('submit', () => {
     expect(ok).toBe(false);
     expect(mockedApi.signUp).not.toHaveBeenCalled();
     expect(result.current.errors.addressSido).toBe('거주지를 선택해주세요');
+  });
+});
+
+describe('필수 동의 (#1088)', () => {
+  // ⚠️ **여기 시험들은 「동의만 빼고 전부 통과한」 상태에서 돈다.**
+  //    (passVerification + fillEverything + checkNickname 을 다 거친다)
+  //
+  //    이게 이 시험의 핵심이다. 다른 검증이 먼저 막고 있는 상태에서 재면,
+  //    동의 자물쇠를 통째로 빼도 시험이 그대로 통과해 **회귀를 못 잡는다.**
+  //    「단추가 회색이 됐다」만 보는 시험도 같은 이유로 모자라다 — 단추는 화면의
+  //    일이고, submit()은 프로그램에서도 불린다.
+  async function 동의만빼고전부(result: { current: Form }) {
+    await passVerification(result);
+    await act(async () => fillEverything(result.current));
+    await act(async () => {
+      await result.current.checkNickname();
+    });
+  }
+
+  it('동의 전에는 canSubmit 이 꺼져 있다', async () => {
+    const { result } = await renderHook(() => useSignupForm());
+    await 동의만빼고전부(result);
+
+    expect(result.current.canSubmit).toBe(false);
+  });
+
+  it('하나만 동의해도 canSubmit 이 안 켜진다', async () => {
+    const { result } = await renderHook(() => useSignupForm());
+    await 동의만빼고전부(result);
+
+    await act(async () => result.current.setConsent('terms', true));
+    expect(result.current.canSubmit).toBe(false);
+
+    await act(async () => result.current.setConsent('privacy', true));
+    expect(result.current.canSubmit).toBe(true);
+  });
+
+  it('동의를 안 하면 submit 이 가입 API 를 아예 안 부른다', async () => {
+    const { result } = await renderHook(() => useSignupForm());
+    await 동의만빼고전부(result);
+
+    let ok = true;
+    await act(async () => {
+      ok = await result.current.submit();
+    });
+
+    // ← 이 줄이 진짜 자물쇠다. 단추가 아니라 **서버를 안 불렀는가**를 본다.
+    expect(mockedApi.signUp).not.toHaveBeenCalled();
+    expect(ok).toBe(false);
+    expect(result.current.formError).toBe('이용약관과 개인정보처리방침에 동의해주세요.');
+  });
+
+  it('약관만 동의하고 방침을 안 하면 그래도 안 부른다', async () => {
+    const { result } = await renderHook(() => useSignupForm());
+    await 동의만빼고전부(result);
+    await act(async () => result.current.setConsent('terms', true));
+
+    await act(async () => {
+      await result.current.submit();
+    });
+
+    expect(mockedApi.signUp).not.toHaveBeenCalled();
+  });
+
+  it('동의를 껐다 켜면 다시 보낼 수 있다', async () => {
+    const { result } = await renderHook(() => useSignupForm());
+    await 동의만빼고전부(result);
+    await act(async () => agreeAll(result.current));
+    await act(async () => result.current.setConsent('terms', false));
+
+    expect(result.current.canSubmit).toBe(false);
+
+    await act(async () => result.current.setConsent('terms', true));
+    await act(async () => {
+      await result.current.submit();
+    });
+
+    expect(mockedApi.signUp).toHaveBeenCalledWith(
+      expect.objectContaining({ termsAgreed: true, privacyAgreed: true })
+    );
   });
 });
