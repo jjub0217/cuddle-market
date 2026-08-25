@@ -57,208 +57,50 @@ describe('1단계 — 인증코드 보내기', () => {
     expect(result.current.secondsLeft).toBeGreaterThan(0);
   });
 
-  it('소셜 계정이면 1단계에 머물고 blocked 가 social 이 된다', async () => {
+  // ⚠️ **아래 셋은 #849 2단계에서 뒤집힌 시험이다.** 예전에는 「소셜이면 1단계에 머물고
+  //    blocked 가 social 이 된다」를 지켰는데, 그 동작이 곧 계정 열거였다 — 화면이
+  //    「이 이메일은 카카오로 가입했다」를 말해 줬다는 뜻이기 때문이다.
+  //
+  //    이제 서버가 없는 이메일·소셜·LOCAL 셋 모두에 200 을 주므로, 앱은 **누가 왔는지
+  //    알 수 없고 알아서도 안 된다.** 그래서 지켜야 할 것이 반대가 됐다 —
+  //    「구분하지 않고 똑같이 2단계로 간다」.
+
+  it('서버가 성공을 주면 누구든 똑같이 2단계로 간다 — 소셜인지 아닌지 알 수 없다', async () => {
     const { result } = await renderHook(() => useFindPassword());
-    await act(async () => result.current.setValue('email', 'me@cuddle.com'));
-    mockedApi.sendResetCode.mockRejectedValue(
-      new api.PasswordResetRejectedError('소셜 로그인 사용자는 비밀번호 재설정이 불가능합니다.', 'social')
-    );
+    await act(async () => result.current.setValue('email', 'social-user@cuddle.com'));
+    mockedApi.sendResetCode.mockResolvedValue(undefined);
     await act(async () => {
       await result.current.sendCode();
     });
 
-    expect(result.current.step).toBe(1);
-    expect(result.current.blocked).toBe('social');
-    expect(result.current.errors.email).toBeUndefined(); // 박스가 말하므로 칸 아래엔 안 띄운다
-  });
-
-  it('없는 이메일이면 1단계에 머물고 blocked 가 notFound 가 된다', async () => {
-    const { result } = await renderHook(() => useFindPassword());
-    await act(async () => result.current.setValue('email', 'nobody@cuddle.com'));
-    mockedApi.sendResetCode.mockRejectedValue(
-      new api.PasswordResetRejectedError('등록되지 않은 이메일입니다.', 'unknown')
-    );
-    await act(async () => {
-      await result.current.sendCode();
-    });
-
-    expect(result.current.step).toBe(1);
-    expect(result.current.blocked).toBe('notFound');
+    expect(result.current.step).toBe(2);
     expect(result.current.errors.email).toBeUndefined();
   });
 
-  it('막힌 뒤 이메일을 고치면 안내가 사라진다', async () => {
+  it('가입되지 않은 이메일이어도 똑같이 2단계로 간다', async () => {
+    const { result } = await renderHook(() => useFindPassword());
+    await act(async () => result.current.setValue('email', 'nobody@cuddle.com'));
+    mockedApi.sendResetCode.mockResolvedValue(undefined);
+    await act(async () => {
+      await result.current.sendCode();
+    });
+
+    expect(result.current.step).toBe(2);
+    expect(result.current.errors.email).toBeUndefined();
+  });
+
+  it('진짜 탈이 나면 1단계에 머물고 뭉뚱그린 오류만 말한다 — 까닭은 안 알려준다', async () => {
     const { result } = await renderHook(() => useFindPassword());
     await act(async () => result.current.setValue('email', 'me@cuddle.com'));
-    mockedApi.sendResetCode.mockRejectedValue(
-      new api.PasswordResetRejectedError('소셜 로그인 사용자는 비밀번호 재설정이 불가능합니다.', 'social')
-    );
-    await act(async () => {
-      await result.current.sendCode();
-    });
-    expect(result.current.blocked).toBe('social');
-
-    await act(async () => result.current.setValue('email', 'other@cuddle.com'));
-    expect(result.current.blocked).toBeNull();
-  });
-});
-
-describe('2단계 — 코드 확인', () => {
-  it('코드가 맞으면 3단계로 간다', async () => {
-    const { result } = await renderHook(() => useFindPassword());
-    await reachStep3(result);
-    expect(result.current.step).toBe(3);
-  });
-
-  it('코드가 틀리면 2단계에 그대로 있는다', async () => {
-    const { result } = await renderHook(() => useFindPassword());
-    await reachStep2(result);
-
-    await act(async () => result.current.setValue('code', '000000'));
-    mockedApi.verifyResetCode.mockResolvedValue(false);
-    await act(async () => {
-      await result.current.submitCode();
-    });
-
-    expect(result.current.step).toBe(2);
-    expect(result.current.errors.code).toBeTruthy();
-  });
-
-  it('코드가 비면 서버를 부르지 않는다', async () => {
-    const { result } = await renderHook(() => useFindPassword());
-    await reachStep2(result);
-
-    await act(async () => {
-      await result.current.submitCode();
-    });
-
-    expect(mockedApi.verifyResetCode).not.toHaveBeenCalled();
-    expect(result.current.errors.code).toBe('전송된 코드를 입력해주세요');
-  });
-
-  it('재전송이 실패해도 2단계에 머문다 — 넣던 코드를 잃으면 안 된다', async () => {
-    const { result } = await renderHook(() => useFindPassword());
-    await reachStep2(result);
-
-    mockedApi.sendResetCode.mockRejectedValue(new Error('네트워크'));
+    mockedApi.sendResetCode.mockRejectedValue(new Error('인증코드 발송에 실패했어요 (HTTP 500)'));
     await act(async () => {
       await result.current.sendCode();
     });
 
-    expect(result.current.step).toBe(2);
-  });
-});
-
-describe('3단계 — 새 비밀번호', () => {
-  it('규칙에 어긋나면 서버를 부르지 않는다', async () => {
-    const { result } = await renderHook(() => useFindPassword());
-    await reachStep3(result);
-
-    await act(async () => result.current.setValue('password', 'short'));
-    await act(async () => result.current.setValue('passwordConfirm', 'short'));
-    await act(async () => {
-      await result.current.submitNewPassword();
-    });
-
-    expect(mockedApi.resetPassword).not.toHaveBeenCalled();
-    expect(result.current.errors.password).toBeTruthy();
-  });
-
-  it('두 칸이 다르면 서버를 부르지 않는다', async () => {
-    const { result } = await renderHook(() => useFindPassword());
-    await reachStep3(result);
-
-    await act(async () => result.current.setValue('password', 'Abcdef1!xy'));
-    await act(async () => result.current.setValue('passwordConfirm', 'Abcdef1!zz'));
-    await act(async () => {
-      await result.current.submitNewPassword();
-    });
-
-    expect(mockedApi.resetPassword).not.toHaveBeenCalled();
-    expect(result.current.errors.passwordConfirm).toBeTruthy();
-  });
-
-  it('성공하면 true 를 주고 셋을 그대로 서버에 보낸다', async () => {
-    const { result } = await renderHook(() => useFindPassword());
-    await reachStep3(result);
-
-    await act(async () => result.current.setValue('password', 'Abcdef1!xy'));
-    await act(async () => result.current.setValue('passwordConfirm', 'Abcdef1!xy'));
-    mockedApi.resetPassword.mockResolvedValue(undefined);
-
-    let ok = false;
-    await act(async () => {
-      ok = await result.current.submitNewPassword();
-    });
-
-    expect(ok).toBe(true);
-    expect(mockedApi.resetPassword).toHaveBeenCalledWith({
-      email: 'me@cuddle.com',
-      newPassword: 'Abcdef1!xy',
-      confirmPassword: 'Abcdef1!xy',
-    });
-  });
-
-  it('서버가 거절하면 false 를 주고 그 문구를 보여준다', async () => {
-    const { result } = await renderHook(() => useFindPassword());
-    await reachStep3(result);
-
-    await act(async () => result.current.setValue('password', 'Abcdef1!xy'));
-    await act(async () => result.current.setValue('passwordConfirm', 'Abcdef1!xy'));
-    mockedApi.resetPassword.mockRejectedValue(
-      new api.PasswordResetRejectedError('이메일 인증이 필요합니다.', 'unknown')
-    );
-
-    let ok = true;
-    await act(async () => {
-      ok = await result.current.submitNewPassword();
-    });
-
-    expect(ok).toBe(false);
-    expect(result.current.formError).toBe('이메일 인증이 필요합니다.');
-  });
-});
-
-describe('뒤로', () => {
-  it('2단계에서 뒤로 가면 1단계로 돌아가고 코드가 지워진다', async () => {
-    const { result } = await renderHook(() => useFindPassword());
-    await reachStep2(result);
-    await act(async () => result.current.setValue('code', '123456'));
-
-    await act(async () => result.current.goPreviousStep());
-
     expect(result.current.step).toBe(1);
-    expect(result.current.values.code).toBe('');
-    expect(result.current.values.email).toBe('me@cuddle.com');
-  });
-
-  it('3단계에서 뒤로 가면 2단계로 돌아간다', async () => {
-    const { result } = await renderHook(() => useFindPassword());
-    await reachStep3(result);
-
-    await act(async () => result.current.goPreviousStep());
-
-    expect(result.current.step).toBe(2);
-  });
-});
-
-describe('타이머', () => {
-  it('5분이 지나면 2단계에서 1단계로 돌아간다', async () => {
-    jest.useFakeTimers();
-    const { result } = await renderHook(() => useFindPassword());
-    await reachStep2(result);
-
-    // ⚠️ waitFor 를 쓰지 않는다. 가짜 타이머를 켜 두면 waitFor 가 기다리는 시계도 멈춰 있다.
-    //    act 로 시간을 감으면 그 안에서 상태와 효과가 다 흘러가므로 바로 확인하면 된다.
-    // ⚠️ 비동기 act 여야 한다. act(() => …) 로 감으면 시계가 안 돈다
-    //    (가입 시험도 await act(async () => …) 로 쓴다)
-    await act(async () => {
-      jest.advanceTimersByTime(300_000);
-    });
-
-    expect(result.current.secondsLeft).toBe(0);
-    expect(result.current.step).toBe(1);
-    expect(result.current.values.code).toBe('');
-    jest.useRealTimers();
+    expect(result.current.errors.email).toBe('인증코드 발송에 실패했어요. 잠시 후 다시 시도해주세요.');
+    // ⚠️ 서버가 준 문구(HTTP 500)를 그대로 뿌리지 않는다. 서버 문구가 화면에 나가면
+    //    나중에 서버가 갈라 말하기 시작했을 때 그것이 그대로 새어 나간다.
+    expect(result.current.errors.email).not.toContain('500');
   });
 });

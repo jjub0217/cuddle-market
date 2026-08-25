@@ -69,10 +69,13 @@ export async function sendResetCode(email: string): Promise<void> {
   });
   if (res.ok) return;
 
-  const body = await readEnvelope<null>(res);
-  if (res.status === 400 && body.message) {
-    throw new PasswordResetRejectedError(body.message, classify(body.message));
-  }
+  // ⚠️ **서버 문구로 갈래를 만들지 않는다**(#849 2단계). 예전에는 400 문구를 뒤져서
+  //    「카카오로 가입한 계정」·「가입된 계정 없음」을 가렸는데, 그 갈래가 곧 계정 열거였다.
+  //    이제 서버는 없는 이메일·소셜·LOCAL 셋 모두에 200 을 준다.
+  //    여기까지 오면 진짜 탈(500 등)이므로 뭉뚱그린 오류만 던진다.
+  //
+  // ⚠️ resetPassword() 쪽의 같은 갈래는 **그대로 뒀다.** 거기는 인증코드를 통과한
+  //    사람만 오는 자리라 갈라 말해도 안 샌다.
   throw new Error(`인증코드 발송에 실패했어요 (HTTP ${res.status})`);
 }
 
