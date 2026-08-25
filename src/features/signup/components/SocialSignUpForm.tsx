@@ -2,7 +2,7 @@
 
 import Button from '@/components/commons/button/Button'
 import AddressField from '@/components/commons/AddressField'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { type Province } from '@/constants/cities'
 import { useState } from 'react'
 import { BirthDateField } from './BirthDateField'
@@ -15,12 +15,15 @@ import type { ToastType } from '@/types/toast'
 import type { SocialSignUpRequestData } from '@/types/auth'
 import { api } from '@/lib/api/api'
 import { NicknameField } from './NicknameField'
+import { ConsentFields } from './ConsentFields'
 
 export interface SocialSignUpFormValues {
   birthDate: string
   nickname: string
   addressSido: Province | ''
   addressGugun: string
+  agreeTerms: boolean
+  agreePrivacy: boolean
 }
 
 export function SocialSignUpForm() {
@@ -49,10 +52,16 @@ export function SocialSignUpForm() {
       birthDate: '',
       addressSido: '',
       addressGugun: '',
+      agreeTerms: false,
+      agreePrivacy: false,
     },
   })
   const [isNicknameVerified, setIsNicknameVerified] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // 동의 둘을 다 해야 가입 단추가 켜진다(#1088). 일반 가입과 같은 방식이다.
+  const [agreeTerms, agreePrivacy] = useWatch({ control, name: ['agreeTerms', 'agreePrivacy'] })
+  const hasAllConsents = agreeTerms === true && agreePrivacy === true
   const [signupNotification, setSignupNotification] = useState<{ message: string; type: ToastType } | null>(null)
   const router = useRouter()
 
@@ -62,6 +71,11 @@ export function SocialSignUpForm() {
   }>({ status: 'idle', message: '' })
 
   const onSubmit = async (data: SocialSignUpFormValues) => {
+    // ⚠️ 단추를 끄는 것만으로는 못 막는다 — 까닭은 SignUpForm.tsx 의 같은 자리에 적었다.
+    if (!data.agreeTerms || !data.agreePrivacy) {
+      return
+    }
+
     let hasError = false
 
     if (checkResult.status === 'error') {
@@ -85,6 +99,8 @@ export function SocialSignUpForm() {
       birthDate: data.birthDate,
       addressSido: data.addressSido,
       addressGugun: data.addressGugun,
+      termsAgreed: true,
+      privacyAgreed: true,
     }
 
     try {
@@ -130,6 +146,7 @@ export function SocialSignUpForm() {
           />
           <AddressField<SocialSignUpFormValues> control={control} setValue={setValue} primaryName="addressSido" secondaryName="addressGugun" />
           <BirthDateField control={control} />
+          <ConsentFields<SocialSignUpFormValues> register={register} />
         </div>
         <AnimatePresence>
           {signupNotification ? (
@@ -138,7 +155,7 @@ export function SocialSignUpForm() {
             </InlineNotification>
           ) : null}
         </AnimatePresence>
-        <Button size="md" className="bg-primary-600 w-full cursor-pointer text-white" type="submit" disabled={isSubmitting}>
+        <Button size="md" className="bg-primary-600 w-full cursor-pointer text-white" type="submit" disabled={isSubmitting || !hasAllConsents}>
           {isSubmitting ? '가입 중...' : '회원가입'}
         </Button>
       </fieldset>

@@ -9,6 +9,7 @@ import {
   signUp,
   verifyCode,
 } from './api';
+import type { ConsentState } from '@/components/signup/consent-checkboxes';
 import {
   formatBirthDate,
   passwordRules,
@@ -57,6 +58,10 @@ export function useSignupForm() {
   // 아무 표시가 없으면 앱이 멈춘 것처럼 보인다(2026-08-04 실기기).
   const [sendingCode, setSendingCode] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  // 필수 동의 둘(#1088). `values` 에 안 넣는 까닭: `SignupValues` 는 전부 글자라
+  // `setValue(key, value: string)` 한 손잡이로 다룬다. 참·거짓을 거기 섞으면
+  // 그 손잡이의 타입이 헐거워진다. 따로 들고 따로 바꾼다.
+  const [consents, setConsents] = useState<ConsentState>({ terms: false, privacy: false });
 
   // 화면이 사라진 뒤 setState가 불리지 않게 정리한다.
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -75,6 +80,11 @@ export function useSignupForm() {
 
     // 닉네임을 고치면 확인이 무효가 된다. 안 그러면 확인한 적 없는 닉네임으로 가입한다.
     if (key === 'nickname') setNicknameChecked(false);
+  }, []);
+
+  const setConsent = useCallback((key: keyof ConsentState, next: boolean) => {
+    setConsents((prev) => ({ ...prev, [key]: next }));
+    setFormError(null);
   }, []);
 
   const startTimer = useCallback(() => {
@@ -206,8 +216,13 @@ export function useSignupForm() {
       validateNickname(values.nickname) === null &&
       validateBirthDate(values.birthYear, values.birthMonth, values.birthDay) === null &&
       values.addressSido.length > 0 &&
-      values.addressGugun.length > 0,
-    [canGoNext, nicknameChecked, values]
+      values.addressGugun.length > 0 &&
+      // 동의 둘을 다 해야 켜진다(#1088). 화면이 아니라 여기서 엮는 까닭:
+      // 이미 `canSubmit` 이 「가입할 수 있는가」를 혼자 판단하고 있어, 화면에 조건을
+      // 덧붙이면 판단하는 곳이 둘로 갈린다.
+      consents.terms &&
+      consents.privacy,
+    [canGoNext, nicknameChecked, values, consents]
   );
 
   const submit = useCallback(async (): Promise<boolean> => {
@@ -237,6 +252,13 @@ export function useSignupForm() {
       return false;
     }
 
+    // ⚠️ **단추를 끄는 것만으로는 못 막는다.** `disabled` 는 화면의 일이고 submit()은
+    //    프로그램에서도 불린다. 여기서 막아야 가입 API 가 정말 안 불린다.
+    if (!consents.terms || !consents.privacy) {
+      setFormError('이용약관과 개인정보처리방침에 동의해주세요.');
+      return false;
+    }
+
     setSubmitting(true);
     setFormError(null);
     const email = values.email.trim();
@@ -250,6 +272,8 @@ export function useSignupForm() {
         birthDate: formatBirthDate(values.birthYear, values.birthMonth, values.birthDay),
         addressSido: values.addressSido,
         addressGugun: values.addressGugun,
+        termsAgreed: true,
+        privacyAgreed: true,
       });
 
       // 웹과 같이 가입 직후 로그인해 세션을 만든다(`SignUpForm.tsx` 의 `onSubmit`).
@@ -267,7 +291,7 @@ export function useSignupForm() {
     } finally {
       setSubmitting(false);
     }
-  }, [submitting, values, verification, nicknameChecked]);
+  }, [submitting, values, verification, nicknameChecked, consents]);
 
   return {
     values,
@@ -283,6 +307,8 @@ export function useSignupForm() {
     changeEmail,
     nicknameChecked,
     checkNickname,
+    consents,
+    setConsent,
     canSubmit,
     canGoNext,
     submitting,

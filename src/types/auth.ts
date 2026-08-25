@@ -45,6 +45,15 @@ export interface SignUpRequestData {
   birthDate: string
   addressSido: Province | ''
   addressGugun: string
+  /**
+   * 필수 동의 둘(#1088). 서버가 이 값을 보고 동의 시각과 약관 판을 스스로 찍는다.
+   *
+   * ⚠️ 시각·판을 화면에서 만들어 보내지 않는다. 보내면 바꿔치기할 수 있고,
+   *    배포 시차로 화면이 아는 판과 서버가 가진 판이 어긋난다.
+   *    화면은 「동의했다」만 말하고, 무엇에 언제 동의했는지는 서버가 적는다.
+   */
+  termsAgreed: boolean
+  privacyAgreed: boolean
 }
 
 export interface SocialSignUpRequestData {
@@ -52,6 +61,9 @@ export interface SocialSignUpRequestData {
   birthDate: string
   addressSido: Province | ''
   addressGugun: string
+  /** 소셜 가입도 같은 이용계약이라 똑같이 받는다. 위 주석 참고. */
+  termsAgreed: boolean
+  privacyAgreed: boolean
 }
 
 export interface SignUpResponse {

@@ -81,6 +81,15 @@ export interface UpdateMeInput {
   /** 없으면 null 을 **명시해서** 보낸다. 키를 빠뜨리면 서버가 지운다 */
   profileImageUrl: string | null;
   introduction: string | null;
+  /**
+   * 소셜 가입을 마칠 때만 보내는 필수 동의 둘(#1088).
+   *
+   * ⚠️ **선택으로 둔 까닭**: 이 손잡이는 프로필 수정(`app/profile-edit.tsx`)도 쓴다.
+   *    필수로 만들면 그쪽이 깨지고, 무엇보다 **프로필을 고칠 때마다 동의를 다시
+   *    보내는** 이상한 일이 된다. 동의는 이용계약을 맺을 때 한 번이다.
+   */
+  termsAgreed?: boolean;
+  privacyAgreed?: boolean;
 }
 
 export async function updateMe(input: UpdateMeInput): Promise<void> {
