@@ -20,6 +20,14 @@ export interface SignUpInput {
   birthDate: string;
   addressSido: string;
   addressGugun: string;
+  /**
+   * 필수 동의 둘(#1088). 웹 `types/auth.ts` 의 `SignUpRequestData` 와 같은 이름이다.
+   *
+   * ⚠️ 동의 시각·약관 판은 **보내지 않는다.** 서버가 스스로 찍는다 — 화면이 만들어
+   *    보내면 바꿔치기할 수 있고, 배포 시차로 화면이 아는 판과 서버 판이 어긋난다.
+   */
+  termsAgreed: boolean;
+  privacyAgreed: boolean;
 }
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };

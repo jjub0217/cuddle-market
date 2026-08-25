@@ -2,7 +2,7 @@
 
 import Button from '@/components/commons/button/Button'
 import AddressField from '@/components/commons/AddressField'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { type Province } from '@/constants/cities'
 import { useState } from 'react'
 import { NameField } from './NameField'
@@ -10,6 +10,7 @@ import { NicknameField } from './NicknameField'
 import { EmailValidCode } from './EmailValidCode'
 import { PasswordField } from './PasswordField'
 import { BirthDateField } from './BirthDateField'
+import { ConsentFields } from './ConsentFields'
 import { login, signup } from '@/lib/api/auth'
 import type { SignUpRequestData } from '@/types'
 import { useRouter } from 'next/navigation'
@@ -32,6 +33,8 @@ export interface SignUpFormValues {
   birthDate: string
   addressSido: Province | ''
   addressGugun: string
+  agreeTerms: boolean
+  agreePrivacy: boolean
 }
 
 export function SignUpForm() {
@@ -54,6 +57,8 @@ export function SignUpForm() {
       birthDate: '',
       addressSido: '',
       addressGugun: '',
+      agreeTerms: false,
+      agreePrivacy: false,
     },
   })
 
@@ -68,9 +73,25 @@ export function SignUpForm() {
   }>({ status: 'idle', message: '' })
   const router = useRouter()
 
+  // 동의 둘을 다 해야 가입 단추가 켜진다(#1088).
+  //
+  // `watch()` 가 아니라 `useWatch` 를 쓰는 까닭: 이 폼은 칸이 아홉이라 `watch()` 를 쓰면
+  // 한 글자 칠 때마다 폼 전체가 다시 그려진다. 이름을 집어 주면 그 둘이 바뀔 때만 그린다.
+  const [agreeTerms, agreePrivacy] = useWatch({ control, name: ['agreeTerms', 'agreePrivacy'] })
+  const hasAllConsents = agreeTerms === true && agreePrivacy === true
+
   const { handleLogin } = useUserStore()
 
   const onSubmit = async (data: SignUpFormValues) => {
+    // ⚠️ **단추를 끄는 것만으로는 못 막는다.** `disabled` 는 화면의 일이고, 폼은
+    //    엔터키로도 프로그램 호출로도 제출된다. 여기서 한 번 더 막아야
+    //    가입 API 가 정말 안 불린다.
+    //    (ConsentFields 의 `required` 가 handleSubmit 단계에서 이미 막지만,
+    //     그 등록을 누가 지워도 이 줄이 남아 있으면 가입은 안 일어난다)
+    if (!data.agreeTerms || !data.agreePrivacy) {
+      return
+    }
+
     let hasError = false
 
     if (checkResult.status === 'error') {
@@ -105,6 +126,8 @@ export function SignUpForm() {
       birthDate: data.birthDate,
       addressSido: data.addressSido,
       addressGugun: data.addressGugun,
+      termsAgreed: true,
+      privacyAgreed: true,
     }
 
     try {
@@ -177,6 +200,7 @@ export function SignUpForm() {
             labelClass="text-sm"
             layoutClass="gap-0"
           />
+          <ConsentFields<SignUpFormValues> register={register} />
         </div>
         <AnimatePresence>
           {signupNotification ? (
@@ -189,7 +213,7 @@ export function SignUpForm() {
           size="md"
           className="bg-primary-600 hover:bg-primary-700 w-full cursor-pointer text-white transition-colors"
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || !hasAllConsents}
         >
           {isSubmitting ? '가입 중...' : '회원가입'}
         </Button>

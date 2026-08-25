@@ -92,6 +92,9 @@ describe('signUp', () => {
     birthDate: '2000-03-07',
     addressSido: '서울특별시',
     addressGugun: '강남구',
+    // 필수 동의 둘(#1088). 화면이 참으로만 보내고 시각·판은 서버가 찍는다.
+    termsAgreed: true,
+    privacyAgreed: true,
   };
 
   it('성공하면 아무것도 던지지 않는다', async () => {

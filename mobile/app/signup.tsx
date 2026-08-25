@@ -18,6 +18,7 @@ import { AddressField } from '@/components/signup/address-field';
 import { BirthDateField } from '@/components/signup/birth-date-field';
 import { EmailVerification } from '@/components/signup/email-verification';
 import { Field, fieldStyles, messageStyles } from '@/components/signup/field';
+import { ConsentCheckboxes } from '@/components/signup/consent-checkboxes';
 import { PasswordChecklist } from '@/components/signup/password-checklist';
 import { colors } from '@/constants/colors';
 import { useFieldScroll } from '@/lib/signup/use-field-scroll';
@@ -229,6 +230,10 @@ export default function SignupScreen() {
               <View onLayout={registerField('address')}>
                 <AddressField form={form} onOpen={blurFields} />
               </View>
+
+              {/* 동의는 가입 단추 바로 위에 둔다 — 누르기 직전에 무엇에 동의하는지
+                  보여야 한다. 웹 두 화면도 마지막 칸 다음이다. */}
+              <ConsentCheckboxes value={form.consents} onChange={form.setConsent} />
 
               {form.formError ? <Text style={messageStyles.error}>{form.formError}</Text> : null}
 
