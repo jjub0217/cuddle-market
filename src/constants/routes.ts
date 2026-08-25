@@ -40,6 +40,7 @@ export const ROUTES = {
   SIGNUP: '/auth/signup',
   SOCIAL_SIGNUP: '/auth/social-signup',
   FIND_PASSWORD: '/auth/find-password',
+  FIND_ACCOUNT: '/auth/find-account',
 
   // Legal
   TERMS: '/terms',

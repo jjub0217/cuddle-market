@@ -112,3 +112,68 @@ describe('withdraw', () => {
     expect(useAuthStore.getState().status).toBe('authed');
   });
 });
+
+// **계정 열거를 막는 줄을 지킨다**(#849).
+//
+// 로그인이 실패한 까닭은 셋이다 — 없는 이메일 · 비밀번호 틀림 · 소셜로 가입함.
+// 이 셋을 밖에서 **구분할 수 없어야** 한다. 구분되면 남의 이메일을 넣어 보는 것만으로
+// 「이 사람은 회원이고 카카오를 쓴다」를 알아낼 수 있다.
+//
+// 바로 위 describe('login') 에 이미 「400이면 InvalidCredentialsError를 던진다」가 있다.
+// 그것은 **오류의 종류**를 본다. 여기서 보는 것은 다른 것이다 —
+// **서버가 준 문구가 그 오류에 실려 나오는가.**
+//
+// ⚠️ 진짜 회귀는 이 모양으로 온다.
+//
+//     throw new InvalidCredentialsError();        →  throw new Error(body.message);
+//
+//    이렇게 바뀌어도 「InvalidCredentialsError 인가」를 안 보는 시험은 통과한다.
+//    화면 문구로 시험해도 마찬가지다 — 화면은 받은 것을 그릴 뿐이라, 새는 자리는 여기다.
+//
+// 지금 서버는 로그인 실패를 둘 다 같은 문구로 답한다(AuthServiceImpl.java:127·131).
+// 하지만 그건 서버 사정이고, 앱이 서버 문구를 실어 나르기 시작하면 서버가 언젠가
+// 갈라 말하는 순간 앱도 같이 샌다. 여기서 끊어 둔다.
+describe('계정 열거 (#849)', () => {
+  /** 로그인해 보고 **던져진 오류**를 돌려준다. */
+  async function 로그인해본다(): Promise<Error> {
+    return login('someone@example.com', 'Abcdefg1!x').then(
+      () => {
+        throw new Error('실패해야 하는데 성공했다');
+      },
+      (error: Error) => error
+    );
+  }
+
+  it('서버가 가입 방법을 알려줘도 그 문구를 밖으로 안 흘린다', async () => {
+    // 비밀번호 찾기 쪽 서버는 이미 이렇게 답한다(AuthServiceImpl.java:199).
+    // 로그인도 언젠가 그렇게 바뀔 수 있다 — 그때 앱이 따라 새면 안 된다.
+    mockFetch.mockResolvedValue(
+      reply(400, { message: '카카오로 가입한 계정입니다. 카카오 로그인을 이용해주세요.' })
+    );
+
+    const error = await 로그인해본다();
+
+    expect(error).toBeInstanceOf(InvalidCredentialsError);
+    expect(error.message).not.toContain('카카오');
+  });
+
+  it('가입되지 않은 이메일이라고 답해도 그 사실을 안 흘린다', async () => {
+    mockFetch.mockResolvedValue(reply(400, { message: '등록되지 않은 이메일입니다.' }));
+
+    const error = await 로그인해본다();
+
+    expect(error).toBeInstanceOf(InvalidCredentialsError);
+    expect(error.message).not.toContain('등록되지 않은');
+  });
+
+  it('없는 계정이든 비밀번호가 틀렸든 **똑같은 오류**가 나온다', async () => {
+    mockFetch.mockResolvedValue(reply(400, { message: '등록되지 않은 이메일입니다.' }));
+    const 없는계정 = await 로그인해본다();
+
+    mockFetch.mockResolvedValue(reply(401, { message: '이메일 또는 비밀번호가 일치하지 않습니다.' }));
+    const 비밀번호틀림 = await 로그인해본다();
+
+    expect(비밀번호틀림.message).toBe(없는계정.message);
+    expect(비밀번호틀림.name).toBe(없는계정.name);
+  });
+});
