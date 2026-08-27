@@ -1,6 +1,6 @@
 import { act, render, screen, waitFor } from '@testing-library/react-native';
 
-import ChatRoomsScreen from '@/app/(tabs)/(chat)/index';
+import ChatRoomsScreen from '@/app/(tabs)/chat/index';
 import { useAuthStore } from '@/lib/auth/store';
 import { createScreenWrapper } from '@/test-utils/query-wrapper';
 

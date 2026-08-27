@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 
-import CommunityListScreen from '@/app/(tabs)/(community)/index';
+import CommunityListScreen from '@/app/(tabs)/community/index';
 import { createQueryWrapper } from '@/test-utils/query-wrapper';
 
 // 커뮤니티 목록 **화면**의 시험.

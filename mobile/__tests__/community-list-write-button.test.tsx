@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 
-import CommunityListScreen from '@/app/(tabs)/(community)/index';
+import CommunityListScreen from '@/app/(tabs)/community/index';
 import { useAuthStore } from '@/lib/auth/store';
 import { createQueryWrapper } from '@/test-utils/query-wrapper';
 

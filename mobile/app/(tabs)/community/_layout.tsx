@@ -5,7 +5,7 @@ import { Stack } from 'expo-router';
 
 export const unstable_settings = {
   // 상세로 바로 들어와도(알림을 눌러 들어오는 길) 목록이 스택 아래에 먼저 깔리게 한다.
-  // 13바퀴 알림이 /(tabs)/(community)/posts/36으로 바로 밀어 넣는데, 이게 없으면
+  // 13바퀴 알림이 /(tabs)/community/posts/36으로 바로 밀어 넣는데, 이게 없으면
   // 뒤로 갈 데가 없다. (home) 스택도 같은 이유로 갖고 있다.
   initialRouteName: 'index',
 };

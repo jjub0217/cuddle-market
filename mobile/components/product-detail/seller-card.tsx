@@ -42,14 +42,15 @@ export function SellerCard({ seller }: Props) {
     //    내 id 로 들어가면 「내 상품 관리」도 없는 반쪽 화면이 뜬다. 웹도 같은 규칙이다
     //    (SellerProfileCard 가 내 id 면 마이페이지로 보낸다) (#869).
     if (me && seller.sellerId === me.id) {
-      router.push('/(tabs)/(my)');
+      router.push('/(tabs)/my');
       return;
     }
 
     // 지금 어느 탭 스택에 있는지 보고 그 스택에 쌓는다.
     // 그룹을 안 적으면 expo-router가 홈 탭으로 옮겨간 뒤 거기에 쌓아서, 찜 목록에서
     // 들어왔을 때 뒤로 가면 원래 자리가 아니라 홈이 나온다(products/[id]와 같은 함정).
-    const group = segments.includes('(my)') ? '(my)' : '(home)';
+    // ⚠️ **홈만 괄호 폴더다**(#1096). 마이는 괄호를 뗐다.
+    const group = segments.includes('my') ? 'my' : '(home)';
     router.push(`/(tabs)/${group}/users/${seller.sellerId}`);
   };
 

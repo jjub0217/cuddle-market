@@ -27,7 +27,7 @@ describe('tabGroupOf', () => {
 
 describe('productDetailHref', () => {
   it('그룹까지 적힌 주소를 만든다', () => {
-    expect(productDetailHref('my', 12)).toBe('/(tabs)/(my)/products/12');
+    expect(productDetailHref('my', 12)).toBe('/(tabs)/my/products/12');
     expect(productDetailHref('home', 12)).toBe('/(tabs)/(home)/products/12');
   });
 });

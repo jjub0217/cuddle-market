@@ -355,7 +355,7 @@ export default function ChatRoomScreen() {
     try {
       await leaveChatRoom(chatRoomId);
       setIsLeaveOpen(false);
-      router.replace('/(tabs)/(chat)');
+      router.replace('/(tabs)/chat');
     } catch {
       showToast('채팅방을 나가지 못했어요');
       // 던지지 않는다 — ConfirmDialog 가 창을 닫지 않고 다시 시도하게 둔다.
@@ -388,7 +388,7 @@ export default function ChatRoomScreen() {
     if (failure === 'gone') {
       return (
         <ErrorState
-          onRetry={() => router.replace('/(tabs)/(chat)')}
+          onRetry={() => router.replace('/(tabs)/chat')}
           title="이미 나간 채팅방이에요."
           description="나간 채팅방은 다시 열 수 없어요. 상품에서 다시 채팅을 시작할 수 있어요."
           actionLabel="채팅 목록으로"

@@ -2,7 +2,7 @@ import { QueryClient } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { Keyboard } from 'react-native';
 
-import PostDetailScreen from '@/app/(tabs)/(community)/posts/[id]';
+import PostDetailScreen from '@/app/(tabs)/community/posts/[id]';
 import { createScreenWrapper } from '@/test-utils/query-wrapper';
 
 // 게시글 상세의 헤더 ⋮ 메뉴 시험.

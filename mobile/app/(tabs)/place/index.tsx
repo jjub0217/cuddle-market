@@ -121,7 +121,7 @@ export default function PlaceScreen() {
     void load(boundsRef.current, category);
   }, [category, load]);
 
-  const openDetail = useCallback((id: number) => router.push(`/places/${id}`), [router]);
+  const openDetail = useCallback((id: number) => router.push(`/place/places/${id}`), [router]);
 
   return (
     <View style={styles.screen}>

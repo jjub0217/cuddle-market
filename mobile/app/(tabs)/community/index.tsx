@@ -181,7 +181,7 @@ export default function CommunityListScreen() {
         ]}
         renderItem={({ item }) => (
           <Pressable
-            onPress={() => router.push(`/(tabs)/(community)/posts/${item.id}`)}
+            onPress={() => router.push(`/(tabs)/community/posts/${item.id}`)}
             style={({ pressed }) => (pressed ? styles.pressed : undefined)}
           >
             <PostCard post={item} />
