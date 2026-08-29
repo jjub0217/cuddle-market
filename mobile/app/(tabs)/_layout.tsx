@@ -29,10 +29,35 @@ import { useAuthStore } from '@/lib/auth/store';
  *
  * ⚠️ 이름이 `initialRouteName` 이 아니라 `anchor` 다. expo-router 6(SDK 54)에서
  *    바뀌었다. 뿌리 `app/_layout.tsx` 도 `anchor: '(tabs)'` 를 쓴다.
+ *
+ * ⚠️⚠️ **그런데 이것만으로는 안 됐다**(2026-08-27, versionCode 4 실기기 확인).
+ *    anchor 는 「탭 navigator 의 기본 탭」을 정하는데, 앱이 주소 `/` 로 열리면
+ *    **그 위에 다른 탭이 얹힌다.** 그래서 아래 「괄호를 뗀 까닭」을 같이 봐야 한다.
  */
 export const unstable_settings = {
   anchor: '(home)',
 };
+
+/*
+ * ⚠️⚠️ **홈 말고 네 탭은 괄호를 안 쓴다. 되돌리지 말 것** (#1096).
+ *
+ * 괄호로 감싼 폴더는 **주소에 안 들어간다.** 다섯을 다 괄호로 감쌌더니 다섯이 전부
+ * `/` 가 되어 같은 주소를 놓고 다퉜고, 알파벳순으로 (chat) 이 이겼다 —
+ * **앱을 열면 채팅 탭이 첫 화면이었다.**
+ *
+ *   예전            지금
+ *   (chat)      /   chat        /chat
+ *   (community) /   community   /community
+ *   (home)      /   (home)      /          ← 괄호는 여기만 남긴다
+ *   (my)        /   my          /my
+ *   (place)     /   place       /place
+ *
+ * Expo 공식 문서의 탭 예시도 이 모양이다 — 스택이 있는 탭 하나만 괄호로 감싸고
+ * 나머지는 평범한 폴더로 둔다.
+ *
+ * ⚠️ 괄호를 다시 씌우면 그 탭이 `/` 를 놓고 홈과 다투기 시작한다. 알파벳순으로
+ *    홈보다 앞서면(c·b·a 로 시작하면) **그 탭이 첫 화면이 된다.**
+ */
 
 /**
  * 탭바 아이콘 선 굵기. Lucide 기본값은 2인데 28px로 크게 그리니 둔해 보였다.
@@ -95,7 +120,7 @@ export default function TabLayout() {
           20바퀴에 채팅이 플레이스와 마이 사이로 들어와 웹과 똑같은 다섯이 됐다.
           커뮤니티는 게스트를 막지 않는다 — 서버가 비회원 조회를 허용한다. */}
       <Tabs.Screen
-        name="(community)"
+        name="community"
         options={{
           title: '커뮤니티',
           tabBarIcon: ({ color }) => (
@@ -106,7 +131,7 @@ export default function TabLayout() {
       {/* 이름은 웹이 쓰는 「플레이스」다. 「지도」로 새로 짓지 않는다 —
           탭 이름과 화면 이름이 다르면 같은 곳인지 헷갈린다. 아이콘도 웹과 같은 MapPin. */}
       <Tabs.Screen
-        name="(place)"
+        name="place"
         options={{
           title: '플레이스',
           tabBarIcon: ({ color }) => (
@@ -116,7 +141,7 @@ export default function TabLayout() {
       />
       {/* 웹 BottomNav 과 같은 자리·같은 아이콘이다 — 플레이스와 마이 사이. */}
       <Tabs.Screen
-        name="(chat)"
+        name="chat"
         options={{
           title: '채팅',
           tabBarIcon: ({ color }) => (
@@ -135,7 +160,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="(my)"
+        name="my"
         options={{
           title: '마이',
           tabBarIcon: ({ color }) => (

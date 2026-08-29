@@ -24,7 +24,7 @@ export default function CommunitySearchScreen() {
     } else {
       // 딥링크 등으로 뒤로 갈 곳이 없을 때의 대비. '/'는 여러 탭을 가리켜 어디로 갈지
       // 정해지지 않으므로 커뮤니티를 콕 집는다(app/search.tsx 와 같은 이유).
-      router.replace('/(tabs)/(community)');
+      router.replace('/(tabs)/community');
     }
   };
 
@@ -41,7 +41,7 @@ export default function CommunitySearchScreen() {
         //    뒤로 갔을 때 이 빈 검색 화면이 아니라 원래 보던 자리로 가는 것도 그대로다.
         //    검색어를 고치고 싶으면 목록 헤더의 검색 줄에서 바로 고친다.
         onSubmit={(keyword) =>
-          router.dismissTo({ pathname: '/(tabs)/(community)', params: { keyword } })
+          router.dismissTo({ pathname: '/(tabs)/community', params: { keyword } })
         }
       />
     </SafeAreaView>

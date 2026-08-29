@@ -6,11 +6,11 @@ import { Redirect } from 'expo-router';
 //    expo-router 는 `/` 에 맞는 **첫 index.tsx** 를 찾는데, 괄호로 감싼 폴더는
 //    URL 에 안 들어가서 다섯이 다 `/` 에 해당한다. 그래서 알파벳순으로 걸린다.
 //
-//      app/(tabs)/(chat)/index.tsx        ← c-h-a 가 가장 앞이라 이게 열린다
-//      app/(tabs)/(community)/index.tsx   ← 채팅 탭이 생기기 전에는 이게 열렸다(c-o-m)
+//      app/(tabs)/chat/index.tsx        ← c-h-a 가 가장 앞이라 이게 열린다
+//      app/(tabs)/community/index.tsx   ← 채팅 탭이 생기기 전에는 이게 열렸다(c-o-m)
 //      app/(tabs)/(home)/index.tsx
-//      app/(tabs)/(my)/index.tsx
-//      app/(tabs)/(place)/index.tsx
+//      app/(tabs)/my/index.tsx
+//      app/(tabs)/place/index.tsx
 //
 //    (tabs)/_layout.tsx 의 <Tabs.Screen> 차례는 **탭바에 보이는 순서**만 정한다.
 //

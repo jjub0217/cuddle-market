@@ -68,7 +68,7 @@ function RowShell({ productId, children }: { productId: number; children: ReactN
 
   return (
     <Pressable
-      onPress={() => router.push(`/(tabs)/(my)/products/${productId}`)}
+      onPress={() => router.push(`/(tabs)/my/products/${productId}`)}
       style={({ pressed }) => (pressed ? styles.cardPressed : undefined)}
     >
       {children}

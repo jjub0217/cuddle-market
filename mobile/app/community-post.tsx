@@ -44,7 +44,7 @@ import type { UploadSlot } from '@/lib/product-images';
 //    칸·한계·검사가 글쓰기와 똑같아서, 나누면 같은 규칙을 두 곳에서 지켜야 한다.
 
 /**
- * 질문/정보 두 갈래. 목록 화면(`(tabs)/(community)/index.tsx` 의 `BOARD_CHIPS`)과
+ * 질문/정보 두 갈래. 목록 화면(`(tabs)/community/index.tsx` 의 `BOARD_CHIPS`)과
  * **같은 조각·같은 말**이다. 같은 갈래를 두 이름으로 부르면 안 된다.
  *
  * ⚠️ 목록의 것을 가져다 쓰지 않고 여기 다시 적었다. 그쪽은 expo-router 의 화면 파일이라

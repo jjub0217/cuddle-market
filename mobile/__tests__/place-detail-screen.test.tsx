@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import React from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import PlaceDetailScreen from '@/app/(tabs)/(place)/places/[id]';
+import PlaceDetailScreen from '@/app/(tabs)/place/places/[id]';
 import type { PlaceDetail } from '@/lib/places/types';
 
 // 장소 상세 **화면**의 시험. 여기서 지키는 것은 **사진 자리**다 —

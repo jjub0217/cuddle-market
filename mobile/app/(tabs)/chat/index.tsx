@@ -125,7 +125,7 @@ export default function ChatRoomsScreen() {
   );
 }
 
-// 로그인 안내는 마이 탭과 같은 모양이다(app/(tabs)/(my)/index.tsx).
+// 로그인 안내는 마이 탭과 같은 모양이다(app/(tabs)/my/index.tsx).
 // 같은 상황에 같은 말·같은 생김새여야 한다.
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },

@@ -133,9 +133,9 @@ export default function MyScreen() {
                nav-purchases). ⚠️ **길 이름(`my-purchases`)은 그대로 둔다** — 문구만 바뀐 것이다. */}
         {/* 줄 왼쪽 아이콘은 웹 모바일 마이페이지(MyPage.tsx의 md:hidden 블록)와 같은 것이다. */}
         <SectionCard title="내 상품 관리">
-          <SectionRow icon={Tag} label="판매 내역" onPress={() => router.push('/(tabs)/(my)/my-products')} />
-          <SectionRow icon={Handbag} label="판매요청 내역" onPress={() => router.push('/(tabs)/(my)/my-purchases')} />
-          <SectionRow icon={Heart} label="찜한 상품" onPress={() => router.push('/(tabs)/(my)/my-favorites')} />
+          <SectionRow icon={Tag} label="판매 내역" onPress={() => router.push('/(tabs)/my/my-products')} />
+          <SectionRow icon={Handbag} label="판매요청 내역" onPress={() => router.push('/(tabs)/my/my-purchases')} />
+          <SectionRow icon={Heart} label="찜한 상품" onPress={() => router.push('/(tabs)/my/my-favorites')} />
         </SectionCard>
 
         <SectionCard title="고객지원">
@@ -151,7 +151,7 @@ export default function MyScreen() {
           <SectionRow
             icon={UserX}
             label="차단 목록"
-            onPress={() => router.push('/(tabs)/(my)/blocked-users')}
+            onPress={() => router.push('/(tabs)/my/blocked-users')}
           />
           <SectionRow icon={LogOut} label="로그아웃" onPress={() => setIsLogoutOpen(true)} />
           <SectionRow icon={UserMinus} label="탈퇴하기" tone="danger" onPress={() => setIsWithdrawOpen(true)} />

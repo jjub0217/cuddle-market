@@ -190,8 +190,8 @@ export default function PostDetailScreen() {
             //       없어 **들어오는 길마다** 막아야 한다.
             onPress={() =>
               me && post.authorId === me.id
-                ? router.push('/(tabs)/(my)')
-                : router.push(`/(tabs)/(community)/users/${post.authorId}`)
+                ? router.push('/(tabs)/my')
+                : router.push(`/(tabs)/community/users/${post.authorId}`)
             }
             accessibilityRole="button"
             accessibilityLabel={`${post.authorNickname}님의 프로필`}

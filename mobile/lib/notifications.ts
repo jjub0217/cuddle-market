@@ -172,15 +172,15 @@ export function resolveTarget(
       return { kind: 'app', path: `/products/${relatedEntityId}` };
     if (relatedEntityType === 'CHAT_ROOM') return { kind: 'app', path: `/chat/${relatedEntityId}` };
     if (relatedEntityType === 'POST')
-      return { kind: 'app', path: `/(tabs)/(community)/posts/${relatedEntityId}` };
+      return { kind: 'app', path: `/(tabs)/community/posts/${relatedEntityId}` };
     // 배포(2026-08-02) 전에 생긴 답글 알림은 'COMMENT' + **댓글** 번호로 남아 있다.
     // 그것만으로는 어느 글인지 알 수 없어 상세로 못 간다. 홈보다는 커뮤니티가 가깝다.
     // 새로 생기는 답글 알림은 서버가 'POST' + 글 번호를 준다.
-    if (relatedEntityType === 'COMMENT') return { kind: 'app', path: '/(tabs)/(community)' };
+    if (relatedEntityType === 'COMMENT') return { kind: 'app', path: '/(tabs)/community' };
   }
 
-  if (notificationType === 'ADMIN_SANCTION') return { kind: 'app', path: '/(tabs)/(my)' };
-  if (notificationType === 'POST_DELETED') return { kind: 'app', path: '/(tabs)/(community)' };
+  if (notificationType === 'ADMIN_SANCTION') return { kind: 'app', path: '/(tabs)/my' };
+  if (notificationType === 'POST_DELETED') return { kind: 'app', path: '/(tabs)/community' };
 
   return { kind: 'app', path: '/(tabs)/(home)' };
 }

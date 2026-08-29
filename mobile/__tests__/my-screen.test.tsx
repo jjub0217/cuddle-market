@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react-native';
 
-import MyScreen from '@/app/(tabs)/(my)/index';
+import MyScreen from '@/app/(tabs)/my/index';
 import { useAuthStore } from '@/lib/auth/store';
 import { createQueryWrapper } from '@/test-utils/query-wrapper';
 

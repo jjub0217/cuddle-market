@@ -91,7 +91,7 @@ export function AppMenuOverlay({ visible, onClose }: Props) {
   };
 
   /** 앱 화면으로 옮길 때도 먼저 닫는다 — 뒤로 오면 메뉴가 덮고 있으면 안 된다. */
-  const go = (path: '/login' | '/signup' | '/(tabs)/(my)') => {
+  const go = (path: '/login' | '/signup' | '/(tabs)/my') => {
     onClose();
     router.navigate(path);
   };
@@ -142,7 +142,7 @@ export function AppMenuOverlay({ visible, onClose }: Props) {
             </Pressable>
 
             <Pressable
-              onPress={isAuthed ? () => go('/(tabs)/(my)') : () => go('/signup')}
+              onPress={isAuthed ? () => go('/(tabs)/my') : () => go('/signup')}
               accessibilityRole="button"
               style={({ pressed }) => [styles.authFilled, pressed && styles.pressed]}
             >

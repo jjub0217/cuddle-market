@@ -27,7 +27,7 @@ import {
 // 판매자 프로필. 상품 상세의 판매자 카드를 눌러 들어온다.
 //
 // 왜 MyProductList를 안 쓰나:
-// 그 안의 RowShell이 이동 경로를 /(tabs)/(my)/products/... 로 못 박고 있어서,
+// 그 안의 RowShell이 이동 경로를 /(tabs)/my/products/... 로 못 박고 있어서,
 // 홈 스택에서 쓰면 상품을 누를 때 마이 탭으로 튄다. 게다가 헤더 제목 · 등록 버튼 ·
 // 상태 필터 칩 · 관리 시트를 다 안고 있어 여기 필요 없는 게 많다.
 // 목록을 여기서 직접 그리는 게 짧고 정확하다.
@@ -59,10 +59,11 @@ export default function UserProfileScreen() {
   // 상품으로 갈 때 그룹을 고정하면 마이에서 들어온 사람이 홈 탭으로 튄다.
   // string[]으로 넓히는 이유는 seller-card.tsx의 같은 자리에 적어 뒀다.
   const segments = useSegments() as string[];
-  const group = segments.includes('(my)')
-    ? '(my)'
-    : segments.includes('(community)')
-      ? '(community)'
+  // ⚠️ **홈만 괄호 폴더다**(#1096). 마이·커뮤니티는 괄호를 뗐다.
+  const group = segments.includes('my')
+    ? 'my'
+    : segments.includes('community')
+      ? 'community'
       : '(home)';
 
   const { data: me } = useMe();
@@ -179,7 +180,8 @@ export default function UserProfileScreen() {
             // 지금 스택에 상세를 쌓는다. 그룹까지 적어야 다른 탭으로 안 튄다.
             onPress={() => {
               // 커뮤니티 스택에는 상품 상세가 없다. 홈 스택으로 보낸다.
-              const target = group === '(community)' ? '(home)' : group;
+              // ⚠️ **홈만 괄호 폴더다**(#1096). 커뮤니티·마이는 괄호를 뗐다.
+              const target = group === 'community' ? '(home)' : group;
               router.push(`/(tabs)/${target}/products/${item.id}`);
             }}
             style={({ pressed }) => (pressed ? styles.cardPressed : undefined)}

@@ -7,5 +7,5 @@ import ProductDetailScreen from '@/app/(tabs)/(home)/products/[id]';
 // 거기에 상세를 쌓는다. 그래서 뒤로 가면 찜 목록이 아니라 홈이 나온다(실기기에서 확인).
 //
 // 두 스택에 각각 두면 온 자리로 되돌아간다. 대신 주소가 두 곳에 생기므로
-// 미는 쪽이 그룹까지 적어야 한다 — `/(tabs)/(my)/products/1` 처럼.
+// 미는 쪽이 그룹까지 적어야 한다 — `/(tabs)/my/products/1` 처럼.
 export default ProductDetailScreen;

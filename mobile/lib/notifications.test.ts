@@ -172,7 +172,7 @@ describe('resolveTarget', () => {
       resolveTarget(
         item({ notificationType: 'ADMIN_SANCTION', relatedEntityType: null, relatedEntityId: null })
       )
-    ).toEqual({ kind: 'app', path: '/(tabs)/(my)' });
+    ).toEqual({ kind: 'app', path: '/(tabs)/my' });
   });
 
   it('채팅 알림은 앱 채팅방으로 간다', () => {
@@ -185,7 +185,7 @@ describe('resolveTarget', () => {
   it('게시글 알림은 앱 커뮤니티 상세로 간다', () => {
     expect(resolveTarget(item({ relatedEntityType: 'POST', relatedEntityId: 36 }))).toEqual({
       kind: 'app',
-      path: '/(tabs)/(community)/posts/36',
+      path: '/(tabs)/community/posts/36',
     });
   });
 
@@ -194,7 +194,7 @@ describe('resolveTarget', () => {
     // 홈으로 보내던 것을 고쳤다 — 커뮤니티가 더 가깝다.
     expect(
       resolveTarget(item({ relatedEntityType: 'COMMENT', relatedEntityId: 55 }))
-    ).toEqual({ kind: 'app', path: '/(tabs)/(community)' });
+    ).toEqual({ kind: 'app', path: '/(tabs)/community' });
   });
 
   it('글이 지워졌다는 알림은 앱 커뮤니티 목록으로 간다', () => {
@@ -202,7 +202,7 @@ describe('resolveTarget', () => {
       resolveTarget(
         item({ notificationType: 'POST_DELETED', relatedEntityType: null, relatedEntityId: null })
       )
-    ).toEqual({ kind: 'app', path: '/(tabs)/(community)' });
+    ).toEqual({ kind: 'app', path: '/(tabs)/community' });
   });
 
   it('아무 데도 안 걸리면 앱 홈으로', () => {
