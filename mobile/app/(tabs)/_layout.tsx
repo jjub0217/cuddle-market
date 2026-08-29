@@ -8,7 +8,31 @@ import { colors } from '@/constants/colors';
 import { useAuthStore } from '@/lib/auth/store';
 
 // ⚠️ 아래 <Tabs.Screen> 차례는 **탭바에 보이는 순서**만 정한다.
-//    앱을 켰을 때 어느 탭이 열리는지는 `app/index.tsx` 가 정한다 — 그 파일 참고.
+//    앱을 켰을 때 어느 탭이 열리는지는 바로 아래 `anchor` 가 정한다.
+
+/**
+ * 앱을 열었을 때 **어느 탭이 먼저 나오는가** (#1096).
+ *
+ * ⚠️ **이것이 없으면 채팅 탭이 열린다.** 괄호로 감싼 폴더는 URL 에 안 들어가서
+ *    다섯 탭이 다 `/` 에 해당하고, 그래서 알파벳순으로 걸린다 —
+ *    (chat) · (community) · (home) · (my) · (place) 중 c-h-a 가 가장 앞이다.
+ *
+ * ⚠️ **2026-08-27 에 실제로 그랬다.** 첫 production 빌드(versionCode 3)를 실기기에
+ *    깔았더니 로그인 전 「로그인이 필요합니다」만 있는 채팅 화면이 첫 화면이었다.
+ *    앱을 완전히 껐다 켜도 마찬가지였다.
+ *
+ * ⚠️ **개발 빌드로는 이 문제가 안 보였다.** 그쪽은 보던 주소를 들고 다시 켜기 때문이다.
+ *    그래서 production 빌드를 처음 만든 날에야 드러났다.
+ *
+ * ⚠️ `app/index.tsx` 의 `<Redirect href="/(tabs)/(home)" />` 도 같은 일을 하는데,
+ *    **그것만으로는 부족했다.** 둘 다 둔다 — 하나가 안 먹을 때 다른 하나가 받는다.
+ *
+ * ⚠️ 이름이 `initialRouteName` 이 아니라 `anchor` 다. expo-router 6(SDK 54)에서
+ *    바뀌었다. 뿌리 `app/_layout.tsx` 도 `anchor: '(tabs)'` 를 쓴다.
+ */
+export const unstable_settings = {
+  anchor: '(home)',
+};
 
 /**
  * 탭바 아이콘 선 굵기. Lucide 기본값은 2인데 28px로 크게 그리니 둔해 보였다.
