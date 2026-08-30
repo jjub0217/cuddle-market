@@ -17,7 +17,7 @@ import { useCallback, useRef } from 'react';
  *    목록이 길어지면 상세에서 받은 값으로 그 항목만 고쳐 쓰는 쪽(`setQueryData`)을 봐야 한다.
  *
  * 채팅 목록은 로그인 여부까지 봐야 해서 자기 자리에 따로 쓴다
- * (`app/(tabs)/(chat)/index.tsx` — `refetch()` 는 `enabled` 를 무시해서 게스트면 401 을 받아 온다).
+ * (`app/(tabs)/chat/index.tsx` — `refetch()` 는 `enabled` 를 무시해서 게스트면 401 을 받아 온다).
  */
 export function useRefetchOnFocus(refetch: () => unknown) {
   const 첫초점 = useRef(true);

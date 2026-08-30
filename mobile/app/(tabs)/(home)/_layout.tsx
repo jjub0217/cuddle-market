@@ -14,7 +14,7 @@ export default function HomeStackLayout() {
   // 빠뜨려 네이티브 헤더가 「users/[id]」라는 라우트 이름을 그대로 띄웠다(#805).
   // 이 탭의 화면은 전부 자기 헤더를 직접 그리므로 — 네이티브 스택 헤더에는 상단
   // 인셋 옵션이 없어 시계·배터리와 붙어 보인다 — 기본값으로 꺼 두는 게 맞다.
-  // 마이 탭((my)/_layout.tsx)이 이미 이 방식이다.
+  // 마이 탭(my/_layout.tsx)이 이미 이 방식이다.
   return (
     <Stack screenOptions={{ headerShown: false }} />
   );

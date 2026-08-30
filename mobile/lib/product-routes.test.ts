@@ -19,9 +19,24 @@ describe('tabGroupOf', () => {
   });
 
   it('주소 조각 목록에서도 찾아낸다', () => {
-    expect(tabGroupOf(['(tabs)', '(my)', 'products', '[id]'])).toBe('my');
+    // ⚠️ **괄호가 있는 모양과 없는 모양을 둘 다 넣는다**(#1101). #1096 에서 홈만 괄호로
+    //    남기고 넷은 뗐다 — 그래서 `useSegments()` 가 주는 값이 탭마다 다르다.
+    //
+    //      마이   ['(tabs)', 'my',     'products', '[id]']    ← 괄호가 없다
+    //      홈     ['(tabs)', '(home)', 'products', '[id]']    ← 괄호가 있다
+    //
+    //    옛 모양(`'(my)'`)만 시험하면 `tabGroupOf` 에서 괄호 없는 쪽을 보는 줄을 지워도
+    //    **시험이 초록으로 통과한다.** 그러면 마이에서 상세로 들어갔다 뒤로 갈 때
+    //    홈으로 튀는데 아무도 못 잡는다.
+    expect(tabGroupOf(['(tabs)', 'my', 'products', '[id]'])).toBe('my');
     expect(tabGroupOf(['(tabs)', '(home)', 'products', '[id]'])).toBe('home');
     expect(tabGroupOf(['products', '[id]', 'edit'])).toBe('home');
+  });
+
+  it('괄호를 씌운 옛 모양도 알아본다', () => {
+    // 괄호를 다시 씌우는 일이 생겨도(#1096 주석의 경고) 이 함수는 버티게 둔다.
+    // 지금 실제로 오는 값은 위 시험의 괄호 없는 쪽이다.
+    expect(tabGroupOf(['(tabs)', '(my)', 'products', '[id]'])).toBe('my');
   });
 });
 
