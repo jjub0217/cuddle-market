@@ -35,7 +35,13 @@ type TestQueryOptions = {
  */
 function createTestQueryClient(options: TestQueryOptions = {}) {
   return new QueryClient({
-    defaultOptions: { queries: { ...options, retry: false, gcTime: Infinity } },
+    defaultOptions: {
+      queries: { ...options, retry: false, gcTime: Infinity },
+      // ⚠️ **바꾸기(mutation)에도 따로 줘야 한다**(#1099). 위 `queries` 는 조회에만 걸린다.
+      //    하트처럼 누르면 서버로 보내는 것을 시험하면 바꾸기 캐시가 자기 몫의 5분 타이머를
+      //    남겨, 조회 쪽을 아무리 막아 놔도 jest 가 스스로 안 끝난다.
+      mutations: { retry: false, gcTime: Infinity },
+    },
   });
 }
 

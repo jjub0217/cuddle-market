@@ -36,9 +36,20 @@ export function useFavorite(productId: number, isFavorite: boolean) {
       old ? { ...old, isFavorite: next, favoriteCount: old.favoriteCount + delta } : old
     );
 
-    /** 무한스크롤 목록 캐시 하나를 뒤집는다. */
+    /**
+     * 무한스크롤 목록 캐시를 뒤집는다.
+     *
+     * ⚠️ **`setQueryData` 가 아니라 `setQueriesData` 다**(#1099). 목록 캐시 이름에는 뒤에
+     *    조건이 더 붙는다 — 홈은 `['products', { keyword, …filters }]`, 찜 목록은 필터 칩
+     *    때문에 `['my','favorites','ALL']` 이다. `setQueryData` 는 **이름이 통째로 같을 때만**
+     *    써서, 앞부분만 적은 이 호출은 **아무 일도 안 하고 아무도 안 읽는 캐시만 하나 만들었다.**
+     *
+     *    찜 목록은 그래서 하트를 눌러도 안 꺼졌다. 홈은 아래 `onSettled` 의 무효화가
+     *    (그쪽은 앞부분만 맞아도 잡는다) 뒤늦게 맞춰 줘서 **늦게 바뀔 뿐 바뀌기는 해**
+     *    오래 안 드러났다.
+     */
     const patchList = (key: readonly unknown[]) => {
-      queryClient.setQueryData<InfiniteData<ProductsPage>>(key, (old) =>
+      queryClient.setQueriesData<InfiniteData<ProductsPage>>({ queryKey: key }, (old) =>
         old
           ? {
               ...old,

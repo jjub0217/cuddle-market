@@ -22,6 +22,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ChevronLeft, Plus, type LucideIcon } from 'lucide-react-native';
 import { useFavorite } from '@/hooks/use-favorite';
 import { useProductActions } from '@/hooks/use-product-actions';
+import { useRefetchOnFocus } from '@/hooks/use-refetch-on-focus';
 import type { MyListPage } from '@/lib/my-lists';
 import type { TradeStatus } from '@/lib/product-actions';
 import { buildOwnerActions, type MenuKind } from '@/lib/product-menu';
@@ -152,6 +153,16 @@ export function MyProductList({
     // 다음 페이지 번호 = 지금까지 받은 페이지 수(0-base). hasNext=false면 종료. 홈과 같은 규칙.
     getNextPageParam: (last, all) => (last.hasNext ? all.length : undefined),
   });
+
+  // 다른 화면에서 바뀐 것을 따라온다 — 홈에서 찜한 상품, 상세에서 오른 조회수 같은 것들(#1099).
+  //
+  // ⚠️ 탭 목록은 다른 탭에 갔다 와도 **화면이 다시 만들어지지 않는다.** 그래서 react-query 가
+  //    스스로 다시 부를 일이 없고, 찜 목록을 열어둔 채 홈에서 찜하고 돌아오면 **빈 목록이
+  //    그대로 남아 있었다.** 홈·커뮤니티 목록은 #932 에 이 훅을 붙였는데 마이 목록 셋만 빠졌다.
+  //
+  // ⚠️ **찜을 뺄 때 항목이 눈앞에서 사라지지는 않는다.** 화면 안에서 하트를 끄는 동안에는
+  //    초점이 그대로라 다시 받지 않기 때문이다 — 잘못 눌렀을 때 되돌릴 수 있어야 한다(설계 §5).
+  useRefetchOnFocus(refetch);
 
   const products: Product[] = data?.pages.flatMap((page) => page.content) ?? [];
   // 서버가 첫 페이지에 전체 개수를 함께 준다. 아직 못 받았으면 개수 줄을 숨긴다.
