@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 
 // 플레이스 탭 안의 스택. 상세로 밀고 들어가도 하단 탭바가 남는다.
-// ((home)·(my) 탭과 같은 방식이다 — Expo 공식 "Stacks inside tabs")
+// ((home)·my 탭과 같은 방식이다 — Expo 공식 "Stacks inside tabs")
 //
 // 상세에서 탭바를 남기는 건 #845에서 정한 규칙이다. 읽기만 하는 화면이라 보다가
 // 다른 탭으로 건너뛰기 쉬워야 한다. 하단에 고정 단추가 생기는 날 다시 판단한다.

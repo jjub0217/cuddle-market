@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 
 // 커뮤니티 탭 안의 스택. 상세로 밀고 들어가도 하단 탭바가 남는다.
-// (Expo 공식 "Stacks inside tabs" 패턴 — (home)·(my) 스택과 같다)
+// (Expo 공식 "Stacks inside tabs" 패턴 — (home)·my 스택과 같다)
 
 export const unstable_settings = {
   // 상세로 바로 들어와도(알림을 눌러 들어오는 길) 목록이 스택 아래에 먼저 깔리게 한다.
