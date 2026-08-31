@@ -42,6 +42,7 @@ pnpm gate:mobile     # tsc --noEmit + expo lint + jest
 | **STOMP 가 아무 응답도 없다** | RN의 WebSocket이 STOMP 프레임 끝의 **NULL 문자를 흘린다.** 서버(Spring)는 「메시지가 아직 안 끝났다」고 보고 버퍼에 담아 둔 채 기다린다 — **오류도, 서버 로그도, 연결 끊김도 없다.** 밖에서는 완전한 침묵으로만 보여서 20바퀴에 토큰 만료로 오해했다 | `Client` 에 **`forceBinaryWSFrames: true`** (받는 쪽은 `appendMissingNULLonIncoming: true`). ⚠️ **폰만 보면 절대 못 가른다** — 맥에서 같은 서버로 셋을 직접 보내 갈랐다: 텍스트+NULL ✅찍힘 · **NULL없음 ❌침묵** · 바이너리+NULL ✅찍힘 |
 | **다시 붙었는데 아무것도 안 온다** | stompjs 는 다시 붙어도 **구독을 살려주지 않는다.** 우리가 다시 걸어야 하는데 「아직 안 걸린 것만 걸기」로 짜면, 죽은 껍데기가 `null` 이 아니라 건너뛴다. **보내기는 새 연결로 잘 나가서 오류도 안내도 없이 받기만 조용히 멈춘다** — 21바퀴에 앱(#882)·웹(#884)에서 같은 것을 두 번 고쳤다 | `onConnect` 에서 걸어 둔 구독을 **전부** 다시 건다(있든 없든). 그리고 **`onWebSocketClose` 를 반드시 단다** — 줄이 뚝 끊기면 `onDisconnect` 는 **안 온다.** 그게 없으면 끊긴 줄 몰라 「연결 중」 띠도 안 뜨고 보내기 실패도 조용히 지나간다 |
 | **시험이 다 초록인데 jest 가 안 끝난다** | react-query 를 쓰는 화면 시험에서 `QueryClient` 의 기본 `gcTime` 이 5분이라, 「5분 뒤에 버린다」 타이머가 남아 명령이 매달린다. `Tests: 18 passed` 뒤에 «Jest did not exit» 만 뜬다 — 무한 루프로 오해하기 쉽다(2026-08-17 에 3분씩 두 번 날렸다). 손으로 매번 `new QueryClient` 를 적다가 다섯 파일이 이 규칙을 빠뜨리기도 했다(#1053) | **손으로 만들지 말고 `mobile/test-utils/query-wrapper.tsx` 의 이 함수를 써라**(#1059) — `QueryClientProvider` 만 필요하면 `createQueryWrapper()`, `SafeAreaProvider` 까지 필요하면 `createScreenWrapper({ safeArea: true })`. `gcTime: Infinity` 가 그 안에 이미 들어 있어 밖에서 못 빠뜨린다 |
+| **도우미를 쓰는데도 jest 가 안 끝난다** | 위의 `gcTime: Infinity` 는 **조회(queries)** 에만 걸린다. **바꾸기(mutations)** 는 자기 몫의 5분 타이머를 따로 남긴다 — 하트처럼 **누르면 서버로 보내는 것**을 시험하면 조회 쪽을 아무리 막아도 매달린다(2026-08-30, #1099. 그런 화면 시험이 이 저장소에 처음이었다) | `query-wrapper.tsx` 에 `mutations` 몫도 넣어 뒀다. **다시 밟을 일은 없지만 지우지 마라.** 마커로 확인했다 — 넣기 전 «Jest did not exit», 넣은 뒤 경고 없음 |
 | **`jest.mock` 밖의 변수를 못 읽는다** | jest 가 `jest.mock` 을 파일 맨 위로 끌어올리는데, babel-plugin-jest-hoist 가 밖의 변수 참조를 막는다. **파일이 아예 안 돈다** | 변수 이름을 **`mock` 으로 시작**하게 짓는다(`mock화면인자`). 그 이름만 빠져나간다 |
 | **`Modal` 안 화면이 시험에서 죽는다** | 확대창처럼 `Modal` 안에서 안전영역(`useSafeAreaInsets`)을 쓰면 시험이 「No safe area value available」로 죽는다. **그 조각을 쓰는 화면의 시험까지 같이 죽는다** — 확대창을 붙인 채팅·커뮤니티 시험이 한꺼번에 빨개졌다(2026-08-13) | 시험을 `SafeAreaProvider` 로 감싼다(`initialMetrics` 까지). `bottom-sheet.test.tsx`·`photo-viewer.test.tsx` 의 `Wrapper`·`METRICS` 를 그대로 본뜬다 |
 | **제스처 안에서 바깥 함수를 부르면 죽는다** | `.onUpdate()` 같은 제스처 콜백은 **손가락 쪽(UI) 스레드**에서 돈다. 거기서 컴포넌트에 만든 보통 함수를 부르면 「UI 스레드에서 일반 함수를 불렀다」로 터진다 | 쓸 값을 **숫자로 미리 담아** 두고 콜백 안에서는 그것만 쓴다 |
@@ -90,6 +91,40 @@ pnpm gate:mobile     # tsc --noEmit + expo lint + jest
 # 남아 있는지 훑는 법
 grep -rn '[A-Za-z0-9/._-]*\.\(tsx\|ts\):[0-9]' mobile --include='*.tsx' --include='*.ts' | grep -v node_modules
 ```
+
+## react-query 캐시를 손댈 때
+
+**세 함수가 캐시 이름을 서로 다르게 본다.** 이것을 모르면 **고친 줄이 아무 일도 안 하는데
+오류도 안 난다.** 2026-08-30(#1099)에 찜 목록이 그랬다.
+
+```
+setQueryData(key, …)             이름이 **통째로** 같아야 쓴다
+setQueriesData({ queryKey }, …)  **앞부분**만 맞으면 쓴다
+invalidateQueries({ queryKey })  **앞부분**만 맞으면 잡는다
+```
+
+⚠️ **목록 캐시 이름에는 뒤에 조건이 더 붙는다.** 그래서 앞부분만 적고 `setQueryData` 를
+쓰면 빗나간다 — 그리고 **아무도 안 읽는 캐시를 하나 새로 만든다.** 조용히.
+
+```
+홈 목록      ['products', { keyword, …filters }]
+찜 목록      ['my', 'favorites', 'ALL']          ← 필터 칩 때문에 'ALL' 이 붙는다
+고치려던 것   ['products']  ·  ['my','favorites']   ← 둘 다 안 맞았다
+```
+
+⚠️ **홈은 이 버그를 안고도 멀쩡해 보였다.** `onSettled` 의 `invalidateQueries` 가
+(그쪽은 앞부분만 맞아도 잡는다) 뒤늦게 맞춰 줘서 **하트가 늦게 바뀔 뿐 바뀌기는 했다.**
+찜 목록은 무효화를 일부러 안 해서(찜을 뺄 때 항목이 사라지지 않게) 영영 안 바뀌었다 —
+**같은 결함인데 한쪽에서만 증상이 났다.**
+
+→ 목록 캐시를 손볼 때는 **`setQueriesData`** 를 쓴다. 조건이 붙어도 잡는다.
+
+**다른 탭에 갔다 오면 목록이 안 바뀐다** — 탭 목록은 화면이 다시 만들어지지 않아
+react-query 가 스스로 다시 부를 일이 없다. `hooks/use-refetch-on-focus.ts` 의
+`useRefetchOnFocus(refetch)` 를 쓴다(「첫 초점은 건너뛴다」가 이미 들어 있다).
+
+⚠️ **새로 만들지 마라.** #932 에 만든 것이고, #1099 에서 그것을 모른 채 똑같은 것을
+다시 설계하다가 `grep -rn "useFocusEffect"` 로 발견했다.
 
 ## API를 붙일 때
 
