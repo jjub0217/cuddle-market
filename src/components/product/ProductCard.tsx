@@ -89,9 +89,16 @@ function ProductCard({ data, 'data-index': dataIndex, vertical = false, hideProd
     router.push(ROUTES.DETAIL_ID(id, title))
   }
 
+  // ⚠️ 아래 `h-full` 은 **판매요청 카드 때문에 있다**(#1109). 요청 카드는 썸네일을 안 그려서
+  //    판매 카드보다 214px 짧다. 그리드(`ProductList`)의 `<li>` 는 `align-items: stretch` 라
+  //    이미 행 높이만큼 늘어나 있는데, 카드가 자기 높이만 차지해서 **테두리가 들쭉날쭉해
+  //    보였다.** `h-full` 로 카드가 그 자리를 채우면 테두리 줄이 가지런해진다.
+  //    (안쪽 글자는 위에 붙고 아래가 비는데, 겉보기에는 그편이 훨씬 낫다.)
+  //
+  // ⚠️ 그리드가 아닌 곳에서는 부모가 높이를 안 정하므로 `auto` 와 같아 아무 일도 안 한다.
   return (
     <article
-      className="group relative overflow-hidden rounded-xl border border-black/5 bg-white shadow-sm transition-all duration-500 md:rounded-3xl md:hover:-translate-y-1 md:hover:shadow-xl"
+      className="group relative h-full overflow-hidden rounded-xl border border-black/5 bg-white shadow-sm transition-all duration-500 md:rounded-3xl md:hover:-translate-y-1 md:hover:shadow-xl"
       data-index={dataIndex}
     >
       <Link

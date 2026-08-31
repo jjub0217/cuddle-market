@@ -107,8 +107,18 @@ export const STATUS_EN_TO_KO: Array<{ value: string | null; name: string; bgColo
 export type TransactionStatus = 'SELLING' | 'RESERVED' | 'COMPLETED'
 
 // ========== 탭 관련 상수 ==========
+// ⚠️ **「전체」 탭이 없다**(#1109). 예전에는 `{ id: 'tab-all', label: '전체', code: 'ALL' }`
+//    이 맨 앞에 있었고 그것이 홈의 기본이었다.
+//
+//    없앤 까닭 둘:
+//    ① 중고거래의 본줄기는 「사는 것」이고 「구해요」는 곁가지다. 기본은 판매가 맞다
+//    ② 요청 카드는 썸네일을 안 그려서 판매 카드보다 짧다. 「전체」로 섞어 놓으면
+//       그리드 테두리가 들쭉날쭉해 보였다
+//
+// ⚠️ 기본값은 **두 곳**이 맞물려 정한다. 한쪽만 고치면 탭과 목록이 어긋난다.
+//    · 보이는 탭  — `Home.tsx` 의 `initialProductTab` 기본 `'tab-sales'`
+//    · 조회 값    — `productQueryKeys.ts` 의 `productType: get('productType') ?? 'SELL'`
 export const PRODUCT_TYPE_TABS = [
-  { id: 'tab-all', label: '전체', code: 'ALL' },
   { id: 'tab-sales', label: '판매', code: 'SELL' },
   { id: 'tab-purchases', label: '판매요청', code: 'REQUEST' },
 ] as const
