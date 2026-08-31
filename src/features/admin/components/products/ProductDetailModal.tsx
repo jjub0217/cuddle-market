@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
-import { fetchAdminProductDetail } from '@/lib/api/admin'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { deleteAdminProduct, fetchAdminProductDetail } from '@/lib/api/admin'
 import {
   PRODUCT_TYPE_EN_TO_KO,
   TRADE_STATUS_EN_TO_KO,
@@ -81,6 +81,8 @@ const CONDITION_COLORS: Record<string, string> = {
 export default function ProductDetailModal({ isOpen, productId, onClose }: ProductDetailModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const queryClient = useQueryClient()
 
   const { data: product, isLoading } = useQuery({
     queryKey: ['admin-product-detail', productId],
@@ -102,12 +104,37 @@ export default function ProductDetailModal({ isOpen, productId, onClose }: Produ
     onClose()
   }
 
+  const handleDelete = async () => {
+    if (productId === null || isDeleting) return
+
+    setIsDeleting(true)
+    try {
+      await deleteAdminProduct(productId)
+
+      // 목록은 ['admin-products', 조회조건] 으로 캐시된다(useAdminTable).
+      // 조회조건까지 맞출 수 없으니 앞부분만 맞으면 잡는 invalidateQueries 를 쓴다.
+      await queryClient.invalidateQueries({ queryKey: ['admin-products'] })
+      // 지운 상품의 상세는 다시 열 일이 없다. 남겨두면 낡은 값이 잠깐 보인다.
+      queryClient.removeQueries({ queryKey: ['admin-product-detail', productId] })
+
+      alert('상품이 삭제되었습니다.')
+      setShowDeleteConfirm(false)
+      dialogRef.current?.close()
+    } catch {
+      // 조용히 닫으면 「지워진 줄 알았는데 그대로」가 된다. 반드시 알린다.
+      alert('상품 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   return (
     <dialog
       ref={dialogRef}
       className="m-auto w-full max-w-225 flex-col rounded-xl bg-white p-0 shadow-xl backdrop:bg-gray-900/70 open:flex"
       onClick={(e) => {
-        if (e.target === dialogRef.current) dialogRef.current.close()
+        // 삭제 중에는 바깥을 눌러도 안 닫는다 — 닫히면 결과를 못 알린다
+        if (e.target === dialogRef.current && !isDeleting) dialogRef.current.close()
       }}
       onClose={handleClose}
     >
@@ -223,7 +250,8 @@ export default function ProductDetailModal({ isOpen, productId, onClose }: Produ
             <button
               type="button"
               onClick={() => setShowDeleteConfirm(true)}
-              className="cursor-pointer rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+              disabled={isDeleting}
+              className="cursor-pointer rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               삭제
             </button>
@@ -233,11 +261,12 @@ export default function ProductDetailModal({ isOpen, productId, onClose }: Produ
             isOpen={showDeleteConfirm}
             title="상품 삭제 확인"
             description="삭제 시 해당 상품과 관련된 모든 데이터가 즉시 삭제되며 되돌릴 수 없습니다."
-            onConfirm={() => {
+            isPending={isDeleting}
+            onConfirm={handleDelete}
+            onCancel={() => {
+              if (isDeleting) return
               setShowDeleteConfirm(false)
-              dialogRef.current?.close()
             }}
-            onCancel={() => setShowDeleteConfirm(false)}
           />
         </>
       ) : null}

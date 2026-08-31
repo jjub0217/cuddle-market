@@ -175,6 +175,23 @@ export async function fetchAdminProductDetail(id: number): Promise<ProductDetail
   }
 }
 
+// 어드민 상품 삭제. 성공하면 서버가 SuccessResponse 를 주지만 쓸 값이 없어 받지 않는다.
+// 실패는 axios 가 그대로 던진다 — 호출부에서 잡아 알린다.
+//
+// ⚠️ **`/admin/products/...` 가 아니라 일반 상품 길이다.** 서버가 이 길에서 이미
+//    「판매자 본인 **또는 관리자**」를 허용한다(`ProductServiceImpl` 의 `deleteProduct` —
+//    `isOwner || isAdmin`). 그래서 관리자는 이 길로 남의 상품도 지울 수 있다.
+//
+// ⚠️ 어드민 전용 길(`/api/admin/products/{id}`)을 새로 파지 않은 까닭:
+//    ① 서버를 배포해야 쓸 수 있는데 지금 얻는 것이 없다
+//    ② 그쪽은 `@PreAuthorize("hasRole('ADMIN')")` 라 **JWT 안의** 역할을 본다.
+//       이 길은 도메인이 **DB 의** `user.role` 을 보므로, 관리자로 올린 뒤 토큰을
+//       새로 안 받았어도 동작한다
+export async function deleteAdminProduct(id: number): Promise<void> {
+  if (DEMO_MODE) return
+  await api.delete(`/products/${id}`)
+}
+
 // ========== 커뮤니티 API ==========
 
 export async function fetchAdminCommunityPosts(params: FetchParams): Promise<AdminTableResponse<CommunityItem>> {

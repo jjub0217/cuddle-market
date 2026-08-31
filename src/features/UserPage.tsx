@@ -285,8 +285,20 @@ function UserPage() {
             {/* ⭐ **여기가 스크롤 상자다.** 넓은 폭·좁은 폭 둘 다 준다.
                 ⚠️ 스크롤 막대를 감추지 마라(`scrollbar-hide`). 감추면 더 있는지 몰라서
                    **「마지막 카드가 잘렸다」로 보인다** — 마이페이지 패널에서 실제로
-                   그랬다(#1031). 막대가 보여야 구를 수 있다는 것을 안다. */}
-            <div className="border-outline-variant/40 min-h-0 flex-1 overflow-y-auto rounded-xl py-5 md:border md:p-5">
+                   그랬다(#1031). 막대가 보여야 구를 수 있다는 것을 안다.
+
+                ⚠️ **`flex-1` 이 아니라 `flex-initial` 이다.** `flex-1`(= `flex: 1 1 0%`)은
+                   내용이 짧아도 상자를 남은 높이만큼 **늘린다.** 상품이 3개뿐인데
+                   테두리 상자가 화면 바닥까지 내려와 아래가 텅 비어 보였다.
+                   `flex-initial`(= `flex: 0 1 auto`)은 **늘지는 않고 줄기만 한다** —
+                   내용이 짧으면 내용 높이, 길면 남은 높이까지만 줄고 그 안에서 구른다.
+                   위 `min-h-0` 이 있어야 줄어든다(없으면 `min-height: auto` 가 막는다).
+                   2026-08-31 에 진짜 크롬으로 쟀다(1440×900, 카드 4열):
+                     카드 0개  764px → 42px    3개  764px → 302px
+                     카드 8개  764px → 578px   40개 764px → 764px + 스크롤 (안 바뀐다)
+                   ⚠️ 좁은 폭(md 미만)은 **재 봐도 값이 똑같다**(390×844 실측). 거기서는
+                      바깥 줄이 세로라 상자가 이미 남은 높이에 맞춰 줄고 있었다. */}
+            <div className="border-outline-variant/40 min-h-0 flex-initial overflow-y-auto rounded-xl py-5 md:border md:p-5">
               <div className="gap-lg flex flex-col">
                 {allProducts.length ? (
                   <>
