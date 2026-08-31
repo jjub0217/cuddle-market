@@ -247,6 +247,14 @@ export async function fetchAdminCommunityDetail(id: number): Promise<CommunityDe
   }
 }
 
+// 게시글을 지운다. 서버(CommunityServiceImpl.deletePost)는 **작성자 본인 또는 관리자**를
+// 허용하므로(`isAuthor || isAdmin`) 어드민 전용 길이 따로 없어도 된다.
+// 게시글을 지우면 거기 달린 댓글도 함께 소프트 삭제된다.
+export async function deleteAdminCommunityPost(id: number): Promise<void> {
+  if (DEMO_MODE) return
+  await api.delete(`/community/posts/${id}`)
+}
+
 // 데모 모드 전용: 필터 드롭다운의 한글 value를 mock 데이터의 영문 코드로 변환.
 // (실제 분기가 백엔드 호출 전 KO_TO_EN 하는 것과 동일한 변환을 mock 호출 전에 적용해야
 //  한글 필터값과 영문 mock 값이 맞아 필터가 동작함)

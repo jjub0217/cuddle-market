@@ -1,11 +1,10 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { X } from 'lucide-react'
 import type { AdminReport } from '../../types/adminApi'
 import { formatDate } from '../common/formatDate'
 import Field from '../common/Field'
-import DeleteConfirmDialog from '../common/DeleteConfirmDialog'
 import { USER_REPORT_REASON_EN_TO_KO } from '../../configs/userReportTableConfig'
 
 interface UserReportDetailModalProps {
@@ -16,7 +15,6 @@ interface UserReportDetailModalProps {
 
 export default function UserReportDetailModal({ isOpen, report, onClose }: UserReportDetailModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   useEffect(() => {
     const dialog = dialogRef.current
@@ -28,7 +26,6 @@ export default function UserReportDetailModal({ isOpen, report, onClose }: UserR
   }, [isOpen, report])
 
   const handleClose = () => {
-    setShowDeleteConfirm(false)
     onClose()
   }
 
@@ -104,26 +101,23 @@ export default function UserReportDetailModal({ isOpen, report, onClose }: UserR
             >
               닫기
             </button>
+            {/* ⚠️ **아직 못 누른다 — 서버에 정지 기능이 없다**(#1107).
+                `suspend` · `정지` · `BANNED` · `SUSPENDED` 를 백엔드 전체에서 찾아도
+                필드도 API 도 없다. 필드·API·로그인 차단·되돌리기까지 새로 설계해야 한다.
+
+                ⚠️ **그전까지 단추를 살려 두면 안 된다.** 예전에는 눌리기는 하는데
+                   「정지 시 즉시 정지되며 되돌릴 수 없습니다」라고 경고까지 하고
+                   **창만 닫았다.** 관리자는 정지시킨 줄 알고 넘어간다 —
+                   같은 종류의 거짓말을 신고 모달 셋에서 방금 걷어냈다(#1106). */}
             <button
               type="button"
-              onClick={() => setShowDeleteConfirm(true)}
-              className="cursor-pointer rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+              disabled
+              title="서버 기능 준비 중입니다"
+              className="cursor-not-allowed rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white opacity-50"
             >
-              정지
+              정지 (준비 중)
             </button>
           </div>
-
-          <DeleteConfirmDialog
-            isOpen={showDeleteConfirm}
-            title="유저 정지 확인"
-            description="정지 시 해당 유저의 계정이 즉시 정지되며 되돌릴 수 없습니다."
-            confirmLabel="정지"
-            onConfirm={() => {
-              setShowDeleteConfirm(false)
-              dialogRef.current?.close()
-            }}
-            onCancel={() => setShowDeleteConfirm(false)}
-          />
         </>
       ) : null}
     </dialog>
