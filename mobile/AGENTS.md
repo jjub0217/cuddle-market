@@ -126,6 +126,42 @@ react-query 가 스스로 다시 부를 일이 없다. `hooks/use-refetch-on-foc
 ⚠️ **새로 만들지 마라.** #932 에 만든 것이고, #1099 에서 그것을 모른 채 똑같은 것을
 다시 설계하다가 `grep -rn "useFocusEffect"` 로 발견했다.
 
+## 상품 API 로 데이터를 넣고 고칠 때
+
+시험 데이터를 넣거나 고칠 일이 있으면 이 표를 먼저 본다. 2026-08-31 에 여기서 두 번 헛돌았다.
+
+```
+등록       POST  /api/products             JSON. **이미지는 선택**(@NotBlank 가 주석 처리돼 있다)
+등록(요청)  POST  /api/products/requests     price 가 아니라 **desiredPrice** 다
+수정       PATCH /api/products/{id}         ⚠️ **PUT 이 아니다**
+수정(요청)  PATCH /api/products/requests/{id}
+삭제       DELETE /api/products/{id}        관리자는 남의 것도 지운다(isOwner || isAdmin)
+이미지      POST  /api/images                multipart, 필드 이름 `files`. 응답에 mainImageUrl
+목록       GET   /api/products/search       ⚠️ `/api/products` 는 500 이 난다
+```
+
+⚠️ **`PUT` 을 쓰면 500 이 온다.** 오류 문구가 「서버 내부 오류」뿐이라 요청이 잘못됐다는
+   것을 알려주지 않는다. 19개를 다 날린 뒤에야 컨트롤러를 열어 `@PatchMapping` 인 것을 봤다.
+   **어노테이션은 끝까지 읽어라** — `@PreAuthorize` 만 보고 매핑을 건너뛴 탓이었다.
+
+⚠️ **수정은 부분 수정이 아니다.** 전체 필드를 다시 보내야 하므로 **기존 값을 GET 으로
+   읽어 고칠 칸만 얹어** 보낸다. 빠뜨린 필드는 지워진다.
+
+## 셸로 API 를 두드릴 때
+
+⚠️ **여러 값을 짝지어야 하면 셸 배열을 쓰지 말고 python 으로 짜라.** 같은 날 두 번 걸렸다.
+
+```
+macOS 는 bash 3.2 라 `declare -A`(연관 배열)가 없다
+  → 대응표가 통째로 비어 **토큰이 빈 값으로 나갔다.** 오류는 401 이 아니라 500 이었다
+zsh 배열은 **1부터** 시작한다
+  → `${CODES[$((i-1))]}` 로 짰더니 값이 한 칸씩 밀렸다.
+    첫 칸은 비고 나머지는 남의 값을 받았다
+```
+
+⚠️ 그리고 **JSON 본문을 `-d "$VAR"` 로 넘기지 마라.** 줄바꿈이 든 설명 글에서 깨진다.
+   python 의 `urllib` 로 보내면 셸 인용을 아예 안 거친다.
+
 ## API를 붙일 때
 
 **응답 DTO를 직접 열어본다.** 「다른 API가 이러니 이것도 그렇겠지」는 추측이다. 9바퀴에 이걸 안 해서 차단 목록이 늘 비어 있었고, **테스트까지 같은 가정으로 써서 틀린 모양을 통과시켰다.**
