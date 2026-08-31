@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
+import { deleteAdminCommunityPost } from '@/lib/api/admin'
 import type { AdminReport } from '../../types/adminApi'
 import { COMMUNITY_REPORT_REASON_EN_TO_KO, BOARD_TYPE_EN_TO_KO } from '../../configs/communityReportTableConfig'
 import { formatDate } from '../common/formatDate'
@@ -18,7 +20,9 @@ interface CommunityReportDetailModalProps {
 export default function CommunityReportDetailModal({ isOpen, report, onClose }: CommunityReportDetailModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [postContent, setPostContent] = useState<string | null>(null)
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     const dialog = dialogRef.current
@@ -43,12 +47,41 @@ export default function CommunityReportDetailModal({ isOpen, report, onClose }: 
     onClose()
   }
 
+  const handleDelete = async () => {
+    if (!report || isDeleting) return
+
+    const postId = report.targetId
+    setIsDeleting(true)
+    try {
+      await deleteAdminCommunityPost(postId)
+
+      // 목록은 ['admin-community-reports', 조회조건] 으로 캐시된다(useAdminTable).
+      // 조회조건까지 맞출 수 없으니 앞부분만 맞으면 잡는 invalidateQueries 를 쓴다.
+      await queryClient.invalidateQueries({ queryKey: ['admin-community-reports'] })
+      // 커뮤니티 관리 목록에서도 사라져야 한다.
+      await queryClient.invalidateQueries({ queryKey: ['admin-community'] })
+      // 지운 게시글의 상세·댓글은 다시 열 일이 없다. 남겨두면 낡은 값이 잠깐 보인다.
+      queryClient.removeQueries({ queryKey: ['admin-community-detail', postId] })
+      queryClient.removeQueries({ queryKey: ['admin-community-comments', postId] })
+
+      alert('게시글이 삭제되었습니다.')
+      setShowDeleteConfirm(false)
+      dialogRef.current?.close()
+    } catch {
+      // 조용히 닫으면 「지워진 줄 알았는데 그대로」가 된다. 반드시 알린다.
+      alert('게시글 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   return (
     <dialog
       ref={dialogRef}
       className="m-auto w-full max-w-170 flex-col rounded-xl bg-white p-0 shadow-xl backdrop:bg-gray-900/70 open:flex"
       onClick={(e) => {
-        if (e.target === dialogRef.current) dialogRef.current.close()
+        // 삭제 중에는 바깥을 눌러도 안 닫는다 — 닫히면 결과를 못 알린다
+        if (e.target === dialogRef.current && !isDeleting) dialogRef.current.close()
       }}
       onClose={handleClose}
     >
@@ -137,7 +170,8 @@ export default function CommunityReportDetailModal({ isOpen, report, onClose }: 
             <button
               type="button"
               onClick={() => setShowDeleteConfirm(true)}
-              className="cursor-pointer rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+              disabled={isDeleting}
+              className="cursor-pointer rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               삭제
             </button>
@@ -147,11 +181,12 @@ export default function CommunityReportDetailModal({ isOpen, report, onClose }: 
             isOpen={showDeleteConfirm}
             title="게시글 삭제 확인"
             description="삭제 시 해당 게시글과 관련된 모든 데이터가 즉시 삭제되며 되돌릴 수 없습니다."
-            onConfirm={() => {
+            isPending={isDeleting}
+            onConfirm={handleDelete}
+            onCancel={() => {
+              if (isDeleting) return
               setShowDeleteConfirm(false)
-              dialogRef.current?.close()
             }}
-            onCancel={() => setShowDeleteConfirm(false)}
           />
         </>
       ) : null}
