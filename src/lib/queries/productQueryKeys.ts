@@ -75,7 +75,15 @@ export function extractProductSearchParams(
 
   return {
     petType: get('petType'),
-    productType: get('productType'),
+    // ⚠️ **주소에 없으면 「판매」다**(#1109). 예전에는 null 이라 서버가 판매·요청을 다 줬다.
+    //
+    //    중고거래의 본줄기는 「사는 것」이고 「구해요」는 곁가지다. 그래서 홈의 「전체」 탭을
+    //    없애고 기본을 판매로 두기로 했다(2026-08-31). 요청 글은 「판매요청」 탭에서 본다.
+    //
+    // ⚠️ **여기서 기본을 줘야 한다.** 이 함수를 SSR(`app/(main)/page.tsx`)과
+    //    화면(`Home.tsx`)이 같이 쓴다 — 한쪽만 고치면 서버가 받아 둔 목록과 화면이 달라져
+    //    하이드레이션에서 목록이 갈아 끼워진다.
+    productType: get('productType') ?? 'SELL',
     petDetailType: get('petDetailType'),
     categories: get('categories'),
     productStatuses: get('productStatuses'),

@@ -120,7 +120,6 @@ function ProductPost() {
                 activeTab={activeProductTypeTab}
                 onTabChange={handleTabChange}
                 ariaLabel="상품 타입"
-                excludeTabId="tab-all"
               />
             ) : null}
             {activeProductTypeTab === 'tab-sales' ? (

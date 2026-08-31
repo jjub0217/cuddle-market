@@ -48,7 +48,7 @@ function Home() {
   const urlPetType = searchParams.get('petType')
   const urlProductType = searchParams.get('productType')
   const initialPetTab = (urlPetType && PET_TYPE_TABS.find((tab) => tab.code === urlPetType)?.id) || 'pet-tab-all'
-  const initialProductTab = (urlProductType && PRODUCT_TYPE_TABS.find((tab) => tab.code === urlProductType)?.id) || 'tab-all'
+  const initialProductTab = (urlProductType && PRODUCT_TYPE_TABS.find((tab) => tab.code === urlProductType)?.id) || 'tab-sales'
 
   const [activePetTypeTab, setActivePetTypeTab] = useState<PetTypeTabId>(initialPetTab)
   const [activeProductTypeTab, setActiveProductTypeTab] = useState<ProductTypeTabId>(initialProductTab)
@@ -75,10 +75,12 @@ function Home() {
       setActiveProductTypeTab(tabId as ProductTypeTabId)
       const productTypeCode = PRODUCT_TYPE_TABS.find((tab) => tab.id === tabId)?.code
       const params = new URLSearchParams(searchParams.toString())
-      if (productTypeCode && productTypeCode !== 'ALL') {
+      // ⚠️ 「전체」가 없어져서(#1109) 지우는 갈래도 없앴다. 예전에는 `'ALL'` 이면 파라미터를
+      //    지웠고, 지운 상태가 곧 「전체」였다. 지금은 **주소에 없으면 판매**로 읽으므로
+      //    (`productQueryKeys.ts`) 고른 값을 늘 적어 둔다 — 안 적으면 판매요청을 골라도
+      //    새로고침하면 판매로 돌아간다.
+      if (productTypeCode) {
         params.set('productType', productTypeCode)
-      } else {
-        params.delete('productType')
       }
       push(`${pathname}?${params.toString()}`)
     },
@@ -134,7 +136,7 @@ function Home() {
       setActivePetTypeTab(newPetTab)
     }
     const newProductType = searchParams.get('productType')
-    const newProductTab = (newProductType && PRODUCT_TYPE_TABS.find((tab) => tab.code === newProductType)?.id) || 'tab-all'
+    const newProductTab = (newProductType && PRODUCT_TYPE_TABS.find((tab) => tab.code === newProductType)?.id) || 'tab-sales'
     if (newProductTab !== activeProductTypeTab) {
       setActiveProductTypeTab(newProductTab)
     }
@@ -245,7 +247,8 @@ function Home() {
     (e: React.MouseEvent) => {
       e.stopPropagation()
       setActivePetTypeTab('pet-tab-all')
-      setActiveProductTypeTab('tab-all')
+      // ⚠️ 상품 유형에는 「전체」가 없다(#1109). 초기화는 기본인 **판매**로 돌아간다.
+      setActiveProductTypeTab('tab-sales')
       push(pathname)
     },
     [push, pathname]

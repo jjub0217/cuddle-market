@@ -11,6 +11,10 @@ import { getOverlay } from '@/lib/tradeStatus';
 
 const THUMB_SIZE = 100; // 정사각 한 변의 최소값. 약 96~104dp (UI 스펙 §4.2)
 
+// 시험에서 「썸네일 자리가 사라졌는가」를 보려면 표식이 있어야 한다 — 회색 상자는 글자가 없다.
+// 판매요청 카드는 이 자리를 아예 안 그린다(#1109). `place-list-item.tsx` 의 THUMB_TEST_ID 와 같은 까닭이다.
+export const THUMB_TEST_ID = 'product-thumb';
+
 /** 찜 하트 뒤에 까는 그림자 색. */
 const SHADOW = 'rgba(0, 0, 0, 0.45)';
 
@@ -40,7 +44,7 @@ export function ProductThumbnail({ imageUrl, tradeStatus, productType, favorite 
   const overlay = getOverlay(tradeStatus, productType);
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID={THUMB_TEST_ID}>
       {!failed && (
         <Image
           source={{ uri: imageUrl }}
