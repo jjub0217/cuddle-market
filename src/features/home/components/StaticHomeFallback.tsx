@@ -124,6 +124,8 @@ function StaticProductCard({ product, index }: { product: Product; index: number
   const productTradeColor = getTradeStatusColor(tradeStatus)
   const priority = index < 4
 
+  const isRequest = productType === 'REQUEST'
+
   const displayTradeStatus = (() => {
     if (productTypeName === '판매요청') {
       if (productTradeName === '판매완료') return '요청완료'
@@ -131,6 +133,11 @@ function StaticProductCard({ product, index }: { product: Product; index: number
     }
     return productTradeName
   })()
+
+  // 요청 카드는 썸네일을 안 그려서(아래) 거기 얹히던 거래상태 뱃지도 같이 사라진다.
+  // 하이드레이션 뒤 자리를 대신하는 `ProductCard` 는 그 값을 글자 영역 뱃지로 옮겨 그리므로,
+  // 여기서도 같이 그려야 바뀌는 순간 글자가 안 튄다. 그릴 조건도 같다 — 예약중·완료계열만.
+  const requestTradeStatus = isRequest && (tradeStatus === 'RESERVED' || tradeStatus === 'COMPLETED') ? displayTradeStatus : null
 
   return (
     <Link
@@ -142,6 +149,11 @@ function StaticProductCard({ product, index }: { product: Product; index: number
       <div className="flex h-full flex-1 flex-col justify-between gap-5 p-3 md:flex-none">
         <div className="flex flex-col gap-2">
           <span className="heading-h5 line-clamp line-1 text-gray-900">{title}</span>
+          {requestTradeStatus ? (
+            <Badge className="w-fit rounded-full bg-gray-900 px-2 py-0.5 text-[11px] font-semibold text-white">
+              {requestTradeStatus}
+            </Badge>
+          ) : null}
           <p className="flex w-full flex-col">
             <span className="font-semibold text-gray-500">{productTypeName}</span>
             <span className="text-gray-900 max-w-[90%] overflow-hidden font-bold">
@@ -155,27 +167,30 @@ function StaticProductCard({ product, index }: { product: Product; index: number
         </div>
       </div>
 
-      {/* ProductThumbnail */}
-      <div className="relative flex-1 overflow-hidden pb-[35%] md:flex-none md:pb-[75%]">
-        <div className="top-sm px-sm absolute flex w-full justify-between">
-          <div className="gap-xs z-1 flex flex-wrap">
-            <Badge className="bg-primary-700 text-white">{petTypeName}</Badge>
-            {productTypeName !== '판매요청' ? (
+      {/* ProductThumbnail — 판매요청은 안 그린다.
+          이 조각은 하이드레이션 전까지만 보이고 곧 ProductCard 가 자리를 대신한다. 그래서
+          **ProductCard 와 같은 규칙으로 갈라야** 한다 — 여기만 썸네일을 그리면 하이드레이션
+          순간에 그림이 사라지며 글자가 튄다(파일 맨 위 「CLS 방지」 주석). */}
+      {isRequest ? null : (
+        <div className="relative flex-1 overflow-hidden pb-[35%] md:flex-none md:pb-[75%]">
+          <div className="top-sm px-sm absolute flex w-full justify-between">
+            <div className="gap-xs z-1 flex flex-wrap">
+              <Badge className="bg-primary-700 text-white">{petTypeName}</Badge>
               <Badge className="bg-primary-200 text-gray-900">{productStatusName}</Badge>
-            ) : null}
+            </div>
           </div>
+          <Badge className={cn('bottom-sm right-sm absolute z-1 text-white', productTradeColor)}>
+            {displayTradeStatus}
+          </Badge>
+          <FallbackImage
+            imageUrl={mainImageUrl}
+            alt={title}
+            sizes={IMAGE_SIZES.productThumbnail}
+            priority={priority}
+            className="t-0 l-0 absolute h-full w-full object-cover"
+          />
         </div>
-        <Badge className={cn('bottom-sm right-sm absolute z-1 text-white', productTradeColor)}>
-          {displayTradeStatus}
-        </Badge>
-        <FallbackImage
-          imageUrl={mainImageUrl}
-          alt={title}
-          sizes={IMAGE_SIZES.productThumbnail}
-          priority={priority}
-          className="t-0 l-0 absolute h-full w-full object-cover"
-        />
-      </div>
+      )}
     </Link>
   )
 }
