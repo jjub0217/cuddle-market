@@ -51,8 +51,14 @@ import { colors } from '@/constants/colors';
  * `@cuddle/shared`에도 이 값은 아직 없다. 문구를 새로 짓지 않으려고 표를 그대로 둔다 —
  * 웹에서 이 표가 바뀌면 여기도 같이 고친다.
  */
+// ⚠️ **「전체」 탭이 없다**(#1111). 예전에는 `{ id: 'tab-all', label: '전체', code: 'ALL' }`
+//    이 맨 앞에 있었고 그것이 기본이었다. 웹이 #1109 에서 먼저 없앴고 여기를 맞춘 것이다.
+//
+//    없앤 까닭: 중고거래의 본줄기는 「사는 것」이고 「구해요」는 곁가지다. 기본은 판매가 맞다.
+//
+// ⚠️ 기본값은 **`lib/products/filters.ts` 의 `EMPTY_FILTERS.productType`** 이 정한다.
+//    여기서 탭만 빼고 그쪽을 안 고치면 **탭은 「판매」인데 목록엔 요청이 섞인다.**
 export const PRODUCT_TYPE_TABS = [
-  { id: 'tab-all', label: '전체', code: 'ALL' },
   { id: 'tab-sales', label: '판매', code: 'SELL' },
   { id: 'tab-purchases', label: '판매요청', code: 'REQUEST' },
 ] as const;
@@ -65,12 +71,10 @@ export const SORT_TYPE = [
   { id: 'favoriteCount', label: '찜 많은 순' },
 ] as const;
 
-/**
- * 「전체」를 나타내는 웹 쪽 코드. 이 줄 밖으로는 **`null`로 알린다** —
- * 서버에 `productType=ALL`을 보내면 그런 이름의 종류를 찾아 아무것도 안 나온다
- * (「전체는 빈 값」 규칙, 계획서 Task 1).
- */
-const ALL_CODE = 'ALL';
+// ⚠️ 예전에 여기 `ALL_CODE = 'ALL'` 이 있었다(#1111 에서 걷었다). 「전체」 탭을 고르면
+//    바깥으로 `null` 을 알리려던 것이다 — 서버에 `productType=ALL` 을 보내면 그런 이름의
+//    종류를 찾아 아무것도 안 나오기 때문이다(「전체는 빈 값」 규칙).
+//    이제 탭이 판매·판매요청 둘뿐이라 그 갈래가 필요 없다. **탭 코드를 그대로 올린다.**
 
 interface Props {
   /** 지금 고른 상품 종류. 「전체」는 `null`이다 */
@@ -139,7 +143,7 @@ export function ProductListToolbar({
           contentContainerStyle={styles.tabs}
         >
           {PRODUCT_TYPE_TABS.map((tab) => {
-            const code = tab.code === ALL_CODE ? null : tab.code;
+            const code = tab.code;
             const active = productType === code;
             return (
               <GesturePressable

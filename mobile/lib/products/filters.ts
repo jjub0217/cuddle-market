@@ -44,7 +44,11 @@ export const EMPTY_FILTERS: ProductFilters = {
   petType: null,
   petDetailType: null,
   category: null,
-  productType: null,
+  // ⚠️ **여기만 `null` 이 아니다**(#1111). 상품 유형에는 「전체」가 없어서 기본이 **판매**다.
+  //    웹도 같다(`productQueryKeys.ts` 의 `productType ?? 'SELL'`).
+  //    ⚠️ 탭(`product-list-toolbar.tsx` 의 `PRODUCT_TYPE_TABS`)과 **맞물린다.**
+  //       한쪽만 고치면 탭은 「판매」인데 목록엔 요청이 섞인다.
+  productType: 'SELL',
   productStatus: null,
   tradeStatus: null,
   price: null,

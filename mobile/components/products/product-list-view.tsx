@@ -166,7 +166,15 @@ export const ProductListView = forwardRef<ProductListViewRef, Props>(function Pr
   //
   // 정렬은 여기서 뺀다 — 「최신순」이 「고른 조건」은 아니다. 정렬만 바꿨는데 목록이 비면
   // 그건 앱에 상품이 없는 것이지 조건이 좁아서가 아니다.
-  const { sortBy: _sortBy, ...좁히는조건 } = filters;
+  //
+  // ⚠️ **상품 유형도 뺀다**(#1111). 「전체」 탭을 없애면서 기본이 `'SELL'` 이 되어
+  //    **늘 값이 있다.** 안 빼면 `조건이걸렸다` 가 항상 참이 되어, 앱에 상품이 하나도
+  //    없을 때도 「검색 결과가 없습니다 / 다른 필터 조건으로 검색해보세요」가 뜬다 —
+  //    필터를 건 적도 없는데 그렇게 말하면 안 된다.
+  //
+  //    ⚠️ 판매요청 탭에서 비어도 홈 문구가 나온다. 그편이 낫다고 봤다 —
+  //       「판매요청이 아직 없다」는 조건을 좁혀서가 아니라 정말 없는 것이기 때문이다.
+  const { sortBy: _sortBy, productType: _productType, ...좁히는조건 } = filters;
   const 조건이걸렸다 = Boolean(keyword) || Object.values(좁히는조건).some((v) => v !== null);
 
   // 목록 밖에 서는 줄. 그래서 `ListHeaderComponent`가 아니라 `SectionList`의 형제로 그린다.

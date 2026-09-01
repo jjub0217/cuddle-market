@@ -96,8 +96,9 @@ it('조건이 없으면 검색어·필터를 안 보낸다 (홈)', async () => {
   await render(<ProductListView />, { wrapper: 감싸기 });
 
   await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
-  // 「전체」는 빈 값이라 키 자체가 안 실린다. 정렬만 늘 실린다(기본 최신순).
-  expect(fetchProducts).toHaveBeenCalledWith({ page: 0, sortBy: 'createdAt' });
+  // ⚠️ **상품 유형은 늘 실린다**(#1111). 「전체」 탭이 없어져 기본이 SELL 이다.
+  //    동물 종류·카테고리 같은 나머지 「전체」는 여전히 빈 값이라 키가 안 실린다.
+  expect(fetchProducts).toHaveBeenCalledWith({ page: 0, sortBy: 'createdAt', productType: 'SELL' });
 });
 
 it('검색어를 받으면 그대로 서버에 넘긴다 (검색 결과)', async () => {
@@ -431,7 +432,9 @@ it('reset() 하면 필터가 풀리고 조건 없이 다시 받는다', async ()
   });
 
   await waitFor(() => expect(fetchProducts).toHaveBeenCalled());
-  expect(fetchProducts).toHaveBeenCalledWith({ page: 0, sortBy: 'createdAt' });
+  // ⚠️ 초기화해도 **상품 유형은 판매로 돌아간다**(#1111). 「전체」가 없어서
+  //    「안 고른 상태」라는 것이 없다. 나머지 조건은 다 풀린다.
+  expect(fetchProducts).toHaveBeenCalledWith({ page: 0, sortBy: 'createdAt', productType: 'SELL' });
 });
 
 // ----- 조건을 바꾸면 맨 위로 올라가는가 (#937) -----

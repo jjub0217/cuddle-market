@@ -45,11 +45,11 @@ function makeProps(overrides: Partial<React.ComponentProps<typeof ProductListToo
   };
 }
 
-it('알약 셋과 정렬·세부 필터 단추가 보인다', async () => {
+it('알약 둘과 정렬·세부 필터 단추가 보인다', async () => {
   const { props } = makeProps();
   await render(<ProductListToolbar {...props} />);
 
-  expect(screen.getByText('전체')).toBeTruthy();
+  // ⚠️ 예전에는 「전체」까지 셋이었다(#1111 에서 걷었다).
   expect(screen.getByText('판매')).toBeTruthy();
   expect(screen.getByText('판매요청')).toBeTruthy();
   expect(screen.getByTestId('open-detail-filter')).toBeTruthy();
@@ -142,13 +142,16 @@ it('판매요청을 누르면 REQUEST로 알린다', async () => {
   expect(onChangeProductType).toHaveBeenCalledWith('REQUEST');
 });
 
-it('전체를 누르면 null로 알린다 (ALL이라는 글자를 보내지 않는다)', async () => {
-  const { props, onChangeProductType } = makeProps({ productType: 'SELL' });
+// ⚠️ 예전에 「전체를 누르면 null 로 알린다」 시험이 여기 있었다(#1111 에서 걷었다).
+//    「전체」 탭이 없어져 그 동작 자체가 사라졌다. 대신 **없다는 것**을 지킨다 —
+//    되살리면 서버에 productType=ALL 이 나가 아무것도 안 나오던 옛 함정으로 돌아간다.
+it('상품 유형 알약은 판매·판매요청 둘뿐이다 (「전체」가 없다)', async () => {
+  const { props } = makeProps();
   await render(<ProductListToolbar {...props} />);
 
-  await fireEvent.press(screen.getByText('전체'));
-
-  expect(onChangeProductType).toHaveBeenCalledWith(null);
+  expect(screen.getByText('판매')).toBeTruthy();
+  expect(screen.getByText('판매요청')).toBeTruthy();
+  expect(screen.queryByText('전체')).toBeNull();
 });
 
 it('지금 고른 상품 종류가 표시된다', async () => {
@@ -156,12 +159,12 @@ it('지금 고른 상품 종류가 표시된다', async () => {
   const view = await render(<ProductListToolbar {...props} />);
 
   expect(screen.getByRole('button', { name: '판매', selected: true })).toBeTruthy();
-  expect(screen.getByRole('button', { name: '전체', selected: false })).toBeTruthy();
+  expect(screen.getByRole('button', { name: '판매요청', selected: false })).toBeTruthy();
 
   // 값이 바뀌면 표시도 따라 바뀐다
-  await view.rerender(<ProductListToolbar {...props} productType={null} />);
+  await view.rerender(<ProductListToolbar {...props} productType="REQUEST" />);
 
-  expect(screen.getByRole('button', { name: '전체', selected: true })).toBeTruthy();
+  expect(screen.getByRole('button', { name: '판매요청', selected: true })).toBeTruthy();
   expect(screen.getByRole('button', { name: '판매', selected: false })).toBeTruthy();
 });
 
