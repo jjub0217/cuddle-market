@@ -6,12 +6,14 @@ function filters(overrides: Partial<ProductFilters> = {}): ProductFilters {
 }
 
 describe('EMPTY_FILTERS', () => {
-  it('아무것도 안 고른 상태다 — 정렬만 최신순', () => {
+  // ⚠️ **`productType` 만 null 이 아니다**(#1111). 상품 유형에는 「전체」가 없어서
+  //    기본이 판매다. 나머지는 전부 「안 골랐다 = null」 그대로다.
+  it('상품 유형만 판매로 정해져 있고 나머지는 안 고른 상태다', () => {
     expect(EMPTY_FILTERS).toEqual({
       petType: null,
       petDetailType: null,
       category: null,
-      productType: null,
+      productType: 'SELL',
       productStatus: null,
       tradeStatus: null,
       price: null,
@@ -23,13 +25,14 @@ describe('EMPTY_FILTERS', () => {
 })
 
 describe('toParams — 빈 값은 뺀다', () => {
-  // ⚠️ 「전체」는 null 이다. 'ALL' 같은 글자를 보내면 서버가 그런 종류를 찾아
-  //    아무것도 안 나온다 (15바퀴에서 정한 규칙).
+  // ⚠️ 동물 종류·카테고리의 「전체」는 여전히 null 이다. 'ALL' 같은 글자를 보내면
+  //    서버가 그런 종류를 찾아 아무것도 안 나온다 (15바퀴에서 정한 규칙).
+  // ⚠️ **상품 유형은 다르다**(#1111). 「전체」 탭이 없어져 늘 SELL 또는 REQUEST 를 싣는다.
 
-  it('아무 조건도 없으면 page 와 정렬만 남는다', () => {
+  it('아무 조건도 없으면 page · 정렬 · 상품 유형만 남는다', () => {
     const params = toParams(EMPTY_FILTERS, 0)
 
-    expect(params).toEqual({ page: 0, sortBy: 'createdAt' })
+    expect(params).toEqual({ page: 0, sortBy: 'createdAt', productType: 'SELL' })
   })
 
   it('page 를 그대로 싣는다', () => {
@@ -52,8 +55,10 @@ describe('toParams — 빈 값은 뺀다', () => {
     expect(params.petDetailType).toBe('DOG')
     expect(params.categories).toBe('FOOD')
     // 안 고른 것은 아예 키가 없다
-    expect(params).not.toHaveProperty('productType')
     expect(params).not.toHaveProperty('addressSido')
+    // ⚠️ `productType` 은 여기 없다 — **늘 실린다**(#1111). 「전체」 탭이 없어서
+    //    안 고른 상태라는 것이 없다. 위 `filters()` 가 EMPTY_FILTERS 를 바탕으로 하므로 SELL 이다.
+    expect(params.productType).toBe('SELL')
   })
 
   it('카테고리는 서버 이름(categories)으로 바뀐다', () => {
