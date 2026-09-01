@@ -56,12 +56,30 @@ interface Props {
   initialSlots: UploadSlot[];
   /** 「등록하기」 또는 「수정 완료」 */
   submitLabel: string;
+  /**
+   * 고치고 있는 상품의 갈래 코드(`SELL`·`REQUEST`). 가격 칸 이름이 이것으로 갈린다(#1113).
+   *
+   * ⚠️ **등록 화면은 안 넘긴다.** 앱은 판매요청을 만들지 못해서(`app/products/new.tsx`)
+   *    등록은 늘 판매다. 그런데 **수정은 판매요청도 된다** — `buildOwnerActions` 가
+   *    갈래를 안 가리고 「수정하기」를 넣어서, 판매요청 글을 고칠 때도 이 폼이 열린다.
+   *    그때 「판매 가격」이라고 물어보면 파는 값처럼 읽힌다.
+   */
+  productType?: string | null;
   onSubmit: (payload: ProductPayload) => Promise<void>;
 }
 
 const EMPTY_OPTIONS: readonly Option[] = [];
 
-export function ProductForm({ initialValues, initialSlots, submitLabel, onSubmit }: Props) {
+export function ProductForm({
+  initialValues,
+  initialSlots,
+  submitLabel,
+  productType,
+  onSubmit,
+}: Props) {
+  // 판매요청이면 「희망 가격」. 웹 등록 폼(`ProductRequestForm.tsx`)이 쓰는 말 그대로다 —
+  // 새로 짓지 않는다. 판매면 지금까지 쓰던 「판매 가격」 그대로.
+  const priceLabel = productType === 'REQUEST' ? '희망 가격' : '판매 가격';
   const [values, setValues] = useState<ProductFormValues>(initialValues);
   const [slots, setSlots] = useState<UploadSlot[]>(initialSlots);
   const [errors, setErrors] = useState<ProductFormErrors>({});
@@ -265,7 +283,7 @@ export function ProductForm({ initialValues, initialSlots, submitLabel, onSubmit
 
         <View onLayout={rememberSpot('price')}>
           <Field
-            label="판매 가격"
+            label={priceLabel}
             required
             inputRef={inputs.price}
             value={values.price}

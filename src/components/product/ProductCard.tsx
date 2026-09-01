@@ -113,6 +113,7 @@ function ProductCard({ data, 'data-index': dataIndex, vertical = false, hideProd
         <ProductInfo
           title={title}
           price={price}
+          productType={productType}
           createdAt={createdAt}
           favoriteCount={favoriteCount}
           productTypeName={productTypeName}

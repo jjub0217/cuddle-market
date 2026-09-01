@@ -6,7 +6,7 @@ import { getProductStatus } from '@/lib/utils/getProductStatus'
 import { getProductType } from '@/lib/utils/getProductType'
 import { getTradeStatus } from '@/lib/utils/getTradeStatus'
 import { getTradeStatusColor } from '@/lib/utils/getTradeStatusColor'
-import { getTimeAgo } from '@cuddle/shared'
+import { getPriceLabel, getTimeAgo } from '@cuddle/shared'
 import { formatPrice } from '@/lib/utils/formatPrice'
 import { cn } from '@/lib/utils/cn'
 import Badge from '@/components/commons/badge/Badge'
@@ -156,7 +156,16 @@ function StaticProductCard({ product, index }: { product: Product; index: number
           ) : null}
           <p className="flex w-full flex-col">
             <span className="font-semibold text-gray-500">{productTypeName}</span>
+            {/* 판매요청이면 「희망」이 앞에 붙는다(#1113).
+                ⚠️ **`ProductCard` 와 같은 규칙이라야 한다.** 여기만 빼면 하이드레이션
+                   순간에 「20,000원」이 「희망 20,000원」으로 바뀌며 글자가 튄다
+                   (파일 맨 위 「CLS 방지」 주석과 같은 까닭). */}
             <span className="text-gray-900 max-w-[90%] overflow-hidden font-bold">
+              {/* ⚠️ **`ProductHeading` 과 크기까지 같아야 한다.** 여기만 다르면
+                     하이드레이션 순간에 글자가 튄다(파일 맨 위 「CLS 방지」 주석) */}
+              {getPriceLabel(productType) ? (
+                <span className="mr-1 text-xs">{getPriceLabel(productType)}</span>
+              ) : null}
               <span>{formatPrice(price)}</span>원
             </span>
           </p>

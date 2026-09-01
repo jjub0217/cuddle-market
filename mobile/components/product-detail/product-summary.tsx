@@ -1,5 +1,6 @@
 import {
   formatPrice,
+  getPriceLabel,
   getProductStatusLabel,
   getProductTypeLabel,
   getTimeAgo,
@@ -30,6 +31,8 @@ interface Props {
 
 export function ProductSummary({ product }: Props) {
   const isRequest = product.productType === 'REQUEST';
+  // 판매요청이면 「희망」. 판매면 null 이라 안 그린다(#1113)
+  const priceLabel = getPriceLabel(product.productType);
   const location = [product.addressSido, product.addressGugun].filter(Boolean).join(' ');
 
   return (
@@ -50,7 +53,16 @@ export function ProductSummary({ product }: Props) {
       <Text selectable style={styles.title}>
         {product.title}
       </Text>
-      <Text selectable style={styles.price}>{`${formatPrice(product.price)}원`}</Text>
+      {/* 판매요청이면 앞에 「희망」이 붙는다(#1113). 카드와 같은 말이라야
+          눌러 들어와도 뜻이 이어진다 — 웹 상세(`ProductTitle`)도 같은 함수를 쓴다.
+
+          ⚠️ 「희망」은 **값보다 작게** 그린다(styles.priceLabel). 이 화면은 제목과
+             가격이 **둘 다 20/700** 이라(아래 styles.title·price), 값과 같은 크기로
+             두면 두 줄이 한 덩어리로 읽힌다 — 2026-09-01 에 실제로 그랬다. */}
+      <Text selectable style={styles.price}>
+        {priceLabel ? <Text style={styles.priceLabel}>{priceLabel} </Text> : null}
+        {`${formatPrice(product.price)}원`}
+      </Text>
       <Text style={styles.meta}>
         {getTimeAgo(product.createdAt)}
         {location ? ` · ${location}` : ''}
@@ -113,6 +125,16 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     // 가격은 제목과 같은 검정(styles.title과 동일).
     color: colors.onSurface,
+  },
+  // 「희망」 라벨. **제목·가격이 둘 다 20/700 이라** 이것까지 같은 크기로 두면
+  // 두 줄이 한 덩어리로 읽힌다. **크기만** 낮춰서 가른다.
+  //
+  // ⚠️ 굵기·색은 안 준다. RN 의 중첩 <Text> 가 위 `price`(700 · 검정)를 물려받는다.
+  //    웹 상세(`ProductTitle`)도 바깥 strong 의 굵기·색을 그대로 쓴다.
+  // ⚠️ **연하게 빼지 마라.** 가격을 꾸미는 말이라 가격에 붙어 읽혀야 한다 —
+  //    회색으로 낮추면 시간·지역 같은 메타 정보처럼 보인다.
+  priceLabel: {
+    fontSize: 14,
   },
   meta: {
     fontSize: 13,
