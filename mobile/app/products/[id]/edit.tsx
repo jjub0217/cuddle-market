@@ -84,6 +84,10 @@ export default function EditProductScreen() {
       <Header onBack={() => router.back()} />
 
       <ProductForm
+        // 판매요청이면 가격 칸 이름이 「희망 가격」이 된다(#1113).
+        // 앱은 판매요청을 등록하지는 못해도 **고칠 수는 있다**
+        // (`lib/product-menu.ts` 의 `buildOwnerActions` 가 갈래를 안 가린다).
+        productType={product.productType}
         initialValues={{
           title: product.title,
           description: product.description ?? '',

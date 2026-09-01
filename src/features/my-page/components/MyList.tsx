@@ -19,7 +19,7 @@ import { ROUTES } from '@/constants/routes'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import IconButton from '@/components/commons/button/IconButton'
 import { DropdownMenu, DropdownMenuItem } from '@/components/commons/DropdownMenu'
-import { getTradeLabel } from '@cuddle/shared'
+import { getPriceLabel, getTradeLabel } from '@cuddle/shared'
 
 interface StatusDropdownProps {
   className?: string
@@ -248,7 +248,15 @@ export default function MyList({
                     </DropdownMenu>
                   </div>
                 ) : null}
-                <span className="text-base font-bold text-gray-900">{formatPrice(price)} 원</span>
+                {/* 판매요청이면 「희망」이 앞에 붙는다(#1113). 앱의 마이 목록도 같은 자리에
+                    같은 말을 쓴다(`product-card.tsx` — 마이 목록 셋이 그 카드를 쓴다).
+                    값보다 **작게만** — 색·굵기는 값과 같이 둔다(카드·상세와 같은 규칙) */}
+                <span className="text-base font-bold text-gray-900">
+                  {getPriceLabel(productType) ? (
+                    <span className="mr-1 text-xs">{getPriceLabel(productType)}</span>
+                  ) : null}
+                  {formatPrice(price)} 원
+                </span>
               </div>
             </div>
             <div className="flex items-center gap-3">

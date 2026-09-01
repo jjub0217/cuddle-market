@@ -1,5 +1,6 @@
 import {
   formatPrice,
+  getPriceLabel,
   getProductStatusLabel,
   getProductTypeLabel,
   getTimeAgo,
@@ -35,6 +36,8 @@ interface Props {
 export function ProductCard({ product, favorite, onMorePress }: Props) {
   const location = product.addressGugun || product.addressSido || '';
   const isRequest = product.productType === 'REQUEST';
+  // 판매요청이면 「희망」. 판매면 null 이라 안 그린다(#1113)
+  const priceLabel = getPriceLabel(product.productType);
 
   // 판매요청(「구해요」) 글의 사진은 **내 물건이 아니라 남의 물건을 퍼온 예시**다.
   // 판매글 사진과 뜻이 다른데 같은 자리에 들어가고, 사진이 없으면 회색 네모가 남아
@@ -132,8 +135,17 @@ export function ProductCard({ product, favorite, onMorePress }: Props) {
           {product.title}
         </Text>
 
-        {/* 가격 (강조) — 단위는 화면에서 붙인다 */}
-        <Text style={styles.price}>{`${formatPrice(product.price)}원`}</Text>
+        {/* 가격 (강조) — 단위는 화면에서 붙인다.
+            판매요청이면 앞에 「희망」이 붙는다(#1113). 같은 「12,000원」이 판매는
+            "이 값에 팝니다", 판매요청은 "이 값에 사고 싶어요"로 뜻이 반대인데
+            카드만 보면 안 갈려서다. 웹 카드도 같은 함수를 쓴다 — `ProductHeading`.
+
+            ⚠️ 「희망」은 **값보다 작게** 그린다(styles.priceLabel). 값과 같은 크기로
+               두면 제목과 한 덩어리로 읽힌다 — 상세에서 실제로 그랬다. */}
+        <Text style={styles.price}>
+          {priceLabel ? <Text style={styles.priceLabel}>{priceLabel} </Text> : null}
+          {`${formatPrice(product.price)}원`}
+        </Text>
 
         {/* 메타 행: 위치 · 찜 N …… 상대시간(오른쪽 끝) */}
         <View style={styles.metaRow}>
@@ -254,6 +266,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: colors.onSurface,
+  },
+  // 「희망」 라벨. **크기만** 낮춘다 — 굵기·색은 안 준다.
+  //
+  // ⚠️ RN 의 중첩 <Text> 는 부모 스타일을 물려받는다. 그래서 여기서 fontWeight·color 를
+  //    비워 두면 위 `price`(700 · 검정)를 그대로 따라간다. 웹도 같다 — 바깥 span 의
+  //    `font-bold text-gray-900` 이 상속된다(`ProductHeading`).
+  // ⚠️ **연하게 빼지 마라.** 「희망」은 가격을 꾸미는 말이라 가격 덩어리에 붙어야 하는데,
+  //    회색으로 낮추면 시간·지역 같은 **메타 정보처럼** 보인다.
+  priceLabel: {
+    fontSize: 12,
   },
   metaRow: {
     flexDirection: 'row',

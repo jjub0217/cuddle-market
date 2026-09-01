@@ -9,6 +9,13 @@ import { cn } from '@/lib/utils/cn'
 interface ProductInfoProps {
   title: string
   price: number
+  /**
+   * 상품 갈래 코드(`SELL`·`REQUEST`). 판매요청이면 가격 앞에 「희망」이 붙는다(#1113).
+   *
+   * ⚠️ 옆의 `productTypeName` 과 다르다. 그쪽은 뱃지에 그릴 **한글 이름**이고 이것은
+   *    **원본 코드**다. 가르는 일에는 코드를 쓴다 — 문구가 바뀌어도 안 깨진다.
+   */
+  productType?: string | null
   createdAt: string
   favoriteCount: number
   productTypeName: string
@@ -37,6 +44,7 @@ interface ProductInfoProps {
 export function ProductInfo({
   title,
   price,
+  productType,
   createdAt,
   favoriteCount,
   productTypeName,
@@ -95,7 +103,7 @@ export function ProductInfo({
       {/* 하트가 붙으면 뱃지 줄이 그 아래로 파고들지 않게 오른쪽을 비운다.
           하트는 절대 배치라 자리를 안 차지하고, 뱃지 줄이 이 카드에서 가장 위 칸이라 부딪힌다. */}
       <ProductBadge items={badgeItems} className={onLikeClick ? 'pr-7' : undefined} />
-      <ProductHeading title={title} price={price} />
+      <ProductHeading title={title} price={price} productType={productType} />
       {/* 메타 (레퍼런스 패턴): 은평구 · 찜 15  ........  3분 전 */}
       <div className="mt-auto flex w-full items-center gap-0.5 text-gray-500 md:gap-1">
         {location ? (

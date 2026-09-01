@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatBirthDate, formatJoinDate, formatPrice, isTradeAvailable } from './format'
+import { formatBirthDate, formatJoinDate, formatPrice, getPriceLabel, isTradeAvailable } from './format'
 
 describe('formatPrice', () => {
   it("천 단위 콤마만 붙이고 '원'은 붙이지 않는다", () => {
@@ -59,5 +59,31 @@ describe('formatJoinDate', () => {
   it('생년월일과 같은 모양이다', () => {
     // 프로필에서 두 날짜가 같이 보인다. 모양이 갈리면 바로 눈에 띈다
     expect(formatJoinDate('2000-03-07T00:00:00')).toBe(formatBirthDate('2000-03-07'))
+  })
+})
+
+describe('getPriceLabel', () => {
+  it('판매요청이면 「희망」을 준다', () => {
+    expect(getPriceLabel('REQUEST')).toBe('희망')
+  })
+
+  it('빈칸을 붙이지 않는다', () => {
+    // 사이 띄우기는 그리는 쪽이 여백으로 준다 — 값에 이어 붙이는 글이 아니라
+    // 작고 연하게 따로 그리는 라벨이기 때문이다
+    expect(getPriceLabel('REQUEST')).not.toMatch(/\s/)
+  })
+
+  it('판매면 null 이라 아무것도 안 그린다', () => {
+    expect(getPriceLabel('SELL')).toBeNull()
+  })
+
+  it('값이 없어도 null', () => {
+    expect(getPriceLabel()).toBeNull()
+    expect(getPriceLabel(null)).toBeNull()
+  })
+
+  it('모르는 코드는 판매로 본다', () => {
+    // 서버가 갈래를 늘려도 「희망」이 엉뚱한 곳에 붙지는 않는다
+    expect(getPriceLabel('AUCTION')).toBeNull()
   })
 })
