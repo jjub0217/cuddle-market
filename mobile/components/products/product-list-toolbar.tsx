@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Pressable as GesturePressable } from 'react-native-gesture-handler';
+
+import { GesturePressable } from '@/components/ui/gesture-pressable';
 
 import { ChevronDown, SlidersHorizontal } from 'lucide-react-native';
 
@@ -28,6 +29,13 @@ import { colors } from '@/constants/colors';
 //    그리고 시트는 붙는 줄이 아니라 애초에 이 고장과 무관하다.
 //
 // ⚠️ **jest 로는 못 잡는다.** 자리가 어긋나는 것은 진짜 화면에서만 생긴다.
+//
+// ⚠️⚠️ **그리고 그것만으로는 화면 낭독기로 못 누른다**(#1115). gesture-handler 는
+//    `onPress` 를 제스처로만 처리하는데, TalkBack 의 두 번 탭은 터치가 아니라
+//    접근성 명령이라 그 판정을 안 거친다 — **안내는 하는데 아무 일도 안 났다.**
+//    그래서 이 줄의 누름판은 `react-native-gesture-handler` 것을 **바로 쓰지 않고**
+//    `components/ui/gesture-pressable.tsx` 를 거친다. 거기서 접근성 클릭을 이어 준다.
+//    ⚠️ **`react-native-gesture-handler` 에서 바로 가져오지 마라** — 되돌아간다.
 
 // 상품 목록 **바로 위에 고정되는** 줄.
 //
