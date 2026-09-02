@@ -85,7 +85,9 @@ it('고른 뒤 그냥 닫으면 알리지 않는다', async () => {
   await render(<DetailFilterSheet {...props} />, { wrapper: Wrapper });
 
   await fireEvent.press(screen.getByText(STATUS.label));
-  await fireEvent.press(screen.getByLabelText('닫기'));
+  // ⚠️ 바깥 누름판은 **낭독기에서 감춰 뒀다**(#1116). 그래서 라벨이 없고 기본 찾기에도
+  //    안 잡힌다 — testID 로, 감춰진 것까지 뒤져서 찾는다. **손으로 누르는 것은 그대로다**
+  await fireEvent.press(screen.getByTestId('sheet-backdrop', { includeHiddenElements: true }));
 
   expect(onClose).toHaveBeenCalled();
   expect(onApply).not.toHaveBeenCalled();
@@ -98,7 +100,9 @@ it('그냥 닫았다가 다시 열면 고르던 것이 버려지고 열 때 값�
   await fireEvent.press(screen.getByText(STATUS.label));
   expect(screen.getByRole('button', { name: STATUS.label, selected: true })).toBeTruthy();
 
-  await fireEvent.press(screen.getByLabelText('닫기'));
+  // ⚠️ 바깥 누름판은 **낭독기에서 감춰 뒀다**(#1116). 그래서 라벨이 없고 기본 찾기에도
+  //    안 잡힌다 — testID 로, 감춰진 것까지 뒤져서 찾는다. **손으로 누르는 것은 그대로다**
+  await fireEvent.press(screen.getByTestId('sheet-backdrop', { includeHiddenElements: true }));
   await view.rerender(<DetailFilterSheet {...props} visible={false} />);
   await view.rerender(<DetailFilterSheet {...props} visible />);
 

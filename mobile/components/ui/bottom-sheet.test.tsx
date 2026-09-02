@@ -63,9 +63,55 @@ describe('BottomSheet', () => {
       { wrapper: Wrapper }
     );
 
-    await fireEvent.press(screen.getByLabelText('닫기'));
+    // ⚠️ 예전에는 `getByLabelText('닫기')` 로 찾았다. 그 라벨을 **일부러 뺐다**(#1116) —
+    //    낭독기에서 이 누름판이 시트 안을 가로챘기 때문이다.
+    // ⚠️ **`includeHiddenElements` 가 필요하다.** 이제 접근성에서 감춘 요소라
+    //    기본 찾기에서 빠진다. **손으로 누르는 것은 그대로**라는 것이 이 시험의 뜻이다
+    await fireEvent.press(
+      screen.getByTestId('sheet-backdrop', { includeHiddenElements: true })
+    );
 
     expect(닫힘).toHaveBeenCalled();
+  });
+
+  it('바깥 누름판은 화면 낭독기에서 감춘다', async () => {
+    // ⚠️ **원인을 직접 본다.** 「시트 안이 읽히는가」는 jest 로 못 본다 —
+    //    접근성 나무는 네이티브가 만든다. 그래서 **그렇게 만드는 속성**을 본다.
+    //
+    //    이 누름판은 absoluteFill 이라 화면을 통째로 덮는데, 낭독기는 겹침 순서를
+    //    안 봐서 시트보다 먼저 잡혔다. 「닫기」가 읽히고 두 번 탭하면 고르기도 전에
+    //    닫혔다(2026-09-02 실기기).
+    await render(
+      <BottomSheet visible onClose={() => {}}>
+        <Text>안에 담은 것</Text>
+      </BottomSheet>,
+      { wrapper: Wrapper }
+    );
+
+    // ① 속성이 붙어 있다
+    expect(
+      screen.getByTestId('sheet-backdrop', { includeHiddenElements: true }).props
+        .importantForAccessibility
+    ).toBe('no-hide-descendants');
+
+    // ② 그리고 **찾기에서 실제로 빠진다.** 시험 라이브러리도 접근성에서 감춰진 것으로
+    //    본다는 뜻이라, ① 보다 「감춰졌다」에 가까운 증거다
+    expect(screen.queryByTestId('sheet-backdrop')).toBeNull();
+  });
+
+  it('바깥 누름판에 읽히는 이름을 다시 붙이지 않는다', async () => {
+    // 이름이 있으면 「읽히는 줄」로 오해하게 된다. 위에서 감췄으므로 이름은 뜻이 없다
+    await render(
+      <BottomSheet visible onClose={() => {}}>
+        <Text>안에 담은 것</Text>
+      </BottomSheet>,
+      { wrapper: Wrapper }
+    );
+
+    expect(
+      screen.getByTestId('sheet-backdrop', { includeHiddenElements: true }).props
+        .accessibilityLabel
+    ).toBeUndefined();
   });
 
   it('손잡이는 끌어 닫기를 켠 시트에만 있다', async () => {
