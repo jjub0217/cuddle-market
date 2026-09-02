@@ -268,7 +268,38 @@ export function BottomSheet({ visible, onClose, dragToClose = false, children }:
            시트를 누름판 **위에** 얹으면 시트를 눌러도 누름판에 안 닿는다. 그래서
            시트 안 누름판이 아예 필요 없어지고, 겨룰 일도 없어진다.
       */}
-      <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="닫기">
+      {/*
+        ⚠️ **화면 낭독기에서는 이 누름판을 감춘다**(#1116).
+
+        이것은 `absoluteFill` 이라 **화면을 통째로 덮는다.** 눈으로는 시트가 그 위에
+        그려져 아무 문제가 없는데, **낭독기는 겹침 순서를 그렇게 보지 않는다** —
+        덮은 것이 차례에서 앞에 와서, 시트를 열면 포커스가 여기 걸렸다.
+        「상품 상태. **닫기**」가 읽히고 두 번 탭하면 **고르기도 전에 닫혔다.**
+        (2026-09-02 실기기. #1115 를 고쳐 시트가 열리게 되자 드러난 자리다.)
+
+        `no-hide-descendants` 는 이 요소와 그 **자손까지** 접근성 나무에서 뺀다.
+        그러면 낭독기 포커스가 시트 안으로 곧장 들어간다.
+
+        ⚠️ **`accessibilityViewIsModal` 은 답이 아니다.** RN 0.81.5 타입에
+           **`@platform ios`** 로 적혀 있다(`ViewAccessibility.d.ts`). 안드로이드에서는
+           `importantForAccessibility` 가 그 몫을 한다.
+
+        ⚠️ **닫는 길은 남아 있다** — 위 `Modal` 의 `onRequestClose` 다. 안드로이드
+           뒤로가기로 닫히고, 낭독기의 뒤로 제스처(두 손가락 쓸기)도 그것을 부른다.
+           손잡이는 세부 필터에만 있어서(다른 넷은 `dragToClose` 를 안 준다) 거기에
+           기댈 수 없다.
+
+        ⚠️ 예전에 있던 `accessibilityLabel="닫기"` 는 **뺐다.** 이제 안 읽히는데
+           남겨 두면 「읽히는 줄」로 오해하게 된다.
+        ⚠️ **손으로 눌러 닫는 것은 그대로다.** 접근성 나무에서만 빠질 뿐이다.
+      */}
+      <Pressable
+        // 라벨을 뺐으니 시험이 찾을 길을 따로 둔다
+        testID="sheet-backdrop"
+        style={StyleSheet.absoluteFill}
+        onPress={onClose}
+        importantForAccessibility="no-hide-descendants"
+      >
         <Animated.View style={[styles.backdropFill, backdropStyle]} />
       </Pressable>
       <Animated.View style={[styles.sheet, sheetStyle]}>
