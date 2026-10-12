@@ -10,6 +10,11 @@ import { getOverlay } from '@/lib/tradeStatus';
 // 실데이터는 대부분 1장이고, 1장이면 점 표시가 나오지 않는다.
 // 거래상태 오버레이 규칙은 홈 썸네일과 같다(UI 스펙 §5).
 
+// 사진이 한 장도 없을 때 메우는 기본 그림(#1120). 사진은 필수가 아니라 없는 상품이 실제로 생긴다.
+// 웹 상세(MainImage.tsx)가 쓰는 public/images/placeholder-800.webp 와 같은 파일이고,
+// 장소 상세가 이미 쓰고 있어 새로 들이지 않는다.
+const PLACEHOLDER = require('@/assets/images/place-placeholder.webp');
+
 interface Props {
   mainImageUrl: string;
   subImageUrls: string[];
@@ -29,6 +34,15 @@ export function ImageCarousel({ mainImageUrl, subImageUrls, tradeStatus, product
 
   return (
     <View style={[styles.container, { width, height: width }]}>
+      {images.length === 0 && (
+        // ⚠️ 누를 수 없게 둔다 — 확대해 볼 사진이 없다.
+        <Image
+          testID="detail-photo-placeholder"
+          source={PLACEHOLDER}
+          style={{ width, height: width }}
+          contentFit="cover"
+        />
+      )}
       <FlatList
         data={images}
         horizontal

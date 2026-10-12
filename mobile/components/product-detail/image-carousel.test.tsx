@@ -47,3 +47,21 @@ it('사진을 누르면 확대창이 열린다', async () => {
 
   expect(screen.getByLabelText('닫기')).toBeTruthy();
 });
+
+// 사진은 필수가 아니다. 한 장도 없으면 빈 회색 칸 대신 기본 그림을 보여 준다(#1120).
+it('사진이 한 장도 없으면 기본 그림을 보여 준다', async () => {
+  await render(
+    <ImageCarousel mainImageUrl="" subImageUrls={[]} tradeStatus={null} productType="판매상품" />
+  , { wrapper: Wrapper });
+
+  expect(screen.getByTestId('detail-photo-placeholder')).toBeTruthy();
+  expect(screen.queryByTestId('detail-photo-0')).toBeNull();
+});
+
+it('사진이 있으면 기본 그림을 안 그린다', async () => {
+  await render(
+    <ImageCarousel mainImageUrl={IMAGES[0]} subImageUrls={[]} tradeStatus={null} productType="판매상품" />
+  , { wrapper: Wrapper });
+
+  expect(screen.queryByTestId('detail-photo-placeholder')).toBeNull();
+});
