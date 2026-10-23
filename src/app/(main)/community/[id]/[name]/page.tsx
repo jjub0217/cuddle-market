@@ -6,6 +6,7 @@ import CommunityDetailSkeleton from '@/features/community/components/CommunityDe
 import { fetchCommunityDetail, fetchCommunityComments } from '@/lib/api/server/community'
 import { toUrlName } from '@/lib/utils/toUrlName'
 import { toPlainText } from '@/lib/utils/toPlainText'
+import { pickCommunityOgImage } from '@/lib/og/ogMeta'
 
 interface CommunityDetailPageProps {
   params: Promise<{ id: string; name: string }>
@@ -24,6 +25,8 @@ export async function generateMetadata({ params }: CommunityDetailPageProps): Pr
   // 상세 응답에는 contentPreview가 없다(목록 전용). 본문을 잘라 쓴다.
   // 본문은 마크다운이라 그대로 자르면 `##`·`**`·`![](url)`이 검색 결과에 그대로 나온다.
   const description = toPlainText(post.content, 155) || '커들마켓 커뮤니티에서 확인해보세요'
+  // 미리보기 그림은 서버가 그리지 않는다. 본문 첫 사진, 없으면 고정 그림(#1122).
+  const ogImage = pickCommunityOgImage(post.content)
 
   return {
     title,
@@ -37,11 +40,13 @@ export async function generateMetadata({ params }: CommunityDetailPageProps): Pr
       url: `https://cuddle-market.vercel.app/community/${id}/${name}`,
       siteName: '커들마켓',
       type: 'article',
+      images: [ogImage],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
+      images: [ogImage],
     },
   }
 }
