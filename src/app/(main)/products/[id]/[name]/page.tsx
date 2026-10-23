@@ -4,6 +4,7 @@ import { notFound, redirect } from 'next/navigation'
 import ProductDetail from '@/features/product-detail/ProductDetail'
 import { fetchProductDetail } from '@/lib/api/server/products'
 import { toUrlName } from '@/lib/utils/toUrlName'
+import { buildProductOgDescription, pickProductOgImage } from '@/lib/og/ogMeta'
 
 interface ProductDetailPageProps {
   params: Promise<{ id: string; name: string }>
@@ -20,6 +21,10 @@ export async function generateMetadata({ params }: ProductDetailPageProps): Prom
   const name = toUrlName(product.title)
   const title = `${product.title} | 커들마켓`
   const description = product.description?.slice(0, 155) || '커들마켓에서 반려동물 용품을 만나보세요'
+  // 미리보기는 그림 안에 가격을 그리지 않는다. 가격·거래 상태를 설명 글자로 옮긴다(#1122).
+  // 검색 결과에 뜨는 `description` 은 본문 그대로 둔다.
+  const ogDescription = buildProductOgDescription(product)
+  const ogImage = pickProductOgImage(product.mainImageUrl)
 
   return {
     title,
@@ -29,15 +34,17 @@ export async function generateMetadata({ params }: ProductDetailPageProps): Prom
     },
     openGraph: {
       title,
-      description,
+      description: ogDescription,
       url: `https://cuddle-market.vercel.app/products/${id}/${name}`,
       siteName: '커들마켓',
       type: 'article',
+      images: [ogImage],
     },
     twitter: {
       card: 'summary_large_image',
       title,
-      description,
+      description: ogDescription,
+      images: [ogImage],
     },
   }
 }
