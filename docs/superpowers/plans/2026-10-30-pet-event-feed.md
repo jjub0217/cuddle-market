@@ -12,7 +12,7 @@
 
 ## 진행 순서 (2026-10-30 사용자 결정으로 바꿈)
 
-**Task 1~3(서버) → Task 3-1(서버, 행사 칸) → Task 10~12(웹) → Task 4~9(크롤러) → Task 13.** 웹을 먼저 해서 로컬 화면(`localhost:3000`)에서 행사 소식을 눈으로 확인한 뒤 크롤러로 넘어간다. 웹은 서버만 있으면 되고 크롤러와는 주고받는 것이 없어 순서를 바꿔도 된다. 웹 확인용 예시 행사 글은 로컬 DB에만 넣는다.
+**Task 1~3(서버) → Task 3-1(서버, 행사 칸) → Task 10~12(웹) → Task 12-1(상태로 걸러 보기) → Task 4~9(크롤러) → Task 13.** 웹을 먼저 해서 로컬 화면(`localhost:3000`)에서 행사 소식을 눈으로 확인한 뒤 크롤러로 넘어간다. 웹은 서버만 있으면 되고 크롤러와는 주고받는 것이 없어 순서를 바꿔도 된다. 웹 확인용 예시 행사 글은 로컬 DB에만 넣는다.
 
 ## 진행 기록
 
@@ -157,6 +157,26 @@
 - [x] **Step 3: 구현** — 컨트롤러가 목록, 상세 결과의 글 번호로 `findEventInfo`를 한 번 불러 붙인다(커뮤니티 도메인이 행사 수집을 모르게).
 - [x] **Step 4: 확인** — 서버 시험 전체 통과, `./gradlew build -x test`, 로컬 서버에서 `GET /api/community/posts?boardType=EVENT`와 상세에 `event`가 붙는지 curl
 - [x] **Step 5: 커밋** — `feat: 행사 기간·지역·주최·한 줄 소개를 저장해 커뮤니티 응답에 붙인다`
+
+### Task 12-1: 행사 상태로 걸러 보기 (2026-10-30 추가, 설계 7-2절)
+
+**서버 (cmarket_api)**
+- Create: `.../domain/eventfeed/model/EventPeriodStatus.java`(`UPCOMING, ONGOING, ENDED`, `static of(start, end, today)`)
+- Modify: `EventIngestService`(`List<Long> findPostIdsByPeriodStatus(EventPeriodStatus, LocalDate today)`), `EventIngestRecordRepository`(`findByStatus`)
+- Modify: `CommunityService(Impl).getPostList`에 `Collection<Long> onlyPostIds`(null이면 거르지 않음, 비면 빈 페이지), `PostRepositoryCustom(Impl).findPosts`에 같은 인자
+- Modify: `CommunityController.getPostList`에 `@RequestParam(required = false) EventPeriodStatus eventStatus`. `boardType=EVENT`일 때만 `today = LocalDate.now(Asia/Seoul)`로 글 번호를 구해 넘긴다
+- Test: `EventPeriodStatusTest`, `EventIngestServiceTest`, `CommunityServiceEventGuardTest`(빈 목록이면 저장소를 부르지 않고 빈 페이지)
+
+**웹**
+- Modify: `src/features/community/CommunityPage.tsx`(행사 소식 탭: 왼쪽 드롭다운, 오른쪽 정렬, 주소 `eventStatus`, 목록 요청에 `eventStatus` 대문자로), `src/app/(main)/community/page.tsx`, `src/lib/api/server/community.ts`(첫 목록에도 같은 값)
+- Create/Modify: `src/constants/constants.ts`의 `EVENT_STATUS_FILTERS`(전체, 예정, 진행 중, 종료)
+- Test: `src/constants/communityTabs.test.ts`에 선택지 시험, 화면은 3000 스크린샷
+
+- [ ] **Step 1: 서버 시험** — 상태 규칙(웹 `getEventStatus`와 같은 경계), 걸러진 글 번호, 빈 목록이면 빈 페이지
+- [ ] **Step 2: 서버 구현과 확인** — 서버 시험 전체, 로컬 서버에서 `eventStatus` 셋을 curl
+- [ ] **Step 3: 웹 시험과 구현** — `pnpm test`, `tsc`, `lint:strict`
+- [ ] **Step 4: 3000 화면 확인** — 드롭다운 위치와 고를 때마다 바뀌는 목록
+- [ ] **Step 5: 커밋** — 서버 `feat: 행사 소식 목록을 진행 상태로 거를 수 있게 한다(#1124)`, 웹 `feat(web): 행사 소식 목록에 상태 드롭다운을 더하고 정렬을 오른쪽으로 옮긴다(#1124)`
 
 ---
 
