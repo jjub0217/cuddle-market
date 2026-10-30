@@ -12,7 +12,7 @@
 
 ## 진행 순서 (2026-10-30 사용자 결정으로 바꿈)
 
-**Task 1~3(서버) → Task 10~12(웹) → Task 4~9(크롤러) → Task 13.** 웹을 먼저 해서 로컬 화면(`localhost:3000`)에서 행사 소식을 눈으로 확인한 뒤 크롤러로 넘어간다. 웹은 서버만 있으면 되고 크롤러와는 주고받는 것이 없어 순서를 바꿔도 된다. 웹 확인용 예시 행사 글은 로컬 DB에만 넣는다.
+**Task 1~3(서버) → Task 3-1(서버, 행사 칸) → Task 10~12(웹) → Task 4~9(크롤러) → Task 13.** 웹을 먼저 해서 로컬 화면(`localhost:3000`)에서 행사 소식을 눈으로 확인한 뒤 크롤러로 넘어간다. 웹은 서버만 있으면 되고 크롤러와는 주고받는 것이 없어 순서를 바꿔도 된다. 웹 확인용 예시 행사 글은 로컬 DB에만 넣는다.
 
 ## 진행 기록
 
@@ -21,6 +21,7 @@
   - Task 2: 배포 전 DB 칸 고치기 SQL `scripts/alter-board-type-column.sql`을 더했다(설계 7절).
   - Task 3: `service/cmarket` 모듈에 JUnit 5 설정이 없어 시험이 「찾지 못함」으로 돌지 않았다. 설정을 더하고, 운영 설정 없이는 늘 실패하는 `CmarketApiApplicationTests`는 실행에서 뺐다. 503 응답용으로 `ResponseCode.SERVICE_UNAVAILABLE`을 더했다.
   - 포스터는 본문 맨 위 사진 표시로 넣는다(설계 9절). Task 7, 8에 반영했다.
+  - 행사 소식 화면을 정했다(설계 7-2절): 목록은 상태 칩, 제목, 한 줄 소개, 기간, 「지역 · 주최」. 프로필, 닉네임, 포스터, 댓글순 없음. 그래서 서버가 행사 칸을 따로 저장해 내려 주는 Task 3-1을 더했고, Task 6, 7, 8, 10을 고쳤다.
 
 ## Global Constraints
 
@@ -135,6 +136,26 @@
 - [x] **Step 4: 통과와 전체 빌드 확인** — `./gradlew build -x test` 성공, 위 시험 PASS
 - [x] **Step 5: 커밋** — `feat: 전용 키로만 여는 행사 수집 주소 두 개를 더한다`
 
+### Task 3-1: 행사 칸 저장과 커뮤니티 응답에 붙이기 (2026-10-30 추가, 설계 7-2절)
+
+**Files:**
+- Modify: `EventIngestRecord`(칸 `eventEndDate`, `region`(20), `place`(100), `organizer`(100), `summary`(100) 추가, 생성자 `@Builder`도), `EventIngestCommand`, `EventIngestService`, `EventIngestRequest`
+- Create: `.../domain/eventfeed/app/dto/EventInfoDto.java`
+- Modify: `EventIngestRecordRepository`(`List<EventIngestRecord> findByStatusAndPostIdIn(EventIngestStatus, Collection<Long>)`)
+- Modify: `service/cmarket/.../web/community/controller/CommunityController.java`(목록, 상세), `PostListItemResponse.java`, `PostDetailResponse.java`(`event` 칸, 행사 글이 아니면 null)
+- Test: `EventIngestServiceTest`에 더한다
+
+**Interfaces:**
+- Produces: `EventIngestService.findEventInfo(Collection<Long> postIds) -> Map<Long, EventInfoDto>`, `EventInfoDto(startDate, endDate, region, place, organizer, summary)`
+- 응답(JSON): 목록 항목과 상세에 `"event": {"startDate":"2026-10-31","endDate":"2026-11-02","region":"서울","place":"문화비축기지","organizer":"서울특별시","summary":"…"}`, 행사 글이 아니면 `"event": null`
+- 요청(크롤러 → 서버): `POST /api/ingest/events` 본문에 `eventEndDate`, `region`, `place`, `organizer`, `summary` 추가(모두 null 가능)
+
+- [ ] **Step 1: 시험** — 정상 POSTED면 기록에 다섯 칸이 저장된다. `findEventInfo([1, 2])`에서 1번만 POSTED 기록이 있으면 `{1: …}`만 돌려준다. 빈 목록이면 저장소를 부르지 않고 빈 Map.
+- [ ] **Step 2: 실패 확인** — `./gradlew :service:cmarket-domain:test --tests '*eventfeed*'`
+- [ ] **Step 3: 구현** — 컨트롤러가 목록, 상세 결과의 글 번호로 `findEventInfo`를 한 번 불러 붙인다(커뮤니티 도메인이 행사 수집을 모르게).
+- [ ] **Step 4: 확인** — 서버 시험 전체 통과, `./gradlew build -x test`, 로컬 서버에서 `GET /api/community/posts?boardType=EVENT`와 상세에 `event`가 붙는지 curl
+- [ ] **Step 5: 커밋** — `feat: 행사 기간·지역·주최·한 줄 소개를 저장해 커뮤니티 응답에 붙인다`
+
 ---
 
 ## 크롤러 (cuddle-market/crawler)
@@ -150,7 +171,7 @@
 - Produces:
   - `models.ListItem(source_code: str, external_id: str, title: str, url: str, posted_on: date | None)`
   - `models.DetailPage(text: str, image_url: str | None)`
-  - `models.EventFields(is_event: bool, title: str, start: date | None, end: date | None, place: str | None, organizer: str | None, target: str | None, fee: str | None, one_line: str | None, activities: list[str], checks: list[str])`
+  - `models.EventFields(is_event: bool, title: str, start: date | None, end: date | None, region: str | None, place: str | None, organizer: str | None, target: str | None, fee: str | None, one_line: str | None, activities: list[str], checks: list[str])`
   - `dates.parse_range(text: str, ref: date) -> tuple[date | None, date | None]`
   - `http.PoliteClient(delay_sec: float = 1.0).get(url: str, params: dict | None = None) -> str`, robots가 막으면 `http.BlockedByRobots`
 
@@ -178,7 +199,7 @@
 **Interfaces:**
 - Consumes: `ListItem`, `DetailPage`
 - Produces:
-  - `sources.json`: 출처마다 `{"code","name","parser","list_url","params","detail_url","enabled"}`. 코드: `MCST`, `SEOUL`, `GANGNAM`, `NOWON_PRESS`, `NOWON_NOTICE`. 주소와 검색 인자는 설계 6절 표 그대로.
+  - `sources.json`: 출처마다 `{"code","name","parser","list_url","params","detail_url","default_region","enabled"}`. `default_region`은 서울시, 강남구, 노원구가 `"서울"`, 문체부는 `null`. 코드: `MCST`, `SEOUL`, `GANGNAM`, `NOWON_PRESS`, `NOWON_NOTICE`. 주소와 검색 인자는 설계 6절 표 그대로.
   - 각 파서 모듈: `parse_list(html: str, source: dict) -> ListResult(items: list[ListItem], reported_total: int | None)`, `parse_detail(html: str, source: dict) -> DetailPage`
   - `qbbs.py`는 노원구용이지만 `q_bbsCode`, `q_bbscttSn` 계열 게시판 공통으로 쓴다.
 
@@ -200,7 +221,7 @@
 - Test: `crawler/tests/test_tourapi.py`, `crawler/tests/fixtures/tourapi_festival.json`
 
 **Interfaces:**
-- Produces: `fetch_festivals(service_key: str, today: date, client) -> list[TourItem]`, `TourItem(external_id, title, start, end, place, image_url, url)`, `PET_WORDS = ("반려", "펫", "댕", "냥", "입양", "강아지", "고양이")`
+- Produces: `fetch_festivals(service_key: str, today: date, client) -> list[TourItem]`, `TourItem(external_id, title, start, end, region, place, image_url, url)` (`region`은 `addr1` 첫 낱말을 설계 7-2절의 짧은 시·도 이름으로), `PET_WORDS = ("반려", "펫", "댕", "냥", "입양", "강아지", "고양이")`
 - 요청: `https://apis.data.go.kr/B551011/KorService2/searchFestival2`, 인자 `serviceKey, MobileOS=ETC, MobileApp=CuddleMarket, _type=json, eventStartDate=오늘(YYYYMMDD), numOfRows=100, pageNo`. 응답 칸: `contentid, title, eventstartdate, eventenddate, addr1, firstimage`. 원문 주소는 `https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid={contentid}` 형식(만들면서 실제로 열리는지 확인).
 
 - [ ] **Step 1: 시험** — 고정 응답에서 제목에 PET_WORDS가 있는 것만 남고, 날짜가 date로 바뀌고, `firstimage`가 비면 `image_url=None`. 응답 `resultCode`가 정상 아니면 예외.
@@ -227,6 +248,8 @@
   - `fee=None`이면 "참가비 | 공식 안내 확인"
   - AI 칸(one_line, activities, checks)이 비면 그 줄과 제목 줄이 빠지고 나머지 모양은 같다
   - 제목 60자 입력 → 50자 이하, 본문은 어떤 입력에도 1,000자 이하(넘으면 activities, checks, one_line 순으로 줄인다)
+  - 장소 줄은 `장소 | {지역} {장소}`(예: `장소 | 서울 문화비축기지`). 둘 다 없으면 `장소 | 공식 안내 확인`
+  - 끝 줄은 `[원문 보기]({원문 주소})`와 `출처: {출처 이름}`
   - 기간은 시작과 끝이 같으면 `2026.10.31 (토)`, 다르면 `2026.11.06 (금) ~ 2026.11.08 (일)`
 - [ ] **Step 2: `test_extract.py`** (가짜 client)
   - 정상 JSON → EventFields
@@ -255,7 +278,8 @@
   - 본문 50자 미만 → `SKIPPED_NO_TEXT` 기록, AI 호출 없음
   - AI가 is_event=false → `SKIPPED_NOT_EVENT`
   - 끝난 행사 → `SKIPPED_ENDED`, 날짜 없음 → `SKIPPED_NO_DATE`
-  - 정상 → `POSTED`, payload에 title, content, imageUrl, eventStartDate
+  - 정상 → `POSTED`, payload에 title, content, imageUrl, eventStartDate, eventEndDate, region, place, organizer, summary(=one_line)
+  - 지역은 설계 7-2절 순서로 정한다(관광공사 주소 → 문체부 장소 칸 → AI 값 → `sources.json`의 `default_region`). 주최가 없으면 출처 이름
   - 한 출처가 robots 차단이나 오류여도 다른 출처는 계속하고 `errors`에 남는다
   - `reported_total > 0`인데 items가 0이면 `errors`에 "구조 변경 의심: {출처}"
 - [ ] **Step 2~4: 실패 확인, 구현, 통과 확인** — 알림은 `errors`가 있거나 새 글이 1개 이상일 때만 디스코드로 한 번 보낸다.
@@ -275,7 +299,7 @@
 
 ## 웹 (cuddle-market/src)
 
-### Task 10: 행사 소식 탭, 글쓰기 선택지 분리
+### Task 10: 행사 소식 탭, 글쓰기 선택지 분리, 행사 화면 (설계 7-2절)
 
 **Files:**
 - Modify: `src/constants/constants.ts:150-155`
@@ -283,14 +307,20 @@
 - Modify: `src/features/community/CommunityPage.tsx` (45-46행, 목록 불러오기 125-175행에 EVENT 하나 더)
 - Modify: `src/app/(main)/community/page.tsx:40-51`, `src/lib/api/server/community.ts`(EVENT 첫 목록 함수)
 - Modify: `src/lib/utils/getBoardType.ts`, `src/features/community/CommunityDetail.tsx:134`, `src/app/(main)/community/[id]/[name]/page.tsx:82`, `src/features/admin/configs/communityTableConfig.ts:25-26`, `src/app/sitemap.xml/route.ts:21-22`
-- Test: `src/lib/utils/getBoardType.test.ts`, `src/constants/communityTabs.test.ts`
+- Modify: `src/graphql/schema.ts`, `src/graphql/resolvers.ts`(`CommunityPost`, `CommunityPostDetail`에 `event: CommunityEvent`), `src/types/community.ts`
+- Create: `src/lib/utils/eventStatus.ts`(`getEventStatus(start, end, today) -> { kind: 'upcoming' | 'ongoing' | 'ended', label: string }`), `src/features/community/components/EventStatusChip.tsx`, `src/features/community/components/EventPostCard.tsx`
+- Test: `src/lib/utils/getBoardType.test.ts`, `src/constants/communityTabs.test.ts`, `src/lib/utils/eventStatus.test.ts`, `src/features/community/components/EventPostCard.test.tsx`
 
 **Interfaces:**
 - Produces: `COMMUNITY_TABS`에 `{ id: 'tab-event', label: '행사 소식', code: 'EVENT' }`, 새 상수 `COMMUNITY_WRITE_BOARDS`(QUESTION, INFO만), `fetchInitialEventCommunity(page, size, searchType, keyword, sortBy)`
 
 - [ ] **Step 1: 시험** — `getBoardType('EVENT') === '행사 소식'`, `COMMUNITY_WRITE_BOARDS`에 EVENT가 없음, `COMMUNITY_TABS`의 id 세 개
+  - `getEventStatus`: 시작 전 `D-n`(내일이면 D-1), 시작일~종료일 `진행 중`(종료일 없으면 시작일 하루), 지난 뒤 `종료`. 오늘은 한국 날짜로 계산
+  - `EventPostCard`: 상태 칩, 제목, 한 줄 소개(없으면 줄째 없음), 기간, 「지역 · 주최」(지역 없으면 주최만). 닉네임, 조회수, 포스터를 그리지 않는다. 종료면 흐린 모양 클래스
 - [ ] **Step 2: 실패 확인** — `npx vitest run --project unit src/lib/utils/getBoardType.test.ts src/constants/communityTabs.test.ts`
 - [ ] **Step 3: 구현** — 글쓰기 화면은 `COMMUNITY_WRITE_BOARDS`만 쓴다. `?tab=tab-event`로 들어오면 글쓰기 기본값은 INFO. 상세의 `articleSection`은 EVENT면 '행사'.
+  - 목록: 행사 소식 탭은 `EventPostCard`로 그린다. 정렬에서 댓글순을 빼고, 글쓰기 단추 두 곳을 숨기고, 빈 화면 문구를 설계 7-2절대로.
+  - 상세: EVENT면 배지 옆에 상태 칩, 프로필 사진과 닉네임 대신 「YYYY.MM.DD 등록」, 「목록으로 돌아가기」는 `?tab=tab-event`.
 - [ ] **Step 4: 확인** — 시험 PASS, `npx tsc --noEmit`, 바뀐 파일 eslint(`CLAUDE.md` 47행 명령)
 - [ ] **Step 5: 커밋** — `feat: 커뮤니티에 행사 소식 탭을 더하고 글쓰기 선택지에서는 뺀다`
 
