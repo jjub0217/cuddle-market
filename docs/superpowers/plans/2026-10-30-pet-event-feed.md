@@ -12,7 +12,7 @@
 
 ## 진행 순서 (2026-10-30 사용자 결정으로 바꿈)
 
-**Task 1~3(서버) → Task 3-1(서버, 행사 칸) → Task 10~12(웹) → Task 12-1(상태로 걸러 보기) → Task 12-2(행사 상세 화면) → Task 12-3(운영시간, 길찾기) → Task 4~9(크롤러) → Task 13.** 웹을 먼저 해서 로컬 화면(`localhost:3000`)에서 행사 소식을 눈으로 확인한 뒤 크롤러로 넘어간다. 웹은 서버만 있으면 되고 크롤러와는 주고받는 것이 없어 순서를 바꿔도 된다. 웹 확인용 예시 행사 글은 로컬 DB에만 넣는다.
+**Task 1~3(서버) → Task 3-1(서버, 행사 칸) → Task 10~12(웹) → Task 12-1(상태로 걸러 보기) → Task 12-2(행사 상세 화면) → Task 12-3(운영시간, 길찾기) → Task 12-4(칸 값 먼저, 포스터 자리, 검색어) → Task 4~9(크롤러) → Task 13.** 웹을 먼저 해서 로컬 화면(`localhost:3000`)에서 행사 소식을 눈으로 확인한 뒤 크롤러로 넘어간다. 웹은 서버만 있으면 되고 크롤러와는 주고받는 것이 없어 순서를 바꿔도 된다. 웹 확인용 예시 행사 글은 로컬 DB에만 넣는다.
 
 ## 진행 기록
 
@@ -211,6 +211,16 @@
 - [x] **Step 3: 웹 시험과 구현**
 - [x] **Step 4: 3000 화면 확인**
 - [x] **Step 5: 커밋**
+
+### Task 12-4: 출처의 칸 값 먼저, 포스터 실패 시 자리 비우기, 길찾기 검색어 다듬기 (2026-10-30 추가, 설계 7-2절)
+
+- 크롤러: Create `crawler/pet_events/labelled.py`(`labelled_fields(text, ref) -> dict`: 「개최기간」→start/end/hours, 「축제장소」→place, 「요금」→fee, 「주최/주관기관」→organizer, 「연령제한」→target). `run._handle`이 AI 값 위에 덮어쓴다. Test: `crawler/tests/test_labelled.py`, `test_run.py`
+- 웹: `EventDetailBody` 포스터 `onError` → 포스터 자리 숨김. `getNaverMapSearchUrl` 검색어 다듬기. Test: `EventDetailBody.test.tsx`, `eventStatus.test.ts`
+
+- [ ] **Step 1: 크롤러 시험과 구현** (진짜 문체부 상세 원본으로도 확인)
+- [ ] **Step 2: 웹 시험과 구현**
+- [ ] **Step 3: 로컬 예시 글을 실제 문체부 원문 값으로 다시 만들고 3000 화면 확인**
+- [ ] **Step 4: 커밋**
 
 ---
 
