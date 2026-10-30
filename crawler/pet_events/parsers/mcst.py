@@ -32,7 +32,7 @@ def parse_detail(html: str, source: dict) -> DetailPage:
     soup = soup_of(html)
     view = soup.select_one("div.view-detail")
     if view is None:
-        return DetailPage(text="", image_url=None)
+        return DetailPage(text="", image_url=None, found=False)
 
     lines = []
     # 개최지역, 개최기간, 축제장소, 요금, 주최 칸을 「칸: 값」으로 남긴다

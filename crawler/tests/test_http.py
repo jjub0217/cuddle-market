@@ -127,3 +127,19 @@ def test_wildcard_and_our_own_group():
         client.get("https://example.go.kr/files/a.pdf")
     with pytest.raises(BlockedByRobots):
         client.get("https://example.go.kr/private/1")
+
+
+# I2: 표준(RFC 9309)은 robots.txt 가 서버 오류(5xx)거나 못 받으면 「전부 막음」으로 본다(4xx 만 「막은 곳 없음」)
+
+def test_robots_server_error_blocks_everything():
+    client, _, _ = make_client({"https://example.go.kr/robots.txt": FakeResponse("", 503)})
+    with pytest.raises(BlockedByRobots):
+        client.get("https://example.go.kr/news")
+
+
+def test_robots_not_found_allows_all():
+    client, _, _ = make_client({
+        "https://example.go.kr/robots.txt": FakeResponse("", 404),
+        "https://example.go.kr/news": FakeResponse("ok"),
+    })
+    assert client.get("https://example.go.kr/news") == "ok"

@@ -34,7 +34,7 @@ def parse_detail(html: str, source: dict) -> DetailPage:
     soup = soup_of(html)
     article = soup.select_one("div.article-view")
     if article is None:
-        return DetailPage(text="", image_url=None)
+        return DetailPage(text="", image_url=None, found=False)
     body = article.select_one("div.article-body")
     poster = None
     for image in (body.find_all("img", src=True) if body else []):

@@ -51,6 +51,8 @@ def _add_line(lines: list, label: str, value_node) -> None:
 
 def parse_detail(html: str, source: dict) -> DetailPage:
     soup = soup_of(html)
+    if soup.select_one("div.ba_info") is None:
+        return DetailPage(text="", image_url=None, found=False)
     lines = []
     # ⚠️ 실제 HTML 은 <p class="tit">주&nbsp;최</dt> 처럼 닫는 태그가 어긋나 있어 값 칸이 이름 칸 안으로
     #    들어가 버린다(2026-10-30 주최를 못 읽었다). 그래서 형제가 아니라 같은 줄(li) 안에서 찾고,

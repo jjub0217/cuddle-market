@@ -126,10 +126,12 @@ def test_prompt_rules():
     assert "파충류" in PROMPT and "관상어" in PROMPT
 
 
-def test_ai_without_date_falls_back_to_text_dates():
+def test_ai_without_date_stays_without_date():
+    # 최종 검토 C1 로 뒤집었다: 본문에서 대신 찾으면 「1.5km」「보도 날짜」를 행사 날짜로 지어낸다.
+    # 출처가 칸으로 적은 날짜는 labelled.py 가 따로 채운다
     client = FakeClient(json.dumps({**GOOD, "start_date": None}))
     fields = extract_event(TEXT, "t", date(2026, 10, 22), client)
-    assert fields.start == date(2026, 10, 31)
+    assert fields.start is None
 
 
 def fields(**overrides):
@@ -214,3 +216,30 @@ def test_guard_keeps_grounded_application():
     text = "11월 6일 ~ 8일. 참가는 10월 31일까지 QR 코드로 사전 신청하거나 당일 현장 접수"
     guarded = guard_against_invented(fields(fee=None, application="사전 신청(10월 31일 마감), 현장 접수 가능"), text)
     assert guarded.application == "사전 신청(10월 31일 마감), 현장 접수 가능"
+
+
+# --- 최종 검토에서 나온 것 ---
+
+def test_ai_without_date_is_not_filled_from_decimals_in_text():
+    # C1: 「1.5km」를 1월 5일로 읽어 지어낸 날짜로 올렸다. AI 가 날짜를 못 뽑으면 날짜 없음이다
+    text = "반려견 산책길 1.5km 구간을 새로 열고 행사를 엽니다. 자세한 일정은 추후 안내합니다. 많은 참여 바랍니다."
+    client = FakeClient(json.dumps({**GOOD, "start_date": None, "end_date": None}))
+    fields = extract_event(text, "산책길 행사", date(2026, 10, 20), client)
+    assert (fields.start, fields.end) == (None, None)
+
+
+def test_guard_drops_fee_amount_not_in_text():
+    # I5: 본문에 「무료」와 「3,000원(주차)」만 있는데 AI 가 「5,000원」을 쓰면 버린다
+    guarded = guard_against_invented(fields(fee="5,000원"), "11월 6일 ~ 8일 무료 행사입니다. 주차는 3,000원")
+    assert guarded.fee is None
+
+
+def test_guard_keeps_fee_amounts_in_text():
+    text = "11월 6일 ~ 8일. 입장료 성인 10,000원, 사전예약 8,000원"
+    guarded = guard_against_invented(fields(fee="성인 10,000원 (사전예약 8,000원)"), text)
+    assert guarded.fee == "성인 10,000원 (사전예약 8,000원)"
+
+
+def test_guard_drops_free_fee_without_free_in_text():
+    guarded = guard_against_invented(fields(fee="무료"), "11월 6일 ~ 8일. 입장료 5,000원")
+    assert guarded.fee is None

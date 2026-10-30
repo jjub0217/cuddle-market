@@ -318,3 +318,12 @@ def test_aggregator_source_name_is_not_used_as_organizer():
     i = item("1")
     _, _, cuddle, _ = run([i], detail_of(i), ai_answer={**EVENT, "organizer": None}, sources=[src])
     assert cuddle.payloads[0]["organizer"] is None
+
+
+
+def test_missing_detail_area_is_error_not_record():
+    # I1: 상세 본문 영역을 못 찾으면(구조가 바뀜) 「글자 없음」으로 기록하지 않고 알린다 — 기록하면 다시 안 묻는다
+    i = item("1")
+    summary, _, cuddle, ai = run([i], {i.url: DetailPage(text="", image_url=None, found=False)})
+    assert cuddle.payloads == []
+    assert any("상세 구조 변경 의심" in e for e in summary.errors)

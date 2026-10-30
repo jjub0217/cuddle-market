@@ -129,3 +129,15 @@ def test_showala_detail_labelled_lines_and_no_contact():
         assert line in page.text, line
     assert "0200000000" not in page.text and "sample@example.com" not in page.text  # 문의처는 읽지 않는다
     assert "참가업체 모집안내" not in page.text  # 상세정보 탭만
+
+
+
+@pytest.mark.parametrize("code", ["MCST", "SEOUL", "GANGNAM", "NOWON_PRESS", "SHOWALA"])
+def test_detail_without_body_area_is_marked_not_found(code):
+    page = get_parser(SOURCES[code]["parser"]).parse_detail("<html><body><p>다른 모양</p></body></html>", SOURCES[code])
+    assert page.found is False
+
+
+def test_image_only_post_is_found_but_short():
+    page = get_parser("gangnam").parse_detail(read("gangnam_detail_image_only.html"), SOURCES["GANGNAM"])
+    assert page.found is True

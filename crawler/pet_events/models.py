@@ -33,6 +33,8 @@ class DetailPage:
     text: str
     image_url: Optional[str]
     title: Optional[str] = None
+    # 본문 영역을 찾았나. 못 찾으면 사이트 구조가 바뀐 것이다 — 「글자 없음」으로 기록하면 다시 안 묻는다(최종 검토 I1)
+    found: bool = True
 
 
 @dataclass

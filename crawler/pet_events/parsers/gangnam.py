@@ -34,7 +34,7 @@ def parse_detail(html: str, source: dict) -> DetailPage:
     soup = soup_of(html)
     content = soup.select_one("div.bbs-view div.post-content")
     if content is None:
-        return DetailPage(text="", image_url=None)
+        return DetailPage(text="", image_url=None, found=False)
     # 본문 글자만 모아 둔 숨은 칸이 있으면 그것을 쓴다(편집기 꾸밈 태그가 없다)
     hidden = content.select_one("input#content_main_text")
     text = (hidden.get("value") or "").strip() if hidden else ""

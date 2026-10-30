@@ -14,7 +14,6 @@ from dataclasses import replace
 from datetime import date
 from typing import Callable, Optional
 
-from .dates import parse_range
 from .models import EventFields
 
 MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.1-flash-lite")
@@ -102,10 +101,8 @@ def extract_event(
         raise ExtractError(f"응답에 {error.args[0]} 칸이 없음") from error
     except (TypeError, ValueError, AttributeError) as error:
         raise ExtractError(f"응답 칸 모양이 틀림: {type(error).__name__} {error}") from error
-
-    if fields.start is None:  # AI 가 날짜를 못 뽑았으면 본문 글자에서 직접 찾는다
-        start, end = parse_range(text, posted_on or date.today())
-        fields = replace(fields, start=start, end=end if end != start else None)
+    # AI 가 날짜를 못 뽑았으면 날짜 없음이다. 본문에서 대신 찾지 않는다 — 「1.5km」를 1월 5일로,
+    # 본문 맨 위 보도 날짜를 행사 날짜로 지어낸다(최종 검토 C1). 칸으로 적힌 날짜는 labelled.py 가 채운다
     return fields
 
 
@@ -139,7 +136,7 @@ def guard_against_invented(fields: EventFields, text: str) -> EventFields:
     if end and not (_mentions_day(text, end) or _mentions_day_only(text, end)):
         end = None
     fee = fields.fee
-    if fee and not re.search(r"무료|\d[\d,]*\s*원", text):
+    if fee and not _fee_grounded(fee, text):
         fee = None
     hours = fields.hours
     # 운영시간 속 숫자 하나라도 본문에 「시각으로」(8시, 18:, :00) 없으면 버린다.
@@ -164,6 +161,16 @@ def _mentions_day(text: str, value: date) -> bool:
         rf"(?<!\d)0?{m}\s*[.\-/]\s*0?{d}(?!\d)",
     ]
     return any(re.search(pattern, text) for pattern in patterns)
+
+
+def _fee_grounded(fee: str, text: str) -> bool:
+    """참가비 속 금액이 모두 본문에 「금액+원」으로 있고, 「무료」라 하면 본문에도 「무료」가 있어야 한다(최종 검토 I5)"""
+    if not re.search(r"무료|\d[\d,]*\s*원", text):
+        return False
+    if "무료" in fee and "무료" not in text:
+        return False
+    text_amounts = {a.replace(",", "") for a in re.findall(r"(\d[\d,]*)\s*원", text)}
+    return all(a.replace(",", "") in text_amounts for a in re.findall(r"(\d[\d,]*)\s*원", fee))
 
 
 def _mentions_time(text: str, number: str) -> bool:

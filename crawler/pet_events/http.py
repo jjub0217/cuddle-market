@@ -59,12 +59,15 @@ class PoliteClient:
         return True if rules is None else rules.allowed(path + (f"?{parts.query}" if parts.query else ""))
 
     def _load_robots(self, origin: str) -> Optional[robots.Robots]:
+        # RFC 9309: 4xx(없음)만 「막은 곳 없음」이다. 서버 오류나 접속 실패는 「전부 막음」으로 본다(최종 검토 I2)
         try:
             response = self._request(f"{origin}/robots.txt", None)
         except requests.RequestException:
-            return None
+            return robots.Robots([(False, "/")])
+        if response.status_code >= 500:
+            return robots.Robots([(False, "/")])
         if response.status_code >= 400:
-            return None  # robots.txt 가 없으면 막은 곳도 없다
+            return None
         return robots.parse(response.text, USER_AGENT)
 
     def _request(self, url: str, params: Optional[dict]):

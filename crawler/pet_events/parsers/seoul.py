@@ -28,6 +28,8 @@ def parse_list(html: str, source: dict) -> ListResult:
 def parse_detail(html: str, source: dict) -> DetailPage:
     soup = soup_of(html)
     body = soup.select_one("div.sib-viw-type-basic-content")
+    if body is None:
+        return DetailPage(text="", image_url=None, found=False)
     image = body.find("img", src=True) if body else None
     return DetailPage(
         text=text_of(body),

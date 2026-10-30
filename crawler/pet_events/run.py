@@ -100,6 +100,9 @@ def _crawl_source(today: date, source: dict, deps: Deps, stat: SourceStat, error
         stat.checked += 1
         try:
             detail = parser.parse_detail(deps.http.get(item.url), source)
+            if not detail.found:
+                errors.append(f"상세 구조 변경 의심: {source['code']} {external_id}")
+                continue
             _handle(today, source, deps, stat, errors,
                     external_id=external_id, url=item.url, title=detail.title or item.title,
                     text=detail.text, image_url=detail.image_url, posted_on=item.posted_on)
