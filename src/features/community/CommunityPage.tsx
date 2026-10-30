@@ -317,16 +317,18 @@ export default function CommunityPage({ initialQuestionData, initialInfoData, in
           />
         </section>
 
-        {/* Search (단독 행) */}
-        <section className="mb-6">
-          <div className="relative w-full">
+        {/* Search (단독 행). 행사 소식은 검색창이 남은 폭을 다 쓰고 오른쪽에 상태·정렬 드롭다운을 둔다(설계 7-2절).
+            휴대폰 폭에서는 드롭다운 두 개만으로 폭의 2/3 를 써서 검색창 아랫줄로 내린다 */}
+        <section className={cn('mb-6', isEventTab && 'flex flex-col gap-3 md:flex-row md:items-center md:gap-2')}>
+          <div className={cn('relative w-full', isEventTab && 'md:min-w-0 md:flex-1')}>
             <Search size={18} className="absolute top-1/2 left-4 -translate-y-1/2 text-[#827565]" />
             <input
               type="text"
               value={searchInput}
               onChange={handleSearchChange}
               onKeyDown={handleSearchSubmit}
-              placeholder="궁금한 내용을 검색해보세요"
+              // 행사 글 본문에는 장소·주최·참가비가 들어 있어 지역·동물로 찾는 것이 실제로 잘 된다
+              placeholder={isEventTab ? '지역, 행사 이름, 동물로 찾아보세요' : '궁금한 내용을 검색해보세요'}
               enterKeyHint="search"
               className="border-outline-variant/40 bg-surface-container-low focus-visible:border-primary w-full rounded-full border py-2 pr-11 pl-11 text-sm text-[#1c1b1b] placeholder:text-sm placeholder:text-[#827565]"
             />
@@ -345,15 +347,8 @@ export default function CommunityPage({ initialQuestionData, initialInfoData, in
               </button>
             ) : null}
           </div>
-        </section>
-
-        {/* Sort filter + 글쓰기 (콘텐츠 컨트롤 행) */}
-        <section
-          className={cn('mb-2 flex justify-between gap-3 text-sm md:mb-4', isEventTab ? 'items-center' : 'items-end')}
-        >
-          {/* 행사 소식은 오른쪽에 「상태 드롭다운 · 정렬 드롭다운」을 붙여 둔다(설계 7-2절). 글쓰기 단추가 없어서다 */}
           {isEventTab ? (
-            <div className="ml-auto flex shrink-0 items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2 self-end md:self-auto">
               <div className="w-32">
                 <SelectDropdown
                   value={eventStatusValue}
@@ -375,7 +370,12 @@ export default function CommunityPage({ initialQuestionData, initialInfoData, in
               </div>
             </div>
           ) : null}
-          <div className={cn('flex items-center gap-3 max-md:ml-auto', isEventTab && 'hidden')}>
+        </section>
+
+        {/* Sort filter + 글쓰기 (콘텐츠 컨트롤 행). 행사 소식은 위 검색 줄의 드롭다운을 쓴다 */}
+        {isEventTab ? null : (
+        <section className="mb-2 flex items-end justify-between gap-3 text-sm md:mb-4">
+          <div className="flex items-center gap-3 max-md:ml-auto">
             {getCommunitySortTypes(activeCommunityTypeTab).map((sort, idx) => {
               const isActive = sort.id === sortBy
               return (
@@ -408,6 +408,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData, in
             </Link>
           ) : null}
         </section>
+        )}
 
         {/* Post list */}
         <SkipToLoadMoreLink targetId="community-posts-load-more" hasNextPage={hasNextPage} />
