@@ -16,12 +16,13 @@
 
 ## 진행 기록
 
-- Task 1~3 완료(cmarket_api `d39f72b`, `8e7c90a`, `c18e380`, 로컬 `main`에만 있고 push 전). 서버 시험 19개 통과.
+- 이슈 #1124. 브랜치 `feature/1124--pet-event-feed`.
+- Task 1~3, 3-1 완료(cmarket_api `c61ba61`, `708727f`, `ce1879b`, `c677141`, 수정 `5e87284`. 로컬 `main`에만 있고 push 전). 서버 시험 24개 통과.
 - 계획과 달라진 점:
   - Task 2: 배포 전 DB 칸 고치기 SQL `scripts/alter-board-type-column.sql`을 더했다(설계 7절).
   - Task 3: `service/cmarket` 모듈에 JUnit 5 설정이 없어 시험이 「찾지 못함」으로 돌지 않았다. 설정을 더하고, 운영 설정 없이는 늘 실패하는 `CmarketApiApplicationTests`는 실행에서 뺐다. 503 응답용으로 `ResponseCode.SERVICE_UNAVAILABLE`을 더했다.
   - 포스터는 본문 맨 위 사진 표시로 넣는다(설계 9절). Task 7, 8에 반영했다.
-  - Task 10: 계획 Task 1의 「수정 명령이 EVENT면 거절」은 설계 7-1절(운영 계정은 자기 행사 글을 고칠 수 있다)과 어긋났다. 서버는 **다른 글을 EVENT로 옮기는 것만** 거절하게 고쳤다(cmarket_api `2d79241`).
+  - Task 10: 계획 Task 1의 「수정 명령이 EVENT면 거절」은 설계 7-1절(운영 계정은 자기 행사 글을 고칠 수 있다)과 어긋났다. 서버는 **다른 글을 EVENT로 옮기는 것만** 거절하게 고쳤다(cmarket_api `5e87284`).
   - 행사 소식 화면을 정했다(설계 7-2절): 목록은 상태 칩, 제목, 한 줄 소개, 기간, 「지역 · 주최」. 프로필, 닉네임, 포스터, 댓글순 없음. 그래서 서버가 행사 칸을 따로 저장해 내려 주는 Task 3-1을 더했고, Task 6, 7, 8, 10을 고쳤다.
 
 ## Global Constraints
