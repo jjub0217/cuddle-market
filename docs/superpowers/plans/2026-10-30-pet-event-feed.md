@@ -264,7 +264,7 @@
   - `extract.guard_against_invented(fields: EventFields, text: str) -> EventFields`
   - `render.render_post(fields: EventFields, source_name: str, source_url: str, image_url: str | None = None) -> tuple[str, str]` (제목, 본문)
 
-- [ ] **Step 1: `test_render.py`**
+- [x] **Step 1: `test_render.py`**
   - 포스터 주소가 있으면 본문 첫 줄이 `![포스터](주소)`, 없으면 그 줄이 없다
   - AI 칸이 모두 있으면 설계 4절 순서와 칸 이름 그대로(한 줄 소개, 기간, 장소, 주최, 대상, 참가비, "이런 걸 할 수 있어요", "가기 전에 확인하세요", 끝 문구 두 줄, "원문 보기: …", "출처: …")
   - `fee=None`이면 "참가비 | 공식 안내 확인"
@@ -273,13 +273,13 @@
   - 장소 줄은 `장소 | {지역} {장소}`(예: `장소 | 서울 문화비축기지`). 둘 다 없으면 `장소 | 공식 안내 확인`
   - 끝 줄은 `[원문 보기]({원문 주소})`와 `출처: {출처 이름}`
   - 기간은 시작과 끝이 같으면 `2026.10.31 (토)`, 다르면 `2026.11.06 (금) ~ 2026.11.08 (일)`
-- [ ] **Step 2: `test_extract.py`** (가짜 client)
+- [x] **Step 2: `test_extract.py`** (가짜 client)
   - 정상 JSON → EventFields
   - 깨진 JSON이나 예외 → None
   - `guard_against_invented`: 본문에 "11월 6일"이 없는데 start가 11-06이면 start, end를 None으로. 본문에 "무료"나 "원"이 없는데 fee가 있으면 fee를 None으로.
-- [ ] **Step 3~4: 실패 확인, 구현** — 지시문에 "본문에 있는 사실만, 없으면 null, 행사(축제, 행사, 교육, 놀이터 운영, 입양 행사)가 아니면 is_event=false"를 넣는다.
-- [ ] **Step 5: 통과 확인**
-- [ ] **Step 6: 커밋** — `feat(crawler): Gemini로 행사 칸을 뽑고 정해진 틀로 글을 만든다`
+- [x] **Step 3~4: 실패 확인, 구현** — 지시문에 "본문에 있는 사실만, 없으면 null, 행사(축제, 행사, 교육, 놀이터 운영, 입양 행사)가 아니면 is_event=false"를 넣는다.
+- [x] **Step 5: 통과 확인**
+- [x] **Step 6: 커밋** — `feat(crawler): Gemini로 행사 칸을 뽑고 정해진 틀로 글을 만든다`
 
 ### Task 8: 실행 흐름, Cuddle 서버 연결, 디스코드 알림
 
