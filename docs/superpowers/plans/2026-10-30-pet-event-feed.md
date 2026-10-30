@@ -232,10 +232,10 @@
 - `tourapi.py`: `fetch_overview(service_key, content_id, client) -> str | None` (`detailCommon2`, HTML 태그 제거)
 - Test: `test_extract.py`, `test_run.py`, `test_tourapi.py`
 
-- [ ] **Step 1: 시험** (실패 확인)
-- [ ] **Step 2: 구현과 통과 확인**
-- [ ] **Step 3: 사용자가 로컬에서 한 번 더 실행해 결과 확인**
-- [ ] **Step 4: 커밋**
+- [x] **Step 1: 시험** (실패 확인)
+- [x] **Step 2: 구현과 통과 확인**
+- [x] **Step 3: 사용자가 로컬에서 한 번 더 실행해 결과 확인**
+- [x] **Step 4: 커밋**
 
 ---
 
@@ -307,7 +307,7 @@
 
 - [x] **Step 1: 시험** — 고정 응답에서 제목에 PET_WORDS가 있는 것만 남고, 날짜가 date로 바뀌고, `firstimage`가 비면 `image_url=None`. 응답 `resultCode`가 정상 아니면 예외.
 - [x] **Step 2~4: 실패 확인, 구현, 통과 확인**
-- [ ] **Step 5: 키가 생기면 실제로 한 번 호출해 고정 응답 모양이 맞는지 확인** (`PUBLIC_DATA_SERVICE_KEY`가 로컬에 없으면 Actions의 손 실행으로 확인) — 2026-10-30 로컬에 키가 없어 Task 13 손 실행으로 미뤘다. 원문 주소(`ms_detail.do?cotid=`)가 실제로 열리는지도 그때 본다
+- [x] **Step 5: 키가 생기면 실제로 한 번 호출해 고정 응답 모양이 맞는지 확인** — 2026-10-30 사용자가 로컬에서 실제 키로 두 번 실행: `searchFestival2`, `detailCommon2` 응답 모양 맞음(포천펫스타). **남은 것: 원문 주소 `ms_detail.do?cotid=`가 「서비스 지연 안내」로 열려 맞는 주소인지 못 가림 → Task 13 전에 다시 본다.** 원래 적혀 있던 내용: (`PUBLIC_DATA_SERVICE_KEY`가 로컬에 없으면 Actions의 손 실행으로 확인) — 2026-10-30 로컬에 키가 없어 Task 13 손 실행으로 미뤘다. 원문 주소(`ms_detail.do?cotid=`)가 실제로 열리는지도 그때 본다
 - [x] **Step 6: 커밋** — `feat(crawler): 관광공사 축제 API로 반려동물 축제를 보완한다`
 
 ### Task 7: Gemini 추출과 틀 채우기
