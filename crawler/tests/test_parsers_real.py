@@ -56,3 +56,11 @@ def test_real_detail(code, rel, phrase):
 def test_real_image_only_notice():
     page = get_parser("gangnam").parse_detail(read("gu/gn_d.html"), SOURCES["GANGNAM_NOTICE"])
     assert len(page.text) < 50
+
+
+def test_real_showala_reads_organizer_despite_broken_tags():
+    # 실제 HTML 은 <p class="tit">주&nbsp;최</dt> 처럼 닫는 태그가 어긋나 있다(2026-10-30 주최를 못 읽었다)
+    page = get_parser("showala").parse_detail(read("showala/detail_3186.html"), SOURCES["SHOWALA"])
+    assert "주최: (사)한국펫사료협회 KPFA" in page.text
+    assert "주관: (주)메쎄이상" in page.text
+    assert "02-415-2077" not in page.text and "0261216247" not in page.text  # 문의처는 읽지 않는다

@@ -35,6 +35,19 @@ VENUE_REGIONS = [
 _TIME = re.compile(r"\d{1,2}\s*(?:시|:\d{2})")
 
 
+_TIME_START = re.compile(r"(?:(?:[월화수목금토일]|평일|주말|매일)\s*)?\d{1,2}\s*(?::\d{2}|시)")
+
+
+def _time_part(value: str) -> str:
+    """시간 앞에 주소·날짜가 섞여 있으면 시간부터 남긴다.
+    「대전컨벤션센터 … (… 107) 26.11.28~29 (토,일) 토 12:00~18:00 …」→「토 12:00~18:00 …」
+    앞부분에 숫자나 괄호가 없으면(「금/토 10:00 …」) 그대로 둔다"""
+    match = _TIME_START.search(value)
+    if match and re.search(r"[\d(]", value[: match.start()]):
+        return value[match.start():].strip()
+    return value
+
+
 def labelled_fields(text: str, ref: date) -> Dict[str, object]:
     found: Dict[str, object] = {}
     for label, value in _LINE.findall(text or ""):
@@ -55,7 +68,7 @@ def labelled_fields(text: str, ref: date) -> Dict[str, object]:
             found["place"] = f"{found['place']} {value}"
         elif label == "관람시간" and _TIME.search(value):
             # 시각 숫자가 없으면 칸을 잘못 적은 것이다(2026-10-30 쇼알라: 관람시간 칸에 주소)
-            found["hours"] = value
+            found["hours"] = _time_part(value)
         elif label == "입장료안내":
             found["fee"] = value
         elif label == "요금":

@@ -67,6 +67,7 @@
     "params": {},
     "detail_url": "https://www.showala.com/ex/ex_detail.php?idx={id}",
     "default_region": null,
+    "aggregator": true,
     "enabled": true
   }
 ]

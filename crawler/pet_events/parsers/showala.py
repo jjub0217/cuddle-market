@@ -37,17 +37,31 @@ def parse_list(html: str, source: dict) -> ListResult:
     return ListResult(items=items, reported_total=len(items))
 
 
+def _own_text(node) -> str:
+    return re.sub(r"\s+", "", "".join(node.find_all(string=True, recursive=False)))
+
+
+def _add_line(lines: list, label: str, value_node) -> None:
+    if not label or label in _SKIP_LABELS or value_node is None:
+        return
+    value = re.sub(r"\s+", " ", value_node.get_text(" ")).strip()
+    if value:
+        lines.append(f"{label}: {value}")
+
+
 def parse_detail(html: str, source: dict) -> DetailPage:
     soup = soup_of(html)
     lines = []
-    for label_node in soup.select("div.ba_info p.tit, div.fee_box p.tit"):
-        label = re.sub(r"\s+", "", label_node.get_text())
-        value_node = label_node.find_next_sibling(["p", "pre"])
-        if not label or label in _SKIP_LABELS or value_node is None:
+    # ⚠️ 실제 HTML 은 <p class="tit">주&nbsp;최</dt> 처럼 닫는 태그가 어긋나 있어 값 칸이 이름 칸 안으로
+    #    들어가 버린다(2026-10-30 주최를 못 읽었다). 그래서 형제가 아니라 같은 줄(li) 안에서 찾고,
+    #    이름은 이름 칸에 바로 붙은 글자만 읽는다
+    for row in soup.select("div.ba_info li"):
+        label_node, value_node = row.select_one(".tit"), row.select_one(".des")
+        if label_node is None or value_node is None:
             continue
-        value = re.sub(r"\s+", " ", value_node.get_text(" ")).strip()
-        if value:
-            lines.append(f"{label}: {value}")
+        _add_line(lines, _own_text(label_node), value_node)
+    for label_node in soup.select("div.fee_box .tit"):
+        _add_line(lines, _own_text(label_node), label_node.find_next_sibling(["p", "pre"]))
 
     body = soup.select_one("div.tab_con_edit1")
     lines.append(text_of(body))

@@ -106,3 +106,14 @@ def test_hours_label_without_time_is_ignored():
 def test_period_label_without_date_is_ignored():
     fields = labelled_fields("전시기간: 추후 공지", date(2026, 10, 30))
     assert "start" not in fields and "end" not in fields
+
+
+def test_hours_label_with_address_before_time_keeps_time_part():
+    # 2026-10-30 실제 쇼알라: 관람시간 칸에 주소·날짜가 앞에 섞여 있었다
+    text = "관람시간: 대전컨벤션센터 1전시장 (대전광역시 유성구 엑스포로 107) 26.11.28~29 (토,일) 토 12:00~18:00 일 10:00~18:00"
+    assert labelled_fields(text, date(2026, 10, 30))["hours"] == "토 12:00~18:00 일 10:00~18:00"
+
+
+def test_plain_hours_label_is_kept_as_is():
+    text = "관람시간: 금/토 10:00 ~ 18:00 (입장마감 17:30) 일 10:00 ~ 17:30"
+    assert labelled_fields(text, date(2026, 10, 30))["hours"] == "금/토 10:00 ~ 18:00 (입장마감 17:30) 일 10:00 ~ 17:30"

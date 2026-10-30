@@ -310,3 +310,11 @@ def test_tour_intro_values_win_over_ai():
     p = payloads[0]
     assert (p["hours"], p["fee"], p["organizer"], p["place"]) == ("10:00~17:00", "무료", "포천시", "포천아트밸리 힐링숲")
     assert p["region"] == "경기"  # 지역은 API 주소로 정한 값 그대로
+
+
+def test_aggregator_source_name_is_not_used_as_organizer():
+    # 쇼알라처럼 여러 주최의 행사를 모은 출처는 주최가 없어도 출처 이름으로 채우지 않는다
+    src = {**source(), "aggregator": True, "name": "쇼알라(한국전시산업진흥회)"}
+    i = item("1")
+    _, _, cuddle, _ = run([i], detail_of(i), ai_answer={**EVENT, "organizer": None}, sources=[src])
+    assert cuddle.payloads[0]["organizer"] is None

@@ -173,7 +173,8 @@ def _finish(today, source, deps, stat, external_id, url, fields: EventFields, im
     if (fields.end or fields.start) < today:
         _record(source, deps, stat, external_id, url, fields.title, "SKIPPED_ENDED", fields.start)
         return
-    if not fields.organizer and source["code"] != TOUR_SOURCE["code"]:
+    # 여러 주최의 행사를 모은 출처(쇼알라, 관광공사)는 출처 이름이 주최가 아니다
+    if not fields.organizer and source["code"] != TOUR_SOURCE["code"] and not source.get("aggregator"):
         fields = replace(fields, organizer=source["name"])
 
     title, content = render_post(fields, source["name"], url, image_url=image_url)
