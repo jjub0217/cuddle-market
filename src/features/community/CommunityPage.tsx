@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { COMMUNITY_TABS, getCommunitySortTypes, type CommunityTabId } from '@/constants/constants'
+import { COMMUNITY_TABS, EVENT_SORT_TYPE, getCommunitySortTypes, type CommunityTabId } from '@/constants/constants'
 import { UnderlineTabs } from '@/components/UnderlineTabs'
 import { ROUTES } from '@/constants/routes'
 import { useInfiniteQuery } from '@tanstack/react-query'
@@ -47,6 +47,10 @@ interface CommunityPageProps {
 }
 
 const SEARCH_TYPE = 'title_content'
+
+// 행사 소식의 상태·정렬 드롭다운 모양. 홈 상세 필터의 지역 드롭다운(LocationFilter card-chip)과 같다
+const EVENT_DROPDOWN_CLASS =
+  'border border-outline-variant bg-white text-gray-900 px-4 py-2 text-xs focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20'
 
 export default function CommunityPage({ initialQuestionData, initialInfoData, initialEventData }: CommunityPageProps) {
   const searchParams = useSearchParams()
@@ -346,20 +350,31 @@ export default function CommunityPage({ initialQuestionData, initialInfoData, in
         <section
           className={cn('mb-2 flex justify-between gap-3 text-sm md:mb-4', isEventTab ? 'items-center' : 'items-end')}
         >
-          {/* 행사 소식은 오른쪽에 「상태 드롭다운 · 정렬」 순서로 붙여 둔다(설계 7-2절). 글쓰기 단추가 없어서다 */}
+          {/* 행사 소식은 오른쪽에 「상태 드롭다운 · 정렬 드롭다운」을 붙여 둔다(설계 7-2절). 글쓰기 단추가 없어서다 */}
           {isEventTab ? (
-            <div className="ml-auto w-32 shrink-0">
-              <SelectDropdown
-                value={eventStatusValue}
-                onChange={handleEventStatusChange}
-                options={EVENT_STATUS_FILTERS.map((filter) => ({ value: filter.value, label: filter.label }))}
-                placeholder="행사 상태"
-                // 홈 상세 필터의 지역 드롭다운(LocationFilter card-chip)과 같은 모양
-                buttonClassName="border border-outline-variant bg-white text-gray-900 px-4 py-2 text-xs focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20"
-              />
+            <div className="ml-auto flex shrink-0 items-center gap-2">
+              <div className="w-32">
+                <SelectDropdown
+                  value={eventStatusValue}
+                  onChange={handleEventStatusChange}
+                  options={EVENT_STATUS_FILTERS.map((filter) => ({ value: filter.value, label: filter.label }))}
+                  placeholder="행사 상태"
+                  buttonClassName={EVENT_DROPDOWN_CLASS}
+                />
+              </div>
+              <div className="w-36">
+                <SelectDropdown
+                  // 행사 소식에 없는 정렬(조회 순 등)이 주소에 남아 있으면 최신순으로 보인다
+                  value={EVENT_SORT_TYPE.some((sort) => sort.id === sortBy) ? sortBy : 'latest'}
+                  onChange={handleSortChange}
+                  options={EVENT_SORT_TYPE.map((sort) => ({ value: sort.id, label: sort.label }))}
+                  placeholder="정렬"
+                  buttonClassName={EVENT_DROPDOWN_CLASS}
+                />
+              </div>
             </div>
           ) : null}
-          <div className={cn('flex items-center gap-3', !isEventTab && 'max-md:ml-auto')}>
+          <div className={cn('flex items-center gap-3 max-md:ml-auto', isEventTab && 'hidden')}>
             {getCommunitySortTypes(activeCommunityTypeTab).map((sort, idx) => {
               const isActive = sort.id === sortBy
               return (
