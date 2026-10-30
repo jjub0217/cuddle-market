@@ -17,6 +17,7 @@ export interface CommunityEvent {
   checks: string[] // 가기 전에 확인하세요
   sourceUrl: string | null // 원문 주소 (「공식 안내 보기」)
   imageUrl: string | null // 포스터 원래 주소
+  hours: string | null // 운영시간
 }
 
 export interface CommunityItem {

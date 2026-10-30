@@ -206,11 +206,11 @@
 - 크롤러: `EventFields.hours`, AI 스키마 `hours`, `guard_against_invented`(본문에 시각 숫자가 없으면 버림), 본문 틀 「운영시간 | …」(기간 아래), 보내는 값 `hours`
 - 웹: `CommunityEvent.hours`, 표에 운영시간 줄, 장소 줄에 길찾기 링크(`getNaverMapSearchUrl`)
 
-- [ ] **Step 1: 서버 시험과 구현**
-- [ ] **Step 2: 크롤러 시험과 구현**
-- [ ] **Step 3: 웹 시험과 구현**
-- [ ] **Step 4: 3000 화면 확인**
-- [ ] **Step 5: 커밋**
+- [x] **Step 1: 서버 시험과 구현**
+- [x] **Step 2: 크롤러 시험과 구현**
+- [x] **Step 3: 웹 시험과 구현**
+- [x] **Step 4: 3000 화면 확인**
+- [x] **Step 5: 커밋**
 
 ---
 

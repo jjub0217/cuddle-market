@@ -4,6 +4,7 @@ import {
   EVENT_STATUS_FILTERS,
   formatEventPeriod,
   formatEventPlace,
+  getNaverMapSearchUrl,
   getSourceName,
   getEventEmptyTitle,
   getEventStatus,
@@ -116,5 +117,18 @@ describe('출처 이름', () => {
   it('없으면 원문 주소의 사이트 이름', () => {
     expect(getSourceName('본문', 'https://www.seoul.go.kr/news?x=1')).toBe('www.seoul.go.kr')
     expect(getSourceName('본문', null)).toBeNull()
+  })
+})
+
+describe('길찾기 주소', () => {
+  it('네이버 지도에서 「지역 장소」를 검색한다', () => {
+    expect(getNaverMapSearchUrl('서울', '노원 공원')).toBe(
+      'https://map.naver.com/p/search/' + encodeURIComponent('서울 노원 공원')
+    )
+  })
+
+  it('장소가 없거나 온라인이면 없다', () => {
+    expect(getNaverMapSearchUrl('서울', null)).toBeNull()
+    expect(getNaverMapSearchUrl(null, '온라인')).toBeNull()
   })
 })

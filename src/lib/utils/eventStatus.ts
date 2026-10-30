@@ -105,3 +105,13 @@ export function getSourceName(content: string | null | undefined, sourceUrl: str
     return null
   }
 }
+
+/**
+ * 장소 옆 「길찾기」: 네이버 지도에서 「지역 장소」를 검색한 화면(설계 7-2절).
+ * 우리 지도(플레이스)에 찍는 것이 아니라 바깥 지도로 보내는 링크다. 장소가 없거나 온라인이면 null.
+ */
+export function getNaverMapSearchUrl(region: string | null, place: string | null): string | null {
+  if (!place || place.includes('온라인')) return null
+  const query = formatEventPlace(region, place)
+  return query ? `https://map.naver.com/p/search/${encodeURIComponent(query)}` : null
+}

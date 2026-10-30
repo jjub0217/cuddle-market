@@ -22,6 +22,7 @@ const EVENT: CommunityEvent = {
   checks: ['목줄과 배변 봉투를 챙기세요'],
   sourceUrl: 'https://www.seoul.go.kr/news/news_report.do?bbsNo=158&nttNo=468820',
   imageUrl: 'https://www.seoul.go.kr/poster.jpg',
+  hours: '오전 11시~오후 7시',
 }
 
 const PROPS = {
@@ -62,33 +63,61 @@ describe('위쪽', () => {
 })
 
 describe('표', () => {
-  it('기간, 장소(지역 + 장소), 주최, 대상, 참가비', () => {
+  it('기간, 운영시간, 장소(지역 + 장소), 대상, 참가비, 주최', () => {
     render(<EventDetailBody {...PROPS} event={EVENT} />)
 
     expect(rowValue('기간')).toBe('2026.10.29 (목) ~ 2026.11.02 (월)')
-    expect(rowValue('장소')).toBe('서울 문화비축기지')
+    expect(rowValue('운영시간')).toBe('오전 11시~오후 7시')
+    expect(rowValue('장소')).toMatch(/^서울 문화비축기지/)
     expect(rowValue('주최')).toBe('서울특별시')
     expect(rowValue('대상')).toBe('반려견, 반려묘')
     expect(rowValue('참가비')).toBe('무료')
   })
 
-  it('반려인이 판단하는 순서: 기간, 장소, 대상, 참가비, 주최', () => {
+  it('반려인이 판단하는 순서: 기간, 운영시간, 장소, 대상, 참가비, 주최', () => {
     render(<EventDetailBody {...PROPS} event={EVENT} />)
-    expect(screen.getAllByRole('term').map((dt) => dt.textContent)).toEqual(['기간', '장소', '대상', '참가비', '주최'])
+    expect(screen.getAllByRole('term').map((dt) => dt.textContent)).toEqual([
+      '기간',
+      '운영시간',
+      '장소',
+      '대상',
+      '참가비',
+      '주최',
+    ])
   })
 
   it('없는 값은 「공식 안내 확인」', () => {
     render(
-      <EventDetailBody {...PROPS} event={{ ...EVENT, place: null, region: null, organizer: null, target: null, fee: null }} />
+      <EventDetailBody
+        {...PROPS}
+        event={{ ...EVENT, place: null, region: null, organizer: null, target: null, fee: null, hours: null }}
+      />
     )
-    for (const label of ['장소', '주최', '대상', '참가비']) {
+    for (const label of ['운영시간', '장소', '주최', '대상', '참가비']) {
       expect(rowValue(label)).toBe('공식 안내 확인')
     }
   })
 
   it('장소가 이미 시·도로 시작하면 지역을 또 붙이지 않는다', () => {
     render(<EventDetailBody {...PROPS} event={{ ...EVENT, region: '제주', place: '제주특별자치도 제주시 서광로' }} />)
-    expect(rowValue('장소')).toBe('제주특별자치도 제주시 서광로')
+    expect(rowValue('장소')).toMatch(/^제주특별자치도 제주시 서광로/)
+  })
+})
+
+describe('길찾기', () => {
+  it('장소 옆 링크가 네이버 지도에서 「지역 장소」를 찾는다(새 창)', () => {
+    render(<EventDetailBody {...PROPS} event={EVENT} />)
+    const link = screen.getByRole('link', { name: '서울 문화비축기지 길찾기' })
+    expect(link).toHaveAttribute('href', 'https://map.naver.com/p/search/' + encodeURIComponent('서울 문화비축기지'))
+    expect(link).toHaveAttribute('target', '_blank')
+  })
+
+  it('장소가 없거나 온라인이면 길찾기가 없다', () => {
+    const { unmount } = render(<EventDetailBody {...PROPS} event={{ ...EVENT, place: null, region: null }} />)
+    expect(screen.queryByRole('link', { name: /길찾기/ })).not.toBeInTheDocument()
+    unmount()
+    render(<EventDetailBody {...PROPS} event={{ ...EVENT, place: '온라인', region: null }} />)
+    expect(screen.queryByRole('link', { name: /길찾기/ })).not.toBeInTheDocument()
   })
 })
 

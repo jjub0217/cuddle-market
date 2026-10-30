@@ -17,6 +17,7 @@ export const typeDefs = gql`
     checks: [String!]!
     sourceUrl: String
     imageUrl: String
+    hours: String
   }
 
   type CommunityPost {

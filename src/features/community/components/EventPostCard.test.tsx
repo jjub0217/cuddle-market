@@ -33,6 +33,7 @@ const POST: CommunityItem = {
     checks: [],
     sourceUrl: null,
     imageUrl: null,
+    hours: null,
   },
 }
 

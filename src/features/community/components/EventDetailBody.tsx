@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
-import { ExternalLink } from 'lucide-react'
+import { ExternalLink, MapPin } from 'lucide-react'
 import { formatJoinDate } from '@cuddle/shared'
 import Badge from '@/components/commons/badge/Badge'
 import { cn } from '@/lib/utils/cn'
-import { formatEventPeriod, formatEventPlace, getEventStatus } from '@/lib/utils/eventStatus'
+import { formatEventPeriod, formatEventPlace, getEventStatus, getNaverMapSearchUrl } from '@/lib/utils/eventStatus'
 import { PLACEHOLDER_IMAGES } from '@/lib/utils/imageUrl'
 import type { CommunityEvent } from '@/types'
 import { EventStatusChip } from './EventStatusChip'
@@ -31,10 +31,13 @@ interface EventDetailBodyProps {
  */
 export function EventDetailBody({ title, createdAt, event, sourceName, today, actions }: EventDetailBodyProps) {
   const status = getEventStatus(event.startDate, event.endDate, today)
-  // 반려인이 갈지 말지 정하는 순서: 언제 → 어디서 → 우리 아이가 갈 수 있나 → 돈이 드나 → 누가 여나
+  // 반려인이 갈지 말지 정하는 순서: 언제(몇 시) → 어디서 → 우리 아이가 갈 수 있나 → 돈이 드나 → 누가 여나
+  const place = formatEventPlace(event.region, event.place)
+  const mapUrl = getNaverMapSearchUrl(event.region, event.place)
   const rows: [string, string | null][] = [
     ['기간', formatEventPeriod(event.startDate, event.endDate)],
-    ['장소', formatEventPlace(event.region, event.place)],
+    ['운영시간', event.hours],
+    ['장소', place],
     ['대상', event.target],
     ['참가비', event.fee],
     ['주최', event.organizer],
@@ -73,7 +76,21 @@ export function EventDetailBody({ title, createdAt, event, sourceName, today, ac
             {rows.map(([label, value]) => (
               <div key={label} className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-3 py-3 text-sm md:text-base">
                 <dt className="text-[#827565]">{label}</dt>
-                <dd className={cn('break-keep text-[#1c1b1b]', !value && 'text-[#827565]')}>{value || CHECK_OFFICIAL}</dd>
+                <dd className={cn('break-keep text-[#1c1b1b]', !value && 'text-[#827565]')}>
+                  {value || CHECK_OFFICIAL}
+                  {label === '장소' && mapUrl ? (
+                    <a
+                      href={mapUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${place} 길찾기`}
+                      className="text-primary-600 ml-2 inline-flex items-center gap-0.5 text-xs font-semibold whitespace-nowrap hover:underline md:text-sm"
+                    >
+                      <MapPin size={14} aria-hidden="true" />
+                      길찾기
+                    </a>
+                  ) : null}
+                </dd>
               </div>
             ))}
           </dl>
