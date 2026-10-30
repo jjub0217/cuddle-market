@@ -1,7 +1,7 @@
 """사이트 규칙을 지키는 요청기.
 
 - 모든 요청에 우리 이름(USER_AGENT)을 단다. 노원구는 기본 이름(python-requests)이면 400을 돌려준다.
-- robots.txt 가 막은 주소는 요청하지 않는다(BlockedByRobots).
+- robots.txt 가 막은 주소는 요청하지 않는다(BlockedByRobots). 판단은 표준대로(robots.py).
 - 요청 사이에 delay_sec 이상 쉰다(robots.txt 요청도 센다).
 """
 from __future__ import annotations
@@ -10,9 +10,10 @@ import json
 import time
 from typing import Callable, Dict, Optional
 from urllib.parse import urlencode, urlsplit
-from urllib.robotparser import RobotFileParser
 
 import requests
+
+from . import robots
 
 USER_AGENT = "CuddleEventBot/0.1 (+https://cuddle-market.vercel.app)"
 TIMEOUT_SEC = 20
@@ -35,7 +36,7 @@ class PoliteClient:
         self._clock = clock
         self._sleep = sleep
         self._last_request_at: Optional[float] = None
-        self._robots: Dict[str, Optional[RobotFileParser]] = {}
+        self._robots: Dict[str, Optional[robots.Robots]] = {}
 
     def get(self, url: str, params: Optional[dict] = None) -> str:
         full_url = f"{url}{'&' if '?' in url else '?'}{urlencode(params)}" if params else url
@@ -53,19 +54,18 @@ class PoliteClient:
         origin = f"{parts.scheme}://{parts.netloc}"
         if origin not in self._robots:
             self._robots[origin] = self._load_robots(origin)
-        parser = self._robots[origin]
-        return True if parser is None else parser.can_fetch(USER_AGENT, url)
+        rules = self._robots[origin]
+        path = parts.path or "/"
+        return True if rules is None else rules.allowed(path + (f"?{parts.query}" if parts.query else ""))
 
-    def _load_robots(self, origin: str) -> Optional[RobotFileParser]:
+    def _load_robots(self, origin: str) -> Optional[robots.Robots]:
         try:
             response = self._request(f"{origin}/robots.txt", None)
         except requests.RequestException:
             return None
         if response.status_code >= 400:
             return None  # robots.txt 가 없으면 막은 곳도 없다
-        parser = RobotFileParser()
-        parser.parse(response.text.splitlines())
-        return parser
+        return robots.parse(response.text, USER_AGENT)
 
     def _request(self, url: str, params: Optional[dict]):
         if self._last_request_at is not None:

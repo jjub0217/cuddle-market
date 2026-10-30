@@ -294,7 +294,7 @@
   - `run.run_once(today: date, sources: list[dict], deps) -> RunSummary(per_source: dict[str, SourceStat], errors: list[str])`
   - 실행: `python3 -m run` (환경 변수 `CUDDLE_API_BASE`, `INGEST_API_KEY`, `GEMINI_API_KEY`, `PUBLIC_DATA_SERVICE_KEY`, `DISCORD_WEBHOOK_URL`). `--dry-run`이면 서버에 보내지 않고 만든 글을 출력만.
 
-- [ ] **Step 1: `test_run.py`** (가짜 요청기, 가짜 AI, 가짜 서버)
+- [x] **Step 1: `test_run.py`** (가짜 요청기, 가짜 AI, 가짜 서버)
   - 90일보다 오래된 목록 항목은 상세를 읽지 않는다
   - 서버가 이미 본 번호는 상세를 읽지 않는다
   - 본문 50자 미만 → `SKIPPED_NO_TEXT` 기록, AI 호출 없음
@@ -304,9 +304,9 @@
   - 지역은 설계 7-2절 순서로 정한다(관광공사 주소 → 문체부 장소 칸 → AI 값 → `sources.json`의 `default_region`). 주최가 없으면 출처 이름
   - 한 출처가 robots 차단이나 오류여도 다른 출처는 계속하고 `errors`에 남는다
   - `reported_total > 0`인데 items가 0이면 `errors`에 "구조 변경 의심: {출처}"
-- [ ] **Step 2~4: 실패 확인, 구현, 통과 확인** — 알림은 `errors`가 있거나 새 글이 1개 이상일 때만 디스코드로 한 번 보낸다.
-- [ ] **Step 5: 로컬 마른 실행** — `GEMINI_API_KEY` 없이 `python3 -m run --dry-run` → 출처별 목록 건수가 찍히고 서버 요청은 없다
-- [ ] **Step 6: 커밋** — `feat(crawler): 수집 흐름과 서버 연결, 실패 알림을 묶는다`
+- [x] **Step 2~4: 실패 확인, 구현, 통과 확인** — 알림은 `errors`가 있거나 새 글이 1개 이상일 때만 디스코드로 한 번 보낸다.
+- [x] **Step 5: 로컬 마른 실행** — `GEMINI_API_KEY` 없이 `python3 -m run --dry-run` → 출처별 목록 건수가 찍히고 서버 요청은 없다
+- [x] **Step 6: 커밋** — `feat(crawler): 수집 흐름과 서버 연결, 실패 알림을 묶는다`
 
 ### Task 9: GitHub Actions 예약 실행
 
