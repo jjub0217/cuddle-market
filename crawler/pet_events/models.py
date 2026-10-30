@@ -48,6 +48,7 @@ class EventFields:
     organizer: Optional[str] = None
     target: Optional[str] = None
     fee: Optional[str] = None
+    hours: Optional[str] = None  # 운영시간
     one_line: Optional[str] = None
     activities: List[str] = field(default_factory=list)
     checks: List[str] = field(default_factory=list)

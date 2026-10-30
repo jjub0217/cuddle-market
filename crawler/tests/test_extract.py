@@ -28,12 +28,12 @@ class FakeClient:
         self.models = FakeModels(text, error)
 
 
-TEXT = "서울시는 10월 31일(토) 문화비축기지에서 반려문화 축제를 연다. 참가비는 무료다. 반려견 놀이터와 상담이 준비됐다."
+TEXT = "서울시는 10월 31일(토) 오전 10시부터 오후 5시까지 문화비축기지에서 반려문화 축제를 연다. 참가비는 무료다. 반려견 놀이터와 상담이 준비됐다."
 
 GOOD = {
     "is_event": True, "title": "2026 서울 댕냥데이즈", "start_date": "2026-10-31", "end_date": None,
     "region": "서울", "place": "문화비축기지", "organizer": "서울특별시", "target": "반려견",
-    "fee": "무료", "one_line": "반려견과 함께 즐기는 가을 축제",
+    "fee": "무료", "hours": "오전 10시~오후 5시", "one_line": "반려견과 함께 즐기는 가을 축제",
     "activities": ["반려견 놀이터", "건강 상담"], "checks": ["목줄 챙기기"],
 }
 
@@ -46,6 +46,7 @@ def test_valid_json_becomes_fields():
     assert fields.title == "2026 서울 댕냥데이즈"
     assert (fields.start, fields.end) == (date(2026, 10, 31), None)
     assert fields.place == "문화비축기지"
+    assert fields.hours == "오전 10시~오후 5시"
     assert fields.activities == ["반려견 놀이터", "건강 상담"]
 
     config = client.models.calls[0]["config"]
@@ -113,3 +114,14 @@ def test_guard_won_must_be_an_amount():
     # 「공원」「지원」의 「원」은 금액이 아니다
     guarded = guard_against_invented(fields(fee="3,000원"), "11월 6일 ~ 8일 공원 지원 사업")
     assert guarded.fee is None
+
+
+def test_guard_drops_hours_without_time_in_text():
+    guarded = guard_against_invented(fields(fee=None, hours="오전 10시~오후 5시"), "11월 6일 ~ 8일 공원에서 열린다")
+    assert guarded.hours is None
+
+
+def test_guard_keeps_hours_with_time_in_text():
+    for text in ["11월 6일 ~ 8일 오전 10시~오후 5시", "11월 6일 ~ 8일 10:00~17:00"]:
+        guarded = guard_against_invented(fields(fee=None, hours="10:00~17:00"), text)
+        assert guarded.hours == "10:00~17:00", text

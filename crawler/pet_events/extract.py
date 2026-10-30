@@ -31,12 +31,13 @@ SCHEMA = {
         "organizer": _NULLABLE_STRING,
         "target": _NULLABLE_STRING,
         "fee": _NULLABLE_STRING,
+        "hours": {**_NULLABLE_STRING, "description": "운영시간. 예: 오전 10시~오후 5시"},
         "one_line": {**_NULLABLE_STRING, "description": "40자 이내 한 줄 소개"},
         "activities": {"type": "array", "items": {"type": "string"}, "maxItems": 3},
         "checks": {"type": "array", "items": {"type": "string"}, "maxItems": 2},
     },
     "required": ["is_event", "title", "start_date", "end_date", "region", "place", "organizer",
-                 "target", "fee", "one_line", "activities", "checks"],
+                 "target", "fee", "hours", "one_line", "activities", "checks"],
 }
 
 PROMPT = """너는 반려동물 행사 안내문을 정리하는 편집자다. 아래 공공기관 글을 읽고 칸을 채워라.
@@ -79,6 +80,7 @@ def extract_event(text: str, title: str, posted_on: Optional[date], client) -> O
             organizer=_str(data["organizer"]),
             target=_str(data["target"]),
             fee=_str(data["fee"]),
+            hours=_str(data["hours"]),
             one_line=_str(data["one_line"]),
             activities=[s.strip() for s in data["activities"] if isinstance(s, str) and s.strip()],
             checks=[s.strip() for s in data["checks"] if isinstance(s, str) and s.strip()],
@@ -93,7 +95,7 @@ def extract_event(text: str, title: str, posted_on: Optional[date], client) -> O
 
 
 def guard_against_invented(fields: EventFields, text: str) -> EventFields:
-    """뽑은 날짜의 월·일이 본문에 없으면 버린다. 금액도 「무료」나 「숫자+원」이 없으면 버린다"""
+    """뽑은 날짜의 월·일이 본문에 없으면 버린다. 금액도 「무료」나 「숫자+원」이, 운영시간도 시각 숫자가 없으면 버린다"""
     start, end = fields.start, fields.end
     if start and not _mentions_day(text, start):
         start, end = None, None
@@ -102,7 +104,10 @@ def guard_against_invented(fields: EventFields, text: str) -> EventFields:
     fee = fields.fee
     if fee and not re.search(r"무료|\d[\d,]*\s*원", text):
         fee = None
-    return replace(fields, start=start, end=end, fee=fee)
+    hours = fields.hours
+    if hours and not re.search(r"\d{1,2}\s*(?:시|:\d{2})", text):
+        hours = None
+    return replace(fields, start=start, end=end, fee=fee, hours=hours)
 
 
 def _mentions_day(text: str, value: date) -> bool:
