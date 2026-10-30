@@ -132,3 +132,22 @@ describe('길찾기 주소', () => {
     expect(getNaverMapSearchUrl(null, '온라인')).toBeNull()
   })
 })
+
+describe('길찾기 검색어 다듬기', () => {
+  const query = (region: string | null, place: string) =>
+    decodeURIComponent(getNaverMapSearchUrl(region, place)!.replace('https://map.naver.com/p/search/', ''))
+
+  it('「일원」「일대」「주변」「인근」을 뺀다', () => {
+    expect(query('제주', '한라체육관 일원')).toBe('제주 한라체육관')
+    expect(query('서울', '노원 공원 일대')).toBe('서울 노원 공원')
+  })
+
+  it('「및 …」 뒤와 괄호를 뺀다', () => {
+    expect(query('서울', '문화비축기지 문화광장 및 T2')).toBe('서울 문화비축기지 문화광장')
+    expect(query('서울', '강남구청 대강당(3층)')).toBe('서울 강남구청 대강당')
+  })
+
+  it('주소는 그대로', () => {
+    expect(query('제주', '제주특별자치도 제주시 서광로2길 24')).toBe('제주특별자치도 제주시 서광로2길 24')
+  })
+})

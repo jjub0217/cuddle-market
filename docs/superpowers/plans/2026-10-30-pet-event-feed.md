@@ -217,10 +217,10 @@
 - 크롤러: Create `crawler/pet_events/labelled.py`(`labelled_fields(text, ref) -> dict`: 「개최기간」→start/end/hours, 「축제장소」→place, 「요금」→fee, 「주최/주관기관」→organizer, 「연령제한」→target). `run._handle`이 AI 값 위에 덮어쓴다. Test: `crawler/tests/test_labelled.py`, `test_run.py`
 - 웹: `EventDetailBody` 포스터 `onError` → 포스터 자리 숨김. `getNaverMapSearchUrl` 검색어 다듬기. Test: `EventDetailBody.test.tsx`, `eventStatus.test.ts`
 
-- [ ] **Step 1: 크롤러 시험과 구현** (진짜 문체부 상세 원본으로도 확인)
-- [ ] **Step 2: 웹 시험과 구현**
-- [ ] **Step 3: 로컬 예시 글을 실제 문체부 원문 값으로 다시 만들고 3000 화면 확인**
-- [ ] **Step 4: 커밋**
+- [x] **Step 1: 크롤러 시험과 구현** (진짜 문체부 상세 원본으로도 확인)
+- [x] **Step 2: 웹 시험과 구현**
+- [x] **Step 3: 로컬 예시 글을 실제 문체부 원문 값으로 다시 만들고 3000 화면 확인**
+- [x] **Step 4: 커밋**
 
 ---
 

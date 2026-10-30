@@ -47,13 +47,17 @@ describe('위쪽', () => {
     expect(screen.getByText('반려견과 함께 즐기는 가을 축제')).toBeInTheDocument()
   })
 
-  it('포스터는 원래 주소 그대로, 못 불러오면 기본 그림', () => {
+  it('포스터는 원래 주소 그대로', () => {
     render(<EventDetailBody {...PROPS} event={EVENT} />)
-    const poster = screen.getByRole('img', { name: '2026 서울 댕냥데이즈 포스터' })
-    expect(poster).toHaveAttribute('src', EVENT.imageUrl)
+    expect(screen.getByRole('img', { name: '2026 서울 댕냥데이즈 포스터' })).toHaveAttribute('src', EVENT.imageUrl)
+  })
 
-    fireEvent.error(poster)
-    expect(poster.getAttribute('src')).toBe(PLACEHOLDER_IMAGES[800])
+  it('포스터를 못 불러오면 자리를 비운다(행사와 상관없는 기본 그림을 보이지 않는다)', () => {
+    render(<EventDetailBody {...PROPS} event={EVENT} />)
+    fireEvent.error(screen.getByRole('img', { name: '2026 서울 댕냥데이즈 포스터' }))
+
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
+    expect(document.querySelector(`img[src="${PLACEHOLDER_IMAGES[800]}"]`)).toBeNull()
   })
 
   it('포스터가 없으면 그림이 없다', () => {

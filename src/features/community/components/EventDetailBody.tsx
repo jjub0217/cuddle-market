@@ -1,10 +1,9 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { ExternalLink, MapPin } from 'lucide-react'
 import { formatJoinDate } from '@cuddle/shared'
 import Badge from '@/components/commons/badge/Badge'
 import { cn } from '@/lib/utils/cn'
 import { formatEventPeriod, formatEventPlace, getEventStatus, getNaverMapSearchUrl } from '@/lib/utils/eventStatus'
-import { PLACEHOLDER_IMAGES } from '@/lib/utils/imageUrl'
 import type { CommunityEvent } from '@/types'
 import { EventStatusChip } from './EventStatusChip'
 
@@ -31,6 +30,8 @@ interface EventDetailBodyProps {
  */
 export function EventDetailBody({ title, createdAt, event, sourceName, today, actions }: EventDetailBodyProps) {
   const status = getEventStatus(event.startDate, event.endDate, today)
+  // 포스터를 못 불러오면 자리를 비운다. 기본 그림은 중고거래용 방 그림이라 행사와 상관이 없다(설계 7-2절)
+  const [posterFailed, setPosterFailed] = useState(false)
   // 반려인이 갈지 말지 정하는 순서: 언제(몇 시) → 어디서 → 우리 아이가 갈 수 있나 → 돈이 드나 → 누가 여나
   const place = formatEventPlace(event.region, event.place)
   const mapUrl = getNaverMapSearchUrl(event.region, event.place)
@@ -46,7 +47,7 @@ export function EventDetailBody({ title, createdAt, event, sourceName, today, ac
   return (
     <article className="flex flex-col gap-8">
       <div className="flex flex-col gap-6 md:flex-row md:items-start md:gap-8">
-        {event.imageUrl ? (
+        {event.imageUrl && !posterFailed ? (
           <div className="w-full shrink-0 overflow-hidden rounded-2xl bg-[#f4efe7] md:w-75">
             {/* 기관 서버의 원래 주소를 그대로 쓴다(복사하지 않는다). next/image 를 쓰지 않는 까닭도 같다 */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -54,10 +55,7 @@ export function EventDetailBody({ title, createdAt, event, sourceName, today, ac
               src={event.imageUrl}
               alt={`${title} 포스터`}
               className="h-auto w-full object-contain"
-              onError={(e) => {
-                const img = e.currentTarget
-                if (!img.src.endsWith(PLACEHOLDER_IMAGES[800])) img.src = PLACEHOLDER_IMAGES[800]
-              }}
+              onError={() => setPosterFailed(true)}
             />
           </div>
         ) : null}

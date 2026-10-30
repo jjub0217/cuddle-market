@@ -112,6 +112,20 @@ export function getSourceName(content: string | null | undefined, sourceUrl: str
  */
 export function getNaverMapSearchUrl(region: string | null, place: string | null): string | null {
   if (!place || place.includes('온라인')) return null
-  const query = formatEventPlace(region, place)
+  const query = formatEventPlace(region, toSearchablePlace(place))
   return query ? `https://map.naver.com/p/search/${encodeURIComponent(query)}` : null
+}
+
+/**
+ * 지도 검색이 빗나가지 않게 장소 이름을 다듬는다.
+ * 「한라체육관 일원」→「한라체육관」, 「문화광장 및 T2」→「문화광장」, 「대강당(3층)」→「대강당」
+ */
+function toSearchablePlace(place: string): string {
+  return (
+    place
+      .replace(/\s*\([^)]*\)/g, '')
+      .split(/\s+및\s+/)[0]
+      .replace(/\s+(일원|일대|주변|인근)$/, '')
+      .trim() || place
+  )
 }
