@@ -13,6 +13,18 @@ from .regions import region_of
 
 ENDPOINT = "https://apis.data.go.kr/B551011/KorService2/searchFestival2"
 DETAIL_ENDPOINT = "https://apis.data.go.kr/B551011/KorService2/detailCommon2"
+INTRO_ENDPOINT = "https://apis.data.go.kr/B551011/KorService2/detailIntro2"
+FESTIVAL_TYPE = 15  # 관광공사 콘텐츠 종류: 축제·공연·행사
+# 소개 정보 칸 → 우리 칸 (설계 7-2절: 출처에 칸으로 적힌 값이 먼저다)
+_INTRO_FIELDS = {
+    "playtime": "hours",
+    "usetimefestival": "fee",
+    "sponsor1": "organizer",
+    "agelimit": "target",
+    "bookingplace": "application",
+    "eventplace": "place",
+}
+_TIME = re.compile(r"\d{1,2}\s*(?:시|:\d{2})")
 PET_WORDS = ("반려", "펫", "댕", "냥", "입양", "강아지", "고양이")
 ROWS_PER_PAGE = 100
 MAX_PAGES = 10
@@ -69,6 +81,33 @@ def fetch_overview(service_key: str, content_id: str, client) -> Optional[str]:
     text = re.sub(r"<br\s*/?>", "\n", overview, flags=re.IGNORECASE)
     text = re.sub(r"<[^>]+>", "", text).strip()
     return text or None
+
+
+def fetch_intro(service_key: str, content_id: str, client) -> dict:
+    """축제 소개 정보 칸(detailIntro2). 빈 칸은 빼고, 시각 숫자가 없는 운영시간도 뺀다"""
+    body = _body(client.get_json(INTRO_ENDPOINT, params={
+        "serviceKey": service_key,
+        "MobileOS": "ETC",
+        "MobileApp": "CuddleMarket",
+        "_type": "json",
+        "contentId": content_id,
+        "contentTypeId": FESTIVAL_TYPE,
+    }))
+    rows = _rows(body)
+    row = rows[0] if rows else {}
+    found = {}
+    for api_key, our_key in _INTRO_FIELDS.items():
+        value = _plain(row.get(api_key))
+        if not value or (our_key == "hours" and not _TIME.search(value)):
+            continue
+        found[our_key] = value
+    return found
+
+
+def _plain(value) -> str:
+    """HTML 줄바꿈과 태그를 빼고 한 줄로"""
+    text = re.sub(r"<br\s*/?>", " ", str(value or ""), flags=re.IGNORECASE)
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", text)).strip()
 
 
 def _body(payload: dict) -> dict:

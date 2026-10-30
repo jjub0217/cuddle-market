@@ -259,6 +259,10 @@ class TourHttp(FakeHttp):
             return {"response": {"header": {"resultCode": "0000"}, "body": {"items": {"item": [{
                 "contentid": "3545306", "title": "포천펫스타", "eventstartdate": "20261114", "eventenddate": "20261115",
                 "addr1": "경기도 포천시 신북면 아트밸리로 234", "firstimage": ""}]}, "totalCount": 1}}}
+        if url.endswith("detailIntro2"):
+            item = {"contentid": "3545306", "playtime": "10:00~17:00", "usetimefestival": "무료",
+                    "sponsor1": "포천시", "eventplace": "포천아트밸리 힐링숲"}
+            return {"response": {"header": {"resultCode": "0000"}, "body": {"items": {"item": [item]}, "totalCount": 1}}}
         items = {"item": [{"contentid": "3545306", "overview": self.overview_text}]} if self.overview_text else ""
         return {"response": {"header": {"resultCode": "0000"}, "body": {"items": items, "totalCount": 1}}}
 
@@ -284,7 +288,8 @@ def test_tour_overview_goes_to_ai_and_api_values_win():
     assert p["summary"] == "반려동물과 함께 즐기는 포천 축제" and p["activities"] == ["어질리티 체험"]
     # 기간·장소·지역은 API 칸 값이 먼저다
     assert (p["eventStartDate"], p["eventEndDate"]) == ("2026-11-14", "2026-11-15")
-    assert (p["place"], p["region"]) == ("경기도 포천시 신북면 아트밸리로 234", "경기")
+    # 장소는 소개 정보의 행사 장소(eventplace)가 주소보다 먼저다. 지역은 API 주소로
+    assert (p["place"], p["region"]) == ("포천아트밸리 힐링숲", "경기")
 
 
 def test_tour_without_overview_posts_without_ai_fields():
@@ -296,3 +301,12 @@ def test_tour_without_overview_posts_without_ai_fields():
 def test_tour_overview_saying_not_pet_event_is_skipped():
     _, payloads, _ = run_tour(TOUR_OVERVIEW, {**EVENT, "is_event": False})
     assert payloads[0]["status"] == "SKIPPED_NOT_EVENT"
+
+
+def test_tour_intro_values_win_over_ai():
+    ai_answer = {**EVENT, "title": "포천펫스타", "start_date": "2026-11-14", "hours": None, "fee": None,
+                 "organizer": "포천 어딘가", "place": "포천"}
+    _, payloads, _ = run_tour(TOUR_OVERVIEW, ai_answer)
+    p = payloads[0]
+    assert (p["hours"], p["fee"], p["organizer"], p["place"]) == ("10:00~17:00", "무료", "포천시", "포천아트밸리 힐링숲")
+    assert p["region"] == "경기"  # 지역은 API 주소로 정한 값 그대로

@@ -267,10 +267,10 @@
 - 크롤러: `labelled.py` 운영시간·기간 칸 값 검사. `tourapi.fetch_intro`(`detailIntro2`, contentTypeId=15) → 운영시간·참가비·주최·대상·신청·장소를 칸 값으로
 - Test: `EventTitleKeyTest`, `EventIngestServiceTest`, `test_labelled.py`, `test_tourapi.py`, `test_run.py`
 
-- [ ] **Step 1: 서버 시험과 구현**
-- [ ] **Step 2: 크롤러 시험과 구현**
+- [x] **Step 1: 서버 시험과 구현**
+- [x] **Step 2: 크롤러 시험과 구현**
 - [ ] **Step 3: 사용자 로컬 실행으로 확인(중복 1건 줄어드는지, 크리쳐 대전 운영시간, 포천펫스타 칸)**
-- [ ] **Step 4: 커밋**
+- [x] **Step 4: 커밋**
 
 ---
 

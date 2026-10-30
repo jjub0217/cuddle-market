@@ -21,7 +21,7 @@ from .parsers import PARSERS
 from .regions import region_of
 from .render import capped, render_post
 from .report import RunSummary, SourceStat
-from .tourapi import fetch_festivals, fetch_overview
+from .tourapi import fetch_festivals, fetch_intro, fetch_overview
 
 RECENT_DAYS = 90
 AI_INTERVAL_SEC = 4.0  # 무료 등급의 분당 요청 한도를 넘지 않게 AI 요청 사이를 둔다
@@ -118,6 +118,8 @@ def _tour(today: date, deps: Deps, stat: SourceStat, errors: list) -> None:
         # 기간·장소·지역은 API 칸 값이 먼저다
         api_values = dict(start=item.start, end=item.end, region=item.region, place=item.place)
         try:
+            # 운영시간·참가비·주최·대상·신청·행사 장소는 소개 정보 칸(detailIntro2)이 먼저다
+            api_values.update(fetch_intro(deps.tour_key, external_id, deps.http))
             # 목록에는 본문이 없어 소개 글을 받아 AI 에 넣는다. 못 받으면 AI 칸 없이 올린다(설계 6절)
             overview = fetch_overview(deps.tour_key, external_id, deps.http)
             if overview and deps.ai is not None:

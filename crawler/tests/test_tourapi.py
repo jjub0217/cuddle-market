@@ -128,3 +128,42 @@ def test_overview_error_raises():
     error = {"response": {"header": {"resultCode": "10", "resultMsg": "INVALID_REQUEST_PARAMETER_ERROR"}}}
     with pytest.raises(TourApiError):
         fetch_overview("KEY", "1", FakeClient([error]))
+
+
+# 축제 소개 정보 칸(detailIntro2, 콘텐츠 종류 15)을 칸 값으로 먼저 쓴다(설계 7-2절)
+
+from pet_events.tourapi import INTRO_ENDPOINT, fetch_intro  # noqa: E402
+
+INTRO = {"response": {"header": {"resultCode": "0000"}, "body": {"items": {"item": [{
+    "contentid": "3545306", "contenttypeid": "15", "playtime": "10:00~17:00<br>(입장 마감 16:30)",
+    "usetimefestival": "무료", "sponsor1": "포천시", "agelimit": "전연령", "bookingplace": "현장 접수",
+    "eventplace": "포천아트밸리 힐링숲",
+}]}, "totalCount": 1}}}
+
+
+def test_intro_fields():
+    client = FakeClient([INTRO])
+    fields = fetch_intro("KEY", "3545306", client)
+
+    assert fields == {
+        "hours": "10:00~17:00 (입장 마감 16:30)",
+        "fee": "무료",
+        "organizer": "포천시",
+        "target": "전연령",
+        "application": "현장 접수",
+        "place": "포천아트밸리 힐링숲",
+    }
+    url, params = client.calls[0]
+    assert url == INTRO_ENDPOINT == "https://apis.data.go.kr/B551011/KorService2/detailIntro2"
+    assert params["contentId"] == "3545306" and params["contentTypeId"] == 15
+
+
+def test_intro_drops_empty_and_timeless_hours():
+    item = {"contentid": "1", "playtime": "추후 공지", "usetimefestival": "", "sponsor1": None}
+    payload = {"response": {"header": {"resultCode": "0000"}, "body": {"items": {"item": [item]}, "totalCount": 1}}}
+    assert fetch_intro("KEY", "1", FakeClient([payload])) == {}
+
+
+def test_intro_missing_is_empty():
+    empty = {"response": {"header": {"resultCode": "0000"}, "body": {"items": "", "totalCount": 0}}}
+    assert fetch_intro("KEY", "1", FakeClient([empty])) == {}

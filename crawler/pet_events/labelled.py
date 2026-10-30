@@ -41,7 +41,7 @@ def labelled_fields(text: str, ref: date) -> Dict[str, object]:
         if label in ("개최기간", "전시기간"):
             period, _, hours = value.partition("|")
             start, end = parse_range(period, ref)
-            if start:
+            if start:  # 날짜를 못 읽으면(「추후 공지」) 칸 값을 쓰지 않는다
                 found["start"] = start
                 found["end"] = end if end and end != start else None
             if _TIME.search(hours):
@@ -53,7 +53,8 @@ def labelled_fields(text: str, ref: date) -> Dict[str, object]:
                 found["region"] = region
         elif label == "세부장소" and "place" in found:
             found["place"] = f"{found['place']} {value}"
-        elif label == "관람시간":
+        elif label == "관람시간" and _TIME.search(value):
+            # 시각 숫자가 없으면 칸을 잘못 적은 것이다(2026-10-30 쇼알라: 관람시간 칸에 주소)
             found["hours"] = value
         elif label == "입장료안내":
             found["fee"] = value

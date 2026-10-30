@@ -92,3 +92,17 @@ def test_showala_labelled_values():
 def test_venue_region(venue, region):
     fields = labelled_fields(f"개최장소: {venue}", date(2026, 5, 1))
     assert fields.get("region") == region
+
+
+# 출처가 칸에 잘못 적는 일이 있다(2026-10-30 쇼알라 크리쳐 케어로그 대전의 「관람시간」에 주소)
+
+def test_hours_label_without_time_is_ignored():
+    text = "전시기간: 2026-11-28 ~ 2026-11-29\n관람시간: 대전컨벤션센터 1전시장 (대전광역시 유성구 엑스포로 107)"
+    fields = labelled_fields(text, date(2026, 10, 30))
+    assert "hours" not in fields
+    assert fields["start"] == date(2026, 11, 28)
+
+
+def test_period_label_without_date_is_ignored():
+    fields = labelled_fields("전시기간: 추후 공지", date(2026, 10, 30))
+    assert "start" not in fields and "end" not in fields
