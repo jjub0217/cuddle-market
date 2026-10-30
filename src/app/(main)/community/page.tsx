@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import CommunityPage from '@/features/community/CommunityPage'
+import { toEventStatusParam } from '@/lib/utils/eventStatus'
 import StaticCommunityFallback from '@/features/community/components/StaticCommunityFallback'
 import {
   fetchInitialQuestionCommunity,
@@ -36,11 +37,12 @@ interface CommunityRouteProps {
     searchType?: string
     communityKeyword?: string
     sortBy?: string
+    eventStatus?: string
   }>
 }
 
 export default async function CommunityRoute({ searchParams }: CommunityRouteProps) {
-  const { tab, searchType, communityKeyword, sortBy } = await searchParams
+  const { tab, searchType, communityKeyword, sortBy, eventStatus } = await searchParams
   const activeTab = tab === 'tab-info' || tab === 'tab-event' ? tab : 'tab-question'
 
   const [initialQuestionData, initialInfoData, initialEventData] = await Promise.all([
@@ -51,7 +53,7 @@ export default async function CommunityRoute({ searchParams }: CommunityRoutePro
       ? fetchInitialInfoCommunity(0, 10, searchType, communityKeyword, sortBy)
       : Promise.resolve(null),
     activeTab === 'tab-event'
-      ? fetchInitialEventCommunity(0, 10, searchType, communityKeyword, sortBy)
+      ? fetchInitialEventCommunity(0, 10, searchType, communityKeyword, sortBy, toEventStatusParam(eventStatus))
       : Promise.resolve(null),
   ])
 

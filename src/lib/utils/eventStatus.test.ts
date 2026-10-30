@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatEventPeriod, getEventStatus, toKoreanDateString } from './eventStatus'
+import { EVENT_STATUS_FILTERS, formatEventPeriod, getEventStatus, toEventStatusParam, toKoreanDateString } from './eventStatus'
 
 // 상태는 서버에 저장하지 않고 화면을 여는 날(한국 날짜) 기준으로 계산한다(설계 7-2절).
 
@@ -47,5 +47,24 @@ describe('기간 글자', () => {
 
   it('여러 날', () => {
     expect(formatEventPeriod('2026-11-06', '2026-11-08')).toBe('2026.11.06 (금) ~ 2026.11.08 (일)')
+  })
+})
+
+// 행사 소식 목록의 상태 드롭다운. 서버가 거른다(설계 7-2절)
+describe('상태 드롭다운', () => {
+  it('전체, 예정, 진행 중, 종료 순서', () => {
+    expect(EVENT_STATUS_FILTERS.map((filter) => filter.label)).toEqual(['전체', '예정', '진행 중', '종료'])
+  })
+
+  it('주소의 값을 서버가 받는 값으로 바꾼다', () => {
+    expect(toEventStatusParam('upcoming')).toBe('UPCOMING')
+    expect(toEventStatusParam('ongoing')).toBe('ONGOING')
+    expect(toEventStatusParam('ended')).toBe('ENDED')
+  })
+
+  it('전체이거나 모르는 값이면 보내지 않는다', () => {
+    expect(toEventStatusParam('all')).toBeUndefined()
+    expect(toEventStatusParam(null)).toBeUndefined()
+    expect(toEventStatusParam('WHATEVER')).toBeUndefined()
   })
 })

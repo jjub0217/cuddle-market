@@ -21,7 +21,8 @@ import Spinner from '@/components/commons/spinner/Spinner'
 import type { CommunityItem } from '@/types'
 import { CommunityPostThumbnail } from './components/CommunityPostThumbnail'
 import { EventPostCard } from './components/EventPostCard'
-import { toKoreanDateString } from '@/lib/utils/eventStatus'
+import { EVENT_STATUS_FILTERS, toEventStatusParam, toKoreanDateString } from '@/lib/utils/eventStatus'
+import SelectDropdown from '@/components/commons/select/SelectDropdown'
 
 interface CommunityListData {
   page: number
@@ -53,6 +54,9 @@ export default function CommunityPage({ initialQuestionData, initialInfoData, in
   const today = toKoreanDateString()
 
   const sortBy = searchParams.get('sortBy') ?? 'latest'
+  // 행사 소식의 상태 드롭다운. 주소에는 소문자(upcoming 등), 서버에는 대문자로 보낸다
+  const eventStatusParam = toEventStatusParam(searchParams.get('eventStatus'))
+  const eventStatusValue = eventStatusParam?.toLowerCase() ?? 'all'
   const currentKeyword = searchParams.get('communityKeyword') || ''
 
   const [searchInput, setSearchInput] = useState(currentKeyword)
@@ -82,6 +86,17 @@ export default function CommunityPage({ initialQuestionData, initialInfoData, in
     params.set('tab', tabId)
     // 아래 handleSortChange 와 같은 상대 주소 방식이다.
     router.replace(`?${params.toString()}`)
+  }
+
+  /** 행사 상태를 바꾼다. 전체면 주소에서 뺀다 — 정렬·검색어는 그대로 들고 간다 */
+  const handleEventStatusChange = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (value === 'all') {
+      params.delete('eventStatus')
+    } else {
+      params.set('eventStatus', value)
+    }
+    router.push(`?${params.toString()}`)
   }
 
   const handleSortChange = (sortId: string) => {
@@ -188,7 +203,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData, in
     isLoading: isLoadingEvent,
     error: errorEvent,
   } = useInfiniteQuery({
-    queryKey: ['community', 'event', SEARCH_TYPE, currentKeyword, sortBy],
+    queryKey: ['community', 'event', SEARCH_TYPE, currentKeyword, sortBy, eventStatusParam],
     queryFn: async ({ pageParam }) => {
       const response = await api.get('/community/posts', {
         params: {
@@ -198,6 +213,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData, in
           searchType: SEARCH_TYPE,
           keyword: currentKeyword || undefined,
           sortBy,
+          eventStatus: eventStatusParam,
         },
       })
       return response.data.data
@@ -322,8 +338,22 @@ export default function CommunityPage({ initialQuestionData, initialInfoData, in
         </section>
 
         {/* Sort filter + 글쓰기 (콘텐츠 컨트롤 행) */}
-        <section className="mb-2 flex items-end justify-between gap-3 text-sm md:mb-4">
-          <div className="flex items-center gap-3 max-md:ml-auto">
+        <section
+          className={cn('mb-2 flex justify-between gap-3 text-sm md:mb-4', isEventTab ? 'items-center' : 'items-end')}
+        >
+          {/* 행사 소식은 왼쪽에 상태 드롭다운, 오른쪽에 정렬(설계 7-2절). 글쓰기 단추가 없어서다 */}
+          {isEventTab ? (
+            <div className="w-32 shrink-0">
+              <SelectDropdown
+                value={eventStatusValue}
+                onChange={handleEventStatusChange}
+                options={EVENT_STATUS_FILTERS.map((filter) => ({ value: filter.value, label: filter.label }))}
+                placeholder="행사 상태"
+                buttonClassName="border-0 bg-primary-50 text-gray-900 px-3 py-2"
+              />
+            </div>
+          ) : null}
+          <div className={cn('flex items-center gap-3', isEventTab ? 'ml-auto' : 'max-md:ml-auto')}>
             {getCommunitySortTypes(activeCommunityTypeTab).map((sort, idx) => {
               const isActive = sort.id === sortBy
               return (

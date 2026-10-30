@@ -78,7 +78,8 @@ export async function fetchInitialEventCommunity(
   size: number = 10,
   searchType?: string | null,
   keyword?: string | null,
-  sortBy?: string | null
+  sortBy?: string | null,
+  eventStatus?: string | null // 서버 값(UPCOMING 등). 없으면 전체
 ): Promise<CommunityListData | null> {
   try {
     const params = new URLSearchParams({
@@ -89,6 +90,7 @@ export async function fetchInitialEventCommunity(
     if (searchType) params.append('searchType', searchType)
     if (keyword) params.append('keyword', keyword)
     if (sortBy) params.append('sortBy', sortBy)
+    if (eventStatus) params.append('eventStatus', eventStatus)
 
     const res = await fetch(`${API_BASE_URL}/community/posts?${params.toString()}`, {
       cache: 'no-store',

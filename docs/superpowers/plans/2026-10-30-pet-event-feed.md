@@ -169,14 +169,14 @@
 
 **웹**
 - Modify: `src/features/community/CommunityPage.tsx`(행사 소식 탭: 왼쪽 드롭다운, 오른쪽 정렬, 주소 `eventStatus`, 목록 요청에 `eventStatus` 대문자로), `src/app/(main)/community/page.tsx`, `src/lib/api/server/community.ts`(첫 목록에도 같은 값)
-- Create/Modify: `src/constants/constants.ts`의 `EVENT_STATUS_FILTERS`(전체, 예정, 진행 중, 종료)
-- Test: `src/constants/communityTabs.test.ts`에 선택지 시험, 화면은 3000 스크린샷
+- Modify: `src/lib/utils/eventStatus.ts`의 `EVENT_STATUS_FILTERS`(전체, 예정, 진행 중, 종료), `toEventStatusParam` (상태 규칙과 한 파일에 두려고 constants 대신 여기에 뒀다)
+- Test: `src/lib/utils/eventStatus.test.ts`에 선택지 시험, 화면은 3000 스크린샷
 
-- [ ] **Step 1: 서버 시험** — 상태 규칙(웹 `getEventStatus`와 같은 경계), 걸러진 글 번호, 빈 목록이면 빈 페이지
-- [ ] **Step 2: 서버 구현과 확인** — 서버 시험 전체, 로컬 서버에서 `eventStatus` 셋을 curl
-- [ ] **Step 3: 웹 시험과 구현** — `pnpm test`, `tsc`, `lint:strict`
-- [ ] **Step 4: 3000 화면 확인** — 드롭다운 위치와 고를 때마다 바뀌는 목록
-- [ ] **Step 5: 커밋** — 서버 `feat: 행사 소식 목록을 진행 상태로 거를 수 있게 한다(#1124)`, 웹 `feat(web): 행사 소식 목록에 상태 드롭다운을 더하고 정렬을 오른쪽으로 옮긴다(#1124)`
+- [x] **Step 1: 서버 시험** — 상태 규칙(웹 `getEventStatus`와 같은 경계), 걸러진 글 번호, 빈 목록이면 빈 페이지
+- [x] **Step 2: 서버 구현과 확인** — 서버 시험 전체, 로컬 서버에서 `eventStatus` 셋을 curl
+- [x] **Step 3: 웹 시험과 구현** — `pnpm test`, `tsc`, `lint:strict`
+- [x] **Step 4: 3000 화면 확인** — 드롭다운 위치와 고를 때마다 바뀌는 목록
+- [x] **Step 5: 커밋** — 서버 `feat: 행사 소식 목록을 진행 상태로 거를 수 있게 한다(#1124)`, 웹 `feat(web): 행사 소식 목록에 상태 드롭다운을 더하고 정렬을 오른쪽으로 옮긴다(#1124)`
 
 ---
 

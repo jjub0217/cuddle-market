@@ -47,3 +47,25 @@ export function formatEventPeriod(startDate: string, endDate: string | null): st
   if (!endDate || endDate === startDate) return formatDay(startDate)
   return `${formatDay(startDate)} ~ ${formatDay(endDate)}`
 }
+
+/**
+ * 행사 소식 목록의 상태 드롭다운 선택지. value 는 주소(?eventStatus=)에 남는 값이다.
+ * 걸러 내기는 서버가 한다 — 화면에서 거르면 10개씩 받는 페이지가 어긋난다(설계 7-2절).
+ */
+export const EVENT_STATUS_FILTERS = [
+  { value: 'all', label: '전체' },
+  { value: 'upcoming', label: '예정' },
+  { value: 'ongoing', label: '진행 중' },
+  { value: 'ended', label: '종료' },
+] as const
+
+const EVENT_STATUS_PARAMS: Record<string, 'UPCOMING' | 'ONGOING' | 'ENDED'> = {
+  upcoming: 'UPCOMING',
+  ongoing: 'ONGOING',
+  ended: 'ENDED',
+}
+
+/** 주소의 값을 서버가 받는 값(EventPeriodStatus)으로. 전체이거나 모르는 값이면 보내지 않는다 */
+export function toEventStatusParam(value: string | null | undefined) {
+  return value ? EVENT_STATUS_PARAMS[value] : undefined
+}
