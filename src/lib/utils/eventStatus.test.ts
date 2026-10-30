@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest'
 import {
   EVENT_STATUS_FILTERS,
   formatEventPeriod,
+  formatEventPlace,
+  getSourceName,
   getEventEmptyTitle,
   getEventStatus,
   toEventStatusParam,
@@ -86,5 +88,33 @@ describe('걸러 본 결과가 없을 때 문구', () => {
 
   it('전체면 없다(기존 빈 화면 문구를 쓴다)', () => {
     expect(getEventEmptyTitle(undefined)).toBeUndefined()
+  })
+})
+
+describe('장소 글자', () => {
+  it('지역과 장소를 같이', () => {
+    expect(formatEventPlace('서울', '문화비축기지')).toBe('서울 문화비축기지')
+  })
+
+  it('장소가 이미 시·도로 시작하면 지역을 또 붙이지 않는다', () => {
+    expect(formatEventPlace('제주', '제주특별자치도 제주시')).toBe('제주특별자치도 제주시')
+  })
+
+  it('하나만 있으면 그것만, 둘 다 없으면 null', () => {
+    expect(formatEventPlace(null, '노원 공원')).toBe('노원 공원')
+    expect(formatEventPlace('서울', null)).toBe('서울')
+    expect(formatEventPlace(null, null)).toBeNull()
+  })
+})
+
+// 출처 이름은 크롤러가 본문 마지막 줄에 「출처: …」로 쓴다(공공누리 출처 표시)
+describe('출처 이름', () => {
+  it('본문의 「출처:」 줄에서 읽는다', () => {
+    expect(getSourceName('…\n[원문 보기](https://a.kr)\n출처: 서울특별시', 'https://www.seoul.go.kr/x')).toBe('서울특별시')
+  })
+
+  it('없으면 원문 주소의 사이트 이름', () => {
+    expect(getSourceName('본문', 'https://www.seoul.go.kr/news?x=1')).toBe('www.seoul.go.kr')
+    expect(getSourceName('본문', null)).toBeNull()
   })
 })

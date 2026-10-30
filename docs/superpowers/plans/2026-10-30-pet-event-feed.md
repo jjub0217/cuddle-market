@@ -194,11 +194,11 @@
 - Modify: `CommunityPage.tsx` — 상태 드롭다운을 홈 상세 필터(`LocationFilter` `card-chip`)와 같은 모양으로
 - Test: `EventDetailBody.test.tsx`(표 칸, 없는 값은 「공식 안내 확인」, 포스터 없으면 그림 없음, 공식 안내 보기 링크가 원문 주소·새 창, AI 칸 없으면 그 칸째 없음), `CommunityDetail` 쪽은 3000 화면
 
-- [ ] **Step 1: 서버 시험과 구현** — 댓글 거절, 새 칸 저장과 응답. `gradlew test`
-- [ ] **Step 2: 크롤러** — 보내는 값 시험 고치고 통과
-- [ ] **Step 3: 웹 시험과 구현** — `pnpm test`, `tsc`, `lint:strict`
-- [ ] **Step 4: 로컬 서버를 새 코드로 띄우고 예시 글을 새 칸까지 넣어 3000 화면 확인(데스크탑, 휴대폰 폭)**
-- [ ] **Step 5: 커밋** — 서버, 크롤러, 웹 각각
+- [x] **Step 1: 서버 시험과 구현** — 댓글 거절, 새 칸 저장과 응답. `gradlew test`
+- [x] **Step 2: 크롤러** — 보내는 값 시험 고치고 통과
+- [x] **Step 3: 웹 시험과 구현** — `pnpm test`, `tsc`, `lint:strict`
+- [x] **Step 4: 로컬 서버를 새 코드로 띄우고 예시 글을 새 칸까지 넣어 3000 화면 확인(데스크탑, 휴대폰 폭)**
+- [x] **Step 5: 커밋** — 서버, 크롤러, 웹 각각
 
 ---
 

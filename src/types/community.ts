@@ -10,6 +10,13 @@ export interface CommunityEvent {
   place: string | null // 구체적인 장소 (상세 본문에 지역과 같이 보인다)
   organizer: string | null
   summary: string | null // 한 줄 소개
+  // 아래는 상세 화면의 표와 목록(설계 7-2절)
+  target: string | null
+  fee: string | null
+  activities: string[] // 이런 걸 할 수 있어요
+  checks: string[] // 가기 전에 확인하세요
+  sourceUrl: string | null // 원문 주소 (「공식 안내 보기」)
+  imageUrl: string | null // 포스터 원래 주소
 }
 
 export interface CommunityItem {

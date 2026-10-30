@@ -27,6 +27,12 @@ const POST: CommunityItem = {
     place: '문화비축기지',
     organizer: '서울특별시',
     summary: '반려견과 함께 즐기는 가을 축제',
+    target: null,
+    fee: null,
+    activities: [],
+    checks: [],
+    sourceUrl: null,
+    imageUrl: null,
   },
 }
 

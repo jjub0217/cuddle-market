@@ -26,7 +26,8 @@ import { toUrlName } from '@/lib/utils/toUrlName'
 import Spinner from '@/components/commons/spinner/Spinner'
 import { PAGE_CONTAINER } from '@/constants/ui'
 import { cn } from '@/lib/utils/cn'
-import { getEventStatus, toKoreanDateString } from '@/lib/utils/eventStatus'
+import { getEventStatus, getSourceName, toKoreanDateString } from '@/lib/utils/eventStatus'
+import { EventDetailBody } from './components/EventDetailBody'
 import { EventStatusChip } from './components/EventStatusChip'
 
 interface CommunityDetailProps {
@@ -121,6 +122,29 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
     isEvent && data.event ? getEventStatus(data.event.startDate, data.event.endDate, toKoreanDateString()) : null
   const listPath = isEvent ? '/community?tab=tab-event' : '/community'
 
+  const isAuthor = user?.id === data?.authorId
+  const authorActions = (
+    <div className="flex items-center gap-1">
+      <button
+        className="text-primary-container cursor-pointer text-xs font-medium hover:underline"
+        type="button"
+        onClick={() => handlePostEdit(Number(id))}
+      >
+        수정
+      </button>
+      <span aria-hidden="true" className="text-xs">
+        ·
+      </span>
+      <button
+        className="text-primary-container cursor-pointer text-xs font-medium hover:underline"
+        type="button"
+        onClick={() => setIsPostDeleteModalOpen(true)}
+      >
+        삭제
+      </button>
+    </div>
+  )
+
   return (
     <>
       {/* 하단 여백을 여기서 안 준다. 레이아웃이 이미 탭바 높이만큼 비켜 준다
@@ -137,6 +161,18 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
               <ArrowLeft size={16} />
               <span>목록으로 돌아가기</span>
             </button>
+            {/* 행사 소식은 본문 글자 대신 행사 칸으로 그린다(설계 7-2절, 픽케어 배치 참고).
+                행사 칸이 없는 옛 글만 아래 일반 화면으로 그린다 */}
+            {isEvent && data.event ? (
+              <EventDetailBody
+                title={data.title}
+                createdAt={data.createdAt}
+                event={data.event}
+                sourceName={getSourceName(data.content, data.event.sourceUrl)}
+                today={toKoreanDateString()}
+                actions={isAuthor ? authorActions : null}
+              />
+            ) : (
             <div className="flex flex-col gap-3.5 rounded-lg">
               <div className="flex items-center gap-1.5">
                 <Badge className="bg-primary-400 w-fit rounded-full text-xs text-white md:font-semibold">
@@ -175,27 +211,10 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
                     </div>
                   )}
                   <div className="flex items-center gap-1">
-                    {user?.id === data?.authorId ? (
-                      <>
-                        <button
-                          className="text-primary-container cursor-pointer text-xs font-medium hover:underline"
-                          type="button"
-                          onClick={() => handlePostEdit(Number(id))}
-                        >
-                          수정
-                        </button>
-                        <span aria-hidden="true" className="text-xs">
-                          ·
-                        </span>
-                        <button
-                          className="text-primary-container cursor-pointer text-xs font-medium hover:underline"
-                          type="button"
-                          onClick={() => setIsPostDeleteModalOpen(true)}
-                        >
-                          삭제
-                        </button>
-                      </>
-                    ) : (
+                    {isAuthor ? (
+                      authorActions
+                    ) : isEvent ? null : (
+                      // 행사 소식에는 신고하기를 두지 않는다(설계 7-1절). 틀린 정보는 원문으로 확인하고 운영 계정이 고친다
                       <button
                         // ⚠️ 데스크탑에서만 바꾼다(md:). 이 조각은 폰과 데스크탑이 함께 쓰는데
                         //    맞추기로 한 것은 **데스크탑의 상품 상세**뿐이라, 폰은 건드리지 않는다(#869).
@@ -219,6 +238,7 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
               {/* <h1 className="text-lg leading-snug font-bold">{data.title}</h1> */}
               <MdPreview value={data.content} className="p-0" enablePhotoViewer />
             </div>
+            )}
 
             {/* 댓글은 폭 상관없이 상세 안에 전부 펼친다.
                 좁은 폭에서 「댓글 N ›」 줄만 두면 대화가 있는지조차 안 보인다.
@@ -227,6 +247,8 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
                 그 댓글과 그 답글만 보여 대화에 집중할 수 있고, 답글이 길어져도
                 다른 댓글을 안 밀어낸다. 답글의 「답글 달기」는 이미 그 스레드 안이라
                 그 자리에서 열린다. */}
+            {/* 행사 소식에는 댓글 영역을 두지 않는다(설계 7-1절). 서버도 댓글을 거절한다 */}
+            {isEvent ? null : (
             <section
               aria-label="댓글"
               className="border-outline-variant/40 flex flex-col gap-3.5 border-t py-5 md:border-t-0"
@@ -245,6 +267,7 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
                 }
               />
             </section>
+            )}
           </div>
         </div>
       </div>

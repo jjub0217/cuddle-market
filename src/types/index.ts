@@ -49,6 +49,7 @@ export type {
 
 // ========== 커뮤니티 관련 타입 ==========
 export type {
+  CommunityEvent,
   CommunityItem,
   CommunityResponse,
   CommunityPostRequestData,

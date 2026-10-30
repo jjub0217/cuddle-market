@@ -80,3 +80,28 @@ const EVENT_EMPTY_TITLES: Record<'UPCOMING' | 'ONGOING' | 'ENDED', string> = {
 export function getEventEmptyTitle(param: ReturnType<typeof toEventStatusParam>) {
   return param ? EVENT_EMPTY_TITLES[param] : undefined
 }
+
+/**
+ * 상세 표의 장소: 「지역 장소」(예: 서울 문화비축기지). 장소가 이미 시·도로 시작하면 지역을 또 붙이지 않는다.
+ * 크롤러가 본문에 쓰는 규칙(crawler/pet_events/render.py `_place`)과 같다.
+ */
+export function formatEventPlace(region: string | null, place: string | null): string | null {
+  if (!place) return region
+  if (!region || place.startsWith(region)) return place
+  return `${region} ${place}`
+}
+
+/**
+ * 출처 이름. 크롤러가 본문 마지막 줄에 「출처: …」로 쓴다(공공누리 출처 표시).
+ * 운영 계정이 글을 고쳐 그 줄이 없어지면 원문 주소의 사이트 이름을 쓴다.
+ */
+export function getSourceName(content: string | null | undefined, sourceUrl: string | null): string | null {
+  const line = content?.match(/^출처:\s*(.+)$/m)
+  if (line) return line[1].trim()
+  if (!sourceUrl) return null
+  try {
+    return new URL(sourceUrl).hostname
+  } catch {
+    return null
+  }
+}

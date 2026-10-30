@@ -354,7 +354,8 @@ export default function CommunityPage({ initialQuestionData, initialInfoData, in
                 onChange={handleEventStatusChange}
                 options={EVENT_STATUS_FILTERS.map((filter) => ({ value: filter.value, label: filter.label }))}
                 placeholder="행사 상태"
-                buttonClassName="border-0 bg-primary-50 text-gray-900 px-3 py-2"
+                // 홈 상세 필터의 지역 드롭다운(LocationFilter card-chip)과 같은 모양
+                buttonClassName="border border-outline-variant bg-white text-gray-900 px-4 py-2 text-xs focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20"
               />
             </div>
           ) : null}

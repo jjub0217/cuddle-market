@@ -11,6 +11,12 @@ export const typeDefs = gql`
     place: String
     organizer: String
     summary: String
+    target: String
+    fee: String
+    activities: [String!]!
+    checks: [String!]!
+    sourceUrl: String
+    imageUrl: String
   }
 
   type CommunityPost {
