@@ -128,6 +128,13 @@ describe('길찾기', () => {
     expect(link).toHaveAttribute('target', '_blank')
   })
 
+  it('장소가 여러 곳이면 첫 번째 장소로 찾고, 표에는 모두 보인다', () => {
+    render(<EventDetailBody {...PROPS} event={{ ...EVENT, place: '개포동근린공원, 강남세곡체육공원' }} />)
+    expect(rowValue('장소')).toMatch(/^서울 개포동근린공원, 강남세곡체육공원/)
+    const link = screen.getByRole('link', { name: '서울 개포동근린공원 길찾기' })
+    expect(link).toHaveAttribute('href', 'https://map.naver.com/p/search/' + encodeURIComponent('서울 개포동근린공원'))
+  })
+
   it('장소가 없거나 온라인이면 길찾기가 없다', () => {
     const { unmount } = render(<EventDetailBody {...PROPS} event={{ ...EVENT, place: null, region: null }} />)
     expect(screen.queryByRole('link', { name: /길찾기/ })).not.toBeInTheDocument()

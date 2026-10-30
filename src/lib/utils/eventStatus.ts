@@ -111,18 +111,25 @@ export function getSourceName(content: string | null | undefined, sourceUrl: str
  * 우리 지도(플레이스)에 찍는 것이 아니라 바깥 지도로 보내는 링크다. 장소가 없거나 온라인이면 null.
  */
 export function getNaverMapSearchUrl(region: string | null, place: string | null): string | null {
-  if (!place || place.includes('온라인')) return null
-  const query = formatEventPlace(region, toSearchablePlace(place))
+  const query = getMapSearchQuery(region, place)
   return query ? `https://map.naver.com/p/search/${encodeURIComponent(query)}` : null
+}
+
+/** 길찾기 검색어(「지역 장소」). 장소가 없거나 온라인이면 null */
+export function getMapSearchQuery(region: string | null, place: string | null): string | null {
+  if (!place || place.includes('온라인')) return null
+  return formatEventPlace(region, toSearchablePlace(place))
 }
 
 /**
  * 지도 검색이 빗나가지 않게 장소 이름을 다듬는다.
  * 「한라체육관 일원」→「한라체육관」, 「문화광장 및 T2」→「문화광장」, 「대강당(3층)」→「대강당」
+ * 여러 곳이면(쉼표) 첫 번째 장소로 찾는다(2026-10-30 사용자 결정): 「개포동근린공원, 강남세곡체육공원」→「개포동근린공원」
  */
 function toSearchablePlace(place: string): string {
   return (
     place
+      .split(/\s*,\s*/)[0]
       .replace(/\s*\([^)]*\)/g, '')
       .split(/\s+및\s+/)[0]
       .replace(/\s+(일원|일대|주변|인근)$/, '')

@@ -3,7 +3,13 @@ import { ExternalLink, MapPin } from 'lucide-react'
 import { formatJoinDate } from '@cuddle/shared'
 import Badge from '@/components/commons/badge/Badge'
 import { cn } from '@/lib/utils/cn'
-import { formatEventPeriod, formatEventPlace, getEventStatus, getNaverMapSearchUrl } from '@/lib/utils/eventStatus'
+import {
+  formatEventPeriod,
+  formatEventPlace,
+  getEventStatus,
+  getMapSearchQuery,
+  getNaverMapSearchUrl,
+} from '@/lib/utils/eventStatus'
 import type { CommunityEvent } from '@/types'
 import { EventStatusChip } from './EventStatusChip'
 
@@ -82,7 +88,7 @@ export function EventDetailBody({ title, createdAt, event, sourceName, today, ac
                       href={mapUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      aria-label={`${place} 길찾기`}
+                      aria-label={`${getMapSearchQuery(event.region, event.place)} 길찾기`}
                       className="text-primary-600 ml-2 inline-flex items-center gap-0.5 text-xs font-semibold whitespace-nowrap hover:underline md:text-sm"
                     >
                       <MapPin size={14} aria-hidden="true" />
