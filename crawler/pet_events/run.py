@@ -14,6 +14,7 @@ from datetime import date, timedelta
 from typing import Callable, Dict, Optional
 
 from .extract import extract_event, guard_against_invented
+from .labelled import labelled_fields
 from .models import EventFields
 from .parsers import PARSERS
 from .regions import region_of
@@ -115,6 +116,8 @@ def _handle(today, source, deps, stat, errors, *, external_id, url, title, text,
         _record(source, deps, stat, external_id, url, title, "SKIPPED_NOT_EVENT")
         return
     fields = guard_against_invented(fields, text)
+    # 출처가 칸으로 적어 둔 값(문체부 「개최기간」「축제장소」 등)이 AI 값보다 먼저다
+    fields = replace(fields, **labelled_fields(text, posted_on or today))
     fields = replace(fields, region=_region(text, fields.region, source.get("default_region")))
     _finish(today, source, deps, stat, external_id, url, fields, image_url)
 

@@ -207,3 +207,20 @@ def test_payload_fits_server_limits():
     assert all(len(x) <= 200 for x in payload["activities"] + payload["checks"])
     assert len(payload["activities"]) <= 3 and len(payload["checks"]) <= 2
     assert len(payload["title"]) <= 50 and len(payload["content"]) <= 1000
+
+
+def test_labelled_values_win_over_ai():
+    # AI 가 다른 날(11-14)을 골라도 출처에 칸으로 적힌 값을 쓴다(설계 7-2절)
+    i = item("1")
+    text = ("개최지역: 제주도 제주시\n개최기간: 2026. 11. 6. ~ 11. 8. | 10:00~18:00\n축제장소: 한라체육관 일원\n"
+            "요금: 무료\n연령제한: 전 연령\n주최/주관기관: 제주특별자치도\n예시 본문입니다. 반려동물 축제가 열립니다. 11월 14일 사전 행사.")
+    ai = {**EVENT, "start_date": "2026-11-14", "end_date": None, "hours": None, "place": "제주시",
+          "fee": None, "organizer": "제주도", "target": "반려견"}
+    _, _, cuddle, _ = run([i], detail_of(i, text=text), ai_answer=ai)
+    p = cuddle.payloads[0]
+
+    assert (p["eventStartDate"], p["eventEndDate"]) == ("2026-11-06", "2026-11-08")
+    assert p["hours"] == "10:00~18:00"
+    assert (p["place"], p["fee"], p["organizer"], p["target"]) == ("한라체육관 일원", "무료", "제주특별자치도", "전 연령")
+    assert p["region"] == "제주"
+    assert p["summary"] == EVENT["one_line"]  # 한 줄 소개와 목록은 AI 가 맡는다
