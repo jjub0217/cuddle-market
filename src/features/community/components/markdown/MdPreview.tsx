@@ -6,6 +6,7 @@ import rehypeSanitize from 'rehype-sanitize'
 import remarkBreaks from 'remark-breaks'
 import PhotoViewer from '@/components/photo-viewer/PhotoViewer'
 import { cn } from '@/lib/utils/cn'
+import { PLACEHOLDER_IMAGES } from '@/lib/utils/imageUrl'
 import { mdSanitizeSchema } from './sanitizeSchema'
 
 interface MdPreviewProps {
@@ -51,6 +52,12 @@ export default function MdPreview({ value, height, className, enablePhotoViewer 
               <img
                 {...p}
                 onClick={enablePhotoViewer && p.src ? () => setViewerSrc(String(p.src)) : undefined}
+                // 행사 포스터는 기관 서버 주소를 그대로 쓴다. 기관이 주소를 바꾸거나
+                // 다른 사이트에서 불러오는 것을 막으면 깨지므로 기본 그림으로 바꾼다(설계 9절)
+                onError={(e) => {
+                  const img = e.currentTarget
+                  if (!img.src.endsWith(PLACEHOLDER_IMAGES[800])) img.src = PLACEHOLDER_IMAGES[800]
+                }}
                 className={cn('my-2 h-auto w-full md:max-w-[50%] rounded-lg', enablePhotoViewer && p.src && 'cursor-zoom-in')}
               />
             ),

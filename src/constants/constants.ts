@@ -151,8 +151,13 @@ export type MyPageNavCode = (typeof MY_PAGE_NAV)[number]['code']
 export const COMMUNITY_TABS = [
   { id: 'tab-question', label: '질문 있어요', code: 'QUESTION' },
   { id: 'tab-info', label: '정보 공유', code: 'INFO' },
+  // 행사 소식은 크롤러가 수집 주소로만 올린다. 서버가 일반 글쓰기를 거절한다
+  { id: 'tab-event', label: '행사 소식', code: 'EVENT' },
 ] as const
 export type CommunityTabId = (typeof COMMUNITY_TABS)[number]['id']
+
+// 글쓰기 화면의 게시판 선택지. 행사 소식은 빠진다(위 탭 주석)
+export const COMMUNITY_WRITE_BOARDS = COMMUNITY_TABS.filter((tab) => tab.code !== 'EVENT')
 
 // ========== 가격대 관련 상수 ==========
 export const PRICE_TYPE = [
@@ -186,6 +191,24 @@ export const COMMUNITY_SORT_TYPE = [
   { id: 'views', label: '조회 순' },
   { id: 'comments', label: '댓글 순' },
 ]
+
+// 행사 소식은 「최신순 | 곧 끝나는 순」(설계 7-2절). 조회수·댓글 수는 행사의 좋고 나쁨을 말하지 않는다.
+// 「곧 끝나는 순」(ending)은 서버가 수집 기록의 기간으로 정렬한다. 「마감 임박순」은 신청 마감과 헷갈려 쓰지 않는다
+export const EVENT_SORT_TYPE = [
+  // 「최신순」은 행사 날짜가 최근인 순으로도 읽혀 올라온 순서임을 밝힌다
+  { id: 'latest', label: '최신 등록순' },
+  { id: 'ending', label: '곧 끝나는 순' },
+]
+
+export const getCommunitySortTypes = (tabId: CommunityTabId) =>
+  tabId === 'tab-event' ? EVENT_SORT_TYPE : COMMUNITY_SORT_TYPE
+
+/**
+ * 그 탭에 있는 정렬 값만 쓴다. 탭을 바꿔도 주소의 sortBy 는 그대로 따라오므로(검색어·정렬 유지, #949)
+ * 질문 탭의 「조회 순」이 행사 탭에서 보이지 않는 채로 정렬을 바꾸지 않게 최신으로 돌린다(최종 검토 I3)
+ */
+export const normalizeSortBy = (tabId: CommunityTabId, sortBy: string | null | undefined) =>
+  getCommunitySortTypes(tabId).some((sort) => sort.id === sortBy) ? (sortBy as string) : 'latest'
 
 /**
  * 커뮤니티 검색 종류.

@@ -1,0 +1,62 @@
+import { describe, expect, it } from 'vitest'
+
+import {
+  COMMUNITY_SORT_TYPE,
+  COMMUNITY_TABS,
+  COMMUNITY_WRITE_BOARDS,
+  getCommunitySortTypes,
+  normalizeSortBy,
+} from './constants'
+
+// 행사 소식은 크롤러가 수집 주소로만 올린다. 서버도 일반 글쓰기를 거절한다.
+// 글쓰기 화면 선택지에 섞이면 누를 수는 있는데 반드시 실패하는 단추가 된다.
+
+describe('커뮤니티 탭', () => {
+  it('질문, 정보, 행사 소식 세 개', () => {
+    expect(COMMUNITY_TABS.map((tab) => tab.id)).toEqual(['tab-question', 'tab-info', 'tab-event'])
+    expect(COMMUNITY_TABS.find((tab) => tab.id === 'tab-event')).toEqual({
+      id: 'tab-event',
+      label: '행사 소식',
+      code: 'EVENT',
+    })
+  })
+
+  it('글쓰기 선택지에는 행사 소식이 없다', () => {
+    expect(COMMUNITY_WRITE_BOARDS.map((board) => board.code)).toEqual(['QUESTION', 'INFO'])
+  })
+})
+
+describe('정렬', () => {
+  it('행사 소식은 최신 등록순과 곧 끝나는 순', () => {
+    // 조회수는 행사의 좋고 나쁨을 말하지 않는다. 「언제까지 갈 수 있나」가 중요하다(설계 7-2절)
+    // 「최신순」은 행사 날짜가 최근인 순으로도 읽혀 「최신 등록순」으로 쓴다
+    expect(getCommunitySortTypes('tab-event')).toEqual([
+      { id: 'latest', label: '최신 등록순' },
+      { id: 'ending', label: '곧 끝나는 순' },
+    ])
+  })
+
+  it('질문, 정보는 그대로 세 개(「최신순」 그대로)', () => {
+    expect(getCommunitySortTypes('tab-question')).toEqual(COMMUNITY_SORT_TYPE)
+    expect(getCommunitySortTypes('tab-info')).toEqual(COMMUNITY_SORT_TYPE)
+  })
+})
+
+// 최종 검토 I3: 질문 탭의 sortBy=views 를 들고 행사 탭에 오면 화면은 「최신 등록순」인데 조회 순으로 정렬됐다
+describe('탭에 없는 정렬 값', () => {
+  it('행사 탭에서 조회 순·댓글 순은 최신으로', () => {
+    expect(normalizeSortBy('tab-event', 'views')).toBe('latest')
+    expect(normalizeSortBy('tab-event', 'comments')).toBe('latest')
+    expect(normalizeSortBy('tab-event', 'ending')).toBe('ending')
+  })
+
+  it('질문·정보 탭에서 곧 끝나는 순은 최신으로', () => {
+    expect(normalizeSortBy('tab-question', 'ending')).toBe('latest')
+    expect(normalizeSortBy('tab-info', 'views')).toBe('views')
+  })
+
+  it('값이 없거나 모르는 값이면 최신', () => {
+    expect(normalizeSortBy('tab-info', null)).toBe('latest')
+    expect(normalizeSortBy('tab-event', 'whatever')).toBe('latest')
+  })
+})

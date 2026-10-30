@@ -18,8 +18,27 @@ export const PLACEHOLDER_SRCSET = `${PLACEHOLDER_IMAGES[150]} 150w, ${PLACEHOLDE
  * @param size - 원하는 크기 (150 | 400 | 800)
  * @returns 리사이즈된 WebP URL (예: https://.../uuid_150.webp)
  */
+// 우리 이미지 서버. 크기별 webp(uuid_150.webp 등)는 이 서버에만 있다
+const OWN_IMAGE_HOST = 'df1xl13ui5mlo.cloudfront.net'
+
+/**
+ * 우리 이미지 서버 주소인가
+ *
+ * 행사 소식 포스터는 기관 서버의 원래 주소를 그대로 쓴다(복사하지 않는다).
+ * 그런 주소에 _150.webp 를 붙이면 없는 주소가 되어 반드시 깨진다.
+ */
+export function isOwnImageUrl(url: string): boolean {
+  try {
+    return new URL(url).hostname === OWN_IMAGE_HOST
+  } catch {
+    return false
+  }
+}
+
 export function toResizedWebpUrl(originalUrl: string | null | undefined, size: ImageSize): string {
   if (!originalUrl) return ''
+  // 외부 주소는 크기 변환 없이 그대로 쓴다(위 isOwnImageUrl)
+  if (!isOwnImageUrl(originalUrl)) return originalUrl
   const lastDotIndex = originalUrl.lastIndexOf('.')
   if (lastDotIndex === -1) return `${originalUrl}_${size}.webp`
   return `${originalUrl.substring(0, lastDotIndex)}_${size}.webp`
@@ -32,7 +51,7 @@ export function toResizedWebpUrl(originalUrl: string | null | undefined, size: I
  */
 const SIZES: ImageSize[] = [150, 400, 800]
 export function getImageSrcSet(originalUrl: string | null | undefined): string {
-  if (!originalUrl) return ''
+  if (!originalUrl || !isOwnImageUrl(originalUrl)) return ''
   return SIZES.map((size) => `${toResizedWebpUrl(originalUrl, size)} ${size}w`).join(', ')
 }
 

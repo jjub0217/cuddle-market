@@ -1,0 +1,73 @@
+[
+  {
+    "code": "MCST",
+    "name": "문화체육관광부",
+    "parser": "mcst",
+    "list_url": "https://www.mcst.go.kr/site/s_culture/festival/festivalList.jsp",
+    "params": {"pSearchType": "01", "pSearchWord": "반려"},
+    "detail_url": "https://www.mcst.go.kr/site/s_culture/festival/festivalView.jsp?pSeq={id}",
+    "default_region": null,
+    "enabled": true
+  },
+  {
+    "code": "SEOUL",
+    "name": "서울특별시",
+    "parser": "seoul",
+    "list_url": "https://www.seoul.go.kr/news/news_report.do",
+    "params": {"bbsNo": "158", "srchText": "반려", "cntPerPage": "30"},
+    "detail_url": "https://www.seoul.go.kr/news/news_report.do?bbsNo=158&nttNo={id}",
+    "default_region": "서울",
+    "enabled": true
+  },
+  {
+    "code": "GANGNAM",
+    "name": "강남구",
+    "parser": "gangnam",
+    "list_url": "https://www.gangnam.go.kr/board/B_000031/list.do",
+    "params": {"mid": "ID01_0313", "keyfield": "bdm_main_title", "keyword": "반려"},
+    "detail_url": "https://www.gangnam.go.kr/board/B_000031/{id}/view.do?mid=ID01_0313",
+    "default_region": "서울",
+    "enabled": true
+  },
+  {
+    "code": "GANGNAM_NOTICE",
+    "name": "강남구",
+    "parser": "gangnam",
+    "list_url": "https://www.gangnam.go.kr/board/B_000001/list.do",
+    "params": {"mid": "ID05_040101", "keyfield": "bdm_main_title", "keyword": "반려"},
+    "detail_url": "https://www.gangnam.go.kr/board/B_000001/{id}/view.do?mid=ID05_040101",
+    "default_region": "서울",
+    "enabled": true
+  },
+  {
+    "code": "NOWON_PRESS",
+    "name": "노원구",
+    "parser": "qbbs",
+    "list_url": "https://www.nowon.kr/www/user/bbs/BD_selectBbsList.do",
+    "params": {"q_bbsCode": "1027", "q_searchKeyTy": "sj___1002", "q_searchVal": "반려"},
+    "detail_url": "https://www.nowon.kr/www/user/bbs/BD_selectBbs.do?q_bbsCode=1027&q_bbscttSn={id}",
+    "default_region": "서울",
+    "enabled": true
+  },
+  {
+    "code": "NOWON_NOTICE",
+    "name": "노원구",
+    "parser": "qbbs",
+    "list_url": "https://www.nowon.kr/www/user/bbs/BD_selectBbsList.do",
+    "params": {"q_bbsCode": "1001", "q_searchKeyTy": "sj___1002", "q_searchVal": "반려"},
+    "detail_url": "https://www.nowon.kr/www/user/bbs/BD_selectBbs.do?q_bbsCode=1001&q_bbscttSn={id}",
+    "default_region": "서울",
+    "enabled": true
+  },
+  {
+    "code": "SHOWALA",
+    "name": "쇼알라(한국전시산업진흥회)",
+    "parser": "showala",
+    "list_url": "https://www.showala.com/",
+    "params": {},
+    "detail_url": "https://www.showala.com/ex/ex_detail.php?idx={id}",
+    "default_region": null,
+    "aggregator": true,
+    "enabled": true
+  }
+]

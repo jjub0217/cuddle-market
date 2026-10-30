@@ -12,7 +12,7 @@ const MdPreview = dynamic(() => import('./components/markdown/MdPreview'), {
 })
 import { getBoardType } from '@/lib/utils/getBoardType'
 import Badge from '@/components/commons/badge/Badge'
-import { getTimeAgo } from '@cuddle/shared'
+import { formatJoinDate, getTimeAgo } from '@cuddle/shared'
 import { CommentSection } from './components/CommentSection'
 import ProfileAvatar from '@/components/commons/ProfileAvatar'
 import type { CommunityDetailItem, Comment } from '@/types'
@@ -26,6 +26,9 @@ import { toUrlName } from '@/lib/utils/toUrlName'
 import Spinner from '@/components/commons/spinner/Spinner'
 import { PAGE_CONTAINER } from '@/constants/ui'
 import { cn } from '@/lib/utils/cn'
+import { getEventStatus, getSourceName, toKoreanDateString } from '@/lib/utils/eventStatus'
+import { EventDetailBody } from './components/EventDetailBody'
+import { EventStatusChip } from './components/EventStatusChip'
 
 interface CommunityDetailProps {
   initialPostData?: CommunityDetailItem
@@ -113,6 +116,35 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
     )
   }
 
+  // 행사 소식은 사람이 쓴 글이 아니라서 글쓴이 대신 등록일을 보이고 상태 칩을 단다(설계 7-2절)
+  const isEvent = data.boardType === 'EVENT'
+  const eventStatus =
+    isEvent && data.event ? getEventStatus(data.event.startDate, data.event.endDate, toKoreanDateString()) : null
+  const listPath = isEvent ? '/community?tab=tab-event' : '/community'
+
+  const isAuthor = user?.id === data?.authorId
+  const authorActions = (
+    <div className="flex items-center gap-1">
+      <button
+        className="text-primary-container cursor-pointer text-xs font-medium hover:underline"
+        type="button"
+        onClick={() => handlePostEdit(Number(id))}
+      >
+        수정
+      </button>
+      <span aria-hidden="true" className="text-xs">
+        ·
+      </span>
+      <button
+        className="text-primary-container cursor-pointer text-xs font-medium hover:underline"
+        type="button"
+        onClick={() => setIsPostDeleteModalOpen(true)}
+      >
+        삭제
+      </button>
+    </div>
+  )
+
   return (
     <>
       {/* 하단 여백을 여기서 안 준다. 레이아웃이 이미 탭바 높이만큼 비켜 준다
@@ -123,64 +155,66 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
           <div className="flex flex-col justify-center gap-1 md:gap-3.5">
             <button
               type="button"
-              onClick={() => router.push('/community')}
+              onClick={() => router.push(listPath)}
               className="text-on-surface-muted hover:text-on-surface mb-6 hidden w-fit cursor-pointer items-center gap-1.5 text-sm font-semibold transition-colors md:flex"
             >
               <ArrowLeft size={16} />
               <span>목록으로 돌아가기</span>
             </button>
+            {/* 행사 소식은 본문 글자 대신 행사 칸으로 그린다(설계 7-2절, 픽케어 배치 참고).
+                행사 칸이 없는 옛 글만 아래 일반 화면으로 그린다 */}
+            {isEvent && data.event ? (
+              <EventDetailBody
+                title={data.title}
+                createdAt={data.createdAt}
+                event={data.event}
+                sourceName={getSourceName(data.content, data.event.sourceUrl)}
+                today={toKoreanDateString()}
+                actions={isAuthor ? authorActions : null}
+              />
+            ) : (
             <div className="flex flex-col gap-3.5 rounded-lg">
-              <Badge className="bg-primary-400 w-fit rounded-full text-xs text-white md:font-semibold">
-                {getBoardType(data.boardType as 'QUESTION' | 'INFO')}
-              </Badge>
+              <div className="flex items-center gap-1.5">
+                <Badge className="bg-primary-400 w-fit rounded-full text-xs text-white md:font-semibold">
+                  {getBoardType(data.boardType as 'QUESTION' | 'INFO' | 'EVENT')}
+                </Badge>
+                {eventStatus ? <EventStatusChip status={eventStatus} /> : null}
+              </div>
               <div className="flex flex-col-reverse gap-3.5 md:flex-col">
                 <h1 className="border-outline-variant/40 border-b pb-4 text-xl leading-snug font-bold md:border-0 md:p-0 md:text-2xl">
                   {data.title}
                 </h1>
                 <div className="md:border-outline-variant/40 flex items-end justify-between md:border-b md:pb-4">
-                  <div className="flex items-center gap-3.5">
-                    <ProfileAvatar
-                      imageUrl={data.authorProfileImageUrl}
-                      nickname={data.authorNickname}
-                      size="lg"
-                      className="h-10 w-10 md:h-10 md:w-10"
-                    />
-                    {/* 유저 정보 */}
-                    <div className="flex flex-col gap-2">
-                      <p className="text-sm leading-none font-bold text-[#1c1b1b] md:text-base md:font-medium">
-                        {data.authorNickname}
-                      </p>
-                      <div className="flex items-center gap-0.5 md:gap-1">
-                        <p className="text-xs leading-none text-[#827565]">{getTimeAgo(data.createdAt)}</p>
-                        <span aria-hidden="true" className="text-xs">
-                          ·
-                        </span>
-                        <p className="text-xs leading-none text-[#827565]">조회 {data.viewCount}</p>
+                  {isEvent ? (
+                    <p className="text-xs leading-none text-[#827565]">{formatJoinDate(data.createdAt)} 등록</p>
+                  ) : (
+                    <div className="flex items-center gap-3.5">
+                      <ProfileAvatar
+                        imageUrl={data.authorProfileImageUrl}
+                        nickname={data.authorNickname}
+                        size="lg"
+                        className="h-10 w-10 md:h-10 md:w-10"
+                      />
+                      {/* 유저 정보 */}
+                      <div className="flex flex-col gap-2">
+                        <p className="text-sm leading-none font-bold text-[#1c1b1b] md:text-base md:font-medium">
+                          {data.authorNickname}
+                        </p>
+                        <div className="flex items-center gap-0.5 md:gap-1">
+                          <p className="text-xs leading-none text-[#827565]">{getTimeAgo(data.createdAt)}</p>
+                          <span aria-hidden="true" className="text-xs">
+                            ·
+                          </span>
+                          <p className="text-xs leading-none text-[#827565]">조회 {data.viewCount}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                   <div className="flex items-center gap-1">
-                    {user?.id === data?.authorId ? (
-                      <>
-                        <button
-                          className="text-primary-container cursor-pointer text-xs font-medium hover:underline"
-                          type="button"
-                          onClick={() => handlePostEdit(Number(id))}
-                        >
-                          수정
-                        </button>
-                        <span aria-hidden="true" className="text-xs">
-                          ·
-                        </span>
-                        <button
-                          className="text-primary-container cursor-pointer text-xs font-medium hover:underline"
-                          type="button"
-                          onClick={() => setIsPostDeleteModalOpen(true)}
-                        >
-                          삭제
-                        </button>
-                      </>
-                    ) : (
+                    {isAuthor ? (
+                      authorActions
+                    ) : isEvent ? null : (
+                      // 행사 소식에는 신고하기를 두지 않는다(설계 7-1절). 틀린 정보는 원문으로 확인하고 운영 계정이 고친다
                       <button
                         // ⚠️ 데스크탑에서만 바꾼다(md:). 이 조각은 폰과 데스크탑이 함께 쓰는데
                         //    맞추기로 한 것은 **데스크탑의 상품 상세**뿐이라, 폰은 건드리지 않는다(#869).
@@ -204,6 +238,7 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
               {/* <h1 className="text-lg leading-snug font-bold">{data.title}</h1> */}
               <MdPreview value={data.content} className="p-0" enablePhotoViewer />
             </div>
+            )}
 
             {/* 댓글은 폭 상관없이 상세 안에 전부 펼친다.
                 좁은 폭에서 「댓글 N ›」 줄만 두면 대화가 있는지조차 안 보인다.
@@ -212,6 +247,8 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
                 그 댓글과 그 답글만 보여 대화에 집중할 수 있고, 답글이 길어져도
                 다른 댓글을 안 밀어낸다. 답글의 「답글 달기」는 이미 그 스레드 안이라
                 그 자리에서 열린다. */}
+            {/* 행사 소식에는 댓글 영역을 두지 않는다(설계 7-1절). 서버도 댓글을 거절한다 */}
+            {isEvent ? null : (
             <section
               aria-label="댓글"
               className="border-outline-variant/40 flex flex-col gap-3.5 border-t py-5 md:border-t-0"
@@ -230,6 +267,7 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
                 }
               />
             </section>
+            )}
           </div>
         </div>
       </div>

@@ -6,7 +6,7 @@ import { useRouter, useParams, usePathname, useSearchParams } from 'next/navigat
 import type { CommunityPostRequestData } from '@/types'
 import { cn } from '@/lib/utils/cn'
 // import RequiredLabel from '@/components/commons/RequiredLabel'
-import { COMMUNITY_TABS } from '@/constants/constants'
+import { COMMUNITY_WRITE_BOARDS } from '@/constants/constants'
 import { commonTitleValidationRules, communityContentValidationRules } from '../../signup/validationRules'
 import Markdown from './markdown/Markdown'
 import { Info } from 'lucide-react'
@@ -238,7 +238,7 @@ export default function CommunityPostForm() {
                         role="radiogroup"
                         aria-label="카테고리 선택"
                       >
-                        {COMMUNITY_TABS.map((category) => {
+                        {COMMUNITY_WRITE_BOARDS.map((category) => {
                           const isActive = field.value === category.code
                           return (
                             <button

@@ -155,7 +155,7 @@ export default function Header() {
                       isCommunityActive ? 'border-primary text-primary border-b-2' : 'text-primary/70 hover:text-primary'
                     )}
                   >
-                    질문·정보
+                    커뮤니티
                   </Link>
                   <Link
                     href={ROUTES.MAP}
@@ -164,7 +164,7 @@ export default function Header() {
                       isMapActive ? 'border-primary text-primary border-b-2' : 'text-primary/70 hover:text-primary'
                     )}
                   >
-                    펫지도
+                    플레이스
                   </Link>
                 </nav>
               ) : null}

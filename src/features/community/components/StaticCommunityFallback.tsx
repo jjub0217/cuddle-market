@@ -5,6 +5,8 @@ import { ROUTES } from '@/constants/routes'
 import { CommunityPostThumbnail } from './CommunityPostThumbnail'
 import { PAGE_CONTAINER } from '@/constants/ui'
 import { cn } from '@/lib/utils/cn'
+import { toKoreanDateString } from '@/lib/utils/eventStatus'
+import { EventPostCard } from './EventPostCard'
 
 /**
  * Suspense fallback용 서버 컴포넌트
@@ -33,7 +35,13 @@ export default function StaticCommunityFallback({ posts }: StaticCommunityFallba
 
           {/* 게시글 목록: 실제 데이터 렌더링 */}
           <ul className="mt-4 flex flex-col gap-2.5 px-3.5 md:mt-0 md:p-0">
-            {posts.map((post) => (
+            {posts.map((post) =>
+              // 행사 소식은 클라이언트 화면과 같은 카드를 그대로 쓴다(서버에서 그려도 되는 조각이다)
+              post.boardType === 'EVENT' ? (
+                <li key={post.id}>
+                  <EventPostCard post={post} today={toKoreanDateString()} />
+                </li>
+              ) : (
               <li key={post.id}>
                 {/* 데스크톱 카드 */}
                 <div className="hidden md:block">
@@ -79,7 +87,8 @@ export default function StaticCommunityFallback({ posts }: StaticCommunityFallba
                   </div>
                 </div>
               </li>
-            ))}
+              )
+            )}
           </ul>
         </div>
       </div>
