@@ -17,11 +17,22 @@ class ListItem:
 
 
 @dataclass(frozen=True)
+class ListResult:
+    """목록 한 페이지. reported_total 은 페이지에 적힌 「총 N건」(없으면 None).
+    이 값이 0보다 큰데 items 가 비면 사이트 구조가 바뀐 것으로 본다."""
+
+    items: List[ListItem]
+    reported_total: Optional[int]
+
+
+@dataclass(frozen=True)
 class DetailPage:
-    """상세 페이지에서 뽑은 본문 글자와 포스터 주소(원래 주소 그대로)"""
+    """상세 페이지에서 뽑은 본문 글자와 포스터 주소(원래 주소 그대로).
+    title 은 상세의 제목 — 노원처럼 목록 제목이 「…」로 잘리는 곳이 있다."""
 
     text: str
     image_url: Optional[str]
+    title: Optional[str] = None
 
 
 @dataclass

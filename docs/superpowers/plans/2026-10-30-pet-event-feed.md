@@ -225,16 +225,16 @@
   - 각 파서 모듈: `parse_list(html: str, source: dict) -> ListResult(items: list[ListItem], reported_total: int | None)`, `parse_detail(html: str, source: dict) -> DetailPage`
   - `qbbs.py`는 노원구용이지만 `q_bbsCode`, `q_bbscttSn` 계열 게시판 공통으로 쓴다.
 
-- [ ] **Step 1: `test_parsers.py`** — 저장본마다
+- [x] **Step 1: `test_parsers.py`** — 저장본마다
   - 목록: 항목이 1개 이상, 저장본에 보이는 제목 하나가 들어 있음(예: 문체부 "제주 반려동물 문화산업 한마당", 노원 "[2026년 노원 반려동물 문화축제]"), 상세 주소가 설계 6절 모양
   - 서울시: `fnTbbsView('468820')`에서 번호를 뽑아 `nttNo=468820` 주소를 만든다
   - `reported_total`: 페이지의 "총 N건"을 읽는다
   - 상세: 본문 글자가 비어 있지 않고, 이미지가 있으면 절대 주소
   - 빈 HTML(`"<html></html>"`)이면 `items=[]`, `reported_total=None`
-- [ ] **Step 2: 실패 확인** — `python3 -m pytest tests/test_parsers.py -q`
-- [ ] **Step 3: 구현** — BeautifulSoup. 상세 본문은 스크립트와 메뉴를 빼고 본문 영역만.
-- [ ] **Step 4: 통과 확인**
-- [ ] **Step 5: 커밋** — `feat(crawler): 출처 설정과 구조가 다른 게시판 파서 4개를 더한다`
+- [x] **Step 2: 실패 확인** — `python3 -m pytest tests/test_parsers.py -q`
+- [x] **Step 3: 구현** — BeautifulSoup. 상세 본문은 스크립트와 메뉴를 빼고 본문 영역만.
+- [x] **Step 4: 통과 확인**
+- [x] **Step 5: 커밋** — `feat(crawler): 출처 설정과 구조가 다른 게시판 파서 4개를 더한다`
 
 ### Task 6: 관광공사 축제 API
 
