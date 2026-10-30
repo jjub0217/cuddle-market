@@ -341,9 +341,9 @@ export default function CommunityPage({ initialQuestionData, initialInfoData, in
         <section
           className={cn('mb-2 flex justify-between gap-3 text-sm md:mb-4', isEventTab ? 'items-center' : 'items-end')}
         >
-          {/* 행사 소식은 왼쪽에 상태 드롭다운, 오른쪽에 정렬(설계 7-2절). 글쓰기 단추가 없어서다 */}
+          {/* 행사 소식은 오른쪽에 「상태 드롭다운 · 정렬」 순서로 붙여 둔다(설계 7-2절). 글쓰기 단추가 없어서다 */}
           {isEventTab ? (
-            <div className="w-32 shrink-0">
+            <div className="ml-auto w-32 shrink-0">
               <SelectDropdown
                 value={eventStatusValue}
                 onChange={handleEventStatusChange}
@@ -353,7 +353,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData, in
               />
             </div>
           ) : null}
-          <div className={cn('flex items-center gap-3', isEventTab ? 'ml-auto' : 'max-md:ml-auto')}>
+          <div className={cn('flex items-center gap-3', !isEventTab && 'max-md:ml-auto')}>
             {getCommunitySortTypes(activeCommunityTypeTab).map((sort, idx) => {
               const isActive = sort.id === sortBy
               return (
