@@ -48,10 +48,10 @@ interface CommunityPageProps {
 
 const SEARCH_TYPE = 'title_content'
 
-// 행사 소식의 상태·정렬 드롭다운 모양. 홈 상세 필터의 지역 드롭다운(LocationFilter card-chip)과 같다.
-// 펼친 목록 글자(optionClassName)도 단추와 같은 text-xs 로 맞춘다 — 기본값 text-sm 이면 펼칠 때 글자가 커진다
+// 행사 소식의 상태·정렬 드롭다운 모양. 홈 상세 필터의 지역 드롭다운(LocationFilter card-chip)을 따랐지만
+// 글자는 펼친 목록의 기본 크기(text-sm)에 맞춘다 — text-xs 로 두면 펼칠 때 글자가 커진다(홈은 그대로 둔다)
 const EVENT_DROPDOWN_CLASS =
-  'border border-outline-variant bg-white text-gray-900 px-4 py-2 text-xs focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20'
+  'border border-outline-variant bg-white text-gray-900 px-4 py-2 text-sm focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20'
 
 export default function CommunityPage({ initialQuestionData, initialInfoData, initialEventData }: CommunityPageProps) {
   const searchParams = useSearchParams()
@@ -361,7 +361,6 @@ export default function CommunityPage({ initialQuestionData, initialInfoData, in
                   options={EVENT_STATUS_FILTERS.map((filter) => ({ value: filter.value, label: filter.label }))}
                   placeholder="행사 상태"
                   buttonClassName={EVENT_DROPDOWN_CLASS}
-                  optionClassName="text-xs"
                 />
               </div>
               <div className="w-36">
@@ -372,7 +371,6 @@ export default function CommunityPage({ initialQuestionData, initialInfoData, in
                   options={EVENT_SORT_TYPE.map((sort) => ({ value: sort.id, label: sort.label }))}
                   placeholder="정렬"
                   buttonClassName={EVENT_DROPDOWN_CLASS}
-                  optionClassName="text-xs"
                 />
               </div>
             </div>
