@@ -10,6 +10,18 @@
 
 **Spec:** `docs/superpowers/specs/2026-10-30-pet-event-feed-design.md`
 
+## 진행 순서 (2026-10-30 사용자 결정으로 바꿈)
+
+**Task 1~3(서버) → Task 10~12(웹) → Task 4~9(크롤러) → Task 13.** 웹을 먼저 해서 로컬 화면(`localhost:3000`)에서 행사 소식을 눈으로 확인한 뒤 크롤러로 넘어간다. 웹은 서버만 있으면 되고 크롤러와는 주고받는 것이 없어 순서를 바꿔도 된다. 웹 확인용 예시 행사 글은 로컬 DB에만 넣는다.
+
+## 진행 기록
+
+- Task 1~3 완료(cmarket_api `d39f72b`, `8e7c90a`, `c18e380`, 로컬 `main`에만 있고 push 전). 서버 시험 19개 통과.
+- 계획과 달라진 점:
+  - Task 2: 배포 전 DB 칸 고치기 SQL `scripts/alter-board-type-column.sql`을 더했다(설계 7절).
+  - Task 3: `service/cmarket` 모듈에 JUnit 5 설정이 없어 시험이 「찾지 못함」으로 돌지 않았다. 설정을 더하고, 운영 설정 없이는 늘 실패하는 `CmarketApiApplicationTests`는 실행에서 뺐다. 503 응답용으로 `ResponseCode.SERVICE_UNAVAILABLE`을 더했다.
+  - 포스터는 본문 맨 위 사진 표시로 넣는다(설계 9절). Task 7, 8에 반영했다.
+
 ## Global Constraints
 
 - 접속 이름: `CuddleEventBot/0.1 (+https://cuddle-market.vercel.app)`. 모든 요청에 쓴다(노원구는 기본 이름이면 400).
@@ -20,7 +32,7 @@
 - 글 제목 50자, 본문 1,000자 이하(`Post.java`). 넘으면 AI 칸부터 줄인다.
 - 틀과 끝 문구는 설계 4절 그대로. 끝 문구: "이 글은 주최 기관이 공개한 자료를 바탕으로 정리한 안내입니다." / "일정과 참가 조건은 바뀔 수 있으니 공식 안내에서 다시 확인해주세요."
 - 본문에 없는 값은 비우고 "공식 안내 확인"으로 쓴다.
-- 포스터는 원래 주소만 저장한다(복사 금지). 글당 1장.
+- 포스터는 원래 주소만 저장한다(복사 금지). 글당 1장. 본문 맨 위에 `![포스터](원래 주소)`로 넣고 `imageUrl`로도 보낸다(설계 9절).
 - 게시판 코드 `EVENT`, 웹 탭 이름 "행사 소식", 탭 id `tab-event`.
 - 일반 글쓰기와 수정에서 `EVENT`로 만들거나 옮기는 것을 거절한다.
 - 헤더: "질문·정보"를 "커뮤니티", "펫지도"를 "플레이스". 커뮤니티 메타 설명: "반려동물 질문과 정보를 나누고, 가까운 행사 소식도 확인해 보세요".
@@ -52,14 +64,14 @@
 **Interfaces:**
 - Produces: `BoardType.EVENT`, `EventBoardWriteNotAllowedException extends RuntimeException`
 
-- [ ] **Step 1: 실패하는 시험 작성** (Mockito로 `CommunityServiceImpl`의 저장소를 가짜로)
+- [x] **Step 1: 실패하는 시험 작성** (Mockito로 `CommunityServiceImpl`의 저장소를 가짜로)
   - `createPost_withEventBoard_throws`: `PostCreateCommand.builder().boardType(BoardType.EVENT)` → `EventBoardWriteNotAllowedException`, `postRepository.save` 호출 없음
   - `updatePost_toEventBoard_throws`: 수정 명령의 boardType이 EVENT면 같은 예외
-- [ ] **Step 2: 시험 실행해 실패 확인** — `JAVA_HOME=/opt/homebrew/opt/openjdk@21 ./gradlew :service:cmarket-domain:test --tests '*CommunityServiceEventGuardTest'` → 컴파일 실패(EVENT 없음)
-- [ ] **Step 3: 구현** — `BoardType`에 `EVENT`(주석 "행사 소식, 수집 주소로만 만든다") 추가. 두 메서드 맨 앞에서 boardType이 EVENT면 예외. 예외는 기존 `PostAccessDeniedException`과 같은 방식으로 전역 예외 처리에 400으로 연결(전역 처리기를 찾아 같은 형식으로 추가).
-- [ ] **Step 4: 목록 조건** — `boardType == null`이면 `post.boardType.ne(BoardType.EVENT)` 조건을 더한다.
-- [ ] **Step 5: 시험과 전체 컴파일 통과 확인** — 위 시험 PASS, `./gradlew compileJava` 성공
-- [ ] **Step 6: 커밋** — `feat: 커뮤니티에 행사 소식(EVENT) 게시판을 더하고 일반 글쓰기에서는 막는다`
+- [x] **Step 2: 시험 실행해 실패 확인** — `JAVA_HOME=/opt/homebrew/opt/openjdk@21 ./gradlew :service:cmarket-domain:test --tests '*CommunityServiceEventGuardTest'` → 컴파일 실패(EVENT 없음)
+- [x] **Step 3: 구현** — `BoardType`에 `EVENT`(주석 "행사 소식, 수집 주소로만 만든다") 추가. 두 메서드 맨 앞에서 boardType이 EVENT면 예외. 예외는 기존 `PostAccessDeniedException`과 같은 방식으로 전역 예외 처리에 400으로 연결(전역 처리기를 찾아 같은 형식으로 추가).
+- [x] **Step 4: 목록 조건** — `boardType == null`이면 `post.boardType.ne(BoardType.EVENT)` 조건을 더한다.
+- [x] **Step 5: 시험과 전체 컴파일 통과 확인** — 위 시험 PASS, `./gradlew compileJava` 성공
+- [x] **Step 6: 커밋** — `feat: 커뮤니티에 행사 소식(EVENT) 게시판을 더하고 일반 글쓰기에서는 막는다`
 
 ### Task 2: 수집 기록 테이블과 수집 서비스
 
@@ -83,21 +95,21 @@
   - `EventIngestResult`: `status`(`CREATED | ALREADY_EXISTS | RECORDED_SKIP | DUPLICATE`), `postId`(null 가능)
   - `EventIngestService`: `List<String> findUnseen(String sourceCode, List<String> externalIds)`, `EventIngestResult ingest(EventIngestCommand command)`. 생성자에서 `@Value("${ingest.author-user-id:}") String authorUserId`를 받는다.
 
-- [ ] **Step 1: `EventTitleKeyTest` 작성**
+- [x] **Step 1: `EventTitleKeyTest` 작성**
   - `normalize("2026 서울 댕냥데이즈")` == `normalize("서울 댕냥데이즈(2026)")` == `"서울댕냥데이즈"`
   - `normalize("[2026년 노원 반려동물 문화축제] 10월 31일(토) 10시 개최")`에서 대괄호, 연도(`20\d\d년?`), 공백, 기호가 빠진다
   - 결과 길이는 100자 이하
-- [ ] **Step 2: `EventIngestServiceTest` 작성** (저장소 가짜)
+- [x] **Step 2: `EventIngestServiceTest` 작성** (저장소 가짜)
   - 같은 (출처, 번호)가 있으면 `ALREADY_EXISTS`, `postRepository.save` 호출 없음
   - `status=SKIPPED_ENDED` 명령은 기록만 저장하고 `RECORDED_SKIP`
   - `POSTED` 명령인데 같은 `titleKey`와 `eventStartDate`의 POSTED 기록이 있으면 `SKIPPED_DUPLICATE`로 기록하고 `DUPLICATE`
   - 정상 `POSTED`면 `Post`가 `boardType=EVENT`, 작성자 52번의 닉네임, `imageUrls=[imageUrl]`(없으면 빈 목록)로 저장되고 기록의 `postId`가 채워진다
   - 제목이 50자를 넘거나 본문이 1,000자를 넘으면 `IllegalArgumentException`
   - `findUnseen("SEOUL", ["1","2"])`에서 "1"만 기록에 있으면 `["2"]`
-- [ ] **Step 3: 실패 확인** — `./gradlew :service:cmarket-domain:test --tests '*eventfeed*'`
-- [ ] **Step 4: 구현** — 정규화: 대괄호와 괄호 안 연도 제거 → `20\d\d년?` 제거 → 한글, 영문, 숫자만 남기고 소문자 → 100자로 자름. `ingest`는 `@Transactional`. `authorUserId`가 비어 있으면 `IllegalStateException`.
-- [ ] **Step 5: 통과 확인** — 위 시험 PASS
-- [ ] **Step 6: 커밋** — `feat: 행사 수집 기록 테이블과 중복을 막는 수집 서비스를 더한다`
+- [x] **Step 3: 실패 확인** — `./gradlew :service:cmarket-domain:test --tests '*eventfeed*'`
+- [x] **Step 4: 구현** — 정규화: 대괄호와 괄호 안 연도 제거 → `20\d\d년?` 제거 → 한글, 영문, 숫자만 남기고 소문자 → 100자로 자름. `ingest`는 `@Transactional`. `authorUserId`가 비어 있으면 `IllegalStateException`.
+- [x] **Step 5: 통과 확인** — 위 시험 PASS
+- [x] **Step 6: 커밋** — `feat: 행사 수집 기록 테이블과 중복을 막는 수집 서비스를 더한다`
 
 ### Task 3: 전용 키로 여는 수집 주소
 
@@ -117,11 +129,11 @@
   - 키가 없거나 틀리면 401, 서버에 키가 설정되지 않았으면 503
   - `IngestKeyVerifier.verify(String presented) -> boolean` (`@Value("${ingest.api-key:}")`, `MessageDigest.isEqual`)
 
-- [ ] **Step 1: `IngestKeyVerifierTest`** — 같은 키 true, 다른 키 false, null false, 서버 키가 빈 문자열이면 무엇이든 false
-- [ ] **Step 2: 실패 확인** — `./gradlew :service:cmarket:test --tests '*IngestKeyVerifierTest'`
-- [ ] **Step 3: 구현** — 컨트롤러는 기존 응답 형식(`SuccessResponse`)을 따른다. `SecurityConfig`에 `.requestMatchers(HttpMethod.POST, "/api/ingest/**").permitAll()`. properties에 `ingest.api-key=${INGEST_API_KEY:}`, `ingest.author-user-id=${INGEST_AUTHOR_USER_ID:}`.
-- [ ] **Step 4: 통과와 전체 빌드 확인** — `./gradlew build -x test` 성공, 위 시험 PASS
-- [ ] **Step 5: 커밋** — `feat: 전용 키로만 여는 행사 수집 주소 두 개를 더한다`
+- [x] **Step 1: `IngestKeyVerifierTest`** — 같은 키 true, 다른 키 false, null false, 서버 키가 빈 문자열이면 무엇이든 false
+- [x] **Step 2: 실패 확인** — `./gradlew :service:cmarket:test --tests '*IngestKeyVerifierTest'`
+- [x] **Step 3: 구현** — 컨트롤러는 기존 응답 형식(`SuccessResponse`)을 따른다. `SecurityConfig`에 `.requestMatchers(HttpMethod.POST, "/api/ingest/**").permitAll()`. properties에 `ingest.api-key=${INGEST_API_KEY:}`, `ingest.author-user-id=${INGEST_AUTHOR_USER_ID:}`.
+- [x] **Step 4: 통과와 전체 빌드 확인** — `./gradlew build -x test` 성공, 위 시험 PASS
+- [x] **Step 5: 커밋** — `feat: 전용 키로만 여는 행사 수집 주소 두 개를 더한다`
 
 ---
 
@@ -207,9 +219,10 @@
 - Produces:
   - `extract.extract_event(text: str, title: str, posted_on: date | None, client) -> EventFields | None` (모델 `gemini-3.1-flash-lite`, 응답은 JSON 스키마로 강제. 실패나 형식 오류면 None)
   - `extract.guard_against_invented(fields: EventFields, text: str) -> EventFields`
-  - `render.render_post(fields: EventFields, source_name: str, source_url: str) -> tuple[str, str]` (제목, 본문)
+  - `render.render_post(fields: EventFields, source_name: str, source_url: str, image_url: str | None = None) -> tuple[str, str]` (제목, 본문)
 
 - [ ] **Step 1: `test_render.py`**
+  - 포스터 주소가 있으면 본문 첫 줄이 `![포스터](주소)`, 없으면 그 줄이 없다
   - AI 칸이 모두 있으면 설계 4절 순서와 칸 이름 그대로(한 줄 소개, 기간, 장소, 주최, 대상, 참가비, "이런 걸 할 수 있어요", "가기 전에 확인하세요", 끝 문구 두 줄, "원문 보기: …", "출처: …")
   - `fee=None`이면 "참가비 | 공식 안내 확인"
   - AI 칸(one_line, activities, checks)이 비면 그 줄과 제목 줄이 빠지고 나머지 모양은 같다
@@ -309,6 +322,7 @@
 
 ### Task 13: 배포와 끝까지 확인 (사용자와 함께)
 
+- [ ] **Step 0:** 운영 DB 백업 → `SHOW COLUMNS FROM posts LIKE 'board_type'` → `enum(...)`이면 cmarket_api의 `scripts/alter-board-type-column.sql` 실행(사용자가 직접. 설계 7절)
 - [ ] **Step 1:** cmarket_api 커밋 push (사용자 허락). 사용자가 `openssl rand -hex 32`로 키를 만들어 GitHub Secrets `INGEST_API_KEY`에 넣고, EC2 실행 명령에 `-Dingest.api-key=… -Dingest.author-user-id=52`를 더해 재배포
 - [ ] **Step 2:** `curl -X POST …/api/ingest/events/unseen` 키 없이 401, 키 있으면 200 확인
 - [ ] **Step 3:** cuddle-market 브랜치 push, develop으로 PR (사용자 허락). 머지는 사용자
