@@ -117,3 +117,13 @@ def test_hours_label_with_address_before_time_keeps_time_part():
 def test_plain_hours_label_is_kept_as_is():
     text = "관람시간: 금/토 10:00 ~ 18:00 (입장마감 17:30) 일 10:00 ~ 17:30"
     assert labelled_fields(text, date(2026, 10, 30))["hours"] == "금/토 10:00 ~ 18:00 (입장마감 17:30) 일 10:00 ~ 17:30"
+
+
+@pytest.mark.parametrize("hours", [
+    # 2026-10-30 실제 쇼알라: 앞에 날짜·오전/오후가 붙은 것은 자르면 뜻이 사라진다
+    "10/31 (토) 오후 11:00~오후 6:00 (18:00) 11/1 (일) 오전 11:00~오후 6:00 (18:00)",
+    "(오전) 10:00 ~ (오후) 6:00 까지",
+    "토요일 : 10:00 ~ 18:00 일요일 : 10:00 ~ 18:00 (입장마감: 17:30)",
+])
+def test_hours_with_date_or_ampm_prefix_is_kept_whole(hours):
+    assert labelled_fields(f"관람시간: {hours}", date(2026, 10, 30))["hours"] == hours

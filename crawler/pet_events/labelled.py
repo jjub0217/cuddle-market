@@ -35,15 +35,16 @@ VENUE_REGIONS = [
 _TIME = re.compile(r"\d{1,2}\s*(?:시|:\d{2})")
 
 
+_ADDRESS = re.compile(r"광역시|특별시|특별자치|[가-힣]+구\s|[가-힣]+로\s*\d|센터|전시장")
 _TIME_START = re.compile(r"(?:(?:[월화수목금토일]|평일|주말|매일)\s*)?\d{1,2}\s*(?::\d{2}|시)")
 
 
 def _time_part(value: str) -> str:
-    """시간 앞에 주소·날짜가 섞여 있으면 시간부터 남긴다.
+    """시간 앞에 **주소**가 섞여 있으면 시간부터 남긴다.
     「대전컨벤션센터 … (… 107) 26.11.28~29 (토,일) 토 12:00~18:00 …」→「토 12:00~18:00 …」
-    앞부분에 숫자나 괄호가 없으면(「금/토 10:00 …」) 그대로 둔다"""
+    앞부분이 날짜나 오전·오후(「10/31 (토) 오후 11:00…」「(오전) 10:00…」)면 자르면 뜻이 사라지니 그대로 둔다"""
     match = _TIME_START.search(value)
-    if match and re.search(r"[\d(]", value[: match.start()]):
+    if match and _ADDRESS.search(value[: match.start()]):
         return value[match.start():].strip()
     return value
 
