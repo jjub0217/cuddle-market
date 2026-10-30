@@ -17,7 +17,7 @@ from .extract import extract_event, guard_against_invented
 from .models import EventFields
 from .parsers import PARSERS
 from .regions import region_of
-from .render import render_post
+from .render import capped, render_post
 from .report import RunSummary, SourceStat
 from .tourapi import fetch_festivals
 
@@ -130,6 +130,7 @@ def _finish(today, source, deps, stat, external_id, url, fields: EventFields, im
         fields = replace(fields, organizer=source["name"])
 
     title, content = render_post(fields, source["name"], url, image_url=image_url)
+    fields = capped(fields)  # 서버 칸 길이 제한(100자, 목록 항목 200자) 안으로
     payload = {
         "sourceCode": source["code"], "externalId": external_id, "sourceUrl": url, "status": "POSTED",
         "title": title, "content": content, "imageUrl": image_url,
@@ -137,6 +138,9 @@ def _finish(today, source, deps, stat, external_id, url, fields: EventFields, im
         "eventEndDate": fields.end.isoformat() if fields.end and fields.end != fields.start else None,
         "region": fields.region, "place": fields.place, "organizer": fields.organizer,
         "summary": fields.one_line,
+        # 상세 화면의 표와 목록(설계 7-2절)
+        "target": fields.target, "fee": fields.fee,
+        "activities": fields.activities, "checks": fields.checks,
     }
     if deps.cuddle is None:
         deps.log(f"\n----- [마른 실행] {source['code']} {external_id}\n{title}\n\n{content}\n")

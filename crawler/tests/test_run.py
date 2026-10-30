@@ -148,6 +148,9 @@ def test_posted_payload():
     assert payload["eventEndDate"] is None
     assert (payload["region"], payload["place"], payload["organizer"]) == ("서울", "노원 공원", "노원구")
     assert payload["summary"] == "이웃과 함께 걷는 산책 행사"
+    assert (payload["target"], payload["fee"]) == ("반려견", "무료")
+    assert payload["activities"] == ["산책 코스 걷기"]
+    assert payload["checks"] == ["목줄 챙기기"]
     assert summary.per_source["NOWON_PRESS"].posted == 1
 
 
@@ -186,3 +189,19 @@ def test_structure_change_is_reported():
 def test_zero_search_results_is_not_an_error():
     summary, _, _, _ = run([], {}, reported_total=0)
     assert summary.errors == []
+
+
+def test_payload_fits_server_limits():
+    # 서버(EventIngestRequest)는 칸마다 길이 제한이 있다. 넘으면 글 전체가 400 으로 거절된다
+    i = item("1")
+    long_answer = {**EVENT, "place": "장" * 300, "organizer": "주" * 300, "target": "대" * 300, "fee": "무료 " * 100,
+                   "one_line": "소" * 300, "activities": ["활" * 500] * 3, "checks": ["확" * 500] * 2}
+    _, _, cuddle, _ = run([i], detail_of(i), ai_answer=long_answer)
+    payload = cuddle.payloads[0]
+
+    for key in ("place", "organizer", "target", "fee", "summary"):
+        assert len(payload[key]) <= 100, key
+    assert len(payload["region"]) <= 20
+    assert all(len(x) <= 200 for x in payload["activities"] + payload["checks"])
+    assert len(payload["activities"]) <= 3 and len(payload["checks"]) <= 2
+    assert len(payload["title"]) <= 50 and len(payload["content"]) <= 1000

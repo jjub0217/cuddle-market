@@ -90,6 +90,13 @@ def _place(region: Optional[str], place: Optional[str]) -> str:
     return f"{region} {place}"
 
 
+def capped(fields: EventFields) -> EventFields:
+    """서버에 보내기 전에 칸 길이를 서버 제한 안으로. 지역은 20자, 목록은 3개·2개까지"""
+    fields = _capped(fields)
+    return replace(fields, region=_cut(fields.region, 20) if fields.region else None,
+                   activities=fields.activities[:3], checks=fields.checks[:2])
+
+
 def _cut(text: str, limit: int) -> str:
     return text if len(text) <= limit else text[: limit - 1] + "…"
 
