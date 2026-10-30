@@ -21,15 +21,16 @@ describe('커뮤니티 탭', () => {
 })
 
 describe('정렬', () => {
-  it('행사 소식은 최신순과 곧 끝나는 순', () => {
+  it('행사 소식은 최신 등록순과 곧 끝나는 순', () => {
     // 조회수는 행사의 좋고 나쁨을 말하지 않는다. 「언제까지 갈 수 있나」가 중요하다(설계 7-2절)
+    // 「최신순」은 행사 날짜가 최근인 순으로도 읽혀 「최신 등록순」으로 쓴다
     expect(getCommunitySortTypes('tab-event')).toEqual([
-      { id: 'latest', label: '최신순' },
+      { id: 'latest', label: '최신 등록순' },
       { id: 'ending', label: '곧 끝나는 순' },
     ])
   })
 
-  it('질문, 정보는 그대로 세 개', () => {
+  it('질문, 정보는 그대로 세 개(「최신순」 그대로)', () => {
     expect(getCommunitySortTypes('tab-question')).toEqual(COMMUNITY_SORT_TYPE)
     expect(getCommunitySortTypes('tab-info')).toEqual(COMMUNITY_SORT_TYPE)
   })

@@ -195,7 +195,8 @@ export const COMMUNITY_SORT_TYPE = [
 // 행사 소식은 「최신순 | 곧 끝나는 순」(설계 7-2절). 조회수·댓글 수는 행사의 좋고 나쁨을 말하지 않는다.
 // 「곧 끝나는 순」(ending)은 서버가 수집 기록의 기간으로 정렬한다. 「마감 임박순」은 신청 마감과 헷갈려 쓰지 않는다
 export const EVENT_SORT_TYPE = [
-  { id: 'latest', label: '최신순' },
+  // 「최신순」은 행사 날짜가 최근인 순으로도 읽혀 올라온 순서임을 밝힌다
+  { id: 'latest', label: '최신 등록순' },
   { id: 'ending', label: '곧 끝나는 순' },
 ]
 
