@@ -18,6 +18,7 @@ export interface CommunityEvent {
   sourceUrl: string | null // 원문 주소 (「공식 안내 보기」)
   imageUrl: string | null // 포스터 원래 주소
   hours: string | null // 운영시간
+  application: string | null // 신청 방법 (사전 신청, 현장 접수 등)
 }
 
 export interface CommunityItem {

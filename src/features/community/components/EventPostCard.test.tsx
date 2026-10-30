@@ -34,6 +34,7 @@ const POST: CommunityItem = {
     sourceUrl: null,
     imageUrl: null,
     hours: null,
+    application: null,
   },
 }
 

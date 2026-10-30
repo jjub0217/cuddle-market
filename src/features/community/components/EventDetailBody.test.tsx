@@ -23,6 +23,7 @@ const EVENT: CommunityEvent = {
   sourceUrl: 'https://www.seoul.go.kr/news/news_report.do?bbsNo=158&nttNo=468820',
   imageUrl: 'https://www.seoul.go.kr/poster.jpg',
   hours: '오전 11시~오후 7시',
+  application: 'QR 사전 신청 또는 현장 접수',
 }
 
 const PROPS = {
@@ -67,7 +68,7 @@ describe('위쪽', () => {
 })
 
 describe('표', () => {
-  it('기간, 운영시간, 장소(지역 + 장소), 대상, 참가비, 주최', () => {
+  it('기간, 운영시간, 장소(지역 + 장소), 대상, 참가비, 신청, 주최', () => {
     render(<EventDetailBody {...PROPS} event={EVENT} />)
 
     expect(rowValue('기간')).toBe('2026.10.29 (목) ~ 2026.11.02 (월)')
@@ -76,9 +77,10 @@ describe('표', () => {
     expect(rowValue('주최')).toBe('서울특별시')
     expect(rowValue('대상')).toBe('반려견, 반려묘')
     expect(rowValue('참가비')).toBe('무료')
+    expect(rowValue('신청')).toBe('QR 사전 신청 또는 현장 접수')
   })
 
-  it('반려인이 판단하는 순서: 기간, 운영시간, 장소, 대상, 참가비, 주최', () => {
+  it('반려인이 판단하는 순서: 기간, 운영시간, 장소, 대상, 참가비, 신청, 주최', () => {
     render(<EventDetailBody {...PROPS} event={EVENT} />)
     expect(screen.getAllByRole('term').map((dt) => dt.textContent)).toEqual([
       '기간',
@@ -86,6 +88,7 @@ describe('표', () => {
       '장소',
       '대상',
       '참가비',
+      '신청',
       '주최',
     ])
   })
@@ -94,10 +97,19 @@ describe('표', () => {
     render(
       <EventDetailBody
         {...PROPS}
-        event={{ ...EVENT, place: null, region: null, organizer: null, target: null, fee: null, hours: null }}
+        event={{
+          ...EVENT,
+          place: null,
+          region: null,
+          organizer: null,
+          target: null,
+          fee: null,
+          hours: null,
+          application: null,
+        }}
       />
     )
-    for (const label of ['운영시간', '장소', '주최', '대상', '참가비']) {
+    for (const label of ['운영시간', '장소', '주최', '대상', '참가비', '신청']) {
       expect(rowValue(label)).toBe('공식 안내 확인')
     }
   })

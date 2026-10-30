@@ -32,7 +32,7 @@ export function EventDetailBody({ title, createdAt, event, sourceName, today, ac
   const status = getEventStatus(event.startDate, event.endDate, today)
   // 포스터를 못 불러오면 자리를 비운다. 기본 그림은 중고거래용 방 그림이라 행사와 상관이 없다(설계 7-2절)
   const [posterFailed, setPosterFailed] = useState(false)
-  // 반려인이 갈지 말지 정하는 순서: 언제(몇 시) → 어디서 → 우리 아이가 갈 수 있나 → 돈이 드나 → 누가 여나
+  // 반려인이 갈지 말지 정하는 순서: 언제(몇 시) → 어디서 → 우리 아이가 갈 수 있나 → 돈이 드나 → 그냥 가도 되나 → 누가 여나
   const place = formatEventPlace(event.region, event.place)
   const mapUrl = getNaverMapSearchUrl(event.region, event.place)
   const rows: [string, string | null][] = [
@@ -41,6 +41,7 @@ export function EventDetailBody({ title, createdAt, event, sourceName, today, ac
     ['장소', place],
     ['대상', event.target],
     ['참가비', event.fee],
+    ['신청', event.application],
     ['주최', event.organizer],
   ]
 
