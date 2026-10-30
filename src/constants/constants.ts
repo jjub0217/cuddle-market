@@ -204,6 +204,13 @@ export const getCommunitySortTypes = (tabId: CommunityTabId) =>
   tabId === 'tab-event' ? EVENT_SORT_TYPE : COMMUNITY_SORT_TYPE
 
 /**
+ * 그 탭에 있는 정렬 값만 쓴다. 탭을 바꿔도 주소의 sortBy 는 그대로 따라오므로(검색어·정렬 유지, #949)
+ * 질문 탭의 「조회 순」이 행사 탭에서 보이지 않는 채로 정렬을 바꾸지 않게 최신으로 돌린다(최종 검토 I3)
+ */
+export const normalizeSortBy = (tabId: CommunityTabId, sortBy: string | null | undefined) =>
+  getCommunitySortTypes(tabId).some((sort) => sort.id === sortBy) ? (sortBy as string) : 'latest'
+
+/**
  * 커뮤니티 검색 종류.
  *
  * ⚠️ **아무 데서도 안 쓴다.** 웹도 앱도 늘 `title_content`(제목+내용)로만 찾는다

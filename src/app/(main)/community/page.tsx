@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import CommunityPage from '@/features/community/CommunityPage'
 import { toEventStatusParam } from '@/lib/utils/eventStatus'
+import { normalizeSortBy } from '@/constants/constants'
 import StaticCommunityFallback from '@/features/community/components/StaticCommunityFallback'
 import {
   fetchInitialQuestionCommunity,
@@ -42,8 +43,10 @@ interface CommunityRouteProps {
 }
 
 export default async function CommunityRoute({ searchParams }: CommunityRouteProps) {
-  const { tab, searchType, communityKeyword, sortBy, eventStatus } = await searchParams
+  const { tab, searchType, communityKeyword, sortBy: rawSortBy, eventStatus } = await searchParams
   const activeTab = tab === 'tab-info' || tab === 'tab-event' ? tab : 'tab-question'
+  // 화면(CommunityPage)과 같은 규칙: 그 탭에 없는 정렬 값은 최신으로
+  const sortBy = normalizeSortBy(activeTab, rawSortBy)
 
   const [initialQuestionData, initialInfoData, initialEventData] = await Promise.all([
     activeTab === 'tab-question'

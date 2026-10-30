@@ -3,7 +3,13 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { COMMUNITY_TABS, EVENT_SORT_TYPE, getCommunitySortTypes, type CommunityTabId } from '@/constants/constants'
+import {
+  COMMUNITY_TABS,
+  EVENT_SORT_TYPE,
+  getCommunitySortTypes,
+  normalizeSortBy,
+  type CommunityTabId,
+} from '@/constants/constants'
 import { UnderlineTabs } from '@/components/UnderlineTabs'
 import { ROUTES } from '@/constants/routes'
 import { useInfiniteQuery } from '@tanstack/react-query'
@@ -63,7 +69,8 @@ export default function CommunityPage({ initialQuestionData, initialInfoData, in
   // 행사 상태(D-n, 진행 중, 종료)를 가르는 날. 서버 조각(StaticCommunityFallback)과 같은 함수를 쓴다
   const today = toKoreanDateString()
 
-  const sortBy = searchParams.get('sortBy') ?? 'latest'
+  // 그 탭에 있는 정렬 값만 쓴다 — 화면 표시와 요청이 같은 값을 보게(최종 검토 I3)
+  const sortBy = normalizeSortBy(activeCommunityTypeTab, searchParams.get('sortBy'))
   // 행사 소식의 상태 드롭다운. 주소에는 소문자(upcoming 등), 서버에는 대문자로 보낸다
   const eventStatusParam = toEventStatusParam(searchParams.get('eventStatus'))
   const eventStatusValue = eventStatusParam?.toLowerCase() ?? 'all'
@@ -360,8 +367,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData, in
               </div>
               <div className="w-36">
                 <SelectDropdown
-                  // 행사 소식에 없는 정렬(조회 순 등)이 주소에 남아 있으면 최신순으로 보인다
-                  value={EVENT_SORT_TYPE.some((sort) => sort.id === sortBy) ? sortBy : 'latest'}
+                  value={sortBy}
                   onChange={handleSortChange}
                   options={EVENT_SORT_TYPE.map((sort) => ({ value: sort.id, label: sort.label }))}
                   placeholder="정렬"
