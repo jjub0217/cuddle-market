@@ -21,8 +21,12 @@ describe('커뮤니티 탭', () => {
 })
 
 describe('정렬', () => {
-  it('행사 소식에는 댓글순이 없다', () => {
-    expect(getCommunitySortTypes('tab-event').map((sort) => sort.id)).toEqual(['latest', 'views'])
+  it('행사 소식은 최신순과 곧 끝나는 순', () => {
+    // 조회수는 행사의 좋고 나쁨을 말하지 않는다. 「언제까지 갈 수 있나」가 중요하다(설계 7-2절)
+    expect(getCommunitySortTypes('tab-event')).toEqual([
+      { id: 'latest', label: '최신순' },
+      { id: 'ending', label: '곧 끝나는 순' },
+    ])
   })
 
   it('질문, 정보는 그대로 세 개', () => {

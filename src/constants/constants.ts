@@ -192,9 +192,15 @@ export const COMMUNITY_SORT_TYPE = [
   { id: 'comments', label: '댓글 순' },
 ]
 
-// 행사 소식 글에는 댓글을 기대하지 않아 댓글순을 뺀다(설계 7-2절)
+// 행사 소식은 「최신순 | 곧 끝나는 순」(설계 7-2절). 조회수·댓글 수는 행사의 좋고 나쁨을 말하지 않는다.
+// 「곧 끝나는 순」(ending)은 서버가 수집 기록의 기간으로 정렬한다. 「마감 임박순」은 신청 마감과 헷갈려 쓰지 않는다
+export const EVENT_SORT_TYPE = [
+  { id: 'latest', label: '최신순' },
+  { id: 'ending', label: '곧 끝나는 순' },
+]
+
 export const getCommunitySortTypes = (tabId: CommunityTabId) =>
-  tabId === 'tab-event' ? COMMUNITY_SORT_TYPE.filter((sort) => sort.id !== 'comments') : COMMUNITY_SORT_TYPE
+  tabId === 'tab-event' ? EVENT_SORT_TYPE : COMMUNITY_SORT_TYPE
 
 /**
  * 커뮤니티 검색 종류.
