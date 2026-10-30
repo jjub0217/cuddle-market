@@ -78,6 +78,7 @@ const CATEGORY_KO_TO_EN: Record<string, string> = {
 const BOARD_TYPE_KO_TO_EN: Record<string, string> = {
   '질문있어요': 'QUESTION',
   '정보공유': 'INFO',
+  '행사소식': 'EVENT',
 }
 
 const USER_ROLE_KO_TO_EN: Record<string, string> = {
@@ -211,6 +212,8 @@ export async function fetchAdminCommunityPosts(params: FetchParams): Promise<Adm
   const searchParams = new URLSearchParams({
     page: String(params.page - 1),
     size: String(params.pageSize),
+    // 행사 소식 글은 일반 목록에서 빠진다. 관리자는 모두 봐야 해서 함께 받는다(#1124)
+    includeEvent: 'true',
   })
 
   if (params.filters?.boardType) {

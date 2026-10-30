@@ -4,6 +4,7 @@ import type { CommunityItem } from '@/types/community'
 const BOARD_TYPE_EN_TO_KO: Record<string, string> = {
   QUESTION: '질문있어요',
   INFO: '정보공유',
+  EVENT: '행사소식',
 }
 
 export { BOARD_TYPE_EN_TO_KO }
@@ -66,6 +67,7 @@ export const communityTableConfig: TableConfig<CommunityItem> = {
       options: [
         { value: '질문있어요', label: '질문있어요' },
         { value: '정보공유', label: '정보공유' },
+        { value: '행사소식', label: '행사소식' },
       ],
     },
   ],
