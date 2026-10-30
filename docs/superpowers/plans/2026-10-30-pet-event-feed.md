@@ -336,9 +336,9 @@
 **Interfaces:**
 - Produces: `isOwnImageUrl(url: string) -> boolean` (호스트가 `df1xl13ui5mlo.cloudfront.net`이면 true). 외부 주소면 `toResizedWebpUrl`는 원래 주소, `getImageSrcSet`는 `''`.
 
-- [ ] **Step 1: 시험** — 우리 주소는 기존대로 `_150.webp`, 외부 주소(`https://www.nowon.kr/math/attach/x.png`)는 그대로, 외부 주소의 srcset은 빈 문자열, 잘못된 주소 문자열은 그대로
-- [ ] **Step 2~4: 실패 확인, 구현, 통과 확인** — 이미지 `onError`에서 기본 이미지(`PLACEHOLDER_IMAGES`)로 바꾼다. `next/image`를 쓰는 곳이 있으면 `next.config.ts`의 `remotePatterns` 때문에 막히는지 확인하고, 행사 글 이미지는 `<img>`로 그린다.
-- [ ] **Step 5: 커밋** — `feat: 우리 이미지 서버가 아닌 주소는 크기 변환 없이 그대로 보여 준다`
+- [x] **Step 1: 시험** — 우리 주소는 기존대로 `_150.webp`, 외부 주소(`https://www.nowon.kr/math/attach/x.png`)는 그대로, 외부 주소의 srcset은 빈 문자열, 잘못된 주소 문자열은 그대로
+- [x] **Step 2~4: 실패 확인, 구현, 통과 확인** — 이미지 `onError`에서 기본 이미지(`PLACEHOLDER_IMAGES`)로 바꾼다. `next/image`를 쓰는 곳이 있으면 `next.config.ts`의 `remotePatterns` 때문에 막히는지 확인하고, 행사 글 이미지는 `<img>`로 그린다.
+- [x] **Step 5: 커밋** — `feat: 우리 이미지 서버가 아닌 주소는 크기 변환 없이 그대로 보여 준다`
 
 ### Task 12: 헤더 이름과 메타 설명
 
