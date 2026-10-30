@@ -96,13 +96,14 @@ export function EventDetailBody({ title, createdAt, event, sourceName, today, ac
       <EventList title="가기 전에 확인하세요" items={event.checks} />
 
       <footer className="border-outline-variant/40 flex flex-col gap-3 border-t pt-4">
-        <p className="text-xs leading-relaxed text-[#827565]">
-          이 글은 주최 기관이 공개한 자료를 바탕으로 정리한 안내입니다. 일정과 참가 조건은 바뀔 수 있으니 공식
-          안내에서 다시 확인해주세요.
-          <br />
+        <div className="flex flex-col gap-1 text-xs leading-relaxed text-[#827565]">
+          <p>
+            이 글은 주최 기관이 공개한 자료를 바탕으로 정리한 안내입니다. 일정과 참가 조건은 바뀔 수 있으니 공식
+            안내에서 다시 확인해주세요.
+          </p>
           {/* 공공누리 출처 표시. 이름을 원문으로 가는 링크로 둔다 */}
           {sourceName ? (
-            <>
+            <p>
               출처:{' '}
               {event.sourceUrl ? (
                 <a href={event.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline">
@@ -111,11 +112,11 @@ export function EventDetailBody({ title, createdAt, event, sourceName, today, ac
               ) : (
                 sourceName
               )}
-              {' · '}
-            </>
+            </p>
           ) : null}
-          {formatJoinDate(createdAt)} 등록
-        </p>
+          {/* 우리가 행사 소식에 올린 날. 정보가 언제 것인지 알려 준다(기관 원문 날짜가 아니다) */}
+          <p>{formatJoinDate(createdAt)} 등록</p>
+        </div>
         {actions}
       </footer>
     </article>

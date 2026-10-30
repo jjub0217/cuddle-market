@@ -129,7 +129,15 @@ describe('목록과 끝 문구', () => {
     const source = screen.getByRole('link', { name: '서울특별시' })
     expect(source).toHaveAttribute('href', EVENT.sourceUrl)
     expect(source).toHaveAttribute('target', '_blank')
-    expect(source.closest('p')?.textContent).toContain('출처: 서울특별시')
+    expect(source.closest('p')?.textContent).toBe('출처: 서울특별시')
+  })
+
+  it('등록일은 출처 아래 줄에 따로', () => {
+    render(<EventDetailBody {...PROPS} event={EVENT} />)
+    const sourceLine = screen.getByRole('link', { name: '서울특별시' }).closest('p')!
+    const dateLine = screen.getByText('2026.10.30 등록')
+    expect(dateLine.tagName).toBe('P')
+    expect(sourceLine.nextElementSibling).toBe(dateLine)
   })
 
   it('원문 주소가 없으면 출처 이름만 글자로', () => {
