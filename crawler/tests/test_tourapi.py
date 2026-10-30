@@ -49,7 +49,8 @@ def test_fields_are_converted():
     assert item.region == "제주"
     assert item.place == "제주특별자치도 제주시 서광로2길 24"
     assert item.image_url == "https://tong.visitkorea.or.kr/cms/resource/30/0000000_image2_1.jpg"
-    assert item.url == "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=2997830"
+    # 대한민국 구석구석 축제 상세. ms_detail.do?cotid= 는 다른 번호(긴 고유 문자열)라 「비정상적인 접근」이 됐다(2026-10-30)
+    assert item.url == "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?cmsCntntsId=2997830"
 
 
 def test_missing_image_is_none():

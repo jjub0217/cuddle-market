@@ -112,5 +112,7 @@ def _to_item(row: dict) -> TourItem:
         place=(row.get("addr1") or "").strip() or None,
         # http 로 오는데, https 화면에서 http 그림은 막힌다. 같은 서버가 https 도 받는다(2026-10-30 확인)
         image_url=image.replace("http://", "https://", 1) if image else None,
-        url=f"https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid={row['contentid']}",
+        # 대한민국 구석구석 축제 상세는 API 번호(contentid)로 열린다(2026-10-30 사용자가 포천펫스타로 확인).
+        # detail/ms_detail.do?cotid= 는 다른 번호를 받아 「비정상적인 접근」이 된다
+        url=f"https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?cmsCntntsId={row['contentid']}",
     )
