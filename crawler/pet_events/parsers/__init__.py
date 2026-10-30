@@ -8,9 +8,9 @@ from __future__ import annotations
 
 from types import ModuleType
 
-from . import gangnam, mcst, qbbs, seoul
+from . import gangnam, mcst, qbbs, seoul, showala
 
-PARSERS = {"mcst": mcst, "seoul": seoul, "gangnam": gangnam, "qbbs": qbbs}
+PARSERS = {"mcst": mcst, "seoul": seoul, "gangnam": gangnam, "qbbs": qbbs, "showala": showala}
 
 
 def get_parser(name: str) -> ModuleType:

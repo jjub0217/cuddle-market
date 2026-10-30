@@ -255,11 +255,11 @@
 - Modify: `sources.json`(SHOWALA), `labelled.py`(전시기간·관람시간·개최장소(+세부장소)·입장료안내·주최, 전시장→지역), `extract.py` 지시문(파충류·관상어·조류 등 포함)
 - Test: `tests/fixtures/showala_main.html`, `showala_detail.html`(구조만 옮기고 문장은 예시), `test_parsers.py`, `test_parsers_real.py`(원본 `probe/event-feed-fixtures/showala/`), `test_labelled.py`
 
-- [ ] **Step 1: 시험** (실패 확인)
-- [ ] **Step 2: 구현과 통과 확인**
-- [ ] **Step 3: 마른 실행으로 실제 첫 화면과 상세를 읽는지 확인**
+- [x] **Step 1: 시험** (실패 확인)
+- [x] **Step 2: 구현과 통과 확인**
+- [x] **Step 3: 마른 실행으로 실제 첫 화면과 상세를 읽는지 확인**
 - [ ] **Step 4: 사용자 로컬 실행으로 AI 결과 확인**
-- [ ] **Step 5: 커밋**
+- [x] **Step 5: 커밋**
 
 ---
 

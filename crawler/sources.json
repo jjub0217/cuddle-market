@@ -58,5 +58,15 @@
     "detail_url": "https://www.nowon.kr/www/user/bbs/BD_selectBbs.do?q_bbsCode=1001&q_bbscttSn={id}",
     "default_region": "서울",
     "enabled": true
+  },
+  {
+    "code": "SHOWALA",
+    "name": "쇼알라(한국전시산업진흥회)",
+    "parser": "showala",
+    "list_url": "https://www.showala.com/",
+    "params": {},
+    "detail_url": "https://www.showala.com/ex/ex_detail.php?idx={id}",
+    "default_region": null,
+    "enabled": true
   }
 ]

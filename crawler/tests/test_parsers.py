@@ -25,6 +25,8 @@ LIST_CASES = [
      r"^https://www\.gangnam\.go\.kr/board/B_000031/\d+/view\.do\?mid=ID01_0313$", date(2026, 10, 1), 2),
     ("NOWON_PRESS", "nowon_list.html", "[2026년 노원 반려동물 문화축제] 10월 31일(토) 10시 개최",
      r"^https://www\.nowon\.kr/www/user/bbs/BD_selectBbs\.do\?q_bbsCode=1027&q_bbscttSn=\d+$", date(2026, 10, 12), 2),
+    ("SHOWALA", "showala_main.html", "2026 아쿠아 렙타일페어 - 일산",
+     r"^https://www\.showala\.com/ex/ex_detail\.php\?idx=\d+$", None, 3),
 ]
 
 
@@ -50,7 +52,7 @@ def test_seoul_builds_detail_url_from_script_link():
     assert first.url == "https://www.seoul.go.kr/news/news_report.do?bbsNo=158&nttNo=468820"
 
 
-@pytest.mark.parametrize("code", ["MCST", "SEOUL", "GANGNAM", "NOWON_PRESS"])
+@pytest.mark.parametrize("code", ["MCST", "SEOUL", "GANGNAM", "NOWON_PRESS", "SHOWALA"])
 def test_empty_page(code):
     source = SOURCES[code]
     result = get_parser(source["parser"]).parse_list("<html></html>", source)
@@ -67,6 +69,7 @@ DETAIL_CASES = [
      "https://www.gangnam.go.kr/upload/editor/2026/09/23/a991d99b-62f1-44e2-ba1f-c51d6c2c4ddd.png"),
     ("NOWON_PRESS", "nowon_detail.html", "노원 공원",
      "https://www.nowon.kr/component/file/ND_fileDownload.do?q_fileSn=310992&q_fileId=efa3e938"),
+    ("SHOWALA", "showala_detail.html", "반려견 놀이 체험", "https://www.showala.com/data/ex/ICnsKxjl51"),
 ]
 
 
@@ -105,3 +108,24 @@ def test_sources_have_required_keys():
     for source in SOURCES.values():
         assert keys <= set(source)
         assert "{id}" in source["detail_url"]
+
+
+def test_showala_menu_only_pet_category():
+    result = get_parser("showala").parse_list(read("showala_main.html"), SOURCES["SHOWALA"])
+    assert [i.external_id for i in result.items] == ["3186", "4822", "4651"]  # 관광박람회(3473)는 안 들어온다
+
+
+def test_showala_missing_menu_reports_structure_change():
+    # 메뉴 제목이 사라지면 「검색 결과 0건」이 아니라 구조가 바뀐 것이다
+    result = get_parser("showala").parse_list("<html><body><p>다른 모양의 첫 화면</p></body></html>", SOURCES["SHOWALA"])
+    assert result.items == [] and result.reported_total == 1
+
+
+def test_showala_detail_labelled_lines_and_no_contact():
+    page = get_parser("showala").parse_detail(read("showala_detail.html"), SOURCES["SHOWALA"])
+    assert page.title == "2026 케이펫페어 수원 시즌2"
+    for line in ["전시기간: 2026-06-26 ~ 2026-06-28", "개최장소: 수원메쎄 (SUWON MESSE)", "주최: (사)한국펫사료협회 KPFA",
+                 "입장료안내: ■사전등록시 무료입장 ■현장등록 : 성인 1인 10,000원", "관람시간: 10:00~18:00 (입장마감 17:30)"]:
+        assert line in page.text, line
+    assert "0200000000" not in page.text and "sample@example.com" not in page.text  # 문의처는 읽지 않는다
+    assert "참가업체 모집안내" not in page.text  # 상세정보 탭만

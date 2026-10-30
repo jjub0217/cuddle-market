@@ -122,6 +122,8 @@ def test_prompt_rules():
     # 반려식물·도시농업·정원 행사는 행사가 아니다. 운영시간은 합쳐 만들지 않는다
     assert "반려식물" in PROMPT and "도시농업" in PROMPT and "정원" in PROMPT
     assert "합쳐" in PROMPT
+    # 파충류·관상어 박람회도 반려동물 행사다(커들마켓 분류에 들어 있다)
+    assert "파충류" in PROMPT and "관상어" in PROMPT
 
 
 def test_ai_without_date_falls_back_to_text_dates():

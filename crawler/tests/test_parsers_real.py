@@ -25,13 +25,14 @@ def read(rel):
     ("NOWON_PRESS", "gu/nw_s_1027.html", None),
     ("NOWON_NOTICE", "gu/nw_s_1001.html", "2026년 반려동물문화센터「힐링하시개!댕댕하우스」11월 교육신청 안내"),
     ("SEOUL", "gu/seoul_report.html", None),
+    ("SHOWALA", "showala/main.html", "2026 아쿠아 렙타일페어 - 일산"),
 ])
 def test_real_list(code, rel, title):
     source = SOURCES[code]
     result = get_parser(source["parser"]).parse_list(read(rel), source)
     assert result.items, "목록에서 글을 하나도 못 찾았다"
     assert result.reported_total and result.reported_total >= len(result.items)
-    assert all(item.posted_on for item in result.items) or code == "MCST"
+    assert all(item.posted_on for item in result.items) or code in ("MCST", "SHOWALA")
     if title:
         assert title in [item.title for item in result.items]
 
@@ -41,6 +42,7 @@ def test_real_list(code, rel, title):
     ("SEOUL", "gu/seoul_d.html", "문화비축기지"),
     ("GANGNAM", "gu/gn_d2.html", "개포동근린공원"),
     ("NOWON_PRESS", "gu/nw_d.html", "반려견 올림픽"),
+    ("SHOWALA", "showala/detail_3186.html", "전시기간: 2026-06-26 ~ 2026-06-28"),
 ])
 def test_real_detail(code, rel, phrase):
     source = SOURCES[code]
