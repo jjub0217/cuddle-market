@@ -1,4 +1,17 @@
 // ========== 커뮤니티 응답 타입 ==========
+/**
+ * 행사 소식 글의 행사 칸. 서버 EventInfoResponse 를 그대로 옮긴 것이다.
+ * 행사 글이 아니면 응답에 null 로 온다.
+ */
+export interface CommunityEvent {
+  startDate: string // YYYY-MM-DD
+  endDate: string | null
+  region: string | null // 목록에 보이는 넓은 지역 (서울, 제주 등)
+  place: string | null // 구체적인 장소 (상세 본문에 지역과 같이 보인다)
+  organizer: string | null
+  summary: string | null // 한 줄 소개
+}
+
 export interface CommunityItem {
   id: number
   title: string
@@ -13,6 +26,7 @@ export interface CommunityItem {
   createdAt: string
   updatedAt: string
   isModified: boolean
+  event?: CommunityEvent | null
 }
 
 export interface CommunityResponse {
@@ -68,6 +82,7 @@ export interface CommunityDetailItem {
   commentCount: number
   createdAt: string
   updatedAt: string
+  event?: CommunityEvent | null
 }
 
 export interface CommunityDetailItemResponse {

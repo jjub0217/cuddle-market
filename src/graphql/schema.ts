@@ -3,6 +3,16 @@ import gql from 'graphql-tag'
 export const typeDefs = gql`
   # ─── Community ───
 
+  # 행사 소식 글의 행사 칸. 행사 글이 아니면 null
+  type CommunityEvent {
+    startDate: String!
+    endDate: String
+    region: String
+    place: String
+    organizer: String
+    summary: String
+  }
+
   type CommunityPost {
     id: Int!
     title: String!
@@ -15,6 +25,7 @@ export const typeDefs = gql`
     createdAt: String!
     updatedAt: String!
     isModified: Boolean
+    event: CommunityEvent
   }
 
   type CommunityPostDetail {
@@ -30,6 +41,7 @@ export const typeDefs = gql`
     createdAt: String!
     updatedAt: String!
     imageUrls: [String!]
+    event: CommunityEvent
   }
 
   type Comment {

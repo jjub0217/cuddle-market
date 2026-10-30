@@ -2,7 +2,11 @@ import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import CommunityPage from '@/features/community/CommunityPage'
 import StaticCommunityFallback from '@/features/community/components/StaticCommunityFallback'
-import { fetchInitialQuestionCommunity, fetchInitialInfoCommunity } from '@/lib/api/server/community'
+import {
+  fetchInitialQuestionCommunity,
+  fetchInitialInfoCommunity,
+  fetchInitialEventCommunity,
+} from '@/lib/api/server/community'
 
 export const metadata: Metadata = {
   title: '커뮤니티 | 커들마켓',
@@ -37,24 +41,34 @@ interface CommunityRouteProps {
 
 export default async function CommunityRoute({ searchParams }: CommunityRouteProps) {
   const { tab, searchType, communityKeyword, sortBy } = await searchParams
-  const activeTab = tab === 'tab-info' ? 'tab-info' : 'tab-question'
+  const activeTab = tab === 'tab-info' || tab === 'tab-event' ? tab : 'tab-question'
 
-  const [initialQuestionData, initialInfoData] = await Promise.all([
+  const [initialQuestionData, initialInfoData, initialEventData] = await Promise.all([
     activeTab === 'tab-question'
       ? fetchInitialQuestionCommunity(0, 10, searchType, communityKeyword, sortBy)
       : Promise.resolve(null),
     activeTab === 'tab-info'
       ? fetchInitialInfoCommunity(0, 10, searchType, communityKeyword, sortBy)
       : Promise.resolve(null),
+    activeTab === 'tab-event'
+      ? fetchInitialEventCommunity(0, 10, searchType, communityKeyword, sortBy)
+      : Promise.resolve(null),
   ])
 
-  const posts = activeTab === 'tab-question'
-    ? initialQuestionData?.content ?? []
-    : initialInfoData?.content ?? []
+  const posts =
+    {
+      'tab-question': initialQuestionData,
+      'tab-info': initialInfoData,
+      'tab-event': initialEventData,
+    }[activeTab]?.content ?? []
 
   return (
     <Suspense fallback={<StaticCommunityFallback posts={posts} />}>
-      <CommunityPage initialQuestionData={initialQuestionData} initialInfoData={initialInfoData} />
+      <CommunityPage
+        initialQuestionData={initialQuestionData}
+        initialInfoData={initialInfoData}
+        initialEventData={initialEventData}
+      />
     </Suspense>
   )
 }

@@ -73,6 +73,36 @@ export async function fetchInitialInfoCommunity(
   }
 }
 
+export async function fetchInitialEventCommunity(
+  page: number = 0,
+  size: number = 10,
+  searchType?: string | null,
+  keyword?: string | null,
+  sortBy?: string | null
+): Promise<CommunityListData | null> {
+  try {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      size: size.toString(),
+      boardType: 'EVENT',
+    })
+    if (searchType) params.append('searchType', searchType)
+    if (keyword) params.append('keyword', keyword)
+    if (sortBy) params.append('sortBy', sortBy)
+
+    const res = await fetch(`${API_BASE_URL}/community/posts?${params.toString()}`, {
+      cache: 'no-store',
+    })
+
+    if (!res.ok) return null
+
+    const json = await res.json()
+    return json.data
+  } catch {
+    return null
+  }
+}
+
 export async function fetchCommunityDetail(postId: string): Promise<CommunityDetailItem | null> {
   try {
     const res = await fetch(`${API_BASE_URL}/community/posts/${postId}`, {

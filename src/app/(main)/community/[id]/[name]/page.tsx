@@ -79,7 +79,7 @@ export default async function CommunityDetailPage({ params }: CommunityDetailPag
     },
     datePublished: initialPostData.createdAt,
     dateModified: initialPostData.updatedAt,
-    articleSection: initialPostData.boardType === 'QUESTION' ? '질문' : '정보',
+    articleSection: { QUESTION: '질문', INFO: '정보', EVENT: '행사' }[initialPostData.boardType ?? ''] ?? '정보',
     publisher: {
       '@type': 'Organization',
       name: '커들마켓',

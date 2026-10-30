@@ -3,12 +3,12 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { COMMUNITY_SORT_TYPE, COMMUNITY_TABS, type CommunityTabId } from '@/constants/constants'
+import { COMMUNITY_TABS, getCommunitySortTypes, type CommunityTabId } from '@/constants/constants'
 import { UnderlineTabs } from '@/components/UnderlineTabs'
 import { ROUTES } from '@/constants/routes'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api/api'
-import { Eye, MessageSquare, MessageSquareText, PenLine, Plus, Search, X } from 'lucide-react'
+import { CalendarDays, Eye, MessageSquare, MessageSquareText, PenLine, Plus, Search, X } from 'lucide-react'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import LoadMoreFocusButton from '@/components/commons/LoadMoreFocusButton'
 import SkipToLoadMoreLink from '@/components/commons/SkipToLoadMoreLink'
@@ -20,6 +20,8 @@ import EmptyState from '@/components/EmptyState'
 import Spinner from '@/components/commons/spinner/Spinner'
 import type { CommunityItem } from '@/types'
 import { CommunityPostThumbnail } from './components/CommunityPostThumbnail'
+import { EventPostCard } from './components/EventPostCard'
+import { toKoreanDateString } from '@/lib/utils/eventStatus'
 
 interface CommunityListData {
   page: number
@@ -35,15 +37,20 @@ interface CommunityListData {
 interface CommunityPageProps {
   initialQuestionData?: CommunityListData | null
   initialInfoData?: CommunityListData | null
+  initialEventData?: CommunityListData | null
 }
 
 const SEARCH_TYPE = 'title_content'
 
-export default function CommunityPage({ initialQuestionData, initialInfoData }: CommunityPageProps) {
+export default function CommunityPage({ initialQuestionData, initialInfoData, initialEventData }: CommunityPageProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const tabParam = searchParams.get('tab') as CommunityTabId | null
-  const activeCommunityTypeTab: CommunityTabId = tabParam === 'tab-info' ? 'tab-info' : 'tab-question'
+  const activeCommunityTypeTab: CommunityTabId =
+    tabParam === 'tab-info' || tabParam === 'tab-event' ? tabParam : 'tab-question'
+  const isEventTab = activeCommunityTypeTab === 'tab-event'
+  // 행사 상태(D-n, 진행 중, 종료)를 가르는 날. 서버 조각(StaticCommunityFallback)과 같은 함수를 쓴다
+  const today = toKoreanDateString()
 
   const sortBy = searchParams.get('sortBy') ?? 'latest'
   const currentKeyword = searchParams.get('communityKeyword') || ''
@@ -173,23 +180,64 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
     enabled: activeCommunityTypeTab === 'tab-info',
   })
 
-  const currentData = activeCommunityTypeTab === 'tab-question' ? questionData : infoData
-  const isLoading = activeCommunityTypeTab === 'tab-question' ? isLoadingQuestion : isLoadingInfo
-  const error = activeCommunityTypeTab === 'tab-question' ? errorQuestion : errorInfo
-  const fetchNextPage = activeCommunityTypeTab === 'tab-question' ? fetchNextQuestion : fetchNextInfo
-  const hasNextPage = activeCommunityTypeTab === 'tab-question' ? hasNextQuestion : hasNextInfo
-  const isFetchingNextPage = activeCommunityTypeTab === 'tab-question' ? isFetchingNextQuestion : isFetchingNextInfo
+  const {
+    data: eventData,
+    fetchNextPage: fetchNextEvent,
+    hasNextPage: hasNextEvent,
+    isFetchingNextPage: isFetchingNextEvent,
+    isLoading: isLoadingEvent,
+    error: errorEvent,
+  } = useInfiniteQuery({
+    queryKey: ['community', 'event', SEARCH_TYPE, currentKeyword, sortBy],
+    queryFn: async ({ pageParam }) => {
+      const response = await api.get('/community/posts', {
+        params: {
+          page: pageParam,
+          size: 10,
+          boardType: 'EVENT',
+          searchType: SEARCH_TYPE,
+          keyword: currentKeyword || undefined,
+          sortBy,
+        },
+      })
+      return response.data.data
+    },
+    getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
+    initialPageParam: 0,
+    initialData: initialEventData ? { pages: [initialEventData], pageParams: [0] } : undefined,
+    enabled: isEventTab,
+  })
 
-  const communityPosts: CommunityItem[] = (() => {
-    switch (activeCommunityTypeTab) {
-      case 'tab-question':
-        return questionData?.pages.flatMap((page) => page.content) ?? []
-      case 'tab-info':
-        return infoData?.pages.flatMap((page) => page.content) ?? []
-      default:
-        return []
-    }
-  })()
+  // 탭마다 따로 불러 둔 것 중 지금 탭의 것을 고른다
+  const active = {
+    'tab-question': {
+      data: questionData,
+      isLoading: isLoadingQuestion,
+      error: errorQuestion,
+      fetchNextPage: fetchNextQuestion,
+      hasNextPage: hasNextQuestion,
+      isFetchingNextPage: isFetchingNextQuestion,
+    },
+    'tab-info': {
+      data: infoData,
+      isLoading: isLoadingInfo,
+      error: errorInfo,
+      fetchNextPage: fetchNextInfo,
+      hasNextPage: hasNextInfo,
+      isFetchingNextPage: isFetchingNextInfo,
+    },
+    'tab-event': {
+      data: eventData,
+      isLoading: isLoadingEvent,
+      error: errorEvent,
+      fetchNextPage: fetchNextEvent,
+      hasNextPage: hasNextEvent,
+      isFetchingNextPage: isFetchingNextEvent,
+    },
+  }[activeCommunityTypeTab]
+  const { data: currentData, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = active
+
+  const communityPosts: CommunityItem[] = currentData?.pages.flatMap((page) => page.content) ?? []
 
   const { isLogin } = useUserStore()
   const hasHydrated = useUserStore((state) => state._hasHydrated)
@@ -276,7 +324,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
         {/* Sort filter + 글쓰기 (콘텐츠 컨트롤 행) */}
         <section className="mb-2 flex items-end justify-between gap-3 text-sm md:mb-4">
           <div className="flex items-center gap-3 max-md:ml-auto">
-            {COMMUNITY_SORT_TYPE.map((sort, idx) => {
+            {getCommunitySortTypes(activeCommunityTypeTab).map((sort, idx) => {
               const isActive = sort.id === sortBy
               return (
                 <div key={sort.id} className="flex items-center gap-3">
@@ -297,7 +345,8 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
               )
             })}
           </div>
-          {hasHydrated && isLogin() ? (
+          {/* 행사 소식은 일반 글쓰기를 서버가 거절한다. 누르면 반드시 실패하는 단추라 숨긴다 */}
+          {hasHydrated && isLogin() && !isEventTab ? (
             <Link
               href={`${ROUTES.COMMUNITY_POST}?tab=${activeCommunityTypeTab}`}
               className="bg-primary-600 hidden items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold whitespace-nowrap text-white shadow-sm transition-opacity hover:opacity-90 active:scale-95 md:flex"
@@ -316,7 +365,23 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
           aria-labelledby={activeCommunityTypeTab}
         >
           {communityPosts.length === 0 ? (
-            <EmptyState icon={MessageSquareText} title="아직 게시글이 없어요" description="첫 번째 이야기를 나눠보세요!" />
+            isEventTab ? (
+              <EmptyState
+                icon={CalendarDays}
+                title="아직 올라온 행사 소식이 없어요"
+                description="반려동물 행사 소식을 모아 매일 올려요"
+              />
+            ) : (
+              <EmptyState icon={MessageSquareText} title="아직 게시글이 없어요" description="첫 번째 이야기를 나눠보세요!" />
+            )
+          ) : isEventTab ? (
+            <ul className="grid grid-cols-1 gap-2 md:gap-4">
+              {communityPosts.map((post) => (
+                <li key={post.id}>
+                  <EventPostCard post={post} today={today} />
+                </li>
+              ))}
+            </ul>
           ) : (
             <ul className="grid grid-cols-1 gap-2 md:gap-4">
               {communityPosts.map((post) => (
@@ -384,8 +449,8 @@ export default function CommunityPage({ initialQuestionData, initialInfoData }: 
         />
       </main>
 
-      {/* Mobile FAB */}
-      {hasHydrated && isLogin() ? (
+      {/* Mobile FAB — 행사 소식에서는 숨긴다(위 글쓰기 단추와 같은 까닭) */}
+      {hasHydrated && isLogin() && !isEventTab ? (
         <Link
           href={`${ROUTES.COMMUNITY_POST}?tab=${activeCommunityTypeTab}`}
           className={cn(

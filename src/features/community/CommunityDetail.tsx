@@ -12,7 +12,7 @@ const MdPreview = dynamic(() => import('./components/markdown/MdPreview'), {
 })
 import { getBoardType } from '@/lib/utils/getBoardType'
 import Badge from '@/components/commons/badge/Badge'
-import { getTimeAgo } from '@cuddle/shared'
+import { formatJoinDate, getTimeAgo } from '@cuddle/shared'
 import { CommentSection } from './components/CommentSection'
 import ProfileAvatar from '@/components/commons/ProfileAvatar'
 import type { CommunityDetailItem, Comment } from '@/types'
@@ -26,6 +26,8 @@ import { toUrlName } from '@/lib/utils/toUrlName'
 import Spinner from '@/components/commons/spinner/Spinner'
 import { PAGE_CONTAINER } from '@/constants/ui'
 import { cn } from '@/lib/utils/cn'
+import { getEventStatus, toKoreanDateString } from '@/lib/utils/eventStatus'
+import { EventStatusChip } from './components/EventStatusChip'
 
 interface CommunityDetailProps {
   initialPostData?: CommunityDetailItem
@@ -113,6 +115,12 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
     )
   }
 
+  // 행사 소식은 사람이 쓴 글이 아니라서 글쓴이 대신 등록일을 보이고 상태 칩을 단다(설계 7-2절)
+  const isEvent = data.boardType === 'EVENT'
+  const eventStatus =
+    isEvent && data.event ? getEventStatus(data.event.startDate, data.event.endDate, toKoreanDateString()) : null
+  const listPath = isEvent ? '/community?tab=tab-event' : '/community'
+
   return (
     <>
       {/* 하단 여백을 여기서 안 준다. 레이아웃이 이미 탭바 높이만큼 비켜 준다
@@ -123,42 +131,49 @@ export default function CommunityDetail({ initialPostData, initialCommentData }:
           <div className="flex flex-col justify-center gap-1 md:gap-3.5">
             <button
               type="button"
-              onClick={() => router.push('/community')}
+              onClick={() => router.push(listPath)}
               className="text-on-surface-muted hover:text-on-surface mb-6 hidden w-fit cursor-pointer items-center gap-1.5 text-sm font-semibold transition-colors md:flex"
             >
               <ArrowLeft size={16} />
               <span>목록으로 돌아가기</span>
             </button>
             <div className="flex flex-col gap-3.5 rounded-lg">
-              <Badge className="bg-primary-400 w-fit rounded-full text-xs text-white md:font-semibold">
-                {getBoardType(data.boardType as 'QUESTION' | 'INFO')}
-              </Badge>
+              <div className="flex items-center gap-1.5">
+                <Badge className="bg-primary-400 w-fit rounded-full text-xs text-white md:font-semibold">
+                  {getBoardType(data.boardType as 'QUESTION' | 'INFO' | 'EVENT')}
+                </Badge>
+                {eventStatus ? <EventStatusChip status={eventStatus} /> : null}
+              </div>
               <div className="flex flex-col-reverse gap-3.5 md:flex-col">
                 <h1 className="border-outline-variant/40 border-b pb-4 text-xl leading-snug font-bold md:border-0 md:p-0 md:text-2xl">
                   {data.title}
                 </h1>
                 <div className="md:border-outline-variant/40 flex items-end justify-between md:border-b md:pb-4">
-                  <div className="flex items-center gap-3.5">
-                    <ProfileAvatar
-                      imageUrl={data.authorProfileImageUrl}
-                      nickname={data.authorNickname}
-                      size="lg"
-                      className="h-10 w-10 md:h-10 md:w-10"
-                    />
-                    {/* 유저 정보 */}
-                    <div className="flex flex-col gap-2">
-                      <p className="text-sm leading-none font-bold text-[#1c1b1b] md:text-base md:font-medium">
-                        {data.authorNickname}
-                      </p>
-                      <div className="flex items-center gap-0.5 md:gap-1">
-                        <p className="text-xs leading-none text-[#827565]">{getTimeAgo(data.createdAt)}</p>
-                        <span aria-hidden="true" className="text-xs">
-                          ·
-                        </span>
-                        <p className="text-xs leading-none text-[#827565]">조회 {data.viewCount}</p>
+                  {isEvent ? (
+                    <p className="text-xs leading-none text-[#827565]">{formatJoinDate(data.createdAt)} 등록</p>
+                  ) : (
+                    <div className="flex items-center gap-3.5">
+                      <ProfileAvatar
+                        imageUrl={data.authorProfileImageUrl}
+                        nickname={data.authorNickname}
+                        size="lg"
+                        className="h-10 w-10 md:h-10 md:w-10"
+                      />
+                      {/* 유저 정보 */}
+                      <div className="flex flex-col gap-2">
+                        <p className="text-sm leading-none font-bold text-[#1c1b1b] md:text-base md:font-medium">
+                          {data.authorNickname}
+                        </p>
+                        <div className="flex items-center gap-0.5 md:gap-1">
+                          <p className="text-xs leading-none text-[#827565]">{getTimeAgo(data.createdAt)}</p>
+                          <span aria-hidden="true" className="text-xs">
+                            ·
+                          </span>
+                          <p className="text-xs leading-none text-[#827565]">조회 {data.viewCount}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                   <div className="flex items-center gap-1">
                     {user?.id === data?.authorId ? (
                       <>

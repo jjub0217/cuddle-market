@@ -16,10 +16,11 @@ function sitemapUrl(url: string): string {
 }
 
 export async function GET() {
-  const [products, questionPosts, infoPosts] = await Promise.all([
+  const [products, questionPosts, infoPosts, eventPosts] = await Promise.all([
     fetchProductSitemapEntries(),
     fetchCommunitySitemapEntries('QUESTION'),
     fetchCommunitySitemapEntries('INFO'),
+    fetchCommunitySitemapEntries('EVENT'),
   ])
 
   const urls: string[] = []
@@ -51,7 +52,7 @@ export async function GET() {
   }
 
   // Community pages
-  for (const post of [...questionPosts, ...infoPosts]) {
+  for (const post of [...questionPosts, ...infoPosts, ...eventPosts]) {
     urls.push(`
   <url>
     <loc>${sitemapUrl(`${SITE_URL}/community/${post.id}/${toUrlName(post.title)}`)}</loc>

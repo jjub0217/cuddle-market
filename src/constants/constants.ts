@@ -151,8 +151,13 @@ export type MyPageNavCode = (typeof MY_PAGE_NAV)[number]['code']
 export const COMMUNITY_TABS = [
   { id: 'tab-question', label: '질문 있어요', code: 'QUESTION' },
   { id: 'tab-info', label: '정보 공유', code: 'INFO' },
+  // 행사 소식은 크롤러가 수집 주소로만 올린다. 서버가 일반 글쓰기를 거절한다
+  { id: 'tab-event', label: '행사 소식', code: 'EVENT' },
 ] as const
 export type CommunityTabId = (typeof COMMUNITY_TABS)[number]['id']
+
+// 글쓰기 화면의 게시판 선택지. 행사 소식은 빠진다(위 탭 주석)
+export const COMMUNITY_WRITE_BOARDS = COMMUNITY_TABS.filter((tab) => tab.code !== 'EVENT')
 
 // ========== 가격대 관련 상수 ==========
 export const PRICE_TYPE = [
@@ -186,6 +191,10 @@ export const COMMUNITY_SORT_TYPE = [
   { id: 'views', label: '조회 순' },
   { id: 'comments', label: '댓글 순' },
 ]
+
+// 행사 소식 글에는 댓글을 기대하지 않아 댓글순을 뺀다(설계 7-2절)
+export const getCommunitySortTypes = (tabId: CommunityTabId) =>
+  tabId === 'tab-event' ? COMMUNITY_SORT_TYPE.filter((sort) => sort.id !== 'comments') : COMMUNITY_SORT_TYPE
 
 /**
  * 커뮤니티 검색 종류.

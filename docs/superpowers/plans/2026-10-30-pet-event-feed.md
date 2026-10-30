@@ -21,6 +21,7 @@
   - Task 2: 배포 전 DB 칸 고치기 SQL `scripts/alter-board-type-column.sql`을 더했다(설계 7절).
   - Task 3: `service/cmarket` 모듈에 JUnit 5 설정이 없어 시험이 「찾지 못함」으로 돌지 않았다. 설정을 더하고, 운영 설정 없이는 늘 실패하는 `CmarketApiApplicationTests`는 실행에서 뺐다. 503 응답용으로 `ResponseCode.SERVICE_UNAVAILABLE`을 더했다.
   - 포스터는 본문 맨 위 사진 표시로 넣는다(설계 9절). Task 7, 8에 반영했다.
+  - Task 10: 계획 Task 1의 「수정 명령이 EVENT면 거절」은 설계 7-1절(운영 계정은 자기 행사 글을 고칠 수 있다)과 어긋났다. 서버는 **다른 글을 EVENT로 옮기는 것만** 거절하게 고쳤다(cmarket_api `2d79241`).
   - 행사 소식 화면을 정했다(설계 7-2절): 목록은 상태 칩, 제목, 한 줄 소개, 기간, 「지역 · 주최」. 프로필, 닉네임, 포스터, 댓글순 없음. 그래서 서버가 행사 칸을 따로 저장해 내려 주는 Task 3-1을 더했고, Task 6, 7, 8, 10을 고쳤다.
 
 ## Global Constraints
@@ -150,11 +151,11 @@
 - 응답(JSON): 목록 항목과 상세에 `"event": {"startDate":"2026-10-31","endDate":"2026-11-02","region":"서울","place":"문화비축기지","organizer":"서울특별시","summary":"…"}`, 행사 글이 아니면 `"event": null`
 - 요청(크롤러 → 서버): `POST /api/ingest/events` 본문에 `eventEndDate`, `region`, `place`, `organizer`, `summary` 추가(모두 null 가능)
 
-- [ ] **Step 1: 시험** — 정상 POSTED면 기록에 다섯 칸이 저장된다. `findEventInfo([1, 2])`에서 1번만 POSTED 기록이 있으면 `{1: …}`만 돌려준다. 빈 목록이면 저장소를 부르지 않고 빈 Map.
-- [ ] **Step 2: 실패 확인** — `./gradlew :service:cmarket-domain:test --tests '*eventfeed*'`
-- [ ] **Step 3: 구현** — 컨트롤러가 목록, 상세 결과의 글 번호로 `findEventInfo`를 한 번 불러 붙인다(커뮤니티 도메인이 행사 수집을 모르게).
-- [ ] **Step 4: 확인** — 서버 시험 전체 통과, `./gradlew build -x test`, 로컬 서버에서 `GET /api/community/posts?boardType=EVENT`와 상세에 `event`가 붙는지 curl
-- [ ] **Step 5: 커밋** — `feat: 행사 기간·지역·주최·한 줄 소개를 저장해 커뮤니티 응답에 붙인다`
+- [x] **Step 1: 시험** — 정상 POSTED면 기록에 다섯 칸이 저장된다. `findEventInfo([1, 2])`에서 1번만 POSTED 기록이 있으면 `{1: …}`만 돌려준다. 빈 목록이면 저장소를 부르지 않고 빈 Map.
+- [x] **Step 2: 실패 확인** — `./gradlew :service:cmarket-domain:test --tests '*eventfeed*'`
+- [x] **Step 3: 구현** — 컨트롤러가 목록, 상세 결과의 글 번호로 `findEventInfo`를 한 번 불러 붙인다(커뮤니티 도메인이 행사 수집을 모르게).
+- [x] **Step 4: 확인** — 서버 시험 전체 통과, `./gradlew build -x test`, 로컬 서버에서 `GET /api/community/posts?boardType=EVENT`와 상세에 `event`가 붙는지 curl
+- [x] **Step 5: 커밋** — `feat: 행사 기간·지역·주최·한 줄 소개를 저장해 커뮤니티 응답에 붙인다`
 
 ---
 
@@ -314,15 +315,15 @@
 **Interfaces:**
 - Produces: `COMMUNITY_TABS`에 `{ id: 'tab-event', label: '행사 소식', code: 'EVENT' }`, 새 상수 `COMMUNITY_WRITE_BOARDS`(QUESTION, INFO만), `fetchInitialEventCommunity(page, size, searchType, keyword, sortBy)`
 
-- [ ] **Step 1: 시험** — `getBoardType('EVENT') === '행사 소식'`, `COMMUNITY_WRITE_BOARDS`에 EVENT가 없음, `COMMUNITY_TABS`의 id 세 개
+- [x] **Step 1: 시험** — `getBoardType('EVENT') === '행사 소식'`, `COMMUNITY_WRITE_BOARDS`에 EVENT가 없음, `COMMUNITY_TABS`의 id 세 개
   - `getEventStatus`: 시작 전 `D-n`(내일이면 D-1), 시작일~종료일 `진행 중`(종료일 없으면 시작일 하루), 지난 뒤 `종료`. 오늘은 한국 날짜로 계산
   - `EventPostCard`: 상태 칩, 제목, 한 줄 소개(없으면 줄째 없음), 기간, 「지역 · 주최」(지역 없으면 주최만). 닉네임, 조회수, 포스터를 그리지 않는다. 종료면 흐린 모양 클래스
-- [ ] **Step 2: 실패 확인** — `npx vitest run --project unit src/lib/utils/getBoardType.test.ts src/constants/communityTabs.test.ts`
-- [ ] **Step 3: 구현** — 글쓰기 화면은 `COMMUNITY_WRITE_BOARDS`만 쓴다. `?tab=tab-event`로 들어오면 글쓰기 기본값은 INFO. 상세의 `articleSection`은 EVENT면 '행사'.
+- [x] **Step 2: 실패 확인** — `npx vitest run --project unit src/lib/utils/getBoardType.test.ts src/constants/communityTabs.test.ts`
+- [x] **Step 3: 구현** — 글쓰기 화면은 `COMMUNITY_WRITE_BOARDS`만 쓴다. `?tab=tab-event`로 들어오면 글쓰기 기본값은 INFO. 상세의 `articleSection`은 EVENT면 '행사'.
   - 목록: 행사 소식 탭은 `EventPostCard`로 그린다. 정렬에서 댓글순을 빼고, 글쓰기 단추 두 곳을 숨기고, 빈 화면 문구를 설계 7-2절대로.
   - 상세: EVENT면 배지 옆에 상태 칩, 프로필 사진과 닉네임 대신 「YYYY.MM.DD 등록」, 「목록으로 돌아가기」는 `?tab=tab-event`.
-- [ ] **Step 4: 확인** — 시험 PASS, `npx tsc --noEmit`, 바뀐 파일 eslint(`CLAUDE.md` 47행 명령)
-- [ ] **Step 5: 커밋** — `feat: 커뮤니티에 행사 소식 탭을 더하고 글쓰기 선택지에서는 뺀다`
+- [x] **Step 4: 확인** — 시험 PASS, `npx tsc --noEmit`, 바뀐 파일 eslint(`CLAUDE.md` 47행 명령)
+- [x] **Step 5: 커밋** — `feat: 커뮤니티에 행사 소식 탭을 더하고 글쓰기 선택지에서는 뺀다`
 
 ### Task 11: 외부 이미지 주소는 그대로 쓰기
 
