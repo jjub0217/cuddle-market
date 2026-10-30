@@ -97,3 +97,33 @@ def test_reads_next_page_until_total():
 ])
 def test_region_of(address, region):
     assert region_of(address) == region
+
+
+# 관광공사 축제 목록에는 본문이 없다. 축제마다 소개 글(detailCommon2 의 overview)을 받아 AI 에 넣는다
+
+from pet_events.tourapi import DETAIL_ENDPOINT, fetch_overview  # noqa: E402
+
+OVERVIEW = {"response": {"header": {"resultCode": "0000"}, "body": {"items": {"item": [
+    {"contentid": "3545306", "overview": "포천펫스타는 반려동물과 함께하는 축제입니다.<br>어질리티 체험과<br />펫 패션쇼가 열립니다."}
+]}, "totalCount": 1}}}
+
+
+def test_overview_is_plain_text():
+    client = FakeClient([OVERVIEW])
+    text = fetch_overview("KEY", "3545306", client)
+
+    assert text == "포천펫스타는 반려동물과 함께하는 축제입니다.\n어질리티 체험과\n펫 패션쇼가 열립니다."
+    url, params = client.calls[0]
+    assert url == DETAIL_ENDPOINT == "https://apis.data.go.kr/B551011/KorService2/detailCommon2"
+    assert params["contentId"] == "3545306" and params["serviceKey"] == "KEY" and params["_type"] == "json"
+
+
+def test_overview_missing_is_none():
+    empty = {"response": {"header": {"resultCode": "0000"}, "body": {"items": "", "totalCount": 0}}}
+    assert fetch_overview("KEY", "1", FakeClient([empty])) is None
+
+
+def test_overview_error_raises():
+    error = {"response": {"header": {"resultCode": "10", "resultMsg": "INVALID_REQUEST_PARAMETER_ERROR"}}}
+    with pytest.raises(TourApiError):
+        fetch_overview("KEY", "1", FakeClient([error]))

@@ -9,20 +9,23 @@ AI 가 실패한 글은 기록하지 않는다 — 기록하면 다음 날 다�
 from __future__ import annotations
 
 import re
+import time
 from dataclasses import dataclass, field, replace
 from datetime import date, timedelta
 from typing import Callable, Dict, Optional
 
-from .extract import extract_event, guard_against_invented
+from .extract import ExtractError, extract_event, guard_against_invented
 from .labelled import labelled_fields
 from .models import EventFields
 from .parsers import PARSERS
 from .regions import region_of
 from .render import capped, render_post
 from .report import RunSummary, SourceStat
-from .tourapi import fetch_festivals
+from .tourapi import fetch_festivals, fetch_overview
 
 RECENT_DAYS = 90
+AI_INTERVAL_SEC = 4.0  # 무료 등급의 분당 요청 한도를 넘지 않게 AI 요청 사이를 둔다
+NOT_PET_WORDS = ("반려식물",)  # 「반려」 검색에 걸리지만 반려동물 행사가 아니다(설계 7-2절)
 MIN_TEXT = 50
 REGION_NAMES = {"서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "경기", "강원",
                 "충북", "충남", "전북", "전남", "경북", "경남", "제주"}
@@ -37,6 +40,26 @@ class Deps:
     tour_key: Optional[str] = None    # 관광공사 서비스 키. 없으면 관광공사는 건너뛴다
     parsers: Dict[str, object] = field(default_factory=lambda: dict(PARSERS))
     log: Callable[[str], None] = lambda message: None
+    ai_pace: Optional[Callable[[], None]] = None  # AI 를 부르기 전에 한 번씩. 없으면 AI_INTERVAL_SEC 만큼 쉰다
+
+    def __post_init__(self):
+        if self.ai_pace is None:
+            self.ai_pace = _Pacer(AI_INTERVAL_SEC)
+
+
+class _Pacer:
+    """앞 요청에서 interval 초가 안 지났으면 나머지만큼 쉰다"""
+
+    def __init__(self, interval: float):
+        self.interval = interval
+        self.last: Optional[float] = None
+
+    def __call__(self) -> None:
+        if self.last is not None:
+            waited = time.monotonic() - self.last
+            if waited < self.interval:
+                time.sleep(self.interval - waited)
+        self.last = time.monotonic()
 
 
 def run_once(today: date, sources: list, deps: Deps) -> RunSummary:
@@ -92,11 +115,25 @@ def _tour(today: date, deps: Deps, stat: SourceStat, errors: list) -> None:
     for external_id in _unseen(TOUR_SOURCE["code"], list(by_id), deps):
         item = by_id[external_id]
         stat.checked += 1
-        # 관광공사 목록에는 본문이 없어 AI 칸 없이 수집한 칸만으로 틀을 채운다(설계 4절)
-        fields = EventFields(is_event=True, title=item.title, start=item.start, end=item.end,
-                             region=item.region, place=item.place)
+        # 기간·장소·지역은 API 칸 값이 먼저다
+        api_values = dict(start=item.start, end=item.end, region=item.region, place=item.place)
         try:
+            # 목록에는 본문이 없어 소개 글을 받아 AI 에 넣는다. 못 받으면 AI 칸 없이 올린다(설계 6절)
+            overview = fetch_overview(deps.tour_key, external_id, deps.http)
+            if overview and deps.ai is not None:
+                deps.ai_pace()
+                fields = extract_event(overview, item.title, today, deps.ai)
+                if not fields.is_event:
+                    _record(TOUR_SOURCE, deps, stat, external_id, item.url, item.title, "SKIPPED_NOT_EVENT")
+                    continue
+                fields = replace(guard_against_invented(fields, overview), title=item.title, **api_values)
+            else:
+                if not overview:
+                    errors.append(f"TOURAPI {external_id}: 소개 글 없음 — AI 칸 없이 올림")
+                fields = EventFields(is_event=True, title=item.title, **api_values)
             _finish(today, TOUR_SOURCE, deps, stat, external_id, item.url, fields, item.image_url)
+        except ExtractError as error:
+            errors.append(f"TOURAPI {external_id}: AI 추출 실패 — {error}")
         except Exception as error:  # noqa: BLE001
             errors.append(f"TOURAPI {external_id}: {type(error).__name__} {error}")
 
@@ -105,12 +142,17 @@ def _handle(today, source, deps, stat, errors, *, external_id, url, title, text,
     if len(text.strip()) < MIN_TEXT:
         _record(source, deps, stat, external_id, url, title, "SKIPPED_NO_TEXT")
         return
+    if any(word in title for word in NOT_PET_WORDS):
+        _record(source, deps, stat, external_id, url, title, "SKIPPED_NOT_EVENT")
+        return
     if deps.ai is None:
         deps.log(f"  {source['code']} {external_id}: AI 키가 없어 여기서 멈춤 — {title}")
         return
-    fields = extract_event(text, title, posted_on, deps.ai)
-    if fields is None:
-        errors.append(f"{source['code']} {external_id}: AI 추출 실패")
+    deps.ai_pace()
+    try:
+        fields = extract_event(text, title, posted_on, deps.ai)
+    except ExtractError as error:
+        errors.append(f"{source['code']} {external_id}: AI 추출 실패 — {error}")
         return
     if not fields.is_event:
         _record(source, deps, stat, external_id, url, title, "SKIPPED_NOT_EVENT")

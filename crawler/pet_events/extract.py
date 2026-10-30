@@ -1,6 +1,7 @@
 """Gemini 로 본문에서 행사 여부와 칸 값을 뽑는다.
 
-- 응답은 JSON 스키마로 강제한다. 형식이 틀리거나 오류면 None (호출하는 쪽이 다음 날 다시 묻는다).
+- 응답은 JSON 스키마로 강제한다. 형식이 틀리거나 오류면 까닭을 담은 ExtractError (호출하는 쪽이 다음 날 다시 묻는다).
+- 요청 한도(429)나 일시 오류(500, 503)는 기다렸다가 두 번까지 다시 한다.
 - AI 가 본문에 없는 날짜나 참가비를 만들어 낼 수 있다 → guard_against_invented 로 버린다.
 """
 from __future__ import annotations
@@ -8,15 +9,22 @@ from __future__ import annotations
 import json
 import os
 import re
+import time
 from dataclasses import replace
 from datetime import date
-from typing import Optional
+from typing import Callable, Optional
 
 from .dates import parse_range
 from .models import EventFields
 
 MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.1-flash-lite")
 MAX_INPUT_CHARS = 6000  # 보도자료 본문 하나는 이 안에 든다. 넘치면 앞부분만
+RETRY_CODES = {429, 500, 503}
+RETRY_WAITS = (15, 45)  # 초. 무료 등급의 분당 한도가 풀리기를 기다린다
+
+
+class ExtractError(Exception):
+    """AI 가 칸을 못 뽑았다. 메시지에 까닭(오류 종류, 응답 문제)을 담는다"""
 
 _NULLABLE_STRING = {"type": ["string", "null"]}
 SCHEMA = {
@@ -43,10 +51,13 @@ SCHEMA = {
 PROMPT = """너는 반려동물 행사 안내문을 정리하는 편집자다. 아래 공공기관 글을 읽고 칸을 채워라.
 
 규칙
-- 반려인이 직접 가서 참여하는 행사(축제, 행사, 교육, 놀이터 운영, 입양 행사)일 때만 is_event 를 true 로 한다.
+- 반려동물과 함께 가거나 반려동물(반려인)을 위한 행사(축제, 교육, 놀이터 운영, 입양 행사)에
+  반려인이 직접 가서 참여할 수 있을 때만 is_event 를 true 로 한다.
   정책 발표, 사업 출범, 예방접종 지원, 단속 안내처럼 참여하는 행사가 아니면 false 다.
+  반려식물, 도시농업, 정원 박람회처럼 반려동물 행사가 아니면 false 다.
 - 본문에 있는 사실만 쓴다. 본문에 없는 값은 지어내지 말고 null 로 둔다(날짜, 장소, 참가비는 특히).
 - 날짜는 등록일 {posted_on} 기준으로 연도를 채워 YYYY-MM-DD 로 쓴다.
+- hours 는 본문에 적힌 전체 운영시간을 적힌 그대로 쓴다. 프로그램별 시간을 합쳐 만들지 말고, 전체 운영시간이 없으면 null 이다.
 - one_line, activities, checks 는 본문 문장을 그대로 옮기지 말고 짧게 새로 쓴다(존댓말 해요체).
 - activities 는 할 수 있는 것 2~3개, checks 는 가기 전에 확인할 것 1~2개.
 
@@ -57,19 +68,16 @@ PROMPT = """너는 반려동물 행사 안내문을 정리하는 편집자다. �
 """
 
 
-def extract_event(text: str, title: str, posted_on: Optional[date], client) -> Optional[EventFields]:
+def extract_event(
+    text: str, title: str, posted_on: Optional[date], client, sleep: Callable[[float], None] = time.sleep
+) -> EventFields:
     prompt = PROMPT.format(
         posted_on=posted_on.isoformat() if posted_on else "알 수 없음",
         title=title,
         text=text[:MAX_INPUT_CHARS],
     )
+    data = _ask(client, prompt, sleep)
     try:
-        response = client.models.generate_content(
-            model=MODEL,
-            contents=prompt,
-            config={"response_mime_type": "application/json", "response_json_schema": SCHEMA},
-        )
-        data = json.loads(response.text)
         fields = EventFields(
             is_event=bool(data["is_event"]),
             title=str(data["title"]).strip() or title,
@@ -85,13 +93,37 @@ def extract_event(text: str, title: str, posted_on: Optional[date], client) -> O
             activities=[s.strip() for s in data["activities"] if isinstance(s, str) and s.strip()],
             checks=[s.strip() for s in data["checks"] if isinstance(s, str) and s.strip()],
         )
-    except Exception:  # noqa: BLE001 — 형식 오류, 할당량, 네트워크 모두 「이번엔 못 뽑음」이다
-        return None
+    except KeyError as error:
+        raise ExtractError(f"응답에 {error.args[0]} 칸이 없음") from error
+    except (TypeError, ValueError, AttributeError) as error:
+        raise ExtractError(f"응답 칸 모양이 틀림: {type(error).__name__} {error}") from error
 
     if fields.start is None:  # AI 가 날짜를 못 뽑았으면 본문 글자에서 직접 찾는다
         start, end = parse_range(text, posted_on or date.today())
         fields = replace(fields, start=start, end=end if end != start else None)
     return fields
+
+
+def _ask(client, prompt: str, sleep: Callable[[float], None]) -> dict:
+    """한도·일시 오류는 기다렸다가 두 번까지 다시. 그 밖의 오류는 바로 까닭을 담아 알린다"""
+    for attempt in range(len(RETRY_WAITS) + 1):
+        try:
+            response = client.models.generate_content(
+                model=MODEL,
+                contents=prompt,
+                config={"response_mime_type": "application/json", "response_json_schema": SCHEMA},
+            )
+        except Exception as error:  # noqa: BLE001 — google.genai 오류도 여기로 온다(code 를 가진다)
+            code = getattr(error, "code", None)
+            if code in RETRY_CODES and attempt < len(RETRY_WAITS):
+                sleep(RETRY_WAITS[attempt])
+                continue
+            raise ExtractError(f"{type(error).__name__} {code or ''} {str(error)[:120]}".strip()) from error
+        try:
+            return json.loads(response.text)
+        except (TypeError, ValueError) as error:
+            raise ExtractError(f"JSON 이 아님: {str(response.text)[:80]!r}") from error
+    raise ExtractError("다시 시도를 다 썼다")
 
 
 def guard_against_invented(fields: EventFields, text: str) -> EventFields:
@@ -105,7 +137,9 @@ def guard_against_invented(fields: EventFields, text: str) -> EventFields:
     if fee and not re.search(r"무료|\d[\d,]*\s*원", text):
         fee = None
     hours = fields.hours
-    if hours and not re.search(r"\d{1,2}\s*(?:시|:\d{2})", text):
+    # 운영시간 속 숫자 하나라도 본문에 「시각으로」(8시, 18:, :00) 없으면 버린다.
+    # 프로그램별 시간을 이어 붙였거나 형식을 바꿔 쓴 것이다(2026-10-30 「오전 12시~오후 8시」)
+    if hours and (not re.findall(r"\d+", hours) or not all(_mentions_time(text, n) for n in re.findall(r"\d+", hours))):
         hours = None
     return replace(fields, start=start, end=end, fee=fee, hours=hours)
 
@@ -117,6 +151,10 @@ def _mentions_day(text: str, value: date) -> bool:
         rf"(?<!\d)0?{m}\s*[.\-/]\s*0?{d}(?!\d)",
     ]
     return any(re.search(pattern, text) for pattern in patterns)
+
+
+def _mentions_time(text: str, number: str) -> bool:
+    return bool(re.search(rf"(?<!\d){number}\s*(?:시|:)", text) or re.search(rf":\s*{number}(?!\d)", text))
 
 
 def _mentions_day_only(text: str, value: date) -> bool:

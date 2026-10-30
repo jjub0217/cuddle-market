@@ -7,7 +7,7 @@ from pet_events.models import DetailPage, ListItem, ListResult
 from pet_events.run import Deps, run_once
 
 TODAY = date(2026, 10, 30)
-LONG_TEXT = "노원구는 11월 8일(일) 오전 10시 노원 공원에서 반려견 산책 행사를 연다. 참가비는 무료이며 누구나 참여할 수 있다. " * 2
+LONG_TEXT = "노원구는 11월 8일(일) 오전 10시부터 낮 12시까지 노원 공원에서 반려견 산책 행사를 연다. 참가비는 무료이며 누구나 참여할 수 있다. " * 2
 
 
 def source(code="NOWON_PRESS", parser="fake", region="서울"):
@@ -83,7 +83,7 @@ def run(items, details, ai_answer=EVENT, seen=(), reported_total=None, blocked=(
     http = FakeHttp(blocked)
     cuddle = FakeCuddle(seen)
     ai = FakeAI(ai_answer)
-    deps = Deps(http=http, cuddle=cuddle, ai=ai, tour_key=None, parsers={"fake": parser})
+    deps = Deps(http=http, cuddle=cuddle, ai=ai, tour_key=None, parsers={"fake": parser}, ai_pace=lambda: None)
     summary = run_once(TODAY, sources or [source()], deps)
     return summary, http, cuddle, ai
 
@@ -168,10 +168,12 @@ def test_ai_failure_is_error_and_not_recorded():
     i = item("1")
     parser = FakeParser([i], detail_of(i))
     broken = SimpleNamespace(models=SimpleNamespace(generate_content=lambda **k: SimpleNamespace(text="{bad")))
-    deps = Deps(http=FakeHttp(), cuddle=FakeCuddle(), ai=broken, tour_key=None, parsers={"fake": parser})
+    deps = Deps(http=FakeHttp(), cuddle=FakeCuddle(), ai=broken, tour_key=None, parsers={"fake": parser},
+                ai_pace=lambda: None)
     summary = run_once(TODAY, [source()], deps)
     assert deps.cuddle.payloads == []
-    assert any("AI" in error for error in summary.errors)
+    # 까닭이 문제 목록에 남는다(예전에는 「AI 추출 실패」뿐이었다)
+    assert any("AI" in error and "JSON" in error for error in summary.errors), summary.errors
 
 
 def test_one_source_failing_does_not_stop_others():
@@ -224,3 +226,72 @@ def test_labelled_values_win_over_ai():
     assert (p["place"], p["fee"], p["organizer"], p["target"]) == ("한라체육관 일원", "무료", "제주특별자치도", "전 연령")
     assert p["region"] == "제주"
     assert p["summary"] == EVENT["one_line"]  # 한 줄 소개와 목록은 AI 가 맡는다
+
+
+def test_plant_titles_are_not_events_without_asking_ai():
+    # 「반려」로 검색하면 「반려식물」도 걸린다(설계 7-2절)
+    plant = item("1", title="2026 반려식물 클리닉 운영 안내")
+    _, _, cuddle, ai = run([plant], detail_of(plant))
+    assert ai.calls == 0
+    assert cuddle.payloads[0]["status"] == "SKIPPED_NOT_EVENT"
+
+
+def test_ai_calls_are_paced():
+    paced = []
+    a, b = item("1"), item("2")
+    parser = FakeParser([a, b], {**detail_of(a), **detail_of(b)})
+    deps = Deps(http=FakeHttp(), cuddle=FakeCuddle(), ai=FakeAI(EVENT), tour_key=None, parsers={"fake": parser},
+                ai_pace=lambda: paced.append(1))
+    run_once(TODAY, [source()], deps)
+    assert len(paced) == 2  # AI 를 부를 때마다 한 번씩 쉰다
+
+
+class TourHttp(FakeHttp):
+    """관광공사 축제 목록과 소개 글을 돌려준다"""
+
+    def __init__(self, overview_text):
+        super().__init__()
+        self.overview_text = overview_text
+
+    def get_json(self, url, params=None):
+        if url.endswith("searchFestival2"):
+            return {"response": {"header": {"resultCode": "0000"}, "body": {"items": {"item": [{
+                "contentid": "3545306", "title": "포천펫스타", "eventstartdate": "20261114", "eventenddate": "20261115",
+                "addr1": "경기도 포천시 신북면 아트밸리로 234", "firstimage": ""}]}, "totalCount": 1}}}
+        items = {"item": [{"contentid": "3545306", "overview": self.overview_text}]} if self.overview_text else ""
+        return {"response": {"header": {"resultCode": "0000"}, "body": {"items": items, "totalCount": 1}}}
+
+
+TOUR_OVERVIEW = "포천펫스타는 11월 14일부터 15일까지 포천 아트밸리에서 열리는 반려동물 축제입니다. 어질리티와 펫 패션쇼가 있습니다."
+
+
+def run_tour(overview_text, ai_answer):
+    ai = FakeAI(ai_answer)
+    deps = Deps(http=TourHttp(overview_text), cuddle=FakeCuddle(), ai=ai, tour_key="KEY", parsers={},
+                ai_pace=lambda: None)
+    summary = run_once(TODAY, [], deps)
+    return summary, deps.cuddle.payloads, ai
+
+
+def test_tour_overview_goes_to_ai_and_api_values_win():
+    ai_answer = {**EVENT, "title": "포천펫스타", "start_date": "2026-11-20", "end_date": None, "place": "포천",
+                 "region": "서울", "one_line": "반려동물과 함께 즐기는 포천 축제", "activities": ["어질리티 체험"]}
+    _, payloads, ai = run_tour(TOUR_OVERVIEW, ai_answer)
+    p = payloads[0]
+
+    assert ai.calls == 1
+    assert p["summary"] == "반려동물과 함께 즐기는 포천 축제" and p["activities"] == ["어질리티 체험"]
+    # 기간·장소·지역은 API 칸 값이 먼저다
+    assert (p["eventStartDate"], p["eventEndDate"]) == ("2026-11-14", "2026-11-15")
+    assert (p["place"], p["region"]) == ("경기도 포천시 신북면 아트밸리로 234", "경기")
+
+
+def test_tour_without_overview_posts_without_ai_fields():
+    _, payloads, ai = run_tour(None, EVENT)
+    assert ai.calls == 0
+    assert payloads[0]["status"] == "POSTED" and payloads[0]["summary"] is None
+
+
+def test_tour_overview_saying_not_pet_event_is_skipped():
+    _, payloads, _ = run_tour(TOUR_OVERVIEW, {**EVENT, "is_event": False})
+    assert payloads[0]["status"] == "SKIPPED_NOT_EVENT"

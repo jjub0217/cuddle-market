@@ -4,6 +4,7 @@
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from datetime import date, datetime
 from typing import List, Optional
@@ -11,6 +12,7 @@ from typing import List, Optional
 from .regions import region_of
 
 ENDPOINT = "https://apis.data.go.kr/B551011/KorService2/searchFestival2"
+DETAIL_ENDPOINT = "https://apis.data.go.kr/B551011/KorService2/detailCommon2"
 PET_WORDS = ("반려", "펫", "댕", "냥", "입양", "강아지", "고양이")
 ROWS_PER_PAGE = 100
 MAX_PAGES = 10
@@ -51,6 +53,22 @@ def fetch_festivals(service_key: str, today: date, client) -> List[TourItem]:
         if not rows or seen >= int(body.get("totalCount") or 0):
             break
     return items
+
+
+def fetch_overview(service_key: str, content_id: str, client) -> Optional[str]:
+    """축제 하나의 소개 글(overview). 목록에는 본문이 없어 AI 에 넣을 글자를 따로 받는다. 없으면 None"""
+    body = _body(client.get_json(DETAIL_ENDPOINT, params={
+        "serviceKey": service_key,
+        "MobileOS": "ETC",
+        "MobileApp": "CuddleMarket",
+        "_type": "json",
+        "contentId": content_id,
+    }))
+    rows = _rows(body)
+    overview = (rows[0].get("overview") or "") if rows else ""
+    text = re.sub(r"<br\s*/?>", "\n", overview, flags=re.IGNORECASE)
+    text = re.sub(r"<[^>]+>", "", text).strip()
+    return text or None
 
 
 def _body(payload: dict) -> dict:

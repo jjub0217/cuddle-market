@@ -1,7 +1,9 @@
 import json
 from datetime import date
 
-from pet_events.extract import extract_event, guard_against_invented
+import pytest
+
+from pet_events.extract import PROMPT, ExtractError, extract_event, guard_against_invented
 from pet_events.models import EventFields
 
 
@@ -11,21 +13,35 @@ class FakeResponse:
 
 
 class FakeModels:
-    def __init__(self, text=None, error=None):
+    def __init__(self, text=None, error=None, errors=()):
         self.text = text
         self.error = error
+        self.errors = list(errors)  # 앞에서부터 한 번씩 던진다
         self.calls = []
 
     def generate_content(self, model, contents, config):
         self.calls.append({"model": model, "contents": contents, "config": config})
+        if self.errors:
+            raise self.errors.pop(0)
         if self.error:
             raise self.error
         return FakeResponse(self.text)
 
 
 class FakeClient:
-    def __init__(self, text=None, error=None):
-        self.models = FakeModels(text, error)
+    def __init__(self, text=None, error=None, errors=()):
+        self.models = FakeModels(text, error, errors)
+
+
+class ApiError(Exception):
+    """google.genai.errors.APIError 처럼 code 를 가진 오류"""
+
+    def __init__(self, code):
+        super().__init__(f"{code} RESOURCE_EXHAUSTED" if code == 429 else f"{code} error")
+        self.code = code
+
+
+NO_WAIT = {"sleep": lambda seconds: None}
 
 
 TEXT = "서울시는 10월 31일(토) 오전 10시부터 오후 5시까지 문화비축기지에서 반려문화 축제를 연다. 참가비는 무료다. 반려견 놀이터와 상담이 준비됐다."
@@ -60,16 +76,51 @@ def test_not_event():
     assert extract_event(TEXT, "순찰대 출범", None, client).is_event is False
 
 
-def test_broken_json_is_none():
-    assert extract_event(TEXT, "t", None, FakeClient("{not json")) is None
+# 실패는 까닭을 담아 알린다(설계 7-2절). 예전에는 None 만 돌려줘 「AI 추출 실패」로만 남았다
 
 
-def test_missing_required_key_is_none():
-    assert extract_event(TEXT, "t", None, FakeClient(json.dumps({"title": "x"}))) is None
+def test_broken_json_raises_with_reason():
+    with pytest.raises(ExtractError, match="JSON"):
+        extract_event(TEXT, "t", None, FakeClient("{not json"), **NO_WAIT)
 
 
-def test_exception_is_none():
-    assert extract_event(TEXT, "t", None, FakeClient(error=RuntimeError("quota"))) is None
+def test_missing_required_key_raises_with_reason():
+    with pytest.raises(ExtractError, match="is_event"):
+        extract_event(TEXT, "t", None, FakeClient(json.dumps({"title": "x"})), **NO_WAIT)
+
+
+def test_other_exception_raises_with_type():
+    with pytest.raises(ExtractError, match="RuntimeError"):
+        extract_event(TEXT, "t", None, FakeClient(error=RuntimeError("network down")), **NO_WAIT)
+
+
+def test_rate_limit_waits_and_retries():
+    waited = []
+    client = FakeClient(json.dumps(GOOD, ensure_ascii=False), errors=[ApiError(429), ApiError(503)])
+    fields = extract_event(TEXT, "t", None, client, sleep=waited.append)
+    assert fields.title == "2026 서울 댕냥데이즈"
+    assert len(client.models.calls) == 3
+    assert len(waited) == 2 and all(w >= 10 for w in waited)
+
+
+def test_rate_limit_gives_up_after_two_retries():
+    client = FakeClient(error=ApiError(429))
+    with pytest.raises(ExtractError, match="429"):
+        extract_event(TEXT, "t", None, client, **NO_WAIT)
+    assert len(client.models.calls) == 3
+
+
+def test_client_error_is_not_retried():
+    client = FakeClient(error=ApiError(400))
+    with pytest.raises(ExtractError, match="400"):
+        extract_event(TEXT, "t", None, client, **NO_WAIT)
+    assert len(client.models.calls) == 1
+
+
+def test_prompt_rules():
+    # 반려식물·도시농업·정원 행사는 행사가 아니다. 운영시간은 합쳐 만들지 않는다
+    assert "반려식물" in PROMPT and "도시농업" in PROMPT and "정원" in PROMPT
+    assert "합쳐" in PROMPT
 
 
 def test_ai_without_date_falls_back_to_text_dates():
@@ -122,6 +173,24 @@ def test_guard_drops_hours_without_time_in_text():
 
 
 def test_guard_keeps_hours_with_time_in_text():
-    for text in ["11월 6일 ~ 8일 오전 10시~오후 5시", "11월 6일 ~ 8일 10:00~17:00"]:
-        guarded = guard_against_invented(fields(fee=None, hours="10:00~17:00"), text)
-        assert guarded.hours == "10:00~17:00", text
+    guarded = guard_against_invented(fields(fee=None, hours="10:00~17:00"), "11월 6일 ~ 8일 10:00~17:00")
+    assert guarded.hours == "10:00~17:00"
+
+
+def test_guard_drops_hours_written_in_other_format():
+    # 본문 「오후 5시」를 「17:00」으로 바꿔 쓰면 적힌 그대로가 아니다(설계 7-2절)
+    guarded = guard_against_invented(fields(fee=None, hours="10:00~17:00"), "11월 6일 ~ 8일 오전 10시~오후 5시")
+    assert guarded.hours is None
+
+
+def test_guard_drops_hours_made_by_joining_programs():
+    # 2026-10-30 실제: 「오후 12시 토크」「18:00~20:00 영화」를 이어 붙여 「오전 12시~오후 8시」를 만들었다
+    text = "11월 6일 ~ 8일. 오후 12시부터 토크콘서트, 저녁 시간(18:00~20:00) 야외 영화관"
+    guarded = guard_against_invented(fields(fee=None, hours="오전 12시~오후 8시"), text)
+    assert guarded.hours is None
+
+
+def test_guard_keeps_hours_whose_numbers_are_all_in_text():
+    text = "11월 6일 ~ 8일 오전 10시부터 오후 5시까지"
+    guarded = guard_against_invented(fields(fee=None, hours="오전 10시~오후 5시"), text)
+    assert guarded.hours == "오전 10시~오후 5시"
