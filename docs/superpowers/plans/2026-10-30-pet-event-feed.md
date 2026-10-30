@@ -313,9 +313,9 @@
 **Files:**
 - Create: `.github/workflows/event-crawler.yml`
 
-- [ ] **Step 1: 작성** — `schedule: cron "0 0 * * *"`(매일 09:00 KST), `workflow_dispatch`(입력 `dry_run` 참/거짓). Python 3.12, `pip install -r crawler/requirements.txt`, `pytest crawler/tests -q`, 그다음 `python -m run`. 환경 변수는 Global Constraints의 Secrets와 `CUDDLE_API_BASE=https://cmarket-api.duckdns.org/api`.
-- [ ] **Step 2: 확인** — `actionlint`가 있으면 통과, 없으면 YAML 문법 검사(`python3 -c "import yaml…"`)
-- [ ] **Step 3: 커밋** — `ci: 행사 수집을 매일 아침 돌리는 워크플로를 더한다`
+- [x] **Step 1: 작성** — `schedule: cron "0 0 * * *"`(매일 09:00 KST), `workflow_dispatch`(입력 `dry_run` 참/거짓). Python 3.12, `pip install -r crawler/requirements.txt`, `pytest crawler/tests -q`, 그다음 `python -m run`. 환경 변수는 Global Constraints의 Secrets와 `CUDDLE_API_BASE=https://cmarket-api.duckdns.org/api`.
+- [x] **Step 2: 확인** — `actionlint`가 있으면 통과, 없으면 YAML 문법 검사(`python3 -c "import yaml…"`)
+- [x] **Step 3: 커밋** — `ci: 행사 수집을 매일 아침 돌리는 워크플로를 더한다`
 
 ---
 
