@@ -7,7 +7,7 @@ from pet_events.models import DetailPage, ListItem, ListResult
 from pet_events.run import Deps, run_once
 
 TODAY = date(2026, 10, 30)
-LONG_TEXT = "노원구는 11월 8일(일) 오전 10시부터 낮 12시까지 노원 공원에서 반려견 산책 행사를 연다. 참가비는 무료이며 누구나 참여할 수 있다. " * 2
+LONG_TEXT = "노원구는 11월 8일(일) 오전 10시부터 낮 12시까지 노원 공원에서 반려견 산책 행사를 연다. 참가비는 무료이며 현장 접수로 누구나 참여할 수 있다. " * 2
 
 
 def source(code="NOWON_PRESS", parser="fake", region="서울"):
@@ -70,7 +70,7 @@ class FakeAI:
 
 EVENT = {"is_event": True, "title": "노원 반려동물 산책 한마당", "start_date": "2026-11-08", "end_date": None,
          "region": "서울", "place": "노원 공원", "organizer": "노원구", "target": "반려견", "fee": "무료",
-         "hours": "오전 10시~낮 12시",
+         "hours": "오전 10시~낮 12시", "application": "현장 접수",
          "one_line": "이웃과 함께 걷는 산책 행사", "activities": ["산책 코스 걷기"], "checks": ["목줄 챙기기"]}
 
 
@@ -151,6 +151,7 @@ def test_posted_payload():
     assert payload["summary"] == "이웃과 함께 걷는 산책 행사"
     assert (payload["target"], payload["fee"]) == ("반려견", "무료")
     assert payload["hours"] == "오전 10시~낮 12시"
+    assert payload["application"] == "현장 접수"
     assert payload["activities"] == ["산책 코스 걷기"]
     assert payload["checks"] == ["목줄 챙기기"]
     assert summary.per_source["NOWON_PRESS"].posted == 1
@@ -199,11 +200,11 @@ def test_payload_fits_server_limits():
     # 서버(EventIngestRequest)는 칸마다 길이 제한이 있다. 넘으면 글 전체가 400 으로 거절된다
     i = item("1")
     long_answer = {**EVENT, "place": "장" * 300, "organizer": "주" * 300, "target": "대" * 300, "fee": "무료 " * 100,
-                   "one_line": "소" * 300, "hours": "10시 " * 100, "activities": ["활" * 500] * 3, "checks": ["확" * 500] * 2}
+                   "one_line": "소" * 300, "hours": "10시 " * 100, "application": "접수 " * 100, "activities": ["활" * 500] * 3, "checks": ["확" * 500] * 2}
     _, _, cuddle, _ = run([i], detail_of(i), ai_answer=long_answer)
     payload = cuddle.payloads[0]
 
-    for key in ("place", "organizer", "target", "fee", "summary", "hours"):
+    for key in ("place", "organizer", "target", "fee", "summary", "hours", "application"):
         assert len(payload[key]) <= 100, key
     assert len(payload["region"]) <= 20
     assert all(len(x) <= 200 for x in payload["activities"] + payload["checks"])

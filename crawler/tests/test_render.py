@@ -11,7 +11,7 @@ def full_fields(**overrides):
         is_event=True, title="2026 서울 댕냥데이즈",
         start=date(2026, 10, 31), end=date(2026, 10, 31),
         region="서울", place="문화비축기지", organizer="서울특별시", target="반려견, 반려묘", fee="무료",
-        hours="오전 11시~오후 7시",
+        hours="오전 11시~오후 7시", application="사전 신청 필요",
         one_line="반려견과 함께 즐기는 가을 축제",
         activities=["반려견 놀이터와 어질리티 체험", "수의사 건강 상담"],
         checks=["목줄과 배변 봉투를 챙기세요"],
@@ -34,6 +34,7 @@ def test_order_and_labels_follow_design():
         "장소 | 서울 문화비축기지",
         "대상 | 반려견, 반려묘",
         "참가비 | 무료",
+        "신청 | 사전 신청 필요",
         "주최 | 서울특별시",
         "",
         "이런 걸 할 수 있어요",
@@ -61,8 +62,9 @@ def test_no_poster_no_poster_line():
 
 
 def test_missing_values_say_check_official_notice():
-    _, body = render_post(full_fields(fee=None, target=None, organizer=None, place=None, region=None, hours=None), "서울특별시", URL)
+    _, body = render_post(full_fields(fee=None, target=None, organizer=None, place=None, region=None, hours=None, application=None), "서울특별시", URL)
     assert "운영시간 | 공식 안내 확인" in body
+    assert "신청 | 공식 안내 확인" in body
     assert "참가비 | 공식 안내 확인" in body
     assert "대상 | 공식 안내 확인" in body
     assert "주최 | 공식 안내 확인" in body

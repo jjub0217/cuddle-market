@@ -40,12 +40,13 @@ SCHEMA = {
         "target": _NULLABLE_STRING,
         "fee": _NULLABLE_STRING,
         "hours": {**_NULLABLE_STRING, "description": "운영시간. 예: 오전 10시~오후 5시"},
+        "application": {**_NULLABLE_STRING, "description": "신청 방법. 예: 사전 신청 필요(10월 31일 마감), 현장 접수"},
         "one_line": {**_NULLABLE_STRING, "description": "40자 이내 한 줄 소개"},
         "activities": {"type": "array", "items": {"type": "string"}, "maxItems": 3},
         "checks": {"type": "array", "items": {"type": "string"}, "maxItems": 2},
     },
     "required": ["is_event", "title", "start_date", "end_date", "region", "place", "organizer",
-                 "target", "fee", "hours", "one_line", "activities", "checks"],
+                 "target", "fee", "hours", "application", "one_line", "activities", "checks"],
 }
 
 PROMPT = """너는 반려동물 행사 안내문을 정리하는 편집자다. 아래 공공기관 글을 읽고 칸을 채워라.
@@ -57,6 +58,7 @@ PROMPT = """너는 반려동물 행사 안내문을 정리하는 편집자다. �
   반려식물, 도시농업, 정원 박람회처럼 반려동물 행사가 아니면 false 다.
 - 본문에 있는 사실만 쓴다. 본문에 없는 값은 지어내지 말고 null 로 둔다(날짜, 장소, 참가비는 특히).
 - 날짜는 등록일 {posted_on} 기준으로 연도를 채워 YYYY-MM-DD 로 쓴다.
+- application 은 사전 신청이 필요한지, 마감일, 현장 접수가 되는지를 본문에 적힌 대로 짧게 쓴다. 없으면 null 이다.
 - hours 는 본문에 적힌 전체 운영시간을 적힌 그대로 쓴다. 프로그램별 시간을 합쳐 만들지 말고, 전체 운영시간이 없으면 null 이다.
 - one_line, activities, checks 는 본문 문장을 그대로 옮기지 말고 짧게 새로 쓴다(존댓말 해요체).
 - activities 는 할 수 있는 것 2~3개, checks 는 가기 전에 확인할 것 1~2개.
@@ -89,6 +91,7 @@ def extract_event(
             target=_str(data["target"]),
             fee=_str(data["fee"]),
             hours=_str(data["hours"]),
+            application=_str(data["application"]),
             one_line=_str(data["one_line"]),
             activities=[s.strip() for s in data["activities"] if isinstance(s, str) and s.strip()],
             checks=[s.strip() for s in data["checks"] if isinstance(s, str) and s.strip()],
@@ -141,7 +144,15 @@ def guard_against_invented(fields: EventFields, text: str) -> EventFields:
     # 프로그램별 시간을 이어 붙였거나 형식을 바꿔 쓴 것이다(2026-10-30 「오전 12시~오후 8시」)
     if hours and (not re.findall(r"\d+", hours) or not all(_mentions_time(text, n) for n in re.findall(r"\d+", hours))):
         hours = None
-    return replace(fields, start=start, end=end, fee=fee, hours=hours)
+    # 신청 방법은 본문에 신청·접수·예약·등록 이야기가 있어야 하고, 마감일 같은 날짜는 본문에 있어야 한다
+    application = fields.application
+    if application and (
+        not re.search(r"신청|접수|예약|등록", text)
+        or any(not re.search(rf"(?<!\d){m}\s*월\s*{d}\s*일|(?<!\d)0?{m}\s*[.\-/]\s*0?{d}(?!\d)", text)
+               for m, d in re.findall(r"(\d{1,2})\s*월\s*(\d{1,2})\s*일", application))
+    ):
+        application = None
+    return replace(fields, start=start, end=end, fee=fee, hours=hours, application=application)
 
 
 def _mentions_day(text: str, value: date) -> bool:

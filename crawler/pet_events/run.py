@@ -184,7 +184,7 @@ def _finish(today, source, deps, stat, external_id, url, fields: EventFields, im
         "region": fields.region, "place": fields.place, "organizer": fields.organizer,
         "summary": fields.one_line,
         # 상세 화면의 표와 목록(설계 7-2절)
-        "target": fields.target, "fee": fields.fee, "hours": fields.hours,
+        "target": fields.target, "fee": fields.fee, "hours": fields.hours, "application": fields.application,
         "activities": fields.activities, "checks": fields.checks,
     }
     if deps.cuddle is None:

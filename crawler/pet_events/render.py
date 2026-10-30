@@ -59,6 +59,7 @@ def _body(fields: EventFields, source_name: str, source_url: str, image_url: Opt
         f"장소 | {_place(fields.region, fields.place)}",
         f"대상 | {fields.target or CHECK_OFFICIAL}",
         f"참가비 | {fields.fee or CHECK_OFFICIAL}",
+        f"신청 | {fields.application or CHECK_OFFICIAL}",
         f"주최 | {fields.organizer or CHECK_OFFICIAL}",
         "",
     ]
@@ -107,7 +108,8 @@ def _capped(fields: EventFields, limit: int = MAX_FIELD) -> EventFields:
     return replace(
         fields,
         region=cap(fields.region), place=cap(fields.place), organizer=cap(fields.organizer),
-        target=cap(fields.target), fee=cap(fields.fee), hours=cap(fields.hours), one_line=cap(fields.one_line),
+        target=cap(fields.target), fee=cap(fields.fee), hours=cap(fields.hours),
+        application=cap(fields.application), one_line=cap(fields.one_line),
         activities=[cap(item) for item in fields.activities],
         checks=[cap(item) for item in fields.checks],
     )

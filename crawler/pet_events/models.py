@@ -49,6 +49,7 @@ class EventFields:
     target: Optional[str] = None
     fee: Optional[str] = None
     hours: Optional[str] = None  # 운영시간
+    application: Optional[str] = None  # 신청 방법 (사전 신청, 현장 접수 등)
     one_line: Optional[str] = None
     activities: List[str] = field(default_factory=list)
     checks: List[str] = field(default_factory=list)

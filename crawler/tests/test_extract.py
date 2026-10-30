@@ -44,12 +44,12 @@ class ApiError(Exception):
 NO_WAIT = {"sleep": lambda seconds: None}
 
 
-TEXT = "서울시는 10월 31일(토) 오전 10시부터 오후 5시까지 문화비축기지에서 반려문화 축제를 연다. 참가비는 무료다. 반려견 놀이터와 상담이 준비됐다."
+TEXT = "서울시는 10월 31일(토) 오전 10시부터 오후 5시까지 문화비축기지에서 반려문화 축제를 연다. 참가비는 무료이고 현장에서 접수한다. 반려견 놀이터와 상담이 준비됐다."
 
 GOOD = {
     "is_event": True, "title": "2026 서울 댕냥데이즈", "start_date": "2026-10-31", "end_date": None,
     "region": "서울", "place": "문화비축기지", "organizer": "서울특별시", "target": "반려견",
-    "fee": "무료", "hours": "오전 10시~오후 5시", "one_line": "반려견과 함께 즐기는 가을 축제",
+    "fee": "무료", "hours": "오전 10시~오후 5시", "application": "현장 접수", "one_line": "반려견과 함께 즐기는 가을 축제",
     "activities": ["반려견 놀이터", "건강 상담"], "checks": ["목줄 챙기기"],
 }
 
@@ -63,6 +63,7 @@ def test_valid_json_becomes_fields():
     assert (fields.start, fields.end) == (date(2026, 10, 31), None)
     assert fields.place == "문화비축기지"
     assert fields.hours == "오전 10시~오후 5시"
+    assert fields.application == "현장 접수"
     assert fields.activities == ["반려견 놀이터", "건강 상담"]
 
     config = client.models.calls[0]["config"]
@@ -194,3 +195,20 @@ def test_guard_keeps_hours_whose_numbers_are_all_in_text():
     text = "11월 6일 ~ 8일 오전 10시부터 오후 5시까지"
     guarded = guard_against_invented(fields(fee=None, hours="오전 10시~오후 5시"), text)
     assert guarded.hours == "오전 10시~오후 5시"
+
+
+def test_guard_drops_application_without_signup_words():
+    guarded = guard_against_invented(fields(fee=None, application="사전 신청 필요"), "11월 6일 ~ 8일 공원에서 열린다")
+    assert guarded.application is None
+
+
+def test_guard_drops_application_with_deadline_not_in_text():
+    text = "11월 6일 ~ 8일. 참가는 홈페이지에서 사전 신청한다."
+    guarded = guard_against_invented(fields(fee=None, application="사전 신청(10월 31일 마감)"), text)
+    assert guarded.application is None
+
+
+def test_guard_keeps_grounded_application():
+    text = "11월 6일 ~ 8일. 참가는 10월 31일까지 QR 코드로 사전 신청하거나 당일 현장 접수"
+    guarded = guard_against_invented(fields(fee=None, application="사전 신청(10월 31일 마감), 현장 접수 가능"), text)
+    assert guarded.application == "사전 신청(10월 31일 마감), 현장 접수 가능"
