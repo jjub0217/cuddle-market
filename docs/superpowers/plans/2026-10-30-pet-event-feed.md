@@ -197,18 +197,18 @@
   - `dates.parse_range(text: str, ref: date) -> tuple[date | None, date | None]`
   - `http.PoliteClient(delay_sec: float = 1.0).get(url: str, params: dict | None = None) -> str`, robots가 막으면 `http.BlockedByRobots`
 
-- [ ] **Step 1: `test_dates.py`**
+- [x] **Step 1: `test_dates.py`**
   - `"2026. 11. 6. ~ 11. 8."` → (2026-11-06, 2026-11-08)
   - `"2026.10.31"` → (2026-10-31, 2026-10-31)
   - `"10월 31일(토)"`, ref 2026-10-12 → (2026-10-31, 2026-10-31)
   - `"1월 10일"`, ref 2026-12-20 → (2027-01-10, 2027-01-10)
   - `"2026-10-30 ~ 2026-11-01"` → (2026-10-30, 2026-11-01)
   - 날짜 없는 글자 → (None, None)
-- [ ] **Step 2: `test_http.py`** — `robots.txt`가 `Disallow: /board`인 가짜 응답에서 `/board/1` 요청은 `BlockedByRobots`, 요청 머리글 User-Agent가 Global Constraints 값, 연속 요청 사이 1초 이상(시간 함수를 가짜로)
-- [ ] **Step 3: 실패 확인** — `cd crawler && python3 -m pytest -q` → import 오류
-- [ ] **Step 4: 구현** — `from __future__ import annotations`로 3.9에서도 돈다. 요청 시간 제한 20초.
-- [ ] **Step 5: 통과 확인** — 같은 명령 PASS
-- [ ] **Step 6: 커밋** (cuddle-market 작업 브랜치) — `feat(crawler): 날짜 정리와 robots.txt를 지키는 요청기를 더한다`
+- [x] **Step 2: `test_http.py`** — `robots.txt`가 `Disallow: /board`인 가짜 응답에서 `/board/1` 요청은 `BlockedByRobots`, 요청 머리글 User-Agent가 Global Constraints 값, 연속 요청 사이 1초 이상(시간 함수를 가짜로)
+- [x] **Step 3: 실패 확인** — `cd crawler && python3 -m pytest -q` → import 오류
+- [x] **Step 4: 구현** — `from __future__ import annotations`로 3.9에서도 돈다. 요청 시간 제한 20초.
+- [x] **Step 5: 통과 확인** — 같은 명령 PASS
+- [x] **Step 6: 커밋** (cuddle-market 작업 브랜치) — `feat(crawler): 날짜 정리와 robots.txt를 지키는 요청기를 더한다`
 
 ### Task 5: 출처 설정과 출처별 파서 4개
 
