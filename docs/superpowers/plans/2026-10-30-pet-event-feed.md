@@ -12,7 +12,7 @@
 
 ## 진행 순서 (2026-10-30 사용자 결정으로 바꿈)
 
-**Task 1~3(서버) → Task 3-1(서버, 행사 칸) → Task 10~12(웹) → Task 12-1(상태로 걸러 보기) → Task 4~9(크롤러) → Task 13.** 웹을 먼저 해서 로컬 화면(`localhost:3000`)에서 행사 소식을 눈으로 확인한 뒤 크롤러로 넘어간다. 웹은 서버만 있으면 되고 크롤러와는 주고받는 것이 없어 순서를 바꿔도 된다. 웹 확인용 예시 행사 글은 로컬 DB에만 넣는다.
+**Task 1~3(서버) → Task 3-1(서버, 행사 칸) → Task 10~12(웹) → Task 12-1(상태로 걸러 보기) → Task 12-2(행사 상세 화면) → Task 4~9(크롤러) → Task 13.** 웹을 먼저 해서 로컬 화면(`localhost:3000`)에서 행사 소식을 눈으로 확인한 뒤 크롤러로 넘어간다. 웹은 서버만 있으면 되고 크롤러와는 주고받는 것이 없어 순서를 바꿔도 된다. 웹 확인용 예시 행사 글은 로컬 DB에만 넣는다.
 
 ## 진행 기록
 
@@ -177,6 +177,28 @@
 - [x] **Step 3: 웹 시험과 구현** — `pnpm test`, `tsc`, `lint:strict`
 - [x] **Step 4: 3000 화면 확인** — 드롭다운 위치와 고를 때마다 바뀌는 목록
 - [x] **Step 5: 커밋** — 서버 `feat: 행사 소식 목록을 진행 상태로 거를 수 있게 한다(#1124)`, 웹 `feat(web): 행사 소식 목록에 상태 드롭다운을 더하고 정렬을 오른쪽으로 옮긴다(#1124)`
+
+### Task 12-2: 행사 상세 화면(픽케어 배치 참고), 댓글·신고 없애기, 드롭다운 모양 (2026-10-30 추가, 설계 7-1·7-2절)
+
+**서버 (cmarket_api)**
+- `CommunityServiceImpl.createComment`: 글이 EVENT면 `EventBoardWriteNotAllowedException`(시험 먼저)
+- `EventIngestRecord`에 `target`(100), `fee`(100), `activities`(1000, 줄바꿈으로 이음), `checks`(500, 줄바꿈으로 이음), `imageUrl`(500) 칸, 생성자 `@Builder`도. `EventIngestCommand`, `EventIngestRequest`, `EventInfoDto`, `EventInfoResponse`에 `target, fee, activities(List), checks(List), sourceUrl, imageUrl`
+
+**크롤러**
+- 보내는 값에 `target, fee, activities, checks` 추가(관광공사는 비어 있다)
+
+**웹**
+- `src/types/community.ts`의 `CommunityEvent`에 같은 칸
+- Create: `src/features/community/components/EventDetailBody.tsx`(포스터 + 배지·상태 + 제목 + 한 줄 소개 + 표 + 공식 안내 보기 + 목록 + 끝 문구). `src/lib/utils/eventStatus.ts`에 `formatEventPlace(region, place)`
+- Modify: `CommunityDetail.tsx` — EVENT이고 `event`가 있으면 `EventDetailBody`, 댓글 영역과 신고하기 단추 없음
+- Modify: `CommunityPage.tsx` — 상태 드롭다운을 홈 상세 필터(`LocationFilter` `card-chip`)와 같은 모양으로
+- Test: `EventDetailBody.test.tsx`(표 칸, 없는 값은 「공식 안내 확인」, 포스터 없으면 그림 없음, 공식 안내 보기 링크가 원문 주소·새 창, AI 칸 없으면 그 칸째 없음), `CommunityDetail` 쪽은 3000 화면
+
+- [ ] **Step 1: 서버 시험과 구현** — 댓글 거절, 새 칸 저장과 응답. `gradlew test`
+- [ ] **Step 2: 크롤러** — 보내는 값 시험 고치고 통과
+- [ ] **Step 3: 웹 시험과 구현** — `pnpm test`, `tsc`, `lint:strict`
+- [ ] **Step 4: 로컬 서버를 새 코드로 띄우고 예시 글을 새 칸까지 넣어 3000 화면 확인(데스크탑, 휴대폰 폭)**
+- [ ] **Step 5: 커밋** — 서버, 크롤러, 웹 각각
 
 ---
 
