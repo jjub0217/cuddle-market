@@ -346,9 +346,9 @@
 - Modify: `src/components/header/Header.tsx:158`, 같은 파일의 "펫지도"
 - Modify: `src/app/(main)/community/page.tsx:9,15,24`
 
-- [ ] **Step 1: 고치기** — Global Constraints의 문구 그대로. 이 문구를 단언하는 기존 시험이 있으면(`grep -rn "질문·정보\|펫지도" src`) 함께 고친다.
-- [ ] **Step 2: 확인** — `npm test`, `npx tsc --noEmit`
-- [ ] **Step 3: 커밋** — `fix: 헤더 메뉴 이름을 하단 메뉴와 같은 커뮤니티, 플레이스로 맞춘다`
+- [x] **Step 1: 고치기** — Global Constraints의 문구 그대로. 이 문구를 단언하는 기존 시험이 있으면(`grep -rn "질문·정보\|펫지도" src`) 함께 고친다.
+- [x] **Step 2: 확인** — `npm test`, `npx tsc --noEmit`
+- [x] **Step 3: 커밋** — `fix: 헤더 메뉴 이름을 하단 메뉴와 같은 커뮤니티, 플레이스로 맞춘다`
 
 ---
 
