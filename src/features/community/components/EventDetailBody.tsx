@@ -31,12 +31,13 @@ interface EventDetailBodyProps {
  */
 export function EventDetailBody({ title, createdAt, event, sourceName, today, actions }: EventDetailBodyProps) {
   const status = getEventStatus(event.startDate, event.endDate, today)
+  // 반려인이 갈지 말지 정하는 순서: 언제 → 어디서 → 우리 아이가 갈 수 있나 → 돈이 드나 → 누가 여나
   const rows: [string, string | null][] = [
     ['기간', formatEventPeriod(event.startDate, event.endDate)],
     ['장소', formatEventPlace(event.region, event.place)],
-    ['주최', event.organizer],
     ['대상', event.target],
     ['참가비', event.fee],
+    ['주최', event.organizer],
   ]
 
   return (
@@ -99,7 +100,20 @@ export function EventDetailBody({ title, createdAt, event, sourceName, today, ac
           이 글은 주최 기관이 공개한 자료를 바탕으로 정리한 안내입니다. 일정과 참가 조건은 바뀔 수 있으니 공식
           안내에서 다시 확인해주세요.
           <br />
-          {sourceName ? `출처: ${sourceName} · ` : null}
+          {/* 공공누리 출처 표시. 이름을 원문으로 가는 링크로 둔다 */}
+          {sourceName ? (
+            <>
+              출처:{' '}
+              {event.sourceUrl ? (
+                <a href={event.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline">
+                  {sourceName}
+                </a>
+              ) : (
+                sourceName
+              )}
+              {' · '}
+            </>
+          ) : null}
           {formatJoinDate(createdAt)} 등록
         </p>
         {actions}

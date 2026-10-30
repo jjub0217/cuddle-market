@@ -56,9 +56,9 @@ def _body(fields: EventFields, source_name: str, source_url: str, image_url: Opt
     lines += [
         f"기간 | {_period(fields.start, fields.end)}",
         f"장소 | {_place(fields.region, fields.place)}",
-        f"주최 | {fields.organizer or CHECK_OFFICIAL}",
         f"대상 | {fields.target or CHECK_OFFICIAL}",
         f"참가비 | {fields.fee or CHECK_OFFICIAL}",
+        f"주최 | {fields.organizer or CHECK_OFFICIAL}",
         "",
     ]
     if fields.activities:

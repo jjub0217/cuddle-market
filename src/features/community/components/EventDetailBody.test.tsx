@@ -72,6 +72,11 @@ describe('표', () => {
     expect(rowValue('참가비')).toBe('무료')
   })
 
+  it('반려인이 판단하는 순서: 기간, 장소, 대상, 참가비, 주최', () => {
+    render(<EventDetailBody {...PROPS} event={EVENT} />)
+    expect(screen.getAllByRole('term').map((dt) => dt.textContent)).toEqual(['기간', '장소', '대상', '참가비', '주최'])
+  })
+
   it('없는 값은 「공식 안내 확인」', () => {
     render(
       <EventDetailBody {...PROPS} event={{ ...EVENT, place: null, region: null, organizer: null, target: null, fee: null }} />
@@ -116,6 +121,20 @@ describe('목록과 끝 문구', () => {
   it('출처와 등록일, 공공 자료 안내', () => {
     render(<EventDetailBody {...PROPS} event={EVENT} />)
     expect(screen.getByText(/주최 기관이 공개한 자료를 바탕으로 정리한 안내입니다/)).toBeInTheDocument()
-    expect(screen.getByText(/출처: 서울특별시 · 2026\.10\.30 등록/)).toBeInTheDocument()
+    expect(screen.getByText(/2026\.10\.30 등록/)).toBeInTheDocument()
+  })
+
+  it('출처 이름은 원문으로 가는 링크(새 창)', () => {
+    render(<EventDetailBody {...PROPS} event={EVENT} />)
+    const source = screen.getByRole('link', { name: '서울특별시' })
+    expect(source).toHaveAttribute('href', EVENT.sourceUrl)
+    expect(source).toHaveAttribute('target', '_blank')
+    expect(source.closest('p')?.textContent).toContain('출처: 서울특별시')
+  })
+
+  it('원문 주소가 없으면 출처 이름만 글자로', () => {
+    render(<EventDetailBody {...PROPS} event={{ ...EVENT, sourceUrl: null }} />)
+    expect(screen.queryByRole('link', { name: '서울특별시' })).not.toBeInTheDocument()
+    expect(screen.getByText(/출처: 서울특별시/)).toBeInTheDocument()
   })
 })
