@@ -69,3 +69,14 @@ const EVENT_STATUS_PARAMS: Record<string, 'UPCOMING' | 'ONGOING' | 'ENDED'> = {
 export function toEventStatusParam(value: string | null | undefined) {
   return value ? EVENT_STATUS_PARAMS[value] : undefined
 }
+
+const EVENT_EMPTY_TITLES: Record<'UPCOMING' | 'ONGOING' | 'ENDED', string> = {
+  UPCOMING: '예정된 행사가 없어요',
+  ONGOING: '지금 진행 중인 행사가 없어요',
+  ENDED: '종료된 행사가 없어요',
+}
+
+/** 상태를 골랐는데 맞는 행사가 없을 때의 문구. 전체면 undefined — 기존 빈 화면 문구를 쓴다 */
+export function getEventEmptyTitle(param: ReturnType<typeof toEventStatusParam>) {
+  return param ? EVENT_EMPTY_TITLES[param] : undefined
+}

@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
-import { EVENT_STATUS_FILTERS, formatEventPeriod, getEventStatus, toEventStatusParam, toKoreanDateString } from './eventStatus'
+import {
+  EVENT_STATUS_FILTERS,
+  formatEventPeriod,
+  getEventEmptyTitle,
+  getEventStatus,
+  toEventStatusParam,
+  toKoreanDateString,
+} from './eventStatus'
 
 // 상태는 서버에 저장하지 않고 화면을 여는 날(한국 날짜) 기준으로 계산한다(설계 7-2절).
 
@@ -66,5 +73,18 @@ describe('상태 드롭다운', () => {
     expect(toEventStatusParam('all')).toBeUndefined()
     expect(toEventStatusParam(null)).toBeUndefined()
     expect(toEventStatusParam('WHATEVER')).toBeUndefined()
+  })
+})
+
+// 상태를 골랐는데 맞는 행사가 없을 때 「행사 소식이 하나도 없다」로 읽히지 않게 한다
+describe('걸러 본 결과가 없을 때 문구', () => {
+  it('고른 상태를 말한다', () => {
+    expect(getEventEmptyTitle('UPCOMING')).toBe('예정된 행사가 없어요')
+    expect(getEventEmptyTitle('ONGOING')).toBe('지금 진행 중인 행사가 없어요')
+    expect(getEventEmptyTitle('ENDED')).toBe('종료된 행사가 없어요')
+  })
+
+  it('전체면 없다(기존 빈 화면 문구를 쓴다)', () => {
+    expect(getEventEmptyTitle(undefined)).toBeUndefined()
   })
 })

@@ -21,7 +21,12 @@ import Spinner from '@/components/commons/spinner/Spinner'
 import type { CommunityItem } from '@/types'
 import { CommunityPostThumbnail } from './components/CommunityPostThumbnail'
 import { EventPostCard } from './components/EventPostCard'
-import { EVENT_STATUS_FILTERS, toEventStatusParam, toKoreanDateString } from '@/lib/utils/eventStatus'
+import {
+  EVENT_STATUS_FILTERS,
+  getEventEmptyTitle,
+  toEventStatusParam,
+  toKoreanDateString,
+} from '@/lib/utils/eventStatus'
 import SelectDropdown from '@/components/commons/select/SelectDropdown'
 
 interface CommunityListData {
@@ -396,10 +401,11 @@ export default function CommunityPage({ initialQuestionData, initialInfoData, in
         >
           {communityPosts.length === 0 ? (
             isEventTab ? (
+              // 상태를 골랐을 때는 「하나도 없다」로 읽히지 않게 고른 상태를 말한다
               <EmptyState
                 icon={CalendarDays}
-                title="아직 올라온 행사 소식이 없어요"
-                description="반려동물 행사 소식을 모아 매일 올려요"
+                title={getEventEmptyTitle(eventStatusParam) ?? '아직 올라온 행사 소식이 없어요'}
+                description={eventStatusParam ? '다른 상태를 골라 보세요' : '반려동물 행사 소식을 모아 매일 올려요'}
               />
             ) : (
               <EmptyState icon={MessageSquareText} title="아직 게시글이 없어요" description="첫 번째 이야기를 나눠보세요!" />
