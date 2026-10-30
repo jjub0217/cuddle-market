@@ -246,10 +246,10 @@
 - Produces: `fetch_festivals(service_key: str, today: date, client) -> list[TourItem]`, `TourItem(external_id, title, start, end, region, place, image_url, url)` (`region`은 `addr1` 첫 낱말을 설계 7-2절의 짧은 시·도 이름으로), `PET_WORDS = ("반려", "펫", "댕", "냥", "입양", "강아지", "고양이")`
 - 요청: `https://apis.data.go.kr/B551011/KorService2/searchFestival2`, 인자 `serviceKey, MobileOS=ETC, MobileApp=CuddleMarket, _type=json, eventStartDate=오늘(YYYYMMDD), numOfRows=100, pageNo`. 응답 칸: `contentid, title, eventstartdate, eventenddate, addr1, firstimage`. 원문 주소는 `https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid={contentid}` 형식(만들면서 실제로 열리는지 확인).
 
-- [ ] **Step 1: 시험** — 고정 응답에서 제목에 PET_WORDS가 있는 것만 남고, 날짜가 date로 바뀌고, `firstimage`가 비면 `image_url=None`. 응답 `resultCode`가 정상 아니면 예외.
-- [ ] **Step 2~4: 실패 확인, 구현, 통과 확인**
-- [ ] **Step 5: 키가 생기면 실제로 한 번 호출해 고정 응답 모양이 맞는지 확인** (`PUBLIC_DATA_SERVICE_KEY`가 로컬에 없으면 Actions의 손 실행으로 확인)
-- [ ] **Step 6: 커밋** — `feat(crawler): 관광공사 축제 API로 반려동물 축제를 보완한다`
+- [x] **Step 1: 시험** — 고정 응답에서 제목에 PET_WORDS가 있는 것만 남고, 날짜가 date로 바뀌고, `firstimage`가 비면 `image_url=None`. 응답 `resultCode`가 정상 아니면 예외.
+- [x] **Step 2~4: 실패 확인, 구현, 통과 확인**
+- [ ] **Step 5: 키가 생기면 실제로 한 번 호출해 고정 응답 모양이 맞는지 확인** (`PUBLIC_DATA_SERVICE_KEY`가 로컬에 없으면 Actions의 손 실행으로 확인) — 2026-10-30 로컬에 키가 없어 Task 13 손 실행으로 미뤘다. 원문 주소(`ms_detail.do?cotid=`)가 실제로 열리는지도 그때 본다
+- [x] **Step 6: 커밋** — `feat(crawler): 관광공사 축제 API로 반려동물 축제를 보완한다`
 
 ### Task 7: Gemini 추출과 틀 채우기
 

@@ -1,0 +1,18 @@
+{
+  "response": {
+    "header": {"resultCode": "0000", "resultMsg": "OK"},
+    "body": {
+      "items": {
+        "item": [
+          {"contentid": "2997830", "title": "제주 반려동물 문화산업 한마당", "eventstartdate": "20261106", "eventenddate": "20261108",
+           "addr1": "제주특별자치도 제주시 서광로2길 24", "firstimage": "http://tong.visitkorea.or.kr/cms/resource/30/0000000_image2_1.jpg"},
+          {"contentid": "1111111", "title": "예시 가을 국화 축제", "eventstartdate": "20261101", "eventenddate": "20261110",
+           "addr1": "경상남도 창원시", "firstimage": ""},
+          {"contentid": "2222222", "title": "댕댕이 산책 페스티벌", "eventstartdate": "20261115", "eventenddate": "20261115",
+           "addr1": "경기도 수원시 팔달구", "firstimage": ""}
+        ]
+      },
+      "numOfRows": 100, "pageNo": 1, "totalCount": 3
+    }
+  }
+}

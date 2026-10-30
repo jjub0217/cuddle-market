@@ -6,6 +6,7 @@
 """
 from __future__ import annotations
 
+import json
 import time
 from typing import Callable, Dict, Optional
 from urllib.parse import urlencode, urlsplit
@@ -43,6 +44,9 @@ class PoliteClient:
         response = self._request(url, params)
         response.raise_for_status()
         return response.text
+
+    def get_json(self, url: str, params: Optional[dict] = None) -> dict:
+        return json.loads(self.get(url, params))
 
     def _allowed(self, url: str) -> bool:
         parts = urlsplit(url)
