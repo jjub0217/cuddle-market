@@ -40,7 +40,18 @@ describe('결제 성공 페이지', () => {
     expect(await screen.findByText('신발')).toBeInTheDocument()
     expect(screen.getByText(/50,000/)).toBeInTheDocument()
     expect(screen.getByText('테스트 결제예요. 실제로 돈이 나가지 않아요')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: '채팅으로 돌아가기' })).toHaveAttribute('href', '/chat')
+    expect(screen.getByRole('link', { name: '채팅방으로 가기' })).toHaveAttribute('href', '/chat')
+  })
+
+  it('결과는 화면을 덮는 확인창 모양으로 보인다', async () => {
+    // 2026-11-01 로컬 확인 뒤 사용자 요청: 결제 완료는 다른 확인창들과 같은 모달 모양으로
+    vi.mocked(confirmPayment).mockResolvedValue({
+      orderId: 'CM1', amount: 50000, productId: 10, productTitle: '신발', approvedAt: '2026-11-01T15:00:00',
+    })
+    render(<PaymentSuccess />)
+
+    const dialog = await screen.findByRole('dialog', { name: '결제가 완료됐어요' })
+    expect(dialog).toHaveAttribute('aria-modal', 'true')
   })
 
   it('결제한 그 채팅방 번호가 오면 「채팅으로 돌아가기」가 그 방으로 간다', async () => {
@@ -49,7 +60,7 @@ describe('결제 성공 페이지', () => {
     })
     render(<PaymentSuccess />)
 
-    expect(await screen.findByRole('link', { name: '채팅으로 돌아가기' })).toHaveAttribute('href', '/chat/100')
+    expect(await screen.findByRole('link', { name: '채팅방으로 가기' })).toHaveAttribute('href', '/chat/100')
   })
 
   it('서버가 거절하면 그 이유와 다시 시도할 길을 보여 준다', async () => {
@@ -59,6 +70,6 @@ describe('결제 성공 페이지', () => {
     render(<PaymentSuccess />)
 
     expect(await screen.findByText('결제 금액이 상품 가격과 다릅니다. 다시 시도해 주세요.')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: '채팅으로 돌아가기' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '채팅방으로 가기' })).toBeInTheDocument()
   })
 })

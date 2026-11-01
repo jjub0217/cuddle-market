@@ -11,6 +11,6 @@ describe('결제 실패 페이지', () => {
     render(<PaymentFail />)
 
     expect(screen.getByText('사용자가 결제를 취소했습니다')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: '채팅으로 돌아가기' })).toHaveAttribute('href', '/chat')
+    expect(screen.getByRole('link', { name: '채팅방으로 가기' })).toHaveAttribute('href', '/chat')
   })
 })

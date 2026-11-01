@@ -1,12 +1,12 @@
 'use client'
 
-import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { confirmPayment, getPaymentErrorMessage, type PaymentResult } from '@/lib/api/payment'
 import { formatPrice } from '@/lib/utils/formatPrice'
 import { ROUTES } from '@/constants/routes'
 import Spinner from '@/components/commons/spinner/Spinner'
+import PaymentResultCard from './PaymentResultCard'
 
 // 토스 결제창이 성공하면 이 페이지로 돌아온다 (#1126).
 //
@@ -33,33 +33,30 @@ export default function PaymentSuccess() {
       .catch((e) => setRequestError(getPaymentErrorMessage(e)))
   }, [isValid, paymentKey, orderId, amount])
 
-  // ⚠️ max-w-md 가 아니라 max-w-112(448px)다. Tailwind v4 에서 md 가 여백 토큰(32px)으로 풀려 글자가 한 글자씩 꺾였다(2026-11-01)
-  return (
-    <div className="mx-auto flex min-h-[60vh] w-full max-w-112 flex-col items-center justify-center gap-4 px-4 text-center">
-      {result ? (
-        <>
-          <h1 className="text-xl font-bold text-gray-900">결제가 완료됐어요</h1>
+  const chatHref = result?.chatRoomId ? ROUTES.CHAT_ROOM_ID(result.chatRoomId) : ROUTES.CHAT
+
+  if (result) {
+    return (
+      <PaymentResultCard title="결제가 완료됐어요" href={chatHref}>
+        <div className="flex flex-col gap-1">
           <p className="text-base text-gray-900">{result.productTitle}</p>
           <p className="text-lg font-bold text-gray-900">{formatPrice(result.amount)} 원</p>
-          <p className="text-sm text-gray-500">테스트 결제예요. 실제로 돈이 나가지 않아요</p>
-        </>
-      ) : error ? (
-        <>
-          <h1 className="text-xl font-bold text-gray-900">결제를 마치지 못했어요</h1>
-          <p className="text-sm text-gray-600">{error}</p>
-          <p className="text-sm text-gray-500">채팅방에서 결제하기를 다시 눌러 주세요.</p>
-        </>
-      ) : (
-        <Spinner size="md" />
-      )}
-      {result || error ? (
-        <Link
-          href={result?.chatRoomId ? ROUTES.CHAT_ROOM_ID(result.chatRoomId) : ROUTES.CHAT}
-          className="text-primary-600 text-sm font-semibold hover:underline"
-        >
-          채팅으로 돌아가기
-        </Link>
-      ) : null}
+        </div>
+        <p className="text-sm text-gray-500">테스트 결제예요. 실제로 돈이 나가지 않아요</p>
+      </PaymentResultCard>
+    )
+  }
+  if (error) {
+    return (
+      <PaymentResultCard title="결제를 마치지 못했어요" href={chatHref}>
+        <p className="text-sm text-gray-600">{error}</p>
+        <p className="text-sm text-gray-500">채팅방에서 결제하기를 다시 눌러 주세요.</p>
+      </PaymentResultCard>
+    )
+  }
+  return (
+    <div className="flex min-h-[60vh] w-full items-center justify-center">
+      <Spinner size="md" />
     </div>
   )
 }
