@@ -12,7 +12,7 @@ export default function PaymentFail() {
   const message = searchParams.get('message') || '결제가 완료되지 않았어요.'
 
   return (
-    <div className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center gap-4 px-4 text-center">
+    <div className="mx-auto flex min-h-[60vh] w-full max-w-112 flex-col items-center justify-center gap-4 px-4 text-center">
       <h1 className="text-xl font-bold text-gray-900">결제가 완료되지 않았어요</h1>
       <p className="text-sm text-gray-600">{message}</p>
       <p className="text-sm text-gray-500">채팅방에서 결제하기를 다시 눌러 주세요.</p>

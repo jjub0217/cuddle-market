@@ -43,6 +43,15 @@ describe('결제 성공 페이지', () => {
     expect(screen.getByRole('link', { name: '채팅으로 돌아가기' })).toHaveAttribute('href', '/chat')
   })
 
+  it('결제한 그 채팅방 번호가 오면 「채팅으로 돌아가기」가 그 방으로 간다', async () => {
+    vi.mocked(confirmPayment).mockResolvedValue({
+      orderId: 'CM1', amount: 50000, productId: 10, productTitle: '신발', approvedAt: '2026-11-01T15:00:00', chatRoomId: 100,
+    })
+    render(<PaymentSuccess />)
+
+    expect(await screen.findByRole('link', { name: '채팅으로 돌아가기' })).toHaveAttribute('href', '/chat/100')
+  })
+
   it('서버가 거절하면 그 이유와 다시 시도할 길을 보여 준다', async () => {
     vi.mocked(confirmPayment).mockRejectedValue({
       response: { data: { message: '결제 금액이 상품 가격과 다릅니다. 다시 시도해 주세요.' } },

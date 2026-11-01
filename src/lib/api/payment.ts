@@ -15,6 +15,8 @@ export interface PaymentResult {
   productId: number
   productTitle: string
   approvedAt: string | null
+  /** 구매자와 판매자의 그 채팅방. 성공 페이지가 그 방으로 돌아가게 한다 */
+  chatRoomId?: number | null
 }
 
 export async function createPaymentOrder(productId: number): Promise<PaymentOrder> {

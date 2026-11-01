@@ -33,8 +33,9 @@ export default function PaymentSuccess() {
       .catch((e) => setRequestError(getPaymentErrorMessage(e)))
   }, [isValid, paymentKey, orderId, amount])
 
+  // ⚠️ max-w-md 가 아니라 max-w-112(448px)다. Tailwind v4 에서 md 가 여백 토큰(32px)으로 풀려 글자가 한 글자씩 꺾였다(2026-11-01)
   return (
-    <div className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center gap-4 px-4 text-center">
+    <div className="mx-auto flex min-h-[60vh] w-full max-w-112 flex-col items-center justify-center gap-4 px-4 text-center">
       {result ? (
         <>
           <h1 className="text-xl font-bold text-gray-900">결제가 완료됐어요</h1>
@@ -52,7 +53,10 @@ export default function PaymentSuccess() {
         <Spinner size="md" />
       )}
       {result || error ? (
-        <Link href={ROUTES.CHAT} className="text-primary-600 text-sm font-semibold hover:underline">
+        <Link
+          href={result?.chatRoomId ? ROUTES.CHAT_ROOM_ID(result.chatRoomId) : ROUTES.CHAT}
+          className="text-primary-600 text-sm font-semibold hover:underline"
+        >
           채팅으로 돌아가기
         </Link>
       ) : null}
