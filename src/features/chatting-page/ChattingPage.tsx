@@ -18,6 +18,7 @@ import { pingChatRoomRead } from '@/lib/api/chatting'
 import { cn } from '@/lib/utils/cn'
 import { Z_INDEX } from '@/constants/ui'
 import { CHAT_BLOCKED_NOTICE } from '@/constants/constants'
+import RoomStateNotice from './components/RoomStateNotice'
 import Spinner from '@/components/commons/spinner/Spinner'
 import imageCompression from 'browser-image-compression'
 
@@ -136,6 +137,8 @@ export default function ChattingPage() {
   // ⚠️ 이건 **화면의 판단이지 서버의 규칙이 아니다.** 서버는 「상대 → 나」 한 방향만 막는다.
   //    그래서 잠기기 전에 보낸 글은 실제로 가고, 조용히 사라지는 메시지가 없다.
   const isOpponentBlocked = selectedRoom?.isOpponentBlocked ?? false
+  // 예약·판매 완료로 멈추거나 닫힌 방(#1126). 서버도 이 방에 오는 메시지를 거절한다
+  const roomState = selectedRoom?.roomState ?? 'OPEN'
 
   const handleSelectRoom = (room: fetchChatRoom) => {
     const roomUnreadCount = chatSocketStore.getState().chatRoomUpdates[room.chatRoomId]?.unreadCount ?? room.unreadCount ?? 0
@@ -149,7 +152,7 @@ export default function ChattingPage() {
   }
 
   const handleSend = () => {
-    if (isOpponentBlocked) return
+    if (isOpponentBlocked || roomState !== 'OPEN') return
     if (chatRoomId && inputMessage.length > 0) {
       sendMessage(Number(chatRoomId), inputMessage, 'TEXT')
       setInputMessage('')
@@ -251,6 +254,15 @@ export default function ChattingPage() {
   // 갱신 간격보다 짧은 틈(만료 직후)에 온 것은 이미 안 읽음으로 세어졌을 수 있다.
   // 화면 뱃지는 그 자리에서 지우고, 서버 쪽 수는 이 요청이 0으로 되돌린다.
   const realtimeCount = realtimeMessages[Number(chatRoomId)]?.length ?? 0
+
+  // 예약이 걸리거나 풀리거나 결제가 끝나면 서버가 방에 한 줄(SYSTEM)을 남긴다(#1126).
+  // 그 한 줄이 오면 방 목록을 다시 받아 입력칸·결제하기를 바로 바꾼다.
+  const lastRealtimeType = realtimeMessages[Number(chatRoomId)]?.at(-1)?.messageType
+  useEffect(() => {
+    if (realtimeCount > 0 && lastRealtimeType === 'SYSTEM') {
+      queryClient.invalidateQueries({ queryKey: ['chatRooms'] })
+    }
+  }, [realtimeCount, lastRealtimeType, queryClient])
   useEffect(() => {
     if (!chatRoomId || realtimeCount === 0) return
     clearUnreadCount(Number(chatRoomId))
@@ -356,6 +368,8 @@ export default function ChattingPage() {
                   // 입력칸 묶음을 통째로 안 그린다 — 잠긴 칸을 보여주는 것보다 이유를 말하는 편이
                   // 낫다. 방과 지난 대화는 그대로 둔다(거래 이야기가 오갔을 수 있다).
                   <p className="text-center text-sm text-gray-500">{CHAT_BLOCKED_NOTICE}</p>
+                ) : roomState !== 'OPEN' ? (
+                  <RoomStateNotice roomState={roomState} />
                 ) : (
                   // 칸이 길어지면 아래로 자란다(#880). 그래서 단추를 아래에 붙이고,
                   // 테두리도 rounded-full 대신 rounded-3xl 로 둔다 — 한 줄일 때는 눈에
