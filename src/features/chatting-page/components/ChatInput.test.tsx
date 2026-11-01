@@ -47,3 +47,15 @@ describe('채팅 입력칸 높이', () => {
     expect(screen.getByPlaceholderText('메시지를 입력하세요')).toHaveStyle({ height: '136px' })
   })
 })
+
+// 초점 테두리는 글칸이 아니라 바깥 둥근 상자(ChattingPage.tsx)가 그린다(#1130).
+// ⚠️ jsdom 은 `:focus-visible` 을 그리지 않아 「테두리가 몇 겹인가」를 볼 수 없다. 그래서
+//    결과(모양)가 아니라 **원인(전역 규칙에서 빼는 클래스)** 을 직접 본다 — 이 클래스가 빠지면
+//    둥근 상자 안에 네모 테두리가 하나 더 생긴다.
+describe('채팅 입력칸 초점 테두리', () => {
+  it('글칸은 전역 초점 규칙에서 빠져 있다', () => {
+    render(<ChatInput value="" onChange={noop} onSubmit={noop} />)
+
+    expect(screen.getByPlaceholderText('메시지를 입력하세요')).toHaveClass('focus-ring-custom')
+  })
+})

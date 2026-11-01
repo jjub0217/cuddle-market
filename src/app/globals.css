@@ -119,8 +119,20 @@ input[type='date']::-webkit-calendar-picker-indicator {
  *    ⚠️ **`box-shadow: none` 으로 끄면 안 된다** — 같은 속성이라 그 자리의 **자기 ring 까지
  *       같이 꺼진다**(2026-08-24 에 커뮤니티 검색창이 그렇게 사라졌다).
  *       그래서 `:not()` 으로 **처음부터 대상에서 뺀다.**
- *    지금 붙어 있는 곳: AdminLogin.tsx(관리자 로그인 2곳) · ProductDescriptionFiled.tsx
- *    · ToastNotification.tsx · InlineNotification.tsx
+ *    ⚠️ 「자기만의 표시」도 **색·두께는 이 규칙과 같게** 맞춘다(primary-500 · 1.2px, #1130).
+ *       예전에는 자리마다 파란 ring·primary-600 ring·그림자가 섞여 화면마다 달라 보였다.
+ *    ⚠️ 붙일 때는 **`outline-none` 도 같이** 준다. 이 규칙이 끄던 브라우저 기본 파란 윤곽선이
+ *       빠진 자리에서는 되살아난다(#1130 에 채팅 글칸에서 실제로 보였다).
+ *    지금 붙어 있는 곳 — 전부 **둥근 상자가 대신 그리는 경우**이거나 **테두리가 뜻이 없는 경우**다.
+ *      상자가 대신 그림   Input.tsx(공용 입력칸) · ChatInput.tsx(채팅 글칸 → ChattingPage.tsx 상자)
+ *                        · CommentForm.tsx(댓글·답글 글칸 2곳 → form 상자)
+ *      뜻이 없음          (main)/layout.tsx 의 <main> · Home.tsx 의 상품 목록 <section>
+ *                        — 둘 다 건너뛰기 링크의 도착점일 뿐 누르는 것이 아니다
+ *
+ * ⚠️ **입력칸과 단추는 켜지는 때가 다르다.** 브라우저는 글을 쓰는 칸(input·textarea)에는
+ *    마우스로 눌러도 `:focus-visible` 을 켜 주고, 단추·링크·탭에는 키보드로 왔을 때만 켠다.
+ *    그래서 입력칸은 누르면 테두리가 보이고, 단추는 Tab 일 때만 보인다 — 의도한 대로다.
+ *    「값을 고르는 칸」인 SelectDropdown 의 여는 단추는 입력칸처럼 보이게 `focus:` 로 따로 준다.
  *
  * ⚠️ `outline` 도 `box-shadow`(ring) 도 아니고 **`border` 를 쓴다.** 2026-08-24 에 셋을 다
  *    크롬으로 찍어 견줘서 고른 것이다.

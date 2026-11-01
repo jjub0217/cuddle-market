@@ -70,7 +70,12 @@ export default function ChatInput({ value, onChange, onSubmit }: ChatInputProps)
       // py-2 는 **세로 정렬을 맞추는 값이다.** 묶음이 items-end 라서(여러 줄일 때 단추가
       // 아래에 붙게 하려고) 여백이 없으면 20px 짜리 글자칸이 36px 짜리 단추 바닥에 붙어
       // 글자만 8px 아래로 내려앉는다(#890). 20 + 8×2 = 36 — 한 줄일 때 단추와 키가 같아진다.
-      className="w-full resize-none overflow-y-auto bg-transparent py-2 text-sm placeholder:text-gray-400"
+      //
+      // ⚠️ 초점 테두리는 이 칸이 아니라 **바깥 둥근 상자**(ChattingPage.tsx)가 그린다(#1130).
+      //    이 칸에도 그리면 둥근 상자 안에 네모 테두리가 하나 더 생긴다. 그래서 `focus-ring-custom`
+      //    으로 전역 규칙에서 뺐다. 그러면 전역 규칙이 끄던 브라우저 기본 파란 윤곽선이
+      //    되살아나므로 `outline-none` 으로 직접 끈다.
+      className="focus-ring-custom w-full resize-none outline-none overflow-y-auto bg-transparent py-2 text-sm placeholder:text-gray-400"
     />
   )
 }

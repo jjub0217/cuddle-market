@@ -51,12 +51,16 @@ export default function MainLayout({ children }: { children: ReactNode }) {
       <SkipToSectionLink targetId="main-content" label="본문 바로가기" className="focus:z-40" />
       <Header />
       {/* ⚠️ `id` 와 `tabIndex={-1}` 은 위 링크의 **목적지**다(#1082).
-          `tabIndex={-1}` 이 없으면 `<main>` 은 초점을 못 받아 링크가 헛돈다. */}
+          `tabIndex={-1}` 이 없으면 `<main>` 은 초점을 못 받아 링크가 헛돈다.
+          ⚠️ `focus-ring-custom` 은 본문 전체에 초점 테두리가 둘리지 않게 뺀 것이다(#1130).
+             누를 수 있는 것이 아니라 건너뛰기의 도착점일 뿐이라 테두리가 뜻이 없고,
+             테두리 두께만큼 페이지 전체가 밀린다. `outline-none` 도 같이 준다 — 전역 규칙에서
+             빠지면 그 규칙이 끄던 브라우저 기본 파란 윤곽선이 되살아난다. */}
       <main
         id="main-content"
         tabIndex={-1}
         className={cn(
-          'w-full flex-1 bg-white transition-[padding-top] duration-300 lg:pb-0',
+          'focus-ring-custom w-full flex-1 outline-none bg-white transition-[padding-top] duration-300 lg:pb-0',
           paddingTopClass,
           noBottomPadding ? 'pb-0' : 'pb-14'
         )}

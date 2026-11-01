@@ -366,12 +366,14 @@ function Home() {
                 `tabIndex={-1}` 이 없으면 `<section>` 은 초점을 못 받아 링크가 헛돈다.
                 Tab 차례에는 안 낀다 — 프로그램으로 줄 때만 받는다.
                 ⚠️ `scroll-mt-22`(88px)는 **고정 헤더(72px)에 목록 머리가 가리지 않게** 두는
-                   빈칸이다. 72 + 숨통 16 = 88 — 위 `pt-22` 와 같은 셈법이다. */}
+                   빈칸이다. 72 + 숨통 16 = 88 — 위 `pt-22` 와 같은 셈법이다.
+                ⚠️ `focus-ring-custom` — 도착점일 뿐 누르는 것이 아니라 목록 전체에 테두리를
+                   두를 까닭이 없다(#1130). `outline-none` 은 브라우저 기본 윤곽선까지 끄려고 준다. */}
             <section
               aria-label="상품 목록"
               id="home-product-list"
               tabIndex={-1}
-              className="flex flex-col gap-6 scroll-mt-22 pt-2 md:pt-0"
+              className="focus-ring-custom flex flex-col outline-none gap-6 scroll-mt-22 pt-2 md:pt-0"
             >
               {/* <h2 className="heading-h4 text-gray-900">상품 목록</h2> */}
               {isLoading && allProducts.length === 0 ? (

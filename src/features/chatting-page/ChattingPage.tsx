@@ -376,7 +376,10 @@ export default function ChattingPage() {
                   // 칸이 길어지면 아래로 자란다(#880). 그래서 단추를 아래에 붙이고,
                   // 테두리도 rounded-full 대신 rounded-3xl 로 둔다 — 한 줄일 때는 눈에
                   // 띄는 차이가 없고(반지름 26px 대 24px), 길어졌을 때 위아래가 불룩해지지 않는다.
-                  <div className="border-outline-variant/40 bg-surface/95 flex items-end gap-3 rounded-3xl border px-3 py-2">
+                  // ⚠️ 글칸에 초점이 가면 **이 상자**가 초점 테두리를 그린다(#1130). 두께·색은
+                  //    globals.css 의 전역 규칙과 같다. `focus-within` 이 아니라 `has-[textarea:focus]`
+                  //    인 까닭 — 전송 단추에 Tab 으로 갔을 때는 단추 자신만 테두리를 보여야 해서다.
+                  <div className="border-outline-variant/40 bg-surface/95 has-[textarea:focus]:border-primary-500 flex items-end gap-3 rounded-3xl border px-3 py-2 has-[textarea:focus]:border-[1.2px]">
                     <input
                       type="file"
                       id="chat-file-input"

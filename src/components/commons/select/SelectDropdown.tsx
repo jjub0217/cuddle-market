@@ -55,6 +55,10 @@ function Select({
       id={id}
       className={cn(
         'relative flex w-full items-center cursor-pointer rounded-lg border border-gray-400 bg-white px-3 py-3 pr-10 text-sm disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100/30 disabled:text-gray-300',
+        // 이 단추는 입력칸처럼 「값을 고르는 칸」이라 **마우스로 눌러도** 초점 테두리를 보인다(#1130).
+        // 전역 규칙(globals.css)은 키보드로 왔을 때(`:focus-visible`)만 켜지므로 `focus:` 로 따로 준다.
+        // 두께 1.2px · primary-500 은 전역 규칙과 같은 값이다. 한쪽만 바꾸지 말 것.
+        'focus:border-primary-500 focus:border-[1.2px]',
         buttonClassName,
       )}
     >

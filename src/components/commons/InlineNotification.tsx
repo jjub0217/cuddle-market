@@ -61,7 +61,7 @@ export default function InlineNotification({ type, children, onClose, durationMs
           aria-label="알림 닫기"
           onClick={onClose}
           className={cn(
-            'focus-ring-custom ml-auto shrink-0 cursor-pointer rounded p-1 transition-colors focus:outline-none focus-visible:ring-2',
+            'ml-auto shrink-0 cursor-pointer rounded p-1 transition-colors',
             styles.text
           )}
         >
