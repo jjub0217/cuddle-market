@@ -38,8 +38,9 @@ export default function PaymentSuccess() {
   if (result) {
     return (
       <PaymentResultCard title="결제가 완료됐어요" href={chatHref}>
-        {/* 채팅방 위쪽과 같은 상품 카드 — 방금 대화하던 그 상품이라는 게 이어져 보이게 한다(2026-11-01 사용자 결정) */}
-        <div className="bg-outline-variant/20 rounded-2xl px-2.5 py-3 text-left">
+        {/* 채팅방 위쪽과 같은 상품 카드 — 방금 대화하던 그 상품이라는 게 이어져 보이게 한다(2026-11-01 사용자 결정).
+            ⚠️ ChatProductCard 는 사진·글자 두 조각만 내보낸다. 가로 배치(flex)는 감싸는 쪽이 정한다(ChatRoomInfo 의 Link 와 같게) */}
+        <div className="bg-outline-variant/20 flex items-center gap-2 rounded-2xl px-2.5 py-3 text-left">
           <ChatProductCard
             productImageUrl={result.productImageUrl ?? undefined}
             productTitle={result.productTitle}
