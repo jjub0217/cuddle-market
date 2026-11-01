@@ -57,7 +57,7 @@ const SEARCH_TYPE = 'title_content'
 // 행사 소식의 상태·정렬 드롭다운 모양. 홈 상세 필터의 지역 드롭다운(LocationFilter card-chip)을 따랐지만
 // 글자는 펼친 목록의 기본 크기(text-sm)에 맞춘다 — text-xs 로 두면 펼칠 때 글자가 커진다(홈은 그대로 둔다)
 const EVENT_DROPDOWN_CLASS =
-  'border border-outline-variant bg-white text-gray-900 px-4 py-2 text-sm focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20'
+  'border border-outline-variant bg-white text-gray-900 px-4 py-2 text-sm'
 
 export default function CommunityPage({ initialQuestionData, initialInfoData, initialEventData }: CommunityPageProps) {
   const searchParams = useSearchParams()
@@ -337,7 +337,7 @@ export default function CommunityPage({ initialQuestionData, initialInfoData, in
               // 행사 글 본문에는 장소·주최·참가비가 들어 있어 지역·동물로 찾는 것이 실제로 잘 된다
               placeholder={isEventTab ? '지역, 행사 이름, 동물로 찾아보세요' : '궁금한 내용을 검색해보세요'}
               enterKeyHint="search"
-              className="border-outline-variant/40 bg-surface-container-low focus-visible:border-primary w-full rounded-full border py-2 pr-11 pl-11 text-sm text-[#1c1b1b] placeholder:text-sm placeholder:text-[#827565]"
+              className="border-outline-variant/40 bg-surface-container-low w-full rounded-full border py-2 pr-11 pl-11 text-sm text-[#1c1b1b] placeholder:text-sm placeholder:text-[#827565]"
             />
             {/* 글자가 있을 때만 보인다. 누르면 곧바로 전체 목록으로 돌아간다 */}
             {searchInput ? (

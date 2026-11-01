@@ -51,7 +51,7 @@ export default function SkipToSectionLink({ targetId, label, className }: SkipTo
     <a
       href={`#${targetId}`}
       className={cn(
-        'sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-10 focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-600 focus:shadow-md',
+        'sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-10 focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-600',
         className
       )}
       onClick={(event) => {

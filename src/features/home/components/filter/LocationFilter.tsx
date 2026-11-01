@@ -19,9 +19,9 @@ const VARIANT_STYLES: Record<LocationFilterVariant, { sidoButton: string; gugunB
   },
   'card-chip': {
     sidoButton:
-      'border border-outline-variant bg-white text-gray-900 px-4 py-2 text-xs focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20',
+      'border border-outline-variant bg-white text-gray-900 px-4 py-2 text-xs',
     gugunButton:
-      'border border-outline-variant bg-white text-gray-900 px-4 py-2 text-xs disabled:bg-surface-container-low disabled:text-gray-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20',
+      'border border-outline-variant bg-white text-gray-900 px-4 py-2 text-xs disabled:bg-surface-container-low disabled:text-gray-400',
   },
 }
 
