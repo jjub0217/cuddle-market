@@ -3,11 +3,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { confirmPayment, getPaymentErrorMessage, type PaymentResult } from '@/lib/api/payment'
-import { formatPrice } from '@/lib/utils/formatPrice'
 import { ROUTES } from '@/constants/routes'
 import Spinner from '@/components/commons/spinner/Spinner'
 import PaymentResultCard from './PaymentResultCard'
-import { PLACEHOLDER_IMAGES, toResizedWebpUrl } from '@/lib/utils/imageUrl'
+import ChatProductCard from '@/components/commons/card/ChatProductCard'
 
 // 토스 결제창이 성공하면 이 페이지로 돌아온다 (#1126).
 //
@@ -39,10 +38,14 @@ export default function PaymentSuccess() {
   if (result) {
     return (
       <PaymentResultCard title="결제가 완료됐어요" href={chatHref}>
-        <ProductImage src={result.productImageUrl} alt={result.productTitle} />
-        <div className="flex flex-col gap-1">
-          <p className="text-base text-gray-900">{result.productTitle}</p>
-          <p className="text-lg font-bold text-gray-900">{formatPrice(result.amount)} 원</p>
+        {/* 채팅방 위쪽과 같은 상품 카드 — 방금 대화하던 그 상품이라는 게 이어져 보이게 한다(2026-11-01 사용자 결정) */}
+        <div className="bg-outline-variant/20 rounded-2xl px-2.5 py-3 text-left">
+          <ChatProductCard
+            productImageUrl={result.productImageUrl ?? undefined}
+            productTitle={result.productTitle}
+            productPrice={result.amount}
+            size="md"
+          />
         </div>
         <p className="text-sm text-gray-500">테스트 결제예요. 실제로 돈이 나가지 않아요</p>
       </PaymentResultCard>
@@ -63,11 +66,3 @@ export default function PaymentSuccess() {
   )
 }
 
-// 상품 사진. 우리 이미지 서버(CDN)의 400px 판을 쓰고, 못 불러오면 원본 → 기본 그림 순으로 바꾼다(MyList 와 같은 순서)
-function ProductImage({ src, alt }: { src?: string | null; alt: string }) {
-  const [stage, setStage] = useState<'resized' | 'original' | 'placeholder'>(src ? 'resized' : 'placeholder')
-  const url = stage === 'resized' ? toResizedWebpUrl(src, 400) : stage === 'original' ? (src ?? '') : PLACEHOLDER_IMAGES[400]
-  // CDN 이미지라 next/image 대신 img 를 쓴다(이 저장소 관례)
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img src={url} alt={alt} className="mx-auto size-28 rounded-xl object-cover" onError={() => setStage((s) => (s === 'resized' ? 'original' : 'placeholder'))} />
-}
