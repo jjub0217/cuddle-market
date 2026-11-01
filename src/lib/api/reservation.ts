@@ -2,7 +2,7 @@ import { api } from './api'
 
 // 예약 상대 고르기 (#1126). 판매자 본인만 부를 수 있다.
 
-export type ChatPartner = {
+export interface ChatPartner {
   userId: number
   nickname: string
   profileImageUrl: string | null

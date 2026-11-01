@@ -257,7 +257,9 @@ export default function ChattingPage() {
 
   // 예약이 걸리거나 풀리거나 결제가 끝나면 서버가 방에 한 줄(SYSTEM)을 남긴다(#1126).
   // 그 한 줄이 오면 방 목록을 다시 받아 입력칸·결제하기를 바로 바꾼다.
-  const lastRealtimeType = realtimeMessages[Number(chatRoomId)]?.at(-1)?.messageType
+  // 메서드(.at) 대신 색인으로 읽는다 — 메서드를 부르면 React 컴파일러가 스토어 값이 바뀔 수 있다고 보고 최적화를 건너뛴다
+  const roomRealtime = realtimeMessages[Number(chatRoomId)]
+  const lastRealtimeType = roomRealtime ? roomRealtime[roomRealtime.length - 1]?.messageType : undefined
   useEffect(() => {
     if (realtimeCount > 0 && lastRealtimeType === 'SYSTEM') {
       queryClient.invalidateQueries({ queryKey: ['chatRooms'] })

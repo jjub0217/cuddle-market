@@ -15,25 +15,23 @@ import Spinner from '@/components/commons/spinner/Spinner'
 
 export default function PaymentSuccess() {
   const searchParams = useSearchParams()
+  const paymentKey = searchParams.get('paymentKey')
+  const orderId = searchParams.get('orderId')
+  const amount = Number(searchParams.get('amount'))
+  const isValid = Boolean(paymentKey && orderId && searchParams.get('amount') && Number.isFinite(amount))
   const [result, setResult] = useState<PaymentResult | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [requestError, setRequestError] = useState<string | null>(null)
+  const error = isValid ? requestError : '결제 정보가 올바르지 않아요.'
   // StrictMode 는 effect 를 두 번 돌린다. 확정 요청은 한 번만 보낸다
   const requested = useRef(false)
 
   useEffect(() => {
-    if (requested.current) return
+    if (requested.current || !isValid || !paymentKey || !orderId) return
     requested.current = true
-    const paymentKey = searchParams.get('paymentKey')
-    const orderId = searchParams.get('orderId')
-    const amount = Number(searchParams.get('amount'))
-    if (!paymentKey || !orderId || !Number.isFinite(amount)) {
-      setError('결제 정보가 올바르지 않아요.')
-      return
-    }
     confirmPayment({ paymentKey, orderId, amount })
       .then(setResult)
-      .catch((e) => setError(getPaymentErrorMessage(e)))
-  }, [searchParams])
+      .catch((e) => setRequestError(getPaymentErrorMessage(e)))
+  }, [isValid, paymentKey, orderId, amount])
 
   return (
     <div className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center gap-4 px-4 text-center">

@@ -3,9 +3,13 @@ import { api } from './api'
 // 토스페이먼츠 테스트 결제 (#1126). 금액은 서버가 정하고, 확정도 서버가 한다.
 // 토스 API 는 웹에서 직접 부르지 않는다 — 비밀 키가 서버에만 있다.
 
-export type PaymentOrder = { orderId: string; amount: number; orderName: string }
+export interface PaymentOrder {
+  orderId: string
+  amount: number
+  orderName: string
+}
 
-export type PaymentResult = {
+export interface PaymentResult {
   orderId: string
   amount: number
   productId: number
