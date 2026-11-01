@@ -51,7 +51,7 @@ export function LoginForm() {
           setError('root', {
             type: 'manual',
             message:
-              '이메일 또는 비밀번호가 일치하지 않습니다. 소셜로 가입하셨다면 아래 소셜 로그인을 이용해주세요.',
+              '이메일 또는 비밀번호가 일치하지 않습니다.\n소셜로 가입하셨다면 아래 소셜 로그인을 이용해주세요.',
           })
         } else {
           setError('root', {
@@ -118,7 +118,7 @@ export function LoginForm() {
             />
             {/* 글자 크기·굵기를 InputField 의 칸별 오류(text-xs font-semibold)와 똑같이 맞춘다.
                 같은 화면에서 같은 일(오류 알림)을 하는데 서로 달라 보이던 것을 없앤 것이다. */}
-            {errors.root ? <p className="text-danger-500 text-xs font-semibold break-keep">{errors.root.message}</p> : null}
+            {errors.root ? <p className="text-danger-500 text-xs font-semibold break-keep whitespace-pre-line">{errors.root.message}</p> : null}
           </div>
           {/* 밑줄 — 링크임을 색만으로 알리면 안 된다(WCAG 1.4.1 「색에 의존하지 않기」).
               underline-offset-2 는 글자 아래 획(ㅁ·ㅂ 등)에 선이 닿지 않게 띄운 값이다. */}
