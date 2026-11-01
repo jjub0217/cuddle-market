@@ -84,7 +84,10 @@ export default function MyList({
     return toResizedWebpUrl(mainImageUrl, 400)
   }
   const router = useRouter()
-  const isMd = useMediaQuery('(min-width: 768px)')
+  // 오른쪽 단추 칸(상태 선택·수정·삭제, 160px)은 **1024 이상**에서만 붙인다(#1134).
+  // 768 부터 붙였더니 왼쪽 메뉴까지 있는 폭에서는 제목 칸이 한두 글자로 좁아져 세로로 쌓이고
+  // 가격이 단추와 겹쳤다. 그보다 좁으면 폰과 같은 ⋮ 메뉴가 같은 일을 다 한다.
+  const isLg = useMediaQuery('(min-width: 1024px)')
   const queryClient = useQueryClient()
   const { mutate } = useMutation({
     mutationFn: (newStatus: TransactionStatus) => api.patch(`/products/${id}/trade-status`, { tradeStatus: newStatus }),
@@ -196,12 +199,12 @@ export default function MyList({
           ) : null}
         </div>
 
-        <div className="flex flex-1 items-stretch gap-3 md:gap-4">
-          <div className="flex flex-1 flex-col justify-between gap-3 self-stretch">
+        <div className="flex min-w-0 flex-1 items-stretch gap-3 md:gap-4">
+          <div className="flex min-w-0 flex-1 flex-col justify-between gap-3 self-stretch">
             <div className="flex w-full items-start justify-between">
               <div className="flex w-full flex-col">
-                {isMd ? <h3 className="line-clamp-2 w-96 text-[15px] leading-6.5">{title}</h3> : null}
-                {!isMd ? (
+                {isLg ? <h3 className="line-clamp-2 w-full text-[15px] leading-6.5">{title}</h3> : null}
+                {!isLg ? (
                   <div className="relative flex w-full items-start justify-between gap-2">
                     <h3 className="line-clamp-2 w-full text-sm font-normal">{title}</h3>
                     <IconButton
@@ -282,8 +285,8 @@ export default function MyList({
           </div>
 
           {/* 데스크탑 우측 액션 컬럼 */}
-          {isMd ? (
-            <div className="flex w-40 flex-col items-stretch gap-2">
+          {isLg ? (
+            <div className="flex w-40 shrink-0 flex-col items-stretch gap-2">
               {/* ⚠️ 「판매요청」 탭이라 **요청 갈래** 말을 쓴다. 위 뱃지·⋮ 메뉴와 같은 말이다 */}
               {isRequestsTab && !isCompleted ? (
                 <Button size="sm" variant="primary" className="cursor-pointer" onClick={productTradeStatusCompleted}>

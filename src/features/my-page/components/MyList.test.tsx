@@ -21,8 +21,12 @@ vi.mock('next/navigation', () => ({
 // jsdom 에는 matchMedia 가 없다. 폭을 시험마다 손으로 정한다.
 // 기본은 좁은 폭(모바일). 데스크탑 전용 단추를 볼 때만 넓은 폭으로 바꾼다
 let isWide = false
+const 물어본폭: string[] = []
 vi.mock('@/hooks/useMediaQuery', () => ({
-  useMediaQuery: () => isWide,
+  useMediaQuery: (query: string) => {
+    물어본폭.push(query)
+    return isWide
+  },
 }))
 
 beforeEach(() => {
@@ -97,6 +101,18 @@ describe('마이페이지 목록 카드의 거래 상태 뱃지', () => {
 })
 
 // 예약은 상대를 골라야 걸린다(#1126). 「예약중으로 바꾸기」는 바로 바꾸지 않고 고르는 창을 연다.
+// jsdom 은 폭을 못 잰다. 그래서 「단추 칸이 몇 폭부터 붙나」는 **카드가 묻는 폭 조건 자체**를 본다.
+// 768 부터 붙였더니 왼쪽 메뉴까지 있는 폭에서 제목이 한두 글자로 좁아져 세로로 쌓였다(#1134).
+describe('마이페이지 목록 카드의 오른쪽 단추 칸', () => {
+  it('1024 이상에서만 붙는다 — 그보다 좁으면 ⋮ 메뉴를 쓴다', () => {
+    물어본폭.length = 0
+    renderMyList({ activeTab: 'tab-sales' })
+
+    expect(물어본폭).toContain('(min-width: 1024px)')
+    expect(물어본폭).not.toContain('(min-width: 768px)')
+  })
+})
+
 describe('마이페이지 목록 카드의 예약', () => {
   it('⋮ 메뉴의 「예약중으로 바꾸기」는 상태를 바로 바꾸지 않고 예약 상대 창을 연다', async () => {
     const { api } = await import('@/lib/api/api')
