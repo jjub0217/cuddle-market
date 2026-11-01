@@ -270,6 +270,10 @@ export const typeDefs = gql`
     unreadCount: Int
     # 내가 이 방의 상대를 차단했는가. 입력창을 잠그는 데 쓴다(#877).
     isOpponentBlocked: Boolean
+    # 이 방이 지금 열려 있는지 (#1126). OPEN · PAUSED_RESERVED · CLOSED_SOLD · CLOSED_DONE
+    roomState: String
+    # 지금 보는 사람이 이 방에서 결제할 수 있는가 (#1126). 예약자 본인만 참
+    canPay: Boolean
   }
 
   type ChatRoomConnection {

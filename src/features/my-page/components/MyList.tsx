@@ -20,6 +20,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery'
 import IconButton from '@/components/commons/button/IconButton'
 import { DropdownMenu, DropdownMenuItem } from '@/components/commons/DropdownMenu'
 import { getPriceLabel, getTradeLabel } from '@cuddle/shared'
+import ReserveBuyerModal from './ReserveBuyerModal'
 
 interface StatusDropdownProps {
   className?: string
@@ -63,6 +64,8 @@ export default function MyList({
   const [currentTradeStatus, setCurrentTradeStatus] = useState(tradeStatus)
   const currentTradeStatusKo = STATUS_EN_TO_KO.find((s) => s.value === currentTradeStatus)?.name ?? '판매중'
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false)
+  // 판매 상품의 예약은 상대를 골라야 걸린다(#1126). 상태를 바로 바꾸지 않고 이 창을 연다
+  const [isReserveModalOpen, setIsReserveModalOpen] = useState(false)
   const moreButtonRef = useRef<HTMLButtonElement>(null)
   const [imgError, setImgError] = useState(false)
   const [usePlaceholder, setUsePlaceholder] = useState(false)
@@ -91,18 +94,30 @@ export default function MyList({
     },
   })
 
+  const changeTradeStatus = (next: TransactionStatus) => {
+    if (next === 'RESERVED' && productType === 'SELL') {
+      setIsReserveModalOpen(true)
+      return
+    }
+    setCurrentTradeStatus(next)
+    mutate(next)
+  }
+
   const handleProductType = (value: string) => {
     const koToEn = STATUS_EN_TO_KO.find((status) => status.name === value)?.value
-    setCurrentTradeStatus(koToEn as TransactionStatus)
-    mutate(koToEn as TransactionStatus)
+    changeTradeStatus(koToEn as TransactionStatus)
   }
 
   const handleChangeTradeStatus = (next: TransactionStatus) => (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    setCurrentTradeStatus(next)
-    mutate(next)
+    changeTradeStatus(next)
     setIsMoreMenuOpen(false)
+  }
+
+  const handleReserved = () => {
+    setCurrentTradeStatus('RESERVED')
+    queryClient.invalidateQueries({ queryKey: ['myProducts'] })
   }
 
   // ⚠️ **삭제도 다른 항목처럼 메뉴를 닫는다.** 예전에는 안 닫아서, 삭제 모달 **뒤에 시트가
@@ -296,6 +311,15 @@ export default function MyList({
           ) : null}
         </div>
       </Link>
+      {/* 창은 Link 바깥에 둔다 — 안에 두면 창을 누를 때마다 상품 상세로 넘어간다 */}
+      {isReserveModalOpen ? (
+        <ReserveBuyerModal
+          isOpen={isReserveModalOpen}
+          productId={id}
+          onReserved={handleReserved}
+          onCancel={() => setIsReserveModalOpen(false)}
+        />
+      ) : null}
     </li>
   )
 }

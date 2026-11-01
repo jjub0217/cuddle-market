@@ -95,3 +95,23 @@ describe('마이페이지 목록 카드의 거래 상태 뱃지', () => {
     expect(screen.queryByText('예약중')).not.toBeInTheDocument()
   })
 })
+
+// 예약은 상대를 골라야 걸린다(#1126). 「예약중으로 바꾸기」는 바로 바꾸지 않고 고르는 창을 연다.
+describe('마이페이지 목록 카드의 예약', () => {
+  it('⋮ 메뉴의 「예약중으로 바꾸기」는 상태를 바로 바꾸지 않고 예약 상대 창을 연다', async () => {
+    const { api } = await import('@/lib/api/api')
+    const patch = vi.spyOn(api, 'patch').mockResolvedValue({ data: {} })
+    const get = vi.spyOn(api, 'get').mockResolvedValue({ data: { data: [] } })
+    const { default: userEvent } = await import('@testing-library/user-event')
+    renderMyList({ productType: 'SELL', tradeStatus: 'SELLING', activeTab: 'tab-sales' })
+
+    await userEvent.click(screen.getByRole('button', { name: /메뉴/ }))
+    await userEvent.click(screen.getByText('예약중으로 바꾸기'))
+
+    expect(await screen.findByText('누구와 예약할까요?')).toBeInTheDocument()
+    expect(get).toHaveBeenCalledWith('/products/1/chat-partners')
+    expect(patch).not.toHaveBeenCalled()
+    patch.mockRestore()
+    get.mockRestore()
+  })
+})

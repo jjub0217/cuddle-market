@@ -15,6 +15,7 @@ import { DropdownMenu, DropdownMenuItem } from '@/components/commons/DropdownMen
 import { useToastStore } from '@/store/toastStore'
 import { useUserStore } from '@/store/userStore'
 import dynamic from 'next/dynamic'
+import PayButton from './PayButton'
 
 // 창은 열릴 때만 받아 온다 — UserPage 가 신고·차단 창을 다루는 방식과 같다.
 const LeaveChatRoomModal = dynamic(() => import('@/components/modal/LeaveChatRoomModal'))
@@ -53,11 +54,11 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
     queryKey: ['product', data.productId],
     queryFn: async () => {
       const result = await fetchGraphQL<{
-        product: { tradeStatus: string | null; productType: string; sellerInfo: { sellerId: number } }
+        product: { tradeStatus: string | null; productType: string; price: number; sellerInfo: { sellerId: number } }
       }>(
         `
         query Product($id: Int!) {
-          product(id: $id) { tradeStatus productType sellerInfo { sellerId } }
+          product(id: $id) { tradeStatus productType price sellerInfo { sellerId } }
         }
       `,
         { id: data.productId }
@@ -244,6 +245,8 @@ export function ChatRoomInfo({ data, onLeaveRoom, onBack }: ChatRoomInfoProps) {
           productType={product?.productType}
         />
       </Link>
+      {/* 예약자 본인의 방에만 보인다(#1126). 가격은 채팅방에 저장된 값이 아니라 지금 상품 가격이다 */}
+      {data.canPay ? <PayButton productId={data.productId} price={product?.price} /> : null}
     </div>
   )
 }

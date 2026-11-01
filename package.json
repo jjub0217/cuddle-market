@@ -28,6 +28,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@stomp/stompjs": "^7.3.0",
     "@tanstack/react-query": "^5.90.20",
+    "@tosspayments/tosspayments-sdk": "^2.10.0",
     "axios": "^1.13.4",
     "browser-image-compression": "^2.0.2",
     "class-variance-authority": "^0.7.1",
