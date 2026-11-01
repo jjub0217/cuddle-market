@@ -25,7 +25,10 @@ function Login() {
                 desc="로그인하고 반려동물 이웃과의 특별한 일상을 시작해보세요"
               />
             </div>
-            <div className="md:bg-surface md:border-outline-variant/10 flex h-full min-w-full flex-col items-center gap-9 px-10 py-7 md:h-auto md:min-w-100 md:rounded-3xl md:border md:shadow-2xl">
+            {/* 데스크탑 폭은 400 으로 **고정**한다(md:w-100). 전에는 md:min-w-100 이라 「최소 400,
+                나머지는 내용만큼」이어서, 로그인 실패 문장이 한 줄로 길게 들어오면 상자가 542 까지
+                넓어졌다(#1132). 고정하면 긴 문장은 상자 안에서 줄바꿈된다. */}
+            <div className="md:bg-surface md:border-outline-variant/10 flex h-full min-w-full flex-col items-center gap-9 px-10 py-7 md:h-auto md:w-100 md:min-w-0 md:rounded-3xl md:border md:shadow-2xl">
               <LoginForm />
               <div className="flex w-full flex-col gap-3">
                 <div className="flex w-full items-center gap-4">
