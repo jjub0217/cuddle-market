@@ -11,5 +11,13 @@ const NOTICE: Record<Exclude<ChatRoomState, 'OPEN'>, string> = {
 
 export default function RoomStateNotice({ roomState }: { roomState: ChatRoomState }) {
   if (roomState === 'OPEN') return null
-  return <p className="text-center text-sm text-gray-500">{NOTICE[roomState]}</p>
+  // 입력칸 자리에 회색 글자만 두면 무엇이 놓였는지 구분이 안 된다(2026-11-01 로컬 확인). 입력칸과 같은 둥근 상자로 감싼다
+  return (
+    <p
+      role="status"
+      className="border-primary-100 bg-primary-50 rounded-3xl border px-4 py-3 text-center text-sm font-medium text-gray-700"
+    >
+      {NOTICE[roomState]}
+    </p>
+  )
 }
