@@ -102,7 +102,7 @@ export default function ChattingPage() {
         `
         query ChatRooms($page: Int!, $size: Int!) {
           chatRooms(page: $page, size: $size) {
-            chatRooms { chatRoomId productId productTitle productPrice productImageUrl opponentId opponentNickname opponentProfileImageUrl lastMessage lastMessageTime unreadCount isOpponentBlocked }
+            chatRooms { chatRoomId productId productTitle productPrice productImageUrl opponentId opponentNickname opponentProfileImageUrl lastMessage lastMessageTime unreadCount isOpponentBlocked roomState canPay }
             currentPage hasNext
           }
         }

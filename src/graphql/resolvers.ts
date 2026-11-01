@@ -172,6 +172,9 @@ export const resolvers = {
         opponentProfileImageUrl: room.otherUserProfileImageUrl ?? room.opponentProfileImageUrl,
         // 서버가 안 주는 동안(배포 전)에도 화면이 undefined 를 받지 않게 여기서 false 로 못 박는다.
         isOpponentBlocked: room.isOpponentBlocked ?? false,
+        // 예약·결제(#1126). 서버가 안 주면 지금처럼 열린 방, 결제 불가로 본다
+        roomState: room.roomState ?? 'OPEN',
+        canPay: room.canPay ?? false,
       }))
       return {
         chatRooms,
