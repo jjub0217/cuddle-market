@@ -97,21 +97,31 @@ export function ChatRooms({
                             </span>
                           ) : null}
                         </div>
-                        <p
-                          className={cn(
-                            'min-w-0 flex-1 truncate text-sm font-medium',
-                            roomData.lastMessage == null ? 'text-blue-600' : '',
-                            // 위 파랑보다 **뒤에** 둔다 — 앞으로 옮기면 twMerge 가 파랑을 살려
-                            // 「채팅방에 입장해주세요」만 색이 튄다(지금은 안 그렇다).
-                            'text-on-surface-muted'
-                          )}
-                        >
-                          {roomData.lastMessage == null
-                            ? '채팅방에 입장해주세요'
-                            : roomData.lastMessage === ''
-                              ? '사진'
-                              : roomData.lastMessage}
-                        </p>
+                        {/* 안 읽음 배지는 **이 줄의 오른쪽 끝**에 둔다(#1136). 예전에는 방 줄 맨 오른쪽에
+                            따로 한 칸(20 + 간격 10)을 차지해, 배지가 붙은 방만 이름·시각·상품칸이
+                            30px 좁아졌다(254 → 224). 여기 두면 줄어드는 것은 이 줄의 글자뿐이다. */}
+                        <div className="flex items-center gap-2">
+                          <p
+                            className={cn(
+                              'min-w-0 flex-1 truncate text-sm font-medium',
+                              roomData.lastMessage == null ? 'text-blue-600' : '',
+                              // 위 파랑보다 **뒤에** 둔다 — 앞으로 옮기면 twMerge 가 파랑을 살려
+                              // 「채팅방에 입장해주세요」만 색이 튄다(지금은 안 그렇다).
+                              'text-on-surface-muted'
+                            )}
+                          >
+                            {roomData.lastMessage == null
+                              ? '채팅방에 입장해주세요'
+                              : roomData.lastMessage === ''
+                                ? '사진'
+                                : roomData.lastMessage}
+                          </p>
+                          {roomData.unreadCount >= 1 ? (
+                            <p className="bg-danger-500 flex size-5 shrink-0 items-center justify-center rounded-full text-xs text-white">
+                              {roomData.unreadCount}
+                            </p>
+                          ) : null}
+                        </div>
                       </div>
                       <div
                         className={cn(
@@ -136,11 +146,6 @@ export function ChatRooms({
                         />
                       </div>
                     </div>
-                    {roomData.unreadCount >= 1 ? (
-                      <p className="bg-danger-500 flex size-5 shrink-0 items-center justify-center rounded-full text-xs text-white">
-                        {roomData.unreadCount}
-                      </p>
-                    ) : null}
                   </div>
                 </li>
               )
