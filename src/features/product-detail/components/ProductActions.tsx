@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation'
 import { useFavorite } from '@/hooks/useFavorite'
 import { fetchGraphQL } from '@/lib/api/graphql'
 import { ROUTES } from '@/constants/routes'
+import { useState } from 'react'
+import ReservedProductModal from './ReservedProductModal'
 
 // 상세 맨 아래 단추 줄. **그 화면에서 할 가장 중요한 일**을 두는 자리다.
 //
@@ -24,8 +26,12 @@ interface ProductActionsProps {
     sellerNickname: string
     sellerProfileImageUrl: string
   }
+  tradeStatus?: string | null
 }
-export default function ProductActions({ id, isFavorite: initialIsFavorite, sellerInfo }: ProductActionsProps) {
+export default function ProductActions({ id, isFavorite: initialIsFavorite, sellerInfo, tradeStatus }: ProductActionsProps) {
+  // 다른 분과 예약된 상품에서 처음 채팅하려 하면 서버가 거절한다(#1126). 이미 대화하던 사람은 그 방을 돌려받으므로
+  // 여기서 실패하는 예약중 상품은 「예약 때문에 막힌」 경우다
+  const [isReservedNoticeOpen, setIsReservedNoticeOpen] = useState(false)
   const { user } = useUserStore()
   const router = useRouter()
 
@@ -49,6 +55,10 @@ export default function ProductActions({ id, isFavorite: initialIsFavorite, sell
       sessionStorage.setItem('chatRoom', JSON.stringify(chatRoom))
       router.push(ROUTES.CHAT_ROOM_ID(chatRoom.chatRoomId))
     } catch {
+      if (tradeStatus === 'RESERVED') {
+        setIsReservedNoticeOpen(true)
+        return
+      }
       alert('채팅방 생성에 실패했습니다. 다시 시도해주세요.')
     }
   }
@@ -75,6 +85,9 @@ export default function ProductActions({ id, isFavorite: initialIsFavorite, sell
           채팅하기
         </Button>
         {favoriteButton}
+        {isReservedNoticeOpen ? (
+          <ReservedProductModal isOpen={isReservedNoticeOpen} onClose={() => setIsReservedNoticeOpen(false)} />
+        ) : null}
       </div>
     )
   }
