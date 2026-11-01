@@ -14,6 +14,8 @@ export interface PaymentResult {
   amount: number
   productId: number
   productTitle: string
+  /** 상품 대표 사진. 결제 완료 확인창에 보인다 */
+  productImageUrl?: string | null
   approvedAt: string | null
   /** 구매자와 판매자의 그 채팅방. 성공 페이지가 그 방으로 돌아가게 한다 */
   chatRoomId?: number | null

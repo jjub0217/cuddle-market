@@ -7,6 +7,7 @@ import { formatPrice } from '@/lib/utils/formatPrice'
 import { ROUTES } from '@/constants/routes'
 import Spinner from '@/components/commons/spinner/Spinner'
 import PaymentResultCard from './PaymentResultCard'
+import { PLACEHOLDER_IMAGES, toResizedWebpUrl } from '@/lib/utils/imageUrl'
 
 // 토스 결제창이 성공하면 이 페이지로 돌아온다 (#1126).
 //
@@ -38,6 +39,7 @@ export default function PaymentSuccess() {
   if (result) {
     return (
       <PaymentResultCard title="결제가 완료됐어요" href={chatHref}>
+        <ProductImage src={result.productImageUrl} alt={result.productTitle} />
         <div className="flex flex-col gap-1">
           <p className="text-base text-gray-900">{result.productTitle}</p>
           <p className="text-lg font-bold text-gray-900">{formatPrice(result.amount)} 원</p>
@@ -59,4 +61,13 @@ export default function PaymentSuccess() {
       <Spinner size="md" />
     </div>
   )
+}
+
+// 상품 사진. 우리 이미지 서버(CDN)의 400px 판을 쓰고, 못 불러오면 원본 → 기본 그림 순으로 바꾼다(MyList 와 같은 순서)
+function ProductImage({ src, alt }: { src?: string | null; alt: string }) {
+  const [stage, setStage] = useState<'resized' | 'original' | 'placeholder'>(src ? 'resized' : 'placeholder')
+  const url = stage === 'resized' ? toResizedWebpUrl(src, 400) : stage === 'original' ? (src ?? '') : PLACEHOLDER_IMAGES[400]
+  // CDN 이미지라 next/image 대신 img 를 쓴다(이 저장소 관례)
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={url} alt={alt} className="mx-auto size-28 rounded-xl object-cover" onError={() => setStage((s) => (s === 'resized' ? 'original' : 'placeholder'))} />
 }

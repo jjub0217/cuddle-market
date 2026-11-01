@@ -43,6 +43,17 @@ describe('결제 성공 페이지', () => {
     expect(screen.getByRole('link', { name: '채팅방으로 가기' })).toHaveAttribute('href', '/chat')
   })
 
+  it('확인창에 상품 사진도 보인다', async () => {
+    // 2026-11-01 사용자 요청
+    vi.mocked(confirmPayment).mockResolvedValue({
+      orderId: 'CM1', amount: 50000, productId: 10, productTitle: '신발', approvedAt: '2026-11-01T15:00:00',
+      productImageUrl: 'https://cdn.example/shoe.png',
+    })
+    render(<PaymentSuccess />)
+
+    expect(await screen.findByRole('img', { name: '신발' })).toBeInTheDocument()
+  })
+
   it('결과는 화면을 덮는 확인창 모양으로 보인다', async () => {
     // 2026-11-01 로컬 확인 뒤 사용자 요청: 결제 완료는 다른 확인창들과 같은 모달 모양으로
     vi.mocked(confirmPayment).mockResolvedValue({
