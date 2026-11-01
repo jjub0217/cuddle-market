@@ -701,7 +701,9 @@ function MyPage() {
               })}
             </div>
           </div>
-          <section className="relative hidden flex-1 flex-col gap-3.5 md:flex md:gap-7">
+          {/* min-w-0 — flex 항목은 기본값이 「내용보다 좁아질 수 없음」이라, 이것이 없으면
+              판매 내역 목록이 1116 아래로 안 줄어 1086 폭에서 오른쪽이 잘렸다(#1134). */}
+          <section className="relative hidden min-w-0 flex-1 flex-col gap-3.5 md:flex md:gap-7">
             <AnimatePresence>
               {unblockError ? (
                 <div className="absolute top-11 left-1/2 z-50 w-11/12 -translate-x-1/2 md:w-auto md:pt-8">
